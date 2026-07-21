@@ -1,21 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="Industrial Raw Materials">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" preserveAspectRatio="xMidYMid slice" role="img" aria-hidden="true">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#2A2A2A"/>
-      <stop offset="1" stop-color="#1BB4D4"/>
-    </linearGradient>
-    <radialGradient id="v" cx="0.5" cy="0.42" r="0.75">
-      <stop offset="0.55" stop-color="#000" stop-opacity="0"/>
-      <stop offset="1" stop-color="#000" stop-opacity="0.32"/>
-    </radialGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0A0A0A"/><stop offset="1" stop-color="#141414"/></linearGradient>
+    <radialGradient id="g1" cx="72%" cy="30%" r="60%"><stop offset="0" stop-color="#1BB4D4" stop-opacity=".38"/><stop offset="70%" stop-color="#1BB4D4" stop-opacity="0"/></radialGradient>
+    <radialGradient id="g2" cx="30%" cy="80%" r="55%"><stop offset="0" stop-color="#2A2A2A" stop-opacity=".28"/><stop offset="70%" stop-color="#2A2A2A" stop-opacity="0"/></radialGradient>
+    <linearGradient id="fac" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1BB4D4" stop-opacity=".5"/><stop offset="1" stop-color="#9ACD3C" stop-opacity=".5"/></linearGradient>
+    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.4" fill="#fff" fill-opacity=".04"/></pattern>
+    <filter id="blur"><feGaussianBlur stdDeviation="8"/></filter>
   </defs>
-  <rect width="1600" height="900" fill="#151515"/>
-  <rect width="1600" height="900" fill="url(#g)" opacity="0.16"/>
-  <g fill="none" stroke="#2A2A2A" stroke-width="1">
-    <circle cx="800" cy="375" r="320" stroke="#1BB4D4" stroke-opacity="0.35"/>
-    <circle cx="800" cy="375" r="200" stroke="#9ACD3C" stroke-opacity="0.35"/>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#dots)"/>
+  <rect width="1600" height="900" fill="url(#g1)"/>
+  <rect width="1600" height="900" fill="url(#g2)"/>
+  <g opacity=".5" filter="url(#blur)">
+    <polygon points="1120,120 1360,220 1300,470 1060,400" fill="url(#fac)"/>
+    <polygon points="1300,470 1500,420 1520,660 1320,700" fill="url(#fac)" opacity=".7"/>
+    <polygon points="1060,400 1300,470 1200,720 980,640" fill="url(#fac)" opacity=".5"/>
   </g>
-  <rect width="1600" height="900" fill="url(#v)"/>
-  <text x="800" y="600" text-anchor="middle" font-family="Inter, sans-serif" font-size="100" font-weight="600" fill="#F7F8F7" opacity="0.9">Industrial Raw Materials</text>
-  <text x="800" y="672" text-anchor="middle" font-family="Inter, sans-serif" font-size="47" letter-spacing="2" fill="#8A8F8C">GULFRABIT</text>
+  <g stroke="#1BB4D4" stroke-opacity=".14" fill="none" stroke-width="1.5">
+    <circle cx="1230" cy="410" r="230"/><circle cx="1230" cy="410" r="150"/>
+  </g>
 </svg>
