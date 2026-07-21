@@ -173,6 +173,12 @@ PAGES = [
      "modules/account/_fragments/wishlist.main.html",
      ["/modules/account/account.css"], "/modules/account/wishlist-page.js"),
 
+    ("modules/account/track.html",
+     "Track Order — GulfRabit",
+     "Track the status of your GulfRabit order.",
+     "modules/account/_fragments/track.main.html",
+     ["/modules/account/account.css"], "/modules/account/track-page.js"),
+
     ("modules/auth/login.html",
      "Sign In — GulfRabit",
      "Sign in to your GulfRabit account.",

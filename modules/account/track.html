@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Account — GulfRabit</title>
-  <meta name="description" content="Your GulfRabit account overview.">
+  <title>Track Order — GulfRabit</title>
+  <meta name="description" content="Track the status of your GulfRabit order.">
   <meta name="theme-color" content="#0A0A0A">
   <meta name="author" content="GulfRabit">
   <meta name="robots" content="index, follow">
@@ -12,12 +12,12 @@
   <!-- Social / Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GulfRabit">
-  <meta property="og:title" content="My Account — GulfRabit">
-  <meta property="og:description" content="Your GulfRabit account overview.">
+  <meta property="og:title" content="Track Order — GulfRabit">
+  <meta property="og:description" content="Track the status of your GulfRabit order.">
   <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="My Account — GulfRabit">
-  <meta name="twitter:description" content="Your GulfRabit account overview.">
+  <meta name="twitter:title" content="Track Order — GulfRabit">
+  <meta name="twitter:description" content="Track the status of your GulfRabit order.">
   <link rel="icon" href="../../favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
   <link rel="apple-touch-icon" href="../../assets/logo/apple-touch-icon.png">
@@ -197,37 +197,48 @@
 
 
 <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
-    <header style="margin-bottom:var(--space-6)">
-      <p class="overline">My Account</p>
-      <h1 class="h2" data-greeting>Welcome</h1>
-    </header>
-    <div class="account-layout">
-      <!-- Sidebar -->
-      <nav class="account-nav" aria-label="Account">
-        <a class="account-nav__link is-active" href="../../modules/account/dashboard.html" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> Overview</a>
-        <a class="account-nav__link" href="../../modules/account/orders.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/></svg> Orders</a>
-        <a class="account-nav__link" href="../../modules/account/addresses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21s7-5.5 7-11a7 7 0 0 0-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> Addresses</a>
-        <a class="account-nav__link" href="../../modules/account/wishlist.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg> Wishlist</a>
-        <a class="account-nav__link account-nav__link--danger" href="#" data-logout><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg> Sign out</a>
-      </nav>
+    <nav class="breadcrumb-gr" aria-label="Breadcrumb" style="margin-bottom:var(--space-5)">
+      <a href="../../index.html">Home</a><span class="breadcrumb-gr__sep">/</span>
+      <a href="../../modules/account/orders.html">Orders</a><span class="breadcrumb-gr__sep">/</span><span>Track</span>
+    </nav>
+    <header style="margin-bottom:var(--space-6)"><p class="overline">Order tracking</p><h1 class="h2">Track your order</h1></header>
 
-      <!-- Content -->
-      <section>
-        <div class="stat-grid" style="margin-bottom:var(--space-6)">
-          <a class="stat-card surface-gr" href="../../modules/account/orders.html"><div class="stat-card__num" data-stat-orders>0</div><div class="stat-card__label">Orders</div></a>
-          <a class="stat-card surface-gr" href="../../modules/account/wishlist.html"><div class="stat-card__num" data-stat-wishlist>0</div><div class="stat-card__label">Wishlist items</div></a>
-          <a class="stat-card surface-gr" href="../../modules/account/addresses.html"><div class="stat-card__num" data-stat-addresses>0</div><div class="stat-card__label">Saved addresses</div></a>
-        </div>
+    <!-- Lookup -->
+    <form class="track-lookup" data-track-lookup novalidate>
+      <input class="input-gr" type="text" name="id" data-track-input placeholder="Order number (e.g. GR-2026-1043)" aria-label="Order number">
+      <button class="btn-gr btn-primary-gr" type="submit">Track</button>
+    </form>
 
-        <div class="surface-gr" style="padding:var(--space-5)">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4)">
-            <h2 class="h5">Recent order</h2><a href="../../modules/account/orders.html" class="caption">View all →</a>
-          </div>
-          <div data-recent-order><p class="text-muted-gr">No orders yet.</p></div>
+    <!-- Result -->
+    <div data-track-result hidden>
+      <div class="surface-gr" style="padding:var(--space-6)">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--space-3);align-items:center;border-bottom:1px solid var(--gr-border);padding-bottom:var(--space-4);margin-bottom:var(--space-5)">
+          <div><strong data-track-id>—</strong><div class="caption" data-track-date></div></div>
+          <div data-track-status></div>
         </div>
-      </section>
+        <div style="display:grid;gap:var(--space-6);grid-template-columns:1fr" class="track-grid">
+          <ol class="timeline" data-timeline role="list"></ol>
+          <aside>
+            <p class="caption" style="margin-bottom:.5rem">Estimated delivery</p>
+            <p style="margin-bottom:var(--space-4)" data-track-eta>2–5 business days</p>
+            <p class="caption" style="margin-bottom:.5rem">Delivery address</p>
+            <p class="text-muted-gr" data-track-address>—</p>
+            <div class="map-placeholder" style="margin-top:var(--space-4);min-height:160px">Live map placeholder</div>
+          </aside>
+        </div>
+        <div data-track-items style="margin-top:var(--space-5)"></div>
+      </div>
+    </div>
+
+    <!-- Not found -->
+    <div class="empty-state" data-track-empty hidden>
+      <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <h2 class="empty-state__title">Order not found</h2>
+      <p class="empty-state__text">Check the order number, or view your full order history.</p>
+      <a class="btn-gr btn-primary-gr" href="../../modules/account/orders.html">My Orders</a>
     </div>
   </main>
+  <style>@media (min-width: 900px){ .track-grid { grid-template-columns: 1.4fr 1fr; } }</style>
 
   <!-- FOOTER (inlined from shared/components/footer.html) -->
 <!-- =========================================================================
@@ -312,6 +323,6 @@
 </style>
 
   <script type="module" src="../../shared/js/main.js"></script>
-  <script type="module" src="../../modules/account/account-page.js"></script>
+  <script type="module" src="../../modules/account/track-page.js"></script>
 </body>
 </html>

@@ -4,6 +4,7 @@
  */
 import { getMockOrders } from '../../shared/js/core/data-service.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
+import { siteURL } from '../../shared/js/core/paths.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { ensureSession, wireLogout, statusBadge } from './account-common.js';
 
@@ -48,7 +49,7 @@ function orderCard(o) {
       </div>
       ${o.items.map((it) => `<div class="order-item-row"><img src="${it.image}" alt=""><span style="flex:1">${escapeHtml(it.title)}</span><span class="caption">×${it.qty}</span><span class="tabular caption">${formatBDT(it.price * it.qty)}</span></div>`).join('')}
       <div style="display:flex;gap:.75rem;margin-top:1rem">
-        <a class="btn-gr btn-outline-gr btn-sm-gr" href="#">Track</a>
+        <a class="btn-gr btn-outline-gr btn-sm-gr" href="${siteURL(`modules/account/track.html?id=${encodeURIComponent(o.id)}`)}">Track</a>
         ${o.status === 'delivered' ? '<button class="btn-gr btn-ghost-gr btn-sm-gr" type="button">Buy again</button>' : ''}
       </div>
     </article>`;

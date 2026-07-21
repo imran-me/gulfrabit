@@ -1,0 +1,43 @@
+  <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
+    <nav class="breadcrumb-gr" aria-label="Breadcrumb" style="margin-bottom:var(--space-5)">
+      <a href="/index.html">Home</a><span class="breadcrumb-gr__sep">/</span>
+      <a href="/modules/account/orders.html">Orders</a><span class="breadcrumb-gr__sep">/</span><span>Track</span>
+    </nav>
+    <header style="margin-bottom:var(--space-6)"><p class="overline">Order tracking</p><h1 class="h2">Track your order</h1></header>
+
+    <!-- Lookup -->
+    <form class="track-lookup" data-track-lookup novalidate>
+      <input class="input-gr" type="text" name="id" data-track-input placeholder="Order number (e.g. GR-2026-1043)" aria-label="Order number">
+      <button class="btn-gr btn-primary-gr" type="submit">Track</button>
+    </form>
+
+    <!-- Result -->
+    <div data-track-result hidden>
+      <div class="surface-gr" style="padding:var(--space-6)">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--space-3);align-items:center;border-bottom:1px solid var(--gr-border);padding-bottom:var(--space-4);margin-bottom:var(--space-5)">
+          <div><strong data-track-id>—</strong><div class="caption" data-track-date></div></div>
+          <div data-track-status></div>
+        </div>
+        <div style="display:grid;gap:var(--space-6);grid-template-columns:1fr" class="track-grid">
+          <ol class="timeline" data-timeline role="list"></ol>
+          <aside>
+            <p class="caption" style="margin-bottom:.5rem">Estimated delivery</p>
+            <p style="margin-bottom:var(--space-4)" data-track-eta>2–5 business days</p>
+            <p class="caption" style="margin-bottom:.5rem">Delivery address</p>
+            <p class="text-muted-gr" data-track-address>—</p>
+            <div class="map-placeholder" style="margin-top:var(--space-4);min-height:160px">Live map placeholder</div>
+          </aside>
+        </div>
+        <div data-track-items style="margin-top:var(--space-5)"></div>
+      </div>
+    </div>
+
+    <!-- Not found -->
+    <div class="empty-state" data-track-empty hidden>
+      <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <h2 class="empty-state__title">Order not found</h2>
+      <p class="empty-state__text">Check the order number, or view your full order history.</p>
+      <a class="btn-gr btn-primary-gr" href="/modules/account/orders.html">My Orders</a>
+    </div>
+  </main>
+  <style>@media (min-width: 900px){ .track-grid { grid-template-columns: 1.4fr 1fr; } }</style>

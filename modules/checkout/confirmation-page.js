@@ -19,6 +19,7 @@ if (!order) {
     `<div class="empty-state"><h1 class="empty-state__title">No recent order</h1><p class="empty-state__text">We couldn’t find that order.</p><a class="btn-gr btn-primary-gr" href="${siteURL('index.html')}">Back to home</a></div>`;
 } else {
   setText('[data-order-id]', order.id);
+  document.querySelector('[data-track-link]')?.setAttribute('href', siteURL(`modules/account/track.html?id=${encodeURIComponent(order.id)}`));
   setText('[data-order-address]', order.address || '—');
   setText('[data-order-total]', formatBDT(order.total));
   document.querySelector('[data-order-items]').innerHTML = order.items.map((it) => `
