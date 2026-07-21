@@ -61,25 +61,23 @@ function initHeroCarousel() {
 /* ---- Product sections (skeleton → data) ------------------------------- */
 async function initProductSections() {
   const premiumRail = document.querySelector('[data-rail="premium"]');
-  const bestGrid = document.querySelector('[data-grid="bestseller"]');
   const newRail = document.querySelector('[data-rail="new"]');
+  // Best Sellers are authored as real HTML in index.html (content-first) and
+  // enhanced by main.js — we don't render them here. Only the dynamic rails load.
 
   if (premiumRail) renderProductSkeletons(premiumRail, 6);
-  if (bestGrid) renderProductSkeletons(bestGrid, 8);
   if (newRail) renderProductSkeletons(newRail, 6);
 
   try {
-    const [premium, best, fresh] = await Promise.all([
+    const [premium, fresh] = await Promise.all([
       getFeatured('premium', 8),
-      getFeatured('bestseller', 8),
       getFeatured('new', 8),
     ]);
     if (premiumRail) renderProductGrid(premiumRail, premium);
-    if (bestGrid) renderProductGrid(bestGrid, best);
     if (newRail) renderProductGrid(newRail, fresh);
   } catch (err) {
     console.error('[home] failed to load products', err);
-    [premiumRail, bestGrid, newRail].forEach((el) => {
+    [premiumRail, newRail].forEach((el) => {
       if (el) el.innerHTML = '<p class="text-muted-gr">Couldn’t load products. Please refresh.</p>';
     });
   }

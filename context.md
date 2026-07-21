@@ -230,10 +230,12 @@ inlined into pages by `tools/assemble.py`).
 - Light-bg **transparent PNG logo** not yet produced (source is `.jpeg` on black). Flag.
 - **Favicon** currently reuses the wide `.jpeg` logo; a **square-cropped** favicon
   (just the rabbit mark) would render sharper in browser tabs. Needs image tooling.
-- **Deployment paths:** all asset/link paths are **root-absolute** (`/shared/…`),
-  which assumes deployment at a domain root (e.g. `gulfrabit.com`) — matches the
-  `sitemap.xml` origin. A GitHub *project* page (`user.github.io/gulfrabit/`) would
-  need a `<base>` or path rewrite; a custom domain / user-page works as-is.
+- **Deployment paths (RESOLVED 2026-07-21):** paths are now **relative** and work
+  at a domain root OR a project subpath (`user.github.io/gulfrabit/`). The
+  assembler rewrites `/shared|/assets|/modules|url(/…)` per page depth; JS derives
+  the site root from `import.meta.url` (`shared/js/core/paths.js` → `siteURL()`),
+  never `location.origin`. `.nojekyll` prevents GitHub Pages from dropping the
+  underscore-prefixed CSS partials. Verified under a simulated subpath.
 - **Tailwind Play CDN** prints a dev-only console notice; fine for now — a real
   build step (PurgeCSS) is the production follow-up.
 - **Backend integration point:** each `modules/*/backend/api.js` currently reads mock JSON
