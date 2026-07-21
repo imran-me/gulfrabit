@@ -315,3 +315,17 @@ inlined into pages by `tools/assemble.py`).
   · **Checkout** — card fields validated only when Card is selected.
   · 24 pages verified 200 under a simulated subpath. Tools: assemble.py,
     sitemap.py, gen-product-images.py.
+- **2026-07-22 (visual QA via headless Chrome screenshots)** — rendered pages with
+  headless Chrome, reviewed, fixed, re-rendered. Found + fixed:
+  · **CRITICAL:** Tailwind Play CDN preflight (injected after style.css) reset
+    h1–h6 to font-size:inherit → every heading rendered at body size. Disabled
+    preflight in tailwind.config.js. (This was invisible without rendering.)
+  · PDP star rating stacked vertically (svg{display:block}) → inline-flex wrapper.
+  · Product images had baked-in title text overlapping the PDP gallery → clean
+    textless art.
+  · Header logo was a squashed 40px square → proper mark + wordmark lockup;
+    mobile header decluttered (account/wishlist in the drawer).
+  · Announcement bar → centered block (safer wrapping).
+  Verified home/PLP/PDP/deals/B2B/login look premium at desktop and the mobile
+  breakpoint. Note: this headless setup enforces a ~500px min viewport, so true
+  375px can't be rendered here — but scrollWidth<innerWidth confirms no overflow.
