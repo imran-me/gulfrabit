@@ -1,0 +1,52 @@
+  <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
+    <nav class="breadcrumb-gr" aria-label="Breadcrumb" style="margin-bottom:var(--space-5)">
+      <a href="/index.html">Home</a><span class="breadcrumb-gr__sep">/</span><span>Cart</span>
+    </nav>
+    <h1 class="h2" style="margin-bottom:var(--space-6)">Your Cart</h1>
+
+    <div class="cart-layout" data-cart-layout>
+      <!-- Line items -->
+      <section aria-label="Cart items">
+        <div data-cart-items></div>
+
+        <!-- Save for later -->
+        <div data-saved-section hidden style="margin-top:var(--space-7)">
+          <h2 class="h5" style="margin-bottom:var(--space-4)">Saved for later</h2>
+          <div data-saved-items></div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state" data-cart-empty hidden>
+          <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+          <h2 class="empty-state__title">Your cart is empty</h2>
+          <p class="empty-state__text">Sourced. Verified. Delivered — let’s find something worth hopping for.</p>
+          <a class="btn-gr btn-primary-gr btn-lg-gr" href="/index.html">Start shopping</a>
+        </div>
+      </section>
+
+      <!-- Order summary -->
+      <aside class="surface-gr order-summary" data-summary style="padding:var(--space-5)">
+        <h2 class="h5" style="margin-bottom:var(--space-4)">Order Summary</h2>
+        <div class="summary-row"><span>Subtotal (<span data-summary-count>0</span> items)</span><span class="tabular" data-summary-subtotal>৳ 0</span></div>
+        <div class="summary-row"><span>Delivery</span><span data-summary-delivery>Calculated at checkout</span></div>
+        <div class="summary-row" data-summary-discount-row hidden><span>Promo <span data-summary-promo-code></span></span><span class="tabular" style="color:var(--gr-lime)" data-summary-discount>−৳ 0</span></div>
+
+        <div class="promo">
+          <input class="input-gr" type="text" data-promo-input placeholder="Promo code (try GULF10)" aria-label="Promo code">
+          <button class="btn-gr btn-outline-gr" data-promo-apply type="button">Apply</button>
+        </div>
+        <p class="caption" data-promo-msg style="min-height:1em;margin-bottom:var(--space-3)"></p>
+
+        <div class="summary-row summary-row--total"><span>Total</span><span class="tabular" data-summary-total>৳ 0</span></div>
+
+        <a class="btn-gr btn-primary-gr btn-block-gr btn-lg-gr" href="/modules/checkout/checkout.html" data-checkout-btn style="margin-top:var(--space-4)">Proceed to Checkout</a>
+        <p class="caption" style="text-align:center;margin-top:var(--space-3)">Secure checkout · bKash · Nagad · Cards · COD</p>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Sticky mobile checkout CTA -->
+  <div class="cart-mobile-cta" data-mobile-cta hidden>
+    <div style="flex:1"><div class="caption">Total</div><div class="price" style="font-size:var(--fs-20)" data-mobile-total>৳ 0</div></div>
+    <a class="btn-gr btn-primary-gr" href="/modules/checkout/checkout.html">Checkout</a>
+  </div>
