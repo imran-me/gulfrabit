@@ -92,6 +92,7 @@ style concern = one CSS partial. Split any file over ~300 lines.
 | Account orders | `modules/account/orders.html` | account | DONE |
 | Account addresses | `modules/account/addresses.html` | account | DONE |
 | Account wishlist | `modules/account/wishlist.html` | account | DONE |
+| Order tracking | `modules/account/track.html` | account | DONE |
 | Login | `modules/auth/login.html` | auth | DONE |
 | Register | `modules/auth/register.html` | auth | DONE |
 | Forgot password | `modules/auth/forgot-password.html` | auth | DONE |
@@ -227,9 +228,12 @@ inlined into pages by `tools/assemble.py`).
 
 ## 8. Known Issues / Follow-ups
 
-- Light-bg **transparent PNG logo** not yet produced (source is `.jpeg` on black). Flag.
-- **Favicon** currently reuses the wide `.jpeg` logo; a **square-cropped** favicon
-  (just the rabbit mark) would render sharper in browser tabs. Needs image tooling.
+- ~~Light-bg transparent PNG logo~~ **DONE** — `assets/logo/gulfrabit-logo.png`
+  (transparent) is now used site-wide; `gulfrabit-mark.png` is the square mark.
+- ~~Favicon square crop~~ **DONE** — `favicon.ico` + `favicon-32.png` +
+  `apple-touch-icon.png` cropped from the rabbit mark.
+- **Product/hero imagery** still uses SVG placeholders — swap for real photography
+  (the one remaining branding follow-up; needs supplied assets).
 - **Deployment paths (RESOLVED 2026-07-21):** paths are now **relative** and work
   at a domain root OR a project subpath (`user.github.io/gulfrabit/`). The
   assembler rewrites `/shared|/assets|/modules|url(/…)` per page depth; JS derives
@@ -291,3 +295,8 @@ inlined into pages by `tools/assemble.py`).
   · **focus-trap** util → cart drawer, mobile nav, quick-view (keyboard a11y).
   · **Recently-viewed** rail on the PDP (localStorage history).
   · Catalog expanded to **44 products** (every category 4–6) so grids read full.
+- **2026-07-21 (branding + features session)** — verified the live deploy renders
+  styled. Then: **transparent PNG logo** site-wide (removed the black-box JPEG);
+  **order-tracking page** (`account/track.html`) with a status timeline, wired
+  from footer/orders/confirmation; **PDP reviews** with an interactive star-rating
+  write-review form (localStorage). 22 pages total.
