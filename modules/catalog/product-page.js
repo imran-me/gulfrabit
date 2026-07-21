@@ -59,9 +59,24 @@ function injectProductSchema(p) {
   if (p.rating && p.reviewCount) {
     schema.aggregateRating = { '@type': 'AggregateRating', ratingValue: p.rating, reviewCount: p.reviewCount };
   }
+  appendLd(schema);
+
+  // Breadcrumb trail: Home › Category › Product.
+  appendLd({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/index.html` },
+      { '@type': 'ListItem', position: 2, name: p.categoryName, item: `${origin}/modules/catalog/category.html?slug=${p.categorySlug}` },
+      { '@type': 'ListItem', position: 3, name: p.title },
+    ],
+  });
+}
+
+function appendLd(obj) {
   const el = document.createElement('script');
   el.type = 'application/ld+json';
-  el.textContent = JSON.stringify(schema);
+  el.textContent = JSON.stringify(obj);
   document.head.appendChild(el);
 }
 
