@@ -279,3 +279,15 @@ inlined into pages by `tools/assemble.py`).
     account stat-card hover; star alignment; pretty paragraph wrapping.
   · Verified: all 20 pages 200, all 23 asset refs + 26 script/style refs resolve,
     CSS braces balanced, JSON valid.
+- **2026-07-21 (deploy-fix + feature session)** — after seeing the live site render
+  unstyled at `imran-me.github.io/gulfrabit/`:
+  · **Critical:** root-absolute paths 404 on a project subpath → converted the
+    whole build to **relative paths** (assembler rewrites per depth) + `siteURL()`
+    from `import.meta.url`; added `.nojekyll` (Jekyll was dropping `_*` partials).
+    Verified all pages/assets 200 under a simulated subpath.
+  · Square favicon set cropped from the rabbit mark; manifest made relative.
+  · **Best Sellers authored as real HTML** product cards in index.html (content-
+    first); home.js only fills the dynamic rails now.
+  · **focus-trap** util → cart drawer, mobile nav, quick-view (keyboard a11y).
+  · **Recently-viewed** rail on the PDP (localStorage history).
+  · Catalog expanded to **44 products** (every category 4–6) so grids read full.
