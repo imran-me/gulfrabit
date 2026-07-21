@@ -93,6 +93,8 @@ style concern = one CSS partial. Split any file over ~300 lines.
 | Account addresses | `modules/account/addresses.html` | account | DONE |
 | Account wishlist | `modules/account/wishlist.html` | account | DONE |
 | Order tracking | `modules/account/track.html` | account | DONE |
+| Deals & Offers | `modules/deals/deals.html` | deals | DONE |
+| Compare | `modules/catalog/compare.html` | catalog | DONE |
 | Login | `modules/auth/login.html` | auth | DONE |
 | Register | `modules/auth/register.html` | auth | DONE |
 | Forgot password | `modules/auth/forgot-password.html` | auth | DONE |
@@ -300,3 +302,16 @@ inlined into pages by `tools/assemble.py`).
   **order-tracking page** (`account/track.html`) with a status timeline, wired
   from footer/orders/confirmation; **PDP reviews** with an interactive star-rating
   write-review form (localStorage). 22 pages total.
+- **2026-07-22 (imagery + features + polish loop)**:
+  · **Imagery** — `tools/gen-product-images.py`: a distinct premium image per
+    product (category-aware motif) with **3 gallery views** each; clean textless
+    hero backgrounds. Grids no longer repeat one tile; PDP has a real thumb rail.
+  · **Product compare** — card toggle + global floating tray + `compare.html`
+    side-by-side table (best price/rating highlights). state.js `COMPARE`.
+  · **Deals module** — `deals.html` (biggest-discounts + sortable grid);
+    `data-service.getDeals()`; header/footer links.
+  · **Richer filters** — facet counts, On-sale facet, collapsible groups.
+  · **Home** — Featured Brands logo-wall.
+  · **Checkout** — card fields validated only when Card is selected.
+  · 24 pages verified 200 under a simulated subpath. Tools: assemble.py,
+    sitemap.py, gen-product-images.py.
