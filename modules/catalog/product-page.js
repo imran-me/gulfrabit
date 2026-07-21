@@ -14,6 +14,7 @@ import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { setup as setupStepper } from '../../shared/js/components/quantity-stepper.js';
 import { initWishlistButtons } from '../../shared/js/components/wishlist.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';
+import { siteURL } from '../../shared/js/core/paths.js';
 
 const STAR = '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
 let currentQty = 1;
@@ -39,12 +40,11 @@ async function init() {
  * only — the human-readable detail is already in the DOM.
  */
 function injectProductSchema(p) {
-  const origin = window.location.origin;
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: p.title,
-    image: [origin + (p.images?.[0] || p.image)],
+    image: [siteURL((p.images?.[0] || p.image))],
     description: p.shortDescription || p.description || '',
     sku: p.id,
     brand: { '@type': 'Brand', name: p.brand || 'GulfRabit' },
@@ -53,7 +53,7 @@ function injectProductSchema(p) {
       priceCurrency: 'BDT',
       price: p.price,
       availability: p.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      url: `${origin}/modules/catalog/product.html?id=${p.id}`,
+      url: siteURL(`modules/catalog/product.html?id=${p.id}`),
     },
   };
   if (p.rating && p.reviewCount) {
@@ -66,8 +66,8 @@ function injectProductSchema(p) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/index.html` },
-      { '@type': 'ListItem', position: 2, name: p.categoryName, item: `${origin}/modules/catalog/category.html?slug=${p.categorySlug}` },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL('index.html') },
+      { '@type': 'ListItem', position: 2, name: p.categoryName, item: siteURL(`modules/catalog/category.html?slug=${p.categorySlug}`) },
       { '@type': 'ListItem', position: 3, name: p.title },
     ],
   });
@@ -106,7 +106,7 @@ function paintInfo(p) {
   document.querySelector('[data-pdp-title]').textContent = p.title;
   document.querySelector('[data-crumb-title]').textContent = p.title;
   const crumbCat = document.querySelector('[data-crumb-cat]');
-  crumbCat.textContent = p.categoryName; crumbCat.href = `/modules/catalog/category.html?slug=${p.categorySlug}`;
+  crumbCat.textContent = p.categoryName; crumbCat.href = siteURL(`modules/catalog/category.html?slug=${p.categorySlug}`);
 
   const full = Math.round(p.rating || 0);
   document.querySelector('[data-pdp-rating]').innerHTML =
@@ -123,7 +123,7 @@ function paintInfo(p) {
   // B2B MOQ / tier hint
   if (p.moq) {
     document.querySelector('[data-pdp-short]').insertAdjacentHTML('afterend',
-      `<p class="caption" style="margin-top:.5rem">MOQ: <strong>${p.moq}</strong> units · Bulk pricing available — <a href="/modules/b2b/b2b-industrial.html">request a quote</a>.</p>`);
+      `<p class="caption" style="margin-top:.5rem">MOQ: <strong>${p.moq}</strong> units · Bulk pricing available — <a href="${siteURL('modules/b2b/b2b-industrial.html')}">request a quote</a>.</p>`);
   }
 
   // Wishlist button: the shared initializer already ran on DOMContentLoaded and
@@ -194,7 +194,7 @@ function renderNotFound() {
     <div class="empty-state" style="grid-column:1/-1">
       <h1 class="empty-state__title">Product not found</h1>
       <p class="empty-state__text">This product may have sold out or the link is incorrect.</p>
-      <a class="btn-gr btn-primary-gr" href="/index.html">Back to home</a>
+      <a class="btn-gr btn-primary-gr" href="${siteURL('index.html')}">Back to home</a>
     </div>`;
 }
 

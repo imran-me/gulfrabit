@@ -6,6 +6,7 @@
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';
+import { siteURL } from '../../shared/js/core/paths.js';
 
 const id = getParam('id');
 let order = storage.get('last-order', null);
@@ -15,7 +16,7 @@ if (!order || (id && order.id !== id)) {
 
 if (!order) {
   document.querySelector('#main').innerHTML =
-    '<div class="empty-state"><h1 class="empty-state__title">No recent order</h1><p class="empty-state__text">We couldn’t find that order.</p><a class="btn-gr btn-primary-gr" href="/index.html">Back to home</a></div>';
+    `<div class="empty-state"><h1 class="empty-state__title">No recent order</h1><p class="empty-state__text">We couldn’t find that order.</p><a class="btn-gr btn-primary-gr" href="${siteURL('index.html')}">Back to home</a></div>`;
 } else {
   setText('[data-order-id]', order.id);
   setText('[data-order-address]', order.address || '—');

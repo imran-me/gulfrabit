@@ -4,7 +4,7 @@
    Gold accent signals the industrial sub-brand.
    ========================================================================= */
 .b2b-hero { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--gr-border);
-  background: linear-gradient(90deg, rgba(10,10,10,.95), rgba(10,10,10,.72)), url("/assets/images/hero/hero-industrial.svg") center/cover;
+  background: linear-gradient(90deg, rgba(10,10,10,.95), rgba(10,10,10,.72)), url("../../assets/images/hero/hero-industrial.svg") center/cover;
   padding: clamp(2.5rem, 6vw, 5rem); }
 .b2b-hero .overline { color: var(--gr-gold-accent); }
 

@@ -9,18 +9,14 @@
  * for the endpoints these will map onto.
  */
 
-// Base path to the mock JSON. When wiring the backend, swap for API_BASE.
-const DATA_BASE = resolveDataBase();
+// Base path to the mock JSON. Resolved relative to THIS module's URL so it works
+// at a domain root or a project subpath (github.io/repo/). When wiring the
+// backend, swap for API_BASE. shared/js/core/ -> up 3 -> <root>/data.
+const DATA_BASE = new URL('../../../data', import.meta.url).href;
 // const API_BASE = 'https://api.gulfrabit.com/v1';   // TODO: backend
 
 // Simple in-memory cache so we fetch each JSON file once per page load.
 const cache = new Map();
-
-/** Resolve /data relative to the site root regardless of page depth. */
-function resolveDataBase() {
-  // Pages live at different depths (/, /modules/cart/…). Anchor to origin.
-  return `${window.location.origin}`.replace(/\/$/, '') + '/data';
-}
 
 async function loadJSON(name) {
   if (cache.has(name)) return cache.get(name);

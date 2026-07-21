@@ -8,6 +8,7 @@
  */
 
 import * as store from '../../shared/js/core/state.js';
+import { siteURL } from '../../shared/js/core/paths.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 
 export function ensureSession() {
@@ -24,7 +25,7 @@ export function wireLogout() {
     e.preventDefault();
     store.clearUser();
     toast.info('Signed out');
-    setTimeout(() => { window.location.href = '/index.html'; }, 700);
+    setTimeout(() => { window.location.href = siteURL('index.html'); }, 700);
   });
 }
 

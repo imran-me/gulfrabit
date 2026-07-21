@@ -12,6 +12,7 @@
  */
 
 import { suggest } from '../core/data-service.js';
+import { siteURL } from '../core/paths.js';
 import { debounce } from '../utils/debounce.js';
 import { formatBDT } from '../utils/format-currency.js';
 
@@ -35,7 +36,7 @@ function setup(form) {
         panel.innerHTML = `<p class="caption" style="padding:.75rem 1rem">No matches for “${escapeHtml(q)}”.</p>`;
       } else {
         panel.innerHTML = items.map((it) => `
-          <a class="search-suggest__item" href="${window.location.origin}/modules/catalog/product.html?id=${encodeURIComponent(it.id)}">
+          <a class="search-suggest__item" href="${siteURL(`modules/catalog/product.html?id=${encodeURIComponent(it.id)}`)}">
             <img src="${it.image}" alt="" width="40" height="40" loading="lazy">
             <span><span class="search-suggest__title">${escapeHtml(it.title)}</span>
             <span class="caption">${escapeHtml(it.brand || '')}</span></span>

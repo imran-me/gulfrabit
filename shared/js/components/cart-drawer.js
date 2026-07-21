@@ -10,6 +10,7 @@
  */
 
 import * as store from '../core/state.js';
+import { siteURL } from '../core/paths.js';
 import { formatBDT } from '../utils/format-currency.js';
 
 let root = null;         // the drawer container
@@ -65,7 +66,7 @@ function render() {
         <div class="cart-empty__icon">${BAG}</div>
         <p class="h5" style="margin-bottom:.5rem">Your cart is empty</p>
         <p class="caption" style="margin-bottom:1.5rem">Sourced. Verified. Delivered — start exploring.</p>
-        <a href="${window.location.origin}/index.html" class="btn-gr btn-outline-gr btn-sm-gr">Continue shopping</a>
+        <a href="${siteURL('index.html')}" class="btn-gr btn-outline-gr btn-sm-gr">Continue shopping</a>
       </div>`;
     footEl.innerHTML = '';
     return;
@@ -101,8 +102,8 @@ function render() {
     <div class="cart-summary-row"><span>Subtotal</span><span class="tabular">${formatBDT(subtotal)}</span></div>
     <div class="cart-summary-row"><span>Delivery</span><span>Calculated at checkout</span></div>
     <div style="display:flex;gap:.75rem;margin-top:1rem">
-      <a href="${window.location.origin}/modules/cart/cart.html" class="btn-gr btn-outline-gr btn-block-gr">View Cart</a>
-      <a href="${window.location.origin}/modules/checkout/checkout.html" class="btn-gr btn-primary-gr btn-block-gr">Checkout</a>
+      <a href="${siteURL('modules/cart/cart.html')}" class="btn-gr btn-outline-gr btn-block-gr">View Cart</a>
+      <a href="${siteURL('modules/checkout/checkout.html')}" class="btn-gr btn-primary-gr btn-block-gr">Checkout</a>
     </div>`;
 }
 

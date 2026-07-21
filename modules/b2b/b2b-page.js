@@ -4,6 +4,7 @@
  * and MOQ badges — deliberately denser and more technical than retail cards.
  */
 import { getProductsByCategory } from '../../shared/js/core/data-service.js';
+import { siteURL } from '../../shared/js/core/paths.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
@@ -30,10 +31,10 @@ function specRow(p) {
     .map((t) => `<tr><td>${t.min.toLocaleString()}+ pcs</td><td>${formatBDT(t.price)}</td></tr>`).join('');
   return `
     <article class="spec-row">
-      <a class="spec-row__media" href="/modules/catalog/product.html?id=${p.id}"><img src="${p.image}" alt="${escapeAttr(p.title)}" loading="lazy"></a>
+      <a class="spec-row__media" href="${siteURL(`modules/catalog/product.html?id=${p.id}`)}"><img src="${p.image}" alt="${escapeAttr(p.title)}" loading="lazy"></a>
       <div>
         <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.4rem">
-          <a href="/modules/catalog/product.html?id=${p.id}"><strong>${escapeHtml(p.title)}</strong></a>
+          <a href="${siteURL(`modules/catalog/product.html?id=${p.id}`)}"><strong>${escapeHtml(p.title)}</strong></a>
           ${p.moq ? `<span class="badge-gr moq-badge">MOQ ${p.moq}</span>` : ''}
         </div>
         <div class="spec-row__specs">${specs}</div>

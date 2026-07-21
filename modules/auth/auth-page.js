@@ -8,6 +8,7 @@
 
 import { getMockUsers } from '../../shared/js/core/data-service.js';
 import * as store from '../../shared/js/core/state.js';
+import { siteURL } from '../../shared/js/core/paths.js';
 import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 
@@ -49,12 +50,12 @@ const handlers = {
     const { valid } = validateForm(form);
     if (!valid) return;
     toast.success('If that email exists, a reset link is on its way.');
-    setTimeout(() => { window.location.href = '/modules/auth/login.html'; }, 1600);
+    setTimeout(() => { window.location.href = siteURL('modules/auth/login.html'); }, 1600);
   },
 };
 
 function signIn(user) {
   store.setUser({ id: user.id, name: user.name, email: user.email, phone: user.phone, tier: user.tier, addresses: user.addresses || [] });
   toast.success(`Welcome, ${user.name.split(' ')[0]}.`);
-  setTimeout(() => { window.location.href = '/modules/account/dashboard.html'; }, 900);
+  setTimeout(() => { window.location.href = siteURL('modules/account/dashboard.html'); }, 900);
 }

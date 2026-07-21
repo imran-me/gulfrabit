@@ -7,6 +7,7 @@
 
 import * as store from '../../shared/js/core/state.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
+import { siteURL } from '../../shared/js/core/paths.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 
@@ -58,9 +59,9 @@ function render() {
 function itemHTML(l) {
   return `
     <div class="cart-item" data-item="${l.id}" data-variant="${l.variant ?? ''}">
-      <a class="cart-item__media" href="/modules/catalog/product.html?id=${l.id}"><img src="${l.image}" alt="${escapeAttr(l.title)}" loading="lazy"></a>
+      <a class="cart-item__media" href="${siteURL(`modules/catalog/product.html?id=${l.id}`)}"><img src="${l.image}" alt="${escapeAttr(l.title)}" loading="lazy"></a>
       <div>
-        <a href="/modules/catalog/product.html?id=${l.id}"><div class="cart-item__title">${escapeHtml(l.title)}</div></a>
+        <a href="${siteURL(`modules/catalog/product.html?id=${l.id}`)}"><div class="cart-item__title">${escapeHtml(l.title)}</div></a>
         <div class="cart-item__meta">${l.brand ? escapeHtml(l.brand) : ''}</div>
         <div class="cart-item__controls">
           <div class="qty-stepper" data-qty>
@@ -79,7 +80,7 @@ function itemHTML(l) {
 function savedHTML(s) {
   return `
     <div class="cart-item" data-saved="${s.id}">
-      <a class="cart-item__media" href="/modules/catalog/product.html?id=${s.id}"><img src="${s.image}" alt="${escapeAttr(s.title)}" loading="lazy"></a>
+      <a class="cart-item__media" href="${siteURL(`modules/catalog/product.html?id=${s.id}`)}"><img src="${s.image}" alt="${escapeAttr(s.title)}" loading="lazy"></a>
       <div>
         <div class="cart-item__title">${escapeHtml(s.title)}</div>
         <div class="cart-item__meta">${escapeHtml(s.brand || '')}</div>

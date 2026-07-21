@@ -10,6 +10,7 @@
 import { getProductById } from '../core/data-service.js';
 import { formatBDT, discountLabel } from '../utils/format-currency.js';
 import * as store from '../core/state.js';
+import { siteURL } from '../core/paths.js';
 import { toast } from './toast-notifications.js';
 import { openCartDrawer } from './cart-drawer.js';
 
@@ -55,7 +56,7 @@ export async function openQuickView(id) {
           <p class="text-muted-gr" style="margin-bottom:1.5rem">${escapeHtml(p.shortDescription || p.description || '')}</p>
           <div style="display:flex;gap:.75rem">
             <button class="btn-gr btn-primary-gr btn-block-gr" data-qv-add ${p.inStock ? '' : 'disabled'}>${p.inStock ? 'Add to Cart' : 'Sold out'}</button>
-            <a class="btn-gr btn-outline-gr" href="${window.location.origin}/modules/catalog/product.html?id=${p.id}">Details</a>
+            <a class="btn-gr btn-outline-gr" href="${siteURL(`modules/catalog/product.html?id=${p.id}`)}">Details</a>
           </div>
         </div>
       </div>

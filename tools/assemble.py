@@ -56,8 +56,10 @@ def head(title, desc, css_links, theme="#0A0A0A"):
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{title}">
   <meta name="twitter:description" content="{desc}">
-  <link rel="icon" href="/assets/logo/gulfrabit-logo-dark-bg.jpeg">
-  <link rel="apple-touch-icon" href="/assets/logo/gulfrabit-logo-dark-bg.jpeg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/assets/logo/favicon-32.png">
+  <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
@@ -81,6 +83,21 @@ def scripts(module_js):
 </html>
 """
 
+def relativize(html, out):
+    """Rewrite site-root-absolute paths (/shared, /assets, /modules, /index.html,
+    /favicon…, /site.webmanifest, url(/…)) into paths RELATIVE to this output
+    page's depth, so the build works at a domain root OR a project subpath
+    (e.g. user.github.io/repo/). External URLs (https://…) and #anchors are
+    untouched because they don't begin with `="/` or `url(/`."""
+    depth = out.count("/")            # e.g. modules/x/y.html -> 2, index.html -> 0
+    prefix = "../" * depth            # "" for root pages
+    if not prefix:
+        # Root page: strip the leading slash so paths become same-dir relative.
+        html = html.replace('="/', '="').replace("url('/", "url('").replace('url("/', 'url("').replace("url(/", "url(")
+    else:
+        html = html.replace('="/', f'="{prefix}').replace("url('/", f"url('{prefix}").replace('url("/', f'url("{prefix}').replace("url(/", f"url({prefix}")
+    return html
+
 def assemble(out, title, desc, main_html, css_links=None, module_js=None):
     page = head(title, desc, css_links or []) + "\n"
     page += "  <!-- HEADER (inlined from shared/components/header.html) -->\n"
@@ -89,6 +106,7 @@ def assemble(out, title, desc, main_html, css_links=None, module_js=None):
     page += "  <!-- FOOTER (inlined from shared/components/footer.html) -->\n"
     page += FOOTER
     page += scripts(module_js)
+    page = relativize(page, out)
     write(out, page)
     print("wrote", out)
 

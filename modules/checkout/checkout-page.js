@@ -9,6 +9,7 @@
 
 import * as store from '../../shared/js/core/state.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
+import { siteURL } from '../../shared/js/core/paths.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
@@ -25,7 +26,7 @@ function init() {
   // Guard: empty cart → back to cart.
   if (!store.getCart().length) {
     document.querySelector('.checkout-layout').innerHTML =
-      `<div class="empty-state" style="grid-column:1/-1"><h2 class="empty-state__title">Your cart is empty</h2><p class="empty-state__text">Add something before checking out.</p><a class="btn-gr btn-primary-gr" href="/index.html">Start shopping</a></div>`;
+      `<div class="empty-state" style="grid-column:1/-1"><h2 class="empty-state__title">Your cart is empty</h2><p class="empty-state__text">Add something before checking out.</p><a class="btn-gr btn-primary-gr" href="${siteURL('index.html')}">Start shopping</a></div>`;
     document.querySelector('[data-stepper]')?.remove();
     return;
   }
@@ -153,7 +154,7 @@ function placeOrder(e) {
 
   store.clearCart();
   storage.remove('cart-promo');
-  window.location.href = `/modules/checkout/order-confirmation.html?id=${encodeURIComponent(orderId)}`;
+  window.location.href = siteURL(`modules/checkout/order-confirmation.html?id=${encodeURIComponent(orderId)}`);
 }
 
 function setText(sel, v) { const el = document.querySelector(sel); if (el) el.textContent = v; }

@@ -32,7 +32,5 @@ export function setParams(updates, { replace = true } = {}) {
   else history.pushState(null, '', url);
 }
 
-/** Absolute path to the site root, so links work from any page depth. */
-export function root(path = '') {
-  return `${window.location.origin}/${path.replace(/^\//, '')}`;
-}
+/** Absolute URL to a site-root-relative path (portable across root/subpath). */
+export { siteURL as root } from './paths.js';

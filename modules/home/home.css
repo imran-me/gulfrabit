@@ -46,7 +46,7 @@
   border: 1px solid var(--gr-border);
   background:
     linear-gradient(90deg, rgba(10,10,10,.95), rgba(10,10,10,.74)),
-    url("/assets/images/hero/hero-industrial.svg") center/cover;
+    url("../../assets/images/hero/hero-industrial.svg") center/cover;
   padding: clamp(2rem, 5vw, 4rem);
 }
 .industry-band__grid { display: grid; gap: var(--space-6); grid-template-columns: 1fr; align-items: center; }

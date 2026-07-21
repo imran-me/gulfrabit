@@ -15,6 +15,7 @@
 
 import { formatBDT, discountLabel } from '../utils/format-currency.js';
 import * as store from '../core/state.js';
+import { siteURL } from '../core/paths.js';
 import { toast } from './toast-notifications.js';
 import { openCartDrawer } from './cart-drawer.js';
 
@@ -35,7 +36,7 @@ function starsHTML(rating = 0, count = 0) {
 
 /** Product detail URL (query-param driven). */
 export function productURL(product) {
-  return `${window.location.origin}/modules/catalog/product.html?id=${encodeURIComponent(product.id)}`;
+  return siteURL(`modules/catalog/product.html?id=${encodeURIComponent(product.id)}`);
 }
 
 /** Canonical card markup for a product object. */
@@ -134,7 +135,7 @@ export function enhanceProductCards(root = document) {
       // Quick-view modal is optional enhancement; fall back to the PDP link.
       import('./quick-view-modal.js')
         .then((m) => m.openQuickView(product.id))
-        .catch(() => { window.location.href = `${window.location.origin}/modules/catalog/product.html?id=${product.id}`; });
+        .catch(() => { window.location.href = siteURL(`modules/catalog/product.html?id=${product.id}`); });
     });
   });
 }
