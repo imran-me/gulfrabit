@@ -1,0 +1,46 @@
+  <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
+    <nav class="breadcrumb-gr" aria-label="Breadcrumb" style="margin-bottom:var(--space-5)">
+      <a href="/index.html">Home</a><span class="breadcrumb-gr__sep">/</span><span>Deals</span>
+    </nav>
+
+    <section class="deals-hero" data-reveal>
+      <div>
+        <p class="overline" style="color:#04222b">Limited-time</p>
+        <h1 class="h1" style="color:#04222b;margin:.25rem 0">Deals &amp; Offers</h1>
+        <p style="color:#04333f;max-width:46ch">Verified imports at a lower price. New markdowns land every week — no inflated “was” prices, just real savings.</p>
+      </div>
+      <div class="deals-hero__stat">
+        <div class="deals-hero__num" data-deal-count>—</div>
+        <div class="deals-hero__label">Products on offer</div>
+      </div>
+    </section>
+
+    <!-- Biggest discounts -->
+    <section aria-labelledby="top-head">
+      <div class="deals-toolbar">
+        <div class="section-head__titles"><p class="overline">Don’t miss</p><h2 id="top-head" class="h3">Biggest Discounts</h2></div>
+      </div>
+      <div class="product-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))" data-top-deals></div>
+    </section>
+
+    <!-- All deals -->
+    <section aria-labelledby="all-head" style="margin-top:var(--space-8)">
+      <div class="deals-toolbar">
+        <div class="section-head__titles"><p class="overline">Everything on sale</p><h2 id="all-head" class="h3">All Deals</h2></div>
+        <label style="display:flex;align-items:center;gap:.5rem" class="caption">Sort
+          <select class="select-gr btn-sm-gr" data-sort style="min-height:40px;width:auto">
+            <option value="discount">Biggest discount</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="rating">Best rated</option>
+          </select>
+        </label>
+      </div>
+      <div class="product-grid" data-all-deals aria-live="polite"></div>
+      <div class="empty-state" data-deals-empty hidden>
+        <h2 class="empty-state__title">No active deals right now</h2>
+        <p class="empty-state__text">Check back soon — or browse the full catalogue.</p>
+        <a class="btn-gr btn-primary-gr" href="/modules/catalog/category.html?slug=imported-food-grocery">Browse all</a>
+      </div>
+    </section>
+  </main>

@@ -59,6 +59,16 @@ export async function getFeatured(tag = 'featured', limit = 8) {
   return products.filter((p) => p.tags?.includes(tag)).slice(0, limit);
 }
 
+/** Discounted products (originalPrice > price), sorted by discount % desc. */
+export async function getDeals(limit) {
+  const products = await getAllProducts();
+  const deals = products
+    .filter((p) => p.originalPrice && p.originalPrice > p.price)
+    .map((p) => ({ ...p, _pct: Math.round((p.originalPrice - p.price) / p.originalPrice * 100) }))
+    .sort((a, b) => b._pct - a._pct);
+  return typeof limit === 'number' ? deals.slice(0, limit) : deals;
+}
+
 export async function getRelated(product, limit = 6) {
   const products = await getAllProducts();
   return products

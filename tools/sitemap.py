@@ -21,6 +21,7 @@ STATIC = [
     "/modules/content/contact.html",
     "/modules/content/faq.html",
     "/modules/content/shipping-returns.html",
+    "/modules/deals/deals.html",
     "/modules/b2b/b2b-industrial.html",
 ]
 

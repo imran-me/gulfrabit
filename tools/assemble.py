@@ -241,6 +241,12 @@ PAGES = [
      "modules/content/_fragments/404.main.html",
      ["/modules/content/content.css"], None),
 
+    ("modules/deals/deals.html",
+     "Deals & Offers — GulfRabit",
+     "Verified imports on offer — GulfRabit deals and markdowns.",
+     "modules/deals/_fragments/deals.main.html",
+     ["/modules/deals/deals.css"], "/modules/deals/deals-page.js"),
+
     ("modules/b2b/b2b-industrial.html",
      "Industrial & B2B — GulfRabit",
      "Raw materials for the electronics industry: PCBs, switches, relays, sensors, polymers. Bulk pricing and RFQ.",
