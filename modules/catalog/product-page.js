@@ -5,7 +5,8 @@
  * spec-sheet table and read as B2B rather than lifestyle.
  */
 
-import { getProductById, getRelated } from '../../shared/js/core/data-service.js';
+import { getProductById, getRelated, getAllProducts } from '../../shared/js/core/data-service.js';
+import { storage } from '../../shared/js/core/storage.js';
 import { formatBDT, discountLabel } from '../../shared/js/utils/format-currency.js';
 import * as store from '../../shared/js/core/state.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
@@ -33,6 +34,25 @@ async function init() {
   paintTabs(product);
   wireActions(product);
   loadRelated(product);
+  recordRecent(product.id);
+  loadRecentlyViewed(product);
+}
+
+/* ---- Recently viewed (localStorage history) --------------------------- */
+function recordRecent(id) {
+  const list = storage.get('recent-viewed', []).filter((x) => x !== id);
+  list.unshift(id);
+  storage.set('recent-viewed', list.slice(0, 12));
+}
+
+async function loadRecentlyViewed(current) {
+  const ids = storage.get('recent-viewed', []).filter((id) => id !== current.id);
+  if (!ids.length) return;
+  const all = await getAllProducts();
+  const items = ids.map((id) => all.find((p) => p.id === id)).filter(Boolean).slice(0, 8);
+  if (!items.length) return;
+  document.querySelector('[data-recent-section]').hidden = false;
+  renderProductGrid(document.querySelector('[data-recent-rail]'), items);
 }
 
 /**
