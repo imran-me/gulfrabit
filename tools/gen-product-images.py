@@ -65,15 +65,19 @@ def motif(kind, cx, cy):
     <rect {facet} x="{cx-34}" y="{cy-34}" width="68" height="68"/>
     {''.join(f'<rect fill="url(#accent)" x="{cx-70}" y="{cy-44+i*22}" width="14" height="8"/><rect fill="url(#accent)" x="{cx+56}" y="{cy-44+i*22}" width="14" height="8"/>' for i in range(5))}'''
 
-def svg(p):
+def svg(p, variant=0):
     cat = p["categorySlug"]
     ca, cb, kind = CAT.get(cat, ("#1BB4D4", "#0E7C99", "circle"))
-    # vary the angle + glow position per product so tiles differ
-    ang = seeded(p["id"], 90)
-    gx = 30 + seeded(p["id"] + "x", 40)
-    gy = 24 + seeded(p["id"] + "y", 30)
+    # vary the angle + glow position per product so tiles differ; variants shift
+    # the composition (angle / glow / motif scale) so a PDP gallery has real views
+    ang = (seeded(p["id"], 90) + variant * 47) % 360
+    gx = 30 + (seeded(p["id"] + "x", 40) + variant * 17) % 40
+    gy = 24 + (seeded(p["id"] + "y", 30) + variant * 13) % 30
+    scale = [1.0, 1.28, 0.82][variant % 3]
+    cy = [232, 250, 220][variant % 3]
     title = html.escape(p["title"])
     brand = html.escape((p.get("brand") or "").upper())
+    show_label = variant == 0
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500" role="img" aria-label="{title}">
   <defs>
     <linearGradient id="accent" gradientTransform="rotate({ang} .5 .5)"><stop offset="0" stop-color="{ca}"/><stop offset="1" stop-color="{cb}"/></linearGradient>
@@ -85,21 +89,23 @@ def svg(p):
   <rect width="400" height="500" fill="#141414"/>
   <rect width="400" height="500" fill="url(#dots)"/>
   <rect width="400" height="500" fill="url(#glow)"/>
-  <g filter="url(#soft)">{motif(kind, 200, 232)}</g>
+  <g filter="url(#soft)" transform="translate(200 {cy}) scale({scale}) translate(-200 -232)">{motif(kind, 200, 232)}</g>
   <rect width="400" height="500" fill="url(#vig)"/>
-  <text x="28" y="46" font-family="Inter, sans-serif" font-size="12" letter-spacing="2.5" fill="#8A8F8C">{brand}</text>
-  <text x="28" y="452" font-family="Inter, sans-serif" font-size="18" font-weight="600" fill="#F7F8F7">{title[:30]}</text>
-  <text x="28" y="476" font-family="Inter, sans-serif" font-size="11" letter-spacing="2" fill="#8A8F8C">GULFRABIT</text>
+  {f'<text x="28" y="46" font-family="Inter, sans-serif" font-size="12" letter-spacing="2.5" fill="#8A8F8C">{brand}</text>' if show_label else ''}
+  {f'<text x="28" y="452" font-family="Inter, sans-serif" font-size="18" font-weight="600" fill="#F7F8F7">{title[:30]}</text>' if show_label else ''}
+  {f'<text x="28" y="476" font-family="Inter, sans-serif" font-size="11" letter-spacing="2" fill="#8A8F8C">GULFRABIT</text>' if show_label else ''}
 </svg>
 '''
 
 def main():
     data = json.loads((ROOT / "data" / "products.json").read_text(encoding="utf-8"))
     for p in data["products"]:
-        path = f"/assets/images/products/{p['id']}.svg"
-        (PDIR / f"{p['id']}.svg").write_text(svg(p), encoding="utf-8", newline="\n")
-        p["image"] = path
-        p["images"] = [path]
+        base = f"/assets/images/products/{p['id']}"
+        (PDIR / f"{p['id']}.svg").write_text(svg(p, 0), encoding="utf-8", newline="\n")
+        (PDIR / f"{p['id']}-2.svg").write_text(svg(p, 1), encoding="utf-8", newline="\n")
+        (PDIR / f"{p['id']}-3.svg").write_text(svg(p, 2), encoding="utf-8", newline="\n")
+        p["image"] = f"{base}.svg"
+        p["images"] = [f"{base}.svg", f"{base}-2.svg", f"{base}-3.svg"]
     (ROOT / "data" / "products.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n")
     print(f"generated {len(data['products'])} product images + updated products.json")

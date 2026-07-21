@@ -9,7 +9,7 @@
   <rect width="400" height="500" fill="#141414"/>
   <rect width="400" height="500" fill="url(#dots)"/>
   <rect width="400" height="500" fill="url(#glow)"/>
-  <g filter="url(#soft)"><rect fill="url(#accent)" stroke="rgba(255,255,255,.18)" stroke-width="1.5" x="140" y="154" rx="16" width="120" height="156"/>
+  <g filter="url(#soft)" transform="translate(200 232) scale(1.0) translate(-200 -232)"><rect fill="url(#accent)" stroke="rgba(255,255,255,.18)" stroke-width="1.5" x="140" y="154" rx="16" width="120" height="156"/>
         <rect stroke="rgba(255,255,255,.16)" fill="none" stroke-width="1.2" x="158" y="174" rx="8" width="84" height="96"/>
         <circle stroke="rgba(255,255,255,.16)" fill="none" stroke-width="1.2" cx="200" cy="288" r="10"/></g>
   <rect width="400" height="500" fill="url(#vig)"/>

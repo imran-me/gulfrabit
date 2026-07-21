@@ -17,7 +17,9 @@
       "originalPrice": 1800,
       "image": "/assets/images/products/gr-1001.svg",
       "images": [
-        "/assets/images/products/gr-1001.svg"
+        "/assets/images/products/gr-1001.svg",
+        "/assets/images/products/gr-1001-2.svg",
+        "/assets/images/products/gr-1001-3.svg"
       ],
       "rating": 4.8,
       "reviewCount": 214,
@@ -48,7 +50,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-1002.svg",
       "images": [
-        "/assets/images/products/gr-1002.svg"
+        "/assets/images/products/gr-1002.svg",
+        "/assets/images/products/gr-1002-2.svg",
+        "/assets/images/products/gr-1002-3.svg"
       ],
       "rating": 4.9,
       "reviewCount": 88,
@@ -77,7 +81,9 @@
       "originalPrice": 1900,
       "image": "/assets/images/products/gr-1003.svg",
       "images": [
-        "/assets/images/products/gr-1003.svg"
+        "/assets/images/products/gr-1003.svg",
+        "/assets/images/products/gr-1003-2.svg",
+        "/assets/images/products/gr-1003-3.svg"
       ],
       "rating": 4.6,
       "reviewCount": 132,
@@ -105,7 +111,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-1004.svg",
       "images": [
-        "/assets/images/products/gr-1004.svg"
+        "/assets/images/products/gr-1004.svg",
+        "/assets/images/products/gr-1004-2.svg",
+        "/assets/images/products/gr-1004-3.svg"
       ],
       "rating": 4.7,
       "reviewCount": 76,
@@ -132,7 +140,9 @@
       "originalPrice": 750,
       "image": "/assets/images/products/gr-1005.svg",
       "images": [
-        "/assets/images/products/gr-1005.svg"
+        "/assets/images/products/gr-1005.svg",
+        "/assets/images/products/gr-1005-2.svg",
+        "/assets/images/products/gr-1005-3.svg"
       ],
       "rating": 4.5,
       "reviewCount": 54,
@@ -157,7 +167,9 @@
       "originalPrice": 2600,
       "image": "/assets/images/products/gr-1101.svg",
       "images": [
-        "/assets/images/products/gr-1101.svg"
+        "/assets/images/products/gr-1101.svg",
+        "/assets/images/products/gr-1101-2.svg",
+        "/assets/images/products/gr-1101-3.svg"
       ],
       "rating": 4.7,
       "reviewCount": 301,
@@ -185,7 +197,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-1102.svg",
       "images": [
-        "/assets/images/products/gr-1102.svg"
+        "/assets/images/products/gr-1102.svg",
+        "/assets/images/products/gr-1102-2.svg",
+        "/assets/images/products/gr-1102-3.svg"
       ],
       "rating": 4.8,
       "reviewCount": 44,
@@ -213,7 +227,9 @@
       "originalPrice": 890,
       "image": "/assets/images/products/gr-1103.svg",
       "images": [
-        "/assets/images/products/gr-1103.svg"
+        "/assets/images/products/gr-1103.svg",
+        "/assets/images/products/gr-1103-2.svg",
+        "/assets/images/products/gr-1103-3.svg"
       ],
       "rating": 4.6,
       "reviewCount": 67,
@@ -238,7 +254,9 @@
       "originalPrice": 1350,
       "image": "/assets/images/products/gr-1201.svg",
       "images": [
-        "/assets/images/products/gr-1201.svg"
+        "/assets/images/products/gr-1201.svg",
+        "/assets/images/products/gr-1201-2.svg",
+        "/assets/images/products/gr-1201-3.svg"
       ],
       "rating": 4.7,
       "reviewCount": 156,
@@ -266,7 +284,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-1202.svg",
       "images": [
-        "/assets/images/products/gr-1202.svg"
+        "/assets/images/products/gr-1202.svg",
+        "/assets/images/products/gr-1202-2.svg",
+        "/assets/images/products/gr-1202-3.svg"
       ],
       "rating": 4.6,
       "reviewCount": 210,
@@ -294,7 +314,9 @@
       "originalPrice": 1150,
       "image": "/assets/images/products/gr-1203.svg",
       "images": [
-        "/assets/images/products/gr-1203.svg"
+        "/assets/images/products/gr-1203.svg",
+        "/assets/images/products/gr-1203-2.svg",
+        "/assets/images/products/gr-1203-3.svg"
       ],
       "rating": 4.5,
       "reviewCount": 98,
@@ -322,7 +344,9 @@
       "originalPrice": 22500,
       "image": "/assets/images/products/gr-2001.svg",
       "images": [
-        "/assets/images/products/gr-2001.svg"
+        "/assets/images/products/gr-2001.svg",
+        "/assets/images/products/gr-2001-2.svg",
+        "/assets/images/products/gr-2001-3.svg"
       ],
       "rating": 4.8,
       "reviewCount": 342,
@@ -355,7 +379,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-2002.svg",
       "images": [
-        "/assets/images/products/gr-2002.svg"
+        "/assets/images/products/gr-2002.svg",
+        "/assets/images/products/gr-2002-2.svg",
+        "/assets/images/products/gr-2002-3.svg"
       ],
       "rating": 4.5,
       "reviewCount": 187,
@@ -386,7 +412,9 @@
       "originalPrice": 11000,
       "image": "/assets/images/products/gr-2003.svg",
       "images": [
-        "/assets/images/products/gr-2003.svg"
+        "/assets/images/products/gr-2003.svg",
+        "/assets/images/products/gr-2003-2.svg",
+        "/assets/images/products/gr-2003-3.svg"
       ],
       "rating": 4.4,
       "reviewCount": 64,
@@ -413,7 +441,9 @@
       "originalPrice": 8500,
       "image": "/assets/images/products/gr-2004.svg",
       "images": [
-        "/assets/images/products/gr-2004.svg"
+        "/assets/images/products/gr-2004.svg",
+        "/assets/images/products/gr-2004-2.svg",
+        "/assets/images/products/gr-2004-3.svg"
       ],
       "rating": 4.6,
       "reviewCount": 233,
@@ -441,7 +471,9 @@
       "originalPrice": 10500,
       "image": "/assets/images/products/gr-2501.svg",
       "images": [
-        "/assets/images/products/gr-2501.svg"
+        "/assets/images/products/gr-2501.svg",
+        "/assets/images/products/gr-2501-2.svg",
+        "/assets/images/products/gr-2501-3.svg"
       ],
       "rating": 4.9,
       "reviewCount": 121,
@@ -465,7 +497,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-2502.svg",
       "images": [
-        "/assets/images/products/gr-2502.svg"
+        "/assets/images/products/gr-2502.svg",
+        "/assets/images/products/gr-2502-2.svg",
+        "/assets/images/products/gr-2502-3.svg"
       ],
       "rating": 4.8,
       "reviewCount": 89,
@@ -489,7 +523,9 @@
       "originalPrice": 2500,
       "image": "/assets/images/products/gr-2503.svg",
       "images": [
-        "/assets/images/products/gr-2503.svg"
+        "/assets/images/products/gr-2503.svg",
+        "/assets/images/products/gr-2503-2.svg",
+        "/assets/images/products/gr-2503-3.svg"
       ],
       "rating": 4.5,
       "reviewCount": 41,
@@ -512,7 +548,9 @@
       "originalPrice": 7000,
       "image": "/assets/images/products/gr-3001.svg",
       "images": [
-        "/assets/images/products/gr-3001.svg"
+        "/assets/images/products/gr-3001.svg",
+        "/assets/images/products/gr-3001-2.svg",
+        "/assets/images/products/gr-3001-3.svg"
       ],
       "rating": 4.6,
       "reviewCount": 52,
@@ -535,7 +573,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-3002.svg",
       "images": [
-        "/assets/images/products/gr-3002.svg"
+        "/assets/images/products/gr-3002.svg",
+        "/assets/images/products/gr-3002-2.svg",
+        "/assets/images/products/gr-3002-3.svg"
       ],
       "rating": 4.8,
       "reviewCount": 34,
@@ -558,7 +598,9 @@
       "originalPrice": 4600,
       "image": "/assets/images/products/gr-3003.svg",
       "images": [
-        "/assets/images/products/gr-3003.svg"
+        "/assets/images/products/gr-3003.svg",
+        "/assets/images/products/gr-3003-2.svg",
+        "/assets/images/products/gr-3003-3.svg"
       ],
       "rating": 4.4,
       "reviewCount": 61,
@@ -581,7 +623,9 @@
       "originalPrice": 2900,
       "image": "/assets/images/products/gr-3501.svg",
       "images": [
-        "/assets/images/products/gr-3501.svg"
+        "/assets/images/products/gr-3501.svg",
+        "/assets/images/products/gr-3501-2.svg",
+        "/assets/images/products/gr-3501-3.svg"
       ],
       "rating": 4.7,
       "reviewCount": 288,
@@ -605,7 +649,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-3502.svg",
       "images": [
-        "/assets/images/products/gr-3502.svg"
+        "/assets/images/products/gr-3502.svg",
+        "/assets/images/products/gr-3502-2.svg",
+        "/assets/images/products/gr-3502-3.svg"
       ],
       "rating": 4.5,
       "reviewCount": 47,
@@ -628,7 +674,9 @@
       "originalPrice": 1100,
       "image": "/assets/images/products/gr-4001.svg",
       "images": [
-        "/assets/images/products/gr-4001.svg"
+        "/assets/images/products/gr-4001.svg",
+        "/assets/images/products/gr-4001-2.svg",
+        "/assets/images/products/gr-4001-3.svg"
       ],
       "rating": 4.6,
       "reviewCount": 73,
@@ -651,7 +699,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-4002.svg",
       "images": [
-        "/assets/images/products/gr-4002.svg"
+        "/assets/images/products/gr-4002.svg",
+        "/assets/images/products/gr-4002-2.svg",
+        "/assets/images/products/gr-4002-3.svg"
       ],
       "rating": 4.7,
       "reviewCount": 129,
@@ -675,7 +725,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-9001.svg",
       "images": [
-        "/assets/images/products/gr-9001.svg"
+        "/assets/images/products/gr-9001.svg",
+        "/assets/images/products/gr-9001-2.svg",
+        "/assets/images/products/gr-9001-3.svg"
       ],
       "rating": 4.5,
       "reviewCount": 38,
@@ -724,7 +776,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-9002.svg",
       "images": [
-        "/assets/images/products/gr-9002.svg"
+        "/assets/images/products/gr-9002.svg",
+        "/assets/images/products/gr-9002-2.svg",
+        "/assets/images/products/gr-9002-3.svg"
       ],
       "rating": 4.6,
       "reviewCount": 51,
@@ -772,7 +826,9 @@
       "originalPrice": 55,
       "image": "/assets/images/products/gr-9003.svg",
       "images": [
-        "/assets/images/products/gr-9003.svg"
+        "/assets/images/products/gr-9003.svg",
+        "/assets/images/products/gr-9003-2.svg",
+        "/assets/images/products/gr-9003-3.svg"
       ],
       "rating": 4.7,
       "reviewCount": 29,
@@ -821,7 +877,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-9004.svg",
       "images": [
-        "/assets/images/products/gr-9004.svg"
+        "/assets/images/products/gr-9004.svg",
+        "/assets/images/products/gr-9004-2.svg",
+        "/assets/images/products/gr-9004-3.svg"
       ],
       "rating": 4.8,
       "reviewCount": 63,
@@ -870,7 +928,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-9005.svg",
       "images": [
-        "/assets/images/products/gr-9005.svg"
+        "/assets/images/products/gr-9005.svg",
+        "/assets/images/products/gr-9005-2.svg",
+        "/assets/images/products/gr-9005-3.svg"
       ],
       "rating": 4.4,
       "reviewCount": 22,
@@ -918,7 +978,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-9006.svg",
       "images": [
-        "/assets/images/products/gr-9006.svg"
+        "/assets/images/products/gr-9006.svg",
+        "/assets/images/products/gr-9006-2.svg",
+        "/assets/images/products/gr-9006-3.svg"
       ],
       "rating": 4.6,
       "reviewCount": 40,
@@ -967,7 +1029,9 @@
       "originalPrice": 1050,
       "image": "/assets/images/products/gr-1006.svg",
       "images": [
-        "/assets/images/products/gr-1006.svg"
+        "/assets/images/products/gr-1006.svg",
+        "/assets/images/products/gr-1006-2.svg",
+        "/assets/images/products/gr-1006-3.svg"
       ],
       "rating": 4.6,
       "reviewCount": 61,
@@ -994,7 +1058,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-1204.svg",
       "images": [
-        "/assets/images/products/gr-1204.svg"
+        "/assets/images/products/gr-1204.svg",
+        "/assets/images/products/gr-1204-2.svg",
+        "/assets/images/products/gr-1204-3.svg"
       ],
       "rating": 4.5,
       "reviewCount": 44,
@@ -1019,7 +1085,9 @@
       "originalPrice": 860,
       "image": "/assets/images/products/gr-1205.svg",
       "images": [
-        "/assets/images/products/gr-1205.svg"
+        "/assets/images/products/gr-1205.svg",
+        "/assets/images/products/gr-1205-2.svg",
+        "/assets/images/products/gr-1205-3.svg"
       ],
       "rating": 4.7,
       "reviewCount": 73,
@@ -1047,7 +1115,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-1104.svg",
       "images": [
-        "/assets/images/products/gr-1104.svg"
+        "/assets/images/products/gr-1104.svg",
+        "/assets/images/products/gr-1104-2.svg",
+        "/assets/images/products/gr-1104-3.svg"
       ],
       "rating": 4.5,
       "reviewCount": 96,
@@ -1074,7 +1144,9 @@
       "originalPrice": 5900,
       "image": "/assets/images/products/gr-2005.svg",
       "images": [
-        "/assets/images/products/gr-2005.svg"
+        "/assets/images/products/gr-2005.svg",
+        "/assets/images/products/gr-2005-2.svg",
+        "/assets/images/products/gr-2005-3.svg"
       ],
       "rating": 4.5,
       "reviewCount": 118,
@@ -1103,7 +1175,9 @@
       "originalPrice": 3800,
       "image": "/assets/images/products/gr-2506.svg",
       "images": [
-        "/assets/images/products/gr-2506.svg"
+        "/assets/images/products/gr-2506.svg",
+        "/assets/images/products/gr-2506-2.svg",
+        "/assets/images/products/gr-2506-3.svg"
       ],
       "rating": 4.5,
       "reviewCount": 57,
@@ -1126,7 +1200,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-2507.svg",
       "images": [
-        "/assets/images/products/gr-2507.svg"
+        "/assets/images/products/gr-2507.svg",
+        "/assets/images/products/gr-2507-2.svg",
+        "/assets/images/products/gr-2507-3.svg"
       ],
       "rating": 4.6,
       "reviewCount": 39,
@@ -1149,7 +1225,9 @@
       "originalPrice": 3200,
       "image": "/assets/images/products/gr-3004.svg",
       "images": [
-        "/assets/images/products/gr-3004.svg"
+        "/assets/images/products/gr-3004.svg",
+        "/assets/images/products/gr-3004-2.svg",
+        "/assets/images/products/gr-3004-3.svg"
       ],
       "rating": 4.6,
       "reviewCount": 48,
@@ -1172,7 +1250,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-3005.svg",
       "images": [
-        "/assets/images/products/gr-3005.svg"
+        "/assets/images/products/gr-3005.svg",
+        "/assets/images/products/gr-3005-2.svg",
+        "/assets/images/products/gr-3005-3.svg"
       ],
       "rating": 4.7,
       "reviewCount": 31,
@@ -1196,7 +1276,9 @@
       "originalPrice": 2300,
       "image": "/assets/images/products/gr-3505.svg",
       "images": [
-        "/assets/images/products/gr-3505.svg"
+        "/assets/images/products/gr-3505.svg",
+        "/assets/images/products/gr-3505-2.svg",
+        "/assets/images/products/gr-3505-3.svg"
       ],
       "rating": 4.6,
       "reviewCount": 142,
@@ -1219,7 +1301,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-3506.svg",
       "images": [
-        "/assets/images/products/gr-3506.svg"
+        "/assets/images/products/gr-3506.svg",
+        "/assets/images/products/gr-3506-2.svg",
+        "/assets/images/products/gr-3506-3.svg"
       ],
       "rating": 4.5,
       "reviewCount": 88,
@@ -1242,7 +1326,9 @@
       "originalPrice": 2500,
       "image": "/assets/images/products/gr-4003.svg",
       "images": [
-        "/assets/images/products/gr-4003.svg"
+        "/assets/images/products/gr-4003.svg",
+        "/assets/images/products/gr-4003-2.svg",
+        "/assets/images/products/gr-4003-3.svg"
       ],
       "rating": 4.6,
       "reviewCount": 34,
@@ -1265,7 +1351,9 @@
       "originalPrice": null,
       "image": "/assets/images/products/gr-4004.svg",
       "images": [
-        "/assets/images/products/gr-4004.svg"
+        "/assets/images/products/gr-4004.svg",
+        "/assets/images/products/gr-4004-2.svg",
+        "/assets/images/products/gr-4004-3.svg"
       ],
       "rating": 4.7,
       "reviewCount": 52,

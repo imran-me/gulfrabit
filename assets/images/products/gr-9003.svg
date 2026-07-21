@@ -9,7 +9,7 @@
   <rect width="400" height="500" fill="#141414"/>
   <rect width="400" height="500" fill="url(#dots)"/>
   <rect width="400" height="500" fill="url(#glow)"/>
-  <g filter="url(#soft)"><rect fill="url(#accent)" stroke="rgba(255,255,255,.18)" stroke-width="1.5" x="144" y="176" rx="6" width="112" height="112"/>
+  <g filter="url(#soft)" transform="translate(200 232) scale(1.0) translate(-200 -232)"><rect fill="url(#accent)" stroke="rgba(255,255,255,.18)" stroke-width="1.5" x="144" y="176" rx="6" width="112" height="112"/>
     <rect stroke="rgba(255,255,255,.16)" fill="none" stroke-width="1.2" x="166" y="198" width="68" height="68"/>
     <rect fill="url(#accent)" x="130" y="188" width="14" height="8"/><rect fill="url(#accent)" x="256" y="188" width="14" height="8"/><rect fill="url(#accent)" x="130" y="210" width="14" height="8"/><rect fill="url(#accent)" x="256" y="210" width="14" height="8"/><rect fill="url(#accent)" x="130" y="232" width="14" height="8"/><rect fill="url(#accent)" x="256" y="232" width="14" height="8"/><rect fill="url(#accent)" x="130" y="254" width="14" height="8"/><rect fill="url(#accent)" x="256" y="254" width="14" height="8"/><rect fill="url(#accent)" x="130" y="276" width="14" height="8"/><rect fill="url(#accent)" x="256" y="276" width="14" height="8"/></g>
   <rect width="400" height="500" fill="url(#vig)"/>
