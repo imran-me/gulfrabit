@@ -1,0 +1,20 @@
+{
+  "_meta": {
+    "note": "Mock users for the demo auth flow. Passwords are plaintext ONLY because this is a front-end mock with no server — NEVER ship real auth like this. Replace with Laravel + JWT (bcrypt/argon2 hashing server-side). See modules/auth/backend/endpoints.md.",
+    "version": 1
+  },
+  "users": [
+    {
+      "id": "u-001",
+      "name": "Imran Hossain",
+      "email": "demo@gulfrabit.com",
+      "password": "demo1234",
+      "tier": "vip",
+      "phone": "+8801712345678",
+      "addresses": [
+        { "id": "a-1", "label": "Home", "line1": "House 12, Road 7, Dhanmondi", "city": "Dhaka", "postcode": "1205", "country": "Bangladesh", "isDefault": true },
+        { "id": "a-2", "label": "Office", "line1": "Level 6, Gulshan Avenue", "city": "Dhaka", "postcode": "1212", "country": "Bangladesh", "isDefault": false }
+      ]
+    }
+  ]
+}

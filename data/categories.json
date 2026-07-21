@@ -1,0 +1,105 @@
+{
+  "_meta": {
+    "note": "Mock category tree. Served by shared/js/core/data-service.js. When the Laravel backend lands, replace with GET /api/categories (see shared/backend/api-contract.md). Icon names map to inline SVGs used by the header mega-menu and category cards.",
+    "version": 1
+  },
+  "categories": [
+    {
+      "slug": "imported-food-grocery",
+      "name": "Imported Food & Grocery",
+      "icon": "basket",
+      "image": "/assets/images/categories/food.svg",
+      "audience": "retail",
+      "blurb": "Sourced from trusted origins. Dates, chocolates, coffee, tea and pantry staples.",
+      "children": [
+        { "slug": "dates-honey", "name": "Dates & Honey" },
+        { "slug": "coffee-tea", "name": "Coffee & Tea" },
+        { "slug": "chocolates-confectionery", "name": "Chocolates & Confectionery" }
+      ]
+    },
+    {
+      "slug": "dairy-milk-powder",
+      "name": "Dairy & Milk Powder",
+      "icon": "milk",
+      "image": "/assets/images/categories/dairy.svg",
+      "audience": "retail",
+      "blurb": "Cold-chain delivered. Imported milk powders, cheese and butter.",
+      "children": [
+        { "slug": "milk-powder", "name": "Milk Powder" },
+        { "slug": "cheese-butter", "name": "Cheese & Butter" }
+      ]
+    },
+    {
+      "slug": "nuts-dry-fruits",
+      "name": "Nuts & Dry Fruits",
+      "icon": "nut",
+      "image": "/assets/images/categories/nuts.svg",
+      "audience": "retail",
+      "blurb": "Grade-A almonds, cashews, pistachios and premium dried fruit.",
+      "children": []
+    },
+    {
+      "slug": "gadgets-electronics",
+      "name": "Gadgets & Electronics",
+      "icon": "cpu",
+      "image": "/assets/images/categories/electronics.svg",
+      "audience": "retail",
+      "blurb": "Verified imports. Audio, wearables, smart-home and accessories.",
+      "children": [
+        { "slug": "audio", "name": "Audio" },
+        { "slug": "wearables", "name": "Wearables" },
+        { "slug": "smart-home", "name": "Smart Home" }
+      ]
+    },
+    {
+      "slug": "kitchen-home",
+      "name": "Kitchen & Home",
+      "icon": "home",
+      "image": "/assets/images/categories/kitchen.svg",
+      "audience": "retail",
+      "blurb": "Considered tools for the everyday kitchen and home.",
+      "children": []
+    },
+    {
+      "slug": "fashion",
+      "name": "Fashion",
+      "icon": "shirt",
+      "image": "/assets/images/categories/fashion.svg",
+      "audience": "retail",
+      "blurb": "Understated pieces and accessories, imported with intent.",
+      "children": []
+    },
+    {
+      "slug": "beauty-personal-care",
+      "name": "Beauty & Personal Care",
+      "icon": "sparkle",
+      "image": "/assets/images/categories/beauty.svg",
+      "audience": "retail",
+      "blurb": "Skincare and grooming from origin brands.",
+      "children": []
+    },
+    {
+      "slug": "office-supplies",
+      "name": "Office Supplies",
+      "icon": "clip",
+      "image": "/assets/images/categories/office.svg",
+      "audience": "retail",
+      "blurb": "Workspace essentials with a premium finish.",
+      "children": []
+    },
+    {
+      "slug": "industrial-raw-materials",
+      "name": "Industrial Raw Materials",
+      "icon": "chip",
+      "image": "/assets/images/categories/industrial.svg",
+      "audience": "b2b",
+      "blurb": "PCBs, switches, relays, sensors and polymers. Spec-driven, bulk-ready.",
+      "children": [
+        { "slug": "pcb-components", "name": "PCB & Components" },
+        { "slug": "switches-relays", "name": "Switches & Relays" },
+        { "slug": "sensors", "name": "Sensors" },
+        { "slug": "polymers", "name": "Polymers & Resins" }
+      ]
+    }
+  ]
+}

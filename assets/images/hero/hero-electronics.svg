@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="Electronics &amp; Gadgets">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1BB4D4"/>
+      <stop offset="1" stop-color="#151515"/>
+    </linearGradient>
+    <radialGradient id="v" cx="0.5" cy="0.42" r="0.75">
+      <stop offset="0.55" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.32"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="#151515"/>
+  <rect width="1600" height="900" fill="url(#g)" opacity="0.16"/>
+  <g fill="none" stroke="#2A2A2A" stroke-width="1">
+    <circle cx="800" cy="375" r="320" stroke="#1BB4D4" stroke-opacity="0.35"/>
+    <circle cx="800" cy="375" r="200" stroke="#9ACD3C" stroke-opacity="0.35"/>
+  </g>
+  <rect width="1600" height="900" fill="url(#v)"/>
+  <text x="800" y="600" text-anchor="middle" font-family="Inter, sans-serif" font-size="100" font-weight="600" fill="#F7F8F7" opacity="0.9">Electronics &amp; Gadgets</text>
+  <text x="800" y="672" text-anchor="middle" font-family="Inter, sans-serif" font-size="47" letter-spacing="2" fill="#8A8F8C">GULFRABIT</text>
+</svg>

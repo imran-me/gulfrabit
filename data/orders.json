@@ -1,0 +1,30 @@
+{
+  "_meta": {
+    "note": "Mock order history for the account area. Replace with GET /api/orders (Laravel) — see modules/account/backend/endpoints.md. Status values: processing | shipped | delivered | cancelled.",
+    "version": 1
+  },
+  "orders": [
+    {
+      "id": "GR-2026-1043", "date": "2026-07-14", "status": "delivered", "total": 4180,
+      "items": [
+        { "id": "gr-1001", "title": "Medjool Dates — Premium Jumbo (1kg)", "qty": 2, "price": 1450, "image": "/assets/images/products/food.svg" },
+        { "id": "gr-1201", "title": "Roasted Salted Pistachios (500g)", "qty": 1, "price": 1180, "image": "/assets/images/products/nuts.svg" }
+      ],
+      "address": "House 12, Road 7, Dhanmondi, Dhaka 1205"
+    },
+    {
+      "id": "GR-2026-1051", "date": "2026-07-18", "status": "shipped", "total": 18900,
+      "items": [
+        { "id": "gr-2001", "title": "Wireless Noise-Cancelling Headphones", "qty": 1, "price": 18900, "image": "/assets/images/products/electronics.svg" }
+      ],
+      "address": "Level 6, Gulshan Avenue, Dhaka 1212"
+    },
+    {
+      "id": "GR-2026-1058", "date": "2026-07-20", "status": "processing", "total": 2350,
+      "items": [
+        { "id": "gr-1101", "title": "Full-Cream Milk Powder (2.25kg Tin)", "qty": 1, "price": 2350, "image": "/assets/images/products/dairy.svg" }
+      ],
+      "address": "House 12, Road 7, Dhanmondi, Dhaka 1205"
+    }
+  ]
+}
