@@ -11,7 +11,7 @@ import * as store from '../../shared/js/core/state.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { siteURL } from '../../shared/js/core/paths.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
-import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
+import { validateForm, validateField, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 
 const form = document.querySelector('[data-checkout-form]');
@@ -65,6 +65,11 @@ function next() {
     // only if visible, so guard here:
     if (!valid && anyVisibleInvalid()) { toast.error('Please complete the required fields.'); return; }
   }
+  // Validate card details while the payment step (and its fields) are visible.
+  if (current === 3 && form.querySelector('[data-payment]:checked')?.value === 'card') {
+    const ok = ['cardNum', 'cardExp', 'cardCvc'].every((n) => validateField(form.querySelector(`[name="${n}"]`), form));
+    if (!ok) { toast.error('Please complete your card details.'); return; }
+  }
   if (current < 4) showStep(current + 1);
 }
 function prev() { if (current > 1) showStep(current - 1); }
@@ -94,9 +99,21 @@ function wireDelivery() {
 }
 function wirePayment() {
   const cardFields = form.querySelector('[data-card-fields]');
+  // Card fields are only validated while "Card" is the chosen method.
+  const setCardRequired = (on) => {
+    const rules = { cardNum: 'required|numeric|min:12', cardExp: 'required', cardCvc: 'required|numeric|min:3' };
+    Object.entries(rules).forEach(([name, rule]) => {
+      const el = form.querySelector(`[name="${name}"]`);
+      if (!el) return;
+      if (on) el.setAttribute('data-validate', rule);
+      else { el.removeAttribute('data-validate'); el.closest('[data-field]')?.classList.remove('is-invalid'); }
+    });
+  };
   form.querySelectorAll('[data-payment]').forEach((r) => r.addEventListener('change', () => {
     form.querySelectorAll('[data-payment]').forEach((x) => x.closest('.option-card').classList.toggle('is-selected', x.checked));
-    cardFields.hidden = form.querySelector('[data-payment]:checked')?.value !== 'card';
+    const isCard = form.querySelector('[data-payment]:checked')?.value === 'card';
+    cardFields.hidden = !isCard;
+    setCardRequired(isCard);
   }));
 }
 
