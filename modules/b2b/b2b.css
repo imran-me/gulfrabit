@@ -1,0 +1,38 @@
+/* =========================================================================
+   GulfRabit · B2B Industrial module
+   Denser, spec-driven, procurement-focused — reads as B2B, not retail.
+   Gold accent signals the industrial sub-brand.
+   ========================================================================= */
+.b2b-hero { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--gr-border);
+  background: linear-gradient(90deg, rgba(10,10,10,.94), rgba(10,10,10,.55)), url("/assets/images/hero/hero-industrial.svg") center/cover;
+  padding: clamp(2.5rem, 6vw, 5rem); }
+.b2b-hero .overline { color: var(--gr-gold-accent); }
+
+.b2b-metrics { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, 1fr); margin-top: var(--space-6); }
+@media (min-width: 768px) { .b2b-metrics { grid-template-columns: repeat(4, 1fr); } }
+.b2b-metric__num { font-family: var(--font-display); font-size: var(--fs-31); color: var(--gr-cyan); font-variant-numeric: tabular-nums; }
+.b2b-metric__label { font-size: var(--fs-12); text-transform: uppercase; letter-spacing: .08em; color: var(--gr-gray-500); }
+
+/* Spec-driven product row (denser than retail cards) */
+.spec-row { display: grid; gap: var(--space-4); grid-template-columns: 1fr; padding: var(--space-5); border: 1px solid var(--gr-border); border-radius: var(--radius-lg); background: var(--gr-charcoal); margin-bottom: var(--space-4); transition: border-color var(--dur-base) var(--ease-out); }
+.spec-row:hover { border-color: var(--gr-cyan-dark); }
+@media (min-width: 768px) { .spec-row { grid-template-columns: 88px 1.4fr 1fr auto; align-items: center; } }
+.spec-row__media { width: 88px; height: 88px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--gr-border); background: var(--gr-graphite); }
+.spec-row__media img { width: 100%; height: 100%; object-fit: cover; }
+.spec-row__specs { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 1rem; font-size: var(--fs-12); color: var(--gr-gray-500); }
+.spec-row__specs b { color: var(--gr-gray-300); font-weight: var(--fw-medium); }
+
+/* Tiered pricing mini-table */
+.tier-table { width: 100%; border-collapse: collapse; font-size: var(--fs-12); font-variant-numeric: tabular-nums; }
+.tier-table td { padding: 2px 0; }
+.tier-table td:last-child { text-align: right; color: var(--gr-white); }
+.moq-badge { background: rgba(201,162,75,.14); color: var(--gr-gold-accent); border: 1px solid rgba(201,162,75,.4); }
+
+/* RFQ form */
+.rfq { border-radius: var(--radius-lg); border: 1px solid var(--gr-border); background: var(--gr-charcoal); padding: clamp(1.5rem, 4vw, 3rem); }
+.rfq-grid { display: grid; gap: 0 var(--space-4); grid-template-columns: 1fr; }
+@media (min-width: 640px) { .rfq-grid { grid-template-columns: 1fr 1fr; } .rfq-grid .col-span-2 { grid-column: 1 / -1; } }
+
+/* Datasheet list */
+.datasheet-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--gr-border); }
+.datasheet-row__icon { color: var(--gr-cyan); flex-shrink: 0; }

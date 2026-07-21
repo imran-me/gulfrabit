@@ -1,0 +1,56 @@
+  <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
+    <nav class="breadcrumb-gr" aria-label="Breadcrumb" style="margin-bottom:var(--space-5)">
+      <a href="/index.html">Home</a><span class="breadcrumb-gr__sep">/</span><span>Industrial &amp; B2B</span>
+    </nav>
+
+    <!-- Hero -->
+    <section class="b2b-hero" data-reveal>
+      <p class="overline">Industrial &amp; B2B</p>
+      <h1 class="h1" style="max-width:18ch;margin:.5rem 0">Raw materials for the electronics industry.</h1>
+      <p class="lead" style="max-width:60ch">PCBs, tactile switches, relays, sensors and industrial polymers — verified, RoHS-compliant, and priced for volume. Built for procurement, not retail.</p>
+      <div class="hero__actions">
+        <a href="#rfq" class="btn-gr btn-gradient-gr btn-lg-gr">Request a Quote</a>
+        <a href="#catalog" class="btn-gr btn-outline-gr btn-lg-gr">View Components</a>
+      </div>
+      <div class="b2b-metrics">
+        <div><div class="b2b-metric__num">1,200+</div><div class="b2b-metric__label">Line items</div></div>
+        <div><div class="b2b-metric__num">48h</div><div class="b2b-metric__label">RFQ turnaround</div></div>
+        <div><div class="b2b-metric__num">RoHS</div><div class="b2b-metric__label">Compliant stock</div></div>
+        <div><div class="b2b-metric__num">MOQ</div><div class="b2b-metric__label">From 50 units</div></div>
+      </div>
+    </section>
+
+    <!-- Component catalogue (spec-driven, rendered by b2b-page.js) -->
+    <section class="section-gr" id="catalog" style="scroll-margin-top:100px">
+      <div class="section-head"><div class="section-head__titles"><p class="overline" style="color:var(--gr-gold-accent)">Catalogue</p><h2>Components &amp; Materials</h2></div>
+        <a href="/modules/catalog/category.html?slug=industrial-raw-materials" class="btn-gr btn-ghost-gr">Full catalogue →</a>
+      </div>
+      <div data-b2b-list aria-live="polite"></div>
+    </section>
+
+    <!-- Datasheets -->
+    <section class="section-gr">
+      <div class="section-head"><div class="section-head__titles"><p class="overline">Documentation</p><h2 class="h3">Datasheets</h2></div></div>
+      <div class="surface-gr" style="padding:var(--space-5)" data-datasheets></div>
+    </section>
+
+    <!-- RFQ -->
+    <section class="section-gr" id="rfq" style="scroll-margin-top:100px">
+      <div class="section-head"><div class="section-head__titles"><p class="overline" style="color:var(--gr-gold-accent)">Request for Quote</p><h2>Tell us what you need</h2></div></div>
+      <div class="rfq">
+        <form data-rfq-form novalidate>
+          <div class="rfq-grid">
+            <div class="field-gr" data-field><label class="label-gr" for="r-company">Company <span class="req">*</span></label><input id="r-company" class="input-gr" name="company" data-validate="required|min:2" data-label="Company"><span class="field-error" data-error></span></div>
+            <div class="field-gr" data-field><label class="label-gr" for="r-contact">Contact name <span class="req">*</span></label><input id="r-contact" class="input-gr" name="contact" data-validate="required|min:2" data-label="Contact"><span class="field-error" data-error></span></div>
+            <div class="field-gr" data-field><label class="label-gr" for="r-email">Email <span class="req">*</span></label><input id="r-email" class="input-gr" type="email" name="email" data-validate="required|email" data-label="Email"><span class="field-error" data-error></span></div>
+            <div class="field-gr" data-field><label class="label-gr" for="r-phone">Phone</label><input id="r-phone" class="input-gr" name="phone" data-validate="phone" data-label="Phone" placeholder="01XXXXXXXXX"><span class="field-error" data-error></span></div>
+            <div class="field-gr" data-field><label class="label-gr" for="r-product">Product / part</label><input id="r-product" class="input-gr" name="product" data-label="Product" placeholder="e.g. Tactile switch 6×6mm"></div>
+            <div class="field-gr" data-field><label class="label-gr" for="r-qty">Quantity <span class="req">*</span></label><input id="r-qty" class="input-gr" name="qty" inputmode="numeric" data-validate="required|numeric" data-label="Quantity"><span class="field-error" data-error></span></div>
+            <div class="field-gr col-span-2" data-field><label class="label-gr" for="r-notes">Specifications / notes</label><textarea id="r-notes" class="textarea-gr" name="notes" placeholder="Tolerances, packaging, target price, delivery timeline…"></textarea></div>
+          </div>
+          <button class="btn-gr btn-gradient-gr btn-lg-gr" type="submit">Submit RFQ</button>
+          <p class="caption" style="margin-top:var(--space-3)">We respond to quote requests within 48 business hours.</p>
+        </form>
+      </div>
+    </section>
+  </main>

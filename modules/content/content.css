@@ -1,0 +1,35 @@
+/* =========================================================================
+   GulfRabit · Content module (about, contact, faq, shipping-returns, 404)
+   ========================================================================= */
+.prose { max-width: 72ch; }
+.prose h2 { margin-top: var(--space-7); margin-bottom: var(--space-3); }
+.prose h3 { margin-top: var(--space-5); margin-bottom: var(--space-2); }
+.prose p, .prose li { color: var(--gr-gray-300); }
+.prose ul { padding-left: 1.25rem; margin: var(--space-3) 0; }
+.prose li { margin-bottom: var(--space-2); }
+
+/* About */
+.about-hero { position: relative; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--gr-border); padding: clamp(2.5rem, 6vw, 5rem); background: linear-gradient(90deg, rgba(10,10,10,.9), rgba(10,10,10,.5)), url("/assets/images/hero/hero-food.svg") center/cover; }
+.values-grid { display: grid; gap: var(--space-4); grid-template-columns: 1fr; }
+@media (min-width: 768px) { .values-grid { grid-template-columns: repeat(3, 1fr); } }
+.value-card { padding: var(--space-5); }
+.value-card__icon { width: 40px; height: 40px; color: var(--gr-cyan); margin-bottom: var(--space-3); }
+
+/* Contact */
+.contact-grid { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
+@media (min-width: 900px) { .contact-grid { grid-template-columns: 1.2fr 1fr; align-items: start; } }
+.contact-channel { display: flex; gap: var(--space-3); padding: var(--space-4) 0; border-bottom: 1px solid var(--gr-border); }
+.contact-channel__icon { width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--gr-graphite); display: grid; place-items: center; color: var(--gr-cyan); flex-shrink: 0; }
+.map-placeholder { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--gr-border); background: linear-gradient(135deg, var(--gr-graphite), var(--gr-charcoal)); min-height: 220px; display: grid; place-items: center; color: var(--gr-gray-500); }
+
+/* FAQ accordion */
+.faq-item { border-bottom: 1px solid var(--gr-border); }
+.faq-q { width: 100%; text-align: left; background: none; border: 0; color: var(--gr-white); font-size: var(--fs-20); font-weight: var(--fw-medium); padding: var(--space-5) 0; display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); cursor: pointer; }
+.faq-q__icon { transition: transform var(--dur-base) var(--ease-out); flex-shrink: 0; }
+.faq-q[aria-expanded="true"] .faq-q__icon { transform: rotate(45deg); }
+.faq-a { overflow: hidden; max-height: 0; transition: max-height var(--dur-slow) var(--ease-out); }
+.faq-a__inner { padding-bottom: var(--space-5); color: var(--gr-gray-300); max-width: 68ch; }
+
+/* 404 */
+.notfound { text-align: center; padding: var(--space-9) var(--space-4); }
+.notfound__code { font-family: var(--font-display); font-size: clamp(5rem, 18vw, 11rem); line-height: 1; background: var(--gr-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
