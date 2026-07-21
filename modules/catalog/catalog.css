@@ -1,0 +1,69 @@
+/* =========================================================================
+   GulfRabit · Catalog module (PLP, PDP, Search)
+   Load after shared/css/style.css.
+   ========================================================================= */
+
+/* ---- Listing layout (sidebar + grid) --------------------------------- */
+.plp { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
+@media (min-width: 1024px) { .plp { grid-template-columns: 260px 1fr; } }
+
+.plp-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-5); }
+.plp-count { color: var(--gr-gray-500); font-size: var(--fs-14); }
+
+/* ---- Filters sidebar -------------------------------------------------- */
+.filters { align-self: start; }
+@media (min-width: 1024px) { .filters { position: sticky; top: calc(var(--header-h) + var(--space-4)); } }
+.filter-group { padding: var(--space-4) 0; border-bottom: 1px solid var(--gr-border); }
+.filter-group__title { font-size: var(--fs-14); font-weight: var(--fw-semibold); margin-bottom: var(--space-3); display: flex; justify-content: space-between; align-items: center; }
+.filter-option { display: flex; align-items: center; gap: var(--space-2); padding: 4px 0; font-size: var(--fs-14); color: var(--gr-gray-300); cursor: pointer; }
+.filter-option input { accent-color: var(--gr-cyan); width: 18px; height: 18px; }
+.price-range { display: flex; align-items: center; gap: var(--space-2); }
+.price-range input[type="number"] { width: 100%; }
+
+/* Mobile filters bottom-sheet */
+.filters-sheet-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 1050; opacity: 0; transition: opacity .3s var(--ease-out); }
+.filters-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 1051;
+  max-height: 85vh; overflow-y: auto;
+  background: var(--gr-charcoal); border-top-left-radius: var(--radius-lg); border-top-right-radius: var(--radius-lg);
+  border-top: 1px solid var(--gr-border);
+  transform: translateY(100%); transition: transform .3s var(--ease-out);
+  padding: var(--space-5);
+}
+.filters-sheet.is-open { transform: translateY(0); }
+
+/* ---- Product Detail (PDP) --------------------------------------------- */
+.pdp { display: grid; gap: var(--space-7); grid-template-columns: 1fr; }
+@media (min-width: 1024px) { .pdp { grid-template-columns: 1.1fr 1fr; align-items: start; } }
+
+.gallery { display: grid; gap: var(--space-3); }
+.gallery__main { position: relative; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--gr-border); background: var(--gr-graphite); aspect-ratio: 1; }
+.gallery__main img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--dur-slow) var(--ease-out); }
+.gallery__main.zoomable:hover img { transform: scale(1.6); cursor: zoom-in; }
+.gallery__thumbs { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.gallery__thumb { width: 72px; height: 72px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--gr-border); cursor: pointer; padding: 0; background: var(--gr-graphite); }
+.gallery__thumb.is-active { border-color: var(--gr-cyan); box-shadow: 0 0 0 2px rgba(27,180,212,.3); }
+.gallery__thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.pdp-info { align-self: start; }
+@media (min-width: 1024px) { .pdp-info { position: sticky; top: calc(var(--header-h) + var(--space-4)); } }
+.pdp-price { display: flex; align-items: baseline; gap: var(--space-3); margin: var(--space-4) 0; }
+.pdp-price__now { font-family: var(--font-display); font-size: var(--fs-31); }
+.pdp-actions { display: flex; gap: var(--space-3); margin: var(--space-5) 0; }
+
+/* ---- Tabs ------------------------------------------------------------- */
+.tabs { border-bottom: 1px solid var(--gr-border); display: flex; gap: var(--space-4); overflow-x: auto; }
+.tab-btn { padding: var(--space-3) 0; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--gr-gray-500); font-weight: var(--fw-medium); cursor: pointer; white-space: nowrap; }
+.tab-btn.is-active { color: var(--gr-white); border-bottom-color: var(--gr-cyan); }
+.tab-panel { padding-top: var(--space-5); }
+.tab-panel[hidden] { display: none; }
+
+/* ---- Spec table (industrial/B2B treatment) ---------------------------- */
+.spec-table { width: 100%; border-collapse: collapse; font-size: var(--fs-14); }
+.spec-table th, .spec-table td { text-align: left; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--gr-border); }
+.spec-table th { color: var(--gr-gray-500); font-weight: var(--fw-medium); width: 40%; }
+.spec-table td { font-variant-numeric: tabular-nums; }
+
+/* ---- Chips (active filters) ------------------------------------------ */
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-pill); background: var(--gr-graphite); border: 1px solid var(--gr-border); font-size: var(--fs-12); }
+.chip button { background: none; border: 0; color: var(--gr-gray-500); cursor: pointer; }

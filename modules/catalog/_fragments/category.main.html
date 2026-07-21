@@ -1,0 +1,65 @@
+  <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-gr" aria-label="Breadcrumb" style="margin-bottom:var(--space-5)">
+      <a href="/index.html">Home</a><span class="breadcrumb-gr__sep">/</span>
+      <span data-crumb-category>Category</span>
+    </nav>
+
+    <!-- Category header -->
+    <header class="section-head" style="margin-bottom:var(--space-6)">
+      <div class="section-head__titles">
+        <p class="overline" data-cat-audience>Shop</p>
+        <h1 data-cat-title>Category</h1>
+        <p class="text-muted-gr" data-cat-blurb style="max-width:60ch"></p>
+      </div>
+    </header>
+
+    <div class="plp">
+      <!-- Filters sidebar (desktop) / bottom-sheet (mobile) -->
+      <aside class="filters" aria-label="Filters">
+        <div data-filters-host>
+          <!-- filters-sidebar.js renders groups here from the category's products -->
+        </div>
+      </aside>
+
+      <!-- Results -->
+      <section aria-label="Products">
+        <div class="plp-toolbar">
+          <div style="display:flex;align-items:center;gap:var(--space-3)">
+            <button class="btn-gr btn-outline-gr btn-sm-gr d-lg-none" type="button" data-open-filters>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 6h16M7 12h10M10 18h4"/></svg> Filters
+            </button>
+            <span class="plp-count" data-result-count>Loading…</span>
+          </div>
+          <label style="display:flex;align-items:center;gap:.5rem" class="caption">Sort
+            <select class="select-gr btn-sm-gr" data-sort style="min-height:40px;width:auto">
+              <option value="featured">Featured</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="newest">Newest</option>
+              <option value="rating">Best Rated</option>
+            </select>
+          </label>
+        </div>
+
+        <!-- Active filter chips -->
+        <div data-active-chips style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:var(--space-4)"></div>
+
+        <!-- Product grid (skeleton → data) -->
+        <div class="product-grid" data-product-grid aria-live="polite"></div>
+
+        <!-- Empty state (shown by JS when zero results) -->
+        <div class="empty-state" data-empty hidden>
+          <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <h2 class="empty-state__title">No products match those filters</h2>
+          <p class="empty-state__text">Try widening your price range or clearing a filter.</p>
+          <button class="btn-gr btn-primary-gr" data-clear-filters type="button">Clear all filters</button>
+        </div>
+
+        <!-- Load more -->
+        <div style="text-align:center;margin-top:var(--space-6)">
+          <button class="btn-gr btn-outline-gr btn-lg-gr" data-load-more hidden>Load more</button>
+        </div>
+      </section>
+    </div>
+  </main>

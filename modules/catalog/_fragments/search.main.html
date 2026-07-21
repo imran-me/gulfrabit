@@ -1,0 +1,41 @@
+  <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
+    <header style="margin-bottom:var(--space-6)">
+      <p class="overline">Search</p>
+      <h1 class="h2">Results for “<span data-query>…</span>”</h1>
+      <p class="text-muted-gr" data-result-count>Searching…</p>
+    </header>
+
+    <div class="plp">
+      <aside class="filters" aria-label="Filters"><div data-filters-host></div></aside>
+
+      <section aria-label="Search results">
+        <div class="plp-toolbar">
+          <button class="btn-gr btn-outline-gr btn-sm-gr d-lg-none" type="button" data-open-filters>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 6h16M7 12h10M10 18h4"/></svg> Filters
+          </button>
+          <label style="display:flex;align-items:center;gap:.5rem" class="caption">Sort
+            <select class="select-gr btn-sm-gr" data-sort style="min-height:40px;width:auto">
+              <option value="featured">Relevance</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="rating">Best Rated</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="product-grid" data-product-grid aria-live="polite"></div>
+
+        <div class="empty-state" data-empty hidden>
+          <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <h2 class="empty-state__title">No results</h2>
+          <p class="empty-state__text">We couldn’t find a match. Try a different term or browse a category.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center">
+            <a class="btn-gr btn-outline-gr btn-sm-gr" href="/modules/catalog/category.html?slug=imported-food-grocery">Imported Food</a>
+            <a class="btn-gr btn-outline-gr btn-sm-gr" href="/modules/catalog/category.html?slug=gadgets-electronics">Electronics</a>
+            <a class="btn-gr btn-outline-gr btn-sm-gr" href="/modules/catalog/category.html?slug=nuts-dry-fruits">Nuts &amp; Dry Fruits</a>
+            <a class="btn-gr btn-outline-gr btn-sm-gr" href="/modules/b2b/b2b-industrial.html">Industrial</a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>

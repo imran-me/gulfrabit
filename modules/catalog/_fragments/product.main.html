@@ -1,0 +1,81 @@
+  <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
+    <nav class="breadcrumb-gr" aria-label="Breadcrumb" style="margin-bottom:var(--space-5)">
+      <a href="/index.html">Home</a><span class="breadcrumb-gr__sep">/</span>
+      <a data-crumb-cat href="#">Category</a><span class="breadcrumb-gr__sep">/</span>
+      <span data-crumb-title>Product</span>
+    </nav>
+
+    <article class="pdp" data-pdp>
+      <!-- Gallery -->
+      <div class="gallery">
+        <div class="gallery__main zoomable" data-gallery-main>
+          <div class="skeleton" style="width:100%;height:100%"></div>
+        </div>
+        <div class="gallery__thumbs" data-gallery-thumbs></div>
+      </div>
+
+      <!-- Info -->
+      <div class="pdp-info">
+        <div data-pdp-badges style="display:flex;gap:.5rem;margin-bottom:.75rem"></div>
+        <p class="product-card__brand" data-pdp-brand></p>
+        <h1 class="h2" data-pdp-title style="margin:.25rem 0 0">Loading…</h1>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:.75rem" data-pdp-rating></div>
+
+        <div class="pdp-price">
+          <span class="price pdp-price__now" data-pdp-price></span>
+          <span class="price price--strike" data-pdp-original></span>
+          <span data-pdp-discount></span>
+        </div>
+
+        <p class="text-muted-gr" data-pdp-short style="max-width:56ch"></p>
+        <p data-pdp-stock style="margin-top:.75rem"></p>
+
+        <div class="pdp-actions">
+          <div class="qty-stepper" data-qty-stepper data-min="1" data-max="99">
+            <button class="qty-stepper__btn" type="button" data-qty-dec aria-label="Decrease quantity">−</button>
+            <input class="qty-stepper__input" data-qty-input value="1" inputmode="numeric" aria-label="Quantity">
+            <button class="qty-stepper__btn" type="button" data-qty-inc aria-label="Increase quantity">+</button>
+          </div>
+          <button class="btn-gr btn-primary-gr" data-add-to-cart style="flex:1">Add to Cart</button>
+        </div>
+
+        <button class="btn-gr btn-outline-gr btn-block-gr" data-wishlist-toggle
+                data-id="" data-title="" data-brand="" data-price="" data-image="">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          <span data-wishlist-label>Add to Wishlist</span>
+        </button>
+
+        <div class="trust-strip" style="grid-template-columns:1fr 1fr;margin-top:var(--space-6);gap:var(--space-4)">
+          <div class="trust-item"><svg class="trust-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/></svg><div><div class="trust-item__title">Import-Verified</div><div class="trust-item__sub">Authenticity checked</div></div></div>
+          <div class="trust-item"><svg class="trust-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/></svg><div><div class="trust-item__title">Fast Delivery</div><div class="trust-item__sub">Dhaka same-week</div></div></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Tabs -->
+    <section style="margin-top:var(--space-9)">
+      <div class="tabs" role="tablist" aria-label="Product information">
+        <button class="tab-btn is-active" role="tab" data-tab="description" aria-selected="true">Description</button>
+        <button class="tab-btn" role="tab" data-tab="specs" aria-selected="false">Specifications</button>
+        <button class="tab-btn" role="tab" data-tab="shipping" aria-selected="false">Shipping &amp; Returns</button>
+        <button class="tab-btn" role="tab" data-tab="reviews" aria-selected="false">Reviews</button>
+      </div>
+      <div class="tab-panel" data-panel="description"><p class="lead" data-pdp-description style="max-width:70ch"></p></div>
+      <div class="tab-panel" data-panel="specs" hidden><div data-pdp-specs></div></div>
+      <div class="tab-panel" data-panel="shipping" hidden>
+        <div class="stack-3" style="max-width:70ch">
+          <p>Free delivery within Dhaka on orders over ৳ 3,000. Nationwide delivery in 2–5 business days.</p>
+          <p>Perishables ship cold-chain. Returns accepted within 7 days for unopened items — see our <a href="/modules/content/shipping-returns.html">Shipping &amp; Returns</a> policy.</p>
+        </div>
+      </div>
+      <div class="tab-panel" data-panel="reviews" hidden>
+        <div data-pdp-reviews class="stack-4" style="max-width:70ch"></div>
+      </div>
+    </section>
+
+    <!-- You may also like -->
+    <section class="section-gr" aria-labelledby="rel-head">
+      <div class="section-head"><div class="section-head__titles"><p class="overline">More from this category</p><h2 id="rel-head" class="h3">You May Also Like</h2></div></div>
+      <div class="snap-rail" data-related role="list"></div>
+    </section>
+  </main>
