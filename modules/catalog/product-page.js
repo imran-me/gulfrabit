@@ -16,6 +16,7 @@ import { setup as setupStepper } from '../../shared/js/components/quantity-stepp
 import { initWishlistButtons } from '../../shared/js/components/wishlist.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';
 import { siteURL } from '../../shared/js/core/paths.js';
+import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 
 const STAR = '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
 let currentQty = 1;
@@ -172,11 +173,7 @@ function paintTabs(p) {
     specsHost.innerHTML = `<table class="spec-table"><tbody>${Object.entries(attrs).filter(([, v]) => v).map(([k, v]) => `<tr><th scope="row">${k}</th><td>${escapeHtml(v)}</td></tr>`).join('')}</tbody></table>`;
   }
 
-  // Reviews (mock summary)
-  document.querySelector('[data-pdp-reviews]').innerHTML = p.reviewCount
-    ? `<p class="lead">${p.rating}★ average from ${p.reviewCount} verified buyers.</p>
-       <div class="surface-gr" style="padding:1.25rem"><p style="color:var(--gr-lime)">${STAR.repeat(5)}</p><p style="margin:.5rem 0">“Exactly as described — authentic and well packed.”</p><p class="caption">Verified buyer</p></div>`
-    : '<p class="text-muted-gr">No reviews yet. Be the first to review this product.</p>';
+  renderReviews(p);
 
   // Tab switching
   const btns = document.querySelectorAll('.tab-btn');
@@ -185,6 +182,75 @@ function paintTabs(p) {
     btn.classList.add('is-active'); btn.setAttribute('aria-selected', 'true');
     document.querySelectorAll('.tab-panel').forEach((panel) => { panel.hidden = panel.dataset.panel !== btn.dataset.tab; });
   }));
+}
+
+/* ---- Reviews (localStorage-backed, with a write-review form) ---------- */
+function reviewsKey(id) { return `reviews:${id}`; }
+
+function getReviews(p) {
+  const stored = storage.get(reviewsKey(p.id), null);
+  if (stored) return stored;
+  // Seed one on-brand review so the section isn't empty on first visit.
+  return p.reviewCount ? [{ name: 'Verified buyer', rating: Math.round(p.rating || 5), text: 'Exactly as described — authentic and well packed.', date: '2026-07-10' }] : [];
+}
+
+function renderReviews(p) {
+  const host = document.querySelector('[data-pdp-reviews]');
+  const reviews = getReviews(p);
+  const avg = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : (p.rating || 0);
+
+  const summary = reviews.length
+    ? `<div class="review-summary"><span class="review-summary__avg">${avg.toFixed(1)}</span>
+         <span><span class="review-card__stars">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5 - Math.round(avg))}</span>
+         <div class="caption">${reviews.length} review${reviews.length === 1 ? '' : 's'}</div></span></div>`
+    : '<p class="text-muted-gr">No reviews yet. Be the first to review this product.</p>';
+
+  const list = reviews.map((r) => `
+    <div class="review-card">
+      <div class="review-card__head"><strong>${escapeHtml(r.name)}</strong><span class="caption">${escapeHtml(r.date || '')}</span></div>
+      <div class="review-card__stars" aria-label="${r.rating} out of 5">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+      <p style="margin-top:.5rem">${escapeHtml(r.text)}</p>
+    </div>`).join('');
+
+  host.innerHTML = `
+    ${summary}
+    <div class="stack-4" style="margin-top:1.5rem">${list}</div>
+    <form class="review-form stack-4" data-review-form novalidate style="margin-top:1.5rem">
+      <h3 class="h5">Write a review</h3>
+      <div class="star-input" data-star-input role="radiogroup" aria-label="Your rating">
+        ${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-star="${n}" aria-label="${n} star${n > 1 ? 's' : ''}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg></button>`).join('')}
+      </div>
+      <div class="field-gr" data-field><label class="label-gr" for="rv-name">Name</label><input id="rv-name" class="input-gr" name="name" data-validate="required|min:2" data-label="Name"><span class="field-error" data-error></span></div>
+      <div class="field-gr" data-field><label class="label-gr" for="rv-text">Review</label><textarea id="rv-text" class="textarea-gr" name="text" data-validate="required|min:8" data-label="Review"></textarea><span class="field-error" data-error></span></div>
+      <button class="btn-gr btn-primary-gr" type="submit">Submit review</button>
+    </form>`;
+
+  wireReviewForm(p, host);
+}
+
+function wireReviewForm(p, host) {
+  const form = host.querySelector('[data-review-form]');
+  attachLiveValidation(form);
+  let rating = 0;
+  const stars = [...form.querySelectorAll('[data-star]')];
+  const paint = (val, cls) => stars.forEach((b, i) => b.classList.toggle(cls, i < val));
+  stars.forEach((btn, i) => {
+    btn.addEventListener('mouseenter', () => paint(i + 1, 'is-hover'));
+    btn.addEventListener('mouseleave', () => paint(0, 'is-hover'));
+    btn.addEventListener('click', () => { rating = i + 1; paint(rating, 'is-on'); });
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const { valid, values } = validateForm(form);
+    if (!rating) { toast.error('Please choose a star rating.'); return; }
+    if (!valid) return;
+    const reviews = getReviews(p);
+    reviews.unshift({ name: values.name, rating, text: values.text, date: new Date().toISOString().slice(0, 10) });
+    storage.set(reviewsKey(p.id), reviews);
+    toast.success('Thanks — your review was added.');
+    renderReviews(p);
+  });
 }
 
 function wireActions(p) {

@@ -66,6 +66,19 @@
 .spec-table th { color: var(--gr-gray-500); font-weight: var(--fw-medium); width: 40%; }
 .spec-table td { font-variant-numeric: tabular-nums; }
 
+/* ---- Reviews --------------------------------------------------------- */
+.review-card { padding: var(--space-4); border: 1px solid var(--gr-border); border-radius: var(--radius-lg); background: var(--gr-charcoal); }
+.review-card__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2); }
+.review-card__stars { color: var(--gr-lime); letter-spacing: 2px; }
+.review-form { padding: var(--space-5); border: 1px solid var(--gr-border); border-radius: var(--radius-lg); background: var(--gr-graphite); }
+/* Interactive star input */
+.star-input { display: inline-flex; gap: 2px; }
+.star-input button { background: none; border: 0; cursor: pointer; padding: 2px; line-height: 0; color: var(--gr-border); transition: color var(--dur-fast) var(--ease-out); }
+.star-input button.is-on, .star-input button.is-hover { color: var(--gr-lime); }
+.star-input svg { width: 26px; height: 26px; display: block; }
+.review-summary { display: flex; align-items: baseline; gap: var(--space-3); }
+.review-summary__avg { font-family: var(--font-display); font-size: var(--fs-39); line-height: 1; }
+
 /* ---- Chips (active filters) ------------------------------------------ */
 .chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-pill); background: var(--gr-graphite); border: 1px solid var(--gr-border); font-size: var(--fs-12); }
 .chip button { background: none; border: 0; color: var(--gr-gray-500); cursor: pointer; }
