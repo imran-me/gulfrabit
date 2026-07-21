@@ -228,6 +228,14 @@ inlined into pages by `tools/assemble.py`).
 ## 8. Known Issues / Follow-ups
 
 - Light-bg **transparent PNG logo** not yet produced (source is `.jpeg` on black). Flag.
+- **Favicon** currently reuses the wide `.jpeg` logo; a **square-cropped** favicon
+  (just the rabbit mark) would render sharper in browser tabs. Needs image tooling.
+- **Deployment paths:** all asset/link paths are **root-absolute** (`/shared/…`),
+  which assumes deployment at a domain root (e.g. `gulfrabit.com`) — matches the
+  `sitemap.xml` origin. A GitHub *project* page (`user.github.io/gulfrabit/`) would
+  need a `<base>` or path rewrite; a custom domain / user-page works as-is.
+- **Tailwind Play CDN** prints a dev-only console notice; fine for now — a real
+  build step (PurgeCSS) is the production follow-up.
 - **Backend integration point:** each `modules/*/backend/api.js` currently reads mock JSON
   / localStorage. Replace with Laravel REST calls (`endpoints.md` per module).
 - **Payment gateway** at checkout is UI-only — `// TODO: connect to payment gateway`.
@@ -256,3 +264,16 @@ inlined into pages by `tools/assemble.py`).
   relocate the live filter host (no dead clone). Verified all pages return 200.
 - **2026-07-21** — All commits authored as **Md Imran Hossain** (no Claude co-author),
   pushed to `origin/main` incrementally per phase.
+- **2026-07-21 (polish session)** — Frontend perfection pass:
+  · SEO: OG/Twitter meta + Organization/WebSite JSON-LD on every page; Product
+    JSON-LD on the PDP; `robots.txt`, `site.webmanifest`, generated `sitemap.xml`
+    (50 URLs, `tools/sitemap.py`); root-level `404.html` for host 404 handling.
+  · Accessibility/resilience: `<noscript>` fallbacks on JS-driven listings.
+  · Fixed 2 real bugs found by an independent runtime audit — PDP wishlist button
+    bound to empty product data, and the Terms checkbox `required` rule never
+    enforcing (checkbox `.value` vs `.checked`).
+  · Visual: clean icon-led home category tiles (removed double-labelled bg images)
+    with a brand-glow hover; darkened hero overlays; image `decoding=async`;
+    account stat-card hover; star alignment; pretty paragraph wrapping.
+  · Verified: all 20 pages 200, all 23 asset refs + 26 script/style refs resolve,
+    CSS braces balanced, JSON valid.
