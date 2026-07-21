@@ -54,6 +54,18 @@
 .empty-state__title { font-family: var(--font-display); font-size: var(--fs-25); margin-bottom: var(--space-2); }
 .empty-state__text { color: var(--gr-gray-500); max-width: 40ch; margin: 0 auto var(--space-5); }
 
+/* ---- No-JS fallback note --------------------------------------------- */
+.noscript-note {
+  display: block;
+  padding: var(--space-5);
+  border: 1px dashed var(--gr-border);
+  border-radius: var(--radius-lg);
+  background: var(--gr-charcoal);
+  color: var(--gr-gray-300);
+  text-align: center;
+}
+.noscript-note a { font-weight: var(--fw-semibold); }
+
 /* ---- Spacing helpers on the 8px grid --------------------------------- */
 .stack-2 > * + * { margin-top: var(--space-2); }
 .stack-3 > * + * { margin-top: var(--space-3); }

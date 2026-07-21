@@ -6,7 +6,6 @@
  */
 
 import { getCategoryBySlug, getProductsByCategory } from '../../shared/js/core/data-service.js';
-import { getProductById } from '../../shared/js/core/data-service.js';
 import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { renderProductSkeletons } from '../../shared/js/components/skeleton-loader.js';
 import { initFilters } from '../../shared/js/components/filters-sidebar.js';

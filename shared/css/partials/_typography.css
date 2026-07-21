@@ -36,7 +36,7 @@ h4, .h4 { font-size: var(--fs-25); }
 h5, .h5 { font-size: var(--fs-20); font-weight: var(--fw-semibold); }
 h6, .h6 { font-size: var(--fs-16); font-weight: var(--fw-semibold); letter-spacing: 0; }
 
-p { margin: 0; }
+p { margin: 0; text-wrap: pretty; }
 p + p { margin-top: var(--space-4); }
 
 /* ---- Lead / secondary / captions ------------------------------------- */

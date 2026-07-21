@@ -46,7 +46,9 @@
         <div data-active-chips style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:var(--space-4)"></div>
 
         <!-- Product grid (skeleton → data) -->
-        <div class="product-grid" data-product-grid aria-live="polite"></div>
+        <div class="product-grid" data-product-grid aria-live="polite">
+          <noscript><p class="noscript-note">Product listings require JavaScript. Use the <a href="/index.html">home page</a> category tiles to browse without it.</p></noscript>
+        </div>
 
         <!-- Empty state (shown by JS when zero results) -->
         <div class="empty-state" data-empty hidden>

@@ -26,11 +26,43 @@ async function init() {
   if (!product) return renderNotFound();
 
   document.title = `${product.title} — GulfRabit`;
+  injectProductSchema(product);
   paintGallery(product);
   paintInfo(product);
   paintTabs(product);
   wireActions(product);
   loadRelated(product);
+}
+
+/**
+ * Inject Product structured data (schema.org) for rich results. Enhancement
+ * only — the human-readable detail is already in the DOM.
+ */
+function injectProductSchema(p) {
+  const origin = window.location.origin;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: p.title,
+    image: [origin + (p.images?.[0] || p.image)],
+    description: p.shortDescription || p.description || '',
+    sku: p.id,
+    brand: { '@type': 'Brand', name: p.brand || 'GulfRabit' },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'BDT',
+      price: p.price,
+      availability: p.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      url: `${origin}/modules/catalog/product.html?id=${p.id}`,
+    },
+  };
+  if (p.rating && p.reviewCount) {
+    schema.aggregateRating = { '@type': 'AggregateRating', ratingValue: p.rating, reviewCount: p.reviewCount };
+  }
+  const el = document.createElement('script');
+  el.type = 'application/ld+json';
+  el.textContent = JSON.stringify(schema);
+  document.head.appendChild(el);
 }
 
 function paintGallery(p) {
