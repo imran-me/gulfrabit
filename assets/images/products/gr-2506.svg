@@ -13,7 +13,4 @@
         <circle stroke="rgba(255,255,255,.16)" fill="none" stroke-width="1.2" cx="200" cy="232" r="50"/>
         <path stroke="rgba(255,255,255,.16)" fill="none" stroke-width="1.2" d="M122 232 l156 0 M200 154 l0 156"/></g>
   <rect width="400" height="500" fill="url(#vig)"/>
-  <text x="28" y="46" font-family="Inter, sans-serif" font-size="12" letter-spacing="2.5" fill="#8A8F8C">FÔYER</text>
-  <text x="28" y="452" font-family="Inter, sans-serif" font-size="18" font-weight="600" fill="#F7F8F7">Nonstick Frying Pan — Granite </text>
-  <text x="28" y="476" font-family="Inter, sans-serif" font-size="11" letter-spacing="2" fill="#8A8F8C">GULFRABIT</text>
 </svg>

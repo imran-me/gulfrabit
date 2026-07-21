@@ -131,7 +131,7 @@ function paintInfo(p) {
 
   const full = Math.round(p.rating || 0);
   document.querySelector('[data-pdp-rating]').innerHTML =
-    `<span style="color:var(--gr-lime)">${STAR.repeat(full)}</span><span style="color:var(--gr-border)">${STAR.repeat(5 - full)}</span><span class="caption">${p.rating || 0} · ${p.reviewCount || 0} reviews</span>`;
+    `<span style="display:inline-flex;color:var(--gr-lime)">${STAR.repeat(full)}</span><span style="display:inline-flex;color:var(--gr-border)">${STAR.repeat(5 - full)}</span><span class="caption">${p.rating || 0} · ${p.reviewCount || 0} reviews</span>`;
 
   document.querySelector('[data-pdp-price]').textContent = formatBDT(p.price);
   document.querySelector('[data-pdp-original]').textContent = p.originalPrice > p.price ? formatBDT(p.originalPrice) : '';

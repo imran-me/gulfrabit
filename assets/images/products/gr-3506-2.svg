@@ -12,7 +12,4 @@
   <g filter="url(#soft)" transform="translate(200 250) scale(1.28) translate(-200 -232)"><path fill="url(#accent)" stroke="rgba(255,255,255,.18)" stroke-width="1.5" d="M186 152 l28 0 l0 26 q26 10 26 40 l0 74 q0 18 -18 18 l-44 0 q-18 0 -18 -18 l0 -74 q0 -30 26 -40 z"/>
         <path stroke="rgba(255,255,255,.16)" fill="none" stroke-width="1.2" d="M160 226 l80 0"/></g>
   <rect width="400" height="500" fill="url(#vig)"/>
-  
-  
-  
 </svg>

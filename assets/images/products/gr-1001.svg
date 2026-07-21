@@ -12,7 +12,4 @@
   <g filter="url(#soft)" transform="translate(200 232) scale(1.0) translate(-200 -232)"><path fill="url(#accent)" stroke="rgba(255,255,255,.18)" stroke-width="1.5" d="M130 192 q0 -26 26 -30 l88 0 q26 4 26 30 l0 130 q0 20 -20 20 l-80 0 q-20 0 -20 -20 z"/>
         <path stroke="rgba(255,255,255,.16)" fill="none" stroke-width="1.2" d="M130 232 l140 0 M200 162 l0 160"/></g>
   <rect width="400" height="500" fill="url(#vig)"/>
-  <text x="28" y="46" font-family="Inter, sans-serif" font-size="12" letter-spacing="2.5" fill="#8A8F8C">AL BARAKAH</text>
-  <text x="28" y="452" font-family="Inter, sans-serif" font-size="18" font-weight="600" fill="#F7F8F7">Medjool Dates — Premium Jumbo </text>
-  <text x="28" y="476" font-family="Inter, sans-serif" font-size="11" letter-spacing="2" fill="#8A8F8C">GULFRABIT</text>
 </svg>

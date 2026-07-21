@@ -76,8 +76,8 @@ def svg(p, variant=0):
     scale = [1.0, 1.28, 0.82][variant % 3]
     cy = [232, 250, 220][variant % 3]
     title = html.escape(p["title"])
-    brand = html.escape((p.get("brand") or "").upper())
-    show_label = variant == 0
+    # Clean, textless product art (the card + PDP already render the title/brand
+    # in HTML — baked-in text overlapped the large gallery and read as broken).
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500" role="img" aria-label="{title}">
   <defs>
     <linearGradient id="accent" gradientTransform="rotate({ang} .5 .5)"><stop offset="0" stop-color="{ca}"/><stop offset="1" stop-color="{cb}"/></linearGradient>
@@ -91,9 +91,6 @@ def svg(p, variant=0):
   <rect width="400" height="500" fill="url(#glow)"/>
   <g filter="url(#soft)" transform="translate(200 {cy}) scale({scale}) translate(-200 -232)">{motif(kind, 200, 232)}</g>
   <rect width="400" height="500" fill="url(#vig)"/>
-  {f'<text x="28" y="46" font-family="Inter, sans-serif" font-size="12" letter-spacing="2.5" fill="#8A8F8C">{brand}</text>' if show_label else ''}
-  {f'<text x="28" y="452" font-family="Inter, sans-serif" font-size="18" font-weight="600" fill="#F7F8F7">{title[:30]}</text>' if show_label else ''}
-  {f'<text x="28" y="476" font-family="Inter, sans-serif" font-size="11" letter-spacing="2" fill="#8A8F8C">GULFRABIT</text>' if show_label else ''}
 </svg>
 '''
 
