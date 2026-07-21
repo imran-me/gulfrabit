@@ -1,0 +1,38 @@
+/* =========================================================================
+   GulfRabit · Checkout module (multi-step) + order confirmation
+   ========================================================================= */
+.checkout-layout { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
+@media (min-width: 1024px) { .checkout-layout { grid-template-columns: 1fr 380px; align-items: start; } }
+
+/* Progress stepper */
+.stepper { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-7); flex-wrap: wrap; }
+.step { display: flex; align-items: center; gap: var(--space-2); color: var(--gr-gray-500); font-size: var(--fs-14); }
+.step__num { width: 30px; height: 30px; border-radius: var(--radius-pill); display: grid; place-items: center; border: 1px solid var(--gr-border); font-weight: var(--fw-semibold); font-size: var(--fs-14); }
+.step.is-active { color: var(--gr-white); }
+.step.is-active .step__num { background: var(--gr-gradient); color: #04222b; border-color: transparent; }
+.step.is-done .step__num { background: var(--gr-graphite); color: var(--gr-lime); border-color: var(--gr-lime); }
+.step__line { flex: 1; min-width: 16px; height: 1px; background: var(--gr-border); }
+
+.checkout-step[hidden] { display: none; }
+.checkout-step__title { margin-bottom: var(--space-5); }
+
+.form-grid { display: grid; gap: 0 var(--space-4); grid-template-columns: 1fr; }
+@media (min-width: 640px) { .form-grid { grid-template-columns: 1fr 1fr; } .form-grid .col-span-2 { grid-column: 1 / -1; } }
+
+/* Delivery / payment option cards */
+.option-card { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-4); border: 1px solid var(--gr-border); border-radius: var(--radius-lg); cursor: pointer; transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out); margin-bottom: var(--space-3); }
+.option-card:hover { border-color: var(--gr-cyan-dark); }
+.option-card input { accent-color: var(--gr-cyan); margin-top: 3px; width: 20px; height: 20px; }
+.option-card.is-selected { border-color: var(--gr-cyan); background: rgba(27,180,212,.06); }
+.option-card__title { font-weight: var(--fw-semibold); }
+.option-card__sub { font-size: var(--fs-14); color: var(--gr-gray-500); }
+.option-card__price { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: var(--fw-semibold); }
+
+.review-line { display: flex; justify-content: space-between; padding: var(--space-2) 0; border-bottom: 1px solid var(--gr-border); }
+
+.step-nav { display: flex; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-6); }
+
+/* ---- Order confirmation ---------------------------------------------- */
+.confirm-hero { text-align: center; padding: var(--space-8) 0 var(--space-6); }
+.confirm-check { width: 84px; height: 84px; margin: 0 auto var(--space-5); border-radius: var(--radius-pill); display: grid; place-items: center; background: var(--gr-gradient); color: #04222b; }
+.confirm-panel { max-width: 640px; margin: 0 auto; }

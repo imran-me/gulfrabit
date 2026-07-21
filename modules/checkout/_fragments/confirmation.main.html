@@ -1,0 +1,24 @@
+  <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
+    <div class="confirm-hero">
+      <div class="confirm-check" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" width="40" height="40"><path d="M20 6 9 17l-5-5"/></svg>
+      </div>
+      <p class="overline">Thank you</p>
+      <h1 class="h2" style="margin:.5rem 0">Your order is confirmed</h1>
+      <p class="text-muted-gr">Order <strong data-order-id>—</strong> · A confirmation has been saved to your account.</p>
+    </div>
+
+    <div class="confirm-panel surface-gr" style="padding:var(--space-6)">
+      <div class="review-line"><span class="text-muted-gr">Estimated delivery</span><span data-order-eta>2–5 business days</span></div>
+      <div class="review-line"><span class="text-muted-gr">Ship to</span><span data-order-address>—</span></div>
+      <div class="review-line"><span class="text-muted-gr">Total paid</span><span class="tabular" data-order-total>৳ 0</span></div>
+
+      <div data-order-items style="margin-top:var(--space-4)"></div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:var(--space-3);margin-top:var(--space-6)">
+        <a class="btn-gr btn-primary-gr" href="/modules/account/orders.html">Track Order</a>
+        <a class="btn-gr btn-outline-gr" href="/index.html">Continue Shopping</a>
+        <button class="btn-gr btn-ghost-gr no-print" type="button" onclick="window.print()">Print receipt</button>
+      </div>
+    </div>
+  </main>
