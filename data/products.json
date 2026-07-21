@@ -349,6 +349,142 @@
       "description": "Low-ESR radial electrolytic capacitors rated to 105°C with a 5,000-hour endurance.",
       "specs": { "Capacitance": "1000 µF", "Voltage": "25 V", "Temp": "105 °C", "Endurance": "5,000 h", "ESR": "Low", "Mount": "Radial THT" },
       "datasheet": "#", "createdAt": 1718900000
+    },
+
+    {
+      "id": "gr-1006", "title": "Organic Green Tea — Sencha (200g)", "brand": "Yamacha", "origin": "Japan",
+      "categorySlug": "imported-food-grocery", "categoryName": "Imported Food & Grocery", "subSlug": "coffee-tea",
+      "price": 880, "originalPrice": 1050, "image": "/assets/images/products/food.svg",
+      "images": ["/assets/images/products/food.svg"],
+      "rating": 4.6, "reviewCount": 61, "inStock": true, "tags": ["new"],
+      "dietary": ["vegan", "organic"],
+      "shortDescription": "First-flush organic Sencha, vivid and grassy.",
+      "description": "A bright, first-flush Sencha with a clean, grassy sweetness. Shade-grown and stone-milled fresh.",
+      "createdAt": 1720750000
+    },
+    {
+      "id": "gr-1204", "title": "Chilean Walnut Halves (500g)", "brand": "Andes", "origin": "Chile",
+      "categorySlug": "nuts-dry-fruits", "categoryName": "Nuts & Dry Fruits",
+      "price": 890, "originalPrice": null, "image": "/assets/images/products/nuts.svg",
+      "images": ["/assets/images/products/nuts.svg"],
+      "rating": 4.5, "reviewCount": 44, "inStock": true, "tags": [],
+      "dietary": ["vegan", "gluten-free"],
+      "shortDescription": "Light-halves walnuts, buttery and fresh.",
+      "description": "Premium light-quarter walnut halves — mild, buttery and never bitter.",
+      "createdAt": 1719700000
+    },
+    {
+      "id": "gr-1205", "title": "Turkish Dried Apricots (500g)", "brand": "Malatya", "origin": "Turkey",
+      "categorySlug": "nuts-dry-fruits", "categoryName": "Nuts & Dry Fruits",
+      "price": 720, "originalPrice": 860, "image": "/assets/images/products/nuts.svg",
+      "images": ["/assets/images/products/nuts.svg"],
+      "rating": 4.7, "reviewCount": 73, "inStock": true, "tags": ["bestseller"],
+      "dietary": ["vegan", "no-added-sugar"],
+      "shortDescription": "Soft, sun-dried Malatya apricots.",
+      "description": "Naturally sun-dried apricots from Malatya — plump, tangy-sweet, unsulphured.",
+      "createdAt": 1719200000
+    },
+    {
+      "id": "gr-1104", "title": "Skimmed Milk Powder (1kg Pouch)", "brand": "Nord Dairy", "origin": "New Zealand",
+      "categorySlug": "dairy-milk-powder", "categoryName": "Dairy & Milk Powder", "subSlug": "milk-powder",
+      "price": 1180, "originalPrice": null, "image": "/assets/images/products/dairy.svg",
+      "images": ["/assets/images/products/dairy.svg"],
+      "rating": 4.5, "reviewCount": 96, "inStock": true, "tags": ["new"],
+      "dietary": ["halal"],
+      "shortDescription": "Instant skimmed milk powder, resealable pouch.",
+      "description": "Low-fat instant skimmed milk powder that dissolves cleanly. Cold-chain handled, resealable pouch.",
+      "createdAt": 1720650000
+    },
+    {
+      "id": "gr-2005", "title": "Portable Bluetooth Speaker (Waterproof)", "brand": "Pulse", "origin": "South Korea",
+      "categorySlug": "gadgets-electronics", "categoryName": "Gadgets & Electronics", "subSlug": "audio",
+      "price": 4900, "originalPrice": 5900, "image": "/assets/images/products/electronics.svg",
+      "images": ["/assets/images/products/electronics.svg"],
+      "rating": 4.5, "reviewCount": 118, "inStock": true, "tags": ["new"],
+      "shortDescription": "IP67, 20-hour battery, stereo pairing.",
+      "description": "A rugged IP67 waterproof speaker with punchy bass, 20-hour battery and true-wireless stereo pairing.",
+      "specs": { "Battery": "20 h", "Water": "IP67", "Bluetooth": "5.3", "Output": "20 W" },
+      "createdAt": 1721000000
+    },
+    {
+      "id": "gr-2506", "title": "Nonstick Frying Pan — Granite (28cm)", "brand": "Fôyer", "origin": "France",
+      "categorySlug": "kitchen-home", "categoryName": "Kitchen & Home",
+      "price": 3200, "originalPrice": 3800, "image": "/assets/images/products/kitchen.svg",
+      "images": ["/assets/images/products/kitchen.svg"],
+      "rating": 4.5, "reviewCount": 57, "inStock": true, "tags": ["bestseller"],
+      "shortDescription": "PFOA-free granite coating, induction-ready.",
+      "description": "A durable granite-coated frying pan — PFOA-free, even heating, induction-ready.",
+      "createdAt": 1719950000
+    },
+    {
+      "id": "gr-2507", "title": "Double-Wall Glass Mugs (Set of 2)", "brand": "Clear", "origin": "Germany",
+      "categorySlug": "kitchen-home", "categoryName": "Kitchen & Home",
+      "price": 1400, "originalPrice": null, "image": "/assets/images/products/kitchen.svg",
+      "images": ["/assets/images/products/kitchen.svg"],
+      "rating": 4.6, "reviewCount": 39, "inStock": true, "tags": ["new"],
+      "shortDescription": "Borosilicate double-wall, keeps drinks hot.",
+      "description": "Hand-blown double-wall borosilicate mugs — insulating, lightweight and elegant.",
+      "createdAt": 1720850000
+    },
+    {
+      "id": "gr-3004", "title": "Full-Grain Leather Belt", "brand": "Atlas", "origin": "Italy",
+      "categorySlug": "fashion", "categoryName": "Fashion",
+      "price": 2600, "originalPrice": 3200, "image": "/assets/images/products/fashion.svg",
+      "images": ["/assets/images/products/fashion.svg"],
+      "rating": 4.6, "reviewCount": 48, "inStock": true, "tags": ["bestseller"],
+      "shortDescription": "Vegetable-tanned leather, brass buckle.",
+      "description": "A vegetable-tanned full-grain belt with a solid brass buckle that patinas beautifully.",
+      "createdAt": 1719450000
+    },
+    {
+      "id": "gr-3005", "title": "Cashmere-Blend Scarf", "brand": "Nordfell", "origin": "Italy",
+      "categorySlug": "fashion", "categoryName": "Fashion",
+      "price": 3400, "originalPrice": null, "image": "/assets/images/products/fashion.svg",
+      "images": ["/assets/images/products/fashion.svg"],
+      "rating": 4.7, "reviewCount": 31, "inStock": true, "tags": ["premium", "new"],
+      "shortDescription": "Cashmere-merino blend, feather-light.",
+      "description": "A feather-light cashmere-merino scarf — warm without weight, in a quiet palette.",
+      "createdAt": 1720950000
+    },
+    {
+      "id": "gr-3505", "title": "Hyaluronic Acid Moisturiser (50ml)", "brand": "Lumen", "origin": "South Korea",
+      "categorySlug": "beauty-personal-care", "categoryName": "Beauty & Personal Care",
+      "price": 1900, "originalPrice": 2300, "image": "/assets/images/products/beauty.svg",
+      "images": ["/assets/images/products/beauty.svg"],
+      "rating": 4.6, "reviewCount": 142, "inStock": true, "tags": ["bestseller"],
+      "shortDescription": "Multi-weight hyaluronic acid, lightweight gel.",
+      "description": "A lightweight gel moisturiser with multi-weight hyaluronic acid for lasting, non-greasy hydration.",
+      "createdAt": 1719650000
+    },
+    {
+      "id": "gr-3506", "title": "Mineral Sunscreen SPF 50 (50ml)", "brand": "Lumen", "origin": "South Korea",
+      "categorySlug": "beauty-personal-care", "categoryName": "Beauty & Personal Care",
+      "price": 1600, "originalPrice": null, "image": "/assets/images/products/beauty.svg",
+      "images": ["/assets/images/products/beauty.svg"],
+      "rating": 4.5, "reviewCount": 88, "inStock": true, "tags": ["new"],
+      "shortDescription": "Broad-spectrum SPF 50, no white cast.",
+      "description": "A broad-spectrum mineral sunscreen that absorbs cleanly with no white cast — daily-wear finish.",
+      "createdAt": 1720450000
+    },
+    {
+      "id": "gr-4003", "title": "Walnut Desk Organiser", "brand": "Leaf", "origin": "Germany",
+      "categorySlug": "office-supplies", "categoryName": "Office Supplies",
+      "price": 2100, "originalPrice": 2500, "image": "/assets/images/products/office.svg",
+      "images": ["/assets/images/products/office.svg"],
+      "rating": 4.6, "reviewCount": 34, "inStock": true, "tags": ["premium"],
+      "shortDescription": "Solid walnut, felt-lined compartments.",
+      "description": "A solid walnut desk organiser with felt-lined compartments — quiet order for the desk.",
+      "createdAt": 1720250000
+    },
+    {
+      "id": "gr-4004", "title": "Drafting Mechanical Pencil Set (0.3/0.5/0.7)", "brand": "Kanji", "origin": "Japan",
+      "categorySlug": "office-supplies", "categoryName": "Office Supplies",
+      "price": 1250, "originalPrice": null, "image": "/assets/images/products/office.svg",
+      "images": ["/assets/images/products/office.svg"],
+      "rating": 4.7, "reviewCount": 52, "inStock": true, "tags": ["bestseller"],
+      "shortDescription": "Metal-body drafting pencils, three gauges.",
+      "description": "A three-gauge set of metal-body drafting pencils with cushioned lead and knurled grips.",
+      "createdAt": 1720150000
     }
   ]
 }
