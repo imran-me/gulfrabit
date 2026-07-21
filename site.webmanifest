@@ -1,0 +1,13 @@
+{
+  "name": "GulfRabit",
+  "short_name": "GulfRabit",
+  "description": "Premium import marketplace for Bangladesh. Shop Smart. Hop Fast.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
+  "lang": "en",
+  "icons": [
+    { "src": "/assets/logo/gulfrabit-logo-dark-bg.jpeg", "sizes": "512x512", "type": "image/jpeg" }
+  ]
+}

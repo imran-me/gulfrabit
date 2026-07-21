@@ -1,0 +1,10 @@
+# GulfRabit — robots
+User-agent: *
+Allow: /
+
+# Keep authoring internals out of the index
+Disallow: /modules/*/_fragments/
+Disallow: /shared/components/
+Disallow: /tools/
+
+Sitemap: https://gulfrabit.com/sitemap.xml

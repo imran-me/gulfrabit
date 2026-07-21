@@ -31,6 +31,9 @@ def write(p, s):
 HEADER = read("shared/components/header.html")
 FOOTER = read("shared/components/footer.html")
 
+# Canonical site origin (placeholder domain — update when the domain is live).
+SITE = "https://gulfrabit.com"
+
 def head(title, desc, css_links, theme="#0A0A0A"):
     extra = "\n  ".join(f'<link rel="stylesheet" href="{c}">' for c in css_links)
     return f"""<!DOCTYPE html>
@@ -41,7 +44,20 @@ def head(title, desc, css_links, theme="#0A0A0A"):
   <title>{title}</title>
   <meta name="description" content="{desc}">
   <meta name="theme-color" content="{theme}">
+  <meta name="author" content="GulfRabit">
+  <meta name="robots" content="index, follow">
+  <meta name="color-scheme" content="dark">
+  <!-- Social / Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GulfRabit">
+  <meta property="og:title" content="{title}">
+  <meta property="og:description" content="{desc}">
+  <meta property="og:image" content="{SITE}/assets/images/hero/hero-food.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{title}">
+  <meta name="twitter:description" content="{desc}">
   <link rel="icon" href="/assets/logo/gulfrabit-logo-dark-bg.jpeg">
+  <link rel="apple-touch-icon" href="/assets/logo/gulfrabit-logo-dark-bg.jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
@@ -51,6 +67,9 @@ def head(title, desc, css_links, theme="#0A0A0A"):
   <script src="/shared/css/tailwind.config.js"></script>
   <link rel="stylesheet" href="/shared/css/style.css">
   {extra}
+  <script type="application/ld+json">
+  {{"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"{SITE}","logo":"{SITE}/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}}
+  </script>
 </head>
 <body>"""
 
