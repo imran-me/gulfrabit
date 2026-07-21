@@ -1,0 +1,78 @@
+/* =========================================================================
+   GulfRabit · Animations, skeletons, scrollbar, toasts
+   Subtle only — 150–300ms, no bounce. Respects prefers-reduced-motion.
+   ========================================================================= */
+
+/* ---- Scroll reveal (IntersectionObserver adds .is-visible) ----------- */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out);
+  will-change: opacity, transform;
+}
+[data-reveal].is-visible { opacity: 1; transform: translateY(0); }
+/* optional stagger via inline --reveal-delay */
+[data-reveal] { transition-delay: var(--reveal-delay, 0ms); }
+
+/* ---- Skeleton shimmer ------------------------------------------------ */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--gr-graphite);
+  border-radius: var(--radius-sm);
+}
+.skeleton::after {
+  content: "";
+  position: absolute; inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
+  animation: gr-shimmer 1.4s infinite;
+}
+@keyframes gr-shimmer { 100% { transform: translateX(100%); } }
+.skeleton--text { height: 0.8em; margin-bottom: 0.5em; }
+.skeleton--media { aspect-ratio: 4/5; border-radius: var(--radius-lg); }
+
+/* ---- Toast ----------------------------------------------------------- */
+.toast-stack {
+  position: fixed; z-index: var(--z-toast);
+  right: var(--space-5); bottom: var(--space-5);
+  display: flex; flex-direction: column; gap: var(--space-3);
+  width: min(360px, calc(100vw - 2rem));
+}
+@media (max-width: 767px) { .toast-stack { left: 50%; right: auto; transform: translateX(-50%); bottom: var(--space-4); align-items: center; } }
+.toast-gr {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--gr-graphite);
+  border: 1px solid var(--gr-border);
+  border-left: 3px solid var(--gr-cyan);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  color: var(--gr-white);
+  font-size: var(--fs-14);
+  transform: translateX(120%);
+  animation: gr-toast-in var(--dur-slow) var(--ease-out) forwards;
+}
+.toast-gr.is-leaving { animation: gr-toast-out var(--dur-base) var(--ease-out) forwards; }
+.toast-gr--success { border-left-color: var(--gr-lime); }
+.toast-gr--error   { border-left-color: var(--gr-error); }
+.toast-gr__icon { flex-shrink: 0; width: 20px; height: 20px; }
+@keyframes gr-toast-in  { to { transform: translateX(0); } }
+@keyframes gr-toast-out { to { transform: translateX(120%); opacity: 0; } }
+
+/* ---- Fade/scale in for modals & overlays ----------------------------- */
+@keyframes gr-fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.animate-fade-up { animation: gr-fade-up var(--dur-slow) var(--ease-out) both; }
+
+/* ---- Custom scrollbar (default browser bars look cheap) -------------- */
+* { scrollbar-width: thin; scrollbar-color: var(--gr-cyan-dark) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--gr-black); }
+::-webkit-scrollbar-thumb { background: var(--gr-graphite); border-radius: var(--radius-pill); border: 2px solid var(--gr-black); }
+::-webkit-scrollbar-thumb:hover { background: var(--gr-cyan-dark); }
+
+/* ---- Reduced motion -------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+  [data-reveal] { opacity: 1; transform: none; }
+}

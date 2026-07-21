@@ -1,0 +1,97 @@
+/* =========================================================================
+   GulfRabit · Design Tokens
+   Single source of truth for colour, type, spacing, radius, elevation, motion.
+   Every other partial and module reads from these custom properties — never
+   hard-code a hex, a shadow, or a radius elsewhere.
+   ========================================================================= */
+
+:root {
+  /* ---- Brand · Primary ------------------------------------------------- */
+  --gr-cyan:        #1BB4D4;   /* primary — CTAs, links, active states       */
+  --gr-cyan-dark:   #0E7C99;   /* hover / pressed, deep accents, gradient    */
+  --gr-lime:        #9ACD3C;   /* secondary — highlights, success/sale badge */
+  --gr-lime-light:  #C3E86B;   /* light accents, gradient partner            */
+
+  /* ---- Brand · Neutrals (the premium base — 80% of the canvas) --------- */
+  --gr-black:       #0A0A0A;   /* primary background (warm black)            */
+  --gr-charcoal:    #151515;   /* card / section backgrounds on black        */
+  --gr-graphite:    #1F1F1F;   /* elevated surfaces, input fields            */
+  --gr-border:      #2A2A2A;   /* hairline borders on dark surfaces          */
+  --gr-white:       #FFFFFF;   /* text on dark / background on light         */
+  --gr-off-white:   #F7F8F7;   /* light-mode section backgrounds             */
+  --gr-ink:         #101314;   /* primary text on light backgrounds          */
+  --gr-gray-500:    #8A8F8C;   /* secondary / muted text                     */
+  --gr-gray-300:    #D8DBD9;   /* dividers on light backgrounds              */
+
+  /* ---- Semantic -------------------------------------------------------- */
+  --gr-success:     #9ACD3C;   /* reuse lime — no generic green              */
+  --gr-error:       #E5484D;
+  --gr-warning:     #E8B342;
+  --gr-gold-accent: #C9A24B;   /* ONLY Premium/Imported/VIP luxury details   */
+
+  /* ---- Brand gradient (accents only — never a full page background) ---- */
+  --gr-gradient:      linear-gradient(135deg, #1BB4D4 0%, #9ACD3C 100%);
+  --gr-gradient-soft: linear-gradient(135deg, rgba(27,180,212,.14) 0%, rgba(154,205,60,.14) 100%);
+
+  /* ---- Typography ------------------------------------------------------ */
+  --font-display: 'Clash Display', 'General Sans', 'Inter', system-ui, sans-serif;
+  --font-body:    'Inter', 'Noto Kufi Arabic', system-ui, -apple-system, sans-serif;
+
+  /* Modular type scale · 1.25 ratio — pull sizes from here, never ad-hoc.  */
+  --fs-12: 0.75rem;   /* 12 — micro tags, legal        */
+  --fs-14: 0.875rem;  /* 14 — small text, captions     */
+  --fs-16: 1rem;      /* 16 — body base                */
+  --fs-20: 1.25rem;   /* 20 — lead, small headings     */
+  --fs-25: 1.5625rem; /* 25 — H4                       */
+  --fs-31: 1.9375rem; /* 31 — H3                       */
+  --fs-39: 2.4375rem; /* 39 — H2                       */
+  --fs-49: 3.0625rem; /* 49 — H1                       */
+
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+
+  --lh-tight:  1.15;
+  --lh-snug:   1.3;
+  --lh-normal: 1.6;
+
+  /* ---- Spacing · 8px baseline grid (precision alignment, no eyeballing) */
+  --space-1: 0.25rem;  /*  4 */
+  --space-2: 0.5rem;   /*  8 */
+  --space-3: 0.75rem;  /* 12 */
+  --space-4: 1rem;     /* 16 */
+  --space-5: 1.5rem;   /* 24 */
+  --space-6: 2rem;     /* 32 */
+  --space-7: 3rem;     /* 48 */
+  --space-8: 4rem;     /* 64 */
+  --space-9: 6rem;     /* 96 */
+  --space-10: 8rem;    /* 128 — section rhythm on large screens */
+
+  /* ---- Radius · exactly two, never deviate ----------------------------- */
+  --radius-sm: 8px;    /* inputs, buttons, tags, small controls */
+  --radius-lg: 16px;   /* cards, modals, media, large surfaces  */
+  --radius-pill: 999px;
+
+  /* ---- Elevation · soft, low-opacity, large-blur (never harsh drops) --- */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.20), 0 1px 3px rgba(0,0,0,.14);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.24), 0 2px 6px rgba(0,0,0,.16);
+  --shadow-lg: 0 18px 48px rgba(0,0,0,.34), 0 6px 16px rgba(0,0,0,.22);
+  /* Brand glow for hero CTAs / focus rings on dark */
+  --shadow-glow: 0 8px 30px rgba(27,180,212,.28);
+
+  /* ---- Motion · subtle, crafted (no bounce, no gimmick easing) --------- */
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast:   150ms;
+  --dur-base:   200ms;
+  --dur-slow:   300ms;
+
+  /* ---- Layout ---------------------------------------------------------- */
+  --container-max: 1400px;
+  --header-h: 76px;
+  --z-header: 1000;
+  --z-drawer: 1050;
+  --z-toast:  1100;
+  --z-modal:  1090;
+}

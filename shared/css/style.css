@@ -1,0 +1,45 @@
+/* =========================================================================
+   GulfRabit · style.css — master stylesheet
+   Imports every design-system partial in cascade order, then holds the base
+   reset and print styles. Load this ONCE per page after Tailwind/Bootstrap so
+   our tokens win over their defaults.
+
+   Order matters: variables first (tokens), then base, then components.
+   ========================================================================= */
+
+@import url("partials/_variables.css");
+@import url("partials/_typography.css");
+@import url("partials/_buttons.css");
+@import url("partials/_cards.css");
+@import url("partials/_navigation.css");
+@import url("partials/_forms.css");
+@import url("partials/_modals-offcanvas.css");
+@import url("partials/_animations.css");
+@import url("partials/_utilities.css");
+
+/* ---- Base reset (light-touch; Tailwind's preflight handles most) ------ */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-height: 100vh; overflow-x: hidden; }
+
+img, picture, svg, video { max-width: 100%; display: block; }
+img { height: auto; }
+
+ul[role="list"], ol[role="list"] { list-style: none; margin: 0; padding: 0; }
+
+:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
+
+::selection { background: rgba(27,180,212,.3); color: var(--gr-white); }
+
+/* Keep the sticky header offset when jumping to in-page anchors */
+:target { scroll-margin-top: calc(var(--header-h) + var(--space-4)); }
+
+/* ---- Print --------------------------------------------------------------
+   Order confirmation / invoices should print clean on white. */
+@media print {
+  .site-header, .site-footer, .cart-drawer, .toast-stack, .announce-bar,
+  .no-print { display: none !important; }
+  body { background: #fff; color: #000; }
+  .canvas-dark, .canvas-panel { background: #fff !important; color: #000 !important; }
+  a { color: #000; text-decoration: underline; }
+}

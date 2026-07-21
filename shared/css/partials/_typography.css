@@ -1,0 +1,73 @@
+/* =========================================================================
+   GulfRabit · Typography
+   One typographic voice, applied consistently. Sizes come only from the
+   scale in _variables.css. Prices use tabular-nums so they align in columns.
+   ========================================================================= */
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--fs-16);
+  line-height: var(--lh-normal);
+  font-weight: var(--fw-regular);
+  color: var(--gr-white);
+  background-color: var(--gr-black);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---- Headings — display face, tight leading, balanced wrapping -------- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
+  color: inherit;
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1, .h1 { font-size: clamp(2.25rem, 5vw, var(--fs-49)); font-weight: var(--fw-bold); }
+h2, .h2 { font-size: clamp(1.9rem, 4vw, var(--fs-39)); }
+h3, .h3 { font-size: clamp(1.5rem, 3vw, var(--fs-31)); }
+h4, .h4 { font-size: var(--fs-25); }
+h5, .h5 { font-size: var(--fs-20); font-weight: var(--fw-semibold); }
+h6, .h6 { font-size: var(--fs-16); font-weight: var(--fw-semibold); letter-spacing: 0; }
+
+p { margin: 0; }
+p + p { margin-top: var(--space-4); }
+
+/* ---- Lead / secondary / captions ------------------------------------- */
+.lead      { font-size: var(--fs-20); line-height: var(--lh-snug); color: var(--gr-gray-300); }
+.text-muted-gr { color: var(--gr-gray-500); }
+.caption   { font-size: var(--fs-14); color: var(--gr-gray-500); }
+.overline  {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gr-cyan);
+}
+
+/* ---- Links ----------------------------------------------------------- */
+a { color: var(--gr-cyan); text-decoration: none; transition: color var(--dur-fast) var(--ease-out); }
+a:hover { color: var(--gr-lime); }
+
+/* ---- Prices / numerals — align in lists and carts -------------------- */
+.price, .tabular { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+.price { font-weight: var(--fw-semibold); }
+.price--strike { color: var(--gr-gray-500); text-decoration: line-through; font-weight: var(--fw-regular); }
+
+/* ---- Gradient text (used sparingly for a single hero accent word) ---- */
+.text-gradient {
+  background: var(--gr-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ---- Arabic content inherits the Kufi fallback automatically --------- */
+[lang="ar"], .arabic { font-family: 'Noto Kufi Arabic', var(--font-body); direction: rtl; }

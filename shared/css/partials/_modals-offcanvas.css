@@ -1,0 +1,46 @@
+/* =========================================================================
+   GulfRabit · Cart drawer & modals (quick view)
+   Re-skins Bootstrap offcanvas/modal so nothing looks "Bootstrap default".
+   ========================================================================= */
+
+/* ---- Cart drawer (offcanvas from the right) -------------------------- */
+.cart-drawer { width: min(420px, 92vw); background: var(--gr-charcoal); color: var(--gr-white); border-left: 1px solid var(--gr-border); }
+.cart-drawer__header { display: flex; align-items: center; justify-content: space-between; padding: var(--space-5); border-bottom: 1px solid var(--gr-border); }
+.cart-drawer__title { font-family: var(--font-display); font-size: var(--fs-20); font-weight: var(--fw-semibold); }
+.cart-drawer__body { flex: 1; overflow-y: auto; padding: var(--space-4) var(--space-5); }
+.cart-drawer__footer { padding: var(--space-5); border-top: 1px solid var(--gr-border); background: var(--gr-black); }
+
+.cart-line { display: grid; grid-template-columns: 64px 1fr auto; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--gr-border); }
+.cart-line__thumb { width: 64px; height: 64px; border-radius: var(--radius-sm); object-fit: cover; background: var(--gr-graphite); }
+.cart-line__title { font-size: var(--fs-14); font-weight: var(--fw-medium); line-height: var(--lh-snug); }
+.cart-line__meta { font-size: var(--fs-12); color: var(--gr-gray-500); }
+.cart-line__price { font-variant-numeric: tabular-nums; font-weight: var(--fw-semibold); white-space: nowrap; }
+.cart-line__remove { background: none; border: 0; color: var(--gr-gray-500); cursor: pointer; font-size: var(--fs-12); }
+.cart-line__remove:hover { color: var(--gr-error); }
+
+.cart-summary-row { display: flex; justify-content: space-between; font-size: var(--fs-14); color: var(--gr-gray-300); margin-bottom: var(--space-2); }
+.cart-summary-row--total { font-size: var(--fs-20); color: var(--gr-white); font-weight: var(--fw-semibold); padding-top: var(--space-3); border-top: 1px solid var(--gr-border); margin-top: var(--space-3); }
+
+/* ---- Empty cart state ------------------------------------------------ */
+.cart-empty { text-align: center; padding: var(--space-8) var(--space-4); color: var(--gr-gray-500); }
+.cart-empty__icon { width: 56px; height: 56px; margin: 0 auto var(--space-4); color: var(--gr-border); }
+
+/* ---- Quick-view / generic modal -------------------------------------- */
+.gr-modal .modal-content { background: var(--gr-charcoal); border: 1px solid var(--gr-border); border-radius: var(--radius-lg); color: var(--gr-white); box-shadow: var(--shadow-lg); }
+.gr-modal .modal-header, .gr-modal .modal-footer { border-color: var(--gr-border); }
+
+/* ---- Backdrop (shared) ----------------------------------------------- */
+.offcanvas-backdrop.show, .modal-backdrop.show { background: rgba(0,0,0,.6); opacity: 1; -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+
+/* ---- Full-screen search overlay -------------------------------------- */
+.search-overlay {
+  position: fixed; inset: 0; z-index: var(--z-modal);
+  background: rgba(10,10,10,.9);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  display: flex; flex-direction: column; align-items: center;
+  padding-top: 12vh;
+  opacity: 0; visibility: hidden;
+  transition: opacity var(--dur-slow) var(--ease-out), visibility var(--dur-slow);
+}
+.search-overlay.is-open { opacity: 1; visibility: visible; }
+.search-overlay__box { width: min(720px, 92vw); }

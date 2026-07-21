@@ -1,0 +1,24 @@
+# ── GulfRabit / OS & editor noise ────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
+
+# ── Editor / IDE ─────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+
+# ── Node / future build tooling (not used yet, reserved) ─────────
+node_modules/
+dist/
+.cache/
+npm-debug.log*
+
+# ── Environment / secrets (for the future Laravel backend) ───────
+.env
+.env.local
+*.local.php
+
+# ── Keep the source logo out of the repo root once copied ────────
+# (working copy lives in assets/logo/) — comment out if you want it tracked.

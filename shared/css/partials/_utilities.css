@@ -1,0 +1,62 @@
+/* =========================================================================
+   GulfRabit · Utilities & layout primitives
+   Small, reusable helpers that Tailwind/Bootstrap don't express cleanly.
+   ========================================================================= */
+
+/* ---- Container & section rhythm -------------------------------------- */
+.gr-container { max-width: var(--container-max); margin-inline: auto; padding-inline: var(--space-5); }
+@media (min-width: 1024px) { .gr-container { padding-inline: var(--space-6); } }
+
+.section-gr { padding-block: var(--space-8); }
+@media (min-width: 1024px) { .section-gr { padding-block: var(--space-10); } }
+
+/* Light / dark section canvases (80/20 neutral system) */
+.canvas-dark  { background: var(--gr-black);     color: var(--gr-white); }
+.canvas-panel { background: var(--gr-charcoal);  color: var(--gr-white); }
+.canvas-light { background: var(--gr-off-white); color: var(--gr-ink); }
+.canvas-light .text-muted-gr { color: var(--gr-gray-500); }
+
+/* ---- Section heading block ------------------------------------------- */
+.section-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); }
+.section-head__titles { display: flex; flex-direction: column; gap: var(--space-2); }
+
+/* ---- Gradient divider ------------------------------------------------ */
+.divider-gradient { height: 2px; border: 0; background: var(--gr-gradient); border-radius: var(--radius-pill); opacity: .8; }
+.divider-hairline { height: 1px; border: 0; background: var(--gr-border); }
+
+/* ---- Horizontal scroll-snap rail (product carousels) ----------------- */
+.snap-rail { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(240px, 1fr); gap: var(--space-4); overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: var(--space-3); scrollbar-width: none; }
+.snap-rail::-webkit-scrollbar { display: none; }
+.snap-rail > * { scroll-snap-align: start; }
+@media (min-width: 1024px) { .snap-rail { grid-auto-columns: minmax(280px, 1fr); } }
+
+/* ---- Responsive product grid ----------------------------------------- */
+.product-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 768px)  { .product-grid { grid-template-columns: repeat(3, 1fr); gap: var(--space-5); } }
+@media (min-width: 1024px) { .product-grid { grid-template-columns: repeat(4, 1fr); } }
+
+/* ---- Trust / feature strip ------------------------------------------- */
+.trust-strip { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
+@media (min-width: 768px) { .trust-strip { grid-template-columns: repeat(4, 1fr); } }
+.trust-item { display: flex; align-items: center; gap: var(--space-3); }
+.trust-item__icon { width: 32px; height: 32px; color: var(--gr-gold-accent); flex-shrink: 0; }
+.trust-item__title { font-size: var(--fs-14); font-weight: var(--fw-semibold); }
+.trust-item__sub { font-size: var(--fs-12); color: var(--gr-gray-500); }
+
+/* ---- Accessibility helpers ------------------------------------------- */
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.skip-link { position: absolute; left: var(--space-4); top: -60px; z-index: calc(var(--z-header) + 1); background: var(--gr-cyan); color: #04222b; padding: 0.6rem 1rem; border-radius: var(--radius-sm); font-weight: var(--fw-semibold); transition: top var(--dur-base) var(--ease-out); }
+.skip-link:focus { top: var(--space-4); }
+
+/* ---- Empty-state block ----------------------------------------------- */
+.empty-state { text-align: center; padding: var(--space-9) var(--space-4); }
+.empty-state__icon { width: 64px; height: 64px; margin: 0 auto var(--space-4); color: var(--gr-border); }
+.empty-state__title { font-family: var(--font-display); font-size: var(--fs-25); margin-bottom: var(--space-2); }
+.empty-state__text { color: var(--gr-gray-500); max-width: 40ch; margin: 0 auto var(--space-5); }
+
+/* ---- Spacing helpers on the 8px grid --------------------------------- */
+.stack-2 > * + * { margin-top: var(--space-2); }
+.stack-3 > * + * { margin-top: var(--space-3); }
+.stack-4 > * + * { margin-top: var(--space-4); }
+.stack-5 > * + * { margin-top: var(--space-5); }
+.stack-6 > * + * { margin-top: var(--space-6); }

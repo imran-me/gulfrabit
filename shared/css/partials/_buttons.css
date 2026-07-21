@@ -1,0 +1,98 @@
+/* =========================================================================
+   GulfRabit · Buttons
+   Micro-interactions: slight scale/opacity shift on hover (not colour-snap).
+   One radius (--radius-sm). Reuse — never restyle buttons per page.
+   ========================================================================= */
+
+.btn-gr {
+  --_bg: var(--gr-graphite);
+  --_fg: var(--gr-white);
+  --_bd: var(--gr-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0.75rem 1.5rem;
+  min-height: 48px;
+  font-family: var(--font-body);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  line-height: 1;
+  color: var(--_fg);
+  background: var(--_bg);
+  border: 1px solid var(--_bd);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+  transition: transform var(--dur-base) var(--ease-out),
+              opacity var(--dur-base) var(--ease-out),
+              background-color var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out);
+}
+.btn-gr:hover  { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.btn-gr:active { transform: translateY(0); opacity: 0.9; }
+.btn-gr:focus-visible {
+  outline: 2px solid var(--gr-cyan);
+  outline-offset: 2px;
+}
+.btn-gr:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ---- Variants -------------------------------------------------------- */
+.btn-primary-gr {
+  --_bg: var(--gr-cyan);
+  --_fg: #04222b;
+  --_bd: transparent;
+}
+.btn-primary-gr:hover { --_bg: var(--gr-cyan-dark); --_fg: var(--gr-white); box-shadow: var(--shadow-glow); }
+
+.btn-gradient-gr {
+  background: var(--gr-gradient);
+  color: #04222b;
+  border-color: transparent;
+}
+.btn-gradient-gr:hover { box-shadow: var(--shadow-glow); }
+
+.btn-outline-gr {
+  --_bg: transparent;
+  --_fg: var(--gr-white);
+  --_bd: var(--gr-border);
+}
+.btn-outline-gr:hover { --_bd: var(--gr-cyan); --_fg: var(--gr-cyan); }
+
+.btn-ghost-gr {
+  --_bg: transparent;
+  --_fg: var(--gr-gray-300);
+  --_bd: transparent;
+  min-height: 40px;
+  padding: 0.5rem 0.9rem;
+}
+.btn-ghost-gr:hover { --_fg: var(--gr-white); background: rgba(255,255,255,.05); box-shadow: none; transform: none; }
+
+/* On light sections */
+.btn-outline-gr--light { --_fg: var(--gr-ink); --_bd: var(--gr-gray-300); }
+.btn-outline-gr--light:hover { --_bd: var(--gr-cyan-dark); --_fg: var(--gr-cyan-dark); }
+
+/* ---- Sizes ----------------------------------------------------------- */
+.btn-sm-gr { min-height: 38px; padding: 0.45rem 0.9rem; font-size: var(--fs-14); }
+.btn-lg-gr { min-height: 56px; padding: 1rem 2rem; font-size: var(--fs-20); }
+.btn-block-gr { width: 100%; }
+
+/* ---- Icon-only round button (header actions, steppers) --------------- */
+.btn-icon-gr {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--gr-white);
+  cursor: pointer;
+  position: relative;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.btn-icon-gr:hover { background: rgba(255,255,255,.06); color: var(--gr-cyan); }
+.btn-icon-gr:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
