@@ -1,0 +1,39 @@
+/* =========================================================================
+   GulfRabit · Account module (dashboard, orders, addresses, wishlist)
+   Shared sidebar + content layout.
+   ========================================================================= */
+.account-layout { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
+@media (min-width: 900px) { .account-layout { grid-template-columns: 240px 1fr; align-items: start; } }
+
+.account-nav { display: flex; gap: var(--space-2); overflow-x: auto; padding-bottom: var(--space-2); }
+@media (min-width: 900px) { .account-nav { position: sticky; top: calc(var(--header-h) + var(--space-4)); flex-direction: column; overflow: visible; } }
+.account-nav__link { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); color: var(--gr-gray-300); white-space: nowrap; border: 1px solid transparent; }
+.account-nav__link:hover { background: var(--gr-graphite); color: var(--gr-white); }
+.account-nav__link.is-active { background: var(--gr-graphite); color: var(--gr-white); border-color: var(--gr-border); }
+.account-nav__link svg { width: 20px; height: 20px; flex-shrink: 0; }
+.account-nav__link--danger { color: var(--gr-gray-500); }
+.account-nav__link--danger:hover { color: var(--gr-error); }
+
+/* Overview stat cards */
+.stat-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 768px) { .stat-grid { grid-template-columns: repeat(3, 1fr); } }
+.stat-card { padding: var(--space-5); }
+.stat-card__num { font-family: var(--font-display); font-size: var(--fs-31); font-variant-numeric: tabular-nums; }
+.stat-card__label { color: var(--gr-gray-500); font-size: var(--fs-14); }
+
+/* Orders */
+.order-card { padding: var(--space-5); margin-bottom: var(--space-4); }
+.order-card__head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3); align-items: center; border-bottom: 1px solid var(--gr-border); padding-bottom: var(--space-4); margin-bottom: var(--space-4); }
+.order-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: var(--radius-pill); font-size: var(--fs-12); font-weight: var(--fw-semibold); }
+.order-status--processing { background: rgba(232,179,66,.14); color: var(--gr-warning); }
+.order-status--shipped { background: rgba(27,180,212,.14); color: var(--gr-cyan); }
+.order-status--delivered { background: rgba(154,205,60,.14); color: var(--gr-lime); }
+.order-status--cancelled { background: rgba(229,72,77,.14); color: var(--gr-error); }
+.order-item-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; }
+.order-item-row img { width: 48px; height: 48px; border-radius: var(--radius-sm); object-fit: cover; background: var(--gr-graphite); }
+
+/* Addresses */
+.address-grid { display: grid; gap: var(--space-4); grid-template-columns: 1fr; }
+@media (min-width: 640px) { .address-grid { grid-template-columns: 1fr 1fr; } }
+.address-card { padding: var(--space-5); position: relative; }
+.address-card.is-default { border-color: var(--gr-cyan); }

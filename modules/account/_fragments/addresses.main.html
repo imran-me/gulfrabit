@@ -1,0 +1,44 @@
+  <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
+    <header style="margin-bottom:var(--space-6)"><p class="overline">My Account</p><h1 class="h2">Addresses</h1></header>
+    <div class="account-layout">
+      <nav class="account-nav" aria-label="Account">
+        <a class="account-nav__link" href="/modules/account/dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> Overview</a>
+        <a class="account-nav__link" href="/modules/account/orders.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/></svg> Orders</a>
+        <a class="account-nav__link is-active" href="/modules/account/addresses.html" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21s7-5.5 7-11a7 7 0 0 0-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> Addresses</a>
+        <a class="account-nav__link" href="/modules/account/wishlist.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg> Wishlist</a>
+        <a class="account-nav__link account-nav__link--danger" href="#" data-logout><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg> Sign out</a>
+      </nav>
+      <section>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-5)">
+          <p class="text-muted-gr">Manage where we deliver your imports.</p>
+          <button class="btn-gr btn-primary-gr" data-add-address>+ Add address</button>
+        </div>
+        <div class="address-grid" data-address-grid></div>
+        <div class="empty-state" data-address-empty hidden>
+          <h2 class="empty-state__title">No saved addresses</h2>
+          <p class="empty-state__text">Add an address to speed up checkout.</p>
+          <button class="btn-gr btn-primary-gr" data-add-address-2>+ Add address</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Address dialog (simple, no Bootstrap dependency) -->
+    <div data-address-dialog hidden style="position:fixed;inset:0;z-index:var(--z-modal);display:grid;place-items:center;padding:1rem">
+      <div data-address-backdrop style="position:absolute;inset:0;background:rgba(0,0,0,.66);backdrop-filter:blur(3px)"></div>
+      <form class="surface-gr animate-fade-up" data-address-form novalidate style="position:relative;width:min(480px,94vw);padding:var(--space-6)">
+        <h2 class="h5" data-dialog-title style="margin-bottom:var(--space-4)">Add address</h2>
+        <input type="hidden" name="id">
+        <div class="field-gr" data-field><label class="label-gr" for="a-label">Label</label><input id="a-label" class="input-gr" name="label" placeholder="Home / Office" data-validate="required" data-label="Label"><span class="field-error" data-error></span></div>
+        <div class="field-gr" data-field><label class="label-gr" for="a-line1">Address</label><input id="a-line1" class="input-gr" name="line1" data-validate="required|min:6" data-label="Address"><span class="field-error" data-error></span></div>
+        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0 1rem">
+          <div class="field-gr" data-field><label class="label-gr" for="a-city">City</label><input id="a-city" class="input-gr" name="city" value="Dhaka" data-validate="required" data-label="City"><span class="field-error" data-error></span></div>
+          <div class="field-gr" data-field><label class="label-gr" for="a-post">Postcode</label><input id="a-post" class="input-gr" name="postcode" data-validate="numeric" data-label="Postcode"><span class="field-error" data-error></span></div>
+        </div>
+        <label class="check-gr" style="margin-bottom:var(--space-4)"><input type="checkbox" name="isDefault"> Set as default</label>
+        <div style="display:flex;gap:.75rem;justify-content:flex-end">
+          <button class="btn-gr btn-ghost-gr" type="button" data-address-cancel>Cancel</button>
+          <button class="btn-gr btn-primary-gr" type="submit">Save</button>
+        </div>
+      </form>
+    </div>
+  </main>

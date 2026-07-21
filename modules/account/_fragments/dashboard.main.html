@@ -1,0 +1,32 @@
+  <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
+    <header style="margin-bottom:var(--space-6)">
+      <p class="overline">My Account</p>
+      <h1 class="h2" data-greeting>Welcome</h1>
+    </header>
+    <div class="account-layout">
+      <!-- Sidebar -->
+      <nav class="account-nav" aria-label="Account">
+        <a class="account-nav__link is-active" href="/modules/account/dashboard.html" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> Overview</a>
+        <a class="account-nav__link" href="/modules/account/orders.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/></svg> Orders</a>
+        <a class="account-nav__link" href="/modules/account/addresses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21s7-5.5 7-11a7 7 0 0 0-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> Addresses</a>
+        <a class="account-nav__link" href="/modules/account/wishlist.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg> Wishlist</a>
+        <a class="account-nav__link account-nav__link--danger" href="#" data-logout><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg> Sign out</a>
+      </nav>
+
+      <!-- Content -->
+      <section>
+        <div class="stat-grid" style="margin-bottom:var(--space-6)">
+          <a class="stat-card surface-gr" href="/modules/account/orders.html"><div class="stat-card__num" data-stat-orders>0</div><div class="stat-card__label">Orders</div></a>
+          <a class="stat-card surface-gr" href="/modules/account/wishlist.html"><div class="stat-card__num" data-stat-wishlist>0</div><div class="stat-card__label">Wishlist items</div></a>
+          <a class="stat-card surface-gr" href="/modules/account/addresses.html"><div class="stat-card__num" data-stat-addresses>0</div><div class="stat-card__label">Saved addresses</div></a>
+        </div>
+
+        <div class="surface-gr" style="padding:var(--space-5)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4)">
+            <h2 class="h5">Recent order</h2><a href="/modules/account/orders.html" class="caption">View all →</a>
+          </div>
+          <div data-recent-order><p class="text-muted-gr">No orders yet.</p></div>
+        </div>
+      </section>
+    </div>
+  </main>

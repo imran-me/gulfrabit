@@ -1,0 +1,21 @@
+  <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
+    <header style="margin-bottom:var(--space-6)"><p class="overline">My Account</p><h1 class="h2">Wishlist</h1></header>
+    <div class="account-layout">
+      <nav class="account-nav" aria-label="Account">
+        <a class="account-nav__link" href="/modules/account/dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> Overview</a>
+        <a class="account-nav__link" href="/modules/account/orders.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/></svg> Orders</a>
+        <a class="account-nav__link" href="/modules/account/addresses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21s7-5.5 7-11a7 7 0 0 0-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> Addresses</a>
+        <a class="account-nav__link is-active" href="/modules/account/wishlist.html" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg> Wishlist</a>
+        <a class="account-nav__link account-nav__link--danger" href="#" data-logout><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg> Sign out</a>
+      </nav>
+      <section>
+        <div class="product-grid" data-wishlist-grid></div>
+        <div class="empty-state" data-wishlist-empty hidden>
+          <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          <h2 class="empty-state__title">Your wishlist is empty</h2>
+          <p class="empty-state__text">Tap the heart on any product to save it here.</p>
+          <a class="btn-gr btn-primary-gr" href="/index.html">Explore products</a>
+        </div>
+      </section>
+    </div>
+  </main>
