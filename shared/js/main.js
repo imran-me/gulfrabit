@@ -19,6 +19,7 @@ import { initNewsletter } from './components/newsletter-signup.js';
 import { initWishlistButtons } from './components/wishlist.js';
 import { initQuantitySteppers } from './components/quantity-stepper.js';
 import { enhanceProductCards } from './components/product-card.js';
+import { initCompareTray } from './components/compare-tray.js';
 
 function boot() {
   initHeader();
@@ -28,6 +29,7 @@ function boot() {
   initNewsletter();
   initWishlistButtons();
   initQuantitySteppers();
+  initCompareTray();
   enhanceProductCards();          // wire any HTML-authored product cards
   document.documentElement.classList.add('js-ready');
 }

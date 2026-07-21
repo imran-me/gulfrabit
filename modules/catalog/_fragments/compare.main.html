@@ -1,0 +1,18 @@
+  <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
+    <nav class="breadcrumb-gr" aria-label="Breadcrumb" style="margin-bottom:var(--space-5)">
+      <a href="/index.html">Home</a><span class="breadcrumb-gr__sep">/</span><span>Compare</span>
+    </nav>
+    <header class="section-head" style="margin-bottom:var(--space-6)">
+      <div class="section-head__titles"><p class="overline">Side by side</p><h1 class="h2">Compare Products</h1></div>
+      <button class="btn-gr btn-ghost-gr" data-clear-all type="button" hidden>Clear all</button>
+    </header>
+
+    <div class="compare-scroll" data-compare-root aria-live="polite"></div>
+
+    <div class="empty-state" data-compare-empty hidden>
+      <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 3v18M5 7h14M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/></svg>
+      <h2 class="empty-state__title">Nothing to compare yet</h2>
+      <p class="empty-state__text">Add products with the compare icon on any product card (up to four), then come back here.</p>
+      <a class="btn-gr btn-primary-gr" href="/modules/catalog/category.html?slug=gadgets-electronics">Browse products</a>
+    </div>
+  </main>

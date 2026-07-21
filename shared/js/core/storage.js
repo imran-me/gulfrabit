@@ -54,6 +54,7 @@ export const session = makeStore(window.sessionStorage);
 export const KEYS = {
   CART: 'cart',
   WISHLIST: 'wishlist',
+  COMPARE: 'compare',
   USER: 'user',
   ADDRESSES: 'addresses',
   ORDERS: 'orders',

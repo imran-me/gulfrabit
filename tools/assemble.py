@@ -131,6 +131,12 @@ PAGES = [
      "modules/catalog/_fragments/search.main.html",
      ["/modules/catalog/catalog.css"], "/modules/catalog/search-page.js"),
 
+    ("modules/catalog/compare.html",
+     "Compare — GulfRabit",
+     "Compare GulfRabit products side by side.",
+     "modules/catalog/_fragments/compare.main.html",
+     ["/modules/catalog/catalog.css"], "/modules/catalog/compare-page.js"),
+
     ("modules/cart/cart.html",
      "Your Cart — GulfRabit",
      "Review and edit the items in your GulfRabit cart.",

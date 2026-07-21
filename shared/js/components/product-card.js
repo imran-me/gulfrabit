@@ -21,6 +21,7 @@ import { openCartDrawer } from './cart-drawer.js';
 
 const HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
 const EYE   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+const SCALE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M12 3v18M5 7h14M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/></svg>';
 const STAR  = '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
 
 /** Star rating markup (filled vs muted). */
@@ -66,6 +67,8 @@ export function productCardHTML(product) {
                 style="background:var(--gr-graphite);${wished ? 'color:var(--gr-lime)' : ''}">${HEART}</button>
         <button class="btn-icon-gr" data-action="quickview" aria-label="Quick view"
                 style="background:var(--gr-graphite)">${EYE}</button>
+        <button class="btn-icon-gr" data-action="compare" aria-pressed="${store.isInCompare(id)}"
+                aria-label="Add to compare" style="background:var(--gr-graphite);${store.isInCompare(id) ? 'color:var(--gr-cyan)' : ''}">${SCALE}</button>
       </div>
       <a href="${productURL(product)}" aria-label="${escapeAttr(title)}">
         <img class="product-card__img" src="${escapeAttr(image)}" alt="${escapeAttr(title)}" loading="lazy" decoding="async" width="400" height="500">
@@ -129,6 +132,15 @@ export function enhanceProductCards(root = document) {
       wishBtn.style.color = active ? 'var(--gr-lime)' : '';
       wishBtn.setAttribute('aria-label', active ? 'Remove from wishlist' : 'Add to wishlist');
       toast.info(active ? 'Saved to wishlist' : 'Removed from wishlist');
+    });
+
+    const cmpBtn = card.querySelector('[data-action="compare"]');
+    cmpBtn?.addEventListener('click', () => {
+      const { active, full } = store.toggleCompare(product.id);
+      if (full) { toast.error(`Compare holds up to ${store.COMPARE_MAX} — remove one first`); return; }
+      cmpBtn.setAttribute('aria-pressed', String(active));
+      cmpBtn.style.color = active ? 'var(--gr-cyan)' : '';
+      toast.info(active ? 'Added to compare' : 'Removed from compare');
     });
 
     card.querySelector('[data-action="quickview"]')?.addEventListener('click', () => {
