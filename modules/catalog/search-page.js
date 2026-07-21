@@ -51,6 +51,7 @@ function render() {
     if (f.tags?.length && !f.tags.some((t) => (p.dietary || []).includes(t))) return false;
     if (f.rating != null && (p.rating ?? 0) < f.rating) return false;
     if (f.inStock && !p.inStock) return false;
+    if (f.onSale && !(p.originalPrice && p.originalPrice > p.price)) return false;
     return true;
   });
   const sort = sortSel?.value || 'featured';

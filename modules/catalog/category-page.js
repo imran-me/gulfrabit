@@ -93,6 +93,7 @@ function applyClientFilters(products, f = {}) {
     if (f.tags?.length && !f.tags.some((t) => (p.dietary || []).includes(t))) return false;
     if (f.rating != null && (p.rating ?? 0) < f.rating) return false;
     if (f.inStock && !p.inStock) return false;
+    if (f.onSale && !(p.originalPrice && p.originalPrice > p.price)) return false;
     return true;
   });
 }
@@ -116,6 +117,7 @@ function renderChips(f = {}) {
   (f.tags || []).forEach((t) => chips.push(chip('tag', t)));
   if (f.rating != null) chips.push(chip('rating', `${f.rating}★ & up`));
   if (f.inStock) chips.push(chip('stock', 'In stock'));
+  if (f.onSale) chips.push(chip('deal', 'On sale'));
   chipsEl.innerHTML = chips.join('');
   if (chips.length) chipsEl.insertAdjacentHTML('beforeend', `<button class="chip" data-clear-chip style="cursor:pointer">Clear all ✕</button>`);
   chipsEl.querySelector('[data-clear-chip]')?.addEventListener('click', () => filtersApi.clear());
@@ -135,6 +137,7 @@ function syncURL() {
     tags: f.tags || null,
     rating: f.rating ?? null,
     inStock: f.inStock ? '1' : null,
+    onSale: f.onSale ? '1' : null,
   });
 }
 function parseFiltersFromURL(p) {
@@ -146,6 +149,7 @@ function parseFiltersFromURL(p) {
   if (p.tags) f.tags = p.tags.split(',');
   if (p.rating) f.rating = Number(p.rating);
   if (p.inStock) f.inStock = true;
+  if (p.onSale) f.onSale = true;
   return f;
 }
 function escapeHtml(str = '') { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
