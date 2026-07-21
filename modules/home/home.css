@@ -1,0 +1,76 @@
+/* =========================================================================
+   GulfRabit · Home module styles
+   Only home-specific composition lives here (hero, trust strip layout,
+   industry band, testimonials). Everything else reuses the shared design
+   system. Load AFTER shared/css/style.css.
+   ========================================================================= */
+
+/* ---- Hero carousel ---------------------------------------------------- */
+.hero { position: relative; overflow: hidden; }
+.hero__viewport { position: relative; height: clamp(460px, 78vh, 760px); }
+.hero__slide {
+  position: absolute; inset: 0;
+  display: grid; align-items: center;
+  opacity: 0; visibility: hidden;
+  transition: opacity 700ms var(--ease-out), visibility 700ms;
+}
+.hero__slide.is-active { opacity: 1; visibility: visible; }
+.hero__media { position: absolute; inset: 0; }
+.hero__media img { width: 100%; height: 100%; object-fit: cover; }
+/* brand-gradient duotone overlay ties disparate imagery into one system */
+.hero__media::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, rgba(10,10,10,.92) 0%, rgba(10,10,10,.55) 45%, rgba(10,10,10,.25) 100%),
+    var(--gr-gradient-soft);
+}
+.hero__content { position: relative; z-index: 2; max-width: 640px; }
+.hero__eyebrow { color: var(--gr-cyan); }
+.hero__title { margin: var(--space-3) 0; }
+.hero__text { color: var(--gr-gray-300); max-width: 48ch; }
+.hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
+
+.hero__controls { position: absolute; z-index: 3; bottom: var(--space-6); right: var(--space-6); display: flex; gap: var(--space-2); }
+.hero__dots { position: absolute; z-index: 3; bottom: var(--space-6); left: var(--space-6); display: flex; gap: var(--space-2); }
+.hero__dot { width: 32px; height: 4px; border: 0; border-radius: var(--radius-pill); background: rgba(255,255,255,.25); cursor: pointer; padding: 0; overflow: hidden; }
+.hero__dot.is-active { background: var(--gr-gradient); }
+
+/* ---- Trust strip ------------------------------------------------------ */
+.trust-band { border-top: 1px solid var(--gr-border); border-bottom: 1px solid var(--gr-border); background: var(--gr-charcoal); }
+
+/* ---- Industry / B2B band --------------------------------------------- */
+.industry-band {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--gr-border);
+  background:
+    linear-gradient(90deg, rgba(10,10,10,.94), rgba(10,10,10,.6)),
+    url("/assets/images/hero/hero-industrial.svg") center/cover;
+  padding: clamp(2rem, 5vw, 4rem);
+}
+.industry-band__grid { display: grid; gap: var(--space-6); grid-template-columns: 1fr; align-items: center; }
+@media (min-width: 900px) { .industry-band__grid { grid-template-columns: 1.4fr 1fr; } }
+.industry-stat { display: flex; flex-direction: column; }
+.industry-stat__num { font-family: var(--font-display); font-size: var(--fs-31); color: var(--gr-cyan); font-variant-numeric: tabular-nums; }
+.industry-stat__label { font-size: var(--fs-12); color: var(--gr-gray-500); text-transform: uppercase; letter-spacing: .08em; }
+
+/* ---- Testimonials ----------------------------------------------------- */
+.testimonials { position: relative; }
+.testi-track { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.testi-track::-webkit-scrollbar { display: none; }
+.testi-card { scroll-snap-align: center; padding: var(--space-2); }
+.testi-card__inner { max-width: 760px; margin: 0 auto; text-align: center; padding: var(--space-7) var(--space-5); }
+.testi-quote { font-family: var(--font-display); font-size: clamp(1.3rem, 3vw, var(--fs-31)); line-height: var(--lh-snug); font-weight: var(--fw-semibold); }
+.testi-author { margin-top: var(--space-5); color: var(--gr-gray-500); }
+.testi-stars { color: var(--gr-lime); margin-bottom: var(--space-4); }
+
+/* ---- Newsletter band -------------------------------------------------- */
+.newsletter-band { position: relative; border-radius: var(--radius-lg); overflow: hidden; background: var(--gr-gradient); color: #04222b; padding: clamp(2rem, 5vw, 4rem); text-align: center; }
+.newsletter-band .input-gr { background: rgba(255,255,255,.9); border-color: transparent; color: var(--gr-ink); }
+.newsletter-band .btn-gr { background: var(--gr-ink); color: var(--gr-white); border-color: transparent; }
+.newsletter-band .btn-gr:hover { background: #000; }
+
+/* ---- Category grid on home ------------------------------------------- */
+.home-cat-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 768px)  { .home-cat-grid { grid-template-columns: repeat(4, 1fr); } }
