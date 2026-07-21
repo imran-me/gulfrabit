@@ -59,8 +59,10 @@ tailwind.config = {
     },
   },
   corePlugins: {
-    // We drive base typography/reset from style.css; keep Tailwind's preflight
-    // but avoid it fighting our body defaults too aggressively.
-    preflight: true,
+    // IMPORTANT: disable Tailwind's preflight. The Play CDN injects its styles at
+    // runtime AFTER our style.css, and preflight resets h1–h6 to font-size:inherit
+    // — which collapsed every heading to body size. Our own reset (style.css) plus
+    // Bootstrap reboot cover the base; our typography must win.
+    preflight: false,
   },
 };
