@@ -41,7 +41,11 @@ function ruleWithArg(name, arg, v, form) {
 export function validateField(input, form) {
   const spec = input.getAttribute('data-validate');
   if (!spec) return true;
-  const value = input.value ?? '';
+  // For checkboxes, `value` is the literal "on" regardless of checked state —
+  // normalise so `required` (and friends) reflect whether it's actually ticked.
+  const value = (input.type === 'checkbox' || input.type === 'radio')
+    ? (input.checked ? input.value || 'on' : '')
+    : (input.value ?? '');
   let error = '';
 
   for (const token of spec.split('|')) {

@@ -203,6 +203,14 @@ PAGES = [
      "modules/content/_fragments/404.main.html",
      ["/modules/content/content.css"], None),
 
+    # Root-level copy so hosts that serve /404.html on a miss (GitHub Pages,
+    # Netlify, most static hosts) get the on-brand page.
+    ("404.html",
+     "Page Not Found — GulfRabit",
+     "The page you were looking for has hopped away.",
+     "modules/content/_fragments/404.main.html",
+     ["/modules/content/content.css"], None),
+
     ("modules/b2b/b2b-industrial.html",
      "Industrial & B2B — GulfRabit",
      "Raw materials for the electronics industry: PCBs, switches, relays, sensors, polymers. Bulk pricing and RFQ.",

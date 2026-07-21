@@ -111,9 +111,15 @@ function paintInfo(p) {
       `<p class="caption" style="margin-top:.5rem">MOQ: <strong>${p.moq}</strong> units · Bulk pricing available — <a href="/modules/b2b/b2b-industrial.html">request a quote</a>.</p>`);
   }
 
-  // Wishlist button data
-  const wb = document.querySelector('[data-wishlist-toggle]');
+  // Wishlist button: the shared initializer already ran on DOMContentLoaded and
+  // bound this button while its data-* were still empty (and flagged it ready).
+  // Replace the node with a fresh clone (drops the stale listener + ready flag),
+  // set the real product data, then re-bind so Save targets THIS product.
+  const wbOld = document.querySelector('[data-wishlist-toggle]');
+  const wb = wbOld.cloneNode(true);
   Object.assign(wb.dataset, { id: p.id, title: p.title, brand: p.brand || '', price: p.price, image: p.image });
+  delete wb.dataset.ready;
+  wbOld.replaceWith(wb);
   initWishlistButtons(document);
 }
 
