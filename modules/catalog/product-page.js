@@ -69,7 +69,7 @@ function paintGallery(p) {
   const main = document.querySelector('[data-gallery-main]');
   const thumbs = document.querySelector('[data-gallery-thumbs]');
   const images = p.images?.length ? p.images : [p.image];
-  main.innerHTML = `<img src="${images[0]}" alt="${escapeAttr(p.title)}" data-main-img>`;
+  main.innerHTML = `<img src="${images[0]}" alt="${escapeAttr(p.title)}" decoding="async" data-main-img>`;
   thumbs.innerHTML = images.map((src, i) => `
     <button class="gallery__thumb ${i === 0 ? 'is-active' : ''}" data-thumb aria-label="View image ${i + 1}"><img src="${src}" alt=""></button>`).join('');
   thumbs.querySelectorAll('[data-thumb]').forEach((btn, i) => btn.addEventListener('click', () => {

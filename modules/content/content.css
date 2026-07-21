@@ -9,7 +9,7 @@
 .prose li { margin-bottom: var(--space-2); }
 
 /* About */
-.about-hero { position: relative; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--gr-border); padding: clamp(2.5rem, 6vw, 5rem); background: linear-gradient(90deg, rgba(10,10,10,.9), rgba(10,10,10,.5)), url("/assets/images/hero/hero-food.svg") center/cover; }
+.about-hero { position: relative; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--gr-border); padding: clamp(2.5rem, 6vw, 5rem); background: linear-gradient(90deg, rgba(10,10,10,.95), rgba(10,10,10,.74)), url("/assets/images/hero/hero-food.svg") center/cover; }
 .values-grid { display: grid; gap: var(--space-4); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .values-grid { grid-template-columns: repeat(3, 1fr); } }
 .value-card { padding: var(--space-5); }

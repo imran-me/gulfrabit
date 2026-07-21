@@ -45,7 +45,7 @@
   overflow: hidden;
   border: 1px solid var(--gr-border);
   background:
-    linear-gradient(90deg, rgba(10,10,10,.94), rgba(10,10,10,.6)),
+    linear-gradient(90deg, rgba(10,10,10,.95), rgba(10,10,10,.74)),
     url("/assets/images/hero/hero-industrial.svg") center/cover;
   padding: clamp(2rem, 5vw, 4rem);
 }
@@ -74,3 +74,11 @@
 /* ---- Category grid on home ------------------------------------------- */
 .home-cat-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, 1fr); }
 @media (min-width: 768px)  { .home-cat-grid { grid-template-columns: repeat(4, 1fr); } }
+/* Clean icon-led tiles with a faint brand glow that lifts on hover. */
+.home-cat-grid .category-card::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 80% at 100% 0%, rgba(27,180,212,.12), transparent 58%);
+  opacity: .65; transition: opacity var(--dur-base) var(--ease-out);
+}
+.home-cat-grid .category-card:hover::before { opacity: 1; }
+.home-cat-grid .category-card > * { position: relative; z-index: 1; }

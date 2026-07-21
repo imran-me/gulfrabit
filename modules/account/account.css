@@ -17,7 +17,8 @@
 /* Overview stat cards */
 .stat-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, 1fr); }
 @media (min-width: 768px) { .stat-grid { grid-template-columns: repeat(3, 1fr); } }
-.stat-card { padding: var(--space-5); }
+.stat-card { padding: var(--space-5); transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out); }
+a.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--gr-cyan-dark); }
 .stat-card__num { font-family: var(--font-display); font-size: var(--fs-31); font-variant-numeric: tabular-nums; }
 .stat-card__label { color: var(--gr-gray-500); font-size: var(--fs-14); }
 

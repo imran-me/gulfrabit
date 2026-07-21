@@ -67,7 +67,7 @@ export function productCardHTML(product) {
                 style="background:var(--gr-graphite)">${EYE}</button>
       </div>
       <a href="${productURL(product)}" aria-label="${escapeAttr(title)}">
-        <img class="product-card__img" src="${escapeAttr(image)}" alt="${escapeAttr(title)}" loading="lazy" width="400" height="500">
+        <img class="product-card__img" src="${escapeAttr(image)}" alt="${escapeAttr(title)}" loading="lazy" decoding="async" width="400" height="500">
       </a>
     </div>
     <div class="product-card__body">
