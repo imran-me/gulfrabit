@@ -6,482 +6,1273 @@
   },
   "products": [
     {
-      "id": "gr-1001", "title": "Medjool Dates — Premium Jumbo (1kg)", "brand": "Al Barakah", "origin": "Jordan",
-      "categorySlug": "imported-food-grocery", "categoryName": "Imported Food & Grocery", "subSlug": "dates-honey",
-      "price": 1450, "originalPrice": 1800, "image": "/assets/images/products/food.svg",
-      "images": ["/assets/images/products/food.svg", "/assets/images/products/honey.svg"],
-      "rating": 4.8, "reviewCount": 214, "inStock": true, "tags": ["featured", "premium", "bestseller"],
-      "dietary": ["vegan", "gluten-free", "no-added-sugar"],
+      "id": "gr-1001",
+      "title": "Medjool Dates — Premium Jumbo (1kg)",
+      "brand": "Al Barakah",
+      "origin": "Jordan",
+      "categorySlug": "imported-food-grocery",
+      "categoryName": "Imported Food & Grocery",
+      "subSlug": "dates-honey",
+      "price": 1450,
+      "originalPrice": 1800,
+      "image": "/assets/images/products/gr-1001.svg",
+      "images": [
+        "/assets/images/products/gr-1001.svg"
+      ],
+      "rating": 4.8,
+      "reviewCount": 214,
+      "inStock": true,
+      "tags": [
+        "featured",
+        "premium",
+        "bestseller"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free",
+        "no-added-sugar"
+      ],
       "shortDescription": "Soft, caramel-rich jumbo Medjool dates, hand-selected and cold-packed.",
       "description": "Grown in the Jordan Valley and graded jumbo for size and moisture. Naturally sweet with a caramel finish — a table centrepiece and an everyday energy source. Sourced. Verified. Delivered.",
       "createdAt": 1718000000
     },
     {
-      "id": "gr-1002", "title": "Sidr Raw Honey (500g)", "brand": "Hadramout", "origin": "Yemen",
-      "categorySlug": "imported-food-grocery", "categoryName": "Imported Food & Grocery", "subSlug": "dates-honey",
-      "price": 3200, "originalPrice": null, "image": "/assets/images/products/honey.svg",
-      "images": ["/assets/images/products/honey.svg"],
-      "rating": 4.9, "reviewCount": 88, "inStock": true, "tags": ["premium", "new"],
-      "dietary": ["raw", "unfiltered"],
+      "id": "gr-1002",
+      "title": "Sidr Raw Honey (500g)",
+      "brand": "Hadramout",
+      "origin": "Yemen",
+      "categorySlug": "imported-food-grocery",
+      "categoryName": "Imported Food & Grocery",
+      "subSlug": "dates-honey",
+      "price": 3200,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-1002.svg",
+      "images": [
+        "/assets/images/products/gr-1002.svg"
+      ],
+      "rating": 4.9,
+      "reviewCount": 88,
+      "inStock": true,
+      "tags": [
+        "premium",
+        "new"
+      ],
+      "dietary": [
+        "raw",
+        "unfiltered"
+      ],
       "shortDescription": "Single-origin Sidr honey, raw and unfiltered.",
       "description": "Harvested from Sidr trees and left raw to preserve enzymes and aroma. Deep amber, floral, and slow to crystallise.",
       "createdAt": 1721000000
     },
     {
-      "id": "gr-1003", "title": "Arabica Coffee Beans — Medium Roast (1kg)", "brand": "Qahwa Co.", "origin": "Ethiopia",
-      "categorySlug": "imported-food-grocery", "categoryName": "Imported Food & Grocery", "subSlug": "coffee-tea",
-      "price": 1650, "originalPrice": 1900, "image": "/assets/images/products/food.svg",
-      "images": ["/assets/images/products/food.svg"],
-      "rating": 4.6, "reviewCount": 132, "inStock": true, "tags": ["featured", "bestseller"],
-      "dietary": ["vegan"],
+      "id": "gr-1003",
+      "title": "Arabica Coffee Beans — Medium Roast (1kg)",
+      "brand": "Qahwa Co.",
+      "origin": "Ethiopia",
+      "categorySlug": "imported-food-grocery",
+      "categoryName": "Imported Food & Grocery",
+      "subSlug": "coffee-tea",
+      "price": 1650,
+      "originalPrice": 1900,
+      "image": "/assets/images/products/gr-1003.svg",
+      "images": [
+        "/assets/images/products/gr-1003.svg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 132,
+      "inStock": true,
+      "tags": [
+        "featured",
+        "bestseller"
+      ],
+      "dietary": [
+        "vegan"
+      ],
       "shortDescription": "Washed Ethiopian Arabica, medium roast, whole bean.",
       "description": "Bright citrus acidity with a jasmine aroma and a clean, sweet finish. Roasted in small batches and shipped within days.",
       "createdAt": 1719500000
     },
     {
-      "id": "gr-1004", "title": "Swiss Dark Chocolate 70% — Gift Box (12pc)", "brand": "Alpenzart", "origin": "Switzerland",
-      "categorySlug": "imported-food-grocery", "categoryName": "Imported Food & Grocery", "subSlug": "chocolates-confectionery",
-      "price": 980, "originalPrice": null, "image": "/assets/images/products/food.svg",
-      "images": ["/assets/images/products/food.svg"],
-      "rating": 4.7, "reviewCount": 76, "inStock": true, "tags": ["new"],
-      "dietary": ["vegetarian"],
+      "id": "gr-1004",
+      "title": "Swiss Dark Chocolate 70% — Gift Box (12pc)",
+      "brand": "Alpenzart",
+      "origin": "Switzerland",
+      "categorySlug": "imported-food-grocery",
+      "categoryName": "Imported Food & Grocery",
+      "subSlug": "chocolates-confectionery",
+      "price": 980,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-1004.svg",
+      "images": [
+        "/assets/images/products/gr-1004.svg"
+      ],
+      "rating": 4.7,
+      "reviewCount": 76,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
+      "dietary": [
+        "vegetarian"
+      ],
       "shortDescription": "Single-origin 70% dark chocolate, gift boxed.",
       "description": "Smooth, low-bitterness dark chocolate in a premium presentation box — a considered gift.",
       "createdAt": 1720500000
     },
     {
-      "id": "gr-1005", "title": "Ceylon Black Tea — Loose Leaf (250g)", "brand": "Kandy Hills", "origin": "Sri Lanka",
-      "categorySlug": "imported-food-grocery", "categoryName": "Imported Food & Grocery", "subSlug": "coffee-tea",
-      "price": 620, "originalPrice": 750, "image": "/assets/images/products/food.svg",
-      "images": ["/assets/images/products/food.svg"],
-      "rating": 4.5, "reviewCount": 54, "inStock": true, "tags": [],
-      "dietary": ["vegan"],
+      "id": "gr-1005",
+      "title": "Ceylon Black Tea — Loose Leaf (250g)",
+      "brand": "Kandy Hills",
+      "origin": "Sri Lanka",
+      "categorySlug": "imported-food-grocery",
+      "categoryName": "Imported Food & Grocery",
+      "subSlug": "coffee-tea",
+      "price": 620,
+      "originalPrice": 750,
+      "image": "/assets/images/products/gr-1005.svg",
+      "images": [
+        "/assets/images/products/gr-1005.svg"
+      ],
+      "rating": 4.5,
+      "reviewCount": 54,
+      "inStock": true,
+      "tags": [],
+      "dietary": [
+        "vegan"
+      ],
       "shortDescription": "High-grown Ceylon black tea, full-leaf.",
       "description": "Brisk, bright, and aromatic — a single-estate Ceylon for everyday brewing.",
       "createdAt": 1717000000
     },
-
     {
-      "id": "gr-1101", "title": "Full-Cream Milk Powder (2.25kg Tin)", "brand": "Nord Dairy", "origin": "New Zealand",
-      "categorySlug": "dairy-milk-powder", "categoryName": "Dairy & Milk Powder", "subSlug": "milk-powder",
-      "price": 2350, "originalPrice": 2600, "image": "/assets/images/products/dairy.svg",
-      "images": ["/assets/images/products/dairy.svg"],
-      "rating": 4.7, "reviewCount": 301, "inStock": true, "tags": ["featured", "bestseller"],
-      "dietary": ["halal"],
+      "id": "gr-1101",
+      "title": "Full-Cream Milk Powder (2.25kg Tin)",
+      "brand": "Nord Dairy",
+      "origin": "New Zealand",
+      "categorySlug": "dairy-milk-powder",
+      "categoryName": "Dairy & Milk Powder",
+      "subSlug": "milk-powder",
+      "price": 2350,
+      "originalPrice": 2600,
+      "image": "/assets/images/products/gr-1101.svg",
+      "images": [
+        "/assets/images/products/gr-1101.svg"
+      ],
+      "rating": 4.7,
+      "reviewCount": 301,
+      "inStock": true,
+      "tags": [
+        "featured",
+        "bestseller"
+      ],
+      "dietary": [
+        "halal"
+      ],
       "shortDescription": "Instant full-cream milk powder, cold-chain handled.",
       "description": "Spray-dried full-cream milk powder that dissolves cleanly in hot or cold water. Sealed tin, cold-chain delivery for freshness.",
       "createdAt": 1719000000
     },
     {
-      "id": "gr-1102", "title": "Aged Gouda Wheel (500g)", "brand": "Zuid", "origin": "Netherlands",
-      "categorySlug": "dairy-milk-powder", "categoryName": "Dairy & Milk Powder", "subSlug": "cheese-butter",
-      "price": 1290, "originalPrice": null, "image": "/assets/images/products/dairy.svg",
-      "images": ["/assets/images/products/dairy.svg"],
-      "rating": 4.8, "reviewCount": 44, "inStock": true, "tags": ["premium"],
-      "dietary": ["vegetarian", "halal"],
+      "id": "gr-1102",
+      "title": "Aged Gouda Wheel (500g)",
+      "brand": "Zuid",
+      "origin": "Netherlands",
+      "categorySlug": "dairy-milk-powder",
+      "categoryName": "Dairy & Milk Powder",
+      "subSlug": "cheese-butter",
+      "price": 1290,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-1102.svg",
+      "images": [
+        "/assets/images/products/gr-1102.svg"
+      ],
+      "rating": 4.8,
+      "reviewCount": 44,
+      "inStock": true,
+      "tags": [
+        "premium"
+      ],
+      "dietary": [
+        "vegetarian",
+        "halal"
+      ],
       "shortDescription": "18-month aged Gouda, nutty and crystalline.",
       "description": "Matured for eighteen months to develop deep, caramel-nutty notes and a crystalline bite. Cold-chain delivered.",
       "createdAt": 1720000000
     },
     {
-      "id": "gr-1103", "title": "Grass-Fed Butter (unsalted, 400g)", "brand": "Éire Gold", "origin": "Ireland",
-      "categorySlug": "dairy-milk-powder", "categoryName": "Dairy & Milk Powder", "subSlug": "cheese-butter",
-      "price": 740, "originalPrice": 890, "image": "/assets/images/products/dairy.svg",
-      "images": ["/assets/images/products/dairy.svg"],
-      "rating": 4.6, "reviewCount": 67, "inStock": false, "tags": [],
-      "dietary": ["vegetarian", "halal"],
+      "id": "gr-1103",
+      "title": "Grass-Fed Butter (unsalted, 400g)",
+      "brand": "Éire Gold",
+      "origin": "Ireland",
+      "categorySlug": "dairy-milk-powder",
+      "categoryName": "Dairy & Milk Powder",
+      "subSlug": "cheese-butter",
+      "price": 740,
+      "originalPrice": 890,
+      "image": "/assets/images/products/gr-1103.svg",
+      "images": [
+        "/assets/images/products/gr-1103.svg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 67,
+      "inStock": false,
+      "tags": [],
+      "dietary": [
+        "vegetarian",
+        "halal"
+      ],
       "shortDescription": "Rich, golden grass-fed butter.",
       "description": "Churned from grass-fed cream for a naturally golden colour and clean, creamy flavour.",
       "createdAt": 1716000000
     },
-
     {
-      "id": "gr-1201", "title": "Roasted Salted Pistachios (500g)", "brand": "Kerman", "origin": "Iran",
-      "categorySlug": "nuts-dry-fruits", "categoryName": "Nuts & Dry Fruits",
-      "price": 1180, "originalPrice": 1350, "image": "/assets/images/products/nuts.svg",
-      "images": ["/assets/images/products/nuts.svg"],
-      "rating": 4.7, "reviewCount": 156, "inStock": true, "tags": ["featured", "bestseller"],
-      "dietary": ["vegan", "gluten-free"],
+      "id": "gr-1201",
+      "title": "Roasted Salted Pistachios (500g)",
+      "brand": "Kerman",
+      "origin": "Iran",
+      "categorySlug": "nuts-dry-fruits",
+      "categoryName": "Nuts & Dry Fruits",
+      "price": 1180,
+      "originalPrice": 1350,
+      "image": "/assets/images/products/gr-1201.svg",
+      "images": [
+        "/assets/images/products/gr-1201.svg"
+      ],
+      "rating": 4.7,
+      "reviewCount": 156,
+      "inStock": true,
+      "tags": [
+        "featured",
+        "bestseller"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free"
+      ],
       "shortDescription": "Long-grain Kerman pistachios, roasted and lightly salted.",
       "description": "Naturally opened, generously sized pistachios roasted for crunch and lightly salted.",
       "createdAt": 1719800000
     },
     {
-      "id": "gr-1202", "title": "California Almonds — Raw (1kg)", "brand": "Sunvale", "origin": "USA",
-      "categorySlug": "nuts-dry-fruits", "categoryName": "Nuts & Dry Fruits",
-      "price": 1290, "originalPrice": null, "image": "/assets/images/products/nuts.svg",
-      "images": ["/assets/images/products/nuts.svg"],
-      "rating": 4.6, "reviewCount": 210, "inStock": true, "tags": ["bestseller"],
-      "dietary": ["vegan", "gluten-free", "keto"],
+      "id": "gr-1202",
+      "title": "California Almonds — Raw (1kg)",
+      "brand": "Sunvale",
+      "origin": "USA",
+      "categorySlug": "nuts-dry-fruits",
+      "categoryName": "Nuts & Dry Fruits",
+      "price": 1290,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-1202.svg",
+      "images": [
+        "/assets/images/products/gr-1202.svg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 210,
+      "inStock": true,
+      "tags": [
+        "bestseller"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free",
+        "keto"
+      ],
       "shortDescription": "Whole raw almonds, premium grade.",
       "description": "Crisp, sweet whole almonds — snack, roast, or blend. Nitrogen-flushed for freshness.",
       "createdAt": 1718500000
     },
     {
-      "id": "gr-1203", "title": "Jumbo Cashews W240 (500g)", "brand": "Malabar", "origin": "India",
-      "categorySlug": "nuts-dry-fruits", "categoryName": "Nuts & Dry Fruits",
-      "price": 980, "originalPrice": 1150, "image": "/assets/images/products/nuts.svg",
-      "images": ["/assets/images/products/nuts.svg"],
-      "rating": 4.5, "reviewCount": 98, "inStock": true, "tags": ["new"],
-      "dietary": ["vegan", "gluten-free"],
+      "id": "gr-1203",
+      "title": "Jumbo Cashews W240 (500g)",
+      "brand": "Malabar",
+      "origin": "India",
+      "categorySlug": "nuts-dry-fruits",
+      "categoryName": "Nuts & Dry Fruits",
+      "price": 980,
+      "originalPrice": 1150,
+      "image": "/assets/images/products/gr-1203.svg",
+      "images": [
+        "/assets/images/products/gr-1203.svg"
+      ],
+      "rating": 4.5,
+      "reviewCount": 98,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free"
+      ],
       "shortDescription": "W240-grade whole cashews.",
       "description": "Large, unbroken W240 cashews with a buttery snap.",
       "createdAt": 1720800000
     },
-
     {
-      "id": "gr-2001", "title": "Wireless Noise-Cancelling Headphones", "brand": "Aurio", "origin": "Japan",
-      "categorySlug": "gadgets-electronics", "categoryName": "Gadgets & Electronics", "subSlug": "audio",
-      "price": 18900, "originalPrice": 22500, "image": "/assets/images/products/electronics.svg",
-      "images": ["/assets/images/products/electronics.svg"],
-      "rating": 4.8, "reviewCount": 342, "inStock": true, "tags": ["featured", "premium", "bestseller"],
+      "id": "gr-2001",
+      "title": "Wireless Noise-Cancelling Headphones",
+      "brand": "Aurio",
+      "origin": "Japan",
+      "categorySlug": "gadgets-electronics",
+      "categoryName": "Gadgets & Electronics",
+      "subSlug": "audio",
+      "price": 18900,
+      "originalPrice": 22500,
+      "image": "/assets/images/products/gr-2001.svg",
+      "images": [
+        "/assets/images/products/gr-2001.svg"
+      ],
+      "rating": 4.8,
+      "reviewCount": 342,
+      "inStock": true,
+      "tags": [
+        "featured",
+        "premium",
+        "bestseller"
+      ],
       "shortDescription": "Adaptive ANC, 40-hour battery, spatial audio.",
       "description": "Hybrid active noise cancellation, plush memory-foam cups, and a 40-hour battery. USB-C fast charge and multipoint Bluetooth.",
-      "specs": { "Driver": "40mm dynamic", "Battery": "40 h (ANC on)", "Bluetooth": "5.3, multipoint", "Charge": "USB-C, 10 min = 5 h", "Weight": "255 g" },
+      "specs": {
+        "Driver": "40mm dynamic",
+        "Battery": "40 h (ANC on)",
+        "Bluetooth": "5.3, multipoint",
+        "Charge": "USB-C, 10 min = 5 h",
+        "Weight": "255 g"
+      },
       "createdAt": 1721500000
     },
     {
-      "id": "gr-2002", "title": "Smartwatch Series X (AMOLED)", "brand": "Pulse", "origin": "South Korea",
-      "categorySlug": "gadgets-electronics", "categoryName": "Gadgets & Electronics", "subSlug": "wearables",
-      "price": 15400, "originalPrice": null, "image": "/assets/images/products/electronics.svg",
-      "images": ["/assets/images/products/electronics.svg"],
-      "rating": 4.5, "reviewCount": 187, "inStock": true, "tags": ["new", "featured"],
+      "id": "gr-2002",
+      "title": "Smartwatch Series X (AMOLED)",
+      "brand": "Pulse",
+      "origin": "South Korea",
+      "categorySlug": "gadgets-electronics",
+      "categoryName": "Gadgets & Electronics",
+      "subSlug": "wearables",
+      "price": 15400,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-2002.svg",
+      "images": [
+        "/assets/images/products/gr-2002.svg"
+      ],
+      "rating": 4.5,
+      "reviewCount": 187,
+      "inStock": true,
+      "tags": [
+        "new",
+        "featured"
+      ],
       "shortDescription": "AMOLED display, SpO2, 7-day battery.",
       "description": "A refined smartwatch with an always-on AMOLED display, health tracking, and a week of battery life.",
-      "specs": { "Display": "1.4\" AMOLED", "Battery": "7 days", "Sensors": "HR, SpO2, accel", "Water": "5 ATM" },
+      "specs": {
+        "Display": "1.4\" AMOLED",
+        "Battery": "7 days",
+        "Sensors": "HR, SpO2, accel",
+        "Water": "5 ATM"
+      },
       "createdAt": 1721200000
     },
     {
-      "id": "gr-2003", "title": "Smart Home Hub (Matter-ready)", "brand": "Nest+", "origin": "Germany",
-      "categorySlug": "gadgets-electronics", "categoryName": "Gadgets & Electronics", "subSlug": "smart-home",
-      "price": 9800, "originalPrice": 11000, "image": "/assets/images/products/electronics.svg",
-      "images": ["/assets/images/products/electronics.svg"],
-      "rating": 4.4, "reviewCount": 64, "inStock": true, "tags": [],
+      "id": "gr-2003",
+      "title": "Smart Home Hub (Matter-ready)",
+      "brand": "Nest+",
+      "origin": "Germany",
+      "categorySlug": "gadgets-electronics",
+      "categoryName": "Gadgets & Electronics",
+      "subSlug": "smart-home",
+      "price": 9800,
+      "originalPrice": 11000,
+      "image": "/assets/images/products/gr-2003.svg",
+      "images": [
+        "/assets/images/products/gr-2003.svg"
+      ],
+      "rating": 4.4,
+      "reviewCount": 64,
+      "inStock": true,
+      "tags": [],
       "shortDescription": "Matter + Thread border router, local control.",
       "description": "A privacy-first hub with Matter and Thread support and local automation that keeps working offline.",
-      "specs": { "Protocols": "Matter, Thread, Zigbee", "Connectivity": "Wi-Fi 6, Ethernet", "Power": "USB-C" },
+      "specs": {
+        "Protocols": "Matter, Thread, Zigbee",
+        "Connectivity": "Wi-Fi 6, Ethernet",
+        "Power": "USB-C"
+      },
       "createdAt": 1719900000
     },
     {
-      "id": "gr-2004", "title": "True Wireless Earbuds Pro", "brand": "Aurio", "origin": "Japan",
-      "categorySlug": "gadgets-electronics", "categoryName": "Gadgets & Electronics", "subSlug": "audio",
-      "price": 7200, "originalPrice": 8500, "image": "/assets/images/products/electronics.svg",
-      "images": ["/assets/images/products/electronics.svg"],
-      "rating": 4.6, "reviewCount": 233, "inStock": true, "tags": ["bestseller"],
+      "id": "gr-2004",
+      "title": "True Wireless Earbuds Pro",
+      "brand": "Aurio",
+      "origin": "Japan",
+      "categorySlug": "gadgets-electronics",
+      "categoryName": "Gadgets & Electronics",
+      "subSlug": "audio",
+      "price": 7200,
+      "originalPrice": 8500,
+      "image": "/assets/images/products/gr-2004.svg",
+      "images": [
+        "/assets/images/products/gr-2004.svg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 233,
+      "inStock": true,
+      "tags": [
+        "bestseller"
+      ],
       "shortDescription": "ANC earbuds, wireless charging case.",
       "description": "Compact ANC earbuds with a wireless-charging case and low-latency game mode.",
-      "specs": { "Battery": "8 h + 24 h case", "ANC": "Hybrid", "Case": "Qi wireless" },
+      "specs": {
+        "Battery": "8 h + 24 h case",
+        "ANC": "Hybrid",
+        "Case": "Qi wireless"
+      },
       "createdAt": 1718800000
     },
-
     {
-      "id": "gr-2501", "title": "Cast-Iron Dutch Oven (5.5L)", "brand": "Fôyer", "origin": "France",
-      "categorySlug": "kitchen-home", "categoryName": "Kitchen & Home",
-      "price": 8900, "originalPrice": 10500, "image": "/assets/images/products/kitchen.svg",
-      "images": ["/assets/images/products/kitchen.svg"],
-      "rating": 4.9, "reviewCount": 121, "inStock": true, "tags": ["featured", "premium"],
+      "id": "gr-2501",
+      "title": "Cast-Iron Dutch Oven (5.5L)",
+      "brand": "Fôyer",
+      "origin": "France",
+      "categorySlug": "kitchen-home",
+      "categoryName": "Kitchen & Home",
+      "price": 8900,
+      "originalPrice": 10500,
+      "image": "/assets/images/products/gr-2501.svg",
+      "images": [
+        "/assets/images/products/gr-2501.svg"
+      ],
+      "rating": 4.9,
+      "reviewCount": 121,
+      "inStock": true,
+      "tags": [
+        "featured",
+        "premium"
+      ],
       "shortDescription": "Enamelled cast iron, oven-to-table.",
       "description": "A heirloom-grade enamelled cast-iron pot with even heat retention — braise, bake, and serve from the same vessel.",
       "createdAt": 1720300000
     },
     {
-      "id": "gr-2502", "title": "Japanese Chef's Knife (Damascus, 20cm)", "brand": "Kirha", "origin": "Japan",
-      "categorySlug": "kitchen-home", "categoryName": "Kitchen & Home",
-      "price": 6400, "originalPrice": null, "image": "/assets/images/products/kitchen.svg",
-      "images": ["/assets/images/products/kitchen.svg"],
-      "rating": 4.8, "reviewCount": 89, "inStock": true, "tags": ["premium", "bestseller"],
+      "id": "gr-2502",
+      "title": "Japanese Chef's Knife (Damascus, 20cm)",
+      "brand": "Kirha",
+      "origin": "Japan",
+      "categorySlug": "kitchen-home",
+      "categoryName": "Kitchen & Home",
+      "price": 6400,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-2502.svg",
+      "images": [
+        "/assets/images/products/gr-2502.svg"
+      ],
+      "rating": 4.8,
+      "reviewCount": 89,
+      "inStock": true,
+      "tags": [
+        "premium",
+        "bestseller"
+      ],
       "shortDescription": "67-layer Damascus, VG-10 core.",
       "description": "A hand-finished gyuto with a VG-10 core and a 67-layer Damascus cladding — precise, balanced, and enduring.",
       "createdAt": 1719300000
     },
     {
-      "id": "gr-2503", "title": "Borosilicate Pour-Over Set", "brand": "Clear", "origin": "Germany",
-      "categorySlug": "kitchen-home", "categoryName": "Kitchen & Home",
-      "price": 2100, "originalPrice": 2500, "image": "/assets/images/products/kitchen.svg",
-      "images": ["/assets/images/products/kitchen.svg"],
-      "rating": 4.5, "reviewCount": 41, "inStock": true, "tags": ["new"],
+      "id": "gr-2503",
+      "title": "Borosilicate Pour-Over Set",
+      "brand": "Clear",
+      "origin": "Germany",
+      "categorySlug": "kitchen-home",
+      "categoryName": "Kitchen & Home",
+      "price": 2100,
+      "originalPrice": 2500,
+      "image": "/assets/images/products/gr-2503.svg",
+      "images": [
+        "/assets/images/products/gr-2503.svg"
+      ],
+      "rating": 4.5,
+      "reviewCount": 41,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
       "shortDescription": "Heat-proof carafe + dripper.",
       "description": "A minimal borosilicate pour-over set for a clean, bright cup.",
       "createdAt": 1720900000
     },
-
     {
-      "id": "gr-3001", "title": "Merino Wool Crew Sweater", "brand": "Nordfell", "origin": "Italy",
-      "categorySlug": "fashion", "categoryName": "Fashion",
-      "price": 5600, "originalPrice": 7000, "image": "/assets/images/products/fashion.svg",
-      "images": ["/assets/images/products/fashion.svg"],
-      "rating": 4.6, "reviewCount": 52, "inStock": true, "tags": ["featured"],
+      "id": "gr-3001",
+      "title": "Merino Wool Crew Sweater",
+      "brand": "Nordfell",
+      "origin": "Italy",
+      "categorySlug": "fashion",
+      "categoryName": "Fashion",
+      "price": 5600,
+      "originalPrice": 7000,
+      "image": "/assets/images/products/gr-3001.svg",
+      "images": [
+        "/assets/images/products/gr-3001.svg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 52,
+      "inStock": true,
+      "tags": [
+        "featured"
+      ],
       "shortDescription": "Fine-gauge merino, temperature-regulating.",
       "description": "A fine-gauge extra-fine merino crew — soft, breathable, and quietly refined.",
       "createdAt": 1719600000
     },
     {
-      "id": "gr-3002", "title": "Full-Grain Leather Weekender", "brand": "Atlas", "origin": "Italy",
-      "categorySlug": "fashion", "categoryName": "Fashion",
-      "price": 14900, "originalPrice": null, "image": "/assets/images/products/fashion.svg",
-      "images": ["/assets/images/products/fashion.svg"],
-      "rating": 4.8, "reviewCount": 34, "inStock": true, "tags": ["premium"],
+      "id": "gr-3002",
+      "title": "Full-Grain Leather Weekender",
+      "brand": "Atlas",
+      "origin": "Italy",
+      "categorySlug": "fashion",
+      "categoryName": "Fashion",
+      "price": 14900,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-3002.svg",
+      "images": [
+        "/assets/images/products/gr-3002.svg"
+      ],
+      "rating": 4.8,
+      "reviewCount": 34,
+      "inStock": true,
+      "tags": [
+        "premium"
+      ],
       "shortDescription": "Vegetable-tanned full-grain leather holdall.",
       "description": "A vegetable-tanned full-grain weekender that ages beautifully — brass hardware, cotton-twill lining.",
       "createdAt": 1720100000
     },
     {
-      "id": "gr-3003", "title": "Polarised Acetate Sunglasses", "brand": "Meridian", "origin": "Italy",
-      "categorySlug": "fashion", "categoryName": "Fashion",
-      "price": 3900, "originalPrice": 4600, "image": "/assets/images/products/fashion.svg",
-      "images": ["/assets/images/products/fashion.svg"],
-      "rating": 4.4, "reviewCount": 61, "inStock": true, "tags": ["new"],
+      "id": "gr-3003",
+      "title": "Polarised Acetate Sunglasses",
+      "brand": "Meridian",
+      "origin": "Italy",
+      "categorySlug": "fashion",
+      "categoryName": "Fashion",
+      "price": 3900,
+      "originalPrice": 4600,
+      "image": "/assets/images/products/gr-3003.svg",
+      "images": [
+        "/assets/images/products/gr-3003.svg"
+      ],
+      "rating": 4.4,
+      "reviewCount": 61,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
       "shortDescription": "Hand-polished acetate, polarised lenses.",
       "description": "Hand-polished Italian acetate frames with polarised, UV400 lenses.",
       "createdAt": 1720700000
     },
-
     {
-      "id": "gr-3501", "title": "Vitamin-C Brightening Serum (30ml)", "brand": "Lumen", "origin": "South Korea",
-      "categorySlug": "beauty-personal-care", "categoryName": "Beauty & Personal Care",
-      "price": 2400, "originalPrice": 2900, "image": "/assets/images/products/beauty.svg",
-      "images": ["/assets/images/products/beauty.svg"],
-      "rating": 4.7, "reviewCount": 288, "inStock": true, "tags": ["featured", "bestseller"],
+      "id": "gr-3501",
+      "title": "Vitamin-C Brightening Serum (30ml)",
+      "brand": "Lumen",
+      "origin": "South Korea",
+      "categorySlug": "beauty-personal-care",
+      "categoryName": "Beauty & Personal Care",
+      "price": 2400,
+      "originalPrice": 2900,
+      "image": "/assets/images/products/gr-3501.svg",
+      "images": [
+        "/assets/images/products/gr-3501.svg"
+      ],
+      "rating": 4.7,
+      "reviewCount": 288,
+      "inStock": true,
+      "tags": [
+        "featured",
+        "bestseller"
+      ],
       "shortDescription": "15% L-ascorbic acid, stabilised.",
       "description": "A stabilised vitamin-C serum that brightens and evens tone, formulated with ferulic acid.",
       "createdAt": 1719400000
     },
     {
-      "id": "gr-3502", "title": "Sandalwood Grooming Set", "brand": "Ébène", "origin": "France",
-      "categorySlug": "beauty-personal-care", "categoryName": "Beauty & Personal Care",
-      "price": 3300, "originalPrice": null, "image": "/assets/images/products/beauty.svg",
-      "images": ["/assets/images/products/beauty.svg"],
-      "rating": 4.5, "reviewCount": 47, "inStock": true, "tags": ["premium"],
+      "id": "gr-3502",
+      "title": "Sandalwood Grooming Set",
+      "brand": "Ébène",
+      "origin": "France",
+      "categorySlug": "beauty-personal-care",
+      "categoryName": "Beauty & Personal Care",
+      "price": 3300,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-3502.svg",
+      "images": [
+        "/assets/images/products/gr-3502.svg"
+      ],
+      "rating": 4.5,
+      "reviewCount": 47,
+      "inStock": true,
+      "tags": [
+        "premium"
+      ],
       "shortDescription": "Beard oil, balm, and comb.",
       "description": "A warm sandalwood grooming trio presented in a linen-lined box.",
       "createdAt": 1720400000
     },
-
     {
-      "id": "gr-4001", "title": "Gel Ink Rollerball — Set of 12", "brand": "Kanji", "origin": "Japan",
-      "categorySlug": "office-supplies", "categoryName": "Office Supplies",
-      "price": 890, "originalPrice": 1100, "image": "/assets/images/products/office.svg",
-      "images": ["/assets/images/products/office.svg"],
-      "rating": 4.6, "reviewCount": 73, "inStock": true, "tags": ["bestseller"],
+      "id": "gr-4001",
+      "title": "Gel Ink Rollerball — Set of 12",
+      "brand": "Kanji",
+      "origin": "Japan",
+      "categorySlug": "office-supplies",
+      "categoryName": "Office Supplies",
+      "price": 890,
+      "originalPrice": 1100,
+      "image": "/assets/images/products/gr-4001.svg",
+      "images": [
+        "/assets/images/products/gr-4001.svg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 73,
+      "inStock": true,
+      "tags": [
+        "bestseller"
+      ],
       "shortDescription": "0.5mm gel rollerballs, smear-free.",
       "description": "Smooth, quick-drying gel rollerballs favoured for clean, consistent lines.",
       "createdAt": 1719100000
     },
     {
-      "id": "gr-4002", "title": "Hardcover Dotted Notebook (A5)", "brand": "Leaf", "origin": "Germany",
-      "categorySlug": "office-supplies", "categoryName": "Office Supplies",
-      "price": 640, "originalPrice": null, "image": "/assets/images/products/office.svg",
-      "images": ["/assets/images/products/office.svg"],
-      "rating": 4.7, "reviewCount": 129, "inStock": true, "tags": ["featured"],
+      "id": "gr-4002",
+      "title": "Hardcover Dotted Notebook (A5)",
+      "brand": "Leaf",
+      "origin": "Germany",
+      "categorySlug": "office-supplies",
+      "categoryName": "Office Supplies",
+      "price": 640,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-4002.svg",
+      "images": [
+        "/assets/images/products/gr-4002.svg"
+      ],
+      "rating": 4.7,
+      "reviewCount": 129,
+      "inStock": true,
+      "tags": [
+        "featured"
+      ],
       "shortDescription": "120gsm dotted, lay-flat binding.",
       "description": "A dotted A5 notebook on bleed-resistant 120gsm paper with a lay-flat binding.",
       "createdAt": 1720600000
     },
-
     {
-      "id": "gr-9001", "title": "FR-4 Double-Sided PCB Blank (100×160mm)", "brand": "Circuiton", "origin": "China",
-      "categorySlug": "industrial-raw-materials", "categoryName": "Industrial Raw Materials", "subSlug": "pcb-components",
-      "price": 220, "originalPrice": null, "image": "/assets/images/products/industrial.svg",
-      "images": ["/assets/images/products/industrial.svg"],
-      "rating": 4.5, "reviewCount": 38, "inStock": true, "tags": ["b2b", "bestseller"],
-      "moq": 50, "priceTiers": [ { "min": 50, "price": 220 }, { "min": 500, "price": 190 }, { "min": 2000, "price": 165 } ],
+      "id": "gr-9001",
+      "title": "FR-4 Double-Sided PCB Blank (100×160mm)",
+      "brand": "Circuiton",
+      "origin": "China",
+      "categorySlug": "industrial-raw-materials",
+      "categoryName": "Industrial Raw Materials",
+      "subSlug": "pcb-components",
+      "price": 220,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-9001.svg",
+      "images": [
+        "/assets/images/products/gr-9001.svg"
+      ],
+      "rating": 4.5,
+      "reviewCount": 38,
+      "inStock": true,
+      "tags": [
+        "b2b",
+        "bestseller"
+      ],
+      "moq": 50,
+      "priceTiers": [
+        {
+          "min": 50,
+          "price": 220
+        },
+        {
+          "min": 500,
+          "price": 190
+        },
+        {
+          "min": 2000,
+          "price": 165
+        }
+      ],
       "shortDescription": "Copper-clad FR-4 laminate, 1.6mm, 1oz copper.",
       "description": "Double-sided copper-clad FR-4 laminate for prototyping and small-run manufacturing. RoHS compliant.",
-      "specs": { "Substrate": "FR-4", "Thickness": "1.6 mm", "Copper": "1 oz (35µm) both sides", "Tg": "140°C", "Dimensions": "100 × 160 mm", "Compliance": "RoHS, REACH" },
-      "datasheet": "#", "createdAt": 1718200000
+      "specs": {
+        "Substrate": "FR-4",
+        "Thickness": "1.6 mm",
+        "Copper": "1 oz (35µm) both sides",
+        "Tg": "140°C",
+        "Dimensions": "100 × 160 mm",
+        "Compliance": "RoHS, REACH"
+      },
+      "datasheet": "#",
+      "createdAt": 1718200000
     },
     {
-      "id": "gr-9002", "title": "Tactile Push Switch 6×6mm (SMD) — Reel 1000", "brand": "Omniswitch", "origin": "China",
-      "categorySlug": "industrial-raw-materials", "categoryName": "Industrial Raw Materials", "subSlug": "switches-relays",
-      "price": 3.2, "originalPrice": null, "image": "/assets/images/products/industrial.svg",
-      "images": ["/assets/images/products/industrial.svg"],
-      "rating": 4.6, "reviewCount": 51, "inStock": true, "tags": ["b2b"],
-      "moq": 1000, "priceTiers": [ { "min": 1000, "price": 3.2 }, { "min": 10000, "price": 2.6 }, { "min": 50000, "price": 2.1 } ],
+      "id": "gr-9002",
+      "title": "Tactile Push Switch 6×6mm (SMD) — Reel 1000",
+      "brand": "Omniswitch",
+      "origin": "China",
+      "categorySlug": "industrial-raw-materials",
+      "categoryName": "Industrial Raw Materials",
+      "subSlug": "switches-relays",
+      "price": 3.2,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-9002.svg",
+      "images": [
+        "/assets/images/products/gr-9002.svg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 51,
+      "inStock": true,
+      "tags": [
+        "b2b"
+      ],
+      "moq": 1000,
+      "priceTiers": [
+        {
+          "min": 1000,
+          "price": 3.2
+        },
+        {
+          "min": 10000,
+          "price": 2.6
+        },
+        {
+          "min": 50000,
+          "price": 2.1
+        }
+      ],
       "shortDescription": "6×6×5mm tactile switch, 160gf, SMD, tape & reel.",
       "description": "Surface-mount tactile push switch rated for 100,000 cycles. Supplied on tape and reel.",
-      "specs": { "Type": "Tactile, momentary", "Force": "160 gf", "Rating": "50 mA / 12 VDC", "Life": "100,000 cycles", "Mount": "SMD", "Packaging": "Tape & reel (1000)" },
-      "datasheet": "#", "createdAt": 1718300000
+      "specs": {
+        "Type": "Tactile, momentary",
+        "Force": "160 gf",
+        "Rating": "50 mA / 12 VDC",
+        "Life": "100,000 cycles",
+        "Mount": "SMD",
+        "Packaging": "Tape & reel (1000)"
+      },
+      "datasheet": "#",
+      "createdAt": 1718300000
     },
     {
-      "id": "gr-9003", "title": "PCB Power Relay 5V SPDT 10A", "brand": "Relko", "origin": "Taiwan",
-      "categorySlug": "industrial-raw-materials", "categoryName": "Industrial Raw Materials", "subSlug": "switches-relays",
-      "price": 42, "originalPrice": 55, "image": "/assets/images/products/industrial.svg",
-      "images": ["/assets/images/products/industrial.svg"],
-      "rating": 4.7, "reviewCount": 29, "inStock": true, "tags": ["b2b", "featured"],
-      "moq": 100, "priceTiers": [ { "min": 100, "price": 42 }, { "min": 1000, "price": 36 }, { "min": 5000, "price": 31 } ],
+      "id": "gr-9003",
+      "title": "PCB Power Relay 5V SPDT 10A",
+      "brand": "Relko",
+      "origin": "Taiwan",
+      "categorySlug": "industrial-raw-materials",
+      "categoryName": "Industrial Raw Materials",
+      "subSlug": "switches-relays",
+      "price": 42,
+      "originalPrice": 55,
+      "image": "/assets/images/products/gr-9003.svg",
+      "images": [
+        "/assets/images/products/gr-9003.svg"
+      ],
+      "rating": 4.7,
+      "reviewCount": 29,
+      "inStock": true,
+      "tags": [
+        "b2b",
+        "featured"
+      ],
+      "moq": 100,
+      "priceTiers": [
+        {
+          "min": 100,
+          "price": 42
+        },
+        {
+          "min": 1000,
+          "price": 36
+        },
+        {
+          "min": 5000,
+          "price": 31
+        }
+      ],
       "shortDescription": "5V coil, SPDT, 10A @ 250VAC, PCB mount.",
       "description": "A compact PCB power relay for switching resistive loads up to 10A. UL/TÜV recognised.",
-      "specs": { "Coil": "5 VDC", "Contact": "SPDT (1C)", "Rating": "10 A / 250 VAC", "Coil Power": "360 mW", "Isolation": "5 kV", "Compliance": "UL, TÜV, RoHS" },
-      "datasheet": "#", "createdAt": 1718400000
+      "specs": {
+        "Coil": "5 VDC",
+        "Contact": "SPDT (1C)",
+        "Rating": "10 A / 250 VAC",
+        "Coil Power": "360 mW",
+        "Isolation": "5 kV",
+        "Compliance": "UL, TÜV, RoHS"
+      },
+      "datasheet": "#",
+      "createdAt": 1718400000
     },
     {
-      "id": "gr-9004", "title": "Digital Temp/Humidity Sensor (I²C)", "brand": "Sensecore", "origin": "Switzerland",
-      "categorySlug": "industrial-raw-materials", "categoryName": "Industrial Raw Materials", "subSlug": "sensors",
-      "price": 185, "originalPrice": null, "image": "/assets/images/products/industrial.svg",
-      "images": ["/assets/images/products/industrial.svg"],
-      "rating": 4.8, "reviewCount": 63, "inStock": true, "tags": ["b2b", "premium"],
-      "moq": 100, "priceTiers": [ { "min": 100, "price": 185 }, { "min": 1000, "price": 158 }, { "min": 10000, "price": 132 } ],
+      "id": "gr-9004",
+      "title": "Digital Temp/Humidity Sensor (I²C)",
+      "brand": "Sensecore",
+      "origin": "Switzerland",
+      "categorySlug": "industrial-raw-materials",
+      "categoryName": "Industrial Raw Materials",
+      "subSlug": "sensors",
+      "price": 185,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-9004.svg",
+      "images": [
+        "/assets/images/products/gr-9004.svg"
+      ],
+      "rating": 4.8,
+      "reviewCount": 63,
+      "inStock": true,
+      "tags": [
+        "b2b",
+        "premium"
+      ],
+      "moq": 100,
+      "priceTiers": [
+        {
+          "min": 100,
+          "price": 185
+        },
+        {
+          "min": 1000,
+          "price": 158
+        },
+        {
+          "min": 10000,
+          "price": 132
+        }
+      ],
       "shortDescription": "±0.2°C, ±2%RH, I²C, DFN package.",
       "description": "A calibrated digital temperature and humidity sensor with an I²C interface, ideal for HVAC and cold-chain monitoring.",
-      "specs": { "Interface": "I²C", "Temp Accuracy": "±0.2 °C", "RH Accuracy": "±2 %RH", "Supply": "2.4–5.5 V", "Package": "DFN-8", "Compliance": "RoHS" },
-      "datasheet": "#", "createdAt": 1718600000
+      "specs": {
+        "Interface": "I²C",
+        "Temp Accuracy": "±0.2 °C",
+        "RH Accuracy": "±2 %RH",
+        "Supply": "2.4–5.5 V",
+        "Package": "DFN-8",
+        "Compliance": "RoHS"
+      },
+      "datasheet": "#",
+      "createdAt": 1718600000
     },
     {
-      "id": "gr-9005", "title": "ABS Polymer Pellets — Natural (25kg Sack)", "brand": "Polychem", "origin": "South Korea",
-      "categorySlug": "industrial-raw-materials", "categoryName": "Industrial Raw Materials", "subSlug": "polymers",
-      "price": 6800, "originalPrice": null, "image": "/assets/images/products/industrial.svg",
-      "images": ["/assets/images/products/industrial.svg"],
-      "rating": 4.4, "reviewCount": 22, "inStock": true, "tags": ["b2b"],
-      "moq": 10, "priceTiers": [ { "min": 10, "price": 6800 }, { "min": 40, "price": 6300 }, { "min": 200, "price": 5850 } ],
+      "id": "gr-9005",
+      "title": "ABS Polymer Pellets — Natural (25kg Sack)",
+      "brand": "Polychem",
+      "origin": "South Korea",
+      "categorySlug": "industrial-raw-materials",
+      "categoryName": "Industrial Raw Materials",
+      "subSlug": "polymers",
+      "price": 6800,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-9005.svg",
+      "images": [
+        "/assets/images/products/gr-9005.svg"
+      ],
+      "rating": 4.4,
+      "reviewCount": 22,
+      "inStock": true,
+      "tags": [
+        "b2b"
+      ],
+      "moq": 10,
+      "priceTiers": [
+        {
+          "min": 10,
+          "price": 6800
+        },
+        {
+          "min": 40,
+          "price": 6300
+        },
+        {
+          "min": 200,
+          "price": 5850
+        }
+      ],
       "shortDescription": "Injection-grade ABS, natural, MFI 20.",
       "description": "General-purpose injection-moulding ABS pellets with balanced impact strength and flow. Supplied in 25kg moisture-barrier sacks.",
-      "specs": { "Grade": "Injection", "MFI": "20 g/10min", "Density": "1.04 g/cm³", "Colour": "Natural", "Pack": "25 kg sack", "Compliance": "REACH, RoHS" },
-      "datasheet": "#", "createdAt": 1718700000
+      "specs": {
+        "Grade": "Injection",
+        "MFI": "20 g/10min",
+        "Density": "1.04 g/cm³",
+        "Colour": "Natural",
+        "Pack": "25 kg sack",
+        "Compliance": "REACH, RoHS"
+      },
+      "datasheet": "#",
+      "createdAt": 1718700000
     },
     {
-      "id": "gr-9006", "title": "Aluminium Electrolytic Capacitor 1000µF 25V — Bag 200", "brand": "Voltcore", "origin": "Japan",
-      "categorySlug": "industrial-raw-materials", "categoryName": "Industrial Raw Materials", "subSlug": "pcb-components",
-      "price": 9, "originalPrice": null, "image": "/assets/images/products/industrial.svg",
-      "images": ["/assets/images/products/industrial.svg"],
-      "rating": 4.6, "reviewCount": 40, "inStock": true, "tags": ["b2b", "new"],
-      "moq": 200, "priceTiers": [ { "min": 200, "price": 9 }, { "min": 2000, "price": 7.4 }, { "min": 20000, "price": 6.1 } ],
+      "id": "gr-9006",
+      "title": "Aluminium Electrolytic Capacitor 1000µF 25V — Bag 200",
+      "brand": "Voltcore",
+      "origin": "Japan",
+      "categorySlug": "industrial-raw-materials",
+      "categoryName": "Industrial Raw Materials",
+      "subSlug": "pcb-components",
+      "price": 9,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-9006.svg",
+      "images": [
+        "/assets/images/products/gr-9006.svg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 40,
+      "inStock": true,
+      "tags": [
+        "b2b",
+        "new"
+      ],
+      "moq": 200,
+      "priceTiers": [
+        {
+          "min": 200,
+          "price": 9
+        },
+        {
+          "min": 2000,
+          "price": 7.4
+        },
+        {
+          "min": 20000,
+          "price": 6.1
+        }
+      ],
       "shortDescription": "1000µF 25V, 105°C, radial, low-ESR.",
       "description": "Low-ESR radial electrolytic capacitors rated to 105°C with a 5,000-hour endurance.",
-      "specs": { "Capacitance": "1000 µF", "Voltage": "25 V", "Temp": "105 °C", "Endurance": "5,000 h", "ESR": "Low", "Mount": "Radial THT" },
-      "datasheet": "#", "createdAt": 1718900000
+      "specs": {
+        "Capacitance": "1000 µF",
+        "Voltage": "25 V",
+        "Temp": "105 °C",
+        "Endurance": "5,000 h",
+        "ESR": "Low",
+        "Mount": "Radial THT"
+      },
+      "datasheet": "#",
+      "createdAt": 1718900000
     },
-
     {
-      "id": "gr-1006", "title": "Organic Green Tea — Sencha (200g)", "brand": "Yamacha", "origin": "Japan",
-      "categorySlug": "imported-food-grocery", "categoryName": "Imported Food & Grocery", "subSlug": "coffee-tea",
-      "price": 880, "originalPrice": 1050, "image": "/assets/images/products/food.svg",
-      "images": ["/assets/images/products/food.svg"],
-      "rating": 4.6, "reviewCount": 61, "inStock": true, "tags": ["new"],
-      "dietary": ["vegan", "organic"],
+      "id": "gr-1006",
+      "title": "Organic Green Tea — Sencha (200g)",
+      "brand": "Yamacha",
+      "origin": "Japan",
+      "categorySlug": "imported-food-grocery",
+      "categoryName": "Imported Food & Grocery",
+      "subSlug": "coffee-tea",
+      "price": 880,
+      "originalPrice": 1050,
+      "image": "/assets/images/products/gr-1006.svg",
+      "images": [
+        "/assets/images/products/gr-1006.svg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 61,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
+      "dietary": [
+        "vegan",
+        "organic"
+      ],
       "shortDescription": "First-flush organic Sencha, vivid and grassy.",
       "description": "A bright, first-flush Sencha with a clean, grassy sweetness. Shade-grown and stone-milled fresh.",
       "createdAt": 1720750000
     },
     {
-      "id": "gr-1204", "title": "Chilean Walnut Halves (500g)", "brand": "Andes", "origin": "Chile",
-      "categorySlug": "nuts-dry-fruits", "categoryName": "Nuts & Dry Fruits",
-      "price": 890, "originalPrice": null, "image": "/assets/images/products/nuts.svg",
-      "images": ["/assets/images/products/nuts.svg"],
-      "rating": 4.5, "reviewCount": 44, "inStock": true, "tags": [],
-      "dietary": ["vegan", "gluten-free"],
+      "id": "gr-1204",
+      "title": "Chilean Walnut Halves (500g)",
+      "brand": "Andes",
+      "origin": "Chile",
+      "categorySlug": "nuts-dry-fruits",
+      "categoryName": "Nuts & Dry Fruits",
+      "price": 890,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-1204.svg",
+      "images": [
+        "/assets/images/products/gr-1204.svg"
+      ],
+      "rating": 4.5,
+      "reviewCount": 44,
+      "inStock": true,
+      "tags": [],
+      "dietary": [
+        "vegan",
+        "gluten-free"
+      ],
       "shortDescription": "Light-halves walnuts, buttery and fresh.",
       "description": "Premium light-quarter walnut halves — mild, buttery and never bitter.",
       "createdAt": 1719700000
     },
     {
-      "id": "gr-1205", "title": "Turkish Dried Apricots (500g)", "brand": "Malatya", "origin": "Turkey",
-      "categorySlug": "nuts-dry-fruits", "categoryName": "Nuts & Dry Fruits",
-      "price": 720, "originalPrice": 860, "image": "/assets/images/products/nuts.svg",
-      "images": ["/assets/images/products/nuts.svg"],
-      "rating": 4.7, "reviewCount": 73, "inStock": true, "tags": ["bestseller"],
-      "dietary": ["vegan", "no-added-sugar"],
+      "id": "gr-1205",
+      "title": "Turkish Dried Apricots (500g)",
+      "brand": "Malatya",
+      "origin": "Turkey",
+      "categorySlug": "nuts-dry-fruits",
+      "categoryName": "Nuts & Dry Fruits",
+      "price": 720,
+      "originalPrice": 860,
+      "image": "/assets/images/products/gr-1205.svg",
+      "images": [
+        "/assets/images/products/gr-1205.svg"
+      ],
+      "rating": 4.7,
+      "reviewCount": 73,
+      "inStock": true,
+      "tags": [
+        "bestseller"
+      ],
+      "dietary": [
+        "vegan",
+        "no-added-sugar"
+      ],
       "shortDescription": "Soft, sun-dried Malatya apricots.",
       "description": "Naturally sun-dried apricots from Malatya — plump, tangy-sweet, unsulphured.",
       "createdAt": 1719200000
     },
     {
-      "id": "gr-1104", "title": "Skimmed Milk Powder (1kg Pouch)", "brand": "Nord Dairy", "origin": "New Zealand",
-      "categorySlug": "dairy-milk-powder", "categoryName": "Dairy & Milk Powder", "subSlug": "milk-powder",
-      "price": 1180, "originalPrice": null, "image": "/assets/images/products/dairy.svg",
-      "images": ["/assets/images/products/dairy.svg"],
-      "rating": 4.5, "reviewCount": 96, "inStock": true, "tags": ["new"],
-      "dietary": ["halal"],
+      "id": "gr-1104",
+      "title": "Skimmed Milk Powder (1kg Pouch)",
+      "brand": "Nord Dairy",
+      "origin": "New Zealand",
+      "categorySlug": "dairy-milk-powder",
+      "categoryName": "Dairy & Milk Powder",
+      "subSlug": "milk-powder",
+      "price": 1180,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-1104.svg",
+      "images": [
+        "/assets/images/products/gr-1104.svg"
+      ],
+      "rating": 4.5,
+      "reviewCount": 96,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
+      "dietary": [
+        "halal"
+      ],
       "shortDescription": "Instant skimmed milk powder, resealable pouch.",
       "description": "Low-fat instant skimmed milk powder that dissolves cleanly. Cold-chain handled, resealable pouch.",
       "createdAt": 1720650000
     },
     {
-      "id": "gr-2005", "title": "Portable Bluetooth Speaker (Waterproof)", "brand": "Pulse", "origin": "South Korea",
-      "categorySlug": "gadgets-electronics", "categoryName": "Gadgets & Electronics", "subSlug": "audio",
-      "price": 4900, "originalPrice": 5900, "image": "/assets/images/products/electronics.svg",
-      "images": ["/assets/images/products/electronics.svg"],
-      "rating": 4.5, "reviewCount": 118, "inStock": true, "tags": ["new"],
+      "id": "gr-2005",
+      "title": "Portable Bluetooth Speaker (Waterproof)",
+      "brand": "Pulse",
+      "origin": "South Korea",
+      "categorySlug": "gadgets-electronics",
+      "categoryName": "Gadgets & Electronics",
+      "subSlug": "audio",
+      "price": 4900,
+      "originalPrice": 5900,
+      "image": "/assets/images/products/gr-2005.svg",
+      "images": [
+        "/assets/images/products/gr-2005.svg"
+      ],
+      "rating": 4.5,
+      "reviewCount": 118,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
       "shortDescription": "IP67, 20-hour battery, stereo pairing.",
       "description": "A rugged IP67 waterproof speaker with punchy bass, 20-hour battery and true-wireless stereo pairing.",
-      "specs": { "Battery": "20 h", "Water": "IP67", "Bluetooth": "5.3", "Output": "20 W" },
+      "specs": {
+        "Battery": "20 h",
+        "Water": "IP67",
+        "Bluetooth": "5.3",
+        "Output": "20 W"
+      },
       "createdAt": 1721000000
     },
     {
-      "id": "gr-2506", "title": "Nonstick Frying Pan — Granite (28cm)", "brand": "Fôyer", "origin": "France",
-      "categorySlug": "kitchen-home", "categoryName": "Kitchen & Home",
-      "price": 3200, "originalPrice": 3800, "image": "/assets/images/products/kitchen.svg",
-      "images": ["/assets/images/products/kitchen.svg"],
-      "rating": 4.5, "reviewCount": 57, "inStock": true, "tags": ["bestseller"],
+      "id": "gr-2506",
+      "title": "Nonstick Frying Pan — Granite (28cm)",
+      "brand": "Fôyer",
+      "origin": "France",
+      "categorySlug": "kitchen-home",
+      "categoryName": "Kitchen & Home",
+      "price": 3200,
+      "originalPrice": 3800,
+      "image": "/assets/images/products/gr-2506.svg",
+      "images": [
+        "/assets/images/products/gr-2506.svg"
+      ],
+      "rating": 4.5,
+      "reviewCount": 57,
+      "inStock": true,
+      "tags": [
+        "bestseller"
+      ],
       "shortDescription": "PFOA-free granite coating, induction-ready.",
       "description": "A durable granite-coated frying pan — PFOA-free, even heating, induction-ready.",
       "createdAt": 1719950000
     },
     {
-      "id": "gr-2507", "title": "Double-Wall Glass Mugs (Set of 2)", "brand": "Clear", "origin": "Germany",
-      "categorySlug": "kitchen-home", "categoryName": "Kitchen & Home",
-      "price": 1400, "originalPrice": null, "image": "/assets/images/products/kitchen.svg",
-      "images": ["/assets/images/products/kitchen.svg"],
-      "rating": 4.6, "reviewCount": 39, "inStock": true, "tags": ["new"],
+      "id": "gr-2507",
+      "title": "Double-Wall Glass Mugs (Set of 2)",
+      "brand": "Clear",
+      "origin": "Germany",
+      "categorySlug": "kitchen-home",
+      "categoryName": "Kitchen & Home",
+      "price": 1400,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-2507.svg",
+      "images": [
+        "/assets/images/products/gr-2507.svg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 39,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
       "shortDescription": "Borosilicate double-wall, keeps drinks hot.",
       "description": "Hand-blown double-wall borosilicate mugs — insulating, lightweight and elegant.",
       "createdAt": 1720850000
     },
     {
-      "id": "gr-3004", "title": "Full-Grain Leather Belt", "brand": "Atlas", "origin": "Italy",
-      "categorySlug": "fashion", "categoryName": "Fashion",
-      "price": 2600, "originalPrice": 3200, "image": "/assets/images/products/fashion.svg",
-      "images": ["/assets/images/products/fashion.svg"],
-      "rating": 4.6, "reviewCount": 48, "inStock": true, "tags": ["bestseller"],
+      "id": "gr-3004",
+      "title": "Full-Grain Leather Belt",
+      "brand": "Atlas",
+      "origin": "Italy",
+      "categorySlug": "fashion",
+      "categoryName": "Fashion",
+      "price": 2600,
+      "originalPrice": 3200,
+      "image": "/assets/images/products/gr-3004.svg",
+      "images": [
+        "/assets/images/products/gr-3004.svg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 48,
+      "inStock": true,
+      "tags": [
+        "bestseller"
+      ],
       "shortDescription": "Vegetable-tanned leather, brass buckle.",
       "description": "A vegetable-tanned full-grain belt with a solid brass buckle that patinas beautifully.",
       "createdAt": 1719450000
     },
     {
-      "id": "gr-3005", "title": "Cashmere-Blend Scarf", "brand": "Nordfell", "origin": "Italy",
-      "categorySlug": "fashion", "categoryName": "Fashion",
-      "price": 3400, "originalPrice": null, "image": "/assets/images/products/fashion.svg",
-      "images": ["/assets/images/products/fashion.svg"],
-      "rating": 4.7, "reviewCount": 31, "inStock": true, "tags": ["premium", "new"],
+      "id": "gr-3005",
+      "title": "Cashmere-Blend Scarf",
+      "brand": "Nordfell",
+      "origin": "Italy",
+      "categorySlug": "fashion",
+      "categoryName": "Fashion",
+      "price": 3400,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-3005.svg",
+      "images": [
+        "/assets/images/products/gr-3005.svg"
+      ],
+      "rating": 4.7,
+      "reviewCount": 31,
+      "inStock": true,
+      "tags": [
+        "premium",
+        "new"
+      ],
       "shortDescription": "Cashmere-merino blend, feather-light.",
       "description": "A feather-light cashmere-merino scarf — warm without weight, in a quiet palette.",
       "createdAt": 1720950000
     },
     {
-      "id": "gr-3505", "title": "Hyaluronic Acid Moisturiser (50ml)", "brand": "Lumen", "origin": "South Korea",
-      "categorySlug": "beauty-personal-care", "categoryName": "Beauty & Personal Care",
-      "price": 1900, "originalPrice": 2300, "image": "/assets/images/products/beauty.svg",
-      "images": ["/assets/images/products/beauty.svg"],
-      "rating": 4.6, "reviewCount": 142, "inStock": true, "tags": ["bestseller"],
+      "id": "gr-3505",
+      "title": "Hyaluronic Acid Moisturiser (50ml)",
+      "brand": "Lumen",
+      "origin": "South Korea",
+      "categorySlug": "beauty-personal-care",
+      "categoryName": "Beauty & Personal Care",
+      "price": 1900,
+      "originalPrice": 2300,
+      "image": "/assets/images/products/gr-3505.svg",
+      "images": [
+        "/assets/images/products/gr-3505.svg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 142,
+      "inStock": true,
+      "tags": [
+        "bestseller"
+      ],
       "shortDescription": "Multi-weight hyaluronic acid, lightweight gel.",
       "description": "A lightweight gel moisturiser with multi-weight hyaluronic acid for lasting, non-greasy hydration.",
       "createdAt": 1719650000
     },
     {
-      "id": "gr-3506", "title": "Mineral Sunscreen SPF 50 (50ml)", "brand": "Lumen", "origin": "South Korea",
-      "categorySlug": "beauty-personal-care", "categoryName": "Beauty & Personal Care",
-      "price": 1600, "originalPrice": null, "image": "/assets/images/products/beauty.svg",
-      "images": ["/assets/images/products/beauty.svg"],
-      "rating": 4.5, "reviewCount": 88, "inStock": true, "tags": ["new"],
+      "id": "gr-3506",
+      "title": "Mineral Sunscreen SPF 50 (50ml)",
+      "brand": "Lumen",
+      "origin": "South Korea",
+      "categorySlug": "beauty-personal-care",
+      "categoryName": "Beauty & Personal Care",
+      "price": 1600,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-3506.svg",
+      "images": [
+        "/assets/images/products/gr-3506.svg"
+      ],
+      "rating": 4.5,
+      "reviewCount": 88,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
       "shortDescription": "Broad-spectrum SPF 50, no white cast.",
       "description": "A broad-spectrum mineral sunscreen that absorbs cleanly with no white cast — daily-wear finish.",
       "createdAt": 1720450000
     },
     {
-      "id": "gr-4003", "title": "Walnut Desk Organiser", "brand": "Leaf", "origin": "Germany",
-      "categorySlug": "office-supplies", "categoryName": "Office Supplies",
-      "price": 2100, "originalPrice": 2500, "image": "/assets/images/products/office.svg",
-      "images": ["/assets/images/products/office.svg"],
-      "rating": 4.6, "reviewCount": 34, "inStock": true, "tags": ["premium"],
+      "id": "gr-4003",
+      "title": "Walnut Desk Organiser",
+      "brand": "Leaf",
+      "origin": "Germany",
+      "categorySlug": "office-supplies",
+      "categoryName": "Office Supplies",
+      "price": 2100,
+      "originalPrice": 2500,
+      "image": "/assets/images/products/gr-4003.svg",
+      "images": [
+        "/assets/images/products/gr-4003.svg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 34,
+      "inStock": true,
+      "tags": [
+        "premium"
+      ],
       "shortDescription": "Solid walnut, felt-lined compartments.",
       "description": "A solid walnut desk organiser with felt-lined compartments — quiet order for the desk.",
       "createdAt": 1720250000
     },
     {
-      "id": "gr-4004", "title": "Drafting Mechanical Pencil Set (0.3/0.5/0.7)", "brand": "Kanji", "origin": "Japan",
-      "categorySlug": "office-supplies", "categoryName": "Office Supplies",
-      "price": 1250, "originalPrice": null, "image": "/assets/images/products/office.svg",
-      "images": ["/assets/images/products/office.svg"],
-      "rating": 4.7, "reviewCount": 52, "inStock": true, "tags": ["bestseller"],
+      "id": "gr-4004",
+      "title": "Drafting Mechanical Pencil Set (0.3/0.5/0.7)",
+      "brand": "Kanji",
+      "origin": "Japan",
+      "categorySlug": "office-supplies",
+      "categoryName": "Office Supplies",
+      "price": 1250,
+      "originalPrice": null,
+      "image": "/assets/images/products/gr-4004.svg",
+      "images": [
+        "/assets/images/products/gr-4004.svg"
+      ],
+      "rating": 4.7,
+      "reviewCount": 52,
+      "inStock": true,
+      "tags": [
+        "bestseller"
+      ],
       "shortDescription": "Metal-body drafting pencils, three gauges.",
       "description": "A three-gauge set of metal-body drafting pencils with cushioned lead and knurled grips.",
       "createdAt": 1720150000
