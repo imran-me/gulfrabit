@@ -81,26 +81,26 @@ style concern = one CSS partial. Split any file over ~300 lines.
 
 | Page | File | Module | Status |
 |---|---|---|---|
-| Home | `index.html` → `modules/home/` | home | NOT STARTED |
-| Category / PLP | `modules/catalog/category.html` | catalog | NOT STARTED |
-| Product / PDP | `modules/catalog/product.html` | catalog | NOT STARTED |
-| Search results | `modules/catalog/search-results.html` | catalog | NOT STARTED |
-| Cart | `modules/cart/cart.html` | cart | NOT STARTED |
-| Checkout | `modules/checkout/checkout.html` | checkout | NOT STARTED |
-| Order confirmation | `modules/checkout/order-confirmation.html` | checkout | NOT STARTED |
-| Account dashboard | `modules/account/dashboard.html` | account | NOT STARTED |
-| Account orders | `modules/account/orders.html` | account | NOT STARTED |
-| Account addresses | `modules/account/addresses.html` | account | NOT STARTED |
-| Account wishlist | `modules/account/wishlist.html` | account | NOT STARTED |
-| Login | `modules/auth/login.html` | auth | NOT STARTED |
-| Register | `modules/auth/register.html` | auth | NOT STARTED |
-| Forgot password | `modules/auth/forgot-password.html` | auth | NOT STARTED |
-| About | `modules/content/about.html` | content | NOT STARTED |
-| Contact | `modules/content/contact.html` | content | NOT STARTED |
-| FAQ | `modules/content/faq.html` | content | NOT STARTED |
-| Shipping & Returns | `modules/content/shipping-returns.html` | content | NOT STARTED |
-| 404 | `modules/content/404.html` | content | NOT STARTED |
-| B2B Industrial | `modules/b2b/b2b-industrial.html` | b2b | NOT STARTED |
+| Home | `index.html` → `modules/home/` | home | DONE |
+| Category / PLP | `modules/catalog/category.html` | catalog | DONE |
+| Product / PDP | `modules/catalog/product.html` | catalog | DONE |
+| Search results | `modules/catalog/search-results.html` | catalog | DONE |
+| Cart | `modules/cart/cart.html` | cart | DONE |
+| Checkout | `modules/checkout/checkout.html` | checkout | DONE |
+| Order confirmation | `modules/checkout/order-confirmation.html` | checkout | DONE |
+| Account dashboard | `modules/account/dashboard.html` | account | DONE |
+| Account orders | `modules/account/orders.html` | account | DONE |
+| Account addresses | `modules/account/addresses.html` | account | DONE |
+| Account wishlist | `modules/account/wishlist.html` | account | DONE |
+| Login | `modules/auth/login.html` | auth | DONE |
+| Register | `modules/auth/register.html` | auth | DONE |
+| Forgot password | `modules/auth/forgot-password.html` | auth | DONE |
+| About | `modules/content/about.html` | content | DONE |
+| Contact | `modules/content/contact.html` | content | DONE |
+| FAQ | `modules/content/faq.html` | content | DONE |
+| Shipping & Returns | `modules/content/shipping-returns.html` | content | DONE |
+| 404 | `modules/content/404.html` | content | DONE |
+| B2B Industrial | `modules/b2b/b2b-industrial.html` | b2b | DONE |
 
 ---
 
@@ -130,9 +130,33 @@ _(update whenever files are added)_
 
 ## 5. Component Inventory
 
+**Core (`shared/js/core/`):** `storage` (namespaced, safe localStorage/session
+wrapper) · `state` (observable cart/wishlist/user store, cross-tab sync) ·
+`data-service` (single data access point → future REST API) · `router-helpers`
+(query-param read/write).
+
+**Components (`shared/js/components/`):**
+
 | Component | Path | Purpose |
 |---|---|---|
-| _(none yet)_ | | |
+| header-nav | `components/header-nav.js` | sticky glass, mega-menu, mobile drawer, count badges, search overlay |
+| cart-drawer | `components/cart-drawer.js` | self-contained offcanvas mini-cart |
+| product-card | `components/product-card.js` | canonical card markup + behaviour enhancer |
+| filters-sidebar | `components/filters-sidebar.js` | facets from a product set + mobile bottom-sheet |
+| quick-view-modal | `components/quick-view-modal.js` | lazy-loaded product peek |
+| search-autocomplete | `components/search-autocomplete.js` | debounced suggestions |
+| quantity-stepper | `components/quantity-stepper.js` | reusable qty control (emits `qty:change`) |
+| toast-notifications | `components/toast-notifications.js` | non-blocking confirmations |
+| scroll-reveal | `components/scroll-reveal.js` | IntersectionObserver reveal (+ stagger) |
+| skeleton-loader | `components/skeleton-loader.js` | shimmer placeholders |
+| newsletter-signup | `components/newsletter-signup.js` | validated newsletter band |
+| wishlist | `components/wishlist.js` | standalone wishlist toggle buttons |
+
+**Utils (`shared/js/utils/`):** `format-currency` (BDT) · `validate-form`
+(declarative, data-attribute driven) · `debounce`.
+
+**Partials (`shared/components/`):** `header.html`, `footer.html` (canonical,
+inlined into pages by `tools/assemble.py`).
 
 ---
 
@@ -156,46 +180,48 @@ _(update whenever files are added)_
 ### Phase 0 — Setup
 - [x] Create context.md with full sections
 - [x] Set up modular folder structure
-- [ ] Link Bootstrap 5 + Tailwind (brand colours) + fonts (done per-page in header)
-- [ ] Prepare logo assets (dark-bg supplied; produce light-bg transparent PNG)
-- [ ] Build `_variables.css` with every `--gr-*` token
+- [x] Link Bootstrap 5 + Tailwind (brand colours) + fonts (done per-page in head)
+- [~] Prepare logo assets (dark-bg supplied; light-bg transparent PNG still TODO)
+- [x] Build `_variables.css` with every `--gr-*` token
 
 ### Phase 1 — Design system & shared components
-- [ ] `_typography.css`, `_buttons.css`, `_cards.css`, `_animations.css` + other partials
-- [ ] `header.html` partial + `header-nav.js` (mega-menu + mobile offcanvas + sticky glass)
-- [ ] `footer.html` partial
-- [ ] `product-card.js` (enhancement for HTML-authored cards)
-- [ ] `cart-drawer.js` + `state.js` (cart logic on localStorage)
-- [ ] `toast-notifications.js`
-- [ ] `scroll-reveal.js`
-- [ ] `skeleton-loader.js`
-- [ ] `data/products.json` + `categories.json` covering ALL verticals
-- [ ] `data-service.js` + per-module `backend/api.js`
+- [x] `_typography.css`, `_buttons.css`, `_cards.css`, `_animations.css` + other partials
+- [x] `header.html` partial + `header-nav.js` (mega-menu + mobile offcanvas + sticky glass)
+- [x] `footer.html` partial
+- [x] `product-card.js` (canonical markup + enhancement for HTML-authored cards)
+- [x] `cart-drawer.js` + `state.js` (cart logic on localStorage)
+- [x] `toast-notifications.js`
+- [x] `scroll-reveal.js`
+- [x] `skeleton-loader.js`
+- [x] `data/products.json` (31) + `categories.json` (9) covering ALL verticals
+- [x] `data-service.js` + per-module `backend/api.js`
 
 ### Phase 2 — Core shopping pages
-- [ ] `index.html` (home)
-- [ ] `catalog/category.html` (filters/sort)
-- [ ] `catalog/product.html` (gallery, tabs, add-to-cart/wishlist)
-- [ ] `catalog/search-results.html` + `search-autocomplete.js`
-- [ ] `cart/cart.html`
+- [x] `index.html` (home)
+- [x] `catalog/category.html` (filters/sort, URL-synced, load-more, empty state)
+- [x] `catalog/product.html` (gallery, tabs, add-to-cart/wishlist, spec-sheet for B2B)
+- [x] `catalog/search-results.html` + `search-autocomplete.js`
+- [x] `cart/cart.html` (editable, promo, save-for-later)
 
 ### Phase 3 — Checkout & account
-- [ ] `checkout/checkout.html` multi-step + validation
-- [ ] `checkout/order-confirmation.html`
-- [ ] `auth/{login,register,forgot-password}.html`
-- [ ] `account/{dashboard,orders,addresses,wishlist}.html`
+- [x] `checkout/checkout.html` multi-step + validation
+- [x] `checkout/order-confirmation.html`
+- [x] `auth/{login,register,forgot-password}.html`
+- [x] `account/{dashboard,orders,addresses,wishlist}.html`
 
 ### Phase 4 — Content & edge pages
-- [ ] `content/{about,contact,faq,shipping-returns}.html`
-- [ ] `content/404.html`
-- [ ] `b2b/b2b-industrial.html` (RFQ form + spec-sheet products)
+- [x] `content/{about,contact,faq,shipping-returns}.html`
+- [x] `content/404.html`
+- [x] `b2b/b2b-industrial.html` (RFQ form + spec-sheet products, tiered pricing, MOQ)
 
 ### Phase 5 — Polish pass
-- [ ] Verify 5 breakpoints on every page
-- [ ] Verify "expensive design" rules (spacing/radius/shadow/colour-ratio/hover)
-- [ ] Accessibility pass (contrast, focus, alt, keyboard)
-- [ ] Empty + loading states on every data-driven page
-- [ ] Final context.md update + backend integration notes
+- [x] Nav breakpoint gap fixed (992/1024); mobile filters bottom-sheet (live host)
+- [x] "Expensive design" rules applied (8px grid, 2 radii, 3 shadows, 80/20 colour)
+- [x] Accessibility: visible focus, alt text, ARIA, keyboard nav, skip link, reduced-motion
+- [x] Empty + loading (skeleton) states on data-driven pages
+- [x] All 20 pages verified 200 via static server
+- [ ] Manual visual QA across 375/768/1024/1440/1920 in a real browser (recommended next)
+- [x] Final context.md update + backend integration notes
 
 ---
 
@@ -216,3 +242,17 @@ _(update whenever files are added)_
 - **2026-07-21** — Repo initialised; remote set to github.com/imran-me/gulfrabit.
   Created modular folder structure, `.gitignore`, `README.md`, `context.md`. Copied logo
   to `assets/logo/`. Began Phase 0/1 design-system foundation.
+- **2026-07-21** — Built the full design system (`shared/css`), the shared JS core +
+  components + utils, mock data (31 products / 9 categories / users / orders), brand-
+  consistent SVG placeholder imagery, and the canonical header/footer partials.
+- **2026-07-21** — Added `tools/assemble.py` (author-time page composer: header/footer
+  partials + module fragments → static HTML). Decision: `index.html` hand-authored; all
+  other pages generated — **edit the fragment, not the generated `.html`.**
+- **2026-07-21** — Shipped ALL 20 pages across home, catalog, cart, checkout, account,
+  auth, content and B2B modules, each with a `backend/` contract (`endpoints.md` + mock
+  `api.js`). Every module is self-contained (frontend + backend seam).
+- **2026-07-21** — Phase 5 polish: fixed the 992–1024px nav dead-zone (desktop nav now
+  appears at 992 to match the hamburger); reworked the mobile filters bottom-sheet to
+  relocate the live filter host (no dead clone). Verified all pages return 200.
+- **2026-07-21** — All commits authored as **Md Imran Hossain** (no Claude co-author),
+  pushed to `origin/main` incrementally per phase.

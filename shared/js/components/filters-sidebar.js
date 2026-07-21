@@ -85,35 +85,50 @@ export function initFilters({ host, products, initial = {}, onChange }) {
   return { getFilters, setFilters, clear };
 }
 
-/* ---- Mobile bottom-sheet --------------------------------------------- */
+/* ---- Mobile bottom-sheet ---------------------------------------------
+   Moves the REAL filter host into the sheet on open and back on close, so the
+   controls stay live (no dead clone) and there's a single source of state. */
 function wireMobileSheet(host) {
   const openBtn = document.querySelector('[data-open-filters]');
   if (!openBtn) return;
-  let sheet, backdrop;
+  let sheet, backdrop, body, placeholder;
 
-  openBtn.addEventListener('click', () => {
-    if (!sheet) buildSheet();
-    backdrop.hidden = false;
-    requestAnimationFrame(() => { backdrop.style.opacity = '1'; sheet.classList.add('is-open'); });
-    document.body.style.overflow = 'hidden';
-  });
+  openBtn.addEventListener('click', open);
 
-  function buildSheet() {
+  function build() {
     backdrop = document.createElement('div');
     backdrop.className = 'filters-sheet-backdrop'; backdrop.hidden = true;
     sheet = document.createElement('div');
     sheet.className = 'filters-sheet';
     sheet.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <h2 class="h5">Filters</h2><button class="btn-icon-gr" data-close-sheet aria-label="Close">✕</button></div>`;
-    // Move the same filter host into the sheet on open, back on close.
-    const clone = host.cloneNode(true);
-    sheet.appendChild(clone);
+      <h2 class="h5">Filters</h2><button class="btn-icon-gr" data-close-sheet aria-label="Close filters">✕</button></div>
+      <div data-sheet-body></div>
+      <button class="btn-gr btn-primary-gr btn-block-gr" data-apply-sheet style="margin-top:1rem">Show results</button>`;
+    body = sheet.querySelector('[data-sheet-body]');
     document.body.append(backdrop, sheet);
-    const close = () => { backdrop.style.opacity = '0'; sheet.classList.remove('is-open'); document.body.style.overflow = ''; setTimeout(() => { backdrop.hidden = true; }, 300); };
     backdrop.addEventListener('click', close);
     sheet.querySelector('[data-close-sheet]').addEventListener('click', close);
-    // Note: the sheet mirrors desktop filters visually; the live controls remain
-    // the sidebar's. Kept simple for the mock — a shared instance lands with the API.
+    sheet.querySelector('[data-apply-sheet]').addEventListener('click', close);
+  }
+
+  function open() {
+    if (!sheet) build();
+    // Relocate the live host into the sheet, leaving a placeholder to restore it.
+    placeholder = document.createComment('filters-host');
+    host.parentNode.insertBefore(placeholder, host);
+    body.appendChild(host);
+    backdrop.hidden = false;
+    requestAnimationFrame(() => { backdrop.style.opacity = '1'; sheet.classList.add('is-open'); });
+    document.body.style.overflow = 'hidden';
+  }
+
+  function close() {
+    backdrop.style.opacity = '0';
+    sheet.classList.remove('is-open');
+    document.body.style.overflow = '';
+    // Return the host to its original place.
+    if (placeholder) { placeholder.parentNode.insertBefore(host, placeholder); placeholder.remove(); placeholder = null; }
+    setTimeout(() => { backdrop.hidden = true; }, 300);
   }
 }
 

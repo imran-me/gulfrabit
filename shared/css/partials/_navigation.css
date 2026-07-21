@@ -47,8 +47,10 @@
 .site-header__actions { display: flex; align-items: center; gap: var(--space-1); margin-left: auto; }
 
 /* ---- Primary nav + mega-menu ----------------------------------------- */
+/* Desktop nav appears at Bootstrap's lg (992px) so it lines up with the
+   hamburger's .d-lg-none — no dead zone where neither shows. */
 .primary-nav { display: none; }
-@media (min-width: 1024px) { .primary-nav { display: flex; align-items: center; gap: var(--space-2); } }
+@media (min-width: 992px) { .primary-nav { display: flex; align-items: center; gap: var(--space-2); } }
 
 .nav-item { position: relative; }
 .nav-link {
@@ -87,7 +89,7 @@
 
 /* ---- Search field in header ------------------------------------------ */
 .header-search { display: none; flex: 1; max-width: 520px; }
-@media (min-width: 1024px) { .header-search { display: block; } }
+@media (min-width: 992px) { .header-search { display: block; } }
 .header-search__field {
   display: flex; align-items: center; gap: var(--space-2);
   height: 46px; padding: 0 var(--space-4);
