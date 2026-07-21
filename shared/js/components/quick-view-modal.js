@@ -13,8 +13,10 @@ import * as store from '../core/state.js';
 import { siteURL } from '../core/paths.js';
 import { toast } from './toast-notifications.js';
 import { openCartDrawer } from './cart-drawer.js';
+import { trapFocus } from '../utils/focus-trap.js';
 
 let host = null;
+let releaseTrap = null;
 
 function ensureHost() {
   if (host) return host;
@@ -37,6 +39,7 @@ export async function openQuickView(id) {
   dialog.innerHTML = `<div style="padding:3rem;text-align:center" class="text-muted-gr">Loading…</div>`;
   el.style.display = 'block';
   document.body.style.overflow = 'hidden';
+  releaseTrap = trapFocus(dialog);
 
   const p = await getProductById(id);
   if (!p) { dialog.innerHTML = `<div style="padding:3rem;text-align:center">Product not found.</div>`; return; }
@@ -80,6 +83,7 @@ function close() {
   if (!host) return;
   host.style.display = 'none';
   document.body.style.overflow = '';
+  if (releaseTrap) { releaseTrap(); releaseTrap = null; }
 }
 
 function escapeHtml(str = '') { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }

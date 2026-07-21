@@ -12,10 +12,12 @@
 import * as store from '../core/state.js';
 import { siteURL } from '../core/paths.js';
 import { formatBDT } from '../utils/format-currency.js';
+import { trapFocus } from '../utils/focus-trap.js';
 
 let root = null;         // the drawer container
 let panel = null;        // the sliding panel
 let unsub = null;
+let releaseTrap = null;  // focus-trap release fn while open
 
 const CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M18 6 6 18M6 6l12 12"/></svg>';
 const BAG   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="56" height="56"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>';
@@ -113,7 +115,7 @@ export function openCartDrawer() {
   bd.hidden = false;
   requestAnimationFrame(() => { bd.style.opacity = '1'; panel.style.transform = 'translateX(0)'; });
   document.body.style.overflow = 'hidden';
-  panel.focus();
+  releaseTrap = trapFocus(panel);
 }
 
 export function closeCartDrawer() {
@@ -122,6 +124,7 @@ export function closeCartDrawer() {
   bd.style.opacity = '0';
   panel.style.transform = 'translateX(100%)';
   document.body.style.overflow = '';
+  if (releaseTrap) { releaseTrap(); releaseTrap = null; }
   setTimeout(() => { bd.hidden = true; }, 300);
 }
 

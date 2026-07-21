@@ -14,6 +14,7 @@
 
 import * as store from '../core/state.js';
 import { storage, KEYS } from '../core/storage.js';
+import { trapFocus } from '../utils/focus-trap.js';
 
 export function initHeader() {
   initStickyGlass();
@@ -58,6 +59,7 @@ function initMobileDrawer() {
   if (!drawer || !openBtn) return;
 
   const backdrop = ensureBackdrop();
+  let releaseTrap = null;
   const open = () => {
     drawer.classList.add('is-open');
     drawer.setAttribute('aria-hidden', 'false');
@@ -65,6 +67,7 @@ function initMobileDrawer() {
     requestAnimationFrame(() => { backdrop.style.opacity = '1'; });
     document.body.style.overflow = 'hidden';
     openBtn.setAttribute('aria-expanded', 'true');
+    releaseTrap = trapFocus(drawer);
   };
   const close = () => {
     drawer.classList.remove('is-open');
@@ -73,6 +76,7 @@ function initMobileDrawer() {
     setTimeout(() => { backdrop.hidden = true; }, 300);
     document.body.style.overflow = '';
     openBtn.setAttribute('aria-expanded', 'false');
+    if (releaseTrap) { releaseTrap(); releaseTrap = null; }
   };
   openBtn.addEventListener('click', open);
   drawer.querySelectorAll('[data-close-mobile-nav]').forEach((b) => b.addEventListener('click', close));
