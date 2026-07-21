@@ -1,7 +1,9 @@
 /* =========================================================================
    GulfRabit · Auth module (login / register / forgot) — centred card layout
    ========================================================================= */
-.auth-wrap { min-height: calc(100vh - var(--header-h)); display: grid; place-items: center; padding: var(--space-7) var(--space-4); }
+/* Constrain the grid column (minmax(0,440px)) so the card can't force the auto
+   column — and the document — wider than a narrow viewport. */
+.auth-wrap { min-height: calc(100vh - var(--header-h)); display: grid; grid-template-columns: minmax(0, 440px); justify-content: center; align-content: center; padding: var(--space-7) var(--space-4); }
 .auth-card { width: 100%; max-width: 440px; }
 .auth-card__inner { background: var(--gr-charcoal); border: 1px solid var(--gr-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: var(--space-7); }
 .auth-head { text-align: center; margin-bottom: var(--space-6); }
