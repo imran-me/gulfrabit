@@ -1,0 +1,14 @@
+/* =========================================================================
+   GulfRabit · Auth module (login / register / forgot) — centred card layout
+   ========================================================================= */
+.auth-wrap { min-height: calc(100vh - var(--header-h)); display: grid; place-items: center; padding: var(--space-7) var(--space-4); }
+.auth-card { width: 100%; max-width: 440px; }
+.auth-card__inner { background: var(--gr-charcoal); border: 1px solid var(--gr-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: var(--space-7); }
+.auth-head { text-align: center; margin-bottom: var(--space-6); }
+.auth-head__logo { height: 40px; margin: 0 auto var(--space-4); }
+.auth-alt { text-align: center; margin-top: var(--space-5); color: var(--gr-gray-500); font-size: var(--fs-14); }
+.auth-divider { display: flex; align-items: center; gap: var(--space-3); color: var(--gr-gray-500); font-size: var(--fs-12); margin: var(--space-5) 0; }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--gr-border); }
+.auth-meta { display: flex; justify-content: space-between; align-items: center; font-size: var(--fs-14); }
+.pw-toggle { position: relative; }
+.pw-toggle__btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: 0; color: var(--gr-gray-500); cursor: pointer; padding: 6px; }

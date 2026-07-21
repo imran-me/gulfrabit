@@ -1,0 +1,29 @@
+  <main id="main" class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-card__inner">
+        <div class="auth-head">
+          <img class="auth-head__logo" src="/assets/logo/gulfrabit-logo-dark-bg.jpeg" alt="GulfRabit">
+          <h1 class="h4">Welcome back</h1>
+          <p class="caption">Sign in to continue. Try <strong>demo@gulfrabit.com</strong> / <strong>demo1234</strong>.</p>
+        </div>
+        <form data-auth-form data-auth-mode="login" novalidate>
+          <div class="field-gr" data-field>
+            <label class="label-gr" for="email">Email</label>
+            <input id="email" class="input-gr" type="email" name="email" data-validate="required|email" data-label="Email" autocomplete="email">
+            <span class="field-error" data-error></span>
+          </div>
+          <div class="field-gr" data-field>
+            <div class="auth-meta"><label class="label-gr" for="password">Password</label><a href="/modules/auth/forgot-password.html">Forgot?</a></div>
+            <div class="pw-toggle">
+              <input id="password" class="input-gr" type="password" name="password" data-validate="required|min:6" data-label="Password" autocomplete="current-password">
+              <button class="pw-toggle__btn" type="button" data-toggle-pw aria-label="Show password">👁</button>
+            </div>
+            <span class="field-error" data-error></span>
+          </div>
+          <label class="check-gr" style="margin-bottom:var(--space-4)"><input type="checkbox" name="remember"> Keep me signed in</label>
+          <button class="btn-gr btn-primary-gr btn-block-gr btn-lg-gr" type="submit">Sign In</button>
+        </form>
+        <p class="auth-alt">New to GulfRabit? <a href="/modules/auth/register.html">Create an account</a></p>
+      </div>
+    </div>
+  </main>

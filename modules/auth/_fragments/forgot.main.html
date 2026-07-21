@@ -1,0 +1,20 @@
+  <main id="main" class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-card__inner">
+        <div class="auth-head">
+          <img class="auth-head__logo" src="/assets/logo/gulfrabit-logo-dark-bg.jpeg" alt="GulfRabit">
+          <h1 class="h4">Reset your password</h1>
+          <p class="caption">Enter your email and we’ll send a reset link.</p>
+        </div>
+        <form data-auth-form data-auth-mode="forgot" novalidate>
+          <div class="field-gr" data-field>
+            <label class="label-gr" for="email">Email</label>
+            <input id="email" class="input-gr" type="email" name="email" data-validate="required|email" data-label="Email" autocomplete="email">
+            <span class="field-error" data-error></span>
+          </div>
+          <button class="btn-gr btn-primary-gr btn-block-gr btn-lg-gr" type="submit">Send reset link</button>
+        </form>
+        <p class="auth-alt"><a href="/modules/auth/login.html">← Back to sign in</a></p>
+      </div>
+    </div>
+  </main>
