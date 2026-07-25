@@ -27,9 +27,9 @@ img { height: auto; }
 
 ul[role="list"], ol[role="list"] { list-style: none; margin: 0; padding: 0; }
 
-:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
 
-::selection { background: rgba(27,180,212,.3); color: var(--gr-white); }
+::selection { background: rgba(27,180,212,.3); color: var(--text-primary); }
 
 /* Keep the sticky header offset when jumping to in-page anchors */
 :target { scroll-margin-top: calc(var(--header-h) + var(--space-4)); }

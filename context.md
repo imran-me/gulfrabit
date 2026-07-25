@@ -36,11 +36,35 @@ recreate the mark in CSS/SVG).
 | `--gr-warning` | `#E8B342` | warnings |
 | `--gr-gold-accent` | `#C9A24B` | ONLY Premium/Imported/VIP luxury micro-details |
 
+> **⚠ Read this before using the table above.** Since 2026-07-25 the site renders on a
+> **white canvas**, so the neutral rows are no longer what the UI paints with — the
+> "primary background" is `--surface-page` (#FFFFFF), not `--gr-black`. The palette
+> above is kept as the *brand* record; the *roles* below are what you actually use.
+>
+> | Role | Value | Use |
+> |---|---|---|
+> | `--surface-page` | `#FFFFFF` | the page canvas |
+> | `--surface-raised` | `#FFFFFF` | cards, menus, modals, drawers (+ hairline) |
+> | `--surface-sunken` | `#F4F6F5` | inputs, image wells, hovered rows |
+> | `--surface-band` | `#F7F8F7` | alternating section bands, footer |
+> | `--border-hairline` | `#E5E9E7` | dividers, card outlines |
+> | `--border-input` | `#808A85` | form controls (meets 3:1) |
+> | `--text-primary` | `#101314` | headings + body |
+> | `--text-secondary` | `#414B47` | supporting copy, labels |
+> | `--text-muted` | `#667069` | captions, meta |
+> | `--link` / `--link-hover` | `#0E7C99` / `#0A5F76` | links, overlines, meaningful icons |
+> | `--lime-ink` | `#547C10` | stars, success text |
+> | `--gold-ink` | `#8A6D22` | premium/VIP text |
+>
+> **Contrast rule:** `--gr-cyan` (2.5:1) and `--gr-lime` (1.9:1) FAIL against white.
+> Use them for fills, borders and glows only — never for text or meaningful icons.
+
 **Brand gradient:** `linear-gradient(135deg, #1BB4D4 0%, #9ACD3C 100%)` — accents only
 (hero overlays, premium badges, active nav underline, newsletter band). Never a full-page
-background.
+background. For **display type** use `--gr-gradient-ink` (#0E7C99 → #4E7A0F) — the raw
+gradient is unreadable as text on white.
 
-**80/20 rule:** canvas is near-black + off-white; cyan/lime are *accents*. If a page
+**80/20 rule:** canvas is white + off-white bands; cyan/lime are *accents*. If a page
 looks colourful, there's too much brand colour.
 
 **Typography:**
@@ -175,6 +199,22 @@ inlined into pages by `tools/assemble.py`).
   dev mode per master prompt; keep `/src`-vs-`/dist` mental separation for later.
 - **2026-07-21** — Logo kept as `.jpeg` source; a transparent light-bg PNG is flagged as a
   to-prepare asset (Known Issues).
+- **2026-07-25** — **Site flipped from a near-black canvas to a WHITE canvas.** Reason:
+  user request ("make my site white background"), and it matches the Bangladeshi
+  e-commerce norm the reference sites (Shajgoj, Ghorer Bazar, Daraz) all follow.
+  Implemented as a **semantic surface-role layer** in `_variables.css` rather than by
+  editing hexes in place: the brand palette (§1) keeps its original, truthful values,
+  and every partial/module now paints with roles (`--surface-page`, `--surface-raised`,
+  `--surface-sunken`, `--surface-band`, `--border-hairline`, `--border-input`,
+  `--text-primary/secondary/muted`). Re-theming the whole site is now one block.
+- **2026-07-25** — **Brand hues re-cut for legibility on white.** `--gr-cyan` is 2.5:1 and
+  `--gr-lime` 1.9:1 against white — both fail WCAG AA as text. The raw hues are still used
+  for fills, borders and glows, but anything that *carries meaning* uses the ink variants:
+  `--link` #0E7C99 (4.8:1), `--lime-ink` #547C10 (4.9:1), `--gold-ink` #8A6D22 (4.8:1).
+  `.text-gradient` uses `--gr-gradient-ink`, since the raw cyan→lime gradient was
+  unreadable as display type on white.
+- **2026-07-25** — **Hero/footer stay light too** (no dark footer anchor). Reason: the ask
+  was an unambiguous white site; a dark footer is a one-line change if wanted later.
 
 ---
 
@@ -329,3 +369,25 @@ inlined into pages by `tools/assemble.py`).
   Verified home/PLP/PDP/deals/B2B/login look premium at desktop and the mobile
   breakpoint. Note: this headless setup enforces a ~500px min viewport, so true
   375px can't be rendered here — but scrollWidth<innerWidth confirms no overflow.
+- **2026-07-25 (white-canvas conversion)** — the whole site re-themed dark → light.
+  · **Tokens:** added a semantic surface-role layer to `_variables.css` (see Decision
+    Log). Shadows re-tuned — the dark theme's `rgba(0,0,0,.20–.34)` reads far too
+    heavy on white, so elevation is now ~⅓ opacity and depth comes from the hairline
+    border first, shadow second.
+  · **Sweep:** rewrote colour roles across **19 CSS files, 48 HTML files and 8 JS
+    files**. The HTML contained zero hard-coded Tailwind dark utilities (the design
+    system was disciplined), so the flip was almost entirely token-level; the JS
+    files mattered because several inject inline `style="color:var(--gr-…)"` at
+    runtime, which CSS-only edits would have missed.
+  · **Imagery regenerated:** all product/category/hero art baked in `#141414`/`#151515`
+    backgrounds and would have read as 155 near-black tiles on a white page.
+    `gen-product-images.py` now emits a white studio canvas (ink facets, soft ground
+    shadow, light vignette); the 10 category tiles and 3 hero SVGs were converted too.
+  · **Two real bugs found only by rendering:** (1) `<meta name="color-scheme"
+    content="dark">` on all 24 pages made the browser paint every checkbox/radio as a
+    black square on the white PLP filter rail; (2) star ratings and "In stock" chips
+    were injected from JS as raw `--gr-lime`, invisible-ish at 1.9:1 on white.
+  · Verified: 24/24 pages 200, 45/45 asset refs resolve, CSS braces balanced, JSON
+    valid, screenshots reviewed at 1440px for home/PLP/PDP.
+  · **Known gap:** `.canvas-dark` is now a light canvas — the class name is a
+    leftover from the dark era and should be renamed in a follow-up.

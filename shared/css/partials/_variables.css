@@ -23,6 +23,43 @@
   --gr-gray-500:    #8A8F8C;   /* secondary / muted text                     */
   --gr-gray-300:    #D8DBD9;   /* dividers on light backgrounds              */
 
+  /* ---- Surface roles · LIGHT THEME ------------------------------------- */
+  /* The palette above lists brand colours; THESE are what the UI actually
+     paints with. Every partial and module reads the role, never the raw hex,
+     so the whole canvas can be re-themed from this block alone.             */
+  --surface-page:    #FFFFFF;  /* the page canvas                           */
+  --surface-raised:  #FFFFFF;  /* cards, menus, modals, drawers (+ border)  */
+  --surface-sunken:  #F4F6F5;  /* inputs, image wells, hovered rows         */
+  --surface-band:    #F7F8F7;  /* alternating section bands, footer         */
+  --surface-inverse: #0A0A0A;  /* deliberate dark blocks (rare)             */
+
+  --border-hairline: #E5E9E7;  /* dividers, card outlines (decorative)      */
+  --border-input:    #808A85;  /* form controls — meets 3:1 for UI          */
+
+  /* Text ramp — every value below is AA-contrast on --surface-page.        */
+  --text-primary:    #101314;  /* headings + body            18.5:1         */
+  --text-secondary:  #414B47;  /* supporting copy, labels     9.0:1         */
+  --text-muted:      #667069;  /* captions, meta              5.1:1         */
+  --text-on-accent:  #04222b;  /* text sitting ON cyan/lime fills           */
+  --text-inverse:    #FFFFFF;  /* text on --surface-inverse                 */
+
+  /* Brand colours re-cut for legibility on white. Raw --gr-cyan (2.5:1) and
+     --gr-lime fail contrast as text on light — use these for anything that
+     carries meaning; keep the raw brand hues for fills, borders and glows.  */
+  --link:            #0E7C99;  /* links, overlines            4.8:1         */
+  --link-hover:      #0A5F76;  /*                             6.4:1         */
+  --accent-ink:      #0E7C99;  /* meaningful icons on light   4.8:1         */
+  --gold-ink:        #8A6D22;  /* premium/VIP text            4.8:1         */
+  --lime-ink:        #547C10;  /* stars, success text         4.9:1         */
+
+  /* Washes & scrims — dark-on-light now, the inverse of the dark theme.    */
+  --wash-hover:      rgba(16,19,20,.055);
+  --wash-shimmer:    rgba(16,19,20,.055);
+  --scrim:           rgba(16,19,20,.45);
+  --glass-header:    rgba(255,255,255,.82);
+  --glass-overlay:   rgba(255,255,255,.94);
+  --scrollbar-thumb: #C3CAC6;
+
   /* ---- Semantic -------------------------------------------------------- */
   --gr-success:     #9ACD3C;   /* reuse lime — no generic green              */
   --gr-error:       #E5484D;
@@ -32,6 +69,9 @@
   /* ---- Brand gradient (accents only — never a full page background) ---- */
   --gr-gradient:      linear-gradient(135deg, #1BB4D4 0%, #9ACD3C 100%);
   --gr-gradient-soft: linear-gradient(135deg, rgba(27,180,212,.14) 0%, rgba(154,205,60,.14) 100%);
+  /* Gradient for TEXT on light: the raw brand gradient reads at 1.9:1 on white
+     and is unreadable, so display type uses this ink-weight cut instead. */
+  --gr-gradient-ink:  linear-gradient(135deg, #0E7C99 0%, #4E7A0F 100%);
 
   /* ---- Typography ------------------------------------------------------ */
   --font-display: 'Clash Display', 'General Sans', 'Inter', system-ui, sans-serif;
@@ -73,12 +113,15 @@
   --radius-lg: 16px;   /* cards, modals, media, large surfaces  */
   --radius-pill: 999px;
 
-  /* ---- Elevation · soft, low-opacity, large-blur (never harsh drops) --- */
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.20), 0 1px 3px rgba(0,0,0,.14);
-  --shadow-md: 0 4px 16px rgba(0,0,0,.24), 0 2px 6px rgba(0,0,0,.16);
-  --shadow-lg: 0 18px 48px rgba(0,0,0,.34), 0 6px 16px rgba(0,0,0,.22);
-  /* Brand glow for hero CTAs / focus rings on dark */
-  --shadow-glow: 0 8px 30px rgba(27,180,212,.28);
+  /* ---- Elevation · soft, low-opacity, large-blur (never harsh drops) ---
+     Tuned for a white canvas: on light backgrounds a shadow reads far louder
+     than the same shadow on black, so these are ~a third of the dark-theme
+     opacity. Depth comes from the hairline border first, shadow second.    */
+  --shadow-sm: 0 1px 2px rgba(16,19,20,.05), 0 1px 3px rgba(16,19,20,.07);
+  --shadow-md: 0 4px 16px rgba(16,19,20,.08), 0 2px 6px rgba(16,19,20,.06);
+  --shadow-lg: 0 18px 48px rgba(16,19,20,.12), 0 6px 16px rgba(16,19,20,.08);
+  /* Brand glow for hero CTAs / focus rings */
+  --shadow-glow: 0 8px 24px rgba(27,180,212,.32);
 
   /* ---- Motion · subtle, crafted (no bounce, no gimmick easing) --------- */
   --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);

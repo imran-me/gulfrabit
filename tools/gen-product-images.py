@@ -32,8 +32,10 @@ def seeded(s, mod):
 
 def motif(kind, cx, cy):
     """Return SVG for a category motif centred at (cx, cy), filled url(#accent)."""
-    a = 'fill="url(#accent)" stroke="rgba(255,255,255,.18)" stroke-width="1.5"'
-    facet = 'stroke="rgba(255,255,255,.16)" fill="none" stroke-width="1.2"'
+    # Facet lines are dark-on-light: the canvas is white, so the edges that used
+    # to be lit with white now have to be drawn with ink.
+    a = 'fill="url(#accent)" stroke="rgba(16,19,20,.14)" stroke-width="1.5"'
+    facet = 'stroke="rgba(255,255,255,.55)" fill="none" stroke-width="1.2"'
     if kind == "bag":
         return f'''<path {a} d="M{cx-70} {cy-40} q0 -26 26 -30 l88 0 q26 4 26 30 l0 130 q0 20 -20 20 l-80 0 q-20 0 -20 -20 z"/>
         <path {facet} d="M{cx-70} {cy} l140 0 M{cx} {cy-70} l0 160"/>'''
@@ -81,12 +83,12 @@ def svg(p, variant=0):
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500" role="img" aria-label="{title}">
   <defs>
     <linearGradient id="accent" gradientTransform="rotate({ang} .5 .5)"><stop offset="0" stop-color="{ca}"/><stop offset="1" stop-color="{cb}"/></linearGradient>
-    <radialGradient id="glow" cx="{gx}%" cy="{gy}%" r="75%"><stop offset="0" stop-color="{ca}" stop-opacity=".22"/><stop offset="60%" stop-color="{ca}" stop-opacity="0"/></radialGradient>
-    <radialGradient id="vig" cx="50%" cy="44%" r="75%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".42"/></radialGradient>
-    <pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1.2" fill="#ffffff" fill-opacity=".05"/></pattern>
-    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#000" flood-opacity=".45"/></filter>
+    <radialGradient id="glow" cx="{gx}%" cy="{gy}%" r="75%"><stop offset="0" stop-color="{ca}" stop-opacity=".16"/><stop offset="65%" stop-color="{ca}" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vig" cx="50%" cy="44%" r="78%"><stop offset="58%" stop-color="#101314" stop-opacity="0"/><stop offset="100%" stop-color="#101314" stop-opacity=".07"/></radialGradient>
+    <pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1.2" fill="#101314" fill-opacity=".05"/></pattern>
+    <filter id="soft" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#101314" flood-opacity=".16"/></filter>
   </defs>
-  <rect width="400" height="500" fill="#141414"/>
+  <rect width="400" height="500" fill="#FFFFFF"/>
   <rect width="400" height="500" fill="url(#dots)"/>
   <rect width="400" height="500" fill="url(#glow)"/>
   <g filter="url(#soft)" transform="translate(200 {cy}) scale({scale}) translate(-200 -232)">{motif(kind, 200, 232)}</g>

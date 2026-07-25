@@ -45,10 +45,10 @@ export async function openQuickView(id) {
   if (!p) { dialog.innerHTML = `<div style="padding:3rem;text-align:center">Product not found.</div>`; return; }
 
   dialog.innerHTML = `
-    <button class="btn-icon-gr" data-qv-close aria-label="Close" style="position:absolute;top:.75rem;right:.75rem;z-index:2;background:var(--gr-graphite)">✕</button>
+    <button class="btn-icon-gr" data-qv-close aria-label="Close" style="position:absolute;top:.75rem;right:.75rem;z-index:2;background:var(--surface-sunken)">✕</button>
     <div style="display:grid;grid-template-columns:1fr;gap:0">
       <div style="display:grid;grid-template-columns:1fr;gap:0" class="quickview-grid">
-        <img src="${p.image}" alt="${escapeAttr(p.title)}" style="width:100%;height:100%;object-fit:cover;aspect-ratio:1;background:var(--gr-graphite)">
+        <img src="${p.image}" alt="${escapeAttr(p.title)}" style="width:100%;height:100%;object-fit:cover;aspect-ratio:1;background:var(--surface-sunken)">
         <div style="padding:2rem">
           ${p.brand ? `<div class="product-card__brand">${escapeHtml(p.brand)}${p.origin ? ' · ' + escapeHtml(p.origin) : ''}</div>` : ''}
           <h2 class="h3" style="margin:.5rem 0 1rem">${escapeHtml(p.title)}</h2>

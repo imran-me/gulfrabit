@@ -7,11 +7,11 @@
 
 .account-nav { display: flex; gap: var(--space-2); overflow-x: auto; padding-bottom: var(--space-2); }
 @media (min-width: 900px) { .account-nav { position: sticky; top: calc(var(--header-h) + var(--space-4)); flex-direction: column; overflow: visible; } }
-.account-nav__link { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); color: var(--gr-gray-300); white-space: nowrap; border: 1px solid transparent; }
-.account-nav__link:hover { background: var(--gr-graphite); color: var(--gr-white); }
-.account-nav__link.is-active { background: var(--gr-graphite); color: var(--gr-white); border-color: var(--gr-border); }
+.account-nav__link { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); color: var(--text-secondary); white-space: nowrap; border: 1px solid transparent; }
+.account-nav__link:hover { background: var(--surface-sunken); color: var(--text-primary); }
+.account-nav__link.is-active { background: var(--surface-sunken); color: var(--text-primary); border-color: var(--border-hairline); }
 .account-nav__link svg { width: 20px; height: 20px; flex-shrink: 0; }
-.account-nav__link--danger { color: var(--gr-gray-500); }
+.account-nav__link--danger { color: var(--text-muted); }
 .account-nav__link--danger:hover { color: var(--gr-error); }
 
 /* Overview stat cards */
@@ -20,18 +20,18 @@
 .stat-card { padding: var(--space-5); transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out); }
 a.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--gr-cyan-dark); }
 .stat-card__num { font-family: var(--font-display); font-size: var(--fs-31); font-variant-numeric: tabular-nums; }
-.stat-card__label { color: var(--gr-gray-500); font-size: var(--fs-14); }
+.stat-card__label { color: var(--text-muted); font-size: var(--fs-14); }
 
 /* Orders */
 .order-card { padding: var(--space-5); margin-bottom: var(--space-4); }
-.order-card__head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3); align-items: center; border-bottom: 1px solid var(--gr-border); padding-bottom: var(--space-4); margin-bottom: var(--space-4); }
+.order-card__head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3); align-items: center; border-bottom: 1px solid var(--border-hairline); padding-bottom: var(--space-4); margin-bottom: var(--space-4); }
 .order-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: var(--radius-pill); font-size: var(--fs-12); font-weight: var(--fw-semibold); }
 .order-status--processing { background: rgba(232,179,66,.14); color: var(--gr-warning); }
-.order-status--shipped { background: rgba(27,180,212,.14); color: var(--gr-cyan); }
-.order-status--delivered { background: rgba(154,205,60,.14); color: var(--gr-lime); }
+.order-status--shipped { background: rgba(27,180,212,.14); color: var(--link); }
+.order-status--delivered { background: rgba(154,205,60,.14); color: var(--lime-ink); }
 .order-status--cancelled { background: rgba(229,72,77,.14); color: var(--gr-error); }
 .order-item-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; }
-.order-item-row img { width: 48px; height: 48px; border-radius: var(--radius-sm); object-fit: cover; background: var(--gr-graphite); }
+.order-item-row img { width: 48px; height: 48px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunken); }
 
 /* Order tracking timeline */
 .track-lookup { display: flex; gap: var(--space-2); max-width: 460px; margin-bottom: var(--space-6); }
@@ -39,20 +39,20 @@ a.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); b
 .timeline__step { position: relative; display: grid; grid-template-columns: 32px 1fr; gap: var(--space-4); padding-bottom: var(--space-6); }
 .timeline__step:last-child { padding-bottom: 0; }
 /* connector line */
-.timeline__step::before { content: ""; position: absolute; left: 15px; top: 30px; bottom: -6px; width: 2px; background: var(--gr-border); }
+.timeline__step::before { content: ""; position: absolute; left: 15px; top: 30px; bottom: -6px; width: 2px; background: var(--border-hairline); }
 .timeline__step:last-child::before { display: none; }
-.timeline__dot { width: 32px; height: 32px; border-radius: var(--radius-pill); display: grid; place-items: center; background: var(--gr-graphite); border: 2px solid var(--gr-border); color: var(--gr-gray-500); z-index: 1; }
+.timeline__dot { width: 32px; height: 32px; border-radius: var(--radius-pill); display: grid; place-items: center; background: var(--surface-sunken); border: 2px solid var(--border-hairline); color: var(--text-muted); z-index: 1; }
 .timeline__title { font-weight: var(--fw-semibold); }
-.timeline__meta { font-size: var(--fs-14); color: var(--gr-gray-500); }
+.timeline__meta { font-size: var(--fs-14); color: var(--text-muted); }
 /* done + current states */
-.timeline__step.is-done .timeline__dot { background: rgba(154,205,60,.16); border-color: var(--gr-lime); color: var(--gr-lime); }
+.timeline__step.is-done .timeline__dot { background: rgba(154,205,60,.16); border-color: var(--gr-lime); color: var(--lime-ink); }
 .timeline__step.is-done::before { background: var(--gr-lime); }
 .timeline__step.is-current .timeline__dot { background: var(--gr-gradient); border-color: transparent; color: #04222b; box-shadow: var(--shadow-glow); }
-.timeline__step.is-current .timeline__title { color: var(--gr-white); }
+.timeline__step.is-current .timeline__title { color: var(--text-primary); }
 .timeline__step.is-cancelled .timeline__dot { background: rgba(229,72,77,.16); border-color: var(--gr-error); color: var(--gr-error); }
 
 /* Addresses */
 .address-grid { display: grid; gap: var(--space-4); grid-template-columns: 1fr; }
 @media (min-width: 640px) { .address-grid { grid-template-columns: 1fr 1fr; } }
 .address-card { padding: var(--space-5); position: relative; }
-.address-card.is-default { border-color: var(--gr-cyan); }
+.address-card.is-default { border-color: var(--gr-cyan-dark); }

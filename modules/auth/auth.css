@@ -5,12 +5,12 @@
    column — and the document — wider than a narrow viewport. */
 .auth-wrap { min-height: calc(100vh - var(--header-h)); display: grid; grid-template-columns: minmax(0, 440px); justify-content: center; align-content: center; padding: var(--space-7) var(--space-4); }
 .auth-card { width: 100%; max-width: 440px; }
-.auth-card__inner { background: var(--gr-charcoal); border: 1px solid var(--gr-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: var(--space-7); }
+.auth-card__inner { background: var(--surface-raised); border: 1px solid var(--border-hairline); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: var(--space-7); }
 .auth-head { text-align: center; margin-bottom: var(--space-6); }
 .auth-head__logo { height: 40px; margin: 0 auto var(--space-4); }
-.auth-alt { text-align: center; margin-top: var(--space-5); color: var(--gr-gray-500); font-size: var(--fs-14); }
-.auth-divider { display: flex; align-items: center; gap: var(--space-3); color: var(--gr-gray-500); font-size: var(--fs-12); margin: var(--space-5) 0; }
-.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--gr-border); }
+.auth-alt { text-align: center; margin-top: var(--space-5); color: var(--text-muted); font-size: var(--fs-14); }
+.auth-divider { display: flex; align-items: center; gap: var(--space-3); color: var(--text-muted); font-size: var(--fs-12); margin: var(--space-5) 0; }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--border-hairline); }
 .auth-meta { display: flex; justify-content: space-between; align-items: center; font-size: var(--fs-14); }
 .pw-toggle { position: relative; }
-.pw-toggle__btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: 0; color: var(--gr-gray-500); cursor: pointer; padding: 6px; }
+.pw-toggle__btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: 0; color: var(--text-muted); cursor: pointer; padding: 6px; }

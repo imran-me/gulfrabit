@@ -133,7 +133,7 @@ function applyPromo() {
   if (PROMOS[code]) {
     promo = { code, ...PROMOS[code] };
     storage.set('cart-promo', promo);
-    msg.style.color = 'var(--gr-lime)';
+    msg.style.color = 'var(--lime-ink)';
     msg.textContent = `Applied ${PROMOS[code].label}.`;
     paintSummary(store.getCart());
   } else {

@@ -46,7 +46,7 @@ def head(title, desc, css_links, theme="#0A0A0A"):
   <meta name="theme-color" content="{theme}">
   <meta name="author" content="GulfRabit">
   <meta name="robots" content="index, follow">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="light">
   <!-- Social / Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GulfRabit">

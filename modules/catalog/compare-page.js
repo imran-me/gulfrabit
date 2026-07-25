@@ -41,7 +41,7 @@ function render() {
   const col = (p) => `<th class="compare-col">
       <div class="compare-col__media">
         <img src="${p.image}" alt="${attr(p.title)}" loading="lazy">
-        <button class="btn-icon-gr compare-col__remove" data-remove="${p.id}" aria-label="Remove" style="background:var(--gr-graphite)">✕</button>
+        <button class="btn-icon-gr compare-col__remove" data-remove="${p.id}" aria-label="Remove" style="background:var(--surface-sunken)">✕</button>
       </div>
       <a href="${siteURL(`modules/catalog/product.html?id=${p.id}`)}"><strong>${esc(p.title)}</strong></a>
     </th>`;
@@ -58,7 +58,7 @@ function render() {
         ${row('Rating', ratingCell)}
         ${row('Brand', (p) => `<td>${esc(p.brand || '—')}</td>`)}
         ${row('Origin', (p) => `<td>${esc(p.origin || '—')}</td>`)}
-        ${row('Availability', (p) => `<td>${p.inStock ? '<span style="color:var(--gr-lime)">In stock</span>' : '<span style="color:var(--gr-error)">Out of stock</span>'}</td>`)}
+        ${row('Availability', (p) => `<td>${p.inStock ? '<span style="color:var(--lime-ink)">In stock</span>' : '<span style="color:var(--gr-error)">Out of stock</span>'}</td>`)}
         ${specKeys.map((k) => row(esc(k), (p) => `<td>${esc(String(p.specs?.[k] ?? '—'))}</td>`)).join('')}
         ${row('', (p) => `<td><button class="btn-gr btn-primary-gr btn-sm-gr btn-block-gr" data-add="${p.id}" ${p.inStock ? '' : 'disabled'}>${p.inStock ? 'Add to Cart' : 'Sold out'}</button></td>`)}
       </tbody>

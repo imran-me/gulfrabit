@@ -131,14 +131,14 @@ function paintInfo(p) {
 
   const full = Math.round(p.rating || 0);
   document.querySelector('[data-pdp-rating]').innerHTML =
-    `<span style="display:inline-flex;color:var(--gr-lime)">${STAR.repeat(full)}</span><span style="display:inline-flex;color:var(--gr-border)">${STAR.repeat(5 - full)}</span><span class="caption">${p.rating || 0} · ${p.reviewCount || 0} reviews</span>`;
+    `<span style="display:inline-flex;color:var(--lime-ink)">${STAR.repeat(full)}</span><span style="display:inline-flex;color:var(--border-input)">${STAR.repeat(5 - full)}</span><span class="caption">${p.rating || 0} · ${p.reviewCount || 0} reviews</span>`;
 
   document.querySelector('[data-pdp-price]').textContent = formatBDT(p.price);
   document.querySelector('[data-pdp-original]').textContent = p.originalPrice > p.price ? formatBDT(p.originalPrice) : '';
   document.querySelector('[data-pdp-discount]').innerHTML = p.originalPrice > p.price ? `<span class="badge-gr badge-sale">${discountLabel(p.originalPrice, p.price)}</span>` : '';
   document.querySelector('[data-pdp-short]').textContent = p.shortDescription || '';
   document.querySelector('[data-pdp-stock]').innerHTML = p.inStock
-    ? '<span style="color:var(--gr-lime)">● In stock</span>'
+    ? '<span style="color:var(--lime-ink)">● In stock</span>'
     : '<span style="color:var(--gr-error)">● Currently unavailable</span>';
 
   // B2B MOQ / tier hint

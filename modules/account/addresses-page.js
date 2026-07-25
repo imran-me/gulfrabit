@@ -38,7 +38,7 @@ function render() {
       <div style="display:flex;gap:.5rem;margin-top:1rem">
         <button class="btn-gr btn-outline-gr btn-sm-gr" data-edit="${a.id}">Edit</button>
         ${a.isDefault ? '' : `<button class="btn-gr btn-ghost-gr btn-sm-gr" data-default="${a.id}">Set default</button>`}
-        <button class="btn-gr btn-ghost-gr btn-sm-gr" data-delete="${a.id}" style="color:var(--gr-gray-500)">Delete</button>
+        <button class="btn-gr btn-ghost-gr btn-sm-gr" data-delete="${a.id}" style="color:var(--text-muted)">Delete</button>
       </div>
     </div>`).join('');
 

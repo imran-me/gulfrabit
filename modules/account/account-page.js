@@ -23,7 +23,7 @@ if (recent) {
       <strong>${recent.id}</strong>${statusBadge(recent.status)}
     </div>
     ${recent.items.map((it) => `<div class="order-item-row"><img src="${it.image}" alt=""><span style="flex:1">${escapeHtml(it.title)}</span><span class="caption">×${it.qty}</span></div>`).join('')}
-    <div style="display:flex;justify-content:space-between;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--gr-border)">
+    <div style="display:flex;justify-content:space-between;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border-hairline)">
       <span class="text-muted-gr">${recent.date}</span><strong class="tabular">${formatBDT(recent.total)}</strong>
     </div>`;
 }

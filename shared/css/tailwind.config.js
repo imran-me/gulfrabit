@@ -33,6 +33,15 @@ tailwind.config = {
         'gr-error':       '#E5484D',
         'gr-warning':     '#E8B342',
         'gr-gold':        '#C9A24B',
+        // light-theme surface roles (mirror of _variables.css)
+        'surface-page':   '#FFFFFF',
+        'surface-raised': '#FFFFFF',
+        'surface-sunken': '#F4F6F5',
+        'surface-band':   '#F7F8F7',
+        'text-primary':   '#101314',
+        'text-secondary': '#414B47',
+        'text-muted':     '#667069',
+        'gr-link':        '#0E7C99',
       },
       fontFamily: {
         display: ['Clash Display', 'General Sans', 'Inter', 'sans-serif'],
@@ -46,10 +55,10 @@ tailwind.config = {
       },
       borderRadius: { 'gr-sm': '8px', 'gr-lg': '16px' },
       boxShadow: {
-        'gr-sm': '0 1px 2px rgba(0,0,0,.20), 0 1px 3px rgba(0,0,0,.14)',
-        'gr-md': '0 4px 16px rgba(0,0,0,.24), 0 2px 6px rgba(0,0,0,.16)',
-        'gr-lg': '0 18px 48px rgba(0,0,0,.34), 0 6px 16px rgba(0,0,0,.22)',
-        'gr-glow': '0 8px 30px rgba(27,180,212,.28)',
+        'gr-sm': '0 1px 2px rgba(16,19,20,.05), 0 1px 3px rgba(16,19,20,.07)',
+        'gr-md': '0 4px 16px rgba(16,19,20,.08), 0 2px 6px rgba(16,19,20,.06)',
+        'gr-lg': '0 18px 48px rgba(16,19,20,.12), 0 6px 16px rgba(16,19,20,.08)',
+        'gr-glow': '0 8px 24px rgba(27,180,212,.32)',
       },
       backgroundImage: {
         'gr-gradient': 'linear-gradient(135deg, #1BB4D4 0%, #9ACD3C 100%)',

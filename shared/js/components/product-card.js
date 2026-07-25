@@ -29,7 +29,7 @@ function starsHTML(rating = 0, count = 0) {
   const full = Math.round(rating);
   let s = '<span class="product-card__stars" aria-label="Rated ' + rating + ' out of 5">';
   for (let i = 1; i <= 5; i++) {
-    s += `<span style="color:${i <= full ? 'var(--gr-lime)' : 'var(--gr-border)'}">${STAR}</span>`;
+    s += `<span style="color:${i <= full ? 'var(--lime-ink)' : 'var(--border-input)'}">${STAR}</span>`;
   }
   s += `</span><span class="caption">(${count})</span>`;
   return s;
@@ -64,11 +64,11 @@ export function productCardHTML(product) {
       <div class="product-card__actions">
         <button class="btn-icon-gr" data-action="wishlist" aria-pressed="${wished}"
                 aria-label="${wished ? 'Remove from wishlist' : 'Add to wishlist'}"
-                style="background:var(--gr-graphite);${wished ? 'color:var(--gr-lime)' : ''}">${HEART}</button>
+                style="background:var(--surface-sunken);${wished ? 'color:var(--lime-ink)' : ''}">${HEART}</button>
         <button class="btn-icon-gr" data-action="quickview" aria-label="Quick view"
-                style="background:var(--gr-graphite)">${EYE}</button>
+                style="background:var(--surface-sunken)">${EYE}</button>
         <button class="btn-icon-gr" data-action="compare" aria-pressed="${store.isInCompare(id)}"
-                aria-label="Add to compare" style="background:var(--gr-graphite);${store.isInCompare(id) ? 'color:var(--gr-cyan)' : ''}">${SCALE}</button>
+                aria-label="Add to compare" style="background:var(--surface-sunken);${store.isInCompare(id) ? 'color:var(--link)' : ''}">${SCALE}</button>
       </div>
       <a href="${productURL(product)}" aria-label="${escapeAttr(title)}">
         <img class="product-card__img" src="${escapeAttr(image)}" alt="${escapeAttr(title)}" loading="lazy" decoding="async" width="400" height="500">
@@ -129,7 +129,7 @@ export function enhanceProductCards(root = document) {
     wishBtn?.addEventListener('click', () => {
       const active = store.toggleWishlist(product);
       wishBtn.setAttribute('aria-pressed', String(active));
-      wishBtn.style.color = active ? 'var(--gr-lime)' : '';
+      wishBtn.style.color = active ? 'var(--lime-ink)' : '';
       wishBtn.setAttribute('aria-label', active ? 'Remove from wishlist' : 'Add to wishlist');
       toast.info(active ? 'Saved to wishlist' : 'Removed from wishlist');
     });
@@ -139,7 +139,7 @@ export function enhanceProductCards(root = document) {
       const { active, full } = store.toggleCompare(product.id);
       if (full) { toast.error(`Compare holds up to ${store.COMPARE_MAX} — remove one first`); return; }
       cmpBtn.setAttribute('aria-pressed', String(active));
-      cmpBtn.style.color = active ? 'var(--gr-cyan)' : '';
+      cmpBtn.style.color = active ? 'var(--link)' : '';
       toast.info(active ? 'Added to compare' : 'Removed from compare');
     });
 

@@ -72,7 +72,7 @@ function render(o) {
 
   document.querySelector('[data-track-items]').innerHTML = o.items.map((it) => `
     <div class="order-item-row"><img src="${it.image}" alt=""><span style="flex:1">${escapeHtml(it.title)}</span><span class="caption">×${it.qty}</span><span class="tabular caption">${formatBDT(it.price * it.qty)}</span></div>`).join('')
-    + `<div class="order-item-row" style="border-top:1px solid var(--gr-border);margin-top:.5rem;padding-top:.75rem"><span style="flex:1;font-weight:600">Total</span><strong class="tabular">${formatBDT(o.total)}</strong></div>`;
+    + `<div class="order-item-row" style="border-top:1px solid var(--border-hairline);margin-top:.5rem;padding-top:.75rem"><span style="flex:1;font-weight:600">Total</span><strong class="tabular">${formatBDT(o.total)}</strong></div>`;
 }
 
 function escapeHtml(str = '') { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }

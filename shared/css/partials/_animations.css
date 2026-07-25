@@ -18,14 +18,14 @@
 .skeleton {
   position: relative;
   overflow: hidden;
-  background: var(--gr-graphite);
+  background: var(--surface-sunken);
   border-radius: var(--radius-sm);
 }
 .skeleton::after {
   content: "";
   position: absolute; inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent);
   animation: gr-shimmer 1.4s infinite;
 }
 @keyframes gr-shimmer { 100% { transform: translateX(100%); } }
@@ -43,12 +43,12 @@
 .toast-gr {
   display: flex; align-items: center; gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  background: var(--gr-graphite);
-  border: 1px solid var(--gr-border);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-hairline);
   border-left: 3px solid var(--gr-cyan);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-lg);
-  color: var(--gr-white);
+  color: var(--text-primary);
   font-size: var(--fs-14);
   transform: translateX(120%);
   animation: gr-toast-in var(--dur-slow) var(--ease-out) forwards;
@@ -67,8 +67,8 @@
 /* ---- Custom scrollbar (default browser bars look cheap) -------------- */
 * { scrollbar-width: thin; scrollbar-color: var(--gr-cyan-dark) transparent; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: var(--gr-black); }
-::-webkit-scrollbar-thumb { background: var(--gr-graphite); border-radius: var(--radius-pill); border: 2px solid var(--gr-black); }
+::-webkit-scrollbar-track { background: var(--surface-page); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: var(--radius-pill); border: 2px solid var(--surface-page); }
 ::-webkit-scrollbar-thumb:hover { background: var(--gr-cyan-dark); }
 
 /* ---- Reduced motion -------------------------------------------------- */
