@@ -50,6 +50,14 @@
           <label class="option-card"><input type="radio" name="payment" value="card" data-payment><span><span class="option-card__title">Card</span><span class="option-card__sub">Visa / Mastercard</span></span></label>
           <label class="option-card"><input type="radio" name="payment" value="cod" data-payment><span><span class="option-card__title">Cash on Delivery</span><span class="option-card__sub">Pay when it arrives</span></span></label>
 
+          <!-- "When do I get my money back" is the question behind most COD
+               hesitation, so answer it at the point of payment, not in a policy
+               page nobody opens. -->
+          <p class="caption" style="margin-top:var(--space-3)">
+            Refunds return by the same route you paid —
+            <a href="/modules/content/shipping-returns.html#refund-timeline">see the refund timeline</a>.
+          </p>
+
           <!-- Card fields (shown only when Card selected) -->
           <div data-card-fields hidden style="margin-top:var(--space-4)">
             <div class="form-grid">

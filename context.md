@@ -283,8 +283,13 @@ errors, and only then start the next. No parallel half-finished features.
       Messenger has no prefilled-text param — `m.me` only forwards `ref` — so it
       carries the product id. Verified: decoded message correct, no overflow at
       375/414/768, no console errors, no-JS fallback intact.
-- [ ] **0.4** Per-tender refund matrix on Shipping & Returns *(Daraz)* — bKash 5 days,
-      COD → bank deposit 5 days, card 10 days; linked from PDP + checkout
+- [x] **0.4** Per-tender refund matrix on Shipping & Returns *(Daraz)* — bKash/Nagad 5
+      working days, card 7–10 (the issuing bank owns the last step), COD → bKash/Nagad/bank
+      you nominate. Linked from the PDP trust block and from the checkout payment step,
+      because "when do I get my money back" is the question behind most COD hesitation.
+      Under 560px the table **stacks into labelled blocks** rather than scrolling
+      sideways — on a refund table the last column is the answer, so it must not be the
+      one that gets hidden. Verified: no overflow at 375/414/768, no console errors.
 - [ ] **3.1** Barcode + country of origin in the PDP spec table *(Shajgoj)* —
       provenance is the product, so it must be checkable
 - [ ] **1.4** One consistent delivery promise sitewide — flat ৳70 metro / ৳130 outside

@@ -33,3 +33,30 @@
 /* 404 */
 .notfound { text-align: center; padding: var(--space-9) var(--space-4); }
 .notfound__code { font-family: var(--font-display); font-size: clamp(5rem, 18vw, 11rem); line-height: 1; background: var(--gr-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* ---- Policy tables (refund timelines, delivery zones) -----------------
+   Wrapped in .table-scroll so a 3-column table scrolls inside its own box
+   at 375px instead of widening the document. */
+.table-scroll { overflow-x: auto; margin: var(--space-4) 0; }
+.policy-table { width: 100%; min-width: 460px; border-collapse: collapse; font-size: var(--fs-14); }
+.policy-table th, .policy-table td { text-align: left; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-hairline); vertical-align: top; }
+.policy-table thead th { color: var(--text-muted); font-weight: var(--fw-semibold); font-size: var(--fs-12); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.policy-table tbody th { font-weight: var(--fw-semibold); color: var(--text-primary); white-space: nowrap; }
+.policy-table td { color: var(--text-secondary); }
+.policy-table td:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Under ~560px a 3-column policy table can only scroll sideways, which buries
+   the last column — and on a refund table that column IS the answer. Stack each
+   row into a labelled block instead so nothing needs scrolling to be read. */
+@media (max-width: 560px) {
+  .table-scroll { overflow-x: visible; }
+  .policy-table { min-width: 0; }
+  .policy-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .policy-table tr { display: block; padding: var(--space-4) 0; border-bottom: 1px solid var(--border-hairline); }
+  .policy-table tbody tr:last-child { border-bottom: 0; }
+  .policy-table th, .policy-table td { display: block; border: 0; padding: 0; white-space: normal; }
+  .policy-table tbody th { font-size: var(--fs-16); margin-bottom: var(--space-2); }
+  .policy-table td { margin-top: var(--space-1); }
+  .policy-table td::before { content: attr(data-label) ": "; color: var(--text-muted); }
+  .policy-table td:last-child { white-space: normal; }
+}
