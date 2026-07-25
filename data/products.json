@@ -2,7 +2,8 @@
   "_meta": {
     "note": "Mock catalog served by shared/js/core/data-service.js. Fields map 1:1 onto the future GET /api/products payload (see shared/backend/api-contract.md). `image` is the card/gallery primary; `images` is the PDP gallery. `specs` and `moq` drive the B2B/industrial spec-sheet treatment. `createdAt` is an epoch-ish sort key for 'Newest'.",
     "currency": "BDT",
-    "version": 1
+    "version": 1,
+    "barcodeNote": "MOCK EAN-13 codes (valid check digit, not GS1-registered) — replace with real supplier barcodes."
   },
   "products": [
     {
@@ -36,7 +37,8 @@
       ],
       "shortDescription": "Soft, caramel-rich jumbo Medjool dates, hand-selected and cold-packed.",
       "description": "Grown in the Jordan Valley and graded jumbo for size and moisture. Naturally sweet with a caramel finish — a table centrepiece and an everyday energy source. Sourced. Verified. Delivered.",
-      "createdAt": 1718000000
+      "createdAt": 1718000000,
+      "barcode": "7836240540692"
     },
     {
       "id": "gr-1002",
@@ -67,7 +69,8 @@
       ],
       "shortDescription": "Single-origin Sidr honey, raw and unfiltered.",
       "description": "Harvested from Sidr trees and left raw to preserve enzymes and aroma. Deep amber, floral, and slow to crystallise.",
-      "createdAt": 1721000000
+      "createdAt": 1721000000,
+      "barcode": "1815491339893"
     },
     {
       "id": "gr-1003",
@@ -97,7 +100,8 @@
       ],
       "shortDescription": "Washed Ethiopian Arabica, medium roast, whole bean.",
       "description": "Bright citrus acidity with a jasmine aroma and a clean, sweet finish. Roasted in small batches and shipped within days.",
-      "createdAt": 1719500000
+      "createdAt": 1719500000,
+      "barcode": "5234894833153"
     },
     {
       "id": "gr-1004",
@@ -126,7 +130,8 @@
       ],
       "shortDescription": "Single-origin 70% dark chocolate, gift boxed.",
       "description": "Smooth, low-bitterness dark chocolate in a premium presentation box — a considered gift.",
-      "createdAt": 1720500000
+      "createdAt": 1720500000,
+      "barcode": "9764819319654"
     },
     {
       "id": "gr-1005",
@@ -153,7 +158,8 @@
       ],
       "shortDescription": "High-grown Ceylon black tea, full-leaf.",
       "description": "Brisk, bright, and aromatic — a single-estate Ceylon for everyday brewing.",
-      "createdAt": 1717000000
+      "createdAt": 1717000000,
+      "barcode": "4661223618210"
     },
     {
       "id": "gr-1101",
@@ -183,7 +189,8 @@
       ],
       "shortDescription": "Instant full-cream milk powder, cold-chain handled.",
       "description": "Spray-dried full-cream milk powder that dissolves cleanly in hot or cold water. Sealed tin, cold-chain delivery for freshness.",
-      "createdAt": 1719000000
+      "createdAt": 1719000000,
+      "barcode": "7615164113140"
     },
     {
       "id": "gr-1102",
@@ -213,7 +220,8 @@
       ],
       "shortDescription": "18-month aged Gouda, nutty and crystalline.",
       "description": "Matured for eighteen months to develop deep, caramel-nutty notes and a crystalline bite. Cold-chain delivered.",
-      "createdAt": 1720000000
+      "createdAt": 1720000000,
+      "barcode": "6806709855323"
     },
     {
       "id": "gr-1103",
@@ -241,7 +249,8 @@
       ],
       "shortDescription": "Rich, golden grass-fed butter.",
       "description": "Churned from grass-fed cream for a naturally golden colour and clean, creamy flavour.",
-      "createdAt": 1716000000
+      "createdAt": 1716000000,
+      "barcode": "1746926816712"
     },
     {
       "id": "gr-1201",
@@ -271,7 +280,8 @@
       ],
       "shortDescription": "Long-grain Kerman pistachios, roasted and lightly salted.",
       "description": "Naturally opened, generously sized pistachios roasted for crunch and lightly salted.",
-      "createdAt": 1719800000
+      "createdAt": 1719800000,
+      "barcode": "9526426403139"
     },
     {
       "id": "gr-1202",
@@ -301,7 +311,8 @@
       ],
       "shortDescription": "Whole raw almonds, premium grade.",
       "description": "Crisp, sweet whole almonds — snack, roast, or blend. Nitrogen-flushed for freshness.",
-      "createdAt": 1718500000
+      "createdAt": 1718500000,
+      "barcode": "2149843702349"
     },
     {
       "id": "gr-1203",
@@ -330,7 +341,8 @@
       ],
       "shortDescription": "W240-grade whole cashews.",
       "description": "Large, unbroken W240 cashews with a buttery snap.",
-      "createdAt": 1720800000
+      "createdAt": 1720800000,
+      "barcode": "4622454867242"
     },
     {
       "id": "gr-2001",
@@ -365,7 +377,8 @@
         "Charge": "USB-C, 10 min = 5 h",
         "Weight": "255 g"
       },
-      "createdAt": 1721500000
+      "createdAt": 1721500000,
+      "barcode": "6510205353480"
     },
     {
       "id": "gr-2002",
@@ -398,7 +411,8 @@
         "Sensors": "HR, SpO2, accel",
         "Water": "5 ATM"
       },
-      "createdAt": 1721200000
+      "createdAt": 1721200000,
+      "barcode": "8121326266405"
     },
     {
       "id": "gr-2003",
@@ -427,7 +441,8 @@
         "Connectivity": "Wi-Fi 6, Ethernet",
         "Power": "USB-C"
       },
-      "createdAt": 1719900000
+      "createdAt": 1719900000,
+      "barcode": "6872521572410"
     },
     {
       "id": "gr-2004",
@@ -458,7 +473,8 @@
         "ANC": "Hybrid",
         "Case": "Qi wireless"
       },
-      "createdAt": 1718800000
+      "createdAt": 1718800000,
+      "barcode": "6935805139157"
     },
     {
       "id": "gr-2501",
@@ -484,7 +500,8 @@
       ],
       "shortDescription": "Enamelled cast iron, oven-to-table.",
       "description": "A heirloom-grade enamelled cast-iron pot with even heat retention — braise, bake, and serve from the same vessel.",
-      "createdAt": 1720300000
+      "createdAt": 1720300000,
+      "barcode": "5192653665783"
     },
     {
       "id": "gr-2502",
@@ -510,7 +527,8 @@
       ],
       "shortDescription": "67-layer Damascus, VG-10 core.",
       "description": "A hand-finished gyuto with a VG-10 core and a 67-layer Damascus cladding — precise, balanced, and enduring.",
-      "createdAt": 1719300000
+      "createdAt": 1719300000,
+      "barcode": "1640015913354"
     },
     {
       "id": "gr-2503",
@@ -535,7 +553,8 @@
       ],
       "shortDescription": "Heat-proof carafe + dripper.",
       "description": "A minimal borosilicate pour-over set for a clean, bright cup.",
-      "createdAt": 1720900000
+      "createdAt": 1720900000,
+      "barcode": "9546759804403"
     },
     {
       "id": "gr-3001",
@@ -560,7 +579,8 @@
       ],
       "shortDescription": "Fine-gauge merino, temperature-regulating.",
       "description": "A fine-gauge extra-fine merino crew — soft, breathable, and quietly refined.",
-      "createdAt": 1719600000
+      "createdAt": 1719600000,
+      "barcode": "6832073803837"
     },
     {
       "id": "gr-3002",
@@ -585,7 +605,8 @@
       ],
       "shortDescription": "Vegetable-tanned full-grain leather holdall.",
       "description": "A vegetable-tanned full-grain weekender that ages beautifully — brass hardware, cotton-twill lining.",
-      "createdAt": 1720100000
+      "createdAt": 1720100000,
+      "barcode": "4712485330867"
     },
     {
       "id": "gr-3003",
@@ -610,7 +631,8 @@
       ],
       "shortDescription": "Hand-polished acetate, polarised lenses.",
       "description": "Hand-polished Italian acetate frames with polarised, UV400 lenses.",
-      "createdAt": 1720700000
+      "createdAt": 1720700000,
+      "barcode": "4596185592875"
     },
     {
       "id": "gr-3501",
@@ -636,7 +658,8 @@
       ],
       "shortDescription": "15% L-ascorbic acid, stabilised.",
       "description": "A stabilised vitamin-C serum that brightens and evens tone, formulated with ferulic acid.",
-      "createdAt": 1719400000
+      "createdAt": 1719400000,
+      "barcode": "0287660635180"
     },
     {
       "id": "gr-3502",
@@ -661,7 +684,8 @@
       ],
       "shortDescription": "Beard oil, balm, and comb.",
       "description": "A warm sandalwood grooming trio presented in a linen-lined box.",
-      "createdAt": 1720400000
+      "createdAt": 1720400000,
+      "barcode": "9257151035967"
     },
     {
       "id": "gr-4001",
@@ -686,7 +710,8 @@
       ],
       "shortDescription": "0.5mm gel rollerballs, smear-free.",
       "description": "Smooth, quick-drying gel rollerballs favoured for clean, consistent lines.",
-      "createdAt": 1719100000
+      "createdAt": 1719100000,
+      "barcode": "8910676623453"
     },
     {
       "id": "gr-4002",
@@ -711,7 +736,8 @@
       ],
       "shortDescription": "120gsm dotted, lay-flat binding.",
       "description": "A dotted A5 notebook on bleed-resistant 120gsm paper with a lay-flat binding.",
-      "createdAt": 1720600000
+      "createdAt": 1720600000,
+      "barcode": "6567875957654"
     },
     {
       "id": "gr-9001",
@@ -762,7 +788,8 @@
         "Compliance": "RoHS, REACH"
       },
       "datasheet": "#",
-      "createdAt": 1718200000
+      "createdAt": 1718200000,
+      "barcode": "6134536012634"
     },
     {
       "id": "gr-9002",
@@ -812,7 +839,8 @@
         "Packaging": "Tape & reel (1000)"
       },
       "datasheet": "#",
-      "createdAt": 1718300000
+      "createdAt": 1718300000,
+      "barcode": "5055605007324"
     },
     {
       "id": "gr-9003",
@@ -863,7 +891,8 @@
         "Compliance": "UL, TÜV, RoHS"
       },
       "datasheet": "#",
-      "createdAt": 1718400000
+      "createdAt": 1718400000,
+      "barcode": "1859042263800"
     },
     {
       "id": "gr-9004",
@@ -914,7 +943,8 @@
         "Compliance": "RoHS"
       },
       "datasheet": "#",
-      "createdAt": 1718600000
+      "createdAt": 1718600000,
+      "barcode": "2004201250897"
     },
     {
       "id": "gr-9005",
@@ -964,7 +994,8 @@
         "Compliance": "REACH, RoHS"
       },
       "datasheet": "#",
-      "createdAt": 1718700000
+      "createdAt": 1718700000,
+      "barcode": "4957252310295"
     },
     {
       "id": "gr-9006",
@@ -1015,7 +1046,8 @@
         "Mount": "Radial THT"
       },
       "datasheet": "#",
-      "createdAt": 1718900000
+      "createdAt": 1718900000,
+      "barcode": "7263350363918"
     },
     {
       "id": "gr-1006",
@@ -1045,7 +1077,8 @@
       ],
       "shortDescription": "First-flush organic Sencha, vivid and grassy.",
       "description": "A bright, first-flush Sencha with a clean, grassy sweetness. Shade-grown and stone-milled fresh.",
-      "createdAt": 1720750000
+      "createdAt": 1720750000,
+      "barcode": "2242530345284"
     },
     {
       "id": "gr-1204",
@@ -1072,7 +1105,8 @@
       ],
       "shortDescription": "Light-halves walnuts, buttery and fresh.",
       "description": "Premium light-quarter walnut halves — mild, buttery and never bitter.",
-      "createdAt": 1719700000
+      "createdAt": 1719700000,
+      "barcode": "6646400475426"
     },
     {
       "id": "gr-1205",
@@ -1101,7 +1135,8 @@
       ],
       "shortDescription": "Soft, sun-dried Malatya apricots.",
       "description": "Naturally sun-dried apricots from Malatya — plump, tangy-sweet, unsulphured.",
-      "createdAt": 1719200000
+      "createdAt": 1719200000,
+      "barcode": "7311413955850"
     },
     {
       "id": "gr-1104",
@@ -1130,7 +1165,8 @@
       ],
       "shortDescription": "Instant skimmed milk powder, resealable pouch.",
       "description": "Low-fat instant skimmed milk powder that dissolves cleanly. Cold-chain handled, resealable pouch.",
-      "createdAt": 1720650000
+      "createdAt": 1720650000,
+      "barcode": "3908888194422"
     },
     {
       "id": "gr-2005",
@@ -1162,7 +1198,8 @@
         "Bluetooth": "5.3",
         "Output": "20 W"
       },
-      "createdAt": 1721000000
+      "createdAt": 1721000000,
+      "barcode": "3278211515461"
     },
     {
       "id": "gr-2506",
@@ -1187,7 +1224,8 @@
       ],
       "shortDescription": "PFOA-free granite coating, induction-ready.",
       "description": "A durable granite-coated frying pan — PFOA-free, even heating, induction-ready.",
-      "createdAt": 1719950000
+      "createdAt": 1719950000,
+      "barcode": "6637995503465"
     },
     {
       "id": "gr-2507",
@@ -1212,7 +1250,8 @@
       ],
       "shortDescription": "Borosilicate double-wall, keeps drinks hot.",
       "description": "Hand-blown double-wall borosilicate mugs — insulating, lightweight and elegant.",
-      "createdAt": 1720850000
+      "createdAt": 1720850000,
+      "barcode": "4089031776012"
     },
     {
       "id": "gr-3004",
@@ -1237,7 +1276,8 @@
       ],
       "shortDescription": "Vegetable-tanned leather, brass buckle.",
       "description": "A vegetable-tanned full-grain belt with a solid brass buckle that patinas beautifully.",
-      "createdAt": 1719450000
+      "createdAt": 1719450000,
+      "barcode": "3386125118958"
     },
     {
       "id": "gr-3005",
@@ -1263,7 +1303,8 @@
       ],
       "shortDescription": "Cashmere-merino blend, feather-light.",
       "description": "A feather-light cashmere-merino scarf — warm without weight, in a quiet palette.",
-      "createdAt": 1720950000
+      "createdAt": 1720950000,
+      "barcode": "5466656600936"
     },
     {
       "id": "gr-3505",
@@ -1288,7 +1329,8 @@
       ],
       "shortDescription": "Multi-weight hyaluronic acid, lightweight gel.",
       "description": "A lightweight gel moisturiser with multi-weight hyaluronic acid for lasting, non-greasy hydration.",
-      "createdAt": 1719650000
+      "createdAt": 1719650000,
+      "barcode": "9139788804836"
     },
     {
       "id": "gr-3506",
@@ -1313,7 +1355,8 @@
       ],
       "shortDescription": "Broad-spectrum SPF 50, no white cast.",
       "description": "A broad-spectrum mineral sunscreen that absorbs cleanly with no white cast — daily-wear finish.",
-      "createdAt": 1720450000
+      "createdAt": 1720450000,
+      "barcode": "3765883382250"
     },
     {
       "id": "gr-4003",
@@ -1338,7 +1381,8 @@
       ],
       "shortDescription": "Solid walnut, felt-lined compartments.",
       "description": "A solid walnut desk organiser with felt-lined compartments — quiet order for the desk.",
-      "createdAt": 1720250000
+      "createdAt": 1720250000,
+      "barcode": "5137174655646"
     },
     {
       "id": "gr-4004",
@@ -1363,7 +1407,8 @@
       ],
       "shortDescription": "Metal-body drafting pencils, three gauges.",
       "description": "A three-gauge set of metal-body drafting pencils with cushioned lead and knurled grips.",
-      "createdAt": 1720150000
+      "createdAt": 1720150000,
+      "barcode": "0468805192502"
     }
   ]
 }

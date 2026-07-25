@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- TEMPORARY QA HARNESS — delete after use.
+<!-- Responsive QA harness (author-time only; never linked from the site).
      Headless Chrome clamps its viewport to ~526px, so true 375px cannot be
      screenshotted directly. An iframe establishes its own viewport for media
      queries, so framing the page at an exact width gives a truthful render
@@ -24,6 +24,7 @@
   const only = qs.get('w');
   const fh = +(qs.get('h') || 0);
   const scrollTo = +(qs.get('s') || 0);
+  const click = qs.get('click');
   const ALL = [[375, 2400], [414, 2400], [768, 2000]];
   const SIZES = (only ? ALL.filter(([w]) => String(w) === only) : ALL)
     .map(([w, h]) => [w, fh || h]);
@@ -45,6 +46,12 @@
       // Give lazy/JS-rendered content a beat to settle before measuring.
       setTimeout(() => {
         try {
+          // ?click=<selector> activates something inside the frame first, so
+          // tab panels and other JS-revealed content can be audited too.
+          if (click) {
+            const el = f.contentDocument.querySelector(click);
+            if (el) el.click();
+          }
           if (scrollTo) {
             // style.css sets `html { scroll-behavior: smooth }`, and a smooth
             // scroll never completes under --virtual-time-budget, so force it

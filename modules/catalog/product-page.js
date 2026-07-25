@@ -194,16 +194,43 @@ function paintOrderChannels(p) {
 function paintTabs(p) {
   document.querySelector('[data-pdp-description]').textContent = p.description || p.shortDescription || '';
 
-  // Specifications — spec-sheet table for industrial, or a simple attribute list.
+  // Specifications. Provenance leads and renders for EVERY product — "Sourced.
+  // Verified. Delivered." is the promise, so the checkable facts (origin,
+  // barcode) are the product, not a footnote. The previous split sent industrial
+  // SKUs down a specs-only branch that dropped origin entirely.
   const specsHost = document.querySelector('[data-pdp-specs]');
+  const details = {
+    Brand: p.brand,
+    'Country of origin': p.origin,
+    Barcode: p.barcode,
+    Category: p.categoryName,
+  };
+  if (p.moq) details['Minimum order'] = `${p.moq} units`;
+
+  const detailRows = Object.entries(details)
+    .filter(([, v]) => v)
+    .map(([k, v]) => {
+      const cell = k === 'Barcode'
+        ? `<td><span class="barcode-value">${escapeHtml(String(v))}</span></td>`
+        : `<td>${escapeHtml(String(v))}</td>`;
+      return `<tr><th scope="row">${k}</th>${cell}</tr>`;
+    })
+    .join('');
+
+  let html = `<h3 class="spec-heading">Product details</h3>
+    <table class="spec-table"><tbody>${detailRows}</tbody></table>`;
+
   if (p.specs && Object.keys(p.specs).length) {
-    const rows = Object.entries(p.specs).map(([k, v]) => `<tr><th scope="row">${escapeHtml(k)}</th><td>${escapeHtml(String(v))}</td></tr>`).join('');
-    specsHost.innerHTML = `<table class="spec-table"><tbody>${rows}</tbody></table>` +
-      (p.datasheet ? `<a class="btn-gr btn-outline-gr btn-sm-gr" href="${p.datasheet}" style="margin-top:1rem" download>Download datasheet (PDF)</a>` : '');
-  } else {
-    const attrs = { Brand: p.brand, Origin: p.origin, Category: p.categoryName };
-    specsHost.innerHTML = `<table class="spec-table"><tbody>${Object.entries(attrs).filter(([, v]) => v).map(([k, v]) => `<tr><th scope="row">${k}</th><td>${escapeHtml(v)}</td></tr>`).join('')}</tbody></table>`;
+    const rows = Object.entries(p.specs)
+      .map(([k, v]) => `<tr><th scope="row">${escapeHtml(k)}</th><td>${escapeHtml(String(v))}</td></tr>`)
+      .join('');
+    html += `<h3 class="spec-heading">Technical specification</h3>
+      <table class="spec-table"><tbody>${rows}</tbody></table>`;
+    if (p.datasheet) {
+      html += `<a class="btn-gr btn-outline-gr btn-sm-gr" href="${p.datasheet}" style="margin-top:1rem" download>Download datasheet (PDF)</a>`;
+    }
   }
+  specsHost.innerHTML = html;
 
   renderReviews(p);
 

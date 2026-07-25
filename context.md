@@ -290,8 +290,14 @@ errors, and only then start the next. No parallel half-finished features.
       Under 560px the table **stacks into labelled blocks** rather than scrolling
       sideways — on a refund table the last column is the answer, so it must not be the
       one that gets hidden. Verified: no overflow at 375/414/768, no console errors.
-- [ ] **3.1** Barcode + country of origin in the PDP spec table *(Shajgoj)* —
-      provenance is the product, so it must be checkable
+- [x] **3.1** Barcode + country of origin in the PDP spec table *(Shajgoj)* —
+      provenance is the product, so it must be checkable. The Specifications tab now
+      leads with a **Product details** block (brand, country of origin, barcode,
+      category, MOQ) for **every** product, then the technical sheet for industrial
+      SKUs. This fixed a real bug: the old code branched on `p.specs` and industrial
+      products fell down a specs-only path that **dropped origin entirely** — the one
+      fact the brand promise rests on. All 44 products carry a mock EAN-13 with a
+      valid check digit.
 - [ ] **1.4** One consistent delivery promise sitewide — flat ৳70 metro / ৳130 outside
       *(Ghorer Bazar)* + gift threshold, replacing the free-delivery banner
 - [ ] **4.2** Absolute savings ("Save ৳125") next to the percentage *(Shajgoj)*
@@ -341,6 +347,9 @@ metadata, cashback clawed back from refunds, and app-install interstitials.
 - **Payment gateway** at checkout is UI-only — `// TODO: connect to payment gateway`.
 - **Auth/session** mocked via localStorage — replace with JWT.
 - **Product imagery** uses placeholders — swap for real photography with vignette treatment.
+- **Barcodes are mock** — `data/products.json` carries synthetic EAN-13 codes that pass
+  check-digit validation but are **not GS1-registered**. Replace with real supplier
+  barcodes before launch (`_meta.barcodeNote` records this in the data file too).
 - **Multi-language** (Bangla/English/Arabic) — font stack ready; not wired.
 
 ---
