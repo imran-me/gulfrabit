@@ -7,7 +7,7 @@
 
 import { getProductById, getRelated, getAllProducts } from '../../shared/js/core/data-service.js';
 import { storage } from '../../shared/js/core/storage.js';
-import { formatBDT, discountLabel } from '../../shared/js/utils/format-currency.js';
+import { formatBDT, discountLabel, savingsLabel } from '../../shared/js/utils/format-currency.js';
 import * as store from '../../shared/js/core/state.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 import { openCartDrawer } from '../../shared/js/components/cart-drawer.js';
@@ -135,7 +135,10 @@ function paintInfo(p) {
 
   document.querySelector('[data-pdp-price]').textContent = formatBDT(p.price);
   document.querySelector('[data-pdp-original]').textContent = p.originalPrice > p.price ? formatBDT(p.originalPrice) : '';
-  document.querySelector('[data-pdp-discount]').innerHTML = p.originalPrice > p.price ? `<span class="badge-gr badge-sale">${discountLabel(p.originalPrice, p.price)}</span>` : '';
+  document.querySelector('[data-pdp-discount]').innerHTML = p.originalPrice > p.price
+    ? `<span class="badge-gr badge-sale">${discountLabel(p.originalPrice, p.price)}</span>`
+      + `<span class="price-saving">${savingsLabel(p.originalPrice, p.price)}</span>`
+    : '';
   document.querySelector('[data-pdp-short]').textContent = p.shortDescription || '';
   document.querySelector('[data-pdp-stock]').innerHTML = p.inStock
     ? '<span style="color:var(--lime-ink)">● In stock</span>'

@@ -309,7 +309,14 @@ errors, and only then start the next. No parallel half-finished features.
       delivery over ৳3,000" while checkout charged ৳60 unconditionally — there was no
       free-delivery logic in checkout at all. Verified: subtotal ৳4,550 + ৳70 = ৳4,620,
       three zone options correct, no module errors, no overflow at 375/414/768.
-- [ ] **4.2** Absolute savings ("Save ৳125") next to the percentage *(Shajgoj)*
+- [x] **4.2** Absolute savings ("Save ৳ 350") next to the percentage *(Shajgoj)* —
+      `savingsLabel()` in `format-currency.js`, rendered on the product card, the PDP
+      and quick-view. In BDT the absolute figure lands harder than the percent, because
+      "19% off" needs arithmetic against a price the shopper has not memorised. Uses
+      `--lime-ink` (4.9:1), never raw `--gr-lime` (1.9:1 on white).
+      Also fixed a **pre-existing layout flaw this exposed**: `.price` now has
+      `white-space: nowrap`, because `formatBDT` emits "৳ 1,450" with a real space and
+      2-up cards at 375px were breaking the symbol onto its own line.
 - [ ] **4.1** Fixed badge slots, priority-ordered, capped at two *(Daraz)*
 - [ ] **0.2/0.3** Checkout trimmed to BD-essential fields (phone is the identity
       primitive; email optional) + district→thana selects driving delivery price

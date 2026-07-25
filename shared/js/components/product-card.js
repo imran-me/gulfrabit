@@ -13,7 +13,7 @@
  * JS only adds interaction.
  */
 
-import { formatBDT, discountLabel } from '../utils/format-currency.js';
+import { formatBDT, discountLabel, savingsLabel } from '../utils/format-currency.js';
 import * as store from '../core/state.js';
 import { siteURL } from '../core/paths.js';
 import { toast } from './toast-notifications.js';
@@ -82,6 +82,7 @@ export function productCardHTML(product) {
         <span class="price product-card__price">${formatBDT(price)}</span>
         ${originalPrice && originalPrice > price ? `<span class="price price--strike">${formatBDT(originalPrice)}</span>` : ''}
       </div>
+      ${originalPrice && originalPrice > price ? `<span class="price-saving">${savingsLabel(originalPrice, price)}</span>` : ''}
       <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart"
               ${inStock ? '' : 'disabled'} style="margin-top:.5rem">
         ${inStock ? 'Add to Cart' : 'Notify Me'}

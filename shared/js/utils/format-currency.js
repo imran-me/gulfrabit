@@ -35,3 +35,16 @@ export function discountLabel(original, current) {
   const pct = Math.round(((original - current) / original) * 100);
   return pct > 0 ? `-${pct}%` : '';
 }
+
+/**
+ * Absolute saving, e.g. "Save ৳ 350". Empty when there is no discount.
+ *
+ * Shown alongside the percentage rather than instead of it: in a price-sensitive
+ * market the taka figure lands harder than the percent, because "19% off" needs
+ * arithmetic against a price the shopper has not memorised. Shajgoj states the
+ * discount four ways for exactly this reason.
+ */
+export function savingsLabel(original, current) {
+  if (!original || original <= current) return '';
+  return `Save ${formatBDT(original - current)}`;
+}

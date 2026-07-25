@@ -56,7 +56,10 @@ a { color: var(--link); text-decoration: none; transition: color var(--dur-fast)
 a:hover { color: var(--link-hover); }
 
 /* ---- Prices / numerals — align in lists and carts -------------------- */
+/* nowrap: formatBDT renders "৳ 1,450" with a real space, so a narrow column
+   (2-up cards at 375px) would otherwise break the symbol onto its own line. */
 .price, .tabular { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+.price { white-space: nowrap; }
 .price { font-weight: var(--fw-semibold); }
 .price--strike { color: var(--text-muted); text-decoration: line-through; font-weight: var(--fw-regular); }
 

@@ -116,3 +116,16 @@
    Card and page are both white now, so the hairline border does the
    separating and a very soft shadow supplies the depth. */
 .surface-gr, .product-card, .category-card { box-shadow: var(--shadow-sm); }
+
+/* ---- Absolute saving ---------------------------------------------------
+   Sits with the price as a second signal to the percentage badge. Uses the
+   accessible green (--lime-ink, 4.9:1) rather than raw --gr-lime, which is
+   1.9:1 on white and unreadable as text. */
+.price-saving {
+  display: inline-block;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--lime-ink);
+  font-variant-numeric: tabular-nums;
+}
+.pdp-price .price-saving { margin-left: var(--space-2); }

@@ -8,7 +8,7 @@
  */
 
 import { getProductById } from '../core/data-service.js';
-import { formatBDT, discountLabel } from '../utils/format-currency.js';
+import { formatBDT, discountLabel, savingsLabel } from '../utils/format-currency.js';
 import * as store from '../core/state.js';
 import { siteURL } from '../core/paths.js';
 import { toast } from './toast-notifications.js';
@@ -54,7 +54,7 @@ export async function openQuickView(id) {
           <h2 class="h3" style="margin:.5rem 0 1rem">${escapeHtml(p.title)}</h2>
           <div class="product-card__price-row" style="margin-bottom:1rem">
             <span class="price" style="font-size:var(--fs-25)">${formatBDT(p.price)}</span>
-            ${p.originalPrice && p.originalPrice > p.price ? `<span class="price price--strike">${formatBDT(p.originalPrice)}</span> <span class="badge-gr badge-sale">${discountLabel(p.originalPrice, p.price)}</span>` : ''}
+            ${p.originalPrice && p.originalPrice > p.price ? `<span class="price price--strike">${formatBDT(p.originalPrice)}</span> <span class="badge-gr badge-sale">${discountLabel(p.originalPrice, p.price)}</span> <span class="price-saving">${savingsLabel(p.originalPrice, p.price)}</span>` : ''}
           </div>
           <p class="text-muted-gr" style="margin-bottom:1.5rem">${escapeHtml(p.shortDescription || p.description || '')}</p>
           <div style="display:flex;gap:.75rem">
