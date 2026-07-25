@@ -11,7 +11,7 @@ import { formatBDT, discountLabel, savingsLabel } from '../../shared/js/utils/fo
 import * as store from '../../shared/js/core/state.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 import { openCartDrawer } from '../../shared/js/components/cart-drawer.js';
-import { renderProductGrid } from '../../shared/js/components/product-card.js';
+import { renderProductGrid, productBadges } from '../../shared/js/components/product-card.js';
 import { setup as setupStepper } from '../../shared/js/components/quantity-stepper.js';
 import { initWishlistButtons } from '../../shared/js/components/wishlist.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';
@@ -116,12 +116,8 @@ function paintGallery(p) {
 }
 
 function paintInfo(p) {
-  const badges = [];
-  if (p.tags?.includes('premium')) badges.push('<span class="badge-gr badge-premium">Premium</span>');
-  if (p.originalPrice > p.price) badges.push(`<span class="badge-gr badge-sale">${discountLabel(p.originalPrice, p.price)}</span>`);
-  if (p.tags?.includes('new')) badges.push('<span class="badge-gr badge-new">New</span>');
-  if (p.tags?.includes('b2b')) badges.push('<span class="badge-gr badge-origin">B2B</span>');
-  document.querySelector('[data-pdp-badges]').innerHTML = badges.join('');
+  // Same priority as the card, one extra slot — the buy column has the room.
+  document.querySelector('[data-pdp-badges]').innerHTML = productBadges(p, 3).join('');
 
   document.querySelector('[data-pdp-brand]').textContent = [p.brand, p.origin].filter(Boolean).join(' · ');
   document.querySelector('[data-pdp-title]').textContent = p.title;

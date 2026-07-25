@@ -41,18 +41,46 @@ export function productURL(product) {
 }
 
 /** Canonical card markup for a product object. */
+/**
+ * Badges in fixed priority order, capped so the stack can never sprawl.
+ *
+ * Daraz solves badge sprawl by having the server return pre-composed badge
+ * images in numbered slots, which caps the row deterministically. We don't need
+ * the sprite machinery, but we do need the discipline: a stable priority and a
+ * hard limit, so two cards side by side always have the same badge geometry.
+ *
+ * Priority is by how much the badge changes a buying decision. Sold-out
+ * outranks everything (nothing else matters if you can't buy it) and returns
+ * alone; a discount beats a quality label; "new" is the weakest signal and only
+ * appears when nothing louder is competing for the slot.
+ *
+ * @param {object} product
+ * @param {number} [max] slots available — 2 on a card, 3 on the roomier PDP
+ * @returns {string[]} badge HTML, already truncated to `max`
+ */
+export function productBadges(product, max = 2) {
+  const { price, originalPrice, inStock = true, tags = [] } = product;
+
+  if (!inStock) return ['<span class="badge-gr badge-out">Sold out</span>'];
+
+  const candidates = [
+    originalPrice && originalPrice > price
+      ? `<span class="badge-gr badge-sale">${discountLabel(originalPrice, price)}</span>` : '',
+    tags.includes('premium') ? '<span class="badge-gr badge-premium">Premium</span>' : '',
+    tags.includes('b2b') ? '<span class="badge-gr badge-origin">B2B</span>' : '',
+    tags.includes('new') ? '<span class="badge-gr badge-new">New</span>' : '',
+  ];
+
+  return candidates.filter(Boolean).slice(0, max);
+}
+
 export function productCardHTML(product) {
   const {
     id, title, brand, origin, price, originalPrice, image, rating = 0,
     reviewCount = 0, inStock = true, tags = [],
   } = product;
 
-  const badges = [];
-  if (tags.includes('premium')) badges.push('<span class="badge-gr badge-premium">Premium</span>');
-  if (originalPrice && originalPrice > price) badges.push(`<span class="badge-gr badge-sale">${discountLabel(originalPrice, price)}</span>`);
-  else if (tags.includes('new')) badges.push('<span class="badge-gr badge-new">New</span>');
-  if (!inStock) badges.push('<span class="badge-gr badge-out">Sold out</span>');
-
+  const badges = productBadges(product);
   const wished = store.isWishlisted(id);
 
   return `

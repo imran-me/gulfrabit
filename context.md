@@ -317,7 +317,12 @@ errors, and only then start the next. No parallel half-finished features.
       Also fixed a **pre-existing layout flaw this exposed**: `.price` now has
       `white-space: nowrap`, because `formatBDT` emits "৳ 1,450" with a real space and
       2-up cards at 375px were breaking the symbol onto its own line.
-- [ ] **4.1** Fixed badge slots, priority-ordered, capped at two *(Daraz)*
+- [x] **4.1** Fixed badge slots, priority-ordered, capped at two *(Daraz)* —
+      `productBadges(product, max)` in `product-card.js` is the one source; the card
+      takes 2 slots, the roomier PDP takes 3. Priority is by decision weight:
+      **sold-out** (returns alone — nothing else matters if you can't buy it) →
+      **discount** → **premium** → **B2B** → **new**. Previously premium outranked the
+      discount and an out-of-stock item still advertised "-17%" beside "Sold out".
 - [ ] **0.2/0.3** Checkout trimmed to BD-essential fields (phone is the identity
       primitive; email optional) + district→thana selects driving delivery price
 - [ ] **1.1** Gift-with-purchase threshold with live progress in cart + drawer
