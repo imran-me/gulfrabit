@@ -157,6 +157,38 @@ function paintInfo(p) {
   delete wb.dataset.ready;
   wbOld.replaceWith(wb);
   initWishlistButtons(document);
+
+  paintOrderChannels(p);
+}
+
+/**
+ * Carry the product into the chat so the agent never has to ask "which one?".
+ * The number is read back out of the markup so the fragment stays the only
+ * place it is written. Messenger has no prefilled-text parameter — m.me only
+ * forwards `ref` to the page's webhook — so it gets the id and nothing more.
+ */
+function paintOrderChannels(p) {
+  const link = siteURL(`modules/catalog/product.html?id=${encodeURIComponent(p.id)}`);
+  const message = [
+    'Hello GulfRabit, I would like to order:',
+    `Product: ${p.title}`,
+    `Price: ${formatBDT(p.price)}`,
+    `SKU: ${p.id}`,
+    `Link: ${link}`,
+  ].join('\n');
+
+  const wa = document.querySelector('[data-order-whatsapp]');
+  if (wa) {
+    const phone = (wa.getAttribute('href').match(/wa\.me\/(\d+)/) || [])[1];
+    if (phone) wa.href = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    wa.setAttribute('aria-label', `Order ${p.title} on WhatsApp`);
+  }
+
+  const fb = document.querySelector('[data-order-messenger]');
+  if (fb) {
+    fb.href = `${fb.getAttribute('href').split('?')[0]}?ref=${encodeURIComponent(`product-${p.id}`)}`;
+    fb.setAttribute('aria-label', `Message us about ${p.title}`);
+  }
 }
 
 function paintTabs(p) {

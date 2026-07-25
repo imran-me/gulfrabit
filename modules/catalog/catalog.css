@@ -100,3 +100,10 @@
 /* ---- Chips (active filters) ------------------------------------------ */
 .chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-pill); background: var(--surface-sunken); border: 1px solid var(--border-hairline); font-size: var(--fs-12); }
 .chip button { background: none; border: 0; color: var(--text-muted); cursor: pointer; }
+
+/* ---- Order channels (WhatsApp / Messenger) ---------------------------
+   Sit under the wishlist button. flex-basis is set so the pair wraps to a
+   stacked full-width layout once the buy column drops under ~400px. */
+.order-channels { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-3); }
+.order-channel { flex: 1 1 190px; }
+.order-channel__icon { flex-shrink: 0; }

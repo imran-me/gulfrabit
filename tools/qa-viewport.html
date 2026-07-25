@@ -1,0 +1,82 @@
+<!doctype html>
+<!-- TEMPORARY QA HARNESS — delete after use.
+     Headless Chrome clamps its viewport to ~526px, so true 375px cannot be
+     screenshotted directly. An iframe establishes its own viewport for media
+     queries, so framing the page at an exact width gives a truthful render
+     AND lets us measure real horizontal overflow (same-origin). -->
+<meta charset="utf-8">
+<title>GulfRabit · viewport QA</title>
+<style>
+  body { margin:0; font:13px/1.4 system-ui, sans-serif; background:#20242a; color:#fff; }
+  .rail { display:flex; gap:16px; padding:16px; align-items:flex-start; }
+  .col { flex:0 0 auto; }
+  .cap { padding:6px 8px; font-weight:600; letter-spacing:.02em; }
+  .verdict { padding:6px 8px; font-family:ui-monospace,monospace; font-size:12px; white-space:pre; }
+  .ok   { background:#123d1e; color:#9AE6A0; }
+  .bad  { background:#4a1420; color:#FF9AA6; }
+  iframe { border:0; background:#fff; display:block; }
+</style>
+<div class="rail" id="rail"></div>
+<script>
+  const qs = new URLSearchParams(location.search);
+  // ?w= narrows the audit to one width, ?h= sets frame height, ?s= scrolls the
+  // framed page so a specific band (e.g. the buy box) is visible in a shot.
+  const only = qs.get('w');
+  const fh = +(qs.get('h') || 0);
+  const scrollTo = +(qs.get('s') || 0);
+  const ALL = [[375, 2400], [414, 2400], [768, 2000]];
+  const SIZES = (only ? ALL.filter(([w]) => String(w) === only) : ALL)
+    .map(([w, h]) => [w, fh || h]);
+  const target = qs.get('u') || '../modules/catalog/product.html?id=gr-1001';
+
+  const rail = document.getElementById('rail');
+  SIZES.forEach(([w, h]) => {
+    const col = document.createElement('div');
+    col.className = 'col';
+    col.innerHTML = `<div class="cap">${w}px</div>`;
+    const f = document.createElement('iframe');
+    f.width = w; f.height = h; f.src = target;
+    const v = document.createElement('div');
+    v.className = 'verdict'; v.textContent = 'measuring…';
+    col.appendChild(f); col.appendChild(v);
+    rail.appendChild(col);
+
+    f.addEventListener('load', () => {
+      // Give lazy/JS-rendered content a beat to settle before measuring.
+      setTimeout(() => {
+        try {
+          if (scrollTo) {
+            // style.css sets `html { scroll-behavior: smooth }`, and a smooth
+            // scroll never completes under --virtual-time-budget, so force it
+            // to an instant jump before measuring/screenshotting.
+            f.contentDocument.documentElement.style.scrollBehavior = 'auto';
+            f.contentWindow.scrollTo(0, scrollTo);
+          }
+          const d = f.contentDocument.documentElement;
+          const scrollW = Math.max(d.scrollWidth, f.contentDocument.body.scrollWidth);
+          const clientW = d.clientWidth;
+          const over = scrollW - clientW;
+          // Find the widest offending elements so a failure is actionable.
+          let culprits = [];
+          if (over > 0) {
+            f.contentDocument.querySelectorAll('*').forEach((el) => {
+              const r = el.getBoundingClientRect();
+              if (r.right > clientW + 1) {
+                culprits.push(`${el.tagName.toLowerCase()}${el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/).slice(0,2).join('.') : ''} → ${Math.round(r.right)}px`);
+              }
+            });
+            culprits = [...new Set(culprits)].slice(0, 6);
+          }
+          v.className = 'verdict ' + (over > 0 ? 'bad' : 'ok');
+          v.textContent = over > 0
+            ? `OVERFLOW +${over}px\nscrollW ${scrollW} > ${clientW}\n` + culprits.join('\n')
+            : `OK  no overflow\nscrollW ${scrollW} = ${clientW}`;
+          v.dataset.result = over > 0 ? 'OVERFLOW' : 'OK';
+        } catch (e) {
+          v.className = 'verdict bad';
+          v.textContent = 'measure failed: ' + e.message;
+        }
+      }, 2500);
+    });
+  });
+</script>

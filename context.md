@@ -266,6 +266,53 @@ inlined into pages by `tools/assemble.py`).
 - [ ] Manual visual QA across 375/768/1024/1440/1920 in a real browser (recommended next)
 - [x] Final context.md update + backend integration notes
 
+### Phase 6 — Competitor-derived features (2026-07-25)
+
+Derived from live teardowns of **Shajgoj**, **Ghorer Bazar** and **Daraz BD** —
+see `research/competitor-analysis.md` (findings) and `research/implementation-plan.md`
+(what to build, where, and why). Ordered by value per hour.
+
+**Working rule for this phase:** build **one item at a time**, verify it 2–3× for
+pixel accuracy, function, responsiveness (375/768/1024/1440/1920) and console
+errors, and only then start the next. No parallel half-finished features.
+
+- [x] **0.1** WhatsApp + Messenger pre-filled order CTAs on the PDP *(Ghorer Bazar)*
+      — deep link carries title, price, SKU and absolute product URL. Links are
+      **real HTML** (work with JS off); `product-page.js` only rewrites the message,
+      and reads the phone number back out of the href so the number is written once.
+      Messenger has no prefilled-text param — `m.me` only forwards `ref` — so it
+      carries the product id. Verified: decoded message correct, no overflow at
+      375/414/768, no console errors, no-JS fallback intact.
+- [ ] **0.4** Per-tender refund matrix on Shipping & Returns *(Daraz)* — bKash 5 days,
+      COD → bank deposit 5 days, card 10 days; linked from PDP + checkout
+- [ ] **3.1** Barcode + country of origin in the PDP spec table *(Shajgoj)* —
+      provenance is the product, so it must be checkable
+- [ ] **1.4** One consistent delivery promise sitewide — flat ৳70 metro / ৳130 outside
+      *(Ghorer Bazar)* + gift threshold, replacing the free-delivery banner
+- [ ] **4.2** Absolute savings ("Save ৳125") next to the percentage *(Shajgoj)*
+- [ ] **4.1** Fixed badge slots, priority-ordered, capped at two *(Daraz)*
+- [ ] **0.2/0.3** Checkout trimmed to BD-essential fields (phone is the identity
+      primitive; email optional) + district→thana selects driving delivery price
+- [ ] **1.1** Gift-with-purchase threshold with live progress in cart + drawer
+- [ ] **1.2** Frequently-bought-together with live savings math
+- [ ] **1.3** Offer *rules* rendered on the PDP, not just a badge *(Shajgoj)*
+- [ ] **2.1** Per-product search synonyms + **2.3** rotating merchandised placeholder
+- [ ] **2.2** Concern/use-case query suggestions
+- [ ] **2.4** Category-schema-driven facets via one generic URL param *(Daraz `ppath`)*
+      — the unlock for filtering B2B `specs`
+- [ ] **3.2** Real sourcing/authenticity page (the hero "Our Sourcing" CTA needs a home)
+- [ ] **3.3** Merchant-authored FAQ + Q&A per product *(works with zero customers)*
+- [ ] **5.1** **Bengali webfont** with correct `unicode-range: U+0980-09FF` —
+      none of the three market leaders ships one; Daraz sends Greek and Cyrillic to
+      Dhaka and no Bengali. Biggest available differentiator.
+- [ ] **5.3** Pre-production: drop the Tailwind Play CDN, ship `srcset`+AVIF with
+      real photography, enable Brotli + long `max-age`, add CSP at the host
+
+**Deliberately rejected** (recorded so they don't get re-proposed): Daraz's
+gamification (coins/games/mystery boxes — signals "cheap" on a premium brand),
+perpetual countdown urgency, keyword-stuffed titles, 384-link SEO footers, 10px
+metadata, cashback clawed back from refunds, and app-install interstitials.
+
 ---
 
 ## 8. Known Issues / Follow-ups
