@@ -298,8 +298,17 @@ errors, and only then start the next. No parallel half-finished features.
       products fell down a specs-only path that **dropped origin entirely** — the one
       fact the brand promise rests on. All 44 products carry a mock EAN-13 with a
       valid check digit.
-- [ ] **1.4** One consistent delivery promise sitewide — flat ৳70 metro / ৳130 outside
-      *(Ghorer Bazar)* + gift threshold, replacing the free-delivery banner
+- [x] **1.4** One consistent delivery promise sitewide — flat **৳70** Dhaka & Chattogram
+      (72 hours) / **৳130** rest of Bangladesh (4 working days) / **৳150** express Dhaka,
+      *the same charge whatever the order is worth* **(Ghorer Bazar)**. Cold-chain is
+      **included** on perishables, never a surcharge — the old ৳200 cold-chain option
+      contradicted the banner on all 24 pages. Canonical values live in
+      `shared/js/core/delivery.js`; cart, checkout, its mock backend, order confirmation
+      and order tracking all read from it, so they cannot drift again.
+      **This fixed a real functional bug:** the banner and cart both promised "free
+      delivery over ৳3,000" while checkout charged ৳60 unconditionally — there was no
+      free-delivery logic in checkout at all. Verified: subtotal ৳4,550 + ৳70 = ৳4,620,
+      three zone options correct, no module errors, no overflow at 375/414/768.
 - [ ] **4.2** Absolute savings ("Save ৳125") next to the percentage *(Shajgoj)*
 - [ ] **4.1** Fixed badge slots, priority-ordered, capped at two *(Daraz)*
 - [ ] **0.2/0.3** Checkout trimmed to BD-essential fields (phone is the identity

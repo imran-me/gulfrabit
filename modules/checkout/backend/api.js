@@ -15,9 +15,7 @@ export async function createOrder(order) {
 
 export async function getShippingQuote(/* address, cart */) {
   // TODO: backend — POST /checkout/shipping-quote.
-  return [
-    { id: 'standard', label: 'Standard', cost: 60 },
-    { id: 'express', label: 'Express (Dhaka)', cost: 150 },
-    { id: 'coldchain', label: 'Cold-chain', cost: 200 },
-  ];
+  // Mirrors shared/js/core/delivery.js — cold-chain is NOT a line item; it is
+  // included on perishables, which is what the site promises on every page.
+  return DELIVERY_OPTIONS.map(({ id, label, cost }) => ({ id, label, cost }));
 }

@@ -3,6 +3,7 @@
  * Looks up an order by ?id= (or the lookup field) from the local order history
  * merged with the mock orders.json, and renders a stage timeline.
  */
+import { deliveryOption } from '../../shared/js/core/delivery.js';
 import { getMockOrders } from '../../shared/js/core/data-service.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
@@ -48,7 +49,10 @@ function render(o) {
   document.querySelector('[data-track-date]').textContent = `Placed ${o.date}`;
   document.querySelector('[data-track-status]').innerHTML = statusBadge(o.status);
   document.querySelector('[data-track-address]').textContent = o.address || '—';
-  document.querySelector('[data-track-eta]').textContent = o.status === 'delivered' ? 'Delivered' : '2–5 business days';
+  // Quote the ETA for the zone actually chosen, not a generic range. Orders
+  // from the mock history predate zones, so fall back to the metro rate.
+  document.querySelector('[data-track-eta]').textContent =
+    o.status === 'delivered' ? 'Delivered' : deliveryOption(o.delivery).eta;
 
   const reached = o.status === 'cancelled' ? -1 : (STATUS_STAGE[o.status] ?? 0);
   const timeline = document.querySelector('[data-timeline]');

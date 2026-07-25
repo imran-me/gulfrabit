@@ -30,6 +30,18 @@
     .map(([w, h]) => [w, fh || h]);
   const target = qs.get('u') || '../modules/catalog/product.html?id=gr-1001';
 
+  // ?cart=1 seeds a two-line cart into localStorage before the frames load, so
+  // cart/checkout can be audited in their populated state instead of the
+  // empty-cart guard. Same origin as the site, so the write is visible to it.
+  if (qs.get('cart')) {
+    localStorage.setItem('gr:cart', JSON.stringify([
+      { id: 'gr-1001', title: 'Medjool Dates — Premium Jumbo (1kg)', brand: 'Al Barakah',
+        price: 1450, image: '/assets/images/products/gr-1001.svg', variant: null, qty: 2 },
+      { id: 'gr-1003', title: 'Arabica Coffee Beans — Medium Roast (1kg)', brand: 'Qahwa Co.',
+        price: 1650, image: '/assets/images/products/gr-1003.svg', variant: null, qty: 1 },
+    ]));
+  }
+
   const rail = document.getElementById('rail');
   SIZES.forEach(([w, h]) => {
     const col = document.createElement('div');

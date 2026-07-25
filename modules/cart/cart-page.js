@@ -8,6 +8,7 @@
 import * as store from '../../shared/js/core/state.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { siteURL } from '../../shared/js/core/paths.js';
+import { DEFAULT_OPTION } from '../../shared/js/core/delivery.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 
@@ -162,7 +163,8 @@ function paintSummary(cart) {
   if (discount > 0) { discRow.hidden = false; setText('[data-summary-discount]', `−${formatBDT(discount)}`); setText('[data-summary-promo-code]', `(${promo.code})`); }
   else if (discRow) discRow.hidden = true;
 
-  const delivery = subtotal >= 3000 || subtotal === 0 ? 'Free in Dhaka' : '৳ 60 (est.)';
+  // Quote the metro rate as an estimate; checkout resolves the real zone.
+  const delivery = subtotal === 0 ? '—' : `from ${formatBDT(DEFAULT_OPTION.cost)}`;
   setText('[data-summary-delivery]', delivery);
 
   mobileCta.hidden = count === 0;

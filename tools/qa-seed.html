@@ -1,0 +1,32 @@
+<!doctype html>
+<!-- Author-time QA seeder (never linked from the site).
+
+     Seeds localStorage, then redirects to ?to=<page>. Because the redirect
+     happens inside the same browsing context, the seeded state is live on the
+     target page — which lets `chrome --dump-dom` inspect cart/checkout in their
+     POPULATED state. (Dumping the iframe harness does not work for this:
+     --dump-dom serialises only the top document, so framed content is absent.)
+
+     Usage:
+       /tools/qa-seed.html?to=../modules/checkout/checkout.html
+       /tools/qa-seed.html?cart=empty&to=../modules/cart/cart.html
+-->
+<meta charset="utf-8">
+<title>QA seed</title>
+<script>
+  var qs = new URLSearchParams(location.search);
+
+  // Two lines, one with qty 2, so totals exercise real arithmetic:
+  //   1450*2 + 1650 = 4550 subtotal.
+  var CART = [
+    { id: 'gr-1001', title: 'Medjool Dates — Premium Jumbo (1kg)', brand: 'Al Barakah',
+      price: 1450, image: '/assets/images/products/gr-1001.svg', variant: null, qty: 2 },
+    { id: 'gr-1003', title: 'Arabica Coffee Beans — Medium Roast (1kg)', brand: 'Qahwa Co.',
+      price: 1650, image: '/assets/images/products/gr-1003.svg', variant: null, qty: 1 }
+  ];
+
+  if (qs.get('cart') === 'empty') localStorage.removeItem('gr:cart');
+  else localStorage.setItem('gr:cart', JSON.stringify(CART));
+
+  location.replace(qs.get('to') || '../index.html');
+</script>

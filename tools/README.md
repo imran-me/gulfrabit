@@ -36,3 +36,18 @@ python -m http.server 5210 --directory .
 
 `s=` forces an instant scroll (the site sets `scroll-behavior: smooth`, which
 never completes under `--virtual-time-budget`).
+
+## `qa-seed.html`
+
+Seeds `localStorage` then redirects to `?to=<page>`, so cart- and checkout-
+dependent pages can be inspected in their **populated** state:
+
+```bash
+chrome --headless --dump-dom \
+  "http://localhost:5210/tools/qa-seed.html?to=../modules/checkout/checkout.html"
+```
+
+Needed because `--dump-dom` serialises only the top document — dumping
+`qa-viewport.html` never shows the framed page's markup. Use the iframe harness
+for *visual* QA (it seeds a cart with `?cart=1`) and this seeder for *DOM*
+assertions. `?cart=empty` exercises the empty-cart guard instead.

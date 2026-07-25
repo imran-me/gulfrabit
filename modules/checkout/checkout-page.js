@@ -10,6 +10,7 @@
 import * as store from '../../shared/js/core/state.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { siteURL } from '../../shared/js/core/paths.js';
+import { DEFAULT_OPTION } from '../../shared/js/core/delivery.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { validateForm, validateField, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
@@ -18,7 +19,8 @@ const form = document.querySelector('[data-checkout-form]');
 const steps = [...document.querySelectorAll('.checkout-step')];
 const indicators = [...document.querySelectorAll('[data-step-indicator]')];
 let current = 1;
-let deliveryCost = 60;
+// Default to the metro rate; the radios (and later the district) refine it.
+let deliveryCost = DEFAULT_OPTION.cost;
 
 init();
 

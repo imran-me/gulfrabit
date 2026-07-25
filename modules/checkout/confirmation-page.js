@@ -3,6 +3,7 @@
  * Reads the "last-order" stash (or looks up by ?id= in local order history).
  */
 
+import { deliveryOption } from '../../shared/js/core/delivery.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';
@@ -22,6 +23,7 @@ if (!order) {
   document.querySelector('[data-track-link]')?.setAttribute('href', siteURL(`modules/account/track.html?id=${encodeURIComponent(order.id)}`));
   setText('[data-order-address]', order.address || '—');
   setText('[data-order-total]', formatBDT(order.total));
+  setText('[data-order-eta]', deliveryOption(order.delivery).eta);
   document.querySelector('[data-order-items]').innerHTML = order.items.map((it) => `
     <div class="cart-line" style="grid-template-columns:48px 1fr auto">
       <img class="cart-line__thumb" style="width:48px;height:48px" src="${it.image}" alt="">
