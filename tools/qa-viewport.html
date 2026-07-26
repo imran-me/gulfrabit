@@ -25,24 +25,32 @@
   const fh = +(qs.get('h') || 0);
   const scrollTo = +(qs.get('s') || 0);
   const click = qs.get('click');
+  const cartN = +(qs.get('cart') || 0);
   const ALL = [[375, 2400], [414, 2400], [768, 2000]];
   const SIZES = (only ? ALL.filter(([w]) => String(w) === only) : ALL)
     .map(([w, h]) => [w, fh || h]);
   const target = qs.get('u') || '../modules/catalog/product.html?id=gr-1001';
 
-  // ?cart=1 seeds a two-line cart into localStorage before the frames load, so
-  // cart/checkout can be audited in their populated state instead of the
-  // empty-cart guard. Same origin as the site, so the write is visible to it.
-  if (qs.get('cart')) {
-    localStorage.setItem('gr:cart', JSON.stringify([
-      { id: 'gr-1001', title: 'Medjool Dates — Premium Jumbo (1kg)', brand: 'Al Barakah',
-        price: 1450, image: '/assets/images/products/gr-1001.svg', variant: null, qty: 2 },
-      { id: 'gr-1003', title: 'Arabica Coffee Beans — Medium Roast (1kg)', brand: 'Qahwa Co.',
-        price: 1650, image: '/assets/images/products/gr-1003.svg', variant: null, qty: 1 },
-    ]));
+  const rail = document.getElementById('rail');
+
+  /**
+   * ?cart=N seeds N real products into the cart before framing the page.
+   * Cart/checkout render an empty state otherwise, so their forms never enter
+   * the DOM and cannot be audited. The harness shares an origin with the site,
+   * so localStorage written here is the same storage the framed page reads.
+   * Mirrors KEYS.CART ('cart') behind the 'gr:' prefix from core/storage.js.
+   */
+  async function seedCart(n) {
+    const { products } = await (await fetch('../data/products.json')).json();
+    const lines = products.slice(0, n).map((p) => ({
+      id: p.id, title: p.title, brand: p.brand || '',
+      price: p.price, image: p.image, qty: 1,
+    }));
+    localStorage.setItem('gr:cart', JSON.stringify(lines));
+    return lines.reduce((s, l) => s + l.price * l.qty, 0);
   }
 
-  const rail = document.getElementById('rail');
+  function buildFrames() {
   SIZES.forEach(([w, h]) => {
     const col = document.createElement('div');
     col.className = 'col';
@@ -98,4 +106,27 @@
       }, 2500);
     });
   });
+  }
+
+  (async () => {
+    // ?go=<url> seeds, then navigates the TOP document there. --dump-dom cannot
+    // see inside an iframe, so DOM inspection of a populated cart/checkout has
+    // to happen at top level.
+    const go = qs.get('go');
+    if (go) {
+      if (cartN) await seedCart(cartN); else localStorage.removeItem('gr:cart');
+      location.replace(go);
+      return;
+    }
+    if (cartN) {
+      const subtotal = await seedCart(cartN);
+      const note = document.createElement('div');
+      note.className = 'cap';
+      note.textContent = `seeded cart: ${cartN} line(s), subtotal ${subtotal}`;
+      document.body.insertBefore(note, rail);
+    } else {
+      localStorage.removeItem('gr:cart');
+    }
+    buildFrames();
+  })();
 </script>

@@ -51,3 +51,8 @@ Needed because `--dump-dom` serialises only the top document — dumping
 `qa-viewport.html` never shows the framed page's markup. Use the iframe harness
 for *visual* QA (it seeds a cart with `?cart=1`) and this seeder for *DOM*
 assertions. `?cart=empty` exercises the empty-cart guard instead.
+
+`?cart=N` seeds N real products into `localStorage` before framing the page —
+cart and checkout render an empty state otherwise, so their forms never reach
+the DOM and cannot be audited. Omit it and the harness clears the cart first, so
+empty states can be audited too.
