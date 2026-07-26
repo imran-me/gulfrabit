@@ -101,12 +101,17 @@ function render() {
 
   const subtotal = store.cartSubtotal();
   footEl.innerHTML = `
+    <div class="gift-progress" data-gift-progress hidden></div>
     <div class="cart-summary-row"><span>Subtotal</span><span class="tabular">${formatBDT(subtotal)}</span></div>
     <div class="cart-summary-row"><span>Delivery</span><span>Calculated at checkout</span></div>
-    <div style="display:flex;gap:.75rem;margin-top:1rem">
+    <div class="flex gap-3 mt-4">
       <a href="${siteURL('modules/cart/cart.html')}" class="btn-gr btn-outline-gr btn-block-gr">View Cart</a>
       <a href="${siteURL('modules/checkout/checkout.html')}" class="btn-gr btn-primary-gr btn-block-gr">Checkout</a>
     </div>`;
+
+  // Not awaited: the drawer must open instantly. The gift block fills in a
+  // beat later and is hidden until it has something to say.
+  paintGift(subtotal);
 }
 
 export function openCartDrawer() {
@@ -133,6 +138,22 @@ export function initCartDrawer() {
   build();
   document.querySelectorAll('[data-open-cart]').forEach((btn) =>
     btn.addEventListener('click', (e) => { e.preventDefault(); openCartDrawer(); }));
+}
+
+/**
+ * The drawer ships on every page, so the gift module is imported lazily — only
+ * once a basket actually has something in it. Failure is swallowed: a missing
+ * reward must never break the cart itself.
+ */
+async function paintGift(subtotal) {
+  const host = document.querySelector('.cart-drawer [data-gift-progress]');
+  if (!host) return;
+  try {
+    const { renderGiftProgress } = await import('../../../modules/cart/gift-progress.js');
+    await renderGiftProgress(host, subtotal);
+  } catch {
+    host.hidden = true;
+  }
 }
 
 function escapeHtml(str = '') { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }

@@ -10,6 +10,7 @@ import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { siteURL } from '../../shared/js/core/paths.js';
 import { DEFAULT_OPTION } from '../delivery/backend/api.js';
 import { validatePromo } from './backend/api.js';
+import { renderGiftProgress } from './gift-progress.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 
@@ -172,6 +173,11 @@ async function paintSummary(cart) {
   const discRow = document.querySelector('[data-summary-discount-row]');
   if (discount > 0) { discRow.hidden = false; setText('[data-summary-discount]', `−${formatBDT(discount)}`); setText('[data-summary-promo-code]', `(${promoCode})`); }
   else if (discRow) discRow.hidden = true;
+
+  // Gift threshold. Awaited so the bar is in place before the summary is
+  // considered painted — a bar that pops in after the total has settled reads
+  // as a layout glitch.
+  await renderGiftProgress(document.querySelector('[data-gift-progress]'), subtotal);
 
   // Quote the metro rate as an estimate; checkout resolves the real zone.
   const delivery = subtotal === 0 ? '—' : `from ${formatBDT(DEFAULT_OPTION.cost)}`;

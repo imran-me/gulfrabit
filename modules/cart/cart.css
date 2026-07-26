@@ -4,11 +4,15 @@
 .cart-layout { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
 @media (min-width: 1024px) { .cart-layout { grid-template-columns: 1fr 380px; align-items: start; } }
 
+/* minmax(0, 1fr), not 1fr: a grid track defaults to min-width:auto, so it
+   cannot shrink below its content's intrinsic width. A long product title was
+   forcing the row 23px past the viewport at 375px. Same fix as
+   `.trust-item > div { min-width: 0 }` in _utilities.css. */
 .cart-item {
-  display: grid; grid-template-columns: 96px 1fr; gap: var(--space-4);
+  display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: var(--space-4);
   padding: var(--space-4) 0; border-bottom: 1px solid var(--border-hairline);
 }
-@media (min-width: 640px) { .cart-item { grid-template-columns: 120px 1fr auto; align-items: center; } }
+@media (min-width: 640px) { .cart-item { grid-template-columns: 120px minmax(0, 1fr) auto; align-items: center; } }
 .cart-item__media { width: 100%; aspect-ratio: 1; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-hairline); background: var(--surface-sunken); }
 .cart-item__media img { width: 100%; height: 100%; object-fit: cover; }
 .cart-item__title { font-weight: var(--fw-medium); }
@@ -28,3 +32,47 @@
 /* Sticky mobile checkout CTA */
 .cart-mobile-cta { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: var(--space-3) var(--space-4); background: rgba(255,255,255,.94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-top: 1px solid var(--border-hairline); display: flex; gap: var(--space-3); align-items: center; }
 @media (min-width: 1024px) { .cart-mobile-cta { display: none; } }
+
+/* ---- Gift-with-purchase progress --------------------------------------
+   The named component; one-off layout inside it uses Tailwind utilities and
+   the bar's motion is driven from gift-progress.js (context.md §2). */
+.gift-progress {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  background: var(--surface-sunken);
+  transition: border-color var(--dur-base) var(--ease-out),
+              background var(--dur-base) var(--ease-out);
+}
+.gift-progress__icon { color: var(--gold-ink); line-height: 0; }
+.gift-progress__msg {
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+  line-height: var(--lh-snug);
+}
+.gift-progress__msg strong { color: var(--text-primary); font-weight: var(--fw-semibold); }
+
+.gift-progress__track {
+  position: relative;
+  height: 6px;
+  margin-top: var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--border-hairline);
+  overflow: hidden;
+}
+.gift-progress__bar {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: var(--radius-pill);
+  background: var(--gr-gradient);
+}
+
+/* Unlocked: the whole block shifts to the success colour so the change is
+   visible peripherally, not only by reading the sentence. */
+.gift-progress.is-unlocked {
+  border-color: var(--lime-ink);
+  background: rgba(154, 205, 60, .08);
+}
+.gift-progress.is-unlocked .gift-progress__icon { color: var(--lime-ink); }

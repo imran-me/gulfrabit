@@ -468,7 +468,18 @@ errors, and only then start the next. No parallel half-finished features.
       Fixed a **pre-existing component bug** found while rendering it: `.option-card__title`
       and `__sub` were unstyled inline spans, rendering as
       "Dhaka & ChattogramWithin 72 hours" on every delivery *and* payment card.
-- [ ] **1.1** Gift-with-purchase threshold with live progress in cart + drawer
+- [x] **1.1** Gift-with-purchase threshold with live progress in cart + drawer —
+      spend ৳3,000, get a free pack of Ceylon Black Tea (a real in-stock SKU,
+      gr-1005, not an invented one). Full slice: `gift_rewards` table + model +
+      seeder reading the module's own `data/rewards.json`, `CartService` returns
+      progress inside the cart payload, and `modules/cart/gift-progress.js`
+      renders it in **both** the cart page and the drawer so they cannot drift.
+      Progress shows even when unmet — "add ৳1,550 more" is the part that moves
+      basket size. Bar motion is JS-driven (rAF, easeOutCubic, honours
+      `prefers-reduced-motion`) because it animates between two runtime values.
+      First use of the Tailwind-utilities rule; also fixed a **pre-existing**
+      +23px overflow on the cart at 375px (`grid-template-columns: 96px 1fr`
+      cannot shrink below its content — now `minmax(0, 1fr)`).
 - [ ] **1.2** Frequently-bought-together with live savings math
 - [ ] **1.3** Offer *rules* rendered on the PDP, not just a badge *(Shajgoj)*
 - [ ] **2.1** Per-product search synonyms + **2.3** rotating merchandised placeholder

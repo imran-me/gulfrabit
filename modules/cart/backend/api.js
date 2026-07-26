@@ -14,6 +14,12 @@
  *   POST   /api/cart/merge              (auth, immediately after login)
  */
 
+import { loadJSON } from '../../../shared/js/core/json-cache.js';
+import { siteURL } from '../../../shared/js/core/paths.js';
+
+// Cart owns its reward rules, the same way catalog owns products.
+const REWARDS_URL = siteURL('modules/cart/data/rewards.json');
+
 /**
  * Mock promo fixtures, mirroring the seeded rows in
  * `Seeders/PromotionSeeder.php` so the pre-backend cart behaves like the real
@@ -59,6 +65,46 @@ export async function validatePromo(code, subtotal = 0) {
   discount = Math.min(discount, subtotal);      // never more than the goods are worth
 
   return { valid: true, reason: null, discount, label: promo.label };
+}
+
+/**
+ * Progress toward the gift-with-purchase threshold.
+ *
+ * Mirrors GiftReward::progressFor() exactly — including returning progress when
+ * the threshold is NOT met, because "add ৳X more" is the part of this mechanic
+ * that actually moves basket size. Hiding it until unlocked would waste it.
+ *
+ * @param {number} subtotal goods subtotal in whole BDT
+ * @returns {Promise<null|{key:string,unlocked:boolean,threshold:number,remaining:number,percent:number,teaser:string,label:string,image:string,sku:string}>}
+ */
+export async function getGiftProgress(subtotal = 0) {
+  // TODO: backend — this arrives inside GET /api/cart as `data.gift`.
+  const reward = await loadRewards();
+  if (!reward) return null;
+
+  const unlocked = subtotal >= reward.thresholdTaka;
+
+  return {
+    key:       reward.id,
+    unlocked,
+    threshold: reward.thresholdTaka,
+    remaining: unlocked ? 0 : reward.thresholdTaka - subtotal,
+    // Clamped: a basket past the threshold must not render a bar wider than
+    // its track.
+    percent:   Math.min(100, Math.floor(subtotal / reward.thresholdTaka * 100)),
+    teaser:    reward.teaser,
+    label:     reward.label,
+    image:     reward.image,
+    sku:       reward.productSku,
+  };
+}
+
+/** Lowest active threshold — chase the nearest reward, not a distant bigger one. */
+async function loadRewards() {
+  const { rewards } = await loadJSON(REWARDS_URL);
+  return rewards
+    .filter((r) => r.isActive)
+    .sort((a, b) => a.thresholdTaka - b.thresholdTaka)[0] ?? null;
 }
 
 /**

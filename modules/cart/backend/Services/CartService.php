@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Cart\Models\Cart;
 use Modules\Cart\Models\CartItem;
+use Modules\Cart\Models\GiftReward;
 use Modules\Catalog\Models\Product;
 use RuntimeException;
 
@@ -183,7 +184,27 @@ final class CartService
                 'total'    => intdiv(max(0, $subtotalPoisha - $discountPoisha), 100),
             ],
             'notices'  => $this->notices($cart),
+            // Progress is returned even when unmet — telling the customer how
+            // much MORE to spend is the part of this mechanic that works.
+            'gift'     => $this->giftProgress($subtotalPoisha),
         ];
+    }
+
+    /**
+     * The live gift threshold and how close this basket is to it.
+     *
+     * Lowest threshold first, so a customer chasing the nearest reward is shown
+     * that one rather than a distant bigger prize they will not reach.
+     */
+    private function giftProgress(int $subtotalPoisha): ?array
+    {
+        $reward = GiftReward::query()
+            ->live()
+            ->with('product:id,sku,title,image')
+            ->orderBy('threshold_poisha')
+            ->first();
+
+        return $reward?->progressFor($subtotalPoisha);
     }
 
     /** @return array<int, string> things the customer should be told, not hidden */

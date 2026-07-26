@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "owner": "modules/cart",
+    "note": "Gift-with-purchase thresholds. Mirrors the gift_rewards table seeded by Seeders/GiftRewardSeeder.php - the storefront reads this until the API is live, so the two must stay in step. Every productSku here MUST exist in modules/catalog/data/products.json or the cart promises a gift nobody can give.",
+    "why": "A physical gift beats waived delivery at these basket sizes: it costs COGS rather than margin, and it seeds trial of another SKU. Ghorer Bazar runs the same mechanic live in their cart drawer."
+  },
+  "rewards": [
+    {
+      "id": "gift-ceylon-tea",
+      "thresholdTaka": 3000,
+      "productSku": "gr-1005",
+      "label": "Ceylon Black Tea — Loose Leaf (250g)",
+      "teaser": "a free pack of Ceylon Black Tea",
+      "image": "/assets/images/products/gr-1005.svg",
+      "valueTaka": 620,
+      "isActive": true
+    }
+  ]
+}

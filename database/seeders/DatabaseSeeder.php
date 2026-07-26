@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Modules\Cart\Seeders\GiftRewardSeeder;
 use Modules\Cart\Seeders\PromotionSeeder;
 use Modules\Catalog\Seeders\CatalogSeeder;
 use Modules\Delivery\Seeders\DeliveryZoneSeeder;
@@ -26,6 +27,8 @@ class DatabaseSeeder extends Seeder
             DeliveryZoneSeeder::class,
             CatalogSeeder::class,
             PromotionSeeder::class,
+            // Must run AFTER CatalogSeeder — a gift points at a real product.
+            GiftRewardSeeder::class,
         ]);
     }
 }
