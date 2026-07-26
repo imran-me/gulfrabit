@@ -191,21 +191,52 @@ style concern = one CSS partial. Split any file over ~300 lines.
 
 ```
 gulfrabit/
-├── context.md · README.md · .gitignore
-├── index.html                          (home shell)
-├── assets/  logo/ icons/ images/{products,categories,hero}/ fonts/
-├── shared/
+├── context.md · README.md · BACKEND.md · .gitignore
+├── composer.json                    PSR-4: Modules\<Feature>\ -> modules/<f>/backend/
+├── bootstrap/providers.php          the ONLY place a module is named from outside
+├── index.html · 404.html · sitemap.xml · robots.txt · site.webmanifest
+├── assets/    logo/ icons/ images/{products,categories,hero}/ fonts/
+├── research/  competitor-analysis.md · implementation-plan.md
+├── tools/     assemble.py · gen-product-images.py · sitemap.py · qa-viewport.html
+├── shared/                          ONLY cross-cutting primitives live here
 │   ├── css/style.css + partials/{_variables,_typography,_buttons,_cards,
 │   │        _navigation,_forms,_modals-offcanvas,_animations,_utilities}.css
-│   ├── js/core/{data-service,storage,state,router-helpers}.js
+│   ├── js/core/{json-cache,storage,state,paths,router-helpers}.js
 │   ├── js/components/{header-nav,cart-drawer,toast-notifications,scroll-reveal,
 │   │        product-card,quantity-stepper,search-autocomplete,skeleton-loader,
-│   │        newsletter-signup,wishlist}.js
+│   │        newsletter-signup,wishlist,compare-tray,quick-view-modal}.js
 │   ├── js/utils/{format-currency,validate-form,debounce}.js
 │   ├── components/{header.html,footer.html}   (canonical partials)
-│   └── backend/{api-contract.md}
-└── modules/<feature>/ { <feature>.html, .css, .js, README.md, backend/{api.js,endpoints.md} }
+│   └── backend/api-contract.md
+└── modules/<feature>/
+    ├── README.md · <page>.html · _fragments/ · <feature>.css · <feature>-page.js
+    ├── data/                        the datasets THIS module owns
+    └── backend/
+        ├── <Feature>ServiceProvider.php   registers routes + migrations from in here
+        ├── routes.php · endpoints.md · api.js      (api.js = the frontend seam)
+        └── Controllers/ Models/ Requests/ Services/ Migrations/ Seeders/
 ```
+
+**Data ownership** (there is no global `/data` bucket — removed 2026-07-26):
+
+| Dataset | Owner |
+|---|---|
+| `products.json`, `categories.json` | `modules/catalog/data/` |
+| `orders.json` | `modules/account/data/` |
+| `users.json` | `modules/auth/data/` |
+| `districts.json` | `modules/delivery/data/` |
+
+**Laravel layer status** — mirrored in `BACKEND.md`:
+
+| Module | Laravel |
+|---|---|
+| `delivery` | authored — provider, routes, controller, request, service, 2 models, 2 migrations, seeder |
+| `catalog` | authored — provider, routes, 2 controllers, request, query service, 2 models, 2 migrations, seeder |
+| `cart` | authored — provider, routes, controller, 2 requests, 2 services, 3 models, 3 migrations, seeder |
+| `checkout`, `auth`, `account`, `b2b`, `deals`, `home`, `content` | not started — frontend runs on `backend/api.js` mocks |
+
+⚠ **No PHP has been executed** — `php`/`composer` are not installed here.
+
 _(update whenever files are added)_
 
 ---
@@ -548,3 +579,52 @@ metadata, cashback clawed back from refunds, and app-install interstitials.
     valid, screenshots reviewed at 1440px for home/PLP/PDP.
   · **Known gap:** `.canvas-dark` is now a light canvas — the class name is a
     leftover from the dark era and should be renamed in a follow-up.
+
+- **2026-07-26 (competitor-derived features, then a full-stack re-architecture)**
+  Two halves. First, Phase 6 features built one at a time, each verified at
+  375/414/768 with measured overflow, console checks and a full page sweep before
+  the next was started:
+  · **0.1** WhatsApp + Messenger order CTAs on the PDP, prefilled with title,
+    price, SKU and absolute URL; real links so they survive JS being off.
+  · **0.4** Per-tender refund matrix, linked from the PDP and the checkout payment
+    step; stacks into labelled blocks under 560px so the timeline column — the
+    actual answer — is never the one hidden by a sideways scroll.
+  · **3.1** Provenance leads the spec tab for EVERY product. Fixed a real bug:
+    industrial SKUs took a specs-only branch that dropped origin entirely.
+  · **1.4** One delivery promise sitewide. The banner promised free delivery over
+    ৳3,000 while checkout charged ৳60 regardless — a promise the code never kept.
+  · **4.2** Absolute savings beside the percentage; also fixed `.price` wrapping
+    between the ৳ symbol and the number in 2-up cards at 375px.
+  · **4.1** Badge slots priority-ordered and capped. Sold-out now returns alone —
+    an out-of-stock product was advertising "-17%" beside "Sold out".
+
+  Then the architecture was **locked** (§2) and applied:
+  · `modules/delivery/` built as the reference vertical slice — the first module
+    with a real Laravel layer. `shared/js/core/delivery.js` deleted.
+  · **0.2/0.3** Checkout cut to four required fields with district-driven pricing.
+  · `modules/catalog/` given its Laravel layer, and its data moved in with it.
+  · `modules/cart/` given its Laravel layer — server cart, guest→user merge,
+    and promo codes as *data* in a `promotions` table rather than a PHP constant.
+  · **`shared/js/core/data-service.js` deleted.** It held four modules' domains in
+    one global file that 19 files imported directly, bypassing every module seam.
+    Each module now owns its data and its door; the only shared piece left is
+    `core/json-cache.js`, a domain-free fetch-and-memoise helper.
+  · Laravel host wiring added (`composer.json` PSR-4 per module,
+    `bootstrap/providers.php`, `BACKEND.md`).
+
+  **Three real bugs were found by running things rather than reading them:**
+  `<meta name="color-scheme" content="dark">` painting every checkbox black;
+  `tools/sitemap.py` breaking on the data move because it builds its path from
+  parts and never matched the grep; and `cart-promo` in localStorage holding an
+  object that would have thrown `TypeError` on `code.trim()` for any returning
+  visitor after the promo refactor.
+
+  **Tooling:** `tools/qa-viewport.html` — headless Chrome clamps its viewport to
+  ~526px, so a `--window-size=375` screenshot is a 526px render cropped to 375 and
+  looks broken when nothing is wrong. The harness frames pages in exact-width
+  iframes and *measures* `scrollWidth` vs `clientWidth`. It also seeds carts,
+  pre-selects districts and auto-fills required fields, without which every
+  cart/checkout check was silently auditing an empty-cart guard.
+
+  ⚠ **No PHP has been executed** — `php`/`composer` are absent on this machine.
+  The Laravel code is authored and structurally checked only.

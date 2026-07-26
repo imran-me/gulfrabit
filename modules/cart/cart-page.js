@@ -9,11 +9,10 @@ import * as store from '../../shared/js/core/state.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { siteURL } from '../../shared/js/core/paths.js';
 import { DEFAULT_OPTION } from '../delivery/backend/api.js';
+import { validatePromo } from './backend/api.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 
-// Mock promo codes. // TODO: backend — validate server-side via /cart/promo.
-const PROMOS = { GULF10: { type: 'pct', value: 10, label: '10% off' }, HOP500: { type: 'flat', value: 500, label: '৳500 off' } };
 
 const itemsEl = document.querySelector('[data-cart-items]');
 const emptyEl = document.querySelector('[data-cart-empty]');
@@ -22,13 +21,18 @@ const savedEl = document.querySelector('[data-saved-items]');
 const summaryEl = document.querySelector('[data-summary]');
 const mobileCta = document.querySelector('[data-mobile-cta]');
 
-let promo = storage.get('cart-promo', null);
+// This key held a {code, type, value, label} object before 2026-07-26. A
+// returning visitor still has that shape in localStorage, and passing it to
+// validatePromo() would throw on code.trim() — so normalise it to the code.
+const storedPromo = storage.get('cart-promo', null);
+let promoCode = typeof storedPromo === 'string' ? storedPromo : (storedPromo?.code ?? null);
+if (storedPromo && typeof storedPromo !== 'string') storage.set('cart-promo', promoCode);
 
 store.subscribe(store.EVENTS.CART, render);
 document.querySelector('[data-promo-apply]')?.addEventListener('click', applyPromo);
 render();
 
-function render() {
+async function render() {
   const cart = store.getCart();
   const saved = storage.get(KEYS.SAVED_FOR_LATER, []);
 
@@ -54,7 +58,7 @@ function render() {
     savedSection.hidden = true;
   }
 
-  paintSummary(cart);
+  await paintSummary(cart);
 }
 
 function itemHTML(l) {
@@ -127,31 +131,37 @@ function moveToCart(item) { dropSaved(item.id); store.addToCart(item, 1); toast.
 function dropSaved(id) { storage.set(KEYS.SAVED_FOR_LATER, storage.get(KEYS.SAVED_FOR_LATER, []).filter((s) => s.id !== id)); render(); }
 
 /* ---- Promo + summary -------------------------------------------------- */
-function applyPromo() {
+async function applyPromo() {
   const code = (document.querySelector('[data-promo-input]').value || '').trim().toUpperCase();
   const msg = document.querySelector('[data-promo-msg]');
   if (!code) return;
-  if (PROMOS[code]) {
-    promo = { code, ...PROMOS[code] };
-    storage.set('cart-promo', promo);
+
+  const result = await validatePromo(code, store.cartSubtotal());
+
+  if (result.valid) {
+    promoCode = code;
+    storage.set('cart-promo', code);
     msg.style.color = 'var(--lime-ink)';
-    msg.textContent = `Applied ${PROMOS[code].label}.`;
-    paintSummary(store.getCart());
+    msg.textContent = `Applied ${result.label}.`;
   } else {
     msg.style.color = 'var(--gr-error)';
-    msg.textContent = 'That code isn’t valid.';
+    // "Too small a basket" is actionable — say so instead of "invalid code",
+    // which sends someone away who was one item from qualifying.
+    msg.textContent = result.reason === 'min_subtotal'
+      ? `Spend ${formatBDT(result.minSpend)} to use this code.`
+      : 'That code isn’t valid.';
   }
+
+  await paintSummary(store.getCart());
 }
 
-function discountFor(subtotal) {
-  if (!promo) return 0;
-  return promo.type === 'pct' ? Math.round(subtotal * (promo.value / 100)) : Math.min(promo.value, subtotal);
-}
-
-function paintSummary(cart) {
+async function paintSummary(cart) {
   const subtotal = store.cartSubtotal();
   const count = store.cartCount();
-  const discount = discountFor(subtotal);
+  // Recomputed every render, never stored: if the basket drops below the
+  // minimum spend the discount disappears on its own, exactly as the server does.
+  const result = promoCode ? await validatePromo(promoCode, subtotal) : null;
+  const discount = result?.valid ? result.discount : 0;
   const total = Math.max(0, subtotal - discount);
 
   setText('[data-summary-count]', count);
@@ -160,7 +170,7 @@ function paintSummary(cart) {
   setText('[data-mobile-total]', formatBDT(total));
 
   const discRow = document.querySelector('[data-summary-discount-row]');
-  if (discount > 0) { discRow.hidden = false; setText('[data-summary-discount]', `−${formatBDT(discount)}`); setText('[data-summary-promo-code]', `(${promo.code})`); }
+  if (discount > 0) { discRow.hidden = false; setText('[data-summary-discount]', `−${formatBDT(discount)}`); setText('[data-summary-promo-code]', `(${promoCode})`); }
   else if (discRow) discRow.hidden = true;
 
   // Quote the metro rate as an estimate; checkout resolves the real zone.

@@ -18,6 +18,7 @@ declare(strict_types=1);
 return [
     App\Providers\AppServiceProvider::class,
 
+    Modules\Cart\CartServiceProvider::class,
     Modules\Catalog\CatalogServiceProvider::class,
     Modules\Delivery\DeliveryServiceProvider::class,
 
@@ -27,7 +28,6 @@ return [
     // Modules\Account\AccountServiceProvider::class,
     // Modules\Auth\AuthServiceProvider::class,
     // Modules\B2b\B2bServiceProvider::class,
-    // Modules\Cart\CartServiceProvider::class,
     // Modules\Checkout\CheckoutServiceProvider::class,
     // Modules\Content\ContentServiceProvider::class,
     // Modules\Deals\DealsServiceProvider::class,
