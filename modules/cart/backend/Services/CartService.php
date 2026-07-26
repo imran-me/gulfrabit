@@ -141,6 +141,21 @@ final class CartService
     }
 
     /**
+     * Goods subtotal in poisha — exact.
+     *
+     * Callers that need to compare against a promo's minimum spend must use
+     * this, NOT the taka figure from toStorefrontArray(): that one is
+     * intdiv()'d to whole taka, so multiplying it back by 100 loses up to 99
+     * poisha and can flip a basket across a minimum-spend boundary.
+     */
+    public function subtotalPoisha(Cart $cart): int
+    {
+        $cart->loadMissing('items.product');
+
+        return $cart->items->sum(fn (CartItem $i) => $i->lineTotalPoisha());
+    }
+
+    /**
      * The full cart payload — lines plus every total, all server-computed.
      *
      * Delivery is deliberately NOT included. It depends on the district, which
@@ -153,7 +168,7 @@ final class CartService
 
         $items = $cart->items->map(fn (CartItem $i) => $i->toStorefrontArray())->all();
 
-        $subtotalPoisha = $cart->items->sum(fn (CartItem $i) => $i->lineTotalPoisha());
+        $subtotalPoisha = $this->subtotalPoisha($cart);
         $discountPoisha = $this->promotions->discountPoisha($cart->promo_code, $subtotalPoisha);
 
         return [

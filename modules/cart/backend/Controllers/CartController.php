@@ -7,14 +7,12 @@ namespace Modules\Cart\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Str;
 use Modules\Cart\Models\Cart;
 use Modules\Cart\Requests\AddCartItemRequest;
 use Modules\Cart\Requests\UpdateCartItemRequest;
 use Modules\Cart\Services\CartService;
 use Modules\Cart\Services\PromotionService;
 use RuntimeException;
-use Symfony\Component\HttpFoundation\Cookie;
 
 /**
  * Cart endpoints.
@@ -85,8 +83,10 @@ class CartController extends Controller
         ]);
 
         $cart = $this->cartFor($request);
-        $payload = $this->carts->toStorefrontArray($cart);
-        $check = $this->promotions->validate($validated['code'], $payload['totals']['subtotal'] * 100);
+        // Exact poisha. Using the taka figure from the payload and multiplying
+        // by 100 would lose up to 99 poisha and could flip the basket across a
+        // minimum-spend boundary.
+        $check = $this->promotions->validate($validated['code'], $this->carts->subtotalPoisha($cart));
 
         if (! $check['valid']) {
             return response()->json([
@@ -122,7 +122,7 @@ class CartController extends Controller
         // resurrect an empty cart on the next request.
         return response()
             ->json(['data' => $this->carts->toStorefrontArray($cart)])
-            ->withCookie(Cookie::create(self::GUEST_COOKIE)->withValue('')->withExpires(1));
+            ->withoutCookie(self::GUEST_COOKIE);
     }
 
     /* ---- internals ----------------------------------------------------- */
@@ -145,10 +145,14 @@ class CartController extends Controller
         $response = response()->json(['data' => $this->carts->toStorefrontArray($cart)]);
 
         // Hand a guest their token so the next request finds the same cart.
-        if ($cart->isGuest() && $request->cookie(self::GUEST_COOKIE) !== $cart->guest_token) {
+        // guest_token is never null on a guest cart — CartService::resolve()
+        // always mints one — so there is deliberately no fallback here: a
+        // generated-on-the-fly value would set a cookie no cart actually holds.
+        if ($cart->isGuest() && $cart->guest_token !== null
+            && $request->cookie(self::GUEST_COOKIE) !== $cart->guest_token) {
             $response->withCookie(cookie(
                 name: self::GUEST_COOKIE,
-                value: $cart->guest_token ?? (string) Str::uuid(),
+                value: $cart->guest_token,
                 minutes: self::COOKIE_DAYS * 24 * 60,
                 httpOnly: true,
                 sameSite: 'lax',

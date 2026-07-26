@@ -56,3 +56,19 @@ assertions. `?cart=empty` exercises the empty-cart guard instead.
 cart and checkout render an empty state otherwise, so their forms never reach
 the DOM and cannot be audited. Omit it and the harness clears the cart first, so
 empty states can be audited too.
+
+## `php-check.py` and `module-deps.py`
+
+There is no `php` binary on this machine, so these stand in for the checks a
+real toolchain would give you. Neither replaces `php -l`, PHPStan or Pint — run
+those the moment a PHP toolchain exists.
+
+```bash
+python tools/php-check.py     # opener, balanced delimiters, namespace vs PSR-4 path, unused imports
+python tools/module-deps.py   # cross-module `use` graph + cycle detection
+```
+
+`module-deps.py` is the important one: the architecture rests on modules being
+independently deletable, and a dependency **cycle** silently breaks that. The
+graph must stay one-way (today: `cart` → `catalog`; `checkout` → `cart`,
+`catalog`, `delivery`).
