@@ -26,7 +26,12 @@ STATIC = [
 ]
 
 def load(name):
-    return json.loads((ROOT / "data" / f"{name}.json").read_text(encoding="utf-8"))
+    # Datasets live with the module that owns them (context.md §2): catalog
+    # owns products + categories; orders/users still sit in /data until the
+    # account and auth modules take them over.
+    owner = {"products": "modules/catalog/data", "categories": "modules/catalog/data"}
+    base = ROOT / owner.get(name, "data")
+    return json.loads((base / f"{name}.json").read_text(encoding="utf-8"))
 
 def main():
     urls = list(STATIC)

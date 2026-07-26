@@ -12,15 +12,29 @@
 // Base path to the mock JSON. Resolved relative to THIS module's URL so it works
 // at a domain root or a project subpath (github.io/repo/). When wiring the
 // backend, swap for API_BASE. shared/js/core/ -> up 3 -> <root>/data.
-const DATA_BASE = new URL('../../../data', import.meta.url).href;
+const ROOT = new URL('../../../', import.meta.url).href;
 // const API_BASE = 'https://api.gulfrabit.com/v1';   // TODO: backend
+
+/**
+ * Which module owns which dataset. Catalog data lives in modules/catalog/data/
+ * because products and categories are the catalog's, not a global bucket's —
+ * see context.md §2. Orders and users still sit in /data until the account and
+ * auth modules take ownership of them.
+ */
+const SOURCES = {
+  products:   `${ROOT}modules/catalog/data/products.json`,
+  categories: `${ROOT}modules/catalog/data/categories.json`,
+  orders:     `${ROOT}data/orders.json`,
+  users:      `${ROOT}data/users.json`,
+};
 
 // Simple in-memory cache so we fetch each JSON file once per page load.
 const cache = new Map();
 
 async function loadJSON(name) {
   if (cache.has(name)) return cache.get(name);
-  const url = `${DATA_BASE}/${name}.json`;
+  const url = SOURCES[name];
+  if (!url) throw new Error(`Unknown dataset "${name}" — add it to SOURCES.`);
   const promise = fetch(url)
     .then((res) => {
       if (!res.ok) throw new Error(`Failed to load ${name}.json (${res.status})`);

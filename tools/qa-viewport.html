@@ -43,7 +43,7 @@
    * Mirrors KEYS.CART ('cart') behind the 'gr:' prefix from core/storage.js.
    */
   async function seedCart(n) {
-    const { products } = await (await fetch('../data/products.json')).json();
+    const { products } = await (await fetch('../modules/catalog/data/products.json')).json();
     const lines = products.slice(0, n).map((p) => ({
       id: p.id, title: p.title, brand: p.brand || '',
       price: p.price, image: p.image, qty: 1,

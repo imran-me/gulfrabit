@@ -128,7 +128,7 @@ and swapping mock for real stops being a one-file change.
 | Module | Frontend | Laravel |
 |---|---|---|
 | `delivery` | live (mock) | **authored** — provider, routes, controller, request, service, 2 models, 2 migrations, seeder |
-| `catalog` | live (mock) | not started |
+| `catalog` | live (mock) | **authored** — provider, routes, 2 controllers, request, query service, 2 models, 2 migrations, seeder |
 | `cart` | live (mock) | not started |
 | `checkout` | live (mock) | not started |
 | `auth` | live (mock) | not started |

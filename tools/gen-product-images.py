@@ -97,7 +97,7 @@ def svg(p, variant=0):
 '''
 
 def main():
-    data = json.loads((ROOT / "data" / "products.json").read_text(encoding="utf-8"))
+    data = json.loads((ROOT / "modules" / "catalog" / "data" / "products.json").read_text(encoding="utf-8"))
     for p in data["products"]:
         base = f"/assets/images/products/{p['id']}"
         (PDIR / f"{p['id']}.svg").write_text(svg(p, 0), encoding="utf-8", newline="\n")
@@ -105,7 +105,7 @@ def main():
         (PDIR / f"{p['id']}-3.svg").write_text(svg(p, 2), encoding="utf-8", newline="\n")
         p["image"] = f"{base}.svg"
         p["images"] = [f"{base}.svg", f"{base}-2.svg", f"{base}-3.svg"]
-    (ROOT / "data" / "products.json").write_text(
+    (ROOT / "modules" / "catalog" / "data" / "products.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n")
     print(f"generated {len(data['products'])} product images + updated products.json")
 
