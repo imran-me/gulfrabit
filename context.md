@@ -82,19 +82,71 @@ ALL CAPS only for small tags/badges.
 
 ---
 
-## 2. Tech Stack & Constraints
+## 2. Architecture — LOCKED. Read before writing any code.
 
-- Content-first **HTML5**, semantic + ARIA. **JS enhances, never renders core content.**
-- **Tailwind CSS** (CDN) configured with brand palette (`bg-gr-cyan`, `text-gr-lime`…).
-- **Bootstrap 5** (CDN) — grid + offcanvas/collapse JS only; everything re-skinned.
-- **Custom `shared/css/style.css`** — imports partials, holds `:root` variables.
-- **Vanilla JS ES modules** — small, single-purpose. No framework, no jQuery.
-- **No backend yet** — mock JSON in `/data`, persisted via `localStorage`/`sessionStorage`.
-  Data access isolated so mock→real API = edit one file per module.
+> These four rules are standing instructions from the project owner. They are not
+> preferences to be re-litigated per task; **every** piece of work follows them.
+
+**1. Frontend = plain, structured HTML.** Semantic + ARIA. No templating engine on the
+   client, no framework.
+**2. Styling = CSS + Tailwind.** Design tokens and components in the CSS partials;
+   Tailwind for utility composition.
+**3. Effects, animation, motion and any special styling behaviour = JS.** Anything that
+   moves, reveals, transitions or reacts is JS-driven; CSS holds the static look.
+**4. Backend = Laravel (PHP).**
+
+### The module rule — the one that matters most
+
+**Every feature or section is ONE self-contained folder holding everything it needs:**
+markup, styles, JS, controllers, routes, models, migrations, tests, docs.
+
+> **The test:** deleting a module folder must cleanly remove that feature and break
+> nothing else. If deleting it leaves orphaned routes, dangling CSS, or half-dead JS
+> elsewhere, the module was built wrong.
+
+Canonical layout — mirror this for every module:
+
+```
+modules/<feature>/
+├── README.md              what this module owns, and its seams
+├── <page>.html            generated page shell (built by tools/assemble.py)
+├── _fragments/            <main> source that the assembler wraps
+├── <feature>.css          styles scoped to this module
+├── <feature>-page.js      behaviour, motion and effects
+└── backend/               ← Laravel, colocated with the feature it serves
+    ├── routes.php         this module's routes only
+    ├── Controllers/       HTTP controllers
+    ├── Models/            Eloquent models
+    ├── Requests/          form-request validation
+    ├── Services/          domain logic (thin controllers)
+    ├── Migrations/        this module's schema
+    ├── api.js             frontend data seam (mock today → HTTP later)
+    └── endpoints.md       the contract, written before the code
+```
+
+Only genuinely **cross-cutting primitives** live in `shared/` — design tokens, currency
+formatting, the storage wrapper, path resolution. If a change is about one feature, it
+belongs in that feature's folder, not in `shared/`.
+
+### Standard for all work
+
+Build it the way an ultra-professional full-stack developer would: clear structure,
+obvious naming, easy to understand, easy to edit and extend, **easy to hand to another
+developer without explanation**. Handover quality is a requirement, not a bonus.
+
+### Current state / constraints
+
 - **Responsive, mobile-first.** Breakpoints: 375 / 768 / 1024 / 1440 / 1920.
-- **Accessibility:** contrast-checked (cyan-on-black ✔, lime-on-white ✘ → use `--gr-ink`),
-  keyboard nav, visible `:focus`, alt text on all images, lazy-load images.
-- **Future backend:** Laravel 12 / PHP 8.4 / MySQL / Redis / REST + JWT.
+- **Accessibility:** AA contrast on the white canvas (see §1 — raw cyan and lime FAIL as
+  text; use `--link` / `--lime-ink` / `--gold-ink`), keyboard nav, visible `:focus`,
+  alt text on all images, lazy-load images.
+- **Bootstrap 5** (CDN) — grid + offcanvas/collapse JS only; fully re-skinned.
+- **Data today:** mock JSON in `/data` via `localStorage`. Each module's `backend/api.js`
+  is the single seam — swapping mock for a real endpoint touches that one file.
+- **Target backend:** Laravel 12 / PHP 8.4 / MySQL / Redis / REST + JWT.
+- ⚠ **`php`, `composer`, `node` and `npm` are NOT installed on this machine**
+  (checked 2026-07-26). Laravel code can be authored but **cannot be run or tested
+  locally** until they are — never claim a PHP path was verified.
 
 **Hard rule:** one page = one HTML file in its module; one feature = one JS module; one
 style concern = one CSS partial. Split any file over ~300 lines.
@@ -215,6 +267,16 @@ inlined into pages by `tools/assemble.py`).
   unreadable as display type on white.
 - **2026-07-25** — **Hero/footer stay light too** (no dark footer anchor). Reason: the ask
   was an unambiguous white site; a dark footer is a one-line change if wanted later.
+- **2026-07-26** — **Architecture locked** (see §2): plain HTML + CSS/Tailwind + JS for
+  motion, Laravel backend, and every feature as ONE self-contained module folder.
+  Standing instruction from the project owner — applies to all work, not per task.
+- **2026-07-26** — **`modules/delivery/` created as the reference vertical slice.**
+  `shared/js/core/delivery.js` was deleted: delivery is a *feature*, not a cross-cutting
+  primitive, so it had no business in `shared/`. The module now owns its Laravel layer
+  (provider, routes, controller, request, service, models, migrations, seeder), its own
+  `data/districts.json` (all 64 districts), the API contract, and the frontend seam.
+  Four modules consume it through `backend/api.js` and nothing reaches past that.
+  Mirror this folder when building any new feature.
 
 ---
 
@@ -303,7 +365,7 @@ errors, and only then start the next. No parallel half-finished features.
       *the same charge whatever the order is worth* **(Ghorer Bazar)**. Cold-chain is
       **included** on perishables, never a surcharge — the old ৳200 cold-chain option
       contradicted the banner on all 24 pages. Canonical values live in
-      `shared/js/core/delivery.js`; cart, checkout, its mock backend, order confirmation
+      `modules/delivery/backend/api.js`; cart, checkout, its mock backend, order confirmation
       and order tracking all read from it, so they cannot drift again.
       **This fixed a real functional bug:** the banner and cart both promised "free
       delivery over ৳3,000" while checkout charged ৳60 unconditionally — there was no

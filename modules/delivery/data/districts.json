@@ -1,0 +1,393 @@
+{
+  "_meta": {
+    "owner": "modules/delivery",
+    "note": "Zones are commercial, not geographic. Metro = the two cities served within 72 hours; every other district is nationwide. Thana lists are not modelled yet — district resolves the price, which is all checkout needs.",
+    "source": "Bangladesh administrative divisions — 64 districts"
+  },
+  "districts": [
+    {
+      "id": "bagerhat",
+      "name": "Bagerhat",
+      "division": "Khulna",
+      "zone": "nationwide"
+    },
+    {
+      "id": "bandarban",
+      "name": "Bandarban",
+      "division": "Chattogram",
+      "zone": "nationwide"
+    },
+    {
+      "id": "barguna",
+      "name": "Barguna",
+      "division": "Barishal",
+      "zone": "nationwide"
+    },
+    {
+      "id": "barishal",
+      "name": "Barishal",
+      "division": "Barishal",
+      "zone": "nationwide"
+    },
+    {
+      "id": "bhola",
+      "name": "Bhola",
+      "division": "Barishal",
+      "zone": "nationwide"
+    },
+    {
+      "id": "bogura",
+      "name": "Bogura",
+      "division": "Rajshahi",
+      "zone": "nationwide"
+    },
+    {
+      "id": "brahmanbaria",
+      "name": "Brahmanbaria",
+      "division": "Chattogram",
+      "zone": "nationwide"
+    },
+    {
+      "id": "chandpur",
+      "name": "Chandpur",
+      "division": "Chattogram",
+      "zone": "nationwide"
+    },
+    {
+      "id": "chapainawabganj",
+      "name": "Chapainawabganj",
+      "division": "Rajshahi",
+      "zone": "nationwide"
+    },
+    {
+      "id": "chattogram",
+      "name": "Chattogram",
+      "division": "Chattogram",
+      "zone": "metro"
+    },
+    {
+      "id": "chuadanga",
+      "name": "Chuadanga",
+      "division": "Khulna",
+      "zone": "nationwide"
+    },
+    {
+      "id": "coxs-bazar",
+      "name": "Cox's Bazar",
+      "division": "Chattogram",
+      "zone": "nationwide"
+    },
+    {
+      "id": "cumilla",
+      "name": "Cumilla",
+      "division": "Chattogram",
+      "zone": "nationwide"
+    },
+    {
+      "id": "dhaka",
+      "name": "Dhaka",
+      "division": "Dhaka",
+      "zone": "metro"
+    },
+    {
+      "id": "dinajpur",
+      "name": "Dinajpur",
+      "division": "Rangpur",
+      "zone": "nationwide"
+    },
+    {
+      "id": "faridpur",
+      "name": "Faridpur",
+      "division": "Dhaka",
+      "zone": "nationwide"
+    },
+    {
+      "id": "feni",
+      "name": "Feni",
+      "division": "Chattogram",
+      "zone": "nationwide"
+    },
+    {
+      "id": "gaibandha",
+      "name": "Gaibandha",
+      "division": "Rangpur",
+      "zone": "nationwide"
+    },
+    {
+      "id": "gazipur",
+      "name": "Gazipur",
+      "division": "Dhaka",
+      "zone": "nationwide"
+    },
+    {
+      "id": "gopalganj",
+      "name": "Gopalganj",
+      "division": "Dhaka",
+      "zone": "nationwide"
+    },
+    {
+      "id": "habiganj",
+      "name": "Habiganj",
+      "division": "Sylhet",
+      "zone": "nationwide"
+    },
+    {
+      "id": "jamalpur",
+      "name": "Jamalpur",
+      "division": "Mymensingh",
+      "zone": "nationwide"
+    },
+    {
+      "id": "jashore",
+      "name": "Jashore",
+      "division": "Khulna",
+      "zone": "nationwide"
+    },
+    {
+      "id": "jhalokati",
+      "name": "Jhalokati",
+      "division": "Barishal",
+      "zone": "nationwide"
+    },
+    {
+      "id": "jhenaidah",
+      "name": "Jhenaidah",
+      "division": "Khulna",
+      "zone": "nationwide"
+    },
+    {
+      "id": "joypurhat",
+      "name": "Joypurhat",
+      "division": "Rajshahi",
+      "zone": "nationwide"
+    },
+    {
+      "id": "khagrachhari",
+      "name": "Khagrachhari",
+      "division": "Chattogram",
+      "zone": "nationwide"
+    },
+    {
+      "id": "khulna",
+      "name": "Khulna",
+      "division": "Khulna",
+      "zone": "nationwide"
+    },
+    {
+      "id": "kishoreganj",
+      "name": "Kishoreganj",
+      "division": "Dhaka",
+      "zone": "nationwide"
+    },
+    {
+      "id": "kurigram",
+      "name": "Kurigram",
+      "division": "Rangpur",
+      "zone": "nationwide"
+    },
+    {
+      "id": "kushtia",
+      "name": "Kushtia",
+      "division": "Khulna",
+      "zone": "nationwide"
+    },
+    {
+      "id": "lakshmipur",
+      "name": "Lakshmipur",
+      "division": "Chattogram",
+      "zone": "nationwide"
+    },
+    {
+      "id": "lalmonirhat",
+      "name": "Lalmonirhat",
+      "division": "Rangpur",
+      "zone": "nationwide"
+    },
+    {
+      "id": "madaripur",
+      "name": "Madaripur",
+      "division": "Dhaka",
+      "zone": "nationwide"
+    },
+    {
+      "id": "magura",
+      "name": "Magura",
+      "division": "Khulna",
+      "zone": "nationwide"
+    },
+    {
+      "id": "manikganj",
+      "name": "Manikganj",
+      "division": "Dhaka",
+      "zone": "nationwide"
+    },
+    {
+      "id": "meherpur",
+      "name": "Meherpur",
+      "division": "Khulna",
+      "zone": "nationwide"
+    },
+    {
+      "id": "moulvibazar",
+      "name": "Moulvibazar",
+      "division": "Sylhet",
+      "zone": "nationwide"
+    },
+    {
+      "id": "munshiganj",
+      "name": "Munshiganj",
+      "division": "Dhaka",
+      "zone": "nationwide"
+    },
+    {
+      "id": "mymensingh",
+      "name": "Mymensingh",
+      "division": "Mymensingh",
+      "zone": "nationwide"
+    },
+    {
+      "id": "naogaon",
+      "name": "Naogaon",
+      "division": "Rajshahi",
+      "zone": "nationwide"
+    },
+    {
+      "id": "narail",
+      "name": "Narail",
+      "division": "Khulna",
+      "zone": "nationwide"
+    },
+    {
+      "id": "narayanganj",
+      "name": "Narayanganj",
+      "division": "Dhaka",
+      "zone": "nationwide"
+    },
+    {
+      "id": "narsingdi",
+      "name": "Narsingdi",
+      "division": "Dhaka",
+      "zone": "nationwide"
+    },
+    {
+      "id": "natore",
+      "name": "Natore",
+      "division": "Rajshahi",
+      "zone": "nationwide"
+    },
+    {
+      "id": "netrokona",
+      "name": "Netrokona",
+      "division": "Mymensingh",
+      "zone": "nationwide"
+    },
+    {
+      "id": "nilphamari",
+      "name": "Nilphamari",
+      "division": "Rangpur",
+      "zone": "nationwide"
+    },
+    {
+      "id": "noakhali",
+      "name": "Noakhali",
+      "division": "Chattogram",
+      "zone": "nationwide"
+    },
+    {
+      "id": "pabna",
+      "name": "Pabna",
+      "division": "Rajshahi",
+      "zone": "nationwide"
+    },
+    {
+      "id": "panchagarh",
+      "name": "Panchagarh",
+      "division": "Rangpur",
+      "zone": "nationwide"
+    },
+    {
+      "id": "patuakhali",
+      "name": "Patuakhali",
+      "division": "Barishal",
+      "zone": "nationwide"
+    },
+    {
+      "id": "pirojpur",
+      "name": "Pirojpur",
+      "division": "Barishal",
+      "zone": "nationwide"
+    },
+    {
+      "id": "rajbari",
+      "name": "Rajbari",
+      "division": "Dhaka",
+      "zone": "nationwide"
+    },
+    {
+      "id": "rajshahi",
+      "name": "Rajshahi",
+      "division": "Rajshahi",
+      "zone": "nationwide"
+    },
+    {
+      "id": "rangamati",
+      "name": "Rangamati",
+      "division": "Chattogram",
+      "zone": "nationwide"
+    },
+    {
+      "id": "rangpur",
+      "name": "Rangpur",
+      "division": "Rangpur",
+      "zone": "nationwide"
+    },
+    {
+      "id": "satkhira",
+      "name": "Satkhira",
+      "division": "Khulna",
+      "zone": "nationwide"
+    },
+    {
+      "id": "shariatpur",
+      "name": "Shariatpur",
+      "division": "Dhaka",
+      "zone": "nationwide"
+    },
+    {
+      "id": "sherpur",
+      "name": "Sherpur",
+      "division": "Mymensingh",
+      "zone": "nationwide"
+    },
+    {
+      "id": "sirajganj",
+      "name": "Sirajganj",
+      "division": "Rajshahi",
+      "zone": "nationwide"
+    },
+    {
+      "id": "sunamganj",
+      "name": "Sunamganj",
+      "division": "Sylhet",
+      "zone": "nationwide"
+    },
+    {
+      "id": "sylhet",
+      "name": "Sylhet",
+      "division": "Sylhet",
+      "zone": "nationwide"
+    },
+    {
+      "id": "tangail",
+      "name": "Tangail",
+      "division": "Dhaka",
+      "zone": "nationwide"
+    },
+    {
+      "id": "thakurgaon",
+      "name": "Thakurgaon",
+      "division": "Rangpur",
+      "zone": "nationwide"
+    }
+  ]
+}

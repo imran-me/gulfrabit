@@ -8,7 +8,7 @@
 import * as store from '../../shared/js/core/state.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { siteURL } from '../../shared/js/core/paths.js';
-import { DEFAULT_OPTION } from '../../shared/js/core/delivery.js';
+import { DEFAULT_OPTION } from '../delivery/backend/api.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 

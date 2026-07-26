@@ -13,9 +13,9 @@ export async function createOrder(order) {
   return { id: order.id, status: 'processing' };
 }
 
-export async function getShippingQuote(/* address, cart */) {
-  // TODO: backend — POST /checkout/shipping-quote.
-  // Mirrors shared/js/core/delivery.js — cold-chain is NOT a line item; it is
-  // included on perishables, which is what the site promises on every page.
-  return DELIVERY_OPTIONS.map(({ id, label, cost }) => ({ id, label, cost }));
-}
+/**
+ * Delivery pricing is owned by modules/delivery — checkout asks, it never
+ * decides. Re-exported here so checkout code has one import surface.
+ * @see modules/delivery/backend/endpoints.md
+ */
+export { getDeliveryOptions as getShippingQuote, quoteForDistrict } from '../../delivery/backend/api.js';

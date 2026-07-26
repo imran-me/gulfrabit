@@ -3,7 +3,7 @@
  * Reads the "last-order" stash (or looks up by ?id= in local order history).
  */
 
-import { deliveryOption } from '../../shared/js/core/delivery.js';
+import { deliveryOption } from '../delivery/backend/api.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';

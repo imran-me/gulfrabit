@@ -3,7 +3,7 @@
  * Looks up an order by ?id= (or the lookup field) from the local order history
  * merged with the mock orders.json, and renders a stage timeline.
  */
-import { deliveryOption } from '../../shared/js/core/delivery.js';
+import { deliveryOption } from '../delivery/backend/api.js';
 import { getMockOrders } from '../../shared/js/core/data-service.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
