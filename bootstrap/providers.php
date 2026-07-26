@@ -18,6 +18,7 @@ declare(strict_types=1);
 return [
     App\Providers\AppServiceProvider::class,
 
+    Modules\Account\AccountServiceProvider::class,
     Modules\Auth\AuthServiceProvider::class,
     Modules\Cart\CartServiceProvider::class,
     Modules\Catalog\CatalogServiceProvider::class,
@@ -27,7 +28,6 @@ return [
     // Added as each module grows a Laravel layer. The frontend for these already
     // runs on the mock seam in modules/<feature>/backend/api.js:
     //
-    // Modules\Account\AccountServiceProvider::class,
     // Modules\B2b\B2bServiceProvider::class,
     // Modules\Content\ContentServiceProvider::class,
     // Modules\Deals\DealsServiceProvider::class,

@@ -138,7 +138,7 @@ and swapping mock for real stops being a one-file change.
 | `cart` | live (mock) | **authored** — provider, routes, controller, 2 requests, 2 services, 3 models, 3 migrations, seeder |
 | `checkout` | live (mock) | **authored** — provider, routes, controller, request, order service, 2 models, 2 migrations |
 | `auth` | live (mock) | **authored** — provider, routes, controller, 4 requests, 2 services, model, migration (OTP-first) |
-| `account` | live (mock) | not started |
+| `account` | live (mock) | **authored** — provider, routes, 2 controllers, request, address service, 2 models, 2 migrations |
 | `b2b` | live (mock) | not started |
 | `deals` | live (mock) | not started |
 | `content` | static | not started |
