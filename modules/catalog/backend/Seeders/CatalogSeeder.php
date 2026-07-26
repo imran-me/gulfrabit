@@ -85,6 +85,7 @@ class CatalogSeeder extends Seeder
                     'in_stock'              => $row['inStock'] ?? true,
                     'tags'                  => $row['tags'] ?? [],
                     'dietary'               => $row['dietary'] ?? [],
+                    'search_terms'          => $row['searchTerms'] ?? [],
                     'short_description'     => $row['shortDescription'] ?? null,
                     'description'           => $row['description'] ?? null,
                     'moq'                   => $row['moq'] ?? null,

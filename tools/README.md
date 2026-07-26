@@ -104,3 +104,9 @@ python -m http.server 5210 --directory .
 It checks `document.fonts` for the face and its status, runs `fonts.check()`,
 and measures the same Bangla string in the real family versus a fallback — if
 the widths match, the font is not being used no matter what the CSS says.
+
+`?focus=<selector>` focuses an element inside the frame. Separate from
+`?click=` because `el.click()` does not reliably move focus in headless, so
+focus-triggered UI — search suggestions, `:focus-within` styling — would
+silently never render and you would screenshot a page that looks fine and
+isn't tested.

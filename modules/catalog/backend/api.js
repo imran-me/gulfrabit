@@ -69,12 +69,33 @@ export async function getRelated(product, limit = 6) {
 export async function searchProducts(query, { sort, filters } = {}) {
   const q = query.trim().toLowerCase();
   if (!q) return [];
-  let results = (await getAllProducts()).filter((p) =>
-    [p.title, p.brand, p.origin, p.categoryName, ...(p.tags || [])]
-      .filter(Boolean).join(' ').toLowerCase().includes(q));
+  let results = (await getAllProducts()).filter((p) => matchesQuery(p, q));
   results = applyFilters(results, filters);
   results = applySort(results, sort);
   return results;
+}
+
+/**
+ * Does this product answer the query?
+ *
+ * Two different matching rules on purpose:
+ *
+ *  · **Free text** (title, brand, origin, category) matches on SUBSTRING, so a
+ *    half-typed word still finds things — typing "choc" should reach chocolate.
+ *
+ *  · **searchTerms** matches on WHOLE WORDS only. These are curated synonyms
+ *    and romanised Bangla ("khejur", "modhu", "chaku"), and substring matching
+ *    them is actively harmful: "cha" (Bangla for tea) would match "chocolate",
+ *    "chashew" and anything else containing those three letters, and the
+ *    synonym list would start returning nonsense.
+ */
+function matchesQuery(p, q) {
+  const freeText = [p.title, p.brand, p.origin, p.categoryName, ...(p.tags || [])]
+    .filter(Boolean).join(' ').toLowerCase();
+  if (freeText.includes(q)) return true;
+
+  return (p.searchTerms || []).some((term) =>
+    term === q || term.split(' ').includes(q) || term.startsWith(`${q} `));
 }
 
 /**
@@ -86,7 +107,12 @@ export async function suggest(query, limit = 6) {
   if (!q) return [];
   const products = await getAllProducts();
   return products
-    .filter((p) => p.title.toLowerCase().includes(q) || p.brand?.toLowerCase().includes(q))
+    .filter((p) => p.title.toLowerCase().includes(q)
+      || p.brand?.toLowerCase().includes(q)
+      // Synonyms count here too, or "khejur" returns nothing in the dropdown
+      // while returning results on the full search page — an inconsistency the
+      // customer experiences as the search being broken.
+      || (p.searchTerms || []).some((t) => t === q || t.split(' ').includes(q) || t.startsWith(`${q} `)))
     .slice(0, limit)
     .map((p) => ({ id: p.id, title: p.title, brand: p.brand, image: p.image, categorySlug: p.categorySlug }));
 }

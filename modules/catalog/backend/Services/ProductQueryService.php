@@ -91,7 +91,11 @@ final class ProductQueryService
             ->active()
             ->where(function (Builder $q) use ($term): void {
                 $q->where('title', 'like', "%{$term}%")
-                    ->orWhere('brand', 'like', "%{$term}%");
+                    ->orWhere('brand', 'like', "%{$term}%")
+                    // Or "khejur" returns nothing in the dropdown while
+                    // returning results on the search page — which the customer
+                    // experiences as the search being broken.
+                    ->orWhereJsonContains('search_terms', mb_strtolower($term));
             })
             ->limit($limit)
             ->get(['sku', 'title', 'brand', 'image', 'category_id'])
@@ -114,12 +118,20 @@ final class ProductQueryService
         }
 
         if (! empty($f['q'])) {
-            $term = $f['q'];
+            $term = mb_strtolower(trim($f['q']));
             $query->where(function (Builder $q) use ($term): void {
+                // Free text matches on substring so a half-typed word still
+                // finds things ("choc" -> chocolate).
                 $q->where('title', 'like', "%{$term}%")
                     ->orWhere('brand', 'like', "%{$term}%")
                     ->orWhere('origin', 'like', "%{$term}%")
-                    ->orWhere('short_description', 'like', "%{$term}%");
+                    ->orWhere('short_description', 'like', "%{$term}%")
+                    // Synonyms match WHOLE terms only. These are curated —
+                    // romanised Bangla like "khejur" and "cha" — and substring
+                    // matching them would make "cha" hit anything containing
+                    // those three letters. Mirrors matchesQuery() in
+                    // backend/api.js; change both together.
+                    ->orWhereJsonContains('search_terms', $term);
             });
         }
 

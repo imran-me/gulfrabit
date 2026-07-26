@@ -162,3 +162,24 @@
 .breadcrumb-gr a { color: var(--text-muted); }
 .breadcrumb-gr a:hover { color: var(--link); }
 .breadcrumb-gr__sep { opacity: .5; }
+
+/* ---- Search: popular queries + merchandised placeholder ----------------
+   Rotation timing is driven from search-autocomplete.js; the transition and
+   the resting look live here (context.md §2). */
+.search-suggest__heading {
+  padding: var(--space-2) var(--space-3) var(--space-1);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.search-suggest__item--query { color: var(--text-secondary); }
+.search-suggest__item--query svg { color: var(--text-muted); flex-shrink: 0; }
+
+.header-search__input::placeholder,
+.search-overlay__box input::placeholder {
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.header-search__input.is-swapping::placeholder,
+.search-overlay__box input.is-swapping::placeholder { opacity: 0; }
