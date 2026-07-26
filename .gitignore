@@ -22,3 +22,19 @@ npm-debug.log*
 
 # ── Keep the source logo out of the repo root once copied ────────
 # (working copy lives in assets/logo/) — comment out if you want it tracked.
+
+# ---- Laravel (see BACKEND.md) ----------------------------------------
+/vendor/
+/node_modules/
+/storage/*.key
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+/bootstrap/cache/*
+/public/storage
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+_laravel-skeleton/

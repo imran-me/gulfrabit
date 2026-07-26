@@ -1,0 +1,54 @@
+{
+  "name": "gulfrabit/storefront",
+  "type": "project",
+  "description": "GulfRabit — premium imports for Bangladesh. Laravel backend, one module per feature.",
+  "keywords": ["laravel", "ecommerce", "bangladesh", "modular"],
+  "license": "proprietary",
+  "require": {
+    "php": "^8.4",
+    "laravel/framework": "^12.0",
+    "laravel/sanctum": "^4.0"
+  },
+  "require-dev": {
+    "fakerphp/faker": "^1.23",
+    "laravel/pint": "^1.18",
+    "mockery/mockery": "^1.6",
+    "nunomaduro/collision": "^8.5",
+    "phpunit/phpunit": "^11.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/",
+      "Database\\Factories\\": "database/factories/",
+      "Database\\Seeders\\": "database/seeders/",
+      "Modules\\Delivery\\": "modules/delivery/backend/",
+      "Modules\\Catalog\\": "modules/catalog/backend/",
+      "Modules\\Cart\\": "modules/cart/backend/",
+      "Modules\\Checkout\\": "modules/checkout/backend/",
+      "Modules\\Auth\\": "modules/auth/backend/",
+      "Modules\\Account\\": "modules/account/backend/",
+      "Modules\\B2b\\": "modules/b2b/backend/",
+      "Modules\\Deals\\": "modules/deals/backend/",
+      "Modules\\Content\\": "modules/content/backend/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "post-autoload-dump": [
+      "@php artisan package:discover --ansi"
+    ],
+    "lint": "pint",
+    "test": "@php artisan test"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
