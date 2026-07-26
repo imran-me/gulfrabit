@@ -1,0 +1,105 @@
+# GulfRabit — Apache config for Hostinger.
+#
+# THE ROUTING MODEL, because it is not the usual Laravel one:
+#
+#   The storefront is a STATIC site living at the repo root (index.html,
+#   modules/, shared/, assets/). Apache serves it directly.
+#   Laravel is ONLY the JSON API. Just /api/* reaches public/index.php.
+#
+# So this repo root is the document root — point public_html at it (or clone the
+# repo as public_html). Do NOT blanket-rewrite everything into public/: that is
+# the standard Laravel setup and it would 404 the entire storefront, because
+# there is no index.html inside public/.
+#
+# The trade-off of having the app root be the web root is that the blocking
+# rules at the bottom are load-bearing. They are tested by
+# `python tools/htaccess-check.py`.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Force HTTPS (Hostinger issues a free certificate).
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+    # --- The API, and only the API, goes to Laravel --------------------
+    RewriteRule ^api(/.*)?$ public/index.php [L,QSA]
+
+    # Laravel's health check.
+    RewriteRule ^up$ public/index.php [L,QSA]
+
+    # --- Everything else is the static storefront ----------------------
+    # Real files and directories are served as-is. Anything else falls
+    # through to the 404 page below rather than to Laravel, which has no
+    # page routes at all (see routes/web.php).
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+</IfModule>
+
+ErrorDocument 404 /404.html
+
+# ---------------------------------------------------------------------------
+# Block application internals.
+#
+# CAREFUL with modules/: that folder is NOT purely server-side. Each module's
+# backend/api.js is the frontend data seam and is imported by the browser, so
+# denying modules/*/backend/ wholesale takes the storefront down. The negative
+# lookahead denies everything under backend/ EXCEPT api.js.
+#
+# The module datasets (modules/*/data/*.json) must stay reachable too — the
+# storefront fetches them directly until the API is live.
+# ---------------------------------------------------------------------------
+
+RedirectMatch 404 ^/(app|bootstrap|config|database|storage|vendor|tools|research)/
+RedirectMatch 404 ^/modules/[^/]+/backend/(?!api\.js$).*$
+RedirectMatch 404 ^/modules/[^/]+/_fragments/
+RedirectMatch 404 ^/(composer\.(json|lock)|artisan|phpunit\.xml|context\.md|BACKEND\.md|DEPLOY-HOSTINGER\.md)$
+
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "\.(md|lock|sql|ini|yml|yaml|log)$">
+    Require all denied
+</FilesMatch>
+
+# ---- Compression -------------------------------------------------------
+# Shajgoj serves 411 KB of JS completely uncompressed because its nginx
+# gzip_types omits application/javascript. Do not repeat that.
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+    AddOutputFilterByType DEFLATE application/javascript application/x-javascript
+    AddOutputFilterByType DEFLATE application/json image/svg+xml
+</IfModule>
+
+# ---- Caching -----------------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # HTML revalidates: tools/assemble.py rewrites pages on every build.
+    ExpiresByType text/html "access plus 0 seconds"
+    # JSON is the mock data layer and changes with the catalog — keep it short.
+    ExpiresByType application/json "access plus 1 hour"
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType image/svg+xml "access plus 30 days"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+# ---- Security headers --------------------------------------------------
+# None of Shajgoj, Ghorer Bazar or Daraz ship a CSP. It is cheap to get right
+# and is a genuine differentiator on a site taking bKash and card payments.
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+
+    # Enable once the domain is HTTPS-only and you are confident:
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+Options -Indexes

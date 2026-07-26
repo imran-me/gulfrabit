@@ -29,7 +29,13 @@ implementation.
 
 ## Install
 
-Nothing here has been run. This is the intended sequence.
+> **For Hostinger specifically, follow `DEPLOY-HOSTINGER.md`** — it covers the
+> document-root decision, which is not the standard Laravel one and will break
+> the storefront if you get it wrong.
+
+The host application (`app/`, `bootstrap/`, `routes/`, `database/`,
+`public/index.php`, `artisan`) is now in the repo, so `composer create-project`
+is no longer needed. Nothing here has been run.
 
 ```bash
 # 1. Toolchain (Windows: use the PHP 8.4 x64 thread-safe build, add to PATH)

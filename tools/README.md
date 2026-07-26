@@ -72,3 +72,20 @@ python tools/module-deps.py   # cross-module `use` graph + cycle detection
 independently deletable, and a dependency **cycle** silently breaks that. The
 graph must stay one-way (today: `cart` → `catalog`; `checkout` → `cart`,
 `catalog`, `delivery`).
+
+## `htaccess-check.py`
+
+Simulates the root `.htaccess` blocking rules against real repo paths. Apache is
+not available here, so this only checks the regexes — but a wrong pattern
+silently 404s files the browser needs, and that would not surface until the site
+was live.
+
+```bash
+python tools/htaccess-check.py
+```
+
+It asserts both directions: that `modules/*/backend/api.js` and
+`modules/*/data/*.json` stay **reachable** (they are frontend files), and that
+PHP, fragments, `vendor/`, `storage/` and `.env` stay **blocked**. An early
+draft denied `modules/*/backend/` wholesale and would have taken the whole
+storefront down; this check exists because of that.

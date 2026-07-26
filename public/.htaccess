@@ -1,0 +1,65 @@
+# Laravel front controller. This is the standard Laravel public/.htaccess plus
+# a few production headers — see the repo root .htaccess for the Hostinger
+# document-root workaround.
+
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect trailing slashes if not a folder
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send anything that is not a real file/folder to the front controller
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# ---- Compression -------------------------------------------------------
+# Shajgoj serves 411 KB of JS completely uncompressed because its nginx
+# gzip_types omits application/javascript. Do not repeat that.
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+    AddOutputFilterByType DEFLATE application/javascript application/x-javascript
+    AddOutputFilterByType DEFLATE application/json image/svg+xml
+</IfModule>
+
+# ---- Caching -----------------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # HTML must revalidate — the assembler rewrites pages on every build.
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType image/svg+xml "access plus 30 days"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+# ---- Security headers --------------------------------------------------
+# None of Shajgoj, Ghorer Bazar or Daraz ship a CSP. This is cheap to get right
+# and is a real differentiator on a site taking bKash and card payments.
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+
+    # Enable once the domain is HTTPS-only and you are confident:
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# Never serve dotfiles or the environment file
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

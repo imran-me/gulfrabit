@@ -95,6 +95,34 @@ ALL CAPS only for small tags/badges.
    moves, reveals, transitions or reacts is JS-driven; CSS holds the static look.
 **4. Backend = Laravel (PHP).**
 
+#### How the three styling layers divide — use all three
+
+| Layer | Owns | Examples |
+|---|---|---|
+| **CSS partials** | design tokens, and any *named, reused component* | `.product-card`, `.btn-gr`, `.option-card`, `--surface-page` |
+| **Tailwind utilities** | one-off layout and spacing on a single element | `flex items-center gap-3`, `mt-6`, `col-span-2`, `md:grid-cols-2` |
+| **JS** | motion, reveal, transitions, state-driven visuals | `scroll-reveal.js`, cart-drawer open/close, badge/promo repaint |
+
+**Audited 2026-07-26 — two things to correct as work continues:**
+
+1. **Tailwind is loaded but generating nothing.** Exactly four Tailwind-shaped
+   classes appear in the HTML (`text-muted-gr`, `select-gr`, `text-gradient`,
+   `col-span-2`) and **all four are our own CSS classes**. The Play CDN ships a
+   JIT compiler on every page for zero output.
+2. **There are ~1,040 inline `style=""` attributes** — `style="margin-right:1rem"`,
+   `style="color:var(--text-muted)"`, `style="font-size:var(--fs-14)"` and so on.
+   **That is the work Tailwind should be doing.** Inline styles cannot be reused,
+   cannot respond to a breakpoint, and beat every stylesheet on specificity.
+
+**Rule going forward:** reach for a Tailwind utility before an inline `style`.
+Promote to a CSS partial the moment the same combination appears three times.
+Do not add new inline `style=""` for anything a utility expresses.
+
+⚠ The **Play CDN is not production-safe** (Tailwind say so themselves). It stays
+for now because there is no `node`/`npm` on this machine to run the Tailwind CLI.
+Before a real launch: install the CLI, build one static stylesheet from
+`shared/css/tailwind.config.js`, and drop the CDN `<script>`.
+
 ### The module rule — the one that matters most
 
 **Every feature or section is ONE self-contained folder holding everything it needs:**
@@ -193,7 +221,12 @@ style concern = one CSS partial. Split any file over ~300 lines.
 gulfrabit/
 ├── context.md · README.md · BACKEND.md · .gitignore
 ├── composer.json                    PSR-4: Modules\<Feature>\ -> modules/<f>/backend/
-├── bootstrap/providers.php          the ONLY place a module is named from outside
+├── artisan · .env.example · .htaccess · DEPLOY-HOSTINGER.md
+├── app/         Models/User.php · Providers/AppServiceProvider.php
+├── bootstrap/   app.php (enables the 'api' group) · providers.php (module list)
+├── database/    migrations/ (users) · seeders/DatabaseSeeder.php
+├── routes/      api.php (empty by design) · web.php · console.php
+├── public/      index.php — Laravel front controller, /api ONLY
 ├── index.html · 404.html · sitemap.xml · robots.txt · site.webmanifest
 ├── assets/    logo/ icons/ images/{products,categories,hero}/ fonts/
 ├── research/  competitor-analysis.md · implementation-plan.md
