@@ -65,6 +65,15 @@ RedirectMatch 404 ^/(composer\.(json|lock)|artisan|phpunit\.xml|context\.md|BACK
     Require all denied
 </FilesMatch>
 
+# ---- MIME types --------------------------------------------------------
+# Not every Apache build knows font/woff2, and serving it as
+# application/octet-stream costs the browser's font-specific optimisations.
+<IfModule mod_mime.c>
+    AddType font/woff2 .woff2
+    AddType image/svg+xml .svg
+    AddType application/manifest+json .webmanifest
+</IfModule>
+
 # ---- Compression -------------------------------------------------------
 # Shajgoj serves 411 KB of JS completely uncompressed because its nginx
 # gzip_types omits application/javascript. Do not repeat that.

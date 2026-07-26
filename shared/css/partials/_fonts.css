@@ -1,0 +1,47 @@
+/* =========================================================================
+   GulfRabit · Fonts
+   One style concern, one partial. Latin comes from Google Fonts (Inter);
+   Bengali is SELF-HOSTED here.
+   ========================================================================= */
+
+/* ---- Bengali ------------------------------------------------------------
+   Not one of Shajgoj, Ghorer Bazar or Daraz loads a Bengali webfont. Daraz
+   self-hosts Roboto with cyrillic, greek and vietnamese subsets and NO Bengali
+   at all, while Bangla is their mobile default language — so Bangla text on the
+   biggest storefront in the country renders in whatever the device happens to
+   have. Fixing that is the cheapest visible advantage available to this project.
+
+   Noto Sans Bengali, SIL Open Font License 1.1 — free to self-host and
+   redistribute. Self-hosted rather than linked so it survives a strict CSP,
+   costs no third-party connection, and cannot be broken by a CDN outage.
+
+   ONE file covers every weight: Google serves byte-identical woff2 for
+   wght@400, wght@600 and wght@100..900, so this is the variable font and the
+   `font-weight: 100 900` range is the correct descriptor. Declaring discrete
+   weights instead would have shipped the same 105 KB twice.
+
+   unicode-range is the important part: the browser downloads this file ONLY
+   when Bengali codepoints are actually on the page. Latin pages pay nothing.
+   Range copied verbatim from Google's own bengali subset. */
+@font-face {
+  font-family: 'Noto Sans Bengali';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../../../assets/fonts/noto-sans-bengali-variable.woff2') format('woff2');
+  unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2,
+                 U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2,
+                 U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
+}
+
+/* Bangla runs slightly larger than Latin at the same px size and needs more
+   leading for its ascenders and matras. Applied by language, so mixed-script
+   pages get it automatically without a wrapper class. */
+[lang="bn"],
+.bn {
+  font-family: 'Noto Sans Bengali', var(--font-body);
+  line-height: 1.75;
+  /* Bangla has no case distinction — uppercasing produces nonsense. */
+  text-transform: none;
+  letter-spacing: 0;
+}

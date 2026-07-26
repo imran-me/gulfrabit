@@ -89,3 +89,18 @@ It asserts both directions: that `modules/*/backend/api.js` and
 PHP, fragments, `vendor/`, `storage/` and `.env` stay **blocked**. An early
 draft denied `modules/*/backend/` wholesale and would have taken the whole
 storefront down; this check exists because of that.
+
+## `font-test.html`
+
+Proves the self-hosted Bengali face is actually **loaded and selected**, not
+silently falling back to a system font — which is precisely the failure Daraz
+and Ghorer Bazar ship.
+
+```bash
+python -m http.server 5210 --directory .
+# then open /tools/font-test.html
+```
+
+It checks `document.fonts` for the face and its status, runs `fonts.check()`,
+and measures the same Bangla string in the real family versus a fallback — if
+the widths match, the font is not being used no matter what the CSS says.

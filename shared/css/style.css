@@ -8,6 +8,7 @@
    ========================================================================= */
 
 @import url("partials/_variables.css");
+@import url("partials/_fonts.css");
 @import url("partials/_typography.css");
 @import url("partials/_buttons.css");
 @import url("partials/_cards.css");

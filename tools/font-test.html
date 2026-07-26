@@ -1,0 +1,85 @@
+<!doctype html>
+<!-- Font rendering check (author-time only; blocked from the web by .htaccess).
+     Proves the self-hosted Bengali face actually loads and is selected, rather
+     than silently falling back to a system font — which is exactly the failure
+     Daraz and Ghorer Bazar ship. -->
+<meta charset="utf-8">
+<title>GulfRabit · font check</title>
+<link rel="stylesheet" href="../shared/css/style.css">
+<style>
+  body { padding: 2rem; max-width: 900px; margin-inline: auto; }
+  .row { padding: 1rem 0; border-bottom: 1px solid var(--border-hairline); }
+  .label { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+  .verdict { padding: .75rem 1rem; border-radius: 8px; font-family: ui-monospace, monospace; white-space: pre; }
+  .ok { background: #123d1e; color: #9AE6A0; }
+  .bad { background: #4a1420; color: #FF9AA6; }
+</style>
+
+<h1 class="h3">Font check</h1>
+
+<div class="row">
+  <p class="label">Latin — should be Inter</p>
+  <p style="font-size:24px">Sourced. Verified. Delivered. — ৳ 1,450</p>
+</div>
+
+<div class="row">
+  <p class="label">Bangla — should be Noto Sans Bengali, NOT a system fallback</p>
+  <p lang="bn" style="font-size:24px">খেজুরগুলো একদম টাটকা এসেছে। মান নিয়ে দুশ্চিন্তা নেই।</p>
+  <p lang="bn" style="font-size:24px;font-weight:600">শারমিন আক্তার · উত্তরা, ঢাকা</p>
+</div>
+
+<div class="row">
+  <p class="label">Weight axis — 300 / 400 / 600 / 700 should visibly differ</p>
+  <p lang="bn" style="font-size:22px;font-weight:300">গালফর‍্যাবিট — নির্ভরযোগ্য আমদানি</p>
+  <p lang="bn" style="font-size:22px;font-weight:400">গালফর‍্যাবিট — নির্ভরযোগ্য আমদানি</p>
+  <p lang="bn" style="font-size:22px;font-weight:600">গালফর‍্যাবিট — নির্ভরযোগ্য আমদানি</p>
+  <p lang="bn" style="font-size:22px;font-weight:700">গালফর‍্যাবিট — নির্ভরযোগ্য আমদানি</p>
+</div>
+
+<div class="row">
+  <p class="label">Mixed in one line — both faces, no wrapper</p>
+  <p style="font-size:22px">Medjool Dates — <span lang="bn">খেজুর</span> — ৳ 1,450</p>
+</div>
+
+<div id="verdict" class="verdict">checking…</div>
+
+<script type="module">
+  // document.fonts is the only honest test: a font can be declared, requested,
+  // and still not be the one painting the glyphs.
+  const lines = [];
+  await document.fonts.ready;
+
+  const loaded = [...document.fonts].map(f => `${f.family} ${f.weight} ${f.status}`);
+  const bengaliFace = [...document.fonts].find(f => f.family.includes('Bengali'));
+
+  lines.push(`document.fonts entries: ${document.fonts.size}`);
+  loaded.forEach(l => lines.push('  ' + l));
+
+  const bnLoaded = document.fonts.check('400 16px "Noto Sans Bengali"');
+  lines.push('');
+  lines.push(`Noto Sans Bengali face present : ${!!bengaliFace}`);
+  lines.push(`face status                    : ${bengaliFace ? bengaliFace.status : 'n/a'}`);
+  lines.push(`fonts.check(Noto Sans Bengali) : ${bnLoaded}`);
+
+  // Width comparison: if the Bengali text renders in a fallback, its measured
+  // width differs from the same text forced to the real family.
+  const measure = (family) => {
+    const el = document.createElement('span');
+    el.textContent = 'খেজুরগুলো একদম টাটকা';
+    el.style.cssText = `position:absolute;visibility:hidden;font-size:40px;font-family:${family}`;
+    document.body.appendChild(el);
+    const w = el.getBoundingClientRect().width;
+    el.remove();
+    return Math.round(w);
+  };
+  const wReal = measure(`"Noto Sans Bengali"`);
+  const wFallback = measure(`monospace`);
+  lines.push('');
+  lines.push(`width in Noto Sans Bengali : ${wReal}px`);
+  lines.push(`width in monospace         : ${wFallback}px`);
+
+  const pass = !!bengaliFace && bengaliFace.status === 'loaded' && bnLoaded && wReal !== wFallback;
+  const v = document.getElementById('verdict');
+  v.className = 'verdict ' + (pass ? 'ok' : 'bad');
+  v.textContent = (pass ? 'PASS — Bengali face is loaded and selected\n\n' : 'FAIL\n\n') + lines.join('\n');
+</script>

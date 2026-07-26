@@ -488,9 +488,18 @@ errors, and only then start the next. No parallel half-finished features.
       — the unlock for filtering B2B `specs`
 - [ ] **3.2** Real sourcing/authenticity page (the hero "Our Sourcing" CTA needs a home)
 - [ ] **3.3** Merchant-authored FAQ + Q&A per product *(works with zero customers)*
-- [ ] **5.1** **Bengali webfont** with correct `unicode-range: U+0980-09FF` —
-      none of the three market leaders ships one; Daraz sends Greek and Cyrillic to
-      Dhaka and no Bengali. Biggest available differentiator.
+- [x] **5.1** **Bengali webfont** — Noto Sans Bengali (OFL), **self-hosted** at
+      `assets/fonts/noto-sans-bengali-variable.woff2` (105 KB), declared in the new
+      `_fonts.css` partial with `unicode-range` copied verbatim from Google's bengali
+      subset, so it downloads **only when Bengali codepoints are on the page**.
+      **One file, `font-weight: 100 900`** — Google serves byte-identical woff2 for
+      `wght@400`, `wght@600` and `wght@100..900`, proving it is the variable font;
+      declaring discrete weights would have shipped the same 105 KB twice.
+      Added to `--font-body` so Bangla renders anywhere, plus a `[lang="bn"]` rule
+      (looser leading, no uppercasing — Bangla has no case).
+      Verified with `tools/font-test.html`: face loaded, `fonts.check()` true, and
+      the measured width differs from fallback (408px vs 468px) — the only honest
+      proof the face is actually painting.
 - [ ] **5.3** Pre-production: drop the Tailwind Play CDN, ship `srcset`+AVIF with
       real photography, enable Brotli + long `max-age`, add CSP at the host
 
