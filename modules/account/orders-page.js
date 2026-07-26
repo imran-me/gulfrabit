@@ -2,7 +2,7 @@
  * orders-page.js — order history: merges locally-placed orders (localStorage)
  * with the mock order history (orders.json), with status filters.
  */
-import { getMockOrders } from '../../shared/js/core/data-service.js';
+import { getMockOrders } from './backend/api.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { siteURL } from '../../shared/js/core/paths.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';

@@ -5,7 +5,7 @@
  * price / rating are highlighted. Re-renders live as items are removed.
  */
 import * as store from '../../shared/js/core/state.js';
-import { getAllProducts } from '../../shared/js/core/data-service.js';
+import { getAllProducts } from './backend/api.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { siteURL } from '../../shared/js/core/paths.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';

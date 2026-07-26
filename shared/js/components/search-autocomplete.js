@@ -11,7 +11,7 @@
  * suggestions are pure enhancement.
  */
 
-import { suggest } from '../core/data-service.js';
+import { suggest } from '../../../modules/catalog/backend/api.js';
 import { siteURL } from '../core/paths.js';
 import { debounce } from '../utils/debounce.js';
 import { formatBDT } from '../utils/format-currency.js';

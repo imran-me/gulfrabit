@@ -4,7 +4,7 @@
  * filters/sort/grid pattern as the PLP.
  */
 
-import { searchProducts } from '../../shared/js/core/data-service.js';
+import { searchProducts } from './backend/api.js';
 import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { renderProductSkeletons } from '../../shared/js/components/skeleton-loader.js';
 import { initFilters } from '../../shared/js/components/filters-sidebar.js';

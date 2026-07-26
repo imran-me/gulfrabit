@@ -1,8 +1,8 @@
 /**
  * B2B · module API (mock)
- * Reads industrial products from the shared data-service and fakes RFQ submit.
+ * Reads industrial products through the catalog module and fakes RFQ submit.
  */
-import { getProductsByCategory } from '../../../shared/js/core/data-service.js';
+import { getProductsByCategory } from '../../catalog/backend/api.js';
 
 export async function getIndustrialProducts() {
   return getProductsByCategory('industrial-raw-materials');

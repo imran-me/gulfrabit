@@ -5,7 +5,7 @@
  * spec-sheet table and read as B2B rather than lifestyle.
  */
 
-import { getProductById, getRelated, getAllProducts } from '../../shared/js/core/data-service.js';
+import { getProductById, getRelated, getAllProducts } from './backend/api.js';
 import { storage } from '../../shared/js/core/storage.js';
 import { formatBDT, discountLabel, savingsLabel } from '../../shared/js/utils/format-currency.js';
 import * as store from '../../shared/js/core/state.js';

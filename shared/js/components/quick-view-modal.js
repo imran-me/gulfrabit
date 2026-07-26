@@ -3,11 +3,11 @@
  * Lazily imported by product-card.js only when a quick-view button is clicked,
  * so it costs nothing on pages that never use it.
  *
- * Self-contained: builds its own dialog, fetches the product via data-service,
+ * Self-contained: builds its own dialog, fetches the product via the catalog module,
  * and reuses the shared cart state + toast.
  */
 
-import { getProductById } from '../core/data-service.js';
+import { getProductById } from '../../../modules/catalog/backend/api.js';
 import { formatBDT, discountLabel, savingsLabel } from '../utils/format-currency.js';
 import * as store from '../core/state.js';
 import { siteURL } from '../core/paths.js';

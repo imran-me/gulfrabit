@@ -2,11 +2,12 @@
  * auth-page.js — one module for login / register / forgot (mode via
  * data-auth-mode). Real client-side validation; mock success flows.
  *
- * MOCK ONLY — auth is faked against data/users.json + localStorage session.
+ * MOCK ONLY — auth is faked against the module's own data/users.json + a
+ * localStorage session.
  * // TODO: backend — replace with JWT auth (see modules/auth/backend/endpoints.md).
  */
 
-import { getMockUsers } from '../../shared/js/core/data-service.js';
+import { getMockUsers } from './backend/api.js';
 import * as store from '../../shared/js/core/state.js';
 import { siteURL } from '../../shared/js/core/paths.js';
 import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';

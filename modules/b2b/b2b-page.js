@@ -3,7 +3,7 @@
  * the RFQ form. Renders the industrial-materials products with tiered pricing
  * and MOQ badges — deliberately denser and more technical than retail cards.
  */
-import { getProductsByCategory } from '../../shared/js/core/data-service.js';
+import { getProductsByCategory } from '../catalog/backend/api.js';
 import { siteURL } from '../../shared/js/core/paths.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';

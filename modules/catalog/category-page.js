@@ -5,7 +5,7 @@
  * the grid with skeletons → data. "Load more" paginates client-side.
  */
 
-import { getCategoryBySlug, getProductsByCategory } from '../../shared/js/core/data-service.js';
+import { getCategoryBySlug, getProductsByCategory } from './backend/api.js';
 import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { renderProductSkeletons } from '../../shared/js/components/skeleton-loader.js';
 import { initFilters } from '../../shared/js/components/filters-sidebar.js';
@@ -83,7 +83,7 @@ function paintGrid() {
   loadMoreBtn.hidden = shown >= filtered.length;
 }
 
-/* ---- Local filter/sort (mirrors data-service so we filter in memory) -- */
+/* ---- Local filter/sort (mirrors backend/api.js, in memory) ------------ */
 function applyClientFilters(products, f = {}) {
   return products.filter((p) => {
     if (f.minPrice != null && p.price < f.minPrice) return false;

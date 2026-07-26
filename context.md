@@ -141,8 +141,12 @@ developer without explanation**. Handover quality is a requirement, not a bonus.
   text; use `--link` / `--lime-ink` / `--gold-ink`), keyboard nav, visible `:focus`,
   alt text on all images, lazy-load images.
 - **Bootstrap 5** (CDN) — grid + offcanvas/collapse JS only; fully re-skinned.
-- **Data today:** mock JSON in `/data` via `localStorage`. Each module's `backend/api.js`
-  is the single seam — swapping mock for a real endpoint touches that one file.
+- **Data today:** mock JSON **owned by each module** (`modules/<feature>/data/`) and read
+  through that module's `backend/api.js`, which is the single seam — swapping mock for a
+  real endpoint touches that one file. The old global `/data` bucket was removed
+  2026-07-26: catalog owns products + categories, account owns orders, auth owns users,
+  delivery owns districts. The only shared piece is `core/json-cache.js`, a domain-free
+  fetch-and-memoise helper.
 - **Target backend:** Laravel 12 / PHP 8.4 / MySQL / Redis / REST + JWT.
 - ⚠ **`php`, `composer`, `node` and `npm` are NOT installed on this machine**
   (checked 2026-07-26). Laravel code can be authored but **cannot be run or tested
@@ -190,7 +194,6 @@ gulfrabit/
 ├── context.md · README.md · .gitignore
 ├── index.html                          (home shell)
 ├── assets/  logo/ icons/ images/{products,categories,hero}/ fonts/
-├── data/    products.json categories.json users.json orders.json
 ├── shared/
 │   ├── css/style.css + partials/{_variables,_typography,_buttons,_cards,
 │   │        _navigation,_forms,_modals-offcanvas,_animations,_utilities}.css

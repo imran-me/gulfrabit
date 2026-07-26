@@ -3,7 +3,7 @@
  * Loads all discounted products, shows the biggest-discount highlights and a
  * sortable grid of everything on sale.
  */
-import { getDeals } from '../../shared/js/core/data-service.js';
+import { getDeals } from '../catalog/backend/api.js';
 import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { renderProductSkeletons } from '../../shared/js/components/skeleton-loader.js';
 

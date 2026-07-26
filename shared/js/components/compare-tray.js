@@ -4,7 +4,7 @@
  * shown only when there is a selection. Boots on every page via main.js.
  */
 import * as store from '../core/state.js';
-import { getAllProducts } from '../core/data-service.js';
+import { getAllProducts } from '../../../modules/catalog/backend/api.js';
 import { siteURL } from '../core/paths.js';
 
 let bar = null;

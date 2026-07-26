@@ -4,7 +4,18 @@
  * the pages keep calling these names.
  */
 import { storage, KEYS } from '../../../shared/js/core/storage.js';
-import { getMockOrders } from '../../../shared/js/core/data-service.js';
+import { loadJSON } from '../../../shared/js/core/json-cache.js';
+import { siteURL } from '../../../shared/js/core/paths.js';
+
+// Account owns its order history. Moved out of the global /data bucket
+// 2026-07-26 so deleting this module takes its data with it.
+const ORDERS_URL = siteURL('modules/account/data/orders.json');
+
+/** Seeded order history, so a fresh visitor sees a populated account. */
+export async function getMockOrders() {
+  const { orders } = await loadJSON(ORDERS_URL);
+  return orders;
+}
 
 export async function getOrders() {
   // TODO: backend — GET /orders. Today: local orders + mock history.

@@ -1,9 +1,19 @@
 /**
  * Auth · module API (mock)
- * Fakes auth against data/users.json. Replace each function with a real call to
+ * Fakes auth against this module's data/users.json. Replace each function with a real call to
  * the /auth endpoints; auth-page.js keeps the same call sites.
  */
-import { getMockUsers } from '../../../shared/js/core/data-service.js';
+import { loadJSON } from '../../../shared/js/core/json-cache.js';
+import { siteURL } from '../../../shared/js/core/paths.js';
+
+// Auth owns the user fixtures. Moved out of the global /data bucket 2026-07-26.
+const USERS_URL = siteURL('modules/auth/data/users.json');
+
+/** Mock user directory. Replaced wholesale by the auth endpoints. */
+export async function getMockUsers() {
+  const { users } = await loadJSON(USERS_URL);
+  return users;
+}
 
 export async function login(email, password) {
   // TODO: backend — POST /auth/login, store JWT (httpOnly cookie preferred).

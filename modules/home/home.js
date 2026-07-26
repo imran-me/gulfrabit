@@ -5,14 +5,14 @@
  * real HTML. This module:
  *   - drives the hero carousel (auto-advance, pause-on-hover, arrows, dots)
  *   - fills the Premium / Best Sellers / New Arrivals product lists from
- *     data-service (skeleton → data — product lists are inherently dynamic)
+ *     catalog module (skeleton → data — product lists are inherently dynamic)
  *   - wires the rail scroll arrows and the testimonials slider
  *
  * Decision (context.md §6): product *lists* are rendered client-side because
  * catalog data is dynamic; all structural page content stays in HTML.
  */
 
-import { getFeatured } from '../../shared/js/core/data-service.js';
+import { getFeatured } from '../catalog/backend/api.js';
 import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { renderProductSkeletons } from '../../shared/js/components/skeleton-loader.js';
 

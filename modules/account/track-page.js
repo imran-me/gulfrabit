@@ -4,7 +4,7 @@
  * merged with the mock orders.json, and renders a stage timeline.
  */
 import { deliveryOption } from '../delivery/backend/api.js';
-import { getMockOrders } from '../../shared/js/core/data-service.js';
+import { getMockOrders } from './backend/api.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';

@@ -3,7 +3,7 @@
  * Loading states are designed, not default (no bare spinner, no layout jump).
  *
  * Helpers return HTML strings you drop into a grid/rail before data arrives,
- * then replace with real cards once data-service resolves.
+ * then replace with real cards once the catalog module resolves.
  */
 
 /** A single product-card skeleton matching the real card's footprint. */
