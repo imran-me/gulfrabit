@@ -26,6 +26,8 @@
   const scrollTo = +(qs.get('s') || 0);
   const click = qs.get('click');
   const cartN = +(qs.get('cart') || 0);
+  const district = qs.get('district');
+  const autofill = qs.get('fill');
   const ALL = [[375, 2400], [414, 2400], [768, 2000]];
   const SIZES = (only ? ALL.filter(([w]) => String(w) === only) : ALL)
     .map(([w, h]) => [w, fh || h]);
@@ -66,6 +68,28 @@
       // Give lazy/JS-rendered content a beat to settle before measuring.
       setTimeout(() => {
         try {
+          // ?fill=1 populates every required field with a plausible value, so
+          // multi-step forms can be advanced past their validation gate and the
+          // later steps actually audited.
+          if (autofill) {
+            const doc = f.contentDocument;
+            doc.querySelectorAll('[data-validate*="required"]').forEach((el) => {
+              if (el.value) return;
+              if (el.tagName === 'SELECT') {
+                const real = [...el.options].find((o) => o.value && !o.disabled);
+                if (real) el.value = real.value;
+              } else if (el.name === 'phone') {
+                el.value = '01712345678';
+              } else if (el.type === 'email') {
+                el.value = 'qa@example.com';
+              } else {
+                el.value = 'QA test value';
+              }
+              el.dispatchEvent(new f.contentWindow.Event('input', { bubbles: true }));
+              el.dispatchEvent(new f.contentWindow.Event('change', { bubbles: true }));
+            });
+          }
+
           // ?click=<selector> activates something inside the frame first, so
           // tab panels and other JS-revealed content can be audited too.
           if (click) {
@@ -113,6 +137,10 @@
     // see inside an iframe, so DOM inspection of a populated cart/checkout has
     // to happen at top level.
     const go = qs.get('go');
+    // ?district=<key> pre-selects a checkout district. checkout-page.js restores
+    // it from this key on load, so seeding it exercises the real restore path
+    // rather than faking a change event.
+    if (district) localStorage.setItem('gr:checkout-district', JSON.stringify(district));
     if (go) {
       if (cartN) await seedCart(cartN); else localStorage.removeItem('gr:cart');
       location.replace(go);

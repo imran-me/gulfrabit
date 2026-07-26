@@ -24,8 +24,11 @@
 .option-card:hover { border-color: var(--gr-cyan-dark); }
 .option-card input { accent-color: var(--gr-cyan); margin-top: 3px; width: 20px; height: 20px; }
 .option-card.is-selected { border-color: var(--gr-cyan-dark); background: rgba(27,180,212,.06); }
-.option-card__title { font-weight: var(--fw-semibold); }
-.option-card__sub { font-size: var(--fs-14); color: var(--text-muted); }
+/* Both were unstyled inline spans, so they rendered as one run-on string —
+   "Dhaka & ChattogramWithin 72 hours". Stack them. Affects delivery AND
+   payment cards, which share this component. */
+.option-card__title { display: block; font-weight: var(--fw-semibold); }
+.option-card__sub { display: block; margin-top: 2px; font-size: var(--fs-14); color: var(--text-muted); }
 .option-card__price { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: var(--fw-semibold); }
 
 .review-line { display: flex; justify-content: space-between; padding: var(--space-2) 0; border-bottom: 1px solid var(--border-hairline); }
@@ -36,3 +39,22 @@
 .confirm-hero { text-align: center; padding: var(--space-8) 0 var(--space-6); }
 .confirm-check { width: 84px; height: 84px; margin: 0 auto var(--space-5); border-radius: var(--radius-pill); display: grid; place-items: center; background: var(--gr-gradient); color: #04222b; }
 .confirm-panel { max-width: 640px; margin: 0 auto; }
+
+/* ---- District-resolved delivery ---------------------------------------
+   The zone follows from the district, so the note explains WHY a given rate
+   applies, and options that cannot apply are dimmed rather than removed —
+   the customer can still see what exists and what it would cost. */
+.delivery-resolved {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  border-left: 3px solid var(--gr-cyan-dark);
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+}
+.delivery-resolved strong { color: var(--text-primary); }
+
+.option-card.is-unavailable { opacity: .45; }
+.option-card.is-unavailable,
+.option-card.is-unavailable input { cursor: not-allowed; }

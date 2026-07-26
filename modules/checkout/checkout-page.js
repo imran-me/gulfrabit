@@ -10,7 +10,7 @@
 import * as store from '../../shared/js/core/state.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { siteURL } from '../../shared/js/core/paths.js';
-import { DEFAULT_OPTION } from '../delivery/backend/api.js';
+import { DEFAULT_OPTION, getDistrictsByDivision, quoteForDistrict } from '../delivery/backend/api.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { validateForm, validateField, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
@@ -24,7 +24,7 @@ let deliveryCost = DEFAULT_OPTION.cost;
 
 init();
 
-function init() {
+async function init() {
   // Guard: empty cart → back to cart.
   if (!store.getCart().length) {
     document.querySelector('.checkout-layout').innerHTML =
@@ -37,6 +37,7 @@ function init() {
   prefillFromUser();
   wireNav();
   wireDelivery();
+  wireDistricts();
   wirePayment();
   paintSummary();
   form.addEventListener('submit', placeOrder);
@@ -87,17 +88,96 @@ function prefillFromUser() {
   setVal('fullName', user.name);
   setVal('phone', user.phone);
   const def = (user.addresses || []).find((a) => a.isDefault);
-  if (def) { setVal('address', def.line1); setVal('city', def.city); setVal('postcode', def.postcode); }
+  if (def) { setVal('address', def.line1); setVal('area', def.city); }
 }
 function setVal(name, v) { const el = form.querySelector(`[name="${name}"]`); if (el && v) el.value = v; }
 
+/* ---- District drives the delivery zone --------------------------------
+   The customer tells us where they are; working out which tier that falls in
+   is our job, not theirs. Ghorer Bazar and Daraz both resolve the charge from
+   the address rather than asking the buyer to self-select a zone.
+   The radios stay in the markup as the no-JS fallback; here we resolve the
+   right one and take the impossible ones out of play. ---------------------- */
+async function wireDistricts() {
+  const select = form.querySelector('[data-district]');
+  if (!select) return;
+
+  let byDivision;
+  try {
+    byDivision = await getDistrictsByDivision();
+  } catch {
+    // Leave the zone radios fully selectable — a failed district lookup must
+    // not block checkout, it just costs us the automatic resolution.
+    return;
+  }
+
+  for (const [division, districts] of Object.entries(byDivision)) {
+    const group = document.createElement('optgroup');
+    group.label = division;
+    for (const d of districts) {
+      const opt = document.createElement('option');
+      opt.value = d.key;
+      opt.textContent = d.name;
+      group.appendChild(opt);
+    }
+    select.appendChild(group);
+  }
+
+  // Restore a saved district before wiring, so the zone resolves on load.
+  const saved = storage.get('checkout-district', '');
+  if (saved && select.querySelector(`option[value="${saved}"]`)) select.value = saved;
+
+  select.addEventListener('change', () => applyDistrict(select.value));
+  if (select.value) applyDistrict(select.value);
+}
+
+async function applyDistrict(districtKey) {
+  const note = form.querySelector('[data-delivery-resolved]');
+  const quote = districtKey ? await quoteForDistrict(districtKey) : null;
+
+  if (!quote) {
+    // Unknown district: unlock everything rather than guessing a zone. Quoting
+    // the cheaper tier on an unserviceable address would undercharge us.
+    form.querySelectorAll('[data-delivery]').forEach((r) => { r.disabled = false; });
+    if (note) note.hidden = true;
+    return;
+  }
+
+  storage.set('checkout-district', districtKey);
+
+  // Express is a genuine upgrade, but only where we run our own last mile.
+  const expressAllowed = districtKey === 'dhaka';
+
+  form.querySelectorAll('[data-delivery]').forEach((radio) => {
+    const isResolved = radio.value === quote.id;
+    const isExpress = radio.value === 'express';
+    radio.disabled = !(isResolved || (isExpress && expressAllowed));
+    radio.closest('.option-card')?.classList.toggle('is-unavailable', radio.disabled);
+    if (isResolved) radio.checked = true;
+  });
+
+  syncDeliverySelection();
+
+  if (note) {
+    const name = form.querySelector('[data-district]')?.selectedOptions[0]?.textContent || '';
+    note.hidden = false;
+    note.innerHTML = `Delivering to <strong>${escapeHtml(name)}</strong> — ${escapeHtml(quote.label)}, ${escapeHtml(quote.eta)}.`;
+  }
+}
+
+/** Mirror the checked radio into cost + card state, then repaint totals. */
+function syncDeliverySelection() {
+  const checked = form.querySelector('[data-delivery]:checked');
+  if (checked) deliveryCost = Number(checked.dataset.cost);
+  form.querySelectorAll('[data-delivery]').forEach((x) =>
+    x.closest('.option-card')?.classList.toggle('is-selected', x.checked));
+  paintSummary();
+}
+
 /* ---- Delivery + payment ---------------------------------------------- */
 function wireDelivery() {
-  form.querySelectorAll('[data-delivery]').forEach((r) => r.addEventListener('change', () => {
-    deliveryCost = Number(r.dataset.cost);
-    form.querySelectorAll('[data-delivery]').forEach((x) => x.closest('.option-card').classList.toggle('is-selected', x.checked));
-    paintSummary();
-  }));
+  form.querySelectorAll('[data-delivery]').forEach((r) =>
+    r.addEventListener('change', syncDeliverySelection));
 }
 function wirePayment() {
   const cardFields = form.querySelector('[data-card-fields]');
@@ -137,7 +217,8 @@ function paintSummary() {
 
 function paintReview() {
   const g = (n) => form.querySelector(`[name="${n}"]`)?.value || '';
-  setText('[data-review-address]', `${g('fullName')}, ${g('address')}, ${g('city')} ${g('postcode')}`);
+  const districtName = form.querySelector('[data-district]')?.selectedOptions[0]?.textContent || '';
+  setText('[data-review-address]', [g('fullName'), g('address'), g('area'), districtName, g('phone')].filter(Boolean).join(', '));
   setText('[data-review-delivery]', form.querySelector('[data-delivery]:checked')?.closest('.option-card').querySelector('.option-card__title').textContent || '');
   setText('[data-review-payment]', form.querySelector('[data-payment]:checked')?.closest('.option-card').querySelector('.option-card__title').textContent || '');
   document.querySelector('[data-review-items]').innerHTML = store.getCart().map((l) =>
@@ -160,7 +241,10 @@ function placeOrder(e) {
     status: 'processing',
     total: total(),
     items: cart.map((l) => ({ id: l.id, title: l.title, qty: l.qty, price: l.price, image: l.image })),
-    address: `${g('address')}, ${g('city')} ${g('postcode')}`.trim(),
+    address: [g('address'), g('area'), form.querySelector('[data-district]')?.selectedOptions[0]?.textContent]
+      .filter(Boolean).join(', '),
+    phone: g('phone'),
+    email: g('email') || null,
     delivery: form.querySelector('[data-delivery]:checked')?.value,
     payment: form.querySelector('[data-payment]:checked')?.value,
   };

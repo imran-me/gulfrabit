@@ -385,8 +385,18 @@ errors, and only then start the next. No parallel half-finished features.
       **sold-out** (returns alone — nothing else matters if you can't buy it) →
       **discount** → **premium** → **B2B** → **new**. Previously premium outranked the
       discount and an out-of-stock item still advertised "-17%" beside "Sold out".
-- [ ] **0.2/0.3** Checkout trimmed to BD-essential fields (phone is the identity
-      primitive; email optional) + district→thana selects driving delivery price
+- [x] **0.2/0.3** Checkout trimmed to BD-essential fields + district-driven delivery.
+      **Exactly four required fields**: full name, phone, address, district. Email is
+      optional and labelled so — the phone number is the identity primitive in this
+      market. **Postcode removed entirely** (Bangladeshi addresses are not routed by
+      one); `city` free-text replaced by a 64-district select grouped into 8 divisions,
+      served by `modules/delivery`. Choosing a district **resolves the zone
+      automatically** and dims the tiers that cannot apply, so the buyer never
+      self-selects a price band. Express unlocks only for Dhaka. The three radios stay
+      real markup, so the step still works with JS off.
+      Fixed a **pre-existing component bug** found while rendering it: `.option-card__title`
+      and `__sub` were unstyled inline spans, rendering as
+      "Dhaka & ChattogramWithin 72 hours" on every delivery *and* payment card.
 - [ ] **1.1** Gift-with-purchase threshold with live progress in cart + drawer
 - [ ] **1.2** Frequently-bought-together with live savings math
 - [ ] **1.3** Offer *rules* rendered on the PDP, not just a badge *(Shajgoj)*
