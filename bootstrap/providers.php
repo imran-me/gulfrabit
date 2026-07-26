@@ -18,6 +18,7 @@ declare(strict_types=1);
 return [
     App\Providers\AppServiceProvider::class,
 
+    Modules\Auth\AuthServiceProvider::class,
     Modules\Cart\CartServiceProvider::class,
     Modules\Catalog\CatalogServiceProvider::class,
     Modules\Checkout\CheckoutServiceProvider::class,
@@ -27,7 +28,6 @@ return [
     // runs on the mock seam in modules/<feature>/backend/api.js:
     //
     // Modules\Account\AccountServiceProvider::class,
-    // Modules\Auth\AuthServiceProvider::class,
     // Modules\B2b\B2bServiceProvider::class,
     // Modules\Content\ContentServiceProvider::class,
     // Modules\Deals\DealsServiceProvider::class,

@@ -27,6 +27,40 @@ export async function register(payload) {
   return { user: { id: 'u-new', ...payload, tier: 'standard', addresses: [] }, token: 'mock.jwt.token' };
 }
 
+/**
+ * Ask for a login code.
+ *
+ * Always resolves the same way whether or not an account exists — mirroring the
+ * server, which never confirms that a number shops here.
+ *
+ * @returns {Promise<{sent:boolean, expiresInMinutes:number}>}
+ */
+export async function requestOtp(/* phone */) {
+  // TODO: backend — POST /api/auth/otp/request
+  return { sent: true, expiresInMinutes: 10 };
+}
+
+/**
+ * Verify a code. Signs in, and creates the account if the number is new —
+ * someone who has just proved they control the number should not then be asked
+ * to sign up.
+ *
+ * The mock accepts any 6 digits so the flow can be built before a gateway
+ * exists. The real endpoint checks a hashed, single-use, 10-minute code.
+ *
+ * @returns {Promise<{user:object, token:string}|null>}
+ */
+export async function verifyOtp(phone, code) {
+  // TODO: backend — POST /api/auth/otp/verify
+  if (!/^\d{6}$/.test(String(code || ''))) return null;
+  const users = await getMockUsers();
+  const existing = users.find((u) => (u.phone || '').endsWith(String(phone).slice(-10)));
+  return {
+    user: existing ? sanitize(existing) : { id: 'u-new', name: 'GulfRabit customer', phone, tier: 'standard' },
+    token: 'mock.sanctum.token',
+  };
+}
+
 export async function forgotPassword(/* email */) {
   // TODO: backend — POST /auth/forgot-password.
   return true;

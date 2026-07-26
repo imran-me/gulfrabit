@@ -267,10 +267,11 @@ gulfrabit/
 | `catalog` | authored — provider, routes, 2 controllers, request, query service, 2 models, 2 migrations, seeder |
 | `cart` | authored — provider, routes, controller, 2 requests, 2 services, 3 models, 3 migrations, seeder |
 | `checkout` | authored — provider, routes, controller, request, order service, 2 models, 2 migrations |
-| `auth`, `account`, `b2b`, `deals`, `home`, `content` | not started — frontend runs on `backend/api.js` mocks |
+| `auth` | authored — provider, routes, controller, 4 requests, 2 services, model, migration (**OTP-first**) |
+| `account`, `b2b`, `deals`, `home`, `content` | not started — frontend runs on `backend/api.js` mocks |
 
 **Module dependency graph** (verified one-way, no cycles):
-`catalog` and `delivery` depend on nothing · `cart` → `catalog` · `checkout` → `cart`, `catalog`, `delivery`
+`catalog` and `delivery` depend on nothing · `cart` → `catalog` · `auth` → `cart` · `checkout` → `cart`, `catalog`, `delivery`
 
 ⚠ **No PHP has been executed** — `php`/`composer` are not installed here.
 
