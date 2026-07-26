@@ -20,6 +20,7 @@ return [
 
     Modules\Cart\CartServiceProvider::class,
     Modules\Catalog\CatalogServiceProvider::class,
+    Modules\Checkout\CheckoutServiceProvider::class,
     Modules\Delivery\DeliveryServiceProvider::class,
 
     // Added as each module grows a Laravel layer. The frontend for these already
@@ -28,7 +29,6 @@ return [
     // Modules\Account\AccountServiceProvider::class,
     // Modules\Auth\AuthServiceProvider::class,
     // Modules\B2b\B2bServiceProvider::class,
-    // Modules\Checkout\CheckoutServiceProvider::class,
     // Modules\Content\ContentServiceProvider::class,
     // Modules\Deals\DealsServiceProvider::class,
 ];

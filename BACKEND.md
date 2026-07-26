@@ -130,7 +130,7 @@ and swapping mock for real stops being a one-file change.
 | `delivery` | live (mock) | **authored** — provider, routes, controller, request, service, 2 models, 2 migrations, seeder |
 | `catalog` | live (mock) | **authored** — provider, routes, 2 controllers, request, query service, 2 models, 2 migrations, seeder |
 | `cart` | live (mock) | **authored** — provider, routes, controller, 2 requests, 2 services, 3 models, 3 migrations, seeder |
-| `checkout` | live (mock) | not started |
+| `checkout` | live (mock) | **authored** — provider, routes, controller, request, order service, 2 models, 2 migrations |
 | `auth` | live (mock) | not started |
 | `account` | live (mock) | not started |
 | `b2b` | live (mock) | not started |
