@@ -76,6 +76,28 @@ class CartController extends Controller
         return $this->respond($this->carts->clear($this->cartFor($request)), $request);
     }
 
+    /**
+     * GET /api/cart/offers
+     *
+     * The publicly advertisable offer rules, plus the active gift threshold.
+     * Public and cacheable — this is marketing copy, identical for everyone,
+     * and it contains no basket and no customer.
+     *
+     * It answers "what may we print", which is a different question from
+     * applyPromo()'s "does this code work for this basket". Keeping them apart
+     * is what stops a private code being advertised just because it happens to
+     * be redeemable.
+     */
+    public function offers(): JsonResponse
+    {
+        return response()->json([
+            'data' => [
+                ...$this->promotions->publicOffers(),
+                ...$this->carts->activeGiftOffer(),
+            ],
+        ]);
+    }
+
     public function applyPromo(Request $request): JsonResponse
     {
         $validated = $request->validate([

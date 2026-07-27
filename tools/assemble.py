@@ -131,11 +131,11 @@ PAGES = [
      "Product — GulfRabit",
      "Product details, specifications and shipping for a GulfRabit import.",
      "modules/catalog/_fragments/product.main.html",
-     # The bundle module rides along on this page and mounts its own section.
-     # Delete these two entries and modules/bundle/ and the PDP loses the
-     # pairing block with nothing left behind.
-     ["/modules/catalog/catalog.css", "/modules/bundle/bundle.css"],
-     ["/modules/catalog/product-page.js", "/modules/bundle/bundle.js"]),
+     # bundle and cart both ride along on this page and mount their own
+     # sections. Delete a module's pair of entries and its folder, and that
+     # section is gone with nothing left behind in catalog's fragment.
+     ["/modules/catalog/catalog.css", "/modules/bundle/bundle.css", "/modules/cart/pdp-offers.css"],
+     ["/modules/catalog/product-page.js", "/modules/bundle/bundle.js", "/modules/cart/pdp-offers.js"]),
 
     ("modules/catalog/search-results.html",
      "Search — GulfRabit",

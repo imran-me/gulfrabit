@@ -25,6 +25,8 @@ class PromotionSeeder extends Seeder
                 'value'               => 10,
                 'min_subtotal_poisha' => 100_000,      // BDT 1,000
                 'max_discount_poisha' => 100_000,      // capped at BDT 1,000
+                // Launch codes, printed on the site — see the is_public migration.
+                'is_public'           => true,
             ],
             [
                 'code'                => 'HOP500',
@@ -33,6 +35,7 @@ class PromotionSeeder extends Seeder
                 'value'               => 50_000,       // BDT 500
                 'min_subtotal_poisha' => 300_000,      // BDT 3,000
                 'max_discount_poisha' => null,
+                'is_public'           => true,
             ],
         ];
 

@@ -22,8 +22,18 @@ const BDT = new Intl.NumberFormat('en-BD', {
  */
 export function formatBDT(amount, { symbol = true, fractionDigits } = {}) {
   const n = Number.isFinite(amount) ? amount : 0;
-  const formatter = fractionDigits != null
-    ? new Intl.NumberFormat('en-BD', { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits })
+
+  // Sub-taka amounts keep their paisa automatically. Component prices are real
+  // fractions — a tactile switch is ৳ 3.20 and its 10,000-unit tier is ৳ 2.60 —
+  // and rounding both to whole taka printed "৳ 3" for each, so the listed price
+  // and the volume price looked identical and the customer was quoted a number
+  // they would not be charged. Above ৳ 100 nothing in this catalogue carries
+  // meaningful paisa, so whole taka stays the default and every retail price
+  // renders exactly as before.
+  const digits = fractionDigits ?? (Math.abs(n) > 0 && Math.abs(n) < 100 && !Number.isInteger(n) ? 2 : null);
+
+  const formatter = digits != null
+    ? new Intl.NumberFormat('en-BD', { minimumFractionDigits: digits, maximumFractionDigits: digits })
     : BDT;
   const body = formatter.format(n);
   return symbol ? `৳ ${body}` : body;

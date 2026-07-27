@@ -143,7 +143,9 @@ function paintInfo(p) {
   // B2B MOQ / tier hint
   if (p.moq) {
     document.querySelector('[data-pdp-short]').insertAdjacentHTML('afterend',
-      `<p class="caption" style="margin-top:.5rem">MOQ: <strong>${p.moq}</strong> units · Bulk pricing available — <a href="${siteURL('modules/b2b/b2b-industrial.html')}">request a quote</a>.</p>`);
+      // Grouped: the offers block below says "1,000-unit minimum order" and an
+      // ungrouped "1000" two lines above it reads like a different number.
+      `<p class="caption" style="margin-top:.5rem">MOQ: <strong>${p.moq.toLocaleString('en-BD')}</strong> units · Bulk pricing available — <a href="${siteURL('modules/b2b/b2b-industrial.html')}">request a quote</a>.</p>`);
   }
 
   // Wishlist button: the shared initializer already ran on DOMContentLoaded and

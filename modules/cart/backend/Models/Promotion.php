@@ -22,7 +22,7 @@ class Promotion extends Model
     protected $fillable = [
         'code', 'label', 'type', 'value',
         'min_subtotal_poisha', 'max_discount_poisha',
-        'starts_at', 'ends_at', 'usage_limit', 'used_count', 'is_active',
+        'starts_at', 'ends_at', 'usage_limit', 'used_count', 'is_active', 'is_public',
     ];
 
     protected function casts(): array
@@ -31,6 +31,7 @@ class Promotion extends Model
             'starts_at'           => 'datetime',
             'ends_at'             => 'datetime',
             'is_active'           => 'boolean',
+            'is_public'           => 'boolean',
             'value'               => 'integer',
             'min_subtotal_poisha' => 'integer',
             'max_discount_poisha' => 'integer',
@@ -48,6 +49,19 @@ class Promotion extends Model
             ->where(fn (Builder $w) => $w->whereNull('starts_at')->orWhere('starts_at', '<=', $now))
             ->where(fn (Builder $w) => $w->whereNull('ends_at')->orWhere('ends_at', '>=', $now))
             ->where(fn (Builder $w) => $w->whereNull('usage_limit')->orWhereColumn('used_count', '<', 'usage_limit'));
+    }
+
+    /**
+     * Redeemable AND cleared for advertising.
+     *
+     * Separate from redeemable() on purpose: a code can be perfectly valid and
+     * still have no business appearing on a product page. Everything the
+     * storefront shows publicly goes through here, so publishing a code is one
+     * deliberate flag rather than a consequence of it merely working.
+     */
+    public function scopePublic(Builder $q): Builder
+    {
+        return $q->redeemable()->where('is_public', true);
     }
 
     /**

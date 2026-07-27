@@ -1,0 +1,75 @@
+/* ============================================================
+   modules/cart — the offers block on a product page.
+   Scoped entirely under .offers; owned by cart because the
+   rules it renders (promotions, gift threshold) are cart's.
+   ============================================================ */
+
+.offers {
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface-sunken);
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-lg);
+}
+
+.offers__head {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+}
+
+.offers__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.offers__item {
+  display: grid;
+  /* minmax(0, 1fr) so a long tier list wraps instead of widening the buy
+     column, which at 375px would push the whole page sideways. */
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.offers__icon { color: var(--gr-cyan-dark); line-height: 0; margin-top: 2px; }
+
+.offers__body > p { margin: 0; }
+
+.offers__title {
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  line-height: var(--lh-snug);
+}
+
+.offers__detail {
+  margin-top: 2px !important;
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+  line-height: var(--lh-normal);
+}
+
+.offers__status { margin-top: var(--space-2) !important; font-size: var(--fs-12); }
+
+/* Qualifies: stated plainly, not as a celebration. */
+.offers__ok { color: var(--gr-success); font-weight: var(--fw-semibold); }
+.offers__ok::before { content: "✓ "; }
+
+/* The gap is the actionable one — it is what actually moves basket size, so it
+   gets the accent rather than being greyed out as a failure. */
+.offers__gap { color: var(--gold-ink); font-weight: var(--fw-semibold); }
+
+/* Quoted, not charged. Deliberately quiet and deliberately present. */
+.offers__note { color: var(--text-muted); }
+
+@media (max-width: 575.98px) {
+  .offers { padding: var(--space-4); }
+}

@@ -30,8 +30,12 @@ const REWARDS_URL = siteURL('modules/cart/data/rewards.json');
  * the order pipeline recomputes it regardless of what happened here.
  */
 const MOCK_PROMOS = {
-  GULF10: { type: 'pct',  value: 10,  minSpend: 1000, maxDiscount: 1000, label: '10% off your order' },
-  HOP500: { type: 'flat', value: 500, minSpend: 3000, maxDiscount: null, label: '৳ 500 off' },
+  // `isPublic` mirrors the promotions.is_public column: may this code be
+  // printed on a product page? It defaults to FALSE on the server, so a code is
+  // advertised only when someone decides to advertise it — never merely because
+  // it is redeemable. Both of these are launch codes already on the site.
+  GULF10: { type: 'pct',  value: 10,  minSpend: 1000, maxDiscount: 1000, label: '10% off your order', isPublic: true },
+  HOP500: { type: 'flat', value: 500, minSpend: 3000, maxDiscount: null, label: '৳ 500 off',          isPublic: true },
 };
 
 /**
@@ -121,4 +125,104 @@ export async function syncCartToServer(/* cart */) {
  */
 export async function mergeGuestCart() {
   return true;
+}
+
+/**
+ * The offer rules that may be shown to the public.
+ *
+ * WHY THIS IS A SEPARATE CALL FROM validatePromo()
+ * ------------------------------------------------
+ * validatePromo() answers "does this code work for this basket". This answers
+ * "what may we print". They are not the same question: a code can be perfectly
+ * redeemable and still have no business appearing on a product page — a
+ * win-back code sent to lapsed customers, an influencer's code, a code held
+ * back for a campaign that has not launched.
+ *
+ * So `isPublic` gates this list, and it defaults to FALSE on the server (see
+ * the promotions is_public migration). A code has to be deliberately published;
+ * it is never advertised just because it happens to work.
+ *
+ * @returns {Promise<Array<object>>} rules in ascending order of minimum spend,
+ *   so the nearest one to reach is listed first.
+ */
+export async function getPublicOffers() {
+  // TODO: backend — GET /api/cart/offers
+  const promos = Object.entries(MOCK_PROMOS)
+    .filter(([, p]) => p.isPublic)
+    .map(([code, p]) => ({
+      kind: 'promo',
+      code,
+      label: p.label,
+      type: p.type,
+      value: p.value,
+      minSpend: p.minSpend,
+      maxDiscount: p.maxDiscount,
+    }));
+
+  const reward = await loadRewards();
+  const gift = reward
+    ? [{
+        kind: 'gift',
+        label: reward.label,
+        teaser: reward.teaser,
+        minSpend: reward.thresholdTaka,
+        valueTaka: reward.valueTaka,
+        image: reward.image,
+        sku: reward.productSku,
+      }]
+    : [];
+
+  return [...promos, ...gift].sort((a, b) => a.minSpend - b.minSpend);
+}
+
+/**
+ * Work out what each rule is worth against ONE item's price, and how far away
+ * it is.
+ *
+ * Pure — no DOM, no fetch — because this is the arithmetic a customer will
+ * check against their own basket, and arithmetic that can be read in one place
+ * is arithmetic that can be trusted.
+ *
+ * The subtle part is what a rule is "worth" when the item does not yet qualify.
+ * Ten percent of a ৳ 620 tea is ৳ 62, but GULF10 needs ৳ 1,000 — so ৳ 62 is a
+ * number the customer can never actually get. Non-qualifying rules are
+ * therefore valued at their own threshold, the cheapest basket that earns them,
+ * and the copy asks for the difference.
+ *
+ * @param {number} price whole taka, one unit of the product
+ * @param {Array<object>} rules from getPublicOffers()
+ */
+export function describeOffers(price, rules = []) {
+  return rules.map((rule) => {
+    const qualifies = price >= rule.minSpend;
+    // Value it at the basket that earns it, not at a basket that cannot.
+    const basis = qualifies ? price : rule.minSpend;
+
+    let benefit = 0;
+    let capped = false;
+
+    if (rule.kind === 'promo') {
+      benefit = rule.type === 'pct'
+        ? Math.floor(basis * rule.value / 100)
+        : rule.value;
+
+      if (rule.maxDiscount != null && benefit > rule.maxDiscount) {
+        benefit = rule.maxDiscount;
+        // Surfaced so the copy can say "capped at" rather than quietly showing
+        // a smaller number than the stated percentage implies.
+        capped = true;
+      }
+      benefit = Math.min(benefit, basis);
+    } else if (rule.kind === 'gift') {
+      benefit = rule.valueTaka ?? 0;
+    }
+
+    return {
+      ...rule,
+      qualifies,
+      shortfall: qualifies ? 0 : rule.minSpend - price,
+      benefit,
+      capped,
+    };
+  });
 }

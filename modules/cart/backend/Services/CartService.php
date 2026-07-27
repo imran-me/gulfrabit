@@ -207,6 +207,42 @@ final class CartService
         return $reward?->progressFor($subtotalPoisha);
     }
 
+    /**
+     * The gift threshold as an OFFER RULE, with no basket attached.
+     *
+     * giftProgress() answers "how close is this cart"; this answers "what is on
+     * offer at all", which is what a product page needs before anyone has a
+     * cart. Returned as a list so the caller can spread it — an empty array
+     * when no gift is running reads better at the call site than a null check
+     * around a splat.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function activeGiftOffer(): array
+    {
+        $reward = GiftReward::query()
+            ->live()
+            ->with('product:id,sku,title,image,price_poisha')
+            ->orderBy('threshold_poisha')
+            ->first();
+
+        if ($reward?->product === null) {
+            // A gift whose product has been delisted is not an offer, it is a
+            // promise nobody can keep. Say nothing rather than name it.
+            return [];
+        }
+
+        return [[
+            'kind'      => 'gift',
+            'label'     => $reward->product->title,
+            'teaser'    => $reward->teaser,
+            'minSpend'  => intdiv($reward->threshold_poisha, 100),
+            'valueTaka' => intdiv($reward->product->price_poisha, 100),
+            'image'     => $reward->product->image,
+            'sku'       => $reward->product->sku,
+        ]];
+    }
+
     /** @return array<int, string> things the customer should be told, not hidden */
     private function notices(Cart $cart): array
     {

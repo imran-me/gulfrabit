@@ -74,6 +74,41 @@ final class PromotionService
     }
 
     /**
+     * The offer rules that may be printed in public, cheapest threshold first.
+     *
+     * Deliberately NOT "every redeemable promotion". A code can be valid and
+     * still have no business on a product page — a win-back code, an
+     * influencer's code, a campaign that has not launched. `is_public` defaults
+     * to false, so a code is advertised only when someone decides to advertise
+     * it. Nothing secret leaks by forgetting a flag.
+     *
+     * Values come back in whole taka: this feeds copy, not arithmetic the
+     * server will act on, and the browser must never be handed a discount it
+     * could then claim. The order pipeline recomputes every figure in poisha.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function publicOffers(): array
+    {
+        return Promotion::query()
+            ->public()
+            ->orderBy('min_subtotal_poisha')
+            ->get()
+            ->map(fn (Promotion $p): array => [
+                'kind'        => 'promo',
+                'code'        => $p->code,
+                'label'       => $p->label,
+                'type'        => $p->type,
+                'value'       => $p->type === 'pct' ? $p->value : intdiv($p->value, 100),
+                'minSpend'    => intdiv($p->min_subtotal_poisha, 100),
+                'maxDiscount' => $p->max_discount_poisha === null
+                    ? null
+                    : intdiv($p->max_discount_poisha, 100),
+            ])
+            ->all();
+    }
+
+    /**
      * Burn one use. Call ONLY when an order is actually created — not when the
      * code is typed, or a browsing customer exhausts a limited campaign without
      * buying anything.

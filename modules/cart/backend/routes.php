@@ -33,6 +33,11 @@ Route::prefix('cart')->name('cart.')->group(function (): void {
     Route::delete('/', [CartController::class, 'clear'])->name('clear');
 
     // Promo attempts are guessable, so rate-limit harder than the rest.
+    // Public: the advertised offer rules, shown on product pages before anyone
+    // has a cart. No basket, no customer, nothing private — `is_public` on the
+    // promotions table decides what is allowed through.
+    Route::get('/offers', [CartController::class, 'offers'])->name('offers');
+
     Route::post('/promo', [CartController::class, 'applyPromo'])
         ->middleware('throttle:20,1')
         ->name('promo.apply');
