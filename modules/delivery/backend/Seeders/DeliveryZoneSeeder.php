@@ -19,19 +19,9 @@ use RuntimeException;
  */
 class DeliveryZoneSeeder extends Seeder
 {
-    /**
-     * Charges in poisha. Flat per zone, whatever the order weighs or is worth —
-     * see modules/delivery/README.md for why there is no free-delivery tier.
-     */
-    private const ZONES = [
-        ['key' => 'metro',      'label' => 'Dhaka & Chattogram',  'eta_text' => 'Within 72 hours',   'charge_poisha' => 7_000,  'sort_order' => 1],
-        ['key' => 'nationwide', 'label' => 'Rest of Bangladesh',  'eta_text' => '4 working days',    'charge_poisha' => 13_000, 'sort_order' => 2],
-        ['key' => 'express',    'label' => 'Express — Dhaka only', 'eta_text' => 'Next working day', 'charge_poisha' => 15_000, 'sort_order' => 3],
-    ];
-
     public function run(): void
     {
-        foreach (self::ZONES as $zone) {
+        foreach ($this->zonesFromJson() as $zone) {
             DeliveryZone::updateOrCreate(['key' => $zone['key']], $zone);
         }
 
@@ -55,6 +45,38 @@ class DeliveryZoneSeeder extends Seeder
                 ],
             );
         }
+    }
+
+    /**
+     * Zones from modules/delivery/data/zones.json — the single source.
+     *
+     * These rates used to be a PHP constant here AND a JS constant in api.js
+     * AND hand-written into three pieces of markup. Five copies of three
+     * numbers; the first one missed becomes a promise the site does not keep.
+     * tools/sync-delivery-copy.py generates the other four from that file, and
+     * this reads it directly.
+     *
+     * @return array<int, array{key:string,label:string,eta_text:string,charge_poisha:int,sort_order:int,is_active:bool}>
+     */
+    private function zonesFromJson(): array
+    {
+        $path = __DIR__ . '/../../data/zones.json';
+
+        if (! is_file($path)) {
+            throw new RuntimeException("Missing {$path} — the delivery module owns this file.");
+        }
+
+        $payload = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+
+        return array_map(static fn (array $z): array => [
+            'key'           => $z['key'],
+            'label'         => $z['label'],
+            'eta_text'      => $z['eta'],
+            // Taka in the JSON (what a human edits), poisha in the database.
+            'charge_poisha' => (int) $z['costTaka'] * 100,
+            'sort_order'    => (int) ($z['sortOrder'] ?? 0),
+            'is_active'     => (bool) ($z['isActive'] ?? true),
+        ], $payload['zones'] ?? []);
     }
 
     /**

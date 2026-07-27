@@ -110,3 +110,34 @@ the widths match, the font is not being used no matter what the CSS says.
 focus-triggered UI — search suggestions, `:focus-within` styling — would
 silently never render and you would screenshot a page that looks fine and
 isn't tested.
+
+## `sync-delivery-copy.py`
+
+Delivery rates have **one** source: `modules/delivery/data/zones.json`. This
+writes them into the five places that quote them.
+
+```bash
+python tools/sync-delivery-copy.py          # regenerate
+python tools/sync-delivery-copy.py --check  # non-zero exit if anything is stale
+python tools/assemble.py                    # then rebuild the pages
+```
+
+Targets, all delimited by `GENERATED-DELIVERY-BEGIN/END` markers:
+
+1. `modules/delivery/backend/api.js` — the `ZONES` constant
+2. `modules/content/_fragments/shipping.main.html` — the policy table
+3. `modules/checkout/_fragments/checkout.main.html` — the delivery radios
+4. `shared/components/header.html` — the announcement bar
+5. `index.html` — **the same bar again**, because index.html is hand-authored and
+   `assemble.py` does not regenerate it
+
+The PHP seeder reads `zones.json` directly, so it needs no generation.
+
+> Why this exists: those three numbers were previously written in five places by
+> hand. The first one missed becomes a promise the site does not keep — which
+> this project already shipped once, when the banner advertised free delivery
+> over ৳ 3,000 while checkout charged ৳ 60 regardless.
+>
+> Item 5 was found by *testing* the pipeline: changing a rate and checking every
+> location showed the home page still quoting the old figure while all 23
+> assembled pages had updated.

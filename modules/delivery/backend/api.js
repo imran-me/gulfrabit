@@ -26,13 +26,13 @@ import { siteURL } from '../../../shared/js/core/paths.js';
  *
  * @type {Quote[]}
  */
+// GENERATED-DELIVERY-BEGIN 
 const ZONES = [
-  { id: 'metro',      label: 'Dhaka & Chattogram',   eta: 'Within 72 hours',  cost: 70 },
-  { id: 'nationwide', label: 'Rest of Bangladesh',   eta: '4 working days',   cost: 130 },
-  { id: 'express',    label: 'Express — Dhaka only', eta: 'Next working day', cost: 150 },
+  { id: 'metro', label: 'Dhaka & Chattogram', eta: 'Within 72 hours', cost: 70 },
+  { id: 'nationwide', label: 'Rest of Bangladesh', eta: '4 working days', cost: 130 },
+  { id: 'express', label: 'Express — Dhaka only', eta: 'Next working day', cost: 150 },
 ];
-
-/** The rate quoted before the customer has told us where they are. */
+// GENERATED-DELIVERY-END /** The rate quoted before the customer has told us where they are. */
 export const DEFAULT_OPTION = ZONES[0];
 
 let districtCache = null;

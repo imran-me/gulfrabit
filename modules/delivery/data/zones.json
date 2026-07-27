@@ -1,0 +1,38 @@
+{
+  "_meta": {
+    "owner": "modules/delivery",
+    "note": "THE single source of truth for delivery rates. Everything else is generated from this file by tools/sync-delivery-copy.py — the frontend ZONES constant, the checkout radios, the Shipping & Returns table, and the announcement bar. Change a rate HERE, then run the tool.",
+    "why": "These three numbers were previously written in five places: api.js, the PHP seeder, the shipping page, the checkout radios, and the announcement bar on all 24 pages. Changing a rate meant finding all five, and the first one missed becomes a promise the site does not keep."
+  },
+  "zones": [
+    {
+      "key": "metro",
+      "label": "Dhaka & Chattogram",
+      "eta": "Within 72 hours",
+      "costTaka": 70,
+      "sortOrder": 1,
+      "isActive": true,
+      "expressOnlyDistrict": null
+    },
+    {
+      "key": "nationwide",
+      "label": "Rest of Bangladesh",
+      "eta": "4 working days",
+      "costTaka": 130,
+      "sortOrder": 2,
+      "isActive": true,
+      "expressOnlyDistrict": null
+    },
+    {
+      "key": "express",
+      "label": "Express — Dhaka only",
+      "eta": "Next working day",
+      "costTaka": 150,
+      "sortOrder": 3,
+      "isActive": true,
+      "expressOnlyDistrict": "dhaka"
+    }
+  ],
+  "coldChainIncluded": true,
+  "freeDeliveryThreshold": null
+}
