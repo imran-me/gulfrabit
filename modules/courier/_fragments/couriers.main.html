@@ -1,0 +1,38 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Couriers</h1>
+          <p class="admin__sub">Who carries your parcels, and which of them this system can talk to directly.</p>
+        </div>
+      </div>
+
+      <!-- Stated up front rather than discovered one order at a time. Until
+           credentials exist, every courier is worked by hand — that is a real
+           way to run a storefront, not a broken state, and saying so plainly
+           keeps anyone from waiting for an integration that has not been set
+           up. -->
+      <div class="acard" style="margin-bottom:var(--space-5)">
+        <h2 class="h5" style="margin:0 0 var(--space-2)">No courier API is connected yet</h2>
+        <p class="admin__sub" style="margin:0">
+          Every courier below is worked manually: you hand over the parcel, type the tracking
+          number, and record each status yourself. Nothing here contacts a courier automatically.
+          When API credentials are added for one, its row changes and nothing else does — the
+          orders screen, the consignment records and the tracking history stay exactly as they are.
+        </p>
+      </div>
+
+      <div class="atable-wrap">
+        <table class="atable">
+          <thead>
+            <tr>
+              <th scope="col">Courier</th>
+              <th scope="col">Integration</th>
+              <th scope="col">Tracking link</th>
+              <th scope="col">Support</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody data-couriers-body>
+            <tr><td colspan="5" class="atable__empty">Loading couriers…</td></tr>
+          </tbody>
+        </table>
+      </div>

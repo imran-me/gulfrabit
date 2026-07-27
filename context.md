@@ -600,7 +600,10 @@ Admin never imports from courier/inventory/accounting/cms.
       detail, a whitelist state machine, an append-only status-event log, and
       refunds with their own audit trail. Domain rules live in
       `modules/checkout` so they hold for webhooks and customers too.
-- [ ] **7.3** Couriers — provider framework, assignment, tracking events, manual provider
+- [x] **7.3** Couriers — `modules/courier/`. Driver contract, a manual driver
+      that genuinely works, 7 real BD carriers seeded, consignments with their
+      own event log, and courier statuses feeding order status THROUGH the
+      fulfilment whitelist.
 - [ ] **7.4** Customers — list, detail, order history, notes
 - [ ] **7.5** Products & inventory — product edit, warehouses, stock, movements, low-stock
 - [ ] **7.6** Accounting — double-entry journal, auto-posting from orders, expenses, P&L
@@ -1063,3 +1066,33 @@ accounting P&L, which needs B5's cost prices to be more than a revenue report.
     wrong row.
   · 31 pages 200 · 115 PHP files clean · no console errors · no overflow at
     375/768/1280/1440 · storefront unaffected.
+- **2026-07-28** — 7.3 couriers (`modules/courier`).
+  · **The manual driver is a real driver, not a stub.** No courier has API
+    credentials (§8b/B2), so all seven carriers run on `manual`: hand over,
+    type the tracking number, record each status. That is how most BD merchants
+    already work, and treating it as first-class means the consignment → event →
+    cost pipeline is in daily use from day one. A Pathao adapter later touches
+    one new class and one row.
+  · **`is_active` and `is_configured` are separate columns.** "We are not using
+    RedX this month" and "no credentials exist" are different facts, and
+    collapsing them hides WHY a courier cannot be booked. The panel states it in
+    three places rather than hiding a courier that cannot auto-book.
+  · **Order status is never written from the courier module.** A delivery scan
+    calls `OrderFulfilmentService::transition()` like anything else — same
+    whitelist, same audit row, `actor_type = 'system'`. A late scan on a
+    cancelled order is refused by that whitelist, the consignment event is still
+    written because it happened, and the request still succeeds: a courier's
+    webhook must not fail because our order moved on.
+  · **Only 4 of 8 courier statuses imply an order status.** `failed` changes
+    nothing — the parcel is still out and they will retry. Mapping all eight
+    would make the customer's tracking page flap.
+  · One open consignment per order (two riders, one parcel); closed ones stay as
+    history, which a `courier_id` column on orders would have overwritten.
+  · Courier cost ≠ the customer's delivery fee; both kept, because that
+    difference is whether delivery makes money. COD tracked separately and
+    starts un-remitted — until the courier hands the cash over it is a
+    receivable, not money in the bank.
+  · Credentials are `encrypted:array` + `$hidden`; duplicate webhook scans are
+    absorbed by a unique `(consignment_id, external_id)`.
+  · 32 pages 200 · 131 PHP files clean · no console errors · no overflow at
+    375/768/1280/1440 · graph one-way (`courier → checkout`).

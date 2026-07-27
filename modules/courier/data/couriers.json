@@ -1,0 +1,66 @@
+{
+  "_meta": {
+    "owner": "modules/courier",
+    "note": "The carriers seeded into the `couriers` table. Everything except `manual` ships with driver='manual' and isConfigured=false, because no API credentials exist yet — see context.md 8b/B2.",
+    "why": "Listing the real Bangladeshi couriers up front means staff can start using them by hand TODAY, with tracking numbers recorded against real carrier names. When credentials arrive, the row's `driver` changes and nothing else does — not the orders screen, not the consignment table, not the UI.",
+    "rule": "Never set isConfigured true here. That flag is a statement that credentials exist, and it is set when they are actually added."
+  },
+  "couriers": [
+    {
+      "key": "manual",
+      "name": "Own rider / hand delivery",
+      "driver": "manual",
+      "trackingUrlTemplate": null,
+      "supportPhone": null,
+      "sortOrder": 0
+    },
+    {
+      "key": "pathao",
+      "name": "Pathao Courier",
+      "driver": "manual",
+      "trackingUrlTemplate": "https://merchant.pathao.com/tracking?consignment_id={tracking}",
+      "supportPhone": "09678100800",
+      "sortOrder": 1
+    },
+    {
+      "key": "steadfast",
+      "name": "Steadfast Courier",
+      "driver": "manual",
+      "trackingUrlTemplate": "https://steadfast.com.bd/t/{tracking}",
+      "supportPhone": "09610990990",
+      "sortOrder": 2
+    },
+    {
+      "key": "redx",
+      "name": "RedX",
+      "driver": "manual",
+      "trackingUrlTemplate": "https://redx.com.bd/track-parcel/?trackingId={tracking}",
+      "supportPhone": "09610000060",
+      "sortOrder": 3
+    },
+    {
+      "key": "ecourier",
+      "name": "eCourier",
+      "driver": "manual",
+      "trackingUrlTemplate": "https://ecourier.com.bd/tracking?id={tracking}",
+      "supportPhone": "09612444444",
+      "sortOrder": 4
+    },
+    {
+      "key": "sundarban",
+      "name": "Sundarban Courier Service",
+      "driver": "manual",
+      "trackingUrlTemplate": null,
+      "supportPhone": "09610990022",
+      "sortOrder": 5
+    },
+    {
+      "key": "sa-paribahan",
+      "name": "SA Paribahan",
+      "driver": "manual",
+      "trackingUrlTemplate": null,
+      "supportPhone": "09604111666",
+      "sortOrder": 6
+    }
+  ]
+}

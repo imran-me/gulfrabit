@@ -38,6 +38,7 @@ NOINDEX = {
     "modules/admin/login.html":             "staff sign-in — never a search result",
     "modules/admin/orders.html":            "staff panel",
     "modules/admin/order.html":             "staff panel",
+    "modules/courier/couriers.html":        "staff panel",
     "modules/content/404.html":             "an error page must never be a search result",
     "404.html":                             "ditto, at the host root",
 

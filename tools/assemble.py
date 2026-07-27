@@ -138,7 +138,10 @@ def assemble(out, title, desc, main_html, css_links=None, module_js=None):
 # Loaded on EVERY admin page so the sidebar is identical everywhere. Each
 # module that contributes screens adds its own nav file here — one line in, one
 # line out. Page logic still loads only on its own page.
-ADMIN_NAV = ["/modules/admin/admin-nav.js"]
+ADMIN_NAV = [
+    "/modules/admin/admin-nav.js",
+    "/modules/courier/courier-nav.js",
+]
 
 ADMIN_SHELL = read("modules/admin/_fragments/_shell.html")
 ADMIN_SHELL_END = read("modules/admin/_fragments/_shell-end.html")
@@ -174,7 +177,16 @@ ADMIN_PAGES = [
     ("modules/admin/order.html", "Order — GulfRabit Admin",
      "modules/admin/_fragments/order.main.html",
      ["/modules/admin/admin.css"],
-     ["/modules/admin/admin-shell.js", "/modules/admin/order-detail-page.js"], True),
+     # The courier module mounts its own section onto this screen. Delete
+     # modules/courier/ and its entries here and the section is gone, with no
+     # orphan markup left in admin's fragment.
+     ["/modules/admin/admin-shell.js", "/modules/admin/order-detail-page.js",
+      "/modules/courier/courier-order-panel.js"], True),
+
+    ("modules/courier/couriers.html", "Couriers — GulfRabit Admin",
+     "modules/courier/_fragments/couriers.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/courier/couriers-page.js"], True),
 
     ("modules/admin/login.html", "Staff sign-in — GulfRabit Admin",
      "modules/admin/_fragments/login.main.html",
