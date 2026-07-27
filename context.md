@@ -640,6 +640,63 @@ metadata, cashback clawed back from refunds, and app-install interstitials.
 
 ---
 
+## 8b. BLOCKED — cannot be done here, and why (2026-07-28)
+
+Kept separate from the follow-up list because these are not "not yet done" —
+they are "cannot be done from this machine or without something only the owner
+can supply". Verified, not assumed: `php`, `composer`, `node` and `mysql` are
+all absent from this environment.
+
+### B1. No PHP has ever executed
+115 PHP files pass structural checks and **none has ever run**. No
+`composer install`, no migration, no request served. So none of this is proven
+to work, only to be well-formed:
+staff sign-in and lockout · role enforcement · the order state machine · the
+row locks on transitions and refunds · every dashboard query · all seeders.
+**Needs:** PHP 8.4 + Composer + MySQL — i.e. Hostinger. This is the single
+biggest gap in the project.
+
+### B2. Third-party accounts and credentials (owner must supply)
+| Blocked | Consequence today |
+|---|---|
+| Payment gateway (bKash / Nagad / card) | Checkout is UI-only; no order can actually be paid |
+| SMS gateway | Customer OTP login is mocked; staff cannot be alerted |
+| Email sending (SMTP/API) | No order confirmation, no staff invite, no password reset |
+| Courier APIs (Pathao, Steadfast, RedX, eCourier) | 7.3 ships the framework + a manual provider only |
+| Real GS1 barcodes | The 44 in `products.json` pass check-digit validation but are **not registered**, and the Sourcing page tells customers to check them |
+
+### B3. Assets the owner must provide
+Real product and hero photography. Everything is an SVG placeholder, which also
+blocks `srcset`/AVIF (5.3) — there is nothing to generate responsive sizes from.
+
+### B4. No Node/npm on this machine
+Blocks replacing the Tailwind Play CDN with a real build (PurgeCSS), JS
+bundling/minification, and any automated JS test runner. Everything is verified
+by driving headless Chrome instead.
+
+### B5. Business data only the owner has — **blocks 7.6 accounting**
+- **Cost prices.** `products.json` has `price` and `originalPrice` but **no
+  cost field** (verified). Without cost there is revenue but no COGS, so gross
+  margin and a real P&L are impossible. This is the hard blocker for 7.6 and
+  needs either a cost per SKU or supplier invoices to derive it from.
+- Opening balances and a real chart of accounts; bank / mobile-money account
+  details; fiscal year start.
+- VAT/BIN registration and the rates that apply per category.
+- Real warehouse locations and supplier list (7.5).
+- Real staff names, emails and role assignments.
+
+### B6. Host / environment
+HTTPS + domain · CSP (including a hash for the inline `no-js` script) · HTTP
+auth in front of `/modules/admin/` · backups · cron for scheduled jobs · a queue
+worker for emails and webhooks.
+
+### B7. Deliberately not done without authorisation
+Live courier API calls, and sending real email or SMS to real customers.
+
+**What is NOT blocked:** every remaining Phase 7 module can be built and
+verified against the mock seam exactly as 7.1 and 7.2 were — except the
+accounting P&L, which needs B5's cost prices to be more than a revenue report.
+
 ## 8. Known Issues / Follow-ups
 
 - ~~Light-bg transparent PNG logo~~ **DONE** — `assets/logo/gulfrabit-logo.png`
