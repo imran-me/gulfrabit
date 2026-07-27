@@ -21,6 +21,7 @@ return [
     Modules\Account\AccountServiceProvider::class,
     Modules\Auth\AuthServiceProvider::class,
     Modules\B2b\B2bServiceProvider::class,
+    Modules\Bundle\BundleServiceProvider::class,
     Modules\Cart\CartServiceProvider::class,
     Modules\Catalog\CatalogServiceProvider::class,
     Modules\Checkout\CheckoutServiceProvider::class,

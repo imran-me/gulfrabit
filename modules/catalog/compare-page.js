@@ -67,7 +67,10 @@ function render() {
   root.querySelectorAll('[data-remove]').forEach((b) => b.addEventListener('click', () => store.removeFromCompare(b.dataset.remove)));
   root.querySelectorAll('[data-add]').forEach((b) => b.addEventListener('click', () => {
     const p = index.get(b.dataset.add);
-    store.addToCart({ id: p.id, title: p.title, brand: p.brand, price: p.price, image: p.image }, 1);
+    // Pass the product itself rather than a hand-picked subset. Every one of
+    // these call sites had quietly dropped `moq`, so a part with a 1,000-unit
+    // minimum entered the cart with no minimum at all.
+    store.addToCart(p, 1);
     toast.success(`Added to cart · ${p.title}`);
     openCartDrawer();
   }));

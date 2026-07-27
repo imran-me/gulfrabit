@@ -75,6 +75,7 @@ function itemHTML(l) {
             <input class="qty-stepper__input" data-qty-val value="${l.qty}" inputmode="numeric" aria-label="Quantity">
             <button class="qty-stepper__btn" type="button" data-inc aria-label="Increase">+</button>
           </div>
+          ${l.moq ? `<span class="cart-item__moq">min ${Number(l.moq).toLocaleString('en-BD')} units</span>` : ''}
           <button class="cart-item__link" data-save>Save for later</button>
           <button class="cart-item__link cart-item__link--danger" data-remove>Remove</button>
         </div>
@@ -104,9 +105,13 @@ function wireItems(cart) {
     const id = row.dataset.item;
     const variant = row.dataset.variant || null;
     const line = cart.find((l) => l.id === id && (l.variant ?? '') === (variant ?? ''));
-    row.querySelector('[data-dec]').addEventListener('click', () => store.updateQty(id, line.qty - 1, variant));
-    row.querySelector('[data-inc]').addEventListener('click', () => store.updateQty(id, line.qty + 1, variant));
-    row.querySelector('[data-qty-val]').addEventListener('change', (e) => store.updateQty(id, parseInt(e.target.value, 10) || 1, variant));
+    // Step by the line's own minimum. Industrial parts are sold in reels and
+    // sacks, so ± on a 1,000-unit line moves by 1,000 — and store.updateQty
+    // clamps to the same floor, so typing 1 into the box cannot get under it.
+    const { step } = store.qtyBounds(line);
+    row.querySelector('[data-dec]').addEventListener('click', () => store.updateQty(id, line.qty - step, variant));
+    row.querySelector('[data-inc]').addEventListener('click', () => store.updateQty(id, line.qty + step, variant));
+    row.querySelector('[data-qty-val]').addEventListener('change', (e) => store.updateQty(id, parseInt(e.target.value, 10) || step, variant));
     row.querySelector('[data-remove]').addEventListener('click', () => { store.removeFromCart(id, variant); toast.info('Removed from cart'); });
     row.querySelector('[data-save]').addEventListener('click', () => saveForLater(line));
   });

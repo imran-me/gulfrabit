@@ -27,7 +27,7 @@ const listeners = { [EVENTS.CART]: new Set(), [EVENTS.WISHLIST]: new Set(), [EVE
 
 export const COMPARE_MAX = 4;
 
-let cart = storage.get(KEYS.CART, []);          // [{ id, title, brand, price, image, qty, variant }]
+let cart = storage.get(KEYS.CART, []);          // [{ id, title, brand, price, image, qty, variant, moq }]
 let wishlist = storage.get(KEYS.WISHLIST, []);  // [{ id, title, brand, price, image }]
 let compare = storage.get(KEYS.COMPARE, []);    // [productId] — compare selection
 let user = storage.get(KEYS.USER, null);        // { id, name, email } | null
@@ -47,20 +47,42 @@ export function subscribe(event, handler) {
 /* ---- Cart -------------------------------------------------------------- */
 export function getCart() { return cart.slice(); }
 
+/* Quantity bounds are PER LINE, because the catalogue is not all one kind of
+   thing. A jar of honey is bought in ones; a tactile switch is bought in reels
+   of 1,000 and its listed price only exists at that quantity. A single global
+   1..99 clamp silently turned a 1,000-unit line into 99 — an order the B2B desk
+   would have had to phone up and correct, at a unit price that does not apply. */
+const RETAIL_MAX = 99;
+function minQty(line) { return Math.max(1, Number(line?.moq) || 1); }
+function maxQty(line) {
+  const moq = Number(line?.moq) || 0;
+  return moq ? moq * 1000 : RETAIL_MAX;
+}
+function clampQty(line, qty) {
+  const n = Number.isFinite(qty) ? qty : minQty(line);
+  return Math.max(minQty(line), Math.min(maxQty(line), n));
+}
+
 export function addToCart(product, qty = 1) {
   const existing = cart.find((l) => l.id === product.id && l.variant === product.variant);
   if (existing) {
-    existing.qty = Math.min(existing.qty + qty, 99);
+    existing.qty = clampQty(existing, existing.qty + qty);
   } else {
-    cart.push({
+    const line = {
       id: product.id,
       title: product.title,
       brand: product.brand ?? '',
       price: product.price,
       image: product.image,
       variant: product.variant ?? null,
-      qty: Math.min(qty, 99),
-    });
+      // Carried on the line so the cart can enforce the minimum without having
+      // to re-fetch the product. Absent on retail lines and on carts saved
+      // before this existed, where minQty() falls back to 1.
+      moq: product.moq ?? null,
+      qty: 1,
+    };
+    line.qty = clampQty(line, qty);
+    cart.push(line);
   }
   persistCart();
 }
@@ -68,8 +90,13 @@ export function addToCart(product, qty = 1) {
 export function updateQty(id, qty, variant = null) {
   const line = cart.find((l) => l.id === id && l.variant === variant);
   if (!line) return;
-  line.qty = Math.max(1, Math.min(qty, 99));
+  line.qty = clampQty(line, qty);
   persistCart();
+}
+
+/** The step and bounds a UI should use for this line. */
+export function qtyBounds(line) {
+  return { min: minQty(line), max: maxQty(line), step: minQty(line) };
 }
 
 export function removeFromCart(id, variant = null) {

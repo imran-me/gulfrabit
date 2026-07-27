@@ -76,7 +76,15 @@ def head(title, desc, css_links, theme="#0A0A0A"):
 <body>"""
 
 def scripts(module_js):
-    js = f'\n  <script type="module" src="{module_js}"></script>' if module_js else ""
+    """`module_js` is one path or a list of them.
+
+    A page can carry more than one module's script — the PDP is catalog's page
+    but the bundle module puts its own block on it. Each entry is a separate
+    <script type="module">, in order, so a module is attached to a page by
+    adding one line here and detached by deleting it. That is the whole
+    coupling: no module reaches into another module's fragment."""
+    paths = [] if not module_js else ([module_js] if isinstance(module_js, str) else list(module_js))
+    js = "".join(f'\n  <script type="module" src="{p}"></script>' for p in paths)
     return f"""
   <script type="module" src="/shared/js/main.js"></script>{js}
 </body>
@@ -123,7 +131,11 @@ PAGES = [
      "Product — GulfRabit",
      "Product details, specifications and shipping for a GulfRabit import.",
      "modules/catalog/_fragments/product.main.html",
-     ["/modules/catalog/catalog.css"], "/modules/catalog/product-page.js"),
+     # The bundle module rides along on this page and mounts its own section.
+     # Delete these two entries and modules/bundle/ and the PDP loses the
+     # pairing block with nothing left behind.
+     ["/modules/catalog/catalog.css", "/modules/bundle/bundle.css"],
+     ["/modules/catalog/product-page.js", "/modules/bundle/bundle.js"]),
 
     ("modules/catalog/search-results.html",
      "Search — GulfRabit",

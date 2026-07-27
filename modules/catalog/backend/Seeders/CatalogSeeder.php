@@ -90,6 +90,7 @@ class CatalogSeeder extends Seeder
                     'description'           => $row['description'] ?? null,
                     'moq'                   => $row['moq'] ?? null,
                     'price_tiers'           => $this->tiersToPoisha($row['priceTiers'] ?? null),
+                    'faq'                   => $row['faq'] ?? null,
                     'specs'                 => $row['specs'] ?? null,
                     'datasheet'             => $row['datasheet'] ?? null,
                     'is_active'             => true,

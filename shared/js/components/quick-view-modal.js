@@ -72,7 +72,7 @@ export async function openQuickView(id) {
   dialog.querySelector('[data-qv-close]').addEventListener('click', close);
   dialog.querySelector('[data-qv-add]')?.addEventListener('click', () => {
     if (!p.inStock) return;
-    store.addToCart({ id: p.id, title: p.title, brand: p.brand, price: p.price, image: p.image }, 1);
+    store.addToCart(p, 1);
     toast.success(`Added to cart · ${p.title}`);
     close();
     openCartDrawer();

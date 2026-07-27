@@ -1,0 +1,125 @@
+{
+  "_meta": {
+    "owner": "modules/bundle",
+    "note": "Merchant-curated pairings. THE single source for what goes with what. Seeded into `product_bundles` by ProductBundleSeeder; read directly by backend/api.js in the static build.",
+    "why": "A storefront with no order history has no co-purchase data, and calling a guess 'frequently bought together' is a claim about other customers that has not happened. These are pairings the merchant stands behind, labelled as such. BundleService prefers real co-purchase counts the moment enough orders exist, and only then does the wording change to 'frequently bought together'.",
+    "rule": "Every bundle states WHY its members belong together, in `reason`, in words a customer would recognise. If a reason cannot be written, the bundle is not real and should not ship."
+  },
+  "minOrdersForBehavioural": 5,
+  "bundles": [
+    {
+      "id": "bdl-coffee-ritual",
+      "title": "The pour-over setup",
+      "reason": "Coarse-ground beans, the cone and carafe to brew them in, and glasses that show the colour. Everything the method needs, nothing it doesn't.",
+      "members": ["gr-1003", "gr-2503", "gr-2507"]
+    },
+    {
+      "id": "bdl-iftar-table",
+      "title": "The dates-and-honey table",
+      "reason": "Medjool dates, Sidr honey and pistachios are the three things that end up on the same plate at iftar and at every gathering after it.",
+      "members": ["gr-1001", "gr-1002", "gr-1201"]
+    },
+    {
+      "id": "bdl-cheese-board",
+      "title": "Build a cheese board",
+      "reason": "Aged Gouda wants something sweet and something with bite next to it. Walnuts and dried apricots are what a cheesemonger would hand you.",
+      "members": ["gr-1102", "gr-1204", "gr-1205"]
+    },
+    {
+      "id": "bdl-tea-tray",
+      "title": "The tea tray",
+      "reason": "One black, one green, and the double-wall glasses that keep both hot without burning your hand.",
+      "members": ["gr-1005", "gr-1006", "gr-2507"]
+    },
+    {
+      "id": "bdl-baking-shelf",
+      "title": "The baking shelf",
+      "reason": "Full-cream powder and grass-fed butter are the two dairy staples almost every recipe starts from, and cashews go into most of what comes out.",
+      "members": ["gr-1101", "gr-1103", "gr-1203"]
+    },
+    {
+      "id": "bdl-skin-routine",
+      "title": "Morning routine, in order",
+      "reason": "Vitamin-C serum, then moisturiser, then sunscreen. That order matters — vitamin C needs to reach skin first, and SPF has to go on last or it does nothing.",
+      "members": ["gr-3501", "gr-3505", "gr-3506"]
+    },
+    {
+      "id": "bdl-kitchen-core",
+      "title": "The three pans you actually use",
+      "reason": "Cast iron for the slow things, nonstick for the fast ones, and one knife sharp enough that neither is a chore.",
+      "members": ["gr-2501", "gr-2506", "gr-2502"]
+    },
+    {
+      "id": "bdl-desk-setup",
+      "title": "The desk, sorted",
+      "reason": "Dotted paper, pens that don't skip, and somewhere to put them that isn't the drawer.",
+      "members": ["gr-4002", "gr-4001", "gr-4003"]
+    },
+    {
+      "id": "bdl-drafting",
+      "title": "Drafting kit",
+      "reason": "Three lead widths and dotted paper — the combination people who sketch technical work reach for.",
+      "members": ["gr-4004", "gr-4002"]
+    },
+    {
+      "id": "bdl-leather-travel",
+      "title": "Leather that ages together",
+      "reason": "Full-grain weekender and full-grain belt take on the same patina, and the scarf covers the one gap a weekend bag leaves.",
+      "members": ["gr-3002", "gr-3004", "gr-3005"]
+    },
+    {
+      "id": "bdl-winter-layer",
+      "title": "The layer for a Dhaka December",
+      "reason": "Merino handles a cold morning without the bulk, and the scarf handles the hour before the sun gets up.",
+      "members": ["gr-3001", "gr-3005"]
+    },
+    {
+      "id": "bdl-connected-home",
+      "title": "Start a connected home",
+      "reason": "The Matter hub is the piece that makes everything else talk to each other; the speaker is usually the first thing people connect to it.",
+      "members": ["gr-2003", "gr-2005"]
+    },
+    {
+      "id": "bdl-listen-anywhere",
+      "title": "Over-ear at the desk, in-ear on the move",
+      "reason": "Noise-cancelling cans for long sessions, buds for the commute, and a watch that controls both without reaching for a phone.",
+      "members": ["gr-2001", "gr-2004", "gr-2002"]
+    },
+    {
+      "id": "bdl-prototype-board",
+      "title": "Prototype a sensor board",
+      "reason": "Blank FR-4, the I²C temp/humidity sensor, the relay it switches, and the tactile switch and bulk capacitor every board of this kind ends up needing.",
+      "members": ["gr-9001", "gr-9004", "gr-9003", "gr-9002", "gr-9006"]
+    },
+    {
+      "id": "bdl-gift-box",
+      "title": "A gift that needs no wrapping",
+      "reason": "Swiss dark chocolate and Medjool dates arrive presentation-ready; the grooming set turns two food gifts into one that works for anybody.",
+      "members": ["gr-1004", "gr-1001", "gr-3502"]
+    },
+    {
+      "id": "bdl-nut-jar",
+      "title": "Fill the nut jar",
+      "reason": "Raw almonds to snack on, cashews to cook with, walnuts for everything else. Buying the three together is how most kitchens stay stocked.",
+      "members": ["gr-1202", "gr-1203", "gr-1204"]
+    },
+    {
+      "id": "bdl-polymer-line",
+      "title": "Polymer and board stock",
+      "reason": "ABS pellets for enclosures and FR-4 blanks for what goes inside them — the two raw stocks a small production run draws down fastest.",
+      "members": ["gr-9005", "gr-9001"]
+    },
+    {
+      "id": "bdl-shade-and-sun",
+      "title": "For the glare",
+      "reason": "Polarised lenses cut the glare your eyes notice; SPF 50 handles the part they don't.",
+      "members": ["gr-3003", "gr-3506"]
+    },
+    {
+      "id": "bdl-milk-and-coffee",
+      "title": "Coffee, the everyday way",
+      "reason": "Skimmed powder keeps without a fridge, which is the reason it and a bag of beans end up on the same shelf in most offices.",
+      "members": ["gr-1104", "gr-1003"]
+    }
+  ]
+}

@@ -76,3 +76,11 @@
   background: rgba(154, 205, 60, .08);
 }
 .gift-progress.is-unlocked .gift-progress__icon { color: var(--lime-ink); }
+
+/* Shown only on lines that have a minimum order quantity, next to the stepper
+   that now moves in those units — otherwise "− 1,000" looks like a glitch. */
+.cart-item__moq {
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+  white-space: nowrap;
+}

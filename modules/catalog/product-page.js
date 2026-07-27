@@ -359,6 +359,22 @@ function wireReviewForm(p, host) {
 
 function wireActions(p) {
   const stepper = document.querySelector('[data-qty-stepper]');
+
+  // The MOQ was being *printed* under the price while the stepper still started
+  // at 1 and stepped by 1 — so a part with a 1,000-unit minimum could be added
+  // to the cart as a single unit, at a unit price that only exists at 1,000.
+  // The minimum is a fact about the product, so it belongs in the control, not
+  // only in the caption next to it.
+  if (p.moq) {
+    stepper.dataset.min = String(p.moq);
+    stepper.dataset.step = String(p.moq);
+    stepper.dataset.max = String(p.moq * 1000);
+    stepper.querySelector('[data-qty-input]').value = String(p.moq);
+    // main.js already enhanced this stepper on DOMContentLoaded, before the
+    // product was known, and setup() is guarded against running twice. Clear
+    // the flag so the re-run below actually takes the new bounds.
+    delete stepper.dataset.ready;
+  }
   setupStepper(stepper);
   stepper.addEventListener('qty:change', (e) => { currentQty = e.detail.value; });
 
@@ -366,7 +382,7 @@ function wireActions(p) {
   if (!p.inStock) { addBtn.disabled = true; addBtn.textContent = 'Sold out'; }
   addBtn.addEventListener('click', () => {
     if (!p.inStock) return;
-    store.addToCart({ id: p.id, title: p.title, brand: p.brand, price: p.price, image: p.image }, currentQty);
+    store.addToCart(p, currentQty);
     toast.success(`Added to cart · ${currentQty} × ${p.title}`);
     openCartDrawer();
   });
