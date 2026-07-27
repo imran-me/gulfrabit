@@ -521,7 +521,14 @@ errors, and only then start the next. No parallel half-finished features.
       so at 44 SKUs only *Compliance* qualifies and the food category correctly shows
       none. Mirrored in `ProductQueryService` via JSON path + LIKE.
 - [ ] **3.2** Real sourcing/authenticity page (the hero "Our Sourcing" CTA needs a home)
-- [ ] **3.3** Merchant-authored FAQ + Q&A per product *(works with zero customers)*
+- [x] **3.3** Merchant-authored FAQ per product *(works with zero customers)* —
+      `tools/gen-product-faq.py` writes `faq: [{q,a}]` onto all 44 products (147
+      questions, 3.3 avg). Every answer is derived from data the product actually
+      carries — barcode, origin, dietary flags, MOQ, price tiers — so nothing is
+      invented. No "Is it halal?" answer, because certification is not in the
+      dataset and writing one would fabricate a claim about real food. Rendered on
+      the PDP as a FAQ tab of native `<details>` (keyboard-accessible and reachable
+      by find-in-page for free), plus FAQPage JSON-LD.
 - [x] **5.1** **Bengali webfont** — Noto Sans Bengali (OFL), **self-hosted** at
       `assets/fonts/noto-sans-bengali-variable.woff2` (105 KB), declared in the new
       `_fonts.css` partial with `unicode-range` copied verbatim from Google's bengali
@@ -719,3 +726,24 @@ metadata, cashback clawed back from refunds, and app-install interstitials.
 
   ⚠ **No PHP has been executed** — `php`/`composer` are absent on this machine.
   The Laravel code is authored and structurally checked only.
+- **2026-07-27** — Per-product FAQ (to-do 3.3) and the end of the delivery-rate
+  duplication.
+  · **3.3 FAQ** — `tools/gen-product-faq.py` generates 147 questions across 44
+    products from real product data only; `renderFaq()` in `product-page.js` paints a
+    `<details>` accordion into the new FAQ tab and injects FAQPage JSON-LD.
+    Verified: 5 questions on gr-1001, 4 JSON-LD blocks, no overflow at
+    375/414/768/1280, no console errors.
+  · **Delivery rates** — `tools/sync-delivery-copy.py` grew named blocks, so one file
+    can hold several. Coverage went from 5 blocks to **9 across 7 files**: added the
+    PDP trust strip, the PDP Shipping-tab prose, the checkout summary's pre-JS
+    default, and the site FAQ's delivery answer.
+  · **The generator now has a detector.** `find_strays()` greps the tree for a rate
+    written outside a generated block and fails `--check`. It found 2 of those 4
+    copies immediately — a generator alone only fixes the copies you remember, and
+    the ones written in prose are exactly the ones you don't.
+  · The PDP prose had silently omitted express (৳ 150) since express was added at
+    checkout; generating it from the zone list fixed that as a side effect.
+  · Round-trip verified: set metro to ৳ 99, ran the tool, confirmed **zero** stale
+    "৳ 70" anywhere in the shipped output and 30 files updated, then reverted.
+  · 26 pages 200 · 88 PHP files clean · dependency graph still one-way · htaccess
+    both directions still asserted.

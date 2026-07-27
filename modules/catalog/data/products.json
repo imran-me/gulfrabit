@@ -57,6 +57,28 @@
         "sugar free",
         "sugarfree",
         "diabetic friendly"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Jordan, and the barcode printed on the pack — 7836240540692 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Keep sealed in a cool, dry place away from direct sunlight. Refrigerate after opening if the pack says so."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan, gluten-free and made with no added sugar. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -104,6 +126,28 @@
         "unprocessed",
         "unfiltered",
         "natural"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Yemen, and the barcode printed on the pack — 1815491339893 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Keep sealed in a cool, dry place away from direct sunlight. Refrigerate after opening if the pack says so."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as raw and unprocessed and unfiltered. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -148,6 +192,28 @@
         "ground coffee",
         "vegan",
         "plant based"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Ethiopia, and the barcode printed on the pack — 5234894833153 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Keep sealed in a cool, dry place away from direct sunlight. Refrigerate after opening if the pack says so."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -192,6 +258,28 @@
         "gift chocolate",
         "vegetarian",
         "veg"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Switzerland, and the barcode printed on the pack — 9764819319654 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Keep sealed in a cool, dry place away from direct sunlight. Refrigerate after opening if the pack says so."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegetarian. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -235,6 +323,28 @@
         "loose leaf",
         "vegan",
         "plant based"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Sri Lanka, and the barcode printed on the pack — 4661223618210 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Keep sealed in a cool, dry place away from direct sunlight. Refrigerate after opening if the pack says so."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -281,6 +391,24 @@
         "formula",
         "full cream",
         "halal"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from New Zealand, and the barcode printed on the pack — 7615164113140 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Store cool and dry, and seal the pack tightly after each use — powder absorbs moisture quickly in Dhaka humidity."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -326,6 +454,28 @@
         "vegetarian",
         "veg",
         "halal"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Netherlands, and the barcode printed on the pack — 6806709855323 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Store cool and dry, and seal the pack tightly after each use — powder absorbs moisture quickly in Dhaka humidity."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegetarian. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -369,6 +519,28 @@
         "vegetarian",
         "veg",
         "halal"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Ireland, and the barcode printed on the pack — 1746926816712 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Store cool and dry, and seal the pack tightly after each use — powder absorbs moisture quickly in Dhaka humidity."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegetarian. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -416,6 +588,28 @@
         "plant based",
         "gluten free",
         "glutenfree"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Iran, and the barcode printed on the pack — 9526426403139 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Airtight and away from heat. Refrigeration extends freshness in warm months and is worth it here."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -463,6 +657,28 @@
         "gluten free",
         "glutenfree",
         "keto"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from USA, and the barcode printed on the pack — 2149843702349 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Airtight and away from heat. Refrigeration extends freshness in warm months and is worth it here."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -507,6 +723,28 @@
         "plant based",
         "gluten free",
         "glutenfree"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from India, and the barcode printed on the pack — 4622454867242 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Airtight and away from heat. Refrigeration extends freshness in warm months and is worth it here."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -557,6 +795,16 @@
         "hedphone",
         "over ear",
         "anc"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 6510205353480 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -601,6 +849,16 @@
         "watch",
         "ghori",
         "fitness watch"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from South Korea, and the barcode printed on the pack — 8121326266405 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -642,6 +900,16 @@
         "home automation",
         "smart hub",
         "matter hub"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Germany, and the barcode printed on the pack — 6872521572410 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -686,6 +954,16 @@
         "airpods alternative",
         "tws",
         "wireless earphone"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 6935805139157 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -725,6 +1003,16 @@
         "casserole",
         "cast iron pot",
         "handi"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from France, and the barcode printed on the pack — 5192653665783 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -764,6 +1052,16 @@
         "chaku",
         "kitchen knife",
         "damascus"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 1640015913354 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -801,6 +1099,16 @@
         "coffee dripper",
         "v60",
         "filter coffee"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Germany, and the barcode printed on the pack — 9546759804403 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -840,6 +1148,16 @@
         "pullover",
         "jumper",
         "winter wear"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Italy, and the barcode printed on the pack — 6832073803837 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -877,6 +1195,16 @@
         "fashion",
         "chamra",
         "genuine leather"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Italy, and the barcode printed on the pack — 4712485330867 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -915,6 +1243,16 @@
         "shades",
         "chosma",
         "goggles"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Italy, and the barcode printed on the pack — 4596185592875 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -952,6 +1290,20 @@
         "beauty & personal care",
         "face serum",
         "vitamin c serum"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from South Korea, and the barcode printed on the pack — 0287660635180 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Room temperature, out of direct sunlight. Check the period-after-opening symbol on the pack."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -987,6 +1339,20 @@
         "beauty & personal care",
         "shaving set",
         "beard care"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from France, and the barcode printed on the pack — 9257151035967 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Room temperature, out of direct sunlight. Check the period-after-opening symbol on the pack."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1024,6 +1390,16 @@
         "pen",
         "kolom",
         "gel pen"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 8910676623453 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1062,6 +1438,16 @@
         "diary",
         "journal",
         "dotted notebook"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Germany, and the barcode printed on the pack — 6567875957654 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1131,6 +1517,24 @@
         "wholesale",
         "b2b",
         "moq"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from China, and the barcode printed on the pack — 6134536012634 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "What is the minimum order quantity?",
+          "a": "The minimum order is 50 units. Volume pricing steps in at 500, 2000 units — request a quote and the B2B desk confirms stock and lead time."
+        },
+        {
+          "q": "Is a datasheet available?",
+          "a": "Yes — download it from the Specifications tab. It carries the full electrical and mechanical detail."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1197,6 +1601,24 @@
         "wholesale",
         "b2b",
         "moq"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from China, and the barcode printed on the pack — 5055605007324 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "What is the minimum order quantity?",
+          "a": "The minimum order is 1000 units. Volume pricing steps in at 10000, 50000 units — request a quote and the B2B desk confirms stock and lead time."
+        },
+        {
+          "q": "Is a datasheet available?",
+          "a": "Yes — download it from the Specifications tab. It carries the full electrical and mechanical detail."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1269,6 +1691,24 @@
         "wholesale",
         "b2b",
         "moq"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Taiwan, and the barcode printed on the pack — 1859042263800 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "What is the minimum order quantity?",
+          "a": "The minimum order is 100 units. Volume pricing steps in at 1000, 5000 units — request a quote and the B2B desk confirms stock and lead time."
+        },
+        {
+          "q": "Is a datasheet available?",
+          "a": "Yes — download it from the Specifications tab. It carries the full electrical and mechanical detail."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1338,6 +1778,24 @@
         "wholesale",
         "b2b",
         "moq"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Switzerland, and the barcode printed on the pack — 2004201250897 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "What is the minimum order quantity?",
+          "a": "The minimum order is 100 units. Volume pricing steps in at 1000, 10000 units — request a quote and the B2B desk confirms stock and lead time."
+        },
+        {
+          "q": "Is a datasheet available?",
+          "a": "Yes — download it from the Specifications tab. It carries the full electrical and mechanical detail."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1404,6 +1862,24 @@
         "wholesale",
         "b2b",
         "moq"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from South Korea, and the barcode printed on the pack — 4957252310295 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "What is the minimum order quantity?",
+          "a": "The minimum order is 10 units. Volume pricing steps in at 40, 200 units — request a quote and the B2B desk confirms stock and lead time."
+        },
+        {
+          "q": "Is a datasheet available?",
+          "a": "Yes — download it from the Specifications tab. It carries the full electrical and mechanical detail."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1471,6 +1947,24 @@
         "wholesale",
         "b2b",
         "moq"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 7263350363918 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "What is the minimum order quantity?",
+          "a": "The minimum order is 200 units. Volume pricing steps in at 2000, 20000 units — request a quote and the B2B desk confirms stock and lead time."
+        },
+        {
+          "q": "Is a datasheet available?",
+          "a": "Yes — download it from the Specifications tab. It carries the full electrical and mechanical detail."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1521,6 +2015,28 @@
         "vegan",
         "plant based",
         "jaibo"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 2242530345284 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Keep sealed in a cool, dry place away from direct sunlight. Refrigerate after opening if the pack says so."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan and organic. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -1563,6 +2079,28 @@
         "plant based",
         "gluten free",
         "glutenfree"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Chile, and the barcode printed on the pack — 6646400475426 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Airtight and away from heat. Refrigeration extends freshness in warm months and is worth it here."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -1609,6 +2147,28 @@
         "sugar free",
         "sugarfree",
         "diabetic friendly"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Turkey, and the barcode printed on the pack — 7311413955850 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Airtight and away from heat. Refrigeration extends freshness in warm months and is worth it here."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan and made with no added sugar. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -1653,6 +2213,24 @@
         "formula",
         "full cream",
         "halal"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from New Zealand, and the barcode printed on the pack — 3908888194422 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Store cool and dry, and seal the pack tightly after each use — powder absorbs moisture quickly in Dhaka humidity."
+        },
+        {
+          "q": "Is it shipped cold-chain?",
+          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+        }
       ]
     },
     {
@@ -1697,6 +2275,16 @@
         "bluetooth speaker",
         "sound box",
         "portable speaker"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from South Korea, and the barcode printed on the pack — 3278211515461 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1734,6 +2322,16 @@
         "korai",
         "nonstick pan",
         "tawa"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from France, and the barcode printed on the pack — 6637995503465 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1772,6 +2370,16 @@
         "mug",
         "cup",
         "glass cup"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Germany, and the barcode printed on the pack — 4089031776012 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1811,6 +2419,16 @@
         "genuine leather",
         "leather belt",
         "waist belt"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Italy, and the barcode printed on the pack — 3386125118958 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1849,6 +2467,16 @@
         "muffler",
         "shawl",
         "chador"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Italy, and the barcode printed on the pack — 5466656600936 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1887,6 +2515,20 @@
         "cream",
         "face cream",
         "hydrating"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from South Korea, and the barcode printed on the pack — 9139788804836 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Room temperature, out of direct sunlight. Check the period-after-opening symbol on the pack."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1923,6 +2565,20 @@
         "beauty & personal care",
         "sun cream",
         "sunblock"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from South Korea, and the barcode printed on the pack — 3765883382250 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "How should I store it?",
+          "a": "Room temperature, out of direct sunlight. Check the period-after-opening symbol on the pack."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1961,6 +2617,16 @@
         "desk tidy",
         "akhrot",
         "walnuts"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Germany, and the barcode printed on the pack — 5137174655646 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     },
     {
@@ -1997,6 +2663,16 @@
         "office supplies",
         "mechanical pencil",
         "drafting pencil"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 0468805192502 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
       ]
     }
   ]

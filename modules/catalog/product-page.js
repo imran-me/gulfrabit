@@ -231,6 +231,7 @@ function paintTabs(p) {
   }
   specsHost.innerHTML = html;
 
+  renderFaq(p);
   renderReviews(p);
 
   // Tab switching
@@ -240,6 +241,51 @@ function paintTabs(p) {
     btn.classList.add('is-active'); btn.setAttribute('aria-selected', 'true');
     document.querySelectorAll('.tab-panel').forEach((panel) => { panel.hidden = panel.dataset.panel !== btn.dataset.tab; });
   }));
+}
+
+/* ---- FAQ --------------------------------------------------------------
+   Answers come from the product's own data (see tools/gen-product-faq.py), so
+   they name the real barcode, origin and MOQ. Rendered as <details> — native
+   disclosure is keyboard-accessible and searchable by the browser's find,
+   which a JS accordion has to reimplement badly. */
+function renderFaq(p) {
+  const host = document.querySelector('[data-pdp-faq]');
+  if (!host) return;
+
+  const faq = p.faq || [];
+  const tabBtn = document.querySelector('.tab-btn[data-tab="faq"]');
+
+  // No questions for this product: hide the tab rather than showing an empty
+  // panel, which reads as broken.
+  if (!faq.length) {
+    if (tabBtn) tabBtn.hidden = true;
+    return;
+  }
+
+  host.innerHTML = faq.map((item, i) => `
+    <details class="faq-item"${i === 0 ? ' open' : ''}>
+      <summary class="faq-item__q">${escapeHtml(item.q)}</summary>
+      <div class="faq-item__a">${escapeHtml(item.a)}</div>
+    </details>`).join('');
+
+  injectFaqSchema(faq);
+}
+
+/**
+ * FAQPage structured data — this is the one schema type that still earns
+ * expanded results, and the questions are exactly what people type into search.
+ * Enhancement only; the answers are already in the DOM.
+ */
+function injectFaqSchema(faq) {
+  appendLd({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  });
 }
 
 /* ---- Reviews (localStorage-backed, with a write-review form) ---------- */

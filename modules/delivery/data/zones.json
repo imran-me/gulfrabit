@@ -1,8 +1,8 @@
 {
   "_meta": {
     "owner": "modules/delivery",
-    "note": "THE single source of truth for delivery rates. Everything else is generated from this file by tools/sync-delivery-copy.py — the frontend ZONES constant, the checkout radios, the Shipping & Returns table, and the announcement bar. Change a rate HERE, then run the tool.",
-    "why": "These three numbers were previously written in five places: api.js, the PHP seeder, the shipping page, the checkout radios, and the announcement bar on all 24 pages. Changing a rate meant finding all five, and the first one missed becomes a promise the site does not keep."
+    "note": "THE single source of truth for delivery rates. Everything else is generated from this file by tools/sync-delivery-copy.py — nine blocks across seven files, covering the frontend ZONES constant, the checkout radios and summary default, the Shipping & Returns table, the site FAQ answer, the PDP trust strip and Shipping tab prose, and the announcement bar. Change a rate HERE, then run the tool.",
+    "why": "These numbers were once written in five places by hand, and four more copies were found later by the tool's own stray check. Changing a rate meant finding all of them, and the first one missed becomes a promise the site does not keep. `python tools/sync-delivery-copy.py --check` fails the build on both a stale block and a newly hardcoded copy."
   },
   "zones": [
     {

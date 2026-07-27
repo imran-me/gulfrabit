@@ -114,3 +114,38 @@
 /* Loosened tracking so a 13-digit code can be read off the screen and checked
    against the physical pack — the whole point of publishing it. */
 .barcode-value { font-variant-numeric: tabular-nums; letter-spacing: .1em; }
+
+/* ---- Product FAQ ------------------------------------------------------
+   Native <details> rather than a JS accordion: it is keyboard-accessible for
+   free and the browser's find-in-page can reach closed answers. */
+.faq-list { max-width: 70ch; }
+.faq-item { border-bottom: 1px solid var(--border-hairline); }
+.faq-item__q {
+  padding: var(--space-4) 0;
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.faq-item__q::-webkit-details-marker { display: none; }
+/* Own marker so the affordance survives the list-style reset above. */
+.faq-item__q::after {
+  content: "";
+  width: 9px; height: 9px;
+  border-right: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted);
+  transform: rotate(45deg);
+  transition: transform var(--dur-base) var(--ease-out);
+  flex-shrink: 0;
+}
+.faq-item[open] .faq-item__q::after { transform: rotate(-135deg); }
+.faq-item__q:hover { color: var(--link); }
+.faq-item__a {
+  padding-bottom: var(--space-4);
+  color: var(--text-secondary);
+  line-height: var(--lh-normal);
+}
