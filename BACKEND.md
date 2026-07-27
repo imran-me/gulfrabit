@@ -139,6 +139,6 @@ and swapping mock for real stops being a one-file change.
 | `checkout` | live (mock) | **authored** — provider, routes, controller, request, order service, 2 models, 2 migrations |
 | `auth` | live (mock) | **authored** — provider, routes, controller, 4 requests, 2 services, model, migration (OTP-first) |
 | `account` | live (mock) | **authored** — provider, routes, 2 controllers, request, address service, 2 models, 2 migrations |
-| `b2b` | live (mock) | not started |
-| `deals` | live (mock) | not started |
-| `content` | static | not started |
+| `b2b` | live (mock) | **authored** — provider, routes, controller, request, quote service, 2 models, 2 migrations |
+| `deals` | live (mock) | **none needed** — owns no data, composes catalog |
+| `content` | static | **none needed** — static pages; would grow one only for a page CMS or contact form |

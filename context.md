@@ -274,7 +274,13 @@ gulfrabit/
 | `checkout` | authored — provider, routes, controller, request, order service, 2 models, 2 migrations |
 | `auth` | authored — provider, routes, controller, 4 requests, 2 services, model, migration (**OTP-first**) |
 | `account` | authored — provider, routes, 2 controllers, request, address service, 2 models, 2 migrations |
-| `b2b`, `deals`, `home`, `content` | not started — frontend runs on `backend/api.js` mocks |
+| `b2b` | authored — provider, routes, controller, request, quote service, 2 models, 2 migrations |
+| `deals`, `home` | **none needed** — own no data; compose `catalog` through its door |
+| `content` | **none needed** — static pages; a backend only if a page CMS or contact form is added |
+
+**Every module now has the backend it should have.** `deals`, `home` and `content`
+have none *deliberately*: giving them controllers would put two places in charge of
+what "featured" means, which is how a catalog starts contradicting itself.
 
 **Module dependency graph** (verified one-way, no cycles):
 `catalog` and `delivery` depend on nothing · `cart` → `catalog` · `auth` → `cart` · `account` → `catalog`, `delivery` · `checkout` → `cart`, `catalog`, `delivery`

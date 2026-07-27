@@ -1,14 +1,25 @@
-# Home · Backend endpoints
+# Home · API contract
 
-The home page composes existing catalog data into merchandising collections.
+Owned by `modules/home`.
 
-| Method | Path | Purpose | Replaces (mock) |
-|---|---|---|---|
-| GET | `/home/collections` | `{ premium:[], bestsellers:[], newArrivals:[] }` in one call | 3× `getFeatured()` over `products.json` |
-| GET | `/home/hero` | hero slides (image, eyebrow, title, cta) — CMS-driven | hard-coded HTML slides |
-| GET | `/home/testimonials` | approved testimonials | hard-coded HTML |
+## This module has no backend, deliberately
 
-Notes
-- `/home/collections` should be cacheable (Redis, short TTL) — it's the busiest call.
-- Hero slides and testimonials are good first CMS candidates.
-- Product objects use the shared product shape (see `shared/backend/api-contract.md`).
+It owns **no data**. Every product it shows belongs to `modules/catalog`, and it
+reads them through `modules/catalog/backend/api.js`:
+
+| What the page shows | Where it comes from |
+|---|---|
+| product collections | `GET /api/catalog/products` |
+| discounted products | `GET /api/catalog/deals` |
+| category tiles | `GET /api/catalog/categories` |
+
+Giving this module its own controller would mean **two places** deciding what
+"featured" means and how a discount is ordered — which is exactly how a catalog
+starts contradicting itself. The one-source-of-truth rule applies across modules,
+not just within one.
+
+`backend/api.js` here is a thin re-export so the page has a single import
+surface. If this module ever owns data of its own — a curated campaign, an
+editorial ordering — it grows a real backend then, and not before.
+
+**Deleting this folder removes the page and nothing else**, which is the test.
