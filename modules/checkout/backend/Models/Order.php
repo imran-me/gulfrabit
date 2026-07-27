@@ -57,6 +57,17 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    /** Oldest first — this is a story, and stories are read forwards. */
+    public function statusEvents(): HasMany
+    {
+        return $this->hasMany(OrderStatusEvent::class)->oldest();
+    }
+
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(OrderRefund::class)->oldest();
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(\App\Models\User::class);

@@ -8,24 +8,6 @@
  */
 
 import { adminFetch } from './backend/api.js';
-import { registerScreen } from './admin-shell.js';
-
-/* Admin's own screens go through the same registry every other module uses.
-   No special case for the module that owns the shell — if the contribution API
-   is not good enough for its author, it is not good enough for anyone. */
-registerScreen({
-  id: 'dashboard',
-  label: 'Dashboard',
-  href: '/modules/admin/index.html',
-  // 'dashboard' is granted to every role — see AdminUser::CAPABILITIES. The
-  // controller still decides which cards each role receives, so landing here
-  // never means being handed figures the role may not see.
-  area: 'dashboard',
-  group: 'Overview',
-  order: 0,
-  icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
-});
-
 const CARD_LABELS = {
   todayCount:       ['Orders today', false],
   awaitingPack:     ['Awaiting packing', true],

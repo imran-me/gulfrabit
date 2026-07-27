@@ -14,7 +14,7 @@
     document.documentElement.classList.remove('no-js');
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — GulfRabit Admin</title>
+  <title>Orders — GulfRabit Admin</title>
   <meta name="description" content="GulfRabit staff panel.">
   <meta name="theme-color" content="#0A0A0A">
   <meta name="author" content="GulfRabit">
@@ -23,11 +23,11 @@
   <!-- Social / Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GulfRabit">
-  <meta property="og:title" content="Dashboard — GulfRabit Admin">
+  <meta property="og:title" content="Orders — GulfRabit Admin">
   <meta property="og:description" content="GulfRabit staff panel.">
   <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Dashboard — GulfRabit Admin">
+  <meta name="twitter:title" content="Orders — GulfRabit Admin">
   <meta name="twitter:description" content="GulfRabit staff panel.">
   <link rel="icon" href="../../favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
@@ -70,26 +70,87 @@
 
 <div class="admin__head">
         <div>
-          <h1 class="admin__title">Dashboard</h1>
-          <p class="admin__sub" data-dash-sub>Loading today’s figures…</p>
+          <h1 class="admin__title">Orders</h1>
+          <p class="admin__sub" data-orders-count>Loading…</p>
         </div>
       </div>
 
-      <!-- Filled from GET /api/admin/dashboard. The server decides which cards
-           this role may receive; the client only lays out what it is given, so
-           a warehouse account is never sent the revenue figure at all. -->
-      <div class="acards" data-dash-cards></div>
+      <!-- Filters. Every control maps to a validated query parameter, and the
+           state lives in the URL so a filtered view can be bookmarked and
+           shared with a colleague rather than described to them. -->
+      <form class="afilters" data-orders-filters>
+        <div class="afilters__field">
+          <label for="f-q">Search</label>
+          <input class="input-gr" id="f-q" name="q" type="search" placeholder="Order no, phone or name">
+        </div>
+        <div class="afilters__field">
+          <label for="f-status">Status</label>
+          <select class="select-gr" id="f-status" name="status">
+            <option value="">Any status</option>
+            <option value="placed">Placed</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="packed">Packed</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="returned">Returned</option>
+          </select>
+        </div>
+        <div class="afilters__field">
+          <label for="f-pay">Payment</label>
+          <select class="select-gr" id="f-pay" name="paymentStatus">
+            <option value="">Any payment</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="failed">Failed</option>
+            <option value="refunded">Refunded</option>
+          </select>
+        </div>
+        <div class="afilters__field">
+          <label for="f-from">From</label>
+          <input class="input-gr" id="f-from" name="from" type="date">
+        </div>
+        <div class="afilters__field">
+          <label for="f-to">To</label>
+          <input class="input-gr" id="f-to" name="to" type="date">
+        </div>
+        <div class="afilters__actions">
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Apply</button>
+          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-orders-clear>Clear</button>
+        </div>
+      </form>
 
-      <p class="admin__sub" data-dash-empty hidden>
-        No cards to show yet. Cards appear as modules are installed — orders,
-        inventory and accounting each contribute their own.
-      </p>
+      <div class="atable-wrap">
+        <table class="atable">
+          <thead>
+            <tr>
+              <th scope="col">Order</th>
+              <th scope="col">Customer</th>
+              <th scope="col">District</th>
+              <th scope="col">Items</th>
+              <th scope="col">Total</th>
+              <th scope="col">Payment</th>
+              <th scope="col">Status</th>
+              <th scope="col">Placed</th>
+            </tr>
+          </thead>
+          <tbody data-orders-body>
+            <tr><td colspan="8" class="atable__empty">Loading orders…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <nav class="apager" data-orders-pager hidden aria-label="Order pages">
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-page-prev>← Previous</button>
+        <span data-page-label></span>
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-page-next>Next →</button>
+      </nav>
     </main>
   </div>
 
   <script type="module" src="../../shared/js/main.js"></script>
   <script type="module" src="../../modules/admin/admin-shell.js"></script>
   <script type="module" src="../../modules/admin/admin-nav.js"></script>
-  <script type="module" src="../../modules/admin/dashboard-page.js"></script>
+  <script type="module" src="../../modules/admin/orders-page.js"></script>
 </body>
 </html>

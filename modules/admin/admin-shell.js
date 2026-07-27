@@ -33,6 +33,8 @@ const screens = [];
  * @param {string}  screen.area   capability required — must match one of the
  *   areas in AdminUser::CAPABILITIES. A screen whose area the signed-in role
  *   lacks is not rendered, and its endpoints would refuse it anyway.
+ * @param {string[]} [screen.match] extra page paths that count as "inside"
+ *   this screen, so a detail view keeps its section highlighted in the sidebar.
  * @param {string} [screen.group] sidebar section heading
  * @param {string} [screen.icon]  inline SVG
  * @param {number} [screen.order] sort within the group
@@ -42,7 +44,7 @@ export function registerScreen(screen) {
     console.warn('[admin] ignoring screen without id/area', screen);
     return;
   }
-  screens.push({ group: 'General', icon: '', order: 100, ...screen });
+  screens.push({ group: 'General', icon: '', order: 100, match: [], ...screen });
 }
 
 /* Modules register during their own module-script evaluation, which finishes
@@ -119,6 +121,12 @@ function paintNav(session) {
   }
 
   const here = location.pathname;
+  /* A screen is "current" when you are on its own page or on one of the detail
+     pages it owns. Without `match`, opening an order left nothing highlighted
+     and the sidebar stopped telling you where you were. Compared as full paths
+     rather than by suffix, because "order.html".endsWith("orders.html") is the
+     kind of near-miss that silently highlights the wrong row. */
+  const isCurrent = (s) => here === s.href || s.match.includes(here);
   host.innerHTML = [...groups]
     .map(([group, items]) => `
       <div class="anav__group">
@@ -126,7 +134,7 @@ function paintNav(session) {
         <ul role="list">
           ${items.map((s) => `
             <li>
-              <a class="anav__link${here.endsWith(s.href.split('/').pop()) ? ' is-current' : ''}"
+              <a class="anav__link${isCurrent(s) ? ' is-current' : ''}"
                  href="${escapeHtml(s.href)}">
                 <span class="anav__icon" aria-hidden="true">${s.icon}</span>
                 <span>${escapeHtml(s.label)}</span>

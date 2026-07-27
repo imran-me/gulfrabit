@@ -596,7 +596,10 @@ Admin never imports from courier/inventory/accounting/cms.
 - [x] **7.1** Admin shell — `modules/admin/`. Staff auth on a separate
       `admin_users` table with five roles, the `admin` guard + `RequireAdmin`
       middleware, a contributed nav registry, login and dashboard screens.
-- [ ] **7.2** Orders & fulfilment — list, filters, detail, status transitions, refunds
+- [x] **7.2** Orders & fulfilment — filtered list (state in the URL), order
+      detail, a whitelist state machine, an append-only status-event log, and
+      refunds with their own audit trail. Domain rules live in
+      `modules/checkout` so they hold for webhooks and customers too.
 - [ ] **7.3** Couriers — provider framework, assignment, tracking events, manual provider
 - [ ] **7.4** Customers — list, detail, order history, notes
 - [ ] **7.5** Products & inventory — product edit, warehouses, stock, movements, low-stock
@@ -974,3 +977,32 @@ metadata, cashback clawed back from refunds, and app-install interstitials.
     brand/identity onto one row brought it to 169px at 375 and 134px at 768.
   · 29 pages 200 · 107 PHP files clean · no console errors · no overflow at
     375/414/768/900/1280/1440 · dependency graph still one-way.
+- **2026-07-28** — 7.2 orders & fulfilment.
+  · **The rules live in checkout, the screens in admin.** `OrderFulfilmentService`
+    is in `modules/checkout` because a courier webhook and a customer cancelling
+    from their account must obey the same transitions. Deleting the admin panel
+    must not make it possible to move an order from delivered back to placed.
+  · **Transitions are a whitelist**, not a validated dropdown: `placed →
+    confirmed|cancelled`, `shipped → delivered|returned`, `cancelled`/`returned`
+    terminal. `allowedTransitions()` is the single source for both the API check
+    and the buttons drawn, so the panel can never offer a move the server would
+    refuse. Warehouse is additionally barred from cancel/return — the role that
+    cannot see money should not start money moving.
+  · **Two append-only tables.** `order_status_events` records who changed what
+    and when (a column that is overwritten keeps no history); `order_refunds`
+    records each refund with amount, method, reason and authoriser, because
+    partial refunds happen more than once and a running total in a column tells
+    you only the sum.
+  · **Both writes take a row lock and re-check inside the transaction.** Two
+    people clicking "Mark shipped" would otherwise write two events with a stale
+    `from_status`; two concurrent refunds would otherwise both pass a
+    check-then-write and send out more than came in.
+  · **Nav registration split out of page scripts** (`admin-nav.js`, loaded on
+    every admin page). It was inside the page scripts, so the sidebar was built
+    from whatever happened to be loaded — the Orders screen showed no Dashboard
+    link and vice versa. `registerScreen({match:[…]})` also keeps a section
+    highlighted on its detail pages, compared as full paths because
+    `"order.html".endsWith("orders.html")` is a near-miss that highlights the
+    wrong row.
+  · 31 pages 200 · 115 PHP files clean · no console errors · no overflow at
+    375/768/1280/1440 · storefront unaffected.

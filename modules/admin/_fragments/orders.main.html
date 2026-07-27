@@ -1,0 +1,77 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Orders</h1>
+          <p class="admin__sub" data-orders-count>Loading…</p>
+        </div>
+      </div>
+
+      <!-- Filters. Every control maps to a validated query parameter, and the
+           state lives in the URL so a filtered view can be bookmarked and
+           shared with a colleague rather than described to them. -->
+      <form class="afilters" data-orders-filters>
+        <div class="afilters__field">
+          <label for="f-q">Search</label>
+          <input class="input-gr" id="f-q" name="q" type="search" placeholder="Order no, phone or name">
+        </div>
+        <div class="afilters__field">
+          <label for="f-status">Status</label>
+          <select class="select-gr" id="f-status" name="status">
+            <option value="">Any status</option>
+            <option value="placed">Placed</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="packed">Packed</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="returned">Returned</option>
+          </select>
+        </div>
+        <div class="afilters__field">
+          <label for="f-pay">Payment</label>
+          <select class="select-gr" id="f-pay" name="paymentStatus">
+            <option value="">Any payment</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="failed">Failed</option>
+            <option value="refunded">Refunded</option>
+          </select>
+        </div>
+        <div class="afilters__field">
+          <label for="f-from">From</label>
+          <input class="input-gr" id="f-from" name="from" type="date">
+        </div>
+        <div class="afilters__field">
+          <label for="f-to">To</label>
+          <input class="input-gr" id="f-to" name="to" type="date">
+        </div>
+        <div class="afilters__actions">
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Apply</button>
+          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-orders-clear>Clear</button>
+        </div>
+      </form>
+
+      <div class="atable-wrap">
+        <table class="atable">
+          <thead>
+            <tr>
+              <th scope="col">Order</th>
+              <th scope="col">Customer</th>
+              <th scope="col">District</th>
+              <th scope="col">Items</th>
+              <th scope="col">Total</th>
+              <th scope="col">Payment</th>
+              <th scope="col">Status</th>
+              <th scope="col">Placed</th>
+            </tr>
+          </thead>
+          <tbody data-orders-body>
+            <tr><td colspan="8" class="atable__empty">Loading orders…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <nav class="apager" data-orders-pager hidden aria-label="Order pages">
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-page-prev>← Previous</button>
+        <span data-page-label></span>
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-page-next>Next →</button>
+      </nav>

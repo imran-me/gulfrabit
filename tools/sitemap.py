@@ -36,6 +36,8 @@ NOINDEX = {
     "modules/checkout/order-confirmation.html": "personal — order-specific",
     "modules/admin/index.html":             "staff panel — noindex, and disallowed in robots.txt",
     "modules/admin/login.html":             "staff sign-in — never a search result",
+    "modules/admin/orders.html":            "staff panel",
+    "modules/admin/order.html":             "staff panel",
     "modules/content/404.html":             "an error page must never be a search result",
     "404.html":                             "ditto, at the host root",
 

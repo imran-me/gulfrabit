@@ -135,6 +135,11 @@ def assemble(out, title, desc, main_html, css_links=None, module_js=None):
 # click "Deals" mid-task, and the announcement bar is meaningless here. The
 # sidebar chrome lives in modules/admin/_fragments/ so it stays inside the
 # module that owns it.
+# Loaded on EVERY admin page so the sidebar is identical everywhere. Each
+# module that contributes screens adds its own nav file here — one line in, one
+# line out. Page logic still loads only on its own page.
+ADMIN_NAV = ["/modules/admin/admin-nav.js"]
+
 ADMIN_SHELL = read("modules/admin/_fragments/_shell.html")
 ADMIN_SHELL_END = read("modules/admin/_fragments/_shell-end.html")
 
@@ -160,6 +165,16 @@ ADMIN_PAGES = [
      "modules/admin/_fragments/dashboard.main.html",
      ["/modules/admin/admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/admin/dashboard-page.js"], True),
+
+    ("modules/admin/orders.html", "Orders — GulfRabit Admin",
+     "modules/admin/_fragments/orders.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/admin/orders-page.js"], True),
+
+    ("modules/admin/order.html", "Order — GulfRabit Admin",
+     "modules/admin/_fragments/order.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/admin/order-detail-page.js"], True),
 
     ("modules/admin/login.html", "Staff sign-in — GulfRabit Admin",
      "modules/admin/_fragments/login.main.html",
@@ -336,7 +351,10 @@ if __name__ == "__main__":
         if not os.path.exists(fp):
             print("SKIP (no fragment yet):", frag)
             continue
-        assemble_admin(out, title, read(frag), css, ajs, chrome)
+        # Shell first, then every module's nav registration, then this page's
+        # own logic — registerScreen must have run before the shell paints.
+        scripts_for_page = ajs[:1] + ADMIN_NAV + ajs[1:] if chrome else ajs
+        assemble_admin(out, title, read(frag), css, scripts_for_page, chrome)
         built += 1
 
     print(f"done — {built} page(s) assembled")

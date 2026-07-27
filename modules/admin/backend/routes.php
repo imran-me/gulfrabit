@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Admin\Controllers\AdminAuthController;
 use Modules\Admin\Controllers\AdminDashboardController;
+use Modules\Admin\Controllers\AdminOrderController;
 
 /**
  * Admin module routes — the module's entire routing surface.
@@ -32,5 +33,17 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         // The dashboard aggregates across modules that may not be installed,
         // so the controller asks each one and skips what is absent.
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+        // Orders. `admin:orders` on the group, so a role without the capability
+        // never reaches the controller — including the roles that exist today
+        // and the ones added later.
+        Route::middleware('admin:orders')->prefix('orders')->name('orders.')->group(function (): void {
+            Route::get('/', [AdminOrderController::class, 'index'])->name('index');
+            Route::get('/{order}', [AdminOrderController::class, 'show'])->name('show');
+            Route::post('/{order}/transition', [AdminOrderController::class, 'transition'])->name('transition');
+            // Refunds carry a second, narrower check inside the controller:
+            // `orders` gets you the screen, it does not get you the money.
+            Route::post('/{order}/refund', [AdminOrderController::class, 'refund'])->name('refund');
+        });
     });
 });

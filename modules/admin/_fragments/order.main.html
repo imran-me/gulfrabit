@@ -1,0 +1,66 @@
+      <div class="admin__head">
+        <div>
+          <p class="admin__sub" style="margin:0 0 .25rem"><a href="/modules/admin/orders.html">← All orders</a></p>
+          <h1 class="admin__title" data-order-number>Order</h1>
+          <p class="admin__sub" data-order-meta></p>
+        </div>
+        <!-- Only the transitions the SERVER says are legal for this order and
+             this role are ever drawn here — the list comes back in the payload
+             rather than being computed in the browser, so the panel cannot
+             offer a button the API would refuse. -->
+        <div class="aactions" data-order-actions></div>
+      </div>
+
+      <div class="aorder">
+        <section class="acard" aria-labelledby="oi-head">
+          <h2 class="h5" id="oi-head">Items</h2>
+          <div class="atable-wrap">
+            <table class="atable atable--tight">
+              <thead><tr><th scope="col">Item</th><th scope="col">Qty</th><th scope="col">Unit</th><th scope="col">Line</th></tr></thead>
+              <tbody data-order-items></tbody>
+            </table>
+          </div>
+          <dl class="atotals" data-order-totals></dl>
+        </section>
+
+        <section class="acard" aria-labelledby="oc-head">
+          <h2 class="h5" id="oc-head">Customer &amp; delivery</h2>
+          <dl class="akv" data-order-customer></dl>
+        </section>
+
+        <section class="acard" aria-labelledby="oh-head">
+          <h2 class="h5" id="oh-head">History</h2>
+          <ol class="atimeline" data-order-history></ol>
+        </section>
+
+        <section class="acard" aria-labelledby="or-head" data-refund-section hidden>
+          <h2 class="h5" id="or-head">Refunds</h2>
+          <ul class="arefunds" data-order-refunds role="list"></ul>
+          <form class="arefund-form" data-refund-form hidden>
+            <p class="admin__sub" data-refundable></p>
+            <div class="afilters__field">
+              <label for="r-amount">Amount (৳)</label>
+              <input class="input-gr" id="r-amount" name="amountTaka" type="number" step="0.01" min="0.01" required>
+            </div>
+            <div class="afilters__field">
+              <label for="r-method">Back via</label>
+              <select class="select-gr" id="r-method" name="method">
+                <option value="original">However they paid</option>
+                <option value="bkash">bKash</option>
+                <option value="nagad">Nagad</option>
+                <option value="bank">Bank transfer</option>
+                <option value="cash">Cash</option>
+                <option value="store_credit">Store credit</option>
+              </select>
+            </div>
+            <div class="afilters__field afilters__field--wide">
+              <label for="r-reason">Reason</label>
+              <input class="input-gr" id="r-reason" name="reason" type="text" required
+                     placeholder="Why is this being refunded?">
+            </div>
+            <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Record refund</button>
+          </form>
+        </section>
+      </div>
+
+      <p class="aerror" data-order-error hidden role="alert"></p>
