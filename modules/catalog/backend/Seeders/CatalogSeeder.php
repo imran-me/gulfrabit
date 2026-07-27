@@ -112,7 +112,11 @@ class CatalogSeeder extends Seeder
         }
 
         return array_map(fn (array $t): array => [
-            'qty'          => (int) ($t['qty'] ?? $t['minQty'] ?? 1),
+            // The data uses 'min' (minimum qty for the tier). Accepting the
+            // other spellings too, but 'min' MUST come first — reading 'qty'
+            // first silently seeded every tier at quantity 1, which would have
+            // made all bulk pricing apply from a single unit.
+            'qty'          => (int) ($t['min'] ?? $t['qty'] ?? $t['minQty'] ?? 1),
             'price_poisha' => $this->toPoisha($t['price'] ?? 0),
         ], $tiers);
     }

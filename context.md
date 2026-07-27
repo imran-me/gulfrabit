@@ -162,6 +162,11 @@ Build it the way an ultra-professional full-stack developer would: clear structu
 obvious naming, easy to understand, easy to edit and extend, **easy to hand to another
 developer without explanation**. Handover quality is a requirement, not a bonus.
 
+> **→ `CONVENTIONS.md`** distils this into the actual working rules: money as integer
+> poisha, the client never sets a price, snapshot vs read-through, rules as data,
+> 404-not-403, thin controllers, contract-before-code, comments that explain *why*,
+> and verify-by-running. Hand that file to any new developer along with this one.
+
 ### Current state / constraints
 
 - **Responsive, mobile-first.** Breakpoints: 375 / 768 / 1024 / 1440 / 1920.

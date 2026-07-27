@@ -55,7 +55,7 @@ ErrorDocument 404 /404.html
 RedirectMatch 404 ^/(app|bootstrap|config|database|storage|vendor|tools|research)/
 RedirectMatch 404 ^/modules/[^/]+/backend/(?!api\.js$).*$
 RedirectMatch 404 ^/modules/[^/]+/_fragments/
-RedirectMatch 404 ^/(composer\.(json|lock)|artisan|phpunit\.xml|context\.md|BACKEND\.md|DEPLOY-HOSTINGER\.md)$
+RedirectMatch 404 ^/(composer\.(json|lock)|artisan|phpunit\.xml|context\.md|BACKEND\.md|CONVENTIONS\.md|DEPLOY-HOSTINGER\.md)$
 
 <FilesMatch "^\.">
     Require all denied
