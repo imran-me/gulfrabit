@@ -565,6 +565,71 @@ errors, and only then start the next. No parallel half-finished features.
 - [ ] **5.3** Pre-production: drop the Tailwind Play CDN, ship `srcset`+AVIF with
       real photography, enable Brotli + long `max-age`, add CSP at the host
 
+### Phase 7 — Admin panel (ADDITIVE MILESTONE, started 2026-07-27)
+
+The storefront to-do above is NOT superseded by this. 5.3 and everything in §8
+stays open and gets finished; the admin panel is a second application that runs
+alongside, not instead.
+
+**Five new modules.** Each passes the deletion test on its own.
+
+| Module | Owns | Deleting it removes |
+|---|---|---|
+| `modules/admin` | Staff auth + roles, layout, nav registry, dashboard, and the admin screens over existing domains (orders, customers, products) | The entire admin panel. The storefront is untouched. |
+| `modules/courier` | Carrier providers, consignment assignment, tracking events | Courier assignment + tracking sync. Orders still work, just unassigned. |
+| `modules/inventory` | Warehouses, stock levels, movements, adjustments | Stock tracking. Products keep their `inStock` flag. |
+| `modules/accounting` | Chart of accounts, journal, ledger, P&L, expenses | The books. Nothing else depends on them. |
+| `modules/cms` | Editable content blocks + the inline editor | Live editing. Pages fall back to their authored HTML. |
+
+Admin screens for orders/customers/products live in `modules/admin` deliberately:
+they are admin functionality, so deleting admin must remove them. Admin depends
+on checkout/auth/catalog for data — one-way, no cycle.
+
+**Nav is contributed, not hardcoded.** `admin-shell.js` exports
+`registerScreen()`; each module's admin script calls it, and `assemble.py`
+includes that script. Delete the module and its assemble entry and its nav entry
+disappears — the same pattern as `modules/bundle` and `pdp-offers.js` on the PDP.
+Admin never imports from courier/inventory/accounting/cms.
+
+**Build order** (dependency-first, one at a time, verified before moving on):
+
+- [x] **7.1** Admin shell — `modules/admin/`. Staff auth on a separate
+      `admin_users` table with five roles, the `admin` guard + `RequireAdmin`
+      middleware, a contributed nav registry, login and dashboard screens.
+- [ ] **7.2** Orders & fulfilment — list, filters, detail, status transitions, refunds
+- [ ] **7.3** Couriers — provider framework, assignment, tracking events, manual provider
+- [ ] **7.4** Customers — list, detail, order history, notes
+- [ ] **7.5** Products & inventory — product edit, warehouses, stock, movements, low-stock
+- [ ] **7.6** Accounting — double-entry journal, auto-posting from orders, expenses, P&L
+- [ ] **7.7** CMS — per-node content overrides, click-to-edit, text + image only
+
+**Decisions taken (2026-07-27, with the user):**
+
+1. **Double-entry, not a cash book.** Chart of accounts, journal, ledger, trial
+   balance, P&L and balance sheet. Orders, refunds, delivery charges, COGS and
+   expenses post journal entries automatically. It reconciles and an accountant
+   can audit it.
+2. **Staff accounts are separate from customers.** A distinct `admin_users`
+   table with roles (owner, manager, warehouse, accounts, editor). A leaked
+   customer password must never reach the admin panel, and the warehouse role
+   must not see the P&L.
+3. **Couriers: framework first, no credentials yet.** A provider-agnostic layer
+   with a manual provider that works today (assign, record tracking number,
+   update status). Pathao/Steadfast/RedX/eCourier adapters drop in later without
+   changing orders or the UI.
+4. **CMS edits content, never layout.** Text and image `src`/`alt` only. The
+   editor refuses to touch classes, structure or attributes that affect layout —
+   enforced in code, not just documented.
+
+**Security posture for a statically-served admin.** The admin HTML is served as
+static files like the rest of the site, so it is readable by anyone who guesses
+the URL. That is acceptable ONLY because it contains no data: every figure on
+every admin screen arrives from an authenticated API call, and the client-side
+guard is a redirect for convenience, never a control. The real authority is the
+`admin` middleware on the server. Admin pages are excluded from `sitemap.xml`
+and disallowed in `robots.txt`, and the host should add HTTP auth in front of
+`/modules/admin/` as defence in depth.
+
 **Deliberately rejected** (recorded so they don't get re-proposed): Daraz's
 gamification (coins/games/mystery boxes — signals "cheap" on a premium brand),
 perpetual countdown urgency, keyword-stuffed titles, 384-link SEO footers, 10px
@@ -871,3 +936,41 @@ metadata, cashback clawed back from refunds, and app-install interstitials.
     CSP hash.
   · 27 pages 200 · 97 PHP files clean · no console errors on 8 pages · no
     overflow at 375/414/768/1280 · all four generators' --check green.
+- **2026-07-28** — Phase 7 begins: `modules/admin` (7.1), the panel's shell.
+  · **Staff are not customers.** `admin_users` is a separate table from `users`.
+    The storefront authenticates by SMS OTP and anyone can open an account; if
+    admin were a flag on that table, every customer-auth weakness would become
+    an admin compromise. Two tables means there is no column to set.
+  · **Five roles, one per account** (`AdminUser::CAPABILITIES` is the whole
+    truth). warehouse gets orders + inventory and no money; accounts gets the
+    books but cannot edit customers or the catalogue; editor sees only content.
+    Every role has `dashboard` so nobody signs in to a panel with nothing in it.
+  · **Filtering happens on the server.** `AdminDashboardController` never sends
+    a warehouse account the revenue figure — data the client hides is still data
+    the client received. It also `Schema::hasTable`-guards every card, so
+    deleting a module costs the dashboard one card, not a 500.
+  · **The client-side guard is a convenience, and the README says so.** The
+    admin HTML is static and public; it is safe only because it holds no data.
+    `RequireAdmin` middleware is the authority. Admin pages are `noindex`,
+    disallowed in robots.txt and excluded from the sitemap.
+  · **The fixture session cannot become an auth bypass.** It engages only when
+    the endpoint is ABSENT (network error, 404, or 501 — a static server's
+    answer to POST). A 401/403 is a real backend saying no, and the fixture
+    stays out of it. 405 is deliberately excluded because Laravel returns it for
+    a real route with the wrong method. Plus: local origins only, plus an
+    explicit localStorage switch, plus an unmissable banner on every screen.
+  · **Nav is contributed, not hardcoded.** `registerScreen()` in
+    `admin-shell.js`; admin imports nothing from courier/inventory/accounting/
+    cms. `assemble.py` grew an `ADMIN_PAGES` registry and an `assemble_admin()`
+    that omits the storefront header/footer — a staff tool with a shop nav in it
+    invites someone to click "Deals" mid-task.
+  · `tools/sitemap.py` now reads both registries; without that its stale-
+    exclusion guard rejected the admin NOINDEX entries and would have put the
+    staff panel back in the sitemap.
+  · **No default password.** `AdminUserSeeder` requires `ADMIN_EMAIL` and
+    generates a strong password when none is set, printing it once.
+  · Layout fixed by measurement: the mobile sidebar was taking 550px of a 900px
+    screen (grid rows stretch). `grid-template-rows: auto 1fr` plus reordering
+    brand/identity onto one row brought it to 169px at 375 and 134px at 768.
+  · 29 pages 200 · 107 PHP files clean · no console errors · no overflow at
+    375/414/768/900/1280/1440 · dependency graph still one-way.

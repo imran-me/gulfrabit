@@ -19,6 +19,7 @@ return [
     App\Providers\AppServiceProvider::class,
 
     Modules\Account\AccountServiceProvider::class,
+    Modules\Admin\AdminServiceProvider::class,
     Modules\Auth\AuthServiceProvider::class,
     Modules\B2b\B2bServiceProvider::class,
     Modules\Bundle\BundleServiceProvider::class,

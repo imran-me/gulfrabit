@@ -34,6 +34,8 @@ NOINDEX = {
     "modules/account/track.html":           "personal — order-specific",
     "modules/auth/forgot-password.html":    "no indexable content; invites scraping",
     "modules/checkout/order-confirmation.html": "personal — order-specific",
+    "modules/admin/index.html":             "staff panel — noindex, and disallowed in robots.txt",
+    "modules/admin/login.html":             "staff sign-in — never a search result",
     "modules/content/404.html":             "an error page must never be a search result",
     "404.html":                             "ditto, at the host root",
 
@@ -51,13 +53,21 @@ ALWAYS = ["/index.html"]
 
 
 def assemble_pages() -> list[str]:
-    """The output paths assemble.py builds. Imported rather than duplicated."""
+    """Every output path assemble.py builds — storefront AND admin.
+
+    Both registries, because both produce real files a crawler could reach. If
+    only PAGES were read, the admin pages would look "unknown" to the stale-
+    exclusion check below and their NOINDEX entries would be rejected as
+    obsolete — which would then leave the staff panel in the sitemap. The rule
+    is the same for both lists: everything built is indexed unless deliberately
+    excluded here.
+    """
     spec = importlib.util.spec_from_file_location("gr_assemble", ROOT / "tools" / "assemble.py")
     module = importlib.util.module_from_spec(spec)
-    # assemble.py reads its partials at import time and defines PAGES as data;
-    # importing it runs no build, so this is safe and always current.
+    # assemble.py reads its partials at import time and defines its registries
+    # as data; importing it runs no build, so this is safe and always current.
     spec.loader.exec_module(module)
-    return [entry[0] for entry in module.PAGES]
+    return [entry[0] for entry in (*module.PAGES, *module.ADMIN_PAGES)]
 
 
 def load(name):

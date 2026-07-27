@@ -1,0 +1,25 @@
+  <main class="alogin" id="main">
+    <form class="alogin__box" data-admin-login novalidate>
+      <div class="alogin__brand"><img src="/assets/logo/gulfrabit-mark.png" alt="GulfRabit"></div>
+      <h1>Staff sign-in</h1>
+      <p class="alogin__sub">This panel is for GulfRabit staff. It is not a customer login.</p>
+
+      <p class="alogin__error" data-login-error hidden role="alert"></p>
+
+      <div class="alogin__field">
+        <label for="a-email">Work email</label>
+        <input class="input-gr" id="a-email" name="email" type="email" autocomplete="username" required>
+      </div>
+
+      <div class="alogin__field">
+        <label for="a-password">Password</label>
+        <input class="input-gr" id="a-password" name="password" type="password" autocomplete="current-password" required>
+      </div>
+
+      <button class="btn-gr btn-primary-gr btn-block-gr" type="submit" data-login-submit>Sign in</button>
+
+      <p class="alogin__note">
+        Customer account? <a href="/modules/auth/login.html">Sign in to the shop instead</a>.
+      </p>
+    </form>
+  </main>

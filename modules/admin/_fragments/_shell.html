@@ -1,0 +1,20 @@
+  <!-- Hidden until the shell confirms a session, so a signed-out visitor never
+       sees a flash of the panel's structure. This is cosmetic, not a control:
+       the page contains no data to protect. -->
+  <div class="admin" data-admin-shell hidden>
+    <aside class="admin__side">
+      <a class="admin__brand" href="/modules/admin/index.html">
+        <img src="/assets/logo/gulfrabit-mark.png" alt="">
+        <span>GulfRabit<small>Admin</small></span>
+      </a>
+
+      <nav class="anav" aria-label="Admin sections" data-admin-nav></nav>
+
+      <div class="admin__who">
+        <div class="admin__who-name" data-admin-name>—</div>
+        <span class="admin__who-role" data-admin-role>—</span>
+        <button type="button" class="admin__signout" data-admin-signout>Sign out</button>
+      </div>
+    </aside>
+
+    <main class="admin__main" id="main">

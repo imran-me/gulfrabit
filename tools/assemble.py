@@ -129,6 +129,44 @@ def assemble(out, title, desc, main_html, css_links=None, module_js=None):
     write(out, page)
     print("wrote", out)
 
+# ---- Admin pages --------------------------------------------------------
+# The panel gets its own build path because it must NOT carry the storefront
+# header and footer: a staff tool with a shop nav in it invites someone to
+# click "Deals" mid-task, and the announcement bar is meaningless here. The
+# sidebar chrome lives in modules/admin/_fragments/ so it stays inside the
+# module that owns it.
+ADMIN_SHELL = read("modules/admin/_fragments/_shell.html")
+ADMIN_SHELL_END = read("modules/admin/_fragments/_shell-end.html")
+
+def assemble_admin(out, title, main_html, css_links, module_js, chrome=True):
+    """`chrome=False` for the login page, which must render without the shell —
+    it is the one admin page a signed-out person is supposed to reach."""
+    page = head(title, "GulfRabit staff panel.", css_links, theme="#0A0A0A") + "\n"
+    # noindex on every admin page, belt and braces with robots.txt: these pages
+    # carry no data, but they should never turn up in a search result either.
+    page = page.replace('<meta name="robots" content="index, follow">',
+                        '<meta name="robots" content="noindex, nofollow">')
+    if chrome:
+        page += ADMIN_SHELL + "\n" + main_html.strip() + "\n" + ADMIN_SHELL_END
+    else:
+        page += main_html.strip() + "\n"
+    page += scripts(module_js)
+    write(out, relativize(page, out))
+    print("wrote", out)
+
+
+ADMIN_PAGES = [
+    ("modules/admin/index.html", "Dashboard — GulfRabit Admin",
+     "modules/admin/_fragments/dashboard.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/admin/dashboard-page.js"], True),
+
+    ("modules/admin/login.html", "Staff sign-in — GulfRabit Admin",
+     "modules/admin/_fragments/login.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/login-page.js"], False),
+]
+
 # ---- Page registry ------------------------------------------------------
 # Each entry: (output path, title, description, fragment path, [css], module_js)
 PAGES = [
@@ -292,4 +330,13 @@ if __name__ == "__main__":
             continue
         assemble(out, title, desc, read(frag), css, mjs)
         built += 1
+
+    for out, title, frag, css, ajs, chrome in ADMIN_PAGES:
+        fp = os.path.join(ROOT, frag)
+        if not os.path.exists(fp):
+            print("SKIP (no fragment yet):", frag)
+            continue
+        assemble_admin(out, title, read(frag), css, ajs, chrome)
+        built += 1
+
     print(f"done — {built} page(s) assembled")

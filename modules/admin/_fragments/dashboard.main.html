@@ -1,0 +1,16 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Dashboard</h1>
+          <p class="admin__sub" data-dash-sub>Loading today’s figures…</p>
+        </div>
+      </div>
+
+      <!-- Filled from GET /api/admin/dashboard. The server decides which cards
+           this role may receive; the client only lays out what it is given, so
+           a warehouse account is never sent the revenue figure at all. -->
+      <div class="acards" data-dash-cards></div>
+
+      <p class="admin__sub" data-dash-empty hidden>
+        No cards to show yet. Cards appear as modules are installed — orders,
+        inventory and accounting each contribute their own.
+      </p>

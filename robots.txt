@@ -7,4 +7,8 @@ Disallow: /modules/*/_fragments/
 Disallow: /shared/components/
 Disallow: /tools/
 
+# Staff panel. These pages hold no data — every figure comes from an
+# authenticated API — but they have no business in a search result either.
+Disallow: /modules/admin/
+
 Sitemap: https://gulfrabit.com/sitemap.xml

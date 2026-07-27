@@ -21,6 +21,7 @@
       "App\\": "app/",
       "Database\\Factories\\": "database/factories/",
       "Database\\Seeders\\": "database/seeders/",
+      "Modules\\Admin\\": "modules/admin/backend/",
       "Modules\\Bundle\\": "modules/bundle/backend/",
       "Modules\\Delivery\\": "modules/delivery/backend/",
       "Modules\\Catalog\\": "modules/catalog/backend/",
