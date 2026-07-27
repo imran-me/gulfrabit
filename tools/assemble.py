@@ -37,9 +37,20 @@ SITE = "https://gulfrabit.com"
 def head(title, desc, css_links, theme="#0A0A0A"):
     extra = "\n  ".join(f'<link rel="stylesheet" href="{c}">' for c in css_links)
     return f"""<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
   <meta charset="UTF-8">
+  <script>
+    /* Removes .no-js before first paint. Everything with [data-reveal] is
+       hidden by CSS until IntersectionObserver reveals it — which means with
+       JavaScript off it stayed hidden forever, taking the whole Sourcing
+       process, the About values and most of the home page with it. Scoping the
+       hide to html:not(.no-js) makes the animation an enhancement again
+       instead of a precondition for reading the site.
+       Inline and first on purpose: a deferred file would let the page paint
+       blank before it ran. */
+    document.documentElement.classList.remove('no-js');
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
   <meta name="description" content="{desc}">
@@ -219,6 +230,12 @@ PAGES = [
      "About — GulfRabit",
      "The GulfRabit story: sourcing, authenticity and craft.",
      "modules/content/_fragments/about.main.html",
+     ["/modules/content/content.css"], None),
+
+    ("modules/content/sourcing.html",
+     "Sourcing & Authenticity — GulfRabit",
+     "What import-verified means at GulfRabit: how we buy, what you can check yourself, and what we do not claim.",
+     "modules/content/_fragments/sourcing.main.html",
      ["/modules/content/content.css"], None),
 
     ("modules/content/contact.html",

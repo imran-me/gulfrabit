@@ -1,7 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
   <meta charset="UTF-8">
+  <script>
+    /* Removes .no-js before first paint. Everything with [data-reveal] is
+       hidden by CSS until IntersectionObserver reveals it — which means with
+       JavaScript off it stayed hidden forever, taking the whole Sourcing
+       process, the About values and most of the home page with it. Scoping the
+       hide to html:not(.no-js) makes the animation an enhancement again
+       instead of a precondition for reading the site.
+       Inline and first on purpose: a deferred file would let the page paint
+       blank before it ran. */
+    document.documentElement.classList.remove('no-js');
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GulfRabit — Premium Imports for Bangladesh. Shop Smart. Hop Fast.</title>
   <meta name="description" content="GulfRabit is a premium import marketplace for Bangladesh — imported foods, electronics, kitchen, fashion, beauty and industrial raw materials. Sourced. Verified. Delivered.">
@@ -185,7 +196,7 @@
             <p class="hero__text lead">Dates, honey, coffee and pantry staples from trusted origins — verified for authenticity, handled cold where it counts.</p>
             <div class="hero__actions">
               <a href="modules/catalog/category.html?slug=imported-food-grocery" class="btn-gr btn-primary-gr btn-lg-gr">Shop Food</a>
-              <a href="modules/content/about.html" class="btn-gr btn-outline-gr btn-lg-gr">Our Sourcing</a>
+              <a href="modules/content/sourcing.html" class="btn-gr btn-outline-gr btn-lg-gr">Our Sourcing</a>
             </div>
           </div></div>
         </article>

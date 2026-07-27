@@ -60,3 +60,79 @@
   .policy-table td::before { content: attr(data-label) ": "; color: var(--text-muted); }
   .policy-table td:last-child { white-space: normal; }
 }
+
+/* ---- Sourcing page ----------------------------------------------------
+   The last column here is prose, not a charge, so it must be allowed to wrap.
+   .policy-table's default nowrap on the last cell exists for the refund and
+   delivery tables, where that column is a single figure. */
+.policy-table--prose td:last-child { white-space: normal; font-variant-numeric: normal; }
+
+/* Counted facts. Deliberately reads as "44 of 44", not as a marketing stat —
+   the fraction is what makes it checkable. */
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--space-4);
+}
+.fact {
+  padding: var(--space-5);
+  background: var(--surface-sunken);
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-lg);
+}
+.fact__n {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-31);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  color: var(--text-primary);
+}
+.fact__l {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--fs-14);
+  line-height: var(--lh-normal);
+}
+
+/* Numbered process. An <ol> because the order is the meaning — step 4 is only
+   possible because step 1 happened. */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); }
+.steps__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+  padding: var(--space-5);
+}
+.steps__n {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--gr-gradient);
+  color: var(--text-on-accent);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-16);
+}
+.steps__item p { margin: var(--space-2) 0 0; color: var(--text-secondary); line-height: var(--lh-normal); }
+
+.limits { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-4); }
+.limit { padding: var(--space-5); }
+.limit p { margin: var(--space-2) 0 0; color: var(--text-secondary); line-height: var(--lh-normal); }
+
+/* The barcode myth box. Set apart from the instruction above it because it
+   corrects the reader rather than instructing them. */
+.caveat {
+  margin-top: var(--space-5);
+  padding: var(--space-5);
+  border-left: 3px solid var(--gr-cyan);
+  max-width: 68ch;
+}
+.caveat p { margin: var(--space-2) 0 0; color: var(--text-secondary); line-height: var(--lh-normal); }
+
+@media (max-width: 575.98px) {
+  .steps__item, .limit, .fact { padding: var(--space-4); }
+}

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://gulfrabit.com/index.html</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gulfrabit.com/modules/catalog/compare.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gulfrabit.com/modules/cart/cart.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gulfrabit.com/modules/checkout/checkout.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gulfrabit.com/modules/auth/login.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gulfrabit.com/modules/auth/register.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gulfrabit.com/modules/content/about.html</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gulfrabit.com/modules/content/sourcing.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gulfrabit.com/modules/content/contact.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gulfrabit.com/modules/content/faq.html</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://gulfrabit.com/modules/content/shipping-returns.html</loc><changefreq>weekly</changefreq></url>

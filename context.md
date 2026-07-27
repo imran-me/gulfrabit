@@ -535,7 +535,13 @@ errors, and only then start the next. No parallel half-finished features.
       filters nothing; **(2)** a facet is shown only when some value covers ≥2 products,
       so at 44 SKUs only *Compliance* qualifies and the food category correctly shows
       none. Mirrored in `ProductQueryService` via JSON path + LIKE.
-- [ ] **3.2** Real sourcing/authenticity page (the hero "Our Sourcing" CTA needs a home)
+- [x] **3.2** Real sourcing/authenticity page — `/modules/content/sourcing.html`.
+      Shows the METHOD, not the claim: four steps, the one thing a customer can
+      check themselves (barcode on the pack vs. barcode in Specifications), the
+      origins counted live from the catalogue, and a "what we do not claim"
+      section. The hero CTA and footer now point at it. My earlier assessment
+      that `about.html` already covered this was wrong — about.html asserts
+      authenticity, it never shows how it is established.
 - [x] **3.3** Merchant-authored FAQ per product *(works with zero customers)* —
       `tools/gen-product-faq.py` writes `faq: [{q,a}]` onto all 44 products (147
       questions, 3.3 avg). Every answer is derived from data the product actually
@@ -827,3 +833,41 @@ metadata, cashback clawed back from refunds, and app-install interstitials.
     only decimals anywhere are the three genuinely fractional component prices).
   · 26 pages 200 · 97 PHP files clean · no console errors · no overflow at
     375/414/768/1280.
+- **2026-07-27** — Sourcing page (to-do 3.2), and a resilience bug it exposed.
+  · **`/modules/content/sourcing.html`** — the page the hero's "Our Sourcing"
+    button always promised. It answers with method rather than adjectives: the
+    four steps, the origins table, and the barcode check a customer can run in
+    ten seconds when the parcel arrives.
+  · **A "what we do not claim" section**, which is the part that makes the rest
+    credible: we do not lab-test, we do not print certifications we cannot
+    evidence, volume prices are quoted not automatic, and origin is the
+    producer's declaration. Consistent with the FAQ generator's refusal to
+    answer "is it halal?".
+  · **It also corrects a myth we would otherwise be trading on.** A barcode's
+    leading digits identify the GS1 organisation the brand registered with, NOT
+    the country of manufacture — and in this catalogue the prefixes genuinely do
+    not line up with the stated origins. So the page uses the barcode for the
+    one thing it proves (this pack is the item we listed) and says so.
+  · **`tools/gen-sourcing-facts.py`** counts the coverage figures and the origins
+    table from products.json into GENERATED markers, so the claims cannot drift
+    from the catalogue. It also validates every EAN-13 check digit and rejects
+    duplicates — the page tells customers to check the barcode, and a code that
+    fails its own checksum would fail in their scanner and discredit the one
+    verifiable promise on the site. All 44 currently pass.
+  · **`tools/sitemap.py` now derives its page list from `assemble.py`'s PAGES.**
+    The Sourcing page was built, registered and linked, and the sitemap still
+    did not know it existed — a hand-kept second copy of the page list, exactly
+    the delivery-rate trap again. Inclusion is now the default; exclusion is a
+    NOINDEX entry with a stated reason, and a stale entry fails the run. Also
+    excluded the three query-parameter templates: bare `product.html` is
+    literally the "product not found" screen.
+  · **BUG (site-wide, pre-existing) — with JavaScript off, most of the site was
+    invisible.** `[data-reveal]` was `opacity: 0` in CSS with only
+    IntersectionObserver to undo it, so 10 of 11 blocks on Sourcing, the About
+    values and 25 blocks on the home page never appeared. Now scoped to
+    `html:not(.no-js)`, with an inline `<head>` script dropping the class before
+    first paint. Verified by rendering the page with every `<script>` stripped:
+    it renders completely. Note for pre-production: that inline script needs a
+    CSP hash.
+  · 27 pages 200 · 97 PHP files clean · no console errors on 8 pages · no
+    overflow at 375/414/768/1280 · all four generators' --check green.

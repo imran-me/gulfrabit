@@ -1,7 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
   <meta charset="UTF-8">
+  <script>
+    /* Removes .no-js before first paint. Everything with [data-reveal] is
+       hidden by CSS until IntersectionObserver reveals it — which means with
+       JavaScript off it stayed hidden forever, taking the whole Sourcing
+       process, the About values and most of the home page with it. Scoping the
+       hide to html:not(.no-js) makes the animation an enhancement again
+       instead of a precondition for reading the site.
+       Inline and first on purpose: a deferred file would let the page paint
+       blank before it ran. */
+    document.documentElement.classList.remove('no-js');
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact — GulfRabit</title>
   <meta name="description" content="Get in touch with GulfRabit support.">
@@ -274,6 +285,7 @@
         <ul role="list" class="stack-2" style="font-size:var(--fs-14)">
           <li><a href="../../modules/content/about.html">About</a></li>
           <li><a href="../../modules/content/contact.html">Contact</a></li>
+          <li><a href="../../modules/content/sourcing.html">Sourcing &amp; Authenticity</a></li>
           <li><a href="../../modules/content/about.html#values">Our Values</a></li>
         </ul>
       </nav>
