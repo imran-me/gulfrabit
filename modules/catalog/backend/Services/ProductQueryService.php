@@ -152,6 +152,56 @@ final class ProductQueryService
         foreach ((array) ($f['dietary'] ?? []) as $diet) {
             $query->whereJsonContains('dietary', $diet);
         }
+
+        $this->applySpecFilters($query, $f['spec'] ?? null);
+    }
+
+    /**
+     * Spec facets, from the single `spec` parameter.
+     *
+     * "Compliance:RoHS,Compliance:REACH,Mount:SMD" means
+     * (Compliance is RoHS OR REACH) AND (Mount is SMD) — OR within a facet, AND
+     * across facets. The opposite makes multi-select useless, because picking
+     * two values from one facet would return nothing.
+     *
+     * Matching is LIKE rather than exact because spec values are list-valued:
+     * a product whose Compliance reads "UL, TÜV, RoHS" must match "RoHS".
+     * Mirrors matchesSpecFilters() + splitSpecValue() in
+     * shared/js/components/filters-sidebar.js — change both together.
+     */
+    private function applySpecFilters(Builder $query, ?string $spec): void
+    {
+        if ($spec === null || trim($spec) === '') {
+            return;
+        }
+
+        $facets = [];
+        foreach (explode(',', $spec) as $pair) {
+            // First colon only — spec values legitimately contain colons.
+            $i = strpos($pair, ':');
+            if ($i === false || $i < 1) {
+                continue;
+            }
+            $key = trim(substr($pair, 0, $i));
+            $value = trim(substr($pair, $i + 1));
+            if ($key === '' || $value === '') {
+                continue;
+            }
+            $facets[$key][] = $value;
+        }
+
+        foreach ($facets as $key => $values) {
+            $query->where(function (Builder $q) use ($key, $values): void {
+                foreach ($values as $value) {
+                    // JSON path to this spec key, then a substring match so a
+                    // list-valued spec still matches one of its members.
+                    $q->orWhereRaw(
+                        "JSON_UNQUOTE(JSON_EXTRACT(specs, ?)) LIKE ?",
+                        ['$."' . str_replace('"', '', $key) . '"', '%' . $value . '%'],
+                    );
+                }
+            });
+        }
     }
 
     private function applySort(Builder $query, string $sort): void

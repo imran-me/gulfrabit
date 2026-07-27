@@ -8,7 +8,7 @@
 import { getCategoryBySlug, getProductsByCategory } from './backend/api.js';
 import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { renderProductSkeletons } from '../../shared/js/components/skeleton-loader.js';
-import { initFilters } from '../../shared/js/components/filters-sidebar.js';
+import { initFilters, matchesSpecFilters } from '../../shared/js/components/filters-sidebar.js';
 import { getParam, getParams, setParams } from '../../shared/js/core/router-helpers.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 
@@ -94,6 +94,7 @@ function applyClientFilters(products, f = {}) {
     if (f.rating != null && (p.rating ?? 0) < f.rating) return false;
     if (f.inStock && !p.inStock) return false;
     if (f.onSale && !(p.originalPrice && p.originalPrice > p.price)) return false;
+    if (!matchesSpecFilters(p, f.specs)) return false;
     return true;
   });
 }
@@ -115,6 +116,10 @@ function renderChips(f = {}) {
   (f.brands || []).forEach((b) => chips.push(chip('brand', b)));
   (f.origins || []).forEach((o) => chips.push(chip('origin', o)));
   (f.tags || []).forEach((t) => chips.push(chip('tag', t)));
+  // Spec chips carry their facet name, or "RoHS" alone tells the customer
+  // nothing about which filter removed everything else.
+  Object.entries(f.specs || {}).forEach(([key, values]) =>
+    values.forEach((v) => chips.push(chip(key.toLowerCase(), v))));
   if (f.rating != null) chips.push(chip('rating', `${f.rating}★ & up`));
   if (f.inStock) chips.push(chip('stock', 'In stock'));
   if (f.onSale) chips.push(chip('deal', 'On sale'));
@@ -138,7 +143,37 @@ function syncURL() {
     rating: f.rating ?? null,
     inStock: f.inStock ? '1' : null,
     onSale: f.onSale ? '1' : null,
+    // ONE generic parameter carries every spec facet, Daraz's `ppath` pattern:
+    // `spec=Compliance:RoHS,Compliance:REACH,Mount:SMD`. A parameter per facet
+    // would mean the URL schema changing every time a category gains an
+    // attribute — this one never changes shape.
+    spec: encodeSpecParam(f.specs),
   });
+}
+
+/** { Compliance: ['RoHS','REACH'] } → "Compliance:RoHS,Compliance:REACH" */
+function encodeSpecParam(specs) {
+  if (!specs || !Object.keys(specs).length) return null;
+  return Object.entries(specs)
+    .flatMap(([key, values]) => values.map((v) => `${key}:${v}`))
+    .join(',');
+}
+
+/** The inverse. Tolerates junk: a hand-edited URL must not break the page. */
+function decodeSpecParam(raw) {
+  if (!raw) return undefined;
+  const out = {};
+  for (const pair of String(raw).split(',')) {
+    // Split on the FIRST colon only — spec values legitimately contain them
+    // ("Rating: 10 A / 250 VAC" style keys, times, ratios).
+    const i = pair.indexOf(':');
+    if (i < 1) continue;
+    const key = pair.slice(0, i).trim();
+    const value = pair.slice(i + 1).trim();
+    if (!key || !value) continue;
+    (out[key] ||= []).push(value);
+  }
+  return Object.keys(out).length ? out : undefined;
 }
 function parseFiltersFromURL(p) {
   const f = {};
@@ -150,6 +185,8 @@ function parseFiltersFromURL(p) {
   if (p.rating) f.rating = Number(p.rating);
   if (p.inStock) f.inStock = true;
   if (p.onSale) f.onSale = true;
+  const specs = decodeSpecParam(p.spec);
+  if (specs) f.specs = specs;
   return f;
 }
 function escapeHtml(str = '') { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }

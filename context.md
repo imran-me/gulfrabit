@@ -510,8 +510,16 @@ errors, and only then start the next. No parallel half-finished features.
       than a CMS field, so it maintains itself ("Medjool Dates · 19% off"). Stops
       the moment the customer focuses or types, and does not run at all under
       `prefers-reduced-motion`.
-- [ ] **2.4** Category-schema-driven facets via one generic URL param *(Daraz `ppath`)*
-      — the unlock for filtering B2B `specs`
+- [x] **2.4** Category-schema-driven facets via one generic URL param *(Daraz `ppath`)*.
+      Facets are derived from each product's own `specs` — no hand-built filter list per
+      category — and encoded as `?spec=Compliance:RoHS,Compliance:REACH`, one parameter
+      whose shape never changes when a category gains an attribute. OR within a facet,
+      AND across facets. Two rules make it actually work:
+      **(1)** list-valued specs are split, so "UL, TÜV, RoHS" is three facts rather than
+      one unique string — without this every product is its own value and the facet
+      filters nothing; **(2)** a facet is shown only when some value covers ≥2 products,
+      so at 44 SKUs only *Compliance* qualifies and the food category correctly shows
+      none. Mirrored in `ProductQueryService` via JSON path + LIKE.
 - [ ] **3.2** Real sourcing/authenticity page (the hero "Our Sourcing" CTA needs a home)
 - [ ] **3.3** Merchant-authored FAQ + Q&A per product *(works with zero customers)*
 - [x] **5.1** **Bengali webfont** — Noto Sans Bengali (OFL), **self-hosted** at

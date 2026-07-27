@@ -46,6 +46,12 @@ class ProductIndexRequest extends FormRequest
             'inStock'    => ['sometimes', 'boolean'],
             'onSale'     => ['sometimes', 'boolean'],
 
+            // One generic parameter carries every spec facet, Daraz's `ppath`
+            // pattern: "Compliance:RoHS,Compliance:REACH,Mount:SMD". A
+            // parameter per facet would change the URL schema every time a
+            // category gains an attribute; this one never changes shape.
+            'spec'       => ['sometimes', 'string', 'max:512'],
+
             'sort'       => ['sometimes', Rule::in(['featured', 'price-asc', 'price-desc', 'newest', 'rating'])],
             'perPage'    => ['sometimes', 'integer', 'min:1', 'max:60'],
         ];

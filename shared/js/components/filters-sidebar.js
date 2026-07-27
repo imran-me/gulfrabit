@@ -20,6 +20,12 @@ export function initFilters({ host, products, initial = {}, onChange }) {
   const priceMin = Math.floor(Math.min(...prices, 0));
   const priceMax = Math.ceil(Math.max(...prices, 100));
 
+  // Facets derived from each product's own `specs`, rather than a hand-built
+  // filter list per category. Daraz do this: smartphones get RAM and battery,
+  // t-shirts get material and fit, all generated from the category's attribute
+  // schema. It is the only approach that survives adding a category.
+  const specFacets = deriveSpecFacets(products);
+
   const onSaleCount = products.filter((p) => p.originalPrice && p.originalPrice > p.price).length;
   // Facet counts so each option shows how many products match.
   const COUNT = {
@@ -65,9 +71,17 @@ export function initFilters({ host, products, initial = {}, onChange }) {
       ${brands.length ? group('Brand', checkList('brands', brands, filters.brands)) : ''}
       ${origins.length ? group('Origin', checkList('origins', origins, filters.origins)) : ''}
       ${dietary.length ? group('Dietary', checkList('tags', dietary, filters.tags)) : ''}
+      ${specFacets.map((f) => group(escapeHtml(f.key), specList(f), true)).join('')}
       ${group('Rating', rating)}
       ${group('Availability', availability)}
       <button class="btn-gr btn-ghost-gr btn-sm-gr" data-clear-all type="button" style="margin-top:1rem">Clear all filters</button>`;
+  }
+
+  /** One derived spec facet, e.g. Compliance → RoHS (4) · REACH (2). */
+  function specList(facet) {
+    const chosen = filters.specs?.[facet.key] || [];
+    return facet.values.map(({ value, count }) => `
+      <label class="filter-option"><input type="checkbox" data-spec="${escapeAttr(facet.key)}" value="${escapeAttr(value)}" ${chosen.includes(value) ? 'checked' : ''}> ${escapeHtml(value)} <span class="filter-count">(${count})</span></label>`).join('');
   }
 
   function checkList(key, values, selected = []) {
@@ -85,6 +99,16 @@ export function initFilters({ host, products, initial = {}, onChange }) {
     host.querySelectorAll('[data-facet]').forEach((cb) => cb.addEventListener('change', () => {
       const key = cb.dataset.facet;
       filters[key] = [...host.querySelectorAll(`[data-facet="${key}"]:checked`)].map((c) => c.value);
+      emit();
+    }));
+
+    host.querySelectorAll('[data-spec]').forEach((cb) => cb.addEventListener('change', () => {
+      const key = cb.dataset.spec;
+      // CSS.escape: spec keys are human labels and can contain characters that
+      // break an attribute selector.
+      const chosen = [...host.querySelectorAll(`[data-spec="${CSS.escape(key)}"]:checked`)].map((c) => c.value);
+      filters.specs = { ...(filters.specs || {}) };
+      if (chosen.length) filters.specs[key] = chosen; else delete filters.specs[key];
       emit();
     }));
 
@@ -156,9 +180,77 @@ function wireMobileSheet(host) {
 }
 
 /* ---- helpers ---------------------------------------------------------- */
+/**
+ * Turn the products' own `specs` into filter facets.
+ *
+ * Two rules do the real work:
+ *
+ * 1. **List-valued specs are split.** "UL, TÜV, RoHS" is three facts, not one
+ *    string. Without splitting, every product becomes its own unique value and
+ *    the facet filters nothing — with it, Compliance → RoHS covers 4 products.
+ *
+ * 2. **A facet must actually narrow the set.** It is shown only when some value
+ *    covers 2+ products AND there are 2+ distinct values. A facet where every
+ *    value matches exactly one product is not a filter — it is the product list
+ *    written twice, and at this catalog size most spec keys are exactly that.
+ *    The gate keeps the sidebar honest today and lets real facets appear by
+ *    themselves once there are 50 board variants instead of 6.
+ *
+ * @returns {{key:string, values:{value:string,count:number}[]}[]}
+ */
+export function deriveSpecFacets(products, { minCoverage = 2, maxFacets = 6 } = {}) {
+  const counts = new Map();                     // specKey -> Map(value -> count)
+
+  for (const p of products) {
+    for (const [key, raw] of Object.entries(p.specs || {})) {
+      if (!counts.has(key)) counts.set(key, new Map());
+      const bucket = counts.get(key);
+      for (const value of splitSpecValue(raw)) {
+        bucket.set(value, (bucket.get(value) || 0) + 1);
+      }
+    }
+  }
+
+  return [...counts.entries()]
+    .map(([key, bucket]) => ({
+      key,
+      values: [...bucket.entries()]
+        .map(([value, count]) => ({ value, count }))
+        .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value)),
+    }))
+    .filter((f) => f.values.length >= 2 && f.values[0].count >= minCoverage)
+    // Most-discriminating first, and capped — a wall of facets is its own kind
+    // of unusable.
+    .sort((a, b) => b.values[0].count - a.values[0].count)
+    .slice(0, maxFacets);
+}
+
+/** "UL, TÜV, RoHS" → ['UL','TÜV','RoHS'] · "1.6 mm" → ['1.6 mm'] */
+export function splitSpecValue(raw) {
+  const parts = String(raw).split(',').map((t) => t.trim()).filter(Boolean);
+  return parts.length > 1 ? parts : [String(raw).trim()];
+}
+
+/**
+ * Does a product satisfy the chosen spec filters?
+ *
+ * OR within a facet, AND across facets — the behaviour every faceted storefront
+ * uses, because the opposite makes multi-select useless (picking two values
+ * would return nothing).
+ */
+export function matchesSpecFilters(product, specs) {
+  if (!specs || !Object.keys(specs).length) return true;
+  const own = product.specs || {};
+  return Object.entries(specs).every(([key, wanted]) => {
+    if (!wanted?.length) return true;
+    const have = splitSpecValue(own[key] ?? '');
+    return wanted.some((w) => have.includes(w));
+  });
+}
+
 function unique(arr) { return [...new Set(arr.filter(Boolean))].sort(); }
 function numOrNull(v) { const n = Number(v); return v === '' || Number.isNaN(n) ? null : n; }
-function normalize(f = {}) { return { minPrice: f.minPrice ?? null, maxPrice: f.maxPrice ?? null, brands: f.brands || [], origins: f.origins || [], tags: f.tags || [], rating: f.rating ?? null, inStock: !!f.inStock, onSale: !!f.onSale }; }
+function normalize(f = {}) { return { minPrice: f.minPrice ?? null, maxPrice: f.maxPrice ?? null, brands: f.brands || [], origins: f.origins || [], tags: f.tags || [], specs: f.specs || {}, rating: f.rating ?? null, inStock: !!f.inStock, onSale: !!f.onSale }; }
 function pruneEmpty(f) {
   const out = {};
   if (f.minPrice != null) out.minPrice = f.minPrice;
@@ -166,6 +258,9 @@ function pruneEmpty(f) {
   if (f.brands?.length) out.brands = f.brands;
   if (f.origins?.length) out.origins = f.origins;
   if (f.tags?.length) out.tags = f.tags;
+  // Only carry `specs` when something is actually selected — an empty object is
+  // truthy, so a bare `if (f.specs)` would put `specs={}` in every URL.
+  if (f.specs && Object.keys(f.specs).length) out.specs = f.specs;
   if (f.rating != null) out.rating = f.rating;
   if (f.inStock) out.inStock = true;
   if (f.onSale) out.onSale = true;
