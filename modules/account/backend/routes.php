@@ -27,4 +27,7 @@ Route::prefix('account')->name('account.')->middleware('auth:sanctum')->group(fu
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist', [WishlistController::class, 'store'])->name('wishlist.store');
     Route::delete('/wishlist/{sku}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
+    // Called once, right after sign-in. Idempotent by the unique
+    // (user_id, product_id) index, so a retry adds nothing twice.
+    Route::post('/wishlist/merge', [WishlistController::class, 'merge'])->name('wishlist.merge');
 });

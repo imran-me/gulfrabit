@@ -10,6 +10,8 @@
 import { getMockUsers } from './backend/api.js';
 import * as store from '../../shared/js/core/state.js';
 import { siteURL } from '../../shared/js/core/paths.js';
+import { mergeGuestWishlist } from '../account/backend/api.js';
+import { mergeGuestCart } from '../cart/backend/api.js';
 import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 
@@ -37,14 +39,14 @@ const handlers = {
     const users = await getMockUsers();
     const user = users.find((u) => u.email.toLowerCase() === values.email.toLowerCase() && u.password === values.password);
     if (!user) { toast.error('Incorrect email or password.'); return; }
-    signIn(user);
+    await signIn(user);
   },
 
   async register() {
     const { valid, values } = validateForm(form);
     if (!valid) { if (!form.querySelector('[name="terms"]').checked) toast.error('Please accept the terms.'); return; }
     // Mock: accept any new account (no server to persist to).
-    signIn({ id: 'u-new', name: values.name, email: values.email, phone: values.phone, tier: 'standard', addresses: [] });
+    await signIn({ id: 'u-new', name: values.name, email: values.email, phone: values.phone, tier: 'standard', addresses: [] });
   },
 
   forgot() {
@@ -55,8 +57,36 @@ const handlers = {
   },
 };
 
-function signIn(user) {
+async function signIn(user) {
   store.setUser({ id: user.id, name: user.name, email: user.email, phone: user.phone, tier: user.tier, addresses: user.addresses || [] });
   toast.success(`Welcome, ${user.name.split(' ')[0]}.`);
+
+  // Fold what they saved as a guest into the account. Awaited before the
+  // redirect so the wishlist page they may land on is already correct — but
+  // both calls swallow their own failures, because a merge that does not go
+  // through must never block a sign-in that already succeeded.
+  await mergeGuestState();
+
   setTimeout(() => { window.location.href = siteURL('modules/account/dashboard.html'); }, 900);
+}
+
+/**
+ * The cart already merged on sign-in; the wishlist did not, so a guest who
+ * saved six things and then created an account arrived at an empty wishlist
+ * with the items still sitting in their browser, invisible.
+ */
+async function mergeGuestState() {
+  const skus = store.getWishlist().map((w) => w.id).filter(Boolean);
+
+  const [wishlist] = await Promise.all([
+    mergeGuestWishlist(skus),
+    mergeGuestCart(),
+  ]);
+
+  // Only mentioned when something was actually dropped. "6 added" on top of a
+  // welcome message is noise; "2 are no longer available" is the one thing the
+  // customer would otherwise notice on their own and not understand.
+  if (wishlist.ok && wishlist.skipped > 0) {
+    toast.info(wishlist.message);
+  }
 }

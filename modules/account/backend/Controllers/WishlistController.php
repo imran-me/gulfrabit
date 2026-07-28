@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Account\Models\WishlistItem;
+use Modules\Account\Services\WishlistService;
 use Modules\Catalog\Models\Product;
 
 /**
@@ -65,5 +66,32 @@ class WishlistController extends Controller
         // The button that calls this should never show an error for reaching
         // the state the customer asked for.
         return response()->json(['message' => 'Removed.']);
+    }
+
+    /**
+     * POST /api/account/wishlist/merge
+     *
+     * Folds the saves a guest made in this browser into their account.
+     *
+     * Capped at 200 skus: a wishlist is a human list, and an uncapped array
+     * from the client is an invitation to send a hundred thousand of them.
+     */
+    public function merge(Request $request, WishlistService $wishlist): JsonResponse
+    {
+        $data = $request->validate([
+            'skus'   => ['required', 'array', 'max:200'],
+            'skus.*' => ['string', 'max:32'],
+        ]);
+
+        $result = $wishlist->mergeSkus($request->user()->id, $data['skus']);
+
+        return response()->json([
+            'data'    => $result,
+            // Says what happened in words, because "6 of 8" needs explaining
+            // and the customer is the one who noticed the difference.
+            'message' => $result['skipped'] > 0
+                ? "{$result['added']} saved item(s) added. {$result['skipped']} are no longer available."
+                : "{$result['added']} saved item(s) added to your account.",
+        ]);
     }
 }

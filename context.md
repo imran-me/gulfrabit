@@ -1251,3 +1251,26 @@ accounting P&L, which needs B5's cost prices to be more than a revenue report.
     developer's original, which is never stored in the DB and so cannot be lost.
   · 40 pages 200 · 175 PHP files clean · no console errors · no overflow at
     375/768/1280/1440 · all four generators green.
+- **2026-07-28** — Guest wishlist merge on sign-in (storefront follow-up).
+  · **The bug:** `wishlist_items` requires a `user_id`, so a guest has no
+    server-side wishlist — theirs lives in localStorage. The cart merged on
+    sign-in; the wishlist did not. Someone who saved six things and then created
+    an account arrived at an EMPTY wishlist, with the items still in their
+    browser, invisible, until localStorage was cleared and they were gone. Quiet
+    data loss at exactly the moment a customer decides to trust the site.
+  · Fixed as a one-way push: `POST /api/account/wishlist/merge` takes the SKUs
+    the browser holds. Idempotent by the unique (user_id, product_id) index, so
+    a retry or a second sign-in adds nothing twice. Capped at 200 — a wishlist
+    is a human list, and an uncapped client array is an invitation.
+  · **Withdrawn products are skipped, not fatal.** A wishlist saved months ago
+    contains things since delisted, and losing the whole merge over one of them
+    would be worse than losing that one. The count of skipped items is reported
+    and shown ONLY when non-zero — "2 are no longer available" is the thing the
+    customer would otherwise notice and not understand.
+  · **Merge failure never blocks sign-in.** Both merges swallow their own
+    errors, and nothing is cleared from localStorage on success either, so the
+    next sign-in tries again. Verified with no backend: merge returns ok:false
+    and the local list is intact.
+  · `signIn()` became async, so both call sites now await it — an unhandled
+    rejection there would have been invisible.
+  · 40 pages 200 · 176 PHP files clean · no console errors · all generators green.
