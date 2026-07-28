@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="no-js">
+<html lang="en" class="no-js" data-cms-page="contact">
 <head>
   <meta charset="UTF-8">
   <script>
@@ -42,6 +42,7 @@
   <script src="../../shared/css/tailwind.config.js"></script>
   <link rel="stylesheet" href="../../shared/css/style.css">
   <link rel="stylesheet" href="../../modules/content/content.css">
+  <link rel="stylesheet" href="../../modules/cms/cms.css">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -213,9 +214,9 @@
 
 <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
     <header style="margin-bottom:var(--space-7);max-width:56ch">
-      <p class="overline">Contact</p>
-      <h1 class="h2">We’re here to help.</h1>
-      <p class="text-muted-gr">Questions about an order, a product, or bulk sourcing? Reach out — we usually reply within a few hours.</p>
+      <p class="overline" data-cms="contact.p-b37456">Contact</p>
+      <h1 class="h2" data-cms="contact.h1-ce1e45">We’re here to help.</h1>
+      <p class="text-muted-gr" data-cms="contact.p-5ff3d7">Questions about an order, a product, or bulk sourcing? Reach out — we usually reply within a few hours.</p>
     </header>
 
     <div class="contact-grid">
@@ -330,5 +331,7 @@
 
   <script type="module" src="../../shared/js/main.js"></script>
   <script type="module" src="../../modules/content/contact-page.js"></script>
+  <script type="module" src="../../modules/cms/cms.js"></script>
+  <script type="module" src="../../modules/cms/cms-editor.js"></script>
 </body>
 </html>

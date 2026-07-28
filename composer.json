@@ -23,6 +23,7 @@
       "Database\\Seeders\\": "database/seeders/",
       "Modules\\Accounting\\": "modules/accounting/backend/",
       "Modules\\Admin\\": "modules/admin/backend/",
+      "Modules\\Cms\\": "modules/cms/backend/",
       "Modules\\Courier\\": "modules/courier/backend/",
       "Modules\\Inventory\\": "modules/inventory/backend/",
       "Modules\\Bundle\\": "modules/bundle/backend/",

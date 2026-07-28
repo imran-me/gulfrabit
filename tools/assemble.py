@@ -34,10 +34,15 @@ FOOTER = read("shared/components/footer.html")
 # Canonical site origin (placeholder domain — update when the domain is live).
 SITE = "https://gulfrabit.com"
 
-def head(title, desc, css_links, theme="#0A0A0A"):
+def head(title, desc, css_links, theme="#0A0A0A", cms_page=None):
     extra = "\n  ".join(f'<link rel="stylesheet" href="{c}">' for c in css_links)
+    # data-cms-page is what modules/cms keys its overrides on. Absent means the
+    # page is not editable, which is the correct default for anything rendered
+    # entirely from data — an override there would be overwritten on the next
+    # render and look like the edit silently failed.
+    cms_attr = f' data-cms-page="{cms_page}"' if cms_page else ""
     return f"""<!DOCTYPE html>
-<html lang="en" class="no-js">
+<html lang="en" class="no-js"{cms_attr}>
 <head>
   <meta charset="UTF-8">
   <script>
@@ -117,8 +122,20 @@ def relativize(html, out):
         html = html.replace('="/', f'="{prefix}').replace("url('/", f"url('{prefix}").replace('url("/', f'url("{prefix}').replace("url(/", f"url({prefix}")
     return html
 
-def assemble(out, title, desc, main_html, css_links=None, module_js=None):
-    page = head(title, desc, css_links or []) + "\n"
+def assemble(out, title, desc, main_html, css_links=None, module_js=None, cms_page=None):
+    """`cms_page` opts a page into live content editing.
+
+    Both additions are enhancements: cms.js only swaps text the server sent for
+    keys the developer marked, and cms-editor.js does nothing without ?edit=1
+    AND a staff session the server recognises. A page without a cms_page is
+    simply not editable, which is the right default for anything rendered
+    entirely from data."""
+    if cms_page:
+        css_links = list(css_links or []) + ["/modules/cms/cms.css"]
+        existing = list(module_js) if isinstance(module_js, list) else ([module_js] if module_js else [])
+        module_js = existing + ["/modules/cms/cms.js", "/modules/cms/cms-editor.js"]
+
+    page = head(title, desc, css_links or [], cms_page=cms_page) + "\n"
     page += "  <!-- HEADER (inlined from shared/components/header.html) -->\n"
     page += HEADER + "\n\n"
     page += main_html.strip() + "\n\n"
@@ -337,31 +354,31 @@ PAGES = [
      "About — GulfRabit",
      "The GulfRabit story: sourcing, authenticity and craft.",
      "modules/content/_fragments/about.main.html",
-     ["/modules/content/content.css"], None),
+     ["/modules/content/content.css"], None, "about"),
 
     ("modules/content/sourcing.html",
      "Sourcing & Authenticity — GulfRabit",
      "What import-verified means at GulfRabit: how we buy, what you can check yourself, and what we do not claim.",
      "modules/content/_fragments/sourcing.main.html",
-     ["/modules/content/content.css"], None),
+     ["/modules/content/content.css"], None, "sourcing"),
 
     ("modules/content/contact.html",
      "Contact — GulfRabit",
      "Get in touch with GulfRabit support.",
      "modules/content/_fragments/contact.main.html",
-     ["/modules/content/content.css"], "/modules/content/contact-page.js"),
+     ["/modules/content/content.css"], "/modules/content/contact-page.js", "contact"),
 
     ("modules/content/faq.html",
      "FAQ — GulfRabit",
      "Answers to common questions about GulfRabit.",
      "modules/content/_fragments/faq.main.html",
-     ["/modules/content/content.css"], "/modules/content/faq-page.js"),
+     ["/modules/content/content.css"], "/modules/content/faq-page.js", "faq"),
 
     ("modules/content/shipping-returns.html",
      "Shipping & Returns — GulfRabit",
      "GulfRabit shipping, delivery and returns policy.",
      "modules/content/_fragments/shipping.main.html",
-     ["/modules/content/content.css"], None),
+     ["/modules/content/content.css"], None, "shipping"),
 
     ("modules/content/404.html",
      "Page Not Found — GulfRabit",
@@ -392,12 +409,12 @@ PAGES = [
 
 if __name__ == "__main__":
     built = 0
-    for out, title, desc, frag, css, mjs in PAGES:
+    for out, title, desc, frag, css, mjs, *rest in PAGES:
         fp = os.path.join(ROOT, frag)
         if not os.path.exists(fp):
             print("SKIP (no fragment yet):", frag)
             continue
-        assemble(out, title, desc, read(frag), css, mjs)
+        assemble(out, title, desc, read(frag), css, mjs, cms_page=(rest[0] if rest else None))
         built += 1
 
     for out, title, frag, css, ajs, chrome in ADMIN_PAGES:

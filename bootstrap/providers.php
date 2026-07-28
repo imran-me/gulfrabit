@@ -26,6 +26,7 @@ return [
     Modules\Bundle\BundleServiceProvider::class,
     Modules\Cart\CartServiceProvider::class,
     Modules\Catalog\CatalogServiceProvider::class,
+    Modules\Cms\CmsServiceProvider::class,
     Modules\Checkout\CheckoutServiceProvider::class,
     Modules\Courier\CourierServiceProvider::class,
     Modules\Inventory\InventoryServiceProvider::class,

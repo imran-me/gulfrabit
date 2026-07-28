@@ -615,7 +615,9 @@ Admin never imports from courier/inventory/accounting/cms.
       double-entry journal, auto-posting from paid orders and refunds, expenses,
       trial balance and P&L. Gross profit is reported as NULL with a stated
       reason whenever any sale lacked a cost of goods.
-- [ ] **7.7** CMS — per-node content overrides, click-to-edit, text + image only
+- [x] **7.7** CMS — `modules/cms/`: per-node overrides, click-to-edit on the
+      live page, text and image only. 61 nodes annotated across 5 content pages
+      by `tools/annotate-cms.py`.
 
 **Decisions taken (2026-07-27, with the user):**
 
@@ -1215,3 +1217,37 @@ accounting P&L, which needs B5's cost prices to be more than a revenue report.
     a real starting position.
   · 40 pages 200 · 166 PHP files clean · no console errors · no overflow at
     375/768/1280/1440 · graph one-way (`accounting -> checkout`).
+- **2026-07-28** — 7.7 CMS, and Phase 7 is complete.
+  · **Overrides, not source.** The authored HTML remains the content; a row says
+    "wherever data-cms=X appears, show this instead". Delete a row and the page
+    returns to what the developer wrote; delete the module and every page still
+    renders as authored. That is what makes it safe to hand to a non-technical
+    editor — the worst outcome is wrong words, never a broken page.
+  · **THE KEY INSIGHT: the safety rule and the no-layout rule are the same
+    rule.** The renderer may only set `textContent`, or a validated image
+    `src`/`alt`. `textContent` never parses HTML, so a `<script>` typed into a
+    headline is displayed as characters — there is no sanitiser to get wrong
+    because nothing is ever parsed. And no markup means no layout. An `html`
+    content type would not be a small convenience; it would remove both
+    guarantees in one change. There is deliberately no rich-text editor.
+  · **Image paths are validated on both sides** — same-origin, under /assets/
+    or /uploads/, rejecting `://` and `//` prefixes before any "starts with /"
+    check. An arbitrary src turns every visitor into a request to somebody
+    else's server.
+  · **`tools/annotate-cms.py` generates the keys** rather than hand-typing
+    hundreds. It skips nodes with element children (a key must own the WHOLE
+    text it replaces, or a paragraph containing a link loses the link) and nodes
+    with other `data-*` attributes (JS owns those; an override would be
+    overwritten on the next render and look like a failed save). Keys carry a
+    hash of the original text, so inserting a paragraph does not renumber its
+    neighbours' overrides onto the wrong sentences.
+  · **Editing happens on the live page**, because a headline is only judgeable
+    at the width and in the place it appears. Gated on `?edit=1` AND a session
+    the server recognises — verified all three states: normal visitor unaffected,
+    `?edit=1` without a session refuses with a reason, with a session marks 13
+    nodes.
+  · Revisions keep the previous value so a bad Friday-afternoon edit is one
+    click back; reverting deletes the override entirely, restoring the
+    developer's original, which is never stored in the DB and so cannot be lost.
+  · 40 pages 200 · 175 PHP files clean · no console errors · no overflow at
+    375/768/1280/1440 · all four generators green.

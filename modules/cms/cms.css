@@ -1,0 +1,49 @@
+/* ============================================================
+   modules/cms — the editing overlay only.
+
+   Nothing here styles the storefront in its normal state. Every
+   rule is scoped under .cms-editing, which is added to <body>
+   only when an editor with a valid session opens ?edit=1. A
+   visitor never downloads a different-looking page.
+   ============================================================ */
+
+.cms-banner {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-toast);
+  background: var(--gr-ink);
+  color: #fff;
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--fs-14);
+  text-align: center;
+}
+.cms-banner--bad { background: #7a1f1f; }
+
+/* Editable regions are outlined rather than filled: an editor needs to see
+   WHICH things are editable without the page stopping looking like the page
+   they are judging. */
+.cms-editing .cms-editable {
+  outline: 2px dashed var(--gr-cyan);
+  outline-offset: 3px;
+  cursor: pointer;
+  transition: outline-color var(--dur-fast) var(--ease-out);
+}
+.cms-editing .cms-editable:hover {
+  outline-style: solid;
+  outline-color: var(--gr-cyan-dark);
+}
+
+/* Links and buttons stop navigating while editing — clicking a headline inside
+   a link should open the editor, not the linked page. */
+.cms-editing a,
+.cms-editing button {
+  pointer-events: none;
+}
+.cms-editing .cms-editable,
+.cms-editing [data-cms] {
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cms-editing .cms-editable { transition: none; }
+}
