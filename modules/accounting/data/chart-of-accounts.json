@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "owner": "modules/accounting",
+    "note": "The starting chart of accounts, seeded by ChartOfAccountsSeeder. Accounts with a systemKey are what the posting rules reference by name; they are marked isSystem and cannot be deleted or retyped from the UI.",
+    "why": "A merchant should be able to rename 'Sales revenue' to whatever their accountant calls it, and add as many expense accounts as they like. What they must NOT be able to do is turn an income account into an expense one — that would silently rewrite every P&L ever produced from these books.",
+    "openingBalances": "NOT seeded. Opening balances are a fact about this business on a particular date and only the owner has them (context.md 8b/B5). Seeding zeroes would look like a real starting position."
+  },
+  "accounts": [
+    { "code": "1000", "name": "Cash at bank",            "type": "asset",     "systemKey": "cash_at_bank" },
+    { "code": "1010", "name": "Cash in hand",             "type": "asset",     "systemKey": null },
+    { "code": "1100", "name": "Receivable from couriers", "type": "asset",     "systemKey": "courier_receivable",
+      "description": "Cash on delivery the courier has collected but not yet remitted. It is ours, but it is not in the bank." },
+    { "code": "1200", "name": "Inventory",                "type": "asset",     "systemKey": "inventory" },
+
+    { "code": "2000", "name": "Accounts payable",         "type": "liability", "systemKey": "accounts_payable" },
+    { "code": "2100", "name": "VAT payable",              "type": "liability", "systemKey": "vat_payable",
+      "description": "Not posted to automatically. VAT treatment depends on registration and category, and guessing at it is worse than leaving it to the owner's accountant." },
+
+    { "code": "3000", "name": "Owner capital",            "type": "equity",    "systemKey": "owner_capital" },
+    { "code": "3100", "name": "Retained earnings",        "type": "equity",    "systemKey": "retained_earnings" },
+
+    { "code": "4000", "name": "Sales revenue",            "type": "income",    "systemKey": "sales_revenue" },
+    { "code": "4100", "name": "Delivery income",          "type": "income",    "systemKey": "delivery_income",
+      "description": "Kept apart from goods revenue so it is possible to answer whether delivery pays for itself." },
+    { "code": "4900", "name": "Refunds and returns",      "type": "income",    "systemKey": "sales_refunds",
+      "description": "Contra-revenue. Held separately rather than netted off sales, because how much is being sent back is a fact worth seeing." },
+
+    { "code": "5000", "name": "Cost of goods sold",       "type": "expense",   "systemKey": "cost_of_goods" },
+    { "code": "5100", "name": "Courier and delivery cost","type": "expense",   "systemKey": "courier_expense",
+      "description": "What carriers charge US — the other half of whether delivery pays for itself." },
+    { "code": "6000", "name": "Rent",                     "type": "expense",   "systemKey": null },
+    { "code": "6100", "name": "Salaries and wages",       "type": "expense",   "systemKey": null },
+    { "code": "6200", "name": "Utilities",                "type": "expense",   "systemKey": null },
+    { "code": "6300", "name": "Marketing and advertising","type": "expense",   "systemKey": null },
+    { "code": "6400", "name": "Packaging and supplies",   "type": "expense",   "systemKey": null },
+    { "code": "6500", "name": "Payment gateway fees",     "type": "expense",   "systemKey": "gateway_fees" },
+    { "code": "6600", "name": "Stock write-off",          "type": "expense",   "systemKey": "stock_writeoff",
+      "description": "Damage, spoilage and known loss. Separate from cost of goods so shrinkage is visible rather than buried in the cost of things actually sold." },
+    { "code": "6900", "name": "Other expenses",           "type": "expense",   "systemKey": null }
+  ]
+}

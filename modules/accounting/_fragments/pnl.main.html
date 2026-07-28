@@ -1,0 +1,48 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Profit &amp; loss</h1>
+          <p class="admin__sub" data-pnl-period>Loading…</p>
+        </div>
+      </div>
+
+      <form class="afilters" data-pnl-filters>
+        <div class="afilters__field">
+          <label for="pl-from">From</label>
+          <input class="input-gr" id="pl-from" name="from" type="date" required>
+        </div>
+        <div class="afilters__field">
+          <label for="pl-to">To</label>
+          <input class="input-gr" id="pl-to" name="to" type="date" required>
+        </div>
+        <div class="afilters__actions">
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Run</button>
+        </div>
+      </form>
+
+      <!-- The caveat, when it applies. Placed ABOVE the figures rather than in
+           a footnote: a number you read before the warning is a number you have
+           already believed. -->
+      <div class="acard" style="margin-bottom:var(--space-5);border-left:3px solid var(--gr-warning)"
+           data-pnl-caveat hidden>
+        <h2 class="h5" style="margin:0 0 var(--space-2)">Gross profit cannot be calculated</h2>
+        <p class="admin__sub" style="margin:0" data-pnl-caveat-text></p>
+      </div>
+
+      <div class="aorder">
+        <section class="acard" aria-labelledby="pi-head">
+          <h2 class="h5" id="pi-head">Income</h2>
+          <dl class="atotals" data-pnl-income></dl>
+        </section>
+
+        <section class="acard" aria-labelledby="pe-head">
+          <h2 class="h5" id="pe-head">Expenses</h2>
+          <dl class="atotals" data-pnl-expenses></dl>
+        </section>
+
+        <section class="acard" aria-labelledby="pr-head">
+          <h2 class="h5" id="pr-head">Result</h2>
+          <div class="acards" data-pnl-result></div>
+        </section>
+      </div>
+
+      <p class="aerror" data-pnl-error hidden role="alert"></p>

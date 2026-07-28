@@ -611,7 +611,10 @@ Admin never imports from courier/inventory/accounting/cms.
 - [x] **7.5** Products & inventory — `modules/inventory/` (warehouses, stock
       ledger, reservations, stocktakes) plus `products.cost_poisha`, the admin
       product list/edit screens and an append-only price-change log., low-stock
-- [ ] **7.6** Accounting — double-entry journal, auto-posting from orders, expenses, P&L
+- [x] **7.6** Accounting — `modules/accounting/`: chart of accounts, immutable
+      double-entry journal, auto-posting from paid orders and refunds, expenses,
+      trial balance and P&L. Gross profit is reported as NULL with a stated
+      reason whenever any sale lacked a cost of goods.
 - [ ] **7.7** CMS — per-node content overrides, click-to-edit, text + image only
 
 **Decisions taken (2026-07-27, with the user):**
@@ -1177,3 +1180,38 @@ accounting P&L, which needs B5's cost prices to be more than a revenue report.
     real changes.
   · 38 pages 200 · 152 PHP files clean · no console errors · no overflow at
     375/768/1280/1440 · storefront unaffected.
+- **2026-07-28** — 7.6 accounting (`modules/accounting`).
+  · **One rule, enforced in code inside the write transaction:** debits equal
+    credits. A ledger that can be one poisha out cannot be reconciled, and
+    nobody finds out until year end.
+  · **Posted entries are immutable.** No update route, no delete route — a
+    mistake is fixed by `reverse()`, which writes a mirror entry dated TODAY
+    (not backdated, which would change a period already reported on) and links
+    both ways. An accountant must see the same numbers today they saw then.
+  · **Debit and credit are two unsigned columns, not one signed amount.**
+    "Debit 500" and "credit -500" are identical to a computer and completely
+    different to an accountant, and every report and conversation about these
+    books will be in debit/credit terms.
+  · **`(source_type, source_id)` is unique** — the guard against double-posting
+    a sale, which is the most common way automated bookkeeping goes wrong.
+  · **Revenue is recognised on PAID, not placed.** COD debits a courier
+    receivable rather than cash, because the money is not ours until it is
+    remitted. Delivery income is a separate account from goods, so "does
+    delivery pay for itself" is answerable.
+  · **THE HONESTY POINT.** `postSale()` omits the cost-of-goods lines entirely
+    when any line's cost is unknown, and `profitAndLoss()` then returns
+    `grossProfitTaka: null`, `costOfGoodsKnown: false`, a count of affected
+    sales, and a written caveat IN THE PAYLOAD so every consumer carries it.
+    The screen renders the caveat ABOVE the figures and does not draw a gross
+    profit card at all — a card showing "—" leaves a profit-shaped hole that
+    eyes fill in. The net line is relabelled "Income less recorded expenses".
+    Assuming zero cost would post every sale at 100% margin: a confident,
+    flattering, wrong number that nobody questions.
+  · Partial COGS is treated as unknown too — costing only the lines we know
+    understates cost and overstates profit, the same lie with better cover.
+  · Chart of accounts is data (21 accounts). Renaming is allowed; retyping a
+    system account is not, because it would silently rewrite every P&L ever
+    produced. Opening balances deliberately NOT seeded — zeroes would look like
+    a real starting position.
+  · 40 pages 200 · 166 PHP files clean · no console errors · no overflow at
+    375/768/1280/1440 · graph one-way (`accounting -> checkout`).

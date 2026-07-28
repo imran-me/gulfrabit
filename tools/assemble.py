@@ -142,6 +142,7 @@ ADMIN_NAV = [
     "/modules/admin/admin-nav.js",
     "/modules/courier/courier-nav.js",
     "/modules/inventory/inventory-nav.js",
+    "/modules/accounting/accounting-nav.js",
 ]
 
 ADMIN_SHELL = read("modules/admin/_fragments/_shell.html")
@@ -218,6 +219,16 @@ ADMIN_PAGES = [
      "modules/inventory/_fragments/movements.main.html",
      ["/modules/admin/admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/inventory/movements-page.js"], True),
+
+    ("modules/accounting/pnl.html", "Profit & loss — GulfRabit Admin",
+     "modules/accounting/_fragments/pnl.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/accounting/pnl-page.js"], True),
+
+    ("modules/accounting/journal.html", "Journal — GulfRabit Admin",
+     "modules/accounting/_fragments/journal.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/accounting/journal-page.js"], True),
 
     ("modules/admin/login.html", "Staff sign-in — GulfRabit Admin",
      "modules/admin/_fragments/login.main.html",

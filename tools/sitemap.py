@@ -43,6 +43,8 @@ NOINDEX = {
     "modules/courier/couriers.html":        "staff panel",
     "modules/admin/products.html":          "staff panel",
     "modules/admin/product-edit.html":      "staff panel",
+    "modules/accounting/pnl.html":          "staff panel",
+    "modules/accounting/journal.html":      "staff panel",
     "modules/inventory/stock.html":         "staff panel",
     "modules/inventory/movements.html":     "staff panel",
     "modules/content/404.html":             "an error page must never be a search result",

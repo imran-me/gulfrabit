@@ -18,6 +18,7 @@ declare(strict_types=1);
 return [
     App\Providers\AppServiceProvider::class,
 
+    Modules\Accounting\AccountingServiceProvider::class,
     Modules\Account\AccountServiceProvider::class,
     Modules\Admin\AdminServiceProvider::class,
     Modules\Auth\AuthServiceProvider::class,
