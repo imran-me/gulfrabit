@@ -183,6 +183,16 @@ ADMIN_PAGES = [
      ["/modules/admin/admin-shell.js", "/modules/admin/order-detail-page.js",
       "/modules/courier/courier-order-panel.js"], True),
 
+    ("modules/admin/customers.html", "Customers — GulfRabit Admin",
+     "modules/admin/_fragments/customers.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/admin/customers-page.js"], True),
+
+    ("modules/admin/customer.html", "Customer — GulfRabit Admin",
+     "modules/admin/_fragments/customer.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/admin/customer-detail-page.js"], True),
+
     ("modules/courier/couriers.html", "Couriers — GulfRabit Admin",
      "modules/courier/_fragments/couriers.main.html",
      ["/modules/admin/admin.css"],

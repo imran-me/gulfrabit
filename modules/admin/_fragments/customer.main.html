@@ -1,0 +1,67 @@
+      <div class="admin__head">
+        <div>
+          <p class="admin__sub" style="margin:0 0 .25rem"><a href="/modules/admin/customers.html">← All customers</a></p>
+          <h1 class="admin__title" data-cust-name>Customer</h1>
+          <p class="admin__sub" data-cust-meta></p>
+        </div>
+      </div>
+
+      <div class="aorder">
+        <section class="acard" aria-labelledby="cs-head">
+          <h2 class="h5" id="cs-head">Summary</h2>
+          <dl class="akv" data-cust-profile></dl>
+          <div class="acards" style="margin-top:var(--space-4)" data-cust-stats></div>
+        </section>
+
+        <section class="acard" aria-labelledby="co-head">
+          <h2 class="h5" id="co-head">Orders</h2>
+          <div class="atable-wrap">
+            <table class="atable atable--tight">
+              <thead><tr><th scope="col">Order</th><th scope="col">Status</th><th scope="col">Total</th><th scope="col">Placed</th></tr></thead>
+              <tbody data-cust-orders></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="acard" aria-labelledby="ca-head">
+          <h2 class="h5" id="ca-head">Addresses</h2>
+          <div data-cust-addresses></div>
+        </section>
+
+        <section class="acard" aria-labelledby="cn-head">
+          <h2 class="h5" id="cn-head">Internal notes</h2>
+          <p class="admin__sub" style="margin-top:0">
+            Only staff see these. Your name is recorded against whatever you write.
+          </p>
+          <ul class="arefunds" data-cust-notes role="list"></ul>
+          <form class="arefund-form" data-note-form>
+            <div class="afilters__field afilters__field--wide">
+              <label for="n-body">Add a note</label>
+              <input class="input-gr" id="n-body" name="body" type="text" required
+                     placeholder="Something the next person needs to know">
+            </div>
+            <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Add note</button>
+          </form>
+        </section>
+
+        <!-- Owner-only, and shown only to owners. The panel does not display a
+             control that will refuse the person looking at it. -->
+        <section class="acard" aria-labelledby="cx-head" data-forget-section hidden>
+          <h2 class="h5" id="cx-head">Erase personal details</h2>
+          <p class="admin__sub" style="margin-top:0">
+            Removes the name, phone, email and addresses, here and on past orders.
+            <strong>Order totals, dates and items are kept</strong> — they are accounting records,
+            and the transaction is not the person. This cannot be undone.
+          </p>
+          <form class="arefund-form" data-forget-form>
+            <div class="afilters__field afilters__field--wide">
+              <label for="x-reason">Reason</label>
+              <input class="input-gr" id="x-reason" name="reason" type="text" required
+                     placeholder="e.g. customer requested erasure by phone on 28 Jul">
+            </div>
+            <button class="btn-gr btn-outline-gr btn-sm-gr" type="submit">Erase details</button>
+          </form>
+        </section>
+      </div>
+
+      <p class="aerror" data-cust-error hidden role="alert"></p>

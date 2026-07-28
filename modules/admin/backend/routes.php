@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Admin\Controllers\AdminAuthController;
 use Modules\Admin\Controllers\AdminDashboardController;
+use Modules\Admin\Controllers\AdminCustomerController;
 use Modules\Admin\Controllers\AdminOrderController;
 
 /**
@@ -44,6 +45,18 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             // Refunds carry a second, narrower check inside the controller:
             // `orders` gets you the screen, it does not get you the money.
             Route::post('/{order}/refund', [AdminOrderController::class, 'refund'])->name('refund');
+        });
+
+        // Customers. The most sensitive area in the panel — a searchable index
+        // of everyone who has ever bought something, with phone numbers. Only
+        // `owner` and `manager` hold the `customers` capability.
+        Route::middleware('admin:customers')->prefix('customers')->name('customers.')->group(function (): void {
+            Route::get('/', [AdminCustomerController::class, 'index'])->name('index');
+            Route::get('/{user}', [AdminCustomerController::class, 'show'])->name('show');
+            Route::post('/{user}/notes', [AdminCustomerController::class, 'addNote'])->name('notes.store');
+            // Irreversible, and it edits historical order records. A second,
+            // narrower check inside the controller restricts it to owners.
+            Route::post('/{user}/forget', [AdminCustomerController::class, 'forget'])->name('forget');
         });
     });
 });

@@ -40,3 +40,16 @@ registerScreen({
   order: 10,
   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 12h7M9 16h7"/></svg>',
 });
+
+registerScreen({
+  id: 'customers',
+  label: 'Customers',
+  href: '/modules/admin/customers.html',
+  match: ['/modules/admin/customer.html'],
+  // Only owner and manager hold this capability. Warehouse sees a delivery
+  // address on a packing slip; accounts sees money without names.
+  area: 'customers',
+  group: 'Trade',
+  order: 30,
+  icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 5.5a3 3 0 0 1 0 5.6M17.5 20a6.4 6.4 0 0 0-2.2-4.8"/></svg>',
+});

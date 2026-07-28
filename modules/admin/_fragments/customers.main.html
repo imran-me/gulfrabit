@@ -1,0 +1,50 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Customers</h1>
+          <p class="admin__sub" data-cust-count>Loading…</p>
+        </div>
+      </div>
+
+      <!-- Said once, at the top, rather than buried in a policy document. Staff
+           who know a screen is sensitive treat it that way. -->
+      <div class="acard" style="margin-bottom:var(--space-5)">
+        <p class="admin__sub" style="margin:0">
+          These are real people’s contact details. Search for the customer you need rather than
+          browsing — and note that only owners and managers can open this screen at all.
+        </p>
+      </div>
+
+      <form class="afilters" data-cust-filters>
+        <div class="afilters__field afilters__field--wide">
+          <label for="cf-q">Search</label>
+          <input class="input-gr" id="cf-q" name="q" type="search" placeholder="Name, phone or email">
+        </div>
+        <div class="afilters__actions">
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Search</button>
+          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-cust-clear>Clear</button>
+        </div>
+      </form>
+
+      <div class="atable-wrap">
+        <table class="atable">
+          <thead>
+            <tr>
+              <th scope="col">Customer</th>
+              <th scope="col">Phone</th>
+              <th scope="col">Orders</th>
+              <th scope="col">Spent</th>
+              <th scope="col">Last order</th>
+              <th scope="col">Joined</th>
+            </tr>
+          </thead>
+          <tbody data-cust-body>
+            <tr><td colspan="6" class="atable__empty">Loading customers…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <nav class="apager" data-cust-pager hidden aria-label="Customer pages">
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-cpage-prev>← Previous</button>
+        <span data-cpage-label></span>
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-cpage-next>Next →</button>
+      </nav>

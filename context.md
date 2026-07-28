@@ -604,7 +604,10 @@ Admin never imports from courier/inventory/accounting/cms.
       that genuinely works, 7 real BD carriers seeded, consignments with their
       own event log, and courier statuses feeding order status THROUGH the
       fulfilment whitelist.
-- [ ] **7.4** Customers — list, detail, order history, notes
+- [x] **7.4** Customers — search-first index, detail with order history,
+      addresses and internal notes, plus owner-only erasure that ANONYMISES
+      rather than deletes (orders are accounting records; the transaction is
+      not the person).
 - [ ] **7.5** Products & inventory — product edit, warehouses, stock, movements, low-stock
 - [ ] **7.6** Accounting — double-entry journal, auto-posting from orders, expenses, P&L
 - [ ] **7.7** CMS — per-node content overrides, click-to-edit, text + image only
@@ -1096,3 +1099,27 @@ accounting P&L, which needs B5's cost prices to be more than a revenue report.
     absorbed by a unique `(consignment_id, external_id)`.
   · 32 pages 200 · 131 PHP files clean · no console errors · no overflow at
     375/768/1280/1440 · graph one-way (`courier → checkout`).
+- **2026-07-28** — 7.4 customers.
+  · **Erasure anonymises, it does not delete.** Deleting a customer either
+    orphans their orders or cascades and destroys them, and both are wrong: a
+    business must keep the transaction for years after the person asks to be
+    forgotten. Those obligations do not conflict — the transaction is not the
+    person. `CustomerAnonymiserService` keeps every figure (totals, dates,
+    items, refunds, district) and scrubs every identifier (name, phone, email,
+    password, addresses, AND the contact details snapshotted onto each order at
+    checkout, which is the copy people forget).
+  · **It refuses while an order is live.** A parcel in transit needs a name and
+    a phone on it, or nobody can deliver it. That is not bureaucracy; it is the
+    difference between forgetting someone and losing their parcel.
+  · **`customer_erasures` records that a request was honoured and stores NO
+    identifiers** — a log that recorded who was erased would be a way of
+    un-erasing them. No foreign key, because the record must outlive the row.
+  · **Owner-only, and hidden rather than disabled** for everyone else. A control
+    that refuses the person looking at it is only a source of confusion.
+  · Search covers name/phone/email only — a wildcard across every column turns
+    a support tool into a way to trawl for people in a particular area. The
+    screen says at the top that these are real people's details.
+  · Lifetime spend and averages count PAID orders only, so abandoned
+    cash-on-delivery attempts do not flatter a customer's record.
+  · 34 pages 200 · 136 PHP files clean · no console errors · no overflow at
+    375/768/1280/1440.
