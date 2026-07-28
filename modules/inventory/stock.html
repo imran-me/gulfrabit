@@ -14,7 +14,7 @@
     document.documentElement.classList.remove('no-js');
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orders — GulfRabit Admin</title>
+  <title>Stock — GulfRabit Admin</title>
   <meta name="description" content="GulfRabit staff panel.">
   <meta name="theme-color" content="#0A0A0A">
   <meta name="author" content="GulfRabit">
@@ -23,11 +23,11 @@
   <!-- Social / Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GulfRabit">
-  <meta property="og:title" content="Orders — GulfRabit Admin">
+  <meta property="og:title" content="Stock — GulfRabit Admin">
   <meta property="og:description" content="GulfRabit staff panel.">
   <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Orders — GulfRabit Admin">
+  <meta name="twitter:title" content="Stock — GulfRabit Admin">
   <meta name="twitter:description" content="GulfRabit staff panel.">
   <link rel="icon" href="../../favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
@@ -70,53 +70,30 @@
 
 <div class="admin__head">
         <div>
-          <h1 class="admin__title">Orders</h1>
-          <p class="admin__sub" data-orders-count>Loading…</p>
+          <h1 class="admin__title">Stock</h1>
+          <p class="admin__sub" data-stock-count>Loading…</p>
         </div>
       </div>
 
-      <!-- Filters. Every control maps to a validated query parameter, and the
-           state lives in the URL so a filtered view can be bookmarked and
-           shared with a colleague rather than described to them. -->
-      <form class="afilters" data-orders-filters>
+      <form class="afilters" data-stock-filters>
         <div class="afilters__field">
-          <label for="f-q">Search</label>
-          <input class="input-gr" id="f-q" name="q" type="search" placeholder="Order no, phone or name">
+          <label for="sf-q">Search</label>
+          <input class="input-gr" id="sf-q" name="q" type="search" placeholder="Product name or SKU">
         </div>
         <div class="afilters__field">
-          <label for="f-status">Status</label>
-          <select class="select-gr" id="f-status" name="status">
-            <option value="">Any status</option>
-            <option value="placed">Placed</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="packed">Packed</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="returned">Returned</option>
+          <label for="sf-wh">Warehouse</label>
+          <select class="select-gr" id="sf-wh" name="warehouse"><option value="">All</option></select>
+        </div>
+        <div class="afilters__field">
+          <label for="sf-low">Show</label>
+          <select class="select-gr" id="sf-low" name="lowOnly">
+            <option value="">Everything</option>
+            <option value="1">At or below reorder level</option>
           </select>
-        </div>
-        <div class="afilters__field">
-          <label for="f-pay">Payment</label>
-          <select class="select-gr" id="f-pay" name="paymentStatus">
-            <option value="">Any payment</option>
-            <option value="pending">Pending</option>
-            <option value="paid">Paid</option>
-            <option value="failed">Failed</option>
-            <option value="refunded">Refunded</option>
-          </select>
-        </div>
-        <div class="afilters__field">
-          <label for="f-from">From</label>
-          <input class="input-gr" id="f-from" name="from" type="date">
-        </div>
-        <div class="afilters__field">
-          <label for="f-to">To</label>
-          <input class="input-gr" id="f-to" name="to" type="date">
         </div>
         <div class="afilters__actions">
           <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Apply</button>
-          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-orders-clear>Clear</button>
+          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-stock-clear>Clear</button>
         </div>
       </form>
 
@@ -124,27 +101,64 @@
         <table class="atable">
           <thead>
             <tr>
-              <th scope="col">Order</th>
-              <th scope="col">Customer</th>
-              <th scope="col">District</th>
-              <th scope="col">Items</th>
-              <th scope="col">Total</th>
-              <th scope="col">Payment</th>
-              <th scope="col">Status</th>
-              <th scope="col">Placed</th>
+              <th scope="col">Product</th>
+              <th scope="col">Warehouse</th>
+              <th scope="col">On hand</th>
+              <th scope="col">Reserved</th>
+              <th scope="col">Available</th>
+              <th scope="col">Reorder at</th>
             </tr>
           </thead>
-          <tbody data-orders-body>
-            <tr><td colspan="8" class="atable__empty">Loading orders…</td></tr>
+          <tbody data-stock-body>
+            <tr><td colspan="6" class="atable__empty">Loading stock…</td></tr>
           </tbody>
         </table>
       </div>
 
-      <nav class="apager" data-orders-pager hidden aria-label="Order pages">
-        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-page-prev>← Previous</button>
-        <span data-page-label></span>
-        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-page-next>Next →</button>
-      </nav>
+      <!-- Every change is a movement with a reason. There is no "set the
+           quantity to N" control anywhere in this panel, on purpose: a ledger
+           that can be overwritten stops being able to explain its own balance,
+           and shrinkage is a number you can only produce if damage and theft
+           were never recorded as generic corrections. -->
+      <section class="acard" style="margin-top:var(--space-5)" aria-labelledby="sm-head">
+        <h2 class="h5" id="sm-head">Record a movement</h2>
+        <form class="arefund-form" data-move-form style="border-top:0;padding-top:0">
+          <div class="afilters__field">
+            <label for="m-sku">SKU</label>
+            <input class="input-gr" id="m-sku" name="sku" type="text" required placeholder="gr-1001">
+          </div>
+          <div class="afilters__field">
+            <label for="m-wh">Warehouse</label>
+            <select class="select-gr" id="m-wh" name="warehouse" required></select>
+          </div>
+          <div class="afilters__field">
+            <label for="m-reason">Reason</label>
+            <select class="select-gr" id="m-reason" name="reason">
+              <option value="receipt">Stock arrived</option>
+              <option value="return">Customer return (resaleable)</option>
+              <option value="damage">Damaged / expired</option>
+              <option value="theft">Known loss</option>
+              <option value="transfer_in">Transfer in</option>
+              <option value="transfer_out">Transfer out</option>
+            </select>
+          </div>
+          <div class="afilters__field">
+            <label for="m-qty">Quantity</label>
+            <input class="input-gr" id="m-qty" name="qty" type="number" required placeholder="12 or -3">
+          </div>
+          <div class="afilters__field">
+            <label for="m-cost">Unit cost ৳ <span class="atable__sub">(receipts)</span></label>
+            <input class="input-gr" id="m-cost" name="unitCostTaka" type="number" step="0.01" min="0">
+          </div>
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Record</button>
+          <p class="admin__sub" style="flex:1 1 100%">
+            Enter the unit cost on every receipt. It is the only source for cost of goods —
+            without it, reports can show revenue but not profit.
+          </p>
+        </form>
+      </section>
+
+      <p class="aerror" data-stock-error hidden role="alert"></p>
     </main>
   </div>
 
@@ -153,6 +167,6 @@
   <script type="module" src="../../modules/admin/admin-nav.js"></script>
   <script type="module" src="../../modules/courier/courier-nav.js"></script>
   <script type="module" src="../../modules/inventory/inventory-nav.js"></script>
-  <script type="module" src="../../modules/admin/orders-page.js"></script>
+  <script type="module" src="../../modules/inventory/stock-page.js"></script>
 </body>
 </html>

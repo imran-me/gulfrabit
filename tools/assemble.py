@@ -141,6 +141,7 @@ def assemble(out, title, desc, main_html, css_links=None, module_js=None):
 ADMIN_NAV = [
     "/modules/admin/admin-nav.js",
     "/modules/courier/courier-nav.js",
+    "/modules/inventory/inventory-nav.js",
 ]
 
 ADMIN_SHELL = read("modules/admin/_fragments/_shell.html")
@@ -197,6 +198,16 @@ ADMIN_PAGES = [
      "modules/courier/_fragments/couriers.main.html",
      ["/modules/admin/admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/courier/couriers-page.js"], True),
+
+    ("modules/inventory/stock.html", "Stock — GulfRabit Admin",
+     "modules/inventory/_fragments/stock.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/inventory/stock-page.js"], True),
+
+    ("modules/inventory/movements.html", "Stock movements — GulfRabit Admin",
+     "modules/inventory/_fragments/movements.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/inventory/movements-page.js"], True),
 
     ("modules/admin/login.html", "Staff sign-in — GulfRabit Admin",
      "modules/admin/_fragments/login.main.html",

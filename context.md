@@ -608,7 +608,9 @@ Admin never imports from courier/inventory/accounting/cms.
       addresses and internal notes, plus owner-only erasure that ANONYMISES
       rather than deletes (orders are accounting records; the transaction is
       not the person).
-- [ ] **7.5** Products & inventory — product edit, warehouses, stock, movements, low-stock
+- [~] **7.5** Products & inventory — **inventory DONE** (`modules/inventory/`:
+      warehouses, stock levels, an append-only movement ledger, reservations,
+      stocktakes) plus `products.cost_poisha`. **Product editing still to do.**, low-stock
 - [ ] **7.6** Accounting — double-entry journal, auto-posting from orders, expenses, P&L
 - [ ] **7.7** CMS — per-node content overrides, click-to-edit, text + image only
 
@@ -1123,3 +1125,33 @@ accounting P&L, which needs B5's cost prices to be more than a revenue report.
     cash-on-delivery attempts do not flatter a customer's record.
   · 34 pages 200 · 136 PHP files clean · no console errors · no overflow at
     375/768/1280/1440.
+- **2026-07-28** — 7.5 part one: `modules/inventory` + the product cost field.
+  · **Stock is a ledger, not a counter.** `stock_movements` is the truth;
+    `stock_levels` is a running total written in the same transaction, so it can
+    be rebuilt from the ledger and a disagreement is a bug with an audit trail.
+    There is deliberately NO endpoint that sets a quantity — a stocktake records
+    the DIFFERENCE with reason `count`, because "the shelf says 38, the system
+    said 41" is the useful fact, and repeated corrections in one direction are
+    how theft is noticed.
+  · **Reserved vs on hand.** Reserving does not move stock (it has not moved),
+    but it stops the last jar being sold twice between order and despatch.
+  · **Negative on-hand is allowed and shown.** It happens — a sale booked before
+    a delivery. Forbidding it in the schema hides the error; showing it makes it
+    findable.
+  · **Reasons are a closed list and the sign is checked against them.** A
+    negative receipt or a positive sale is a flipped sign upstream, and catching
+    it is what keeps a shrinkage report worth reading.
+  · **`products.cost_poisha` added, nullable, never defaulting to zero** — a
+    zero cost makes every sale look like 100% margin, which reads as good news
+    and so never gets questioned. It is a STANDARD cost; COGS will use the
+    weighted average of real receipts in `stock_movements.unit_cost_poisha`.
+    `averageCostPoisha()` returns null today and callers must say "cost not
+    recorded" rather than substitute the selling price. This is the 7.6 blocker
+    (§8b/B5) made concrete.
+  · **`Product::toAdminArray()` is separate from `toStorefrontArray()`** so cost
+    cannot reach a customer's browser by someone adding a field to the wrong
+    array. Cost tells a customer how much room there is to haggle and tells a
+    competitor our supplier terms.
+  · 36 pages 200 · 149 PHP files clean · no console errors · no overflow at
+    375/768/1280/1440 · graph one-way (`inventory -> catalog`).
+  · STILL TO DO in 7.5: the admin product-edit screen.

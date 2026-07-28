@@ -28,7 +28,7 @@ class Product extends Model
     protected $fillable = [
         'sku', 'title', 'brand', 'origin', 'barcode',
         'category_id', 'sub_category_id',
-        'price_poisha', 'original_price_poisha',
+        'price_poisha', 'original_price_poisha', 'cost_poisha',
         'image', 'images', 'rating', 'review_count',
         'in_stock', 'stock_qty', 'tags', 'dietary', 'search_terms',
         'short_description', 'description', 'faq',
@@ -51,6 +51,7 @@ class Product extends Model
             'rating'                => 'float',
             'price_poisha'          => 'integer',
             'original_price_poisha' => 'integer',
+            'cost_poisha'           => 'integer',
             'review_count'          => 'integer',
         ];
     }
@@ -147,6 +148,7 @@ class Product extends Model
             'subSlug'          => $this->subCategory?->slug,
             'price'            => $this->priceTaka(),
             'originalPrice'    => $this->originalPriceTaka(),
+            // Deliberately NOT in the storefront payload — see toAdminArray().
             'image'            => $this->image,
             'images'           => $this->images ?? [],
             'rating'           => $this->rating,
@@ -163,6 +165,29 @@ class Product extends Model
             'specs'            => $this->specs,
             'datasheet'        => $this->datasheet,
             'createdAt'        => $this->created_at?->timestamp,
+        ];
+    }
+
+    /**
+     * The admin view of a product.
+     *
+     * Separate from toStorefrontArray() because cost is in it, and cost is the
+     * one field that must never reach a customer's browser: it tells them
+     * exactly how much room there is to haggle, and it tells a competitor what
+     * our supplier terms are. Keeping the two serialisations apart means that
+     * cannot happen by someone adding a field to the wrong array.
+     */
+    public function toAdminArray(): array
+    {
+        return $this->toStorefrontArray() + [
+            // null means unknown, never zero — a zero cost makes every sale
+            // look like pure profit.
+            'costTaka'   => $this->cost_poisha === null ? null : intdiv($this->cost_poisha, 100),
+            'marginTaka' => $this->cost_poisha === null
+                ? null
+                : intdiv($this->price_poisha - $this->cost_poisha, 100),
+            'isActive'   => $this->is_active,
+            'stockQty'   => $this->stock_qty,
         ];
     }
 }

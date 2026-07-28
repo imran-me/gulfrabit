@@ -41,6 +41,8 @@ NOINDEX = {
     "modules/admin/customers.html":         "staff panel — customer PII",
     "modules/admin/customer.html":          "staff panel — customer PII",
     "modules/courier/couriers.html":        "staff panel",
+    "modules/inventory/stock.html":         "staff panel",
+    "modules/inventory/movements.html":     "staff panel",
     "modules/content/404.html":             "an error page must never be a search result",
     "404.html":                             "ditto, at the host root",
 
