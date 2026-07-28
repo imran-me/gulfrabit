@@ -7,6 +7,7 @@ use Modules\Admin\Controllers\AdminAuthController;
 use Modules\Admin\Controllers\AdminDashboardController;
 use Modules\Admin\Controllers\AdminCustomerController;
 use Modules\Admin\Controllers\AdminOrderController;
+use Modules\Admin\Controllers\AdminProductController;
 
 /**
  * Admin module routes — the module's entire routing surface.
@@ -57,6 +58,15 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             // Irreversible, and it edits historical order records. A second,
             // narrower check inside the controller restricts it to owners.
             Route::post('/{user}/forget', [AdminCustomerController::class, 'forget'])->name('forget');
+        });
+
+        // Catalogue. Editing is scoped to the fields a merchant changes week to
+        // week — identity fields (sku, barcode, origin, category) are not
+        // editable here at all.
+        Route::middleware('admin:products')->prefix('products')->name('products.')->group(function (): void {
+            Route::get('/', [AdminProductController::class, 'index'])->name('index');
+            Route::get('/{sku}', [AdminProductController::class, 'show'])->name('show');
+            Route::patch('/{sku}', [AdminProductController::class, 'update'])->name('update');
         });
     });
 });

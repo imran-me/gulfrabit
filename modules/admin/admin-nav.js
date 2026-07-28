@@ -53,3 +53,14 @@ registerScreen({
   order: 30,
   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 5.5a3 3 0 0 1 0 5.6M17.5 20a6.4 6.4 0 0 0-2.2-4.8"/></svg>',
 });
+
+registerScreen({
+  id: 'products',
+  label: 'Products',
+  href: '/modules/admin/products.html',
+  match: ['/modules/admin/product-edit.html'],
+  area: 'products',
+  group: 'Catalogue',
+  order: 35,
+  icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7 12 3 4 7v10l8 4 8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>',
+});

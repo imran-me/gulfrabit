@@ -199,6 +199,16 @@ ADMIN_PAGES = [
      ["/modules/admin/admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/courier/couriers-page.js"], True),
 
+    ("modules/admin/products.html", "Products — GulfRabit Admin",
+     "modules/admin/_fragments/products.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/admin/products-page.js"], True),
+
+    ("modules/admin/product-edit.html", "Edit product — GulfRabit Admin",
+     "modules/admin/_fragments/product-edit.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/admin/product-edit-page.js"], True),
+
     ("modules/inventory/stock.html", "Stock — GulfRabit Admin",
      "modules/inventory/_fragments/stock.main.html",
      ["/modules/admin/admin.css"],

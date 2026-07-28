@@ -1,0 +1,62 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Products</h1>
+          <p class="admin__sub" data-prod-count>Loading…</p>
+        </div>
+      </div>
+
+      <!-- Shown only while cost is missing somewhere. It turns a vague blocker
+           ("we cannot report margin") into a worklist with a number on it. -->
+      <div class="acard" style="margin-bottom:var(--space-5)" data-cost-gap hidden>
+        <h2 class="h5" style="margin:0 0 var(--space-2)">
+          <span data-cost-gap-n></span> products have no cost recorded
+        </h2>
+        <p class="admin__sub" style="margin:0">
+          Margin and profit cannot be calculated for those, and reports will say so rather than
+          guess. Enter the unit cost from your supplier invoices — either here, or on each stock
+          receipt, which is the figure cost of goods actually uses.
+          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-cost-gap-filter>Show them</button>
+        </p>
+      </div>
+
+      <form class="afilters" data-prod-filters>
+        <div class="afilters__field">
+          <label for="pf-q">Search</label>
+          <input class="input-gr" id="pf-q" name="q" type="search" placeholder="Title, SKU or brand">
+        </div>
+        <div class="afilters__field">
+          <label for="pf-nocost">Show</label>
+          <select class="select-gr" id="pf-nocost" name="noCost">
+            <option value="">All products</option>
+            <option value="1">Missing cost only</option>
+          </select>
+        </div>
+        <div class="afilters__actions">
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Apply</button>
+          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-prod-clear>Clear</button>
+        </div>
+      </form>
+
+      <div class="atable-wrap">
+        <table class="atable">
+          <thead>
+            <tr>
+              <th scope="col">Product</th>
+              <th scope="col">Category</th>
+              <th scope="col">Price</th>
+              <th scope="col">Cost</th>
+              <th scope="col">Margin</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody data-prod-body>
+            <tr><td colspan="6" class="atable__empty">Loading products…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <nav class="apager" data-prod-pager hidden aria-label="Product pages">
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-ppage-prev>← Previous</button>
+        <span data-ppage-label></span>
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-ppage-next>Next →</button>
+      </nav>

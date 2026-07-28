@@ -608,9 +608,9 @@ Admin never imports from courier/inventory/accounting/cms.
       addresses and internal notes, plus owner-only erasure that ANONYMISES
       rather than deletes (orders are accounting records; the transaction is
       not the person).
-- [~] **7.5** Products & inventory — **inventory DONE** (`modules/inventory/`:
-      warehouses, stock levels, an append-only movement ledger, reservations,
-      stocktakes) plus `products.cost_poisha`. **Product editing still to do.**, low-stock
+- [x] **7.5** Products & inventory — `modules/inventory/` (warehouses, stock
+      ledger, reservations, stocktakes) plus `products.cost_poisha`, the admin
+      product list/edit screens and an append-only price-change log., low-stock
 - [ ] **7.6** Accounting — double-entry journal, auto-posting from orders, expenses, P&L
 - [ ] **7.7** CMS — per-node content overrides, click-to-edit, text + image only
 
@@ -1155,3 +1155,25 @@ accounting P&L, which needs B5's cost prices to be more than a revenue report.
   · 36 pages 200 · 149 PHP files clean · no console errors · no overflow at
     375/768/1280/1440 · graph one-way (`inventory -> catalog`).
   · STILL TO DO in 7.5: the admin product-edit screen.
+- **2026-07-28** — 7.5 part two: product editing.
+  · **Editing is scoped to what changes week to week** — price, cost, stock
+    flag, copy, listed/unlisted. NOT sku, barcode, origin or category: those are
+    identity, and a screen that lets a busy person retype a barcode is the
+    screen that eventually breaks the one verifiable promise the Sourcing page
+    makes to customers.
+  · **`product_price_changes` logs every price and cost move with a name.** A
+    price is the field customers screenshot; "it was ৳ 1,200 yesterday" is a
+    real conversation and without a log the only honest answer is a shrug.
+    Orders already snapshot what was charged, so this is about explaining the
+    shelf price, which is a different question.
+  · **Empty cost is null, never zero, all the way through** — form placeholder,
+    PATCH body, column and margin calculation. `marginPercent()` returns null
+    when cost is unknown, and both screens print "not recorded" rather than a
+    dash that reads as zero.
+  · **The list leads with a missing-cost count and a one-click filter for it**,
+    turning §8b/B5 from a vague blocker into a worklist somebody can finish.
+  · The edit form PATCHes only what changed — resending every field would write
+    a price-history row each time someone opened the form and saved, burying the
+    real changes.
+  · 38 pages 200 · 152 PHP files clean · no console errors · no overflow at
+    375/768/1280/1440 · storefront unaffected.

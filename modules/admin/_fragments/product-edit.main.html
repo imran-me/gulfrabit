@@ -1,0 +1,76 @@
+      <div class="admin__head">
+        <div>
+          <p class="admin__sub" style="margin:0 0 .25rem"><a href="/modules/admin/products.html">← All products</a></p>
+          <h1 class="admin__title" data-pe-title>Product</h1>
+          <p class="admin__sub" data-pe-meta></p>
+        </div>
+      </div>
+
+      <div class="aorder">
+        <section class="acard" aria-labelledby="pe-head">
+          <h2 class="h5" id="pe-head">Details</h2>
+          <form data-pe-form>
+            <div class="afilters__field" style="margin-bottom:var(--space-4)">
+              <label for="pe-name">Title</label>
+              <input class="input-gr" id="pe-name" name="title" type="text" required>
+            </div>
+            <div class="afilters__field" style="margin-bottom:var(--space-4)">
+              <label for="pe-brand">Brand</label>
+              <input class="input-gr" id="pe-brand" name="brand" type="text">
+            </div>
+            <div class="afilters__field" style="margin-bottom:var(--space-4)">
+              <label for="pe-short">Short description</label>
+              <input class="input-gr" id="pe-short" name="shortDescription" type="text">
+            </div>
+
+            <div class="arefund-form" style="padding-top:var(--space-4)">
+              <div class="afilters__field">
+                <label for="pe-price">Selling price ৳</label>
+                <input class="input-gr" id="pe-price" name="priceTaka" type="number" step="0.01" min="0.01" required>
+              </div>
+              <div class="afilters__field">
+                <label for="pe-was">“Was” price ৳</label>
+                <input class="input-gr" id="pe-was" name="originalPriceTaka" type="number" step="0.01" min="0">
+              </div>
+              <div class="afilters__field">
+                <label for="pe-cost">Unit cost ৳</label>
+                <input class="input-gr" id="pe-cost" name="costTaka" type="number" step="0.01" min="0" placeholder="Unknown">
+              </div>
+              <!-- Says what an empty box means, because "unknown" and "zero"
+                   are different facts and only one of them is honest. -->
+              <p class="admin__sub" style="flex:1 1 100%;margin:0">
+                Leave cost empty if you genuinely do not know it — that is recorded as unknown,
+                not as zero. A zero cost would report every sale as pure profit.
+              </p>
+            </div>
+
+            <div class="arefund-form" style="border-top:0">
+              <label class="afilters__field" style="flex-direction:row;align-items:center;gap:var(--space-2)">
+                <input type="checkbox" name="inStock"> <span>In stock</span>
+              </label>
+              <label class="afilters__field" style="flex-direction:row;align-items:center;gap:var(--space-2)">
+                <input type="checkbox" name="isActive"> <span>Listed on the site</span>
+              </label>
+            </div>
+
+            <div class="afilters__field" style="margin:var(--space-4) 0">
+              <label for="pe-reason">Reason for a price change <span class="atable__sub">(recorded)</span></label>
+              <input class="input-gr" id="pe-reason" name="reason" type="text" placeholder="e.g. supplier increase from 1 Aug">
+            </div>
+
+            <button class="btn-gr btn-primary-gr" type="submit">Save changes</button>
+            <p class="admin__sub" data-pe-saved hidden></p>
+          </form>
+        </section>
+
+        <section class="acard" aria-labelledby="ph-head">
+          <h2 class="h5" id="ph-head">Price history</h2>
+          <p class="admin__sub" style="margin-top:0">
+            Orders always charge the price at the time, so this is about being able to explain
+            the shelf price — not about what anyone was billed.
+          </p>
+          <ul class="arefunds" data-pe-history role="list"></ul>
+        </section>
+      </div>
+
+      <p class="aerror" data-pe-error hidden role="alert"></p>
