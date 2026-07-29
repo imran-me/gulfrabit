@@ -22,12 +22,55 @@ import { loadJSON } from '../../../shared/js/core/json-cache.js';
 import { siteURL } from '../../../shared/js/core/paths.js';
 
 // Catalog owns its data. Moved out of the old global /data bucket 2026-07-26.
+
+/* ---- Live API, with the JSON files as the fallback ---------------------
+ *
+ * The Laravel API is now the source of truth. These JSON files remain as the
+ * fallback for two situations, and only two: local development with no PHP
+ * running, and a backend outage — where showing yesterday's catalogue beats
+ * showing an error page to somebody trying to buy something.
+ *
+ * WHY THIS MATTERS MORE THAN IT LOOKS
+ * The admin panel writes to the database. Until this seam read from it, a
+ * merchant switching a category off changed the database and the shop carried
+ * on selling from a JSON file — the panel and the site disagreeing, with no
+ * error anywhere to say so.
+ *
+ * The fallback is a read of public catalogue data, so unlike the admin
+ * fixture it carries no security weight: the worst case is a stale price,
+ * which the checkout recomputes server-side anyway.
+ */
+let apiAlive = null;   // null = untried, true/false once known
+
+async function fromApi(path) {
+  if (apiAlive === false) return null;
+
+  try {
+    const res = await fetch(siteURL(`api/catalog${path}`), { headers: { Accept: 'application/json' } });
+    if (!res.ok) {
+      // A 404 means no PHP is serving /api — remember it, so every subsequent
+      // call on this page goes straight to the JSON instead of paying for a
+      // round trip that will fail the same way.
+      if (res.status === 404) apiAlive = false;
+      return null;
+    }
+    apiAlive = true;
+    return (await res.json()).data;
+  } catch {
+    apiAlive = false;
+    return null;
+  }
+}
+
 const PRODUCTS_URL   = siteURL('modules/catalog/data/products.json');
 const CATEGORIES_URL = siteURL('modules/catalog/data/categories.json');
 
 /* ---- Products ---------------------------------------------------------- */
 
 export async function getAllProducts() {
+  const live = await fromApi('/products');
+  if (live) return live;
+
   const { products } = await loadJSON(PRODUCTS_URL);
   return products;
 }
@@ -120,6 +163,9 @@ export async function suggest(query, limit = 6) {
 /* ---- Categories -------------------------------------------------------- */
 
 export async function getCategories() {
+  const live = await fromApi('/categories');
+  if (live) return live;
+
   const { categories } = await loadJSON(CATEGORIES_URL);
   return categories;
 }
