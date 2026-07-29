@@ -45,6 +45,24 @@ for f in sorted(pathlib.Path('.').rglob('*.php')):
         if not re.search(r'\b' + re.escape(short) + r'\b', body):
             issues.append(f'{rel}: unused import {fqcn}')
 
+# ---- Every Seeder must be registered -------------------------------------
+# A seeder that is never called from DatabaseSeeder produces NO error at all:
+# `db:seed` reports success having done nothing. Five were missed exactly that
+# way, and the first production seed created no admin account, no couriers, no
+# warehouse and no chart of accounts while printing DONE for everything it did
+# run. The silence is what makes it worth checking.
+registry = pathlib.Path('database/seeders/DatabaseSeeder.php')
+if registry.exists():
+    listed = registry.read_text(encoding='utf-8')
+    # Strip comments first. A commented-out registration still contains the
+    # class name and would satisfy a plain substring check.
+    listed = re.sub(r'//.*', '', listed)
+    listed = re.sub(r'/\*.*?\*/', '', listed, flags=re.S)
+
+    for sf in sorted(pathlib.Path('.').glob('modules/*/backend/Seeders/*Seeder.php')):
+        if sf.stem + '::class' not in listed:
+            issues.append(f'{sf.as_posix()}: not called from DatabaseSeeder - it will never run')
+
 print(f'  {count} PHP files checked')
 print(f'  issues: {len(issues)}')
 for i in issues:
