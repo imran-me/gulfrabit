@@ -34,7 +34,7 @@ class RequireAdmin
         // resources rule. The staff member is authenticated and known; hiding
         // the existence of the accounting area from the warehouse team buys
         // nothing and makes a permissions problem look like a broken link.
-        if ($area !== null && ! $user->can($area)) {
+        if ($area !== null && ! $user->canAccess($area)) {
             return response()->json([
                 'message' => 'Your role does not have access to this area.',
             ], 403);

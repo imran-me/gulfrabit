@@ -84,7 +84,21 @@ class AdminUser extends Authenticatable
         return self::CAPABILITIES[$this->role] ?? [];
     }
 
-    public function can(string $area): bool
+    /**
+     * May this staff member open a given admin area?
+     *
+     * NOT named `can()`. Laravel's Authenticatable already has one, from the
+     * Authorizable trait, with the signature `can($abilities, $arguments = [])`
+     * — it routes to the Gate. Redeclaring it with a narrower signature is a
+     * fatal PHP error the moment the class is loaded, which is exactly how this
+     * was found: the seeder that creates the first admin account died on it.
+     *
+     * Renaming is also the honest fix rather than matching the parent's
+     * signature. This asks about an area of the panel, not a Gate ability, and
+     * two different questions sharing one method name is how the wrong one
+     * eventually gets called.
+     */
+    public function canAccess(string $area): bool
     {
         return in_array($area, $this->capabilities(), true);
     }
