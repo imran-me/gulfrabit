@@ -71,6 +71,7 @@ jobs:
         run: |
           # A deploy that fails these should never reach the site.
           python3 tools/php-check.py
+          python3 tools/migration-order.py
           python3 tools/module-deps.py
           python3 tools/htaccess-check.py
           python3 tools/sync-delivery-copy.py --check
