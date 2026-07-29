@@ -39,6 +39,20 @@ IRREGULAR = {
 }
 
 
+
+# Tables the FRAMEWORK expects when the matching driver is selected. These ship
+# with a default Laravel install and are easy to lose when a project is
+# assembled by hand — and their absence is invisible until the one code path
+# that touches them runs. `cache` was missing here, so every Cache::remember
+# returned 500 while uncached endpoints worked perfectly.
+FRAMEWORK_TABLES = {
+    "sessions":    "SESSION_DRIVER=database",
+    "cache":       "CACHE_STORE=database",
+    "cache_locks": "Cache::lock()",
+    "jobs":        "QUEUE_CONNECTION=database",
+    "failed_jobs": "queue failures — without it a failed job vanishes silently",
+}
+
 def table_for(column_stem: str) -> str:
     """`journal_entry` -> `journal_entries`, `product` -> `products`."""
     for singular, plural in IRREGULAR.items():
@@ -65,8 +79,11 @@ def main() -> int:
     for path in scan():
         text = path.read_text(encoding="utf-8")
 
-        made = re.search(r"Schema::create\('([a-z_]+)'", text)
-        creates = made.group(1) if made else None
+        # findall, not search: one migration file routinely creates several
+        # tables. Laravel's own cache migration makes both `cache` and
+        # `cache_locks`, and the jobs one makes three. Reading only the first
+        # left this checker blind to exactly the tables it was added to guard.
+        makes = re.findall(r"Schema::create\('([a-z_]+)'", text)
 
         deps = set(re.findall(r"constrained\('([a-z_]+)'\)", text))
         for stem in re.findall(
@@ -74,16 +91,27 @@ def main() -> int:
         ):
             deps.add(table_for(stem))
 
-        # A table may reference itself (journal_entries.reverses_id), which is
-        # fine: the row exists by the time the constraint is added.
-        deps.discard(creates)
+        # A table may reference itself (journal_entries.reverses_id), and one
+        # file's tables may reference each other. Both are fine — they exist by
+        # the time the constraint is added.
+        deps -= set(makes)
 
         missing = sorted(d for d in deps if d not in created)
         if missing:
             problems.append((path.name, missing))
 
-        if creates:
-            created.add(creates)
+        created.update(makes)
+
+    absent = [t for t in FRAMEWORK_TABLES if t not in created]
+    if absent:
+        print(f"  {len(absent)} framework table(s) have no migration:\n")
+        for t in absent:
+            print(f"    {t:<14} needed by: {FRAMEWORK_TABLES[t]}")
+        print()
+        print("  These ship with a default Laravel install and are easy to lose when a")
+        print("  project is assembled by hand. Their absence is invisible until the one")
+        print("  code path that touches them runs.")
+        return 1
 
     if problems:
         print(f"  {len(problems)} migration(s) run BEFORE a table they reference:\n")
@@ -95,7 +123,7 @@ def main() -> int:
         print("  dated a day earlier than everything that references its tables.")
         return 1
 
-    print(f"  {len(created)} tables, migration order is consistent")
+    print(f"  {len(created)} tables, order consistent, framework tables present")
     return 0
 
 
