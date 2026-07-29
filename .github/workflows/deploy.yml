@@ -17,10 +17,15 @@
 
 name: Deploy to Hostinger
 
+# MANUAL ONLY. GulfRabit deploys via cron on the server (see deploy.sh), which
+# needs no secrets and no keys held by a third party. This workflow is kept as
+# the alternative for when the build needs tools the shared host does not have
+# — a Tailwind/PurgeCSS step, for instance, which needs Node.
+#
+# It does NOT run on push. Left on a push trigger with no secrets configured it
+# would fail on every commit and mail a failure notice each time, which trains
+# everyone to ignore build failures.
 on:
-  push:
-    branches: [main]
-  # Lets you re-run a deploy from the Actions tab without making a commit.
   workflow_dispatch:
 
 concurrency:
