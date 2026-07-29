@@ -69,6 +69,9 @@ php artisan migrate --force
 say "Rebuilding caches"
 php artisan config:cache --quiet
 php artisan route:cache --quiet
-php artisan view:cache --quiet
+# view:cache is deliberately absent. GulfRabit renders no Blade templates —
+# the storefront is static HTML built by tools/assemble.py and Laravel serves
+# JSON only. There is no resources/views directory to compile, and calling it
+# fails the whole step for nothing.
 
 say "Done — now on ${REMOTE:0:7}"

@@ -67,7 +67,10 @@ run php artisan db:seed --force
 say "Caches"
 run php artisan config:cache
 run php artisan route:cache
-run php artisan view:cache
+# view:cache is deliberately absent. GulfRabit renders no Blade templates —
+# the storefront is static HTML built by tools/assemble.py and Laravel serves
+# JSON only. There is no resources/views directory to compile, and calling it
+# fails the whole step for nothing.
 
 say "Done"
 echo "" | tee -a "$LOG"
