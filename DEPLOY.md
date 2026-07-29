@@ -406,3 +406,30 @@ cd ~/domains/gulfrabit.com/public_html && php artisan key:generate --force && ph
 Then read `storage/logs/setup.log` in the File Manager. **The seeder prints the
 generated admin password there — copy it before deleting the log**, because
 there is no staff password reset yet.
+
+---
+
+# Appendix — Hostinger cron gotcha
+
+A cron command starting with `cd` fails with:
+
+```
+timeout: failed to run command 'cd': No such file or directory
+```
+
+Hostinger wraps cron commands in `timeout`, which executes the binary
+**directly rather than through a shell**. `cd` is a shell builtin — there is no
+`/bin/cd` to run — so it is genuinely not found. The same applies to `&&`,
+`>`, `|` and anything else the shell provides.
+
+**So always invoke a shell explicitly, and always use absolute paths** (cron
+does not expand `~` reliably either):
+
+| Job | Command |
+|---|---|
+| One-off setup | `/bin/bash /home/u239665931/domains/gulfrabit.com/public_html/setup.sh` |
+| Recurring deploy | `/bin/bash /home/u239665931/domains/gulfrabit.com/public_html/deploy.sh` |
+
+Both scripts `cd` to their own directory as their first action, so nothing else
+is needed on the command line. That is deliberate: the less a cron entry has to
+get right, the fewer ways it can fail silently at 3am.
