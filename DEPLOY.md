@@ -6,42 +6,64 @@ Follow these in order. Do not skip step 0.
 
 ---
 
-## ⚠️ STOP — is there already a site on this hosting?
+## Step −1 — Remove WordPress properly
 
-hPanel showed a **live WordPress site on gulfrabit.com** (0.92 GB of files).
+`gulfrabit.com` currently runs WordPress. It is being replaced, so
+`public_html` becomes GulfRabit's home and no subdomain is needed.
 
-The deploy in this repo uses `rsync --delete`, which makes the server match the
-repo exactly. Pointed at a `public_html` containing WordPress, **it deletes
-WordPress** — files, theme, uploads, everything. The WordPress *database* would
-survive, but the site would be gone.
+**Deleting the files is not enough.** hPanel manages that WordPress
+installation — auto-updates, the vulnerability scanner, staging tools. If the
+installation is still registered after you empty the directory, Hostinger can
+write files back into `public_html` on its own schedule, and they will appear
+in the middle of a Laravel app. Uninstall it through hPanel so nothing is left
+pointing at that directory.
 
-**So deploy to a subdomain first.** Not as a precaution — as the actual plan:
+### 1. Back it up first, and download the backup
 
-1. It cannot touch the existing site, whatever goes wrong.
-2. You can test the storefront, the admin panel and the database against a real
-   server before anything customer-facing changes.
-3. Switching over later is a DNS/document-root change, not a redeployment.
+hPanel → **Files → Backups** → generate a backup of both **files and database**,
+then **download it to your own computer**.
 
-### Create the subdomain
+Hostinger's daily backups are a safety net with a retention window, not an
+archive. Once the site is gone and the window passes, so is any chance of
+recovering something you did not realise you needed — a page of copy, a product
+photo, a form submission.
 
-hPanel → **Domains → Subdomains** → create `app.gulfrabit.com`.
+This costs five minutes and is the only step here that cannot be redone later.
 
-Hostinger creates a directory for it, usually:
+### 2. Uninstall WordPress through hPanel
 
-```
-/home/uXXXXXXXX/domains/gulfrabit.com/public_html/app
-```
+hPanel → **WordPress → Dashboard** (or **Websites → gulfrabit.com →
+WordPress**) → look for **Delete / Uninstall WordPress**.
 
-Note the **exact** path it shows you — that is your `HOSTINGER_PATH` secret, and
-it must NOT be the WordPress `public_html`.
+Use that, not the file manager. It deregisters the installation so Hostinger
+stops managing, updating and scanning that directory.
 
-### Before you switch the main domain over, later
+### 3. Confirm the directory is empty
 
-- Take a **full backup** of the WordPress site (hPanel → Backups) and download
-  it. Hostinger's daily backups are a safety net, not an archive.
-- Decide what happens to WordPress. If it is being replaced, keep the backup. If
-  parts of it stay, they need a different subdomain — two applications cannot
-  share one document root.
+hPanel → **Files → File Manager** → open `public_html`.
+
+Remove anything left: `wp-admin/`, `wp-content/`, `wp-includes/`,
+`wp-config.php`, `index.php`, `.htaccess`, `default.php`. The directory should
+be completely empty before the first deploy.
+
+> An old `index.php` or `.htaccess` left behind will be overwritten by the
+> deploy anyway — but an old `wp-config.php` sitting in a public directory with
+> live database credentials in it will not be, because nothing in this repo has
+> that filename to replace it. Check for it specifically.
+
+### 4. The WordPress database
+
+The uninstall may leave the database in place. Look in **Databases →
+Management** for a database whose name contains `wp` or matches the WordPress
+site.
+
+**Do not delete it today.** Leave it until GulfRabit is running and you are
+certain nothing was missed — a database costs nothing to keep and is the last
+copy of anything the file backup did not capture. Delete it in a month.
+
+Create a **new, separate** database for GulfRabit in Step 2. Never reuse the
+WordPress one: Laravel's migrations would run alongside WordPress tables in the
+same schema, and telling the two apart later is unnecessary work.
 
 ---
 
@@ -163,7 +185,7 @@ ssh -p PORT USERNAME@HOST     # the values from hPanel → SSH Access
 Then:
 
 ```bash
-cd ~/domains/YOURDOMAIN/public_html
+cd ~/domains/gulfrabit.com/public_html
 nano .env
 ```
 
@@ -214,7 +236,7 @@ repository secret**. Add five:
 | `HOSTINGER_HOST` | SSH host from hPanel (an IP or hostname) |
 | `HOSTINGER_PORT` | SSH port from hPanel (usually `65002`) |
 | `HOSTINGER_USER` | SSH username (`u123456789`) |
-| `HOSTINGER_PATH` | `/home/u123456789/domains/YOURDOMAIN/public_html` |
+| `HOSTINGER_PATH` | `/home/u123456789/domains/gulfrabit.com/public_html` |
 | `HOSTINGER_SSH_KEY` | The **entire** contents of `~/.ssh/gulfrabit_deploy` |
 
 For the key, copy everything including the first and last lines:
