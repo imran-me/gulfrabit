@@ -653,6 +653,125 @@ metadata, cashback clawed back from refunds, and app-install interstitials.
 
 ---
 
+## 7b. LIVE DEPLOYMENT (as of 2026-07-30) — READ THIS FIRST
+
+**The site is live at https://gulfrabit.com** — Laravel 12, PHP 8.3, MySQL, on
+Hostinger. Not GitHub Pages. PHP genuinely executes; `/api/catalog/products`
+returns 24 products from the database.
+
+### How deployment works now
+
+```
+edit in VS Code  →  git push  →  live within ~1 minute
+```
+
+A cron job on the server runs `deploy.sh` every minute. It fetches, resets to
+`origin/main`, runs Composer only when the lock changed, applies **migrations**,
+and rebuilds caches. It exits in milliseconds when nothing moved.
+
+**Hostinger's hPanel → GIT "Redeploy" button is NOT used** — it has no webhook
+and cannot run migrations. The cron replaces it entirely.
+
+### Server facts
+
+| | |
+|---|---|
+| SSH | **BLOCKED from the owner's network** on 22 and 65002, on wifi and mobile. All server work goes through hPanel cron jobs. |
+| Path | `/home/u239665931/domains/gulfrabit.com/public_html` |
+| Cron command form | `/bin/bash /full/path/script.sh` — Hostinger execs without a shell, so `cd` and `&&` fail |
+| PHP | 8.3.31 · Laravel 12.64 |
+| `.env` | On the server only. **Hostinger's WAF blocks saving a file named `.env` in File Manager** — upload as `.txt` and rename. |
+
+### Scripts on the server
+
+| Script | When |
+|---|---|
+| `deploy.sh` | **Permanent cron, every minute.** Do not remove. |
+| `doctor.sh` | Run on demand via a temporary cron when something breaks — reports EVERYTHING at once |
+| `setup.sh` | First install only |
+| `reset-db.sh` | Wipes and rebuilds. **Refuses once real orders exist.** |
+
+### PERMANENT BACKUP
+
+- **Git tag `v1.0-live`** (pushed to GitHub) — `git checkout v1.0-live` restores
+  the exact state at go-live.
+- **Zip:** `D:\Shah Alam\GulfRabit\_BACKUPS\gulfrabit-v1.0-live-2026-07-30.zip`
+
+Before modifying a module, tag it: `git tag pre-<module>-<date>`.
+
+---
+
+## 7c. PHASE 8 — CATALOGUE MANAGEMENT + LUXURY UI (owner brief, 2026-07-30)
+
+**Owner's words:** "I will login, add product, delete products, add categories,
+what to show in highlights, what to showcase, how to change price listing,
+coupon set, original vs discount price, add multiple photos."
+
+Full autonomy granted: build continuously, no permission needed, verify each
+piece before moving to the next.
+
+### What EXISTS today (do not rebuild)
+
+Admin product **edit** only: title, brand, short description, price, was-price,
+cost, in-stock, listed. Price changes logged. Screens: dashboard, orders,
+quotes, couriers, customers, products, stock, P&L, journal.
+
+### What is MISSING — the Phase 8 build order
+
+- [ ] **8.1 Categories** — CRUD, **on/off toggle** (off = category AND its
+      products vanish from the site; on = they return), sort order, menu
+      visibility. Do this first: the new categories below depend on it.
+- [ ] **8.2 Products** — create, delete (unlist, since orders reference them),
+      on/off toggle, bulk actions
+- [ ] **8.3 Images** — upload endpoint + gallery ordering. Also unblocks real
+      photography (§8b/B3). Currently all images are placeholder SVGs.
+- [ ] **8.4 Highlights / showcase** — pick featured products by clicking, decide
+      what appears on the home page
+- [ ] **8.5 Coupons** — create codes, min spend, cap, expiry, on/off.
+      Currently GULF10/HOP500 are HARDCODED in `PromotionSeeder.php`.
+- [ ] **8.6 Menus / submenus** — manage the header nav from the panel
+- [ ] **8.7 Luxury UI/UX pass** — see below
+
+### NEW CATEGORIES the owner wants (add these)
+
+1. Imported Food & Grocery · 2. Dates · 3. Honey · 4. Beverage ·
+5. Dry Fruits · 6. Spices · 7. Nuts & Makhana · 8. Baby Food · 9. Herbs ·
+10. Oil & Ghee
+
+**Keep the existing categories** (electronics, kitchen, fashion, beauty, office,
+industrial) — just give everything an on/off switch so unused ones can be
+hidden rather than deleted.
+
+### UI/UX direction
+
+> "Minimal, clean, yet luxurious, high quality and classy visuals and effects.
+> BD's only platform where every item is 100% imported, premium, high price."
+
+- **MOBILE FIRST — the top priority.** Most customers are on phones.
+- Alignment, button consistency, hover/press effects, considered animation
+- Study comparable premium retailers before designing
+- Effects go in JS per the locked architecture; Tailwind + custom CSS for style
+
+### Working method the owner asked for, explicitly
+
+1. Back up the module before touching it
+2. Build
+3. **Check → review → test → compare against the previous look**
+4. Refine, re-apply, re-check
+5. Only at 100% satisfaction, move to the next
+
+### Traps to remember
+
+- **Do NOT add `db:seed` to `deploy.sh`.** Seeders use `updateOrCreate`, so a
+  deploy would silently revert prices edited in the admin panel.
+- Deleting a product must UNLIST, never hard-delete — `order_items` references it.
+- Category off must hide its products too, without deleting anything.
+- Every admin write needs the CSRF header (`csrfHeader()` in
+  `modules/admin/backend/api.js`) — admin pages are static, so Laravel cannot
+  inject a token.
+
+---
+
 ## 8b. BLOCKED — cannot be done here, and why (2026-07-28)
 
 Kept separate from the follow-up list because these are not "not yet done" —
