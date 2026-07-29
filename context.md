@@ -1274,3 +1274,25 @@ accounting P&L, which needs B5's cost prices to be more than a revenue report.
   · `signIn()` became async, so both call sites now await it — an unhandled
     rejection there would have been invisible.
   · 40 pages 200 · 176 PHP files clean · no console errors · all generators green.
+- **2026-07-29** — B2B desk notification when an RFQ arrives (storefront follow-up).
+  · **The problem:** a quote request was stored and nobody was told.
+  · **The obvious fix is an email, and there is no mail credential (§8b/B2).**
+    So the fix that actually works today is to make an unanswered request
+    impossible to walk past: a count on the dashboard every staff member sees on
+    sign-in, and an inbox ordered OLDEST-FIRST. Newest-first would bury the
+    request that has waited three days under the one from this morning — and the
+    old one is the one costing money.
+  · That is not a stand-in for email. For a desk of two or three people it is
+    the better alert, because it cannot be marked read and forgotten: the count
+    stays up until the request is actually moved on. Email is an addition when
+    there is something to send it with, and the screen says so plainly rather
+    than leaving someone to conclude the feature is broken.
+  · Waiting time is shown per row and turns red past 24 hours — a B2B enquiry
+    that waits two days has usually already phoned somebody else.
+  · `responded_at` is stamped the FIRST time a request leaves `new` and never
+    overwritten, so "how long did we take to respond" stays answerable.
+  · **Route-stack split:** the storefront's quote endpoints are stateless JSON
+    on `api`; the admin inbox authenticates with a session cookie and needs the
+    `web` stack. One file cannot be on both, so `admin-routes.php` is separate.
+  · 41 pages 200 · 178 PHP files clean · no console errors · no overflow at
+    375/768/1280/1440 · all four generators green.

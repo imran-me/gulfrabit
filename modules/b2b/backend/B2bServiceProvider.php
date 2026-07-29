@@ -34,6 +34,16 @@ class B2bServiceProvider extends ServiceProvider
                 ->middleware('api')
                 ->prefix('api')
                 ->group(__DIR__ . '/routes.php');
+
+            // The admin inbox is a SEPARATE file on the `web` stack. The
+            // storefront's quote endpoints are stateless JSON and belong on
+            // `api`; the panel authenticates with a session cookie, which needs
+            // the session and CSRF middleware `api` deliberately omits. One
+            // file cannot be on both stacks, so there are two.
+            $this->app['router']
+                ->middleware('web')
+                ->prefix('api')
+                ->group(__DIR__ . '/admin-routes.php');
         });
     }
 }

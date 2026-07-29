@@ -16,6 +16,7 @@ const CARD_LABELS = {
   lowStock:         ['Lines at or below reorder level', true],
   outOfStock:       ['Out of stock', true],
   unpostedEntries:  ['Unposted journal entries', true],
+  quotesWaiting:    ['Quote requests waiting', true],
 };
 
 document.addEventListener('admin:ready', ({ detail }) => paint(detail.session));

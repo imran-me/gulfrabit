@@ -37,6 +37,16 @@ class AdminDashboardController extends Controller
             $cards['orders'] = $this->orderCards($user->can('accounting') || $user->can('customers'));
         }
 
+        // Quote requests waiting on somebody. This IS the B2B notification:
+        // there is no mail credential (context.md 8b/B2), so the thing that
+        // actually works is a count nobody can walk past on sign-in.
+        if ($user->can('orders') && Schema::hasTable('quote_requests')) {
+            $waiting = DB::table('quote_requests')->whereIn('status', ['new', 'reviewing'])->count();
+            if ($waiting > 0) {
+                $cards['b2b'] = ['quotesWaiting' => $waiting];
+            }
+        }
+
         if ($user->can('inventory') && Schema::hasTable('stock_levels')) {
             $cards['inventory'] = $this->inventoryCards();
         }

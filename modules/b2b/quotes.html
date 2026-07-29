@@ -14,7 +14,7 @@
     document.documentElement.classList.remove('no-js');
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profit & loss — GulfRabit Admin</title>
+  <title>Quote requests — GulfRabit Admin</title>
   <meta name="description" content="GulfRabit staff panel.">
   <meta name="theme-color" content="#0A0A0A">
   <meta name="author" content="GulfRabit">
@@ -23,11 +23,11 @@
   <!-- Social / Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GulfRabit">
-  <meta property="og:title" content="Profit & loss — GulfRabit Admin">
+  <meta property="og:title" content="Quote requests — GulfRabit Admin">
   <meta property="og:description" content="GulfRabit staff panel.">
   <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Profit & loss — GulfRabit Admin">
+  <meta name="twitter:title" content="Quote requests — GulfRabit Admin">
   <meta name="twitter:description" content="GulfRabit staff panel.">
   <link rel="icon" href="../../favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
@@ -70,52 +70,57 @@
 
 <div class="admin__head">
         <div>
-          <h1 class="admin__title">Profit &amp; loss</h1>
-          <p class="admin__sub" data-pnl-period>Loading…</p>
+          <h1 class="admin__title">Quote requests</h1>
+          <p class="admin__sub" data-q-count>Loading…</p>
         </div>
       </div>
 
-      <form class="afilters" data-pnl-filters>
+      <!-- Said plainly rather than left to be discovered. Somebody wondering
+           why they never got an email should find the answer here, not conclude
+           the feature is broken. -->
+      <div class="acard" style="margin-bottom:var(--space-5)">
+        <p class="admin__sub" style="margin:0">
+          There is no email or SMS gateway connected, so nothing is sent when a request arrives.
+          The count on your dashboard is the alert — it stays up until each request is moved on,
+          and this list puts the one that has been waiting longest at the top.
+        </p>
+      </div>
+
+      <form class="afilters" data-q-filters>
         <div class="afilters__field">
-          <label for="pl-from">From</label>
-          <input class="input-gr" id="pl-from" name="from" type="date" required>
-        </div>
-        <div class="afilters__field">
-          <label for="pl-to">To</label>
-          <input class="input-gr" id="pl-to" name="to" type="date" required>
+          <label for="qf-status">Show</label>
+          <select class="select-gr" id="qf-status" name="status">
+            <option value="open">Waiting on us</option>
+            <option value="quoted">Quoted</option>
+            <option value="won">Won</option>
+            <option value="lost">Lost</option>
+          </select>
         </div>
         <div class="afilters__actions">
-          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Run</button>
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Apply</button>
         </div>
       </form>
 
-      <!-- The caveat, when it applies. Placed ABOVE the figures rather than in
-           a footnote: a number you read before the warning is a number you have
-           already believed. -->
-      <div class="acard" style="margin-bottom:var(--space-5);border-left:3px solid var(--gr-warning)"
-           data-pnl-caveat hidden>
-        <h2 class="h5" style="margin:0 0 var(--space-2)">Gross profit cannot be calculated</h2>
-        <p class="admin__sub" style="margin:0" data-pnl-caveat-text></p>
+      <div class="atable-wrap">
+        <table class="atable">
+          <thead>
+            <tr>
+              <th scope="col">Ref</th>
+              <th scope="col">Company</th>
+              <th scope="col">Contact</th>
+              <th scope="col">Lines</th>
+              <th scope="col">Indicative</th>
+              <th scope="col">Waiting</th>
+              <th scope="col">Move to</th>
+            </tr>
+          </thead>
+          <tbody data-q-body>
+            <tr><td colspan="7" class="atable__empty">Loading requests…</td></tr>
+          </tbody>
+        </table>
       </div>
 
-      <div class="aorder">
-        <section class="acard" aria-labelledby="pi-head">
-          <h2 class="h5" id="pi-head">Income</h2>
-          <dl class="atotals" data-pnl-income></dl>
-        </section>
-
-        <section class="acard" aria-labelledby="pe-head">
-          <h2 class="h5" id="pe-head">Expenses</h2>
-          <dl class="atotals" data-pnl-expenses></dl>
-        </section>
-
-        <section class="acard" aria-labelledby="pr-head">
-          <h2 class="h5" id="pr-head">Result</h2>
-          <div class="acards" data-pnl-result></div>
-        </section>
-      </div>
-
-      <p class="aerror" data-pnl-error hidden role="alert"></p>
+      <p class="aerror" data-q-error hidden role="alert"></p>
     </main>
   </div>
 
@@ -126,6 +131,6 @@
   <script type="module" src="../../modules/inventory/inventory-nav.js"></script>
   <script type="module" src="../../modules/accounting/accounting-nav.js"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js"></script>
-  <script type="module" src="../../modules/accounting/pnl-page.js"></script>
+  <script type="module" src="../../modules/b2b/quotes-page.js"></script>
 </body>
 </html>

@@ -1,0 +1,53 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Quote requests</h1>
+          <p class="admin__sub" data-q-count>Loading…</p>
+        </div>
+      </div>
+
+      <!-- Said plainly rather than left to be discovered. Somebody wondering
+           why they never got an email should find the answer here, not conclude
+           the feature is broken. -->
+      <div class="acard" style="margin-bottom:var(--space-5)">
+        <p class="admin__sub" style="margin:0">
+          There is no email or SMS gateway connected, so nothing is sent when a request arrives.
+          The count on your dashboard is the alert — it stays up until each request is moved on,
+          and this list puts the one that has been waiting longest at the top.
+        </p>
+      </div>
+
+      <form class="afilters" data-q-filters>
+        <div class="afilters__field">
+          <label for="qf-status">Show</label>
+          <select class="select-gr" id="qf-status" name="status">
+            <option value="open">Waiting on us</option>
+            <option value="quoted">Quoted</option>
+            <option value="won">Won</option>
+            <option value="lost">Lost</option>
+          </select>
+        </div>
+        <div class="afilters__actions">
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Apply</button>
+        </div>
+      </form>
+
+      <div class="atable-wrap">
+        <table class="atable">
+          <thead>
+            <tr>
+              <th scope="col">Ref</th>
+              <th scope="col">Company</th>
+              <th scope="col">Contact</th>
+              <th scope="col">Lines</th>
+              <th scope="col">Indicative</th>
+              <th scope="col">Waiting</th>
+              <th scope="col">Move to</th>
+            </tr>
+          </thead>
+          <tbody data-q-body>
+            <tr><td colspan="7" class="atable__empty">Loading requests…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="aerror" data-q-error hidden role="alert"></p>
