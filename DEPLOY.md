@@ -18,19 +18,7 @@ write files back into `public_html` on its own schedule, and they will appear
 in the middle of a Laravel app. Uninstall it through hPanel so nothing is left
 pointing at that directory.
 
-### 1. Back it up first, and download the backup
-
-hPanel → **Files → Backups** → generate a backup of both **files and database**,
-then **download it to your own computer**.
-
-Hostinger's daily backups are a safety net with a retention window, not an
-archive. Once the site is gone and the window passes, so is any chance of
-recovering something you did not realise you needed — a page of copy, a product
-photo, a form submission.
-
-This costs five minutes and is the only step here that cannot be redone later.
-
-### 2. Uninstall WordPress through hPanel
+### 1. Uninstall WordPress through hPanel
 
 hPanel → **WordPress → Dashboard** (or **Websites → gulfrabit.com →
 WordPress**) → look for **Delete / Uninstall WordPress**.
@@ -38,7 +26,7 @@ WordPress**) → look for **Delete / Uninstall WordPress**.
 Use that, not the file manager. It deregisters the installation so Hostinger
 stops managing, updating and scanning that directory.
 
-### 3. Confirm the directory is empty
+### 2. Confirm the directory is empty
 
 hPanel → **Files → File Manager** → open `public_html`.
 
@@ -51,19 +39,18 @@ be completely empty before the first deploy.
 > live database credentials in it will not be, because nothing in this repo has
 > that filename to replace it. Check for it specifically.
 
-### 4. The WordPress database
+### 3. The WordPress database
 
 The uninstall may leave the database in place. Look in **Databases →
 Management** for a database whose name contains `wp` or matches the WordPress
 site.
 
-**Do not delete it today.** Leave it until GulfRabit is running and you are
-certain nothing was missed — a database costs nothing to keep and is the last
-copy of anything the file backup did not capture. Delete it in a month.
+Delete it whenever you like — the old site held nothing worth keeping.
 
-Create a **new, separate** database for GulfRabit in Step 2. Never reuse the
-WordPress one: Laravel's migrations would run alongside WordPress tables in the
-same schema, and telling the two apart later is unnecessary work.
+What matters is that GulfRabit gets a **new, separate** database in Step 2.
+Never reuse the WordPress one: Laravel's migrations would create tables
+alongside WordPress's in the same schema, and telling the two apart afterwards
+is work with no payoff.
 
 ---
 
