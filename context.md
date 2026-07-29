@@ -718,7 +718,7 @@ quotes, couriers, customers, products, stock, P&L, journal.
 
 ### What is MISSING — the Phase 8 build order
 
-- [ ] **8.1 Categories** — CRUD, **on/off toggle** (off = category AND its
+- [x] **8.1 Categories** DONE 2026-07-30 — — CRUD, **on/off toggle** (off = category AND its
       products vanish from the site; on = they return), sort order, menu
       visibility. Do this first: the new categories below depend on it.
 - [ ] **8.2 Products** — create, delete (unlist, since orders reference them),
@@ -1415,3 +1415,17 @@ accounting P&L, which needs B5's cost prices to be more than a revenue report.
     `web` stack. One file cannot be on both, so `admin-routes.php` is separate.
   · 41 pages 200 · 178 PHP files clean · no console errors · no overflow at
     375/768/1280/1440 · all four generators green.
+
+### 8.1 done — and one thing it exposed
+
+`modules/catalog/backend/api.js` (the frontend seam) still reads
+`data/products.json` and `data/categories.json`. The Laravel API exists and
+works, but **the storefront is not calling it yet** — so the shop reads JSON
+while the admin panel reads the database.
+
+That split has to close before category on/off actually affects the shop: today
+a merchant switching a category off in the panel changes the database, and the
+storefront never looks. **This is now the first job of 8.2.**
+
+Also: `deploy.sh` deliberately does not seed, so the 9 new categories only reach
+the live database when `db:seed` is run once by hand (a one-off cron).

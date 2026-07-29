@@ -23,7 +23,7 @@ class Category extends Model
 
     protected $fillable = [
         'slug', 'name', 'icon', 'image', 'blurb',
-        'audience', 'parent_id', 'sort_order', 'is_active',
+        'audience', 'parent_id', 'sort_order', 'is_active', 'show_in_menu', 'menu_order',
     ];
 
     protected function casts(): array

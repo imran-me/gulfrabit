@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Admin\Controllers\AdminAuthController;
 use Modules\Admin\Controllers\AdminDashboardController;
+use Modules\Admin\Controllers\AdminCategoryController;
 use Modules\Admin\Controllers\AdminCustomerController;
 use Modules\Admin\Controllers\AdminOrderController;
 use Modules\Admin\Controllers\AdminProductController;
@@ -84,6 +85,16 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::get('/', [AdminProductController::class, 'index'])->name('index');
             Route::get('/{sku}', [AdminProductController::class, 'show'])->name('show');
             Route::patch('/{sku}', [AdminProductController::class, 'update'])->name('update');
+        });
+
+        // Categories. Same capability as products — whoever curates the
+        // catalogue curates the shelves it sits on.
+        Route::middleware('admin:products')->prefix('categories')->name('categories.')->group(function (): void {
+            Route::get('/', [AdminCategoryController::class, 'index'])->name('index');
+            Route::post('/', [AdminCategoryController::class, 'store'])->name('store');
+            Route::patch('/{category}', [AdminCategoryController::class, 'update'])->name('update');
+            // Refuses while products are attached — see the controller.
+            Route::delete('/{category}', [AdminCategoryController::class, 'destroy'])->name('destroy');
         });
     });
 });

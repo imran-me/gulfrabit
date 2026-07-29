@@ -218,6 +218,11 @@ ADMIN_PAGES = [
      ["/modules/admin/admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/courier/couriers-page.js"], True),
 
+    ("modules/admin/categories.html", "Categories — GulfRabit Admin",
+     "modules/admin/_fragments/categories.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/admin/categories-page.js"], True),
+
     ("modules/admin/products.html", "Products — GulfRabit Admin",
      "modules/admin/_fragments/products.main.html",
      ["/modules/admin/admin.css"],

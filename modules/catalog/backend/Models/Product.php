@@ -75,9 +75,26 @@ class Product extends Model
 
     /* ---- Scopes -------------------------------------------------------- */
 
+    /**
+     * Sellable: the product is on AND its category is on.
+     *
+     * The category check is here, in the one scope every listing, search,
+     * homepage rail and API already uses, rather than repeated at each call
+     * site. Switching a category off has to hide its products everywhere at
+     * once — the merchant's expectation is "the category disappears from the
+     * site including its products", and a scope that only checked the product
+     * flag would leave them findable by search and reachable by direct link
+     * while the category itself was gone.
+     *
+     * A product with no category stays visible: null means uncategorised, not
+     * hidden, and dropping those would silently delist anything mid-migration.
+     */
     public function scopeActive(Builder $q): Builder
     {
-        return $q->where('is_active', true);
+        return $q->where('products.is_active', true)
+            ->where(fn (Builder $w) => $w
+                ->whereNull('category_id')
+                ->orWhereHas('category', fn (Builder $c) => $c->where('is_active', true)));
     }
 
     public function scopeDiscounted(Builder $q): Builder

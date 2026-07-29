@@ -336,3 +336,75 @@
   background: rgba(200, 30, 30, .08); color: var(--gr-error);
   border-radius: var(--radius-sm); font-size: var(--fs-14);
 }
+
+/* ---- Categories -------------------------------------------------------
+   Cards rather than a table row: eighteen categories with two switches each
+   needs more horizontal room than a phone has, and this panel is used on one. */
+.acat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+.acat {
+  background: var(--surface-raised);
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+.acat:hover { border-color: var(--gr-cyan); box-shadow: var(--shadow-sm); }
+
+/* An off category is visibly muted, but never hidden — the merchant has to be
+   able to find it again to switch it back on. */
+.acat.is-off { opacity: .62; }
+.acat.is-off .acat__name { text-decoration: line-through; text-decoration-thickness: 1px; }
+
+.acat__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.acat__name { margin: 0; font-size: var(--fs-20); line-height: var(--lh-snug); }
+.acat__slug { font-size: var(--fs-12); color: var(--text-muted); font-family: monospace; }
+.acat__blurb { margin: 0; color: var(--text-secondary); font-size: var(--fs-14); line-height: var(--lh-normal); }
+
+.acat__counts { display: flex; gap: var(--space-4); font-size: var(--fs-12); color: var(--text-muted); }
+.acat__counts strong { color: var(--text-primary); font-size: var(--fs-16); display: block; }
+
+.acat__switches { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: auto; padding-top: var(--space-3); border-top: 1px solid var(--border-hairline); }
+
+/* ---- Switch -----------------------------------------------------------
+   A real checkbox underneath, so it is keyboard-reachable and announces its
+   state to a screen reader. The visual is drawn from the input's own :checked
+   state rather than a class the JS has to remember to keep in sync. */
+.aswitch { display: inline-flex; align-items: center; gap: var(--space-2); cursor: pointer; font-size: var(--fs-14); }
+.aswitch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.aswitch__track {
+  position: relative;
+  width: 40px; height: 22px;
+  border-radius: var(--radius-pill);
+  background: var(--border-input);
+  transition: background var(--dur-fast) var(--ease-out);
+  flex-shrink: 0;
+}
+.aswitch__track::after {
+  content: "";
+  position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.aswitch input:checked + .aswitch__track { background: var(--gr-cyan); }
+.aswitch input:checked + .aswitch__track::after { transform: translateX(18px); }
+.aswitch input:focus-visible + .aswitch__track { outline: 2px solid var(--gr-cyan-dark); outline-offset: 2px; }
+.aswitch input:disabled + .aswitch__track { opacity: .5; cursor: wait; }
+
+.acat-new { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-end; margin-bottom: var(--space-5); }
+.acat-new__actions { display: flex; gap: var(--space-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .acat, .aswitch__track, .aswitch__track::after { transition: none; }
+}

@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "note": "Mock category tree. Served by shared/js/core/data-service.js. When the Laravel backend lands, replace with GET /api/categories (see shared/backend/api-contract.md). Icon names map to inline SVGs used by the header mega-menu and category cards.",
+    "note": "Seeded by CatalogSeeder. Adding a category here creates it; it never deletes one, because a category with products in it is not something a data file should be able to remove. Use the admin panel's on/off switch to hide a category instead — that hides its products too, reversibly.",
     "version": 1
   },
   "categories": [
@@ -12,9 +12,18 @@
       "audience": "retail",
       "blurb": "Sourced from trusted origins. Dates, chocolates, coffee, tea and pantry staples.",
       "children": [
-        { "slug": "dates-honey", "name": "Dates & Honey" },
-        { "slug": "coffee-tea", "name": "Coffee & Tea" },
-        { "slug": "chocolates-confectionery", "name": "Chocolates & Confectionery" }
+        {
+          "slug": "dates-honey",
+          "name": "Dates & Honey"
+        },
+        {
+          "slug": "coffee-tea",
+          "name": "Coffee & Tea"
+        },
+        {
+          "slug": "chocolates-confectionery",
+          "name": "Chocolates & Confectionery"
+        }
       ]
     },
     {
@@ -25,8 +34,14 @@
       "audience": "retail",
       "blurb": "Cold-chain delivered. Imported milk powders, cheese and butter.",
       "children": [
-        { "slug": "milk-powder", "name": "Milk Powder" },
-        { "slug": "cheese-butter", "name": "Cheese & Butter" }
+        {
+          "slug": "milk-powder",
+          "name": "Milk Powder"
+        },
+        {
+          "slug": "cheese-butter",
+          "name": "Cheese & Butter"
+        }
       ]
     },
     {
@@ -46,9 +61,18 @@
       "audience": "retail",
       "blurb": "Verified imports. Audio, wearables, smart-home and accessories.",
       "children": [
-        { "slug": "audio", "name": "Audio" },
-        { "slug": "wearables", "name": "Wearables" },
-        { "slug": "smart-home", "name": "Smart Home" }
+        {
+          "slug": "audio",
+          "name": "Audio"
+        },
+        {
+          "slug": "wearables",
+          "name": "Wearables"
+        },
+        {
+          "slug": "smart-home",
+          "name": "Smart Home"
+        }
       ]
     },
     {
@@ -95,11 +119,104 @@
       "audience": "b2b",
       "blurb": "PCBs, switches, relays, sensors and polymers. Spec-driven, bulk-ready.",
       "children": [
-        { "slug": "pcb-components", "name": "PCB & Components" },
-        { "slug": "switches-relays", "name": "Switches & Relays" },
-        { "slug": "sensors", "name": "Sensors" },
-        { "slug": "polymers", "name": "Polymers & Resins" }
+        {
+          "slug": "pcb-components",
+          "name": "PCB & Components"
+        },
+        {
+          "slug": "switches-relays",
+          "name": "Switches & Relays"
+        },
+        {
+          "slug": "sensors",
+          "name": "Sensors"
+        },
+        {
+          "slug": "polymers",
+          "name": "Polymers & Resins"
+        }
       ]
+    },
+    {
+      "slug": "dates",
+      "name": "Dates",
+      "icon": null,
+      "image": "/assets/images/categories/dates.svg",
+      "blurb": "Medjool, Ajwa, Sukkari — graded and cold-packed.",
+      "audience": "retail",
+      "children": []
+    },
+    {
+      "slug": "honey",
+      "name": "Honey",
+      "icon": null,
+      "image": "/assets/images/categories/honey.svg",
+      "blurb": "Raw, unfiltered, single-origin. Sidr, Manuka, wildflower.",
+      "audience": "retail",
+      "children": []
+    },
+    {
+      "slug": "beverage",
+      "name": "Beverage",
+      "icon": null,
+      "image": "/assets/images/categories/beverage.svg",
+      "blurb": "Coffee, tea and imported soft drinks.",
+      "audience": "retail",
+      "children": []
+    },
+    {
+      "slug": "dry-fruits",
+      "name": "Dry Fruits",
+      "icon": null,
+      "image": "/assets/images/categories/dry-fruits.svg",
+      "blurb": "Apricots, figs, raisins and prunes.",
+      "audience": "retail",
+      "children": []
+    },
+    {
+      "slug": "spices",
+      "name": "Spices",
+      "icon": null,
+      "image": "/assets/images/categories/spices.svg",
+      "blurb": "Whole and ground, from their growing regions.",
+      "audience": "retail",
+      "children": []
+    },
+    {
+      "slug": "nuts-makhana",
+      "name": "Nuts & Makhana",
+      "icon": null,
+      "image": "/assets/images/categories/nuts-makhana.svg",
+      "blurb": "Pistachios, cashews, almonds, walnuts and fox nuts.",
+      "audience": "retail",
+      "children": []
+    },
+    {
+      "slug": "baby-food",
+      "name": "Baby Food",
+      "icon": null,
+      "image": "/assets/images/categories/baby-food.svg",
+      "blurb": "Formula, cereals and purees from trusted brands.",
+      "audience": "retail",
+      "children": []
+    },
+    {
+      "slug": "herbs",
+      "name": "Herbs",
+      "icon": null,
+      "image": "/assets/images/categories/herbs.svg",
+      "blurb": "Culinary and wellness herbs, whole and dried.",
+      "audience": "retail",
+      "children": []
+    },
+    {
+      "slug": "oil-ghee",
+      "name": "Oil & Ghee",
+      "icon": null,
+      "image": "/assets/images/categories/oil-ghee.svg",
+      "blurb": "Olive, cold-pressed oils, and pure ghee.",
+      "audience": "retail",
+      "children": []
     }
   ]
 }

@@ -41,6 +41,7 @@ NOINDEX = {
     "modules/admin/customers.html":         "staff panel — customer PII",
     "modules/admin/customer.html":          "staff panel — customer PII",
     "modules/courier/couriers.html":        "staff panel",
+    "modules/admin/categories.html":        "staff panel",
     "modules/admin/products.html":          "staff panel",
     "modules/admin/product-edit.html":      "staff panel",
     "modules/b2b/quotes.html":              "staff panel",

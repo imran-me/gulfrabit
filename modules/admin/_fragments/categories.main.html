@@ -1,0 +1,49 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Categories</h1>
+          <p class="admin__sub" data-cat-count>Loading…</p>
+        </div>
+        <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-cat-new>+ New category</button>
+      </div>
+
+      <!-- Stated once, plainly, because the two switches look similar and do
+           very different things. A merchant who confuses them either hides a
+           category they meant to keep selling, or leaves one on sale that they
+           thought they had taken down. -->
+      <div class="acard" style="margin-bottom:var(--space-5)">
+        <p class="admin__sub" style="margin:0">
+          <strong>Live</strong> off hides the category <em>and every product in it</em> from the
+          whole site — reversible, nothing is deleted.
+          <strong>In menu</strong> off only removes it from the header navigation; it stays
+          shoppable and searchable.
+        </p>
+      </div>
+
+      <form class="acard acat-new" data-cat-form hidden>
+        <div class="afilters__field">
+          <label for="cn-name">Category name</label>
+          <input class="input-gr" id="cn-name" name="name" type="text" required
+                 placeholder="e.g. Saffron &amp; Rare Spices">
+        </div>
+        <div class="afilters__field afilters__field--wide">
+          <label for="cn-blurb">Short description <span class="atable__sub">(shown on the category page)</span></label>
+          <input class="input-gr" id="cn-blurb" name="blurb" type="text"
+                 placeholder="One line about what belongs here">
+        </div>
+        <div class="acat-new__actions">
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Create</button>
+          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-cat-cancel>Cancel</button>
+        </div>
+        <p class="admin__sub" style="flex:1 1 100%;margin:0">
+          The web address is set from the name and never changes afterwards — it is in every
+          product link a customer may have saved.
+        </p>
+      </form>
+
+      <!-- Cards, not a table. Eighteen categories with two switches each is a
+           lot of horizontal room, and this panel is used on a phone. -->
+      <div class="acat-grid" data-cat-list>
+        <p class="admin__sub">Loading categories…</p>
+      </div>
+
+      <p class="aerror" data-cat-error hidden role="alert"></p>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="UTF-8">
+  <script>
+    /* Removes .no-js before first paint. Everything with [data-reveal] is
+       hidden by CSS until IntersectionObserver reveals it — which means with
+       JavaScript off it stayed hidden forever, taking the whole Sourcing
+       process, the About values and most of the home page with it. Scoping the
+       hide to html:not(.no-js) makes the animation an enhancement again
+       instead of a precondition for reading the site.
+       Inline and first on purpose: a deferred file would let the page paint
+       blank before it ran. */
+    document.documentElement.classList.remove('no-js');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categories — GulfRabit Admin</title>
+  <meta name="description" content="GulfRabit staff panel.">
+  <meta name="theme-color" content="#0A0A0A">
+  <meta name="author" content="GulfRabit">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="light">
+  <!-- Social / Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GulfRabit">
+  <meta property="og:title" content="Categories — GulfRabit Admin">
+  <meta property="og:description" content="GulfRabit staff panel.">
+  <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Categories — GulfRabit Admin">
+  <meta name="twitter:description" content="GulfRabit staff panel.">
+  <link rel="icon" href="../../favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
+  <link rel="apple-touch-icon" href="../../assets/logo/apple-touch-icon.png">
+  <link rel="manifest" href="../../site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../../shared/css/tailwind.config.js"></script>
+  <link rel="stylesheet" href="../../shared/css/style.css">
+  <link rel="stylesheet" href="../../modules/admin/admin.css">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
+  </script>
+</head>
+<body>
+  <!-- Hidden until the shell confirms a session, so a signed-out visitor never
+       sees a flash of the panel's structure. This is cosmetic, not a control:
+       the page contains no data to protect. -->
+  <div class="admin" data-admin-shell hidden>
+    <aside class="admin__side">
+      <a class="admin__brand" href="../../modules/admin/index.html">
+        <img src="../../assets/logo/gulfrabit-mark.png" alt="">
+        <span>GulfRabit<small>Admin</small></span>
+      </a>
+
+      <nav class="anav" aria-label="Admin sections" data-admin-nav></nav>
+
+      <div class="admin__who">
+        <div class="admin__who-name" data-admin-name>—</div>
+        <span class="admin__who-role" data-admin-role>—</span>
+        <button type="button" class="admin__signout" data-admin-signout>Sign out</button>
+      </div>
+    </aside>
+
+    <main class="admin__main" id="main">
+
+<div class="admin__head">
+        <div>
+          <h1 class="admin__title">Categories</h1>
+          <p class="admin__sub" data-cat-count>Loading…</p>
+        </div>
+        <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-cat-new>+ New category</button>
+      </div>
+
+      <!-- Stated once, plainly, because the two switches look similar and do
+           very different things. A merchant who confuses them either hides a
+           category they meant to keep selling, or leaves one on sale that they
+           thought they had taken down. -->
+      <div class="acard" style="margin-bottom:var(--space-5)">
+        <p class="admin__sub" style="margin:0">
+          <strong>Live</strong> off hides the category <em>and every product in it</em> from the
+          whole site — reversible, nothing is deleted.
+          <strong>In menu</strong> off only removes it from the header navigation; it stays
+          shoppable and searchable.
+        </p>
+      </div>
+
+      <form class="acard acat-new" data-cat-form hidden>
+        <div class="afilters__field">
+          <label for="cn-name">Category name</label>
+          <input class="input-gr" id="cn-name" name="name" type="text" required
+                 placeholder="e.g. Saffron &amp; Rare Spices">
+        </div>
+        <div class="afilters__field afilters__field--wide">
+          <label for="cn-blurb">Short description <span class="atable__sub">(shown on the category page)</span></label>
+          <input class="input-gr" id="cn-blurb" name="blurb" type="text"
+                 placeholder="One line about what belongs here">
+        </div>
+        <div class="acat-new__actions">
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Create</button>
+          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-cat-cancel>Cancel</button>
+        </div>
+        <p class="admin__sub" style="flex:1 1 100%;margin:0">
+          The web address is set from the name and never changes afterwards — it is in every
+          product link a customer may have saved.
+        </p>
+      </form>
+
+      <!-- Cards, not a table. Eighteen categories with two switches each is a
+           lot of horizontal room, and this panel is used on a phone. -->
+      <div class="acat-grid" data-cat-list>
+        <p class="admin__sub">Loading categories…</p>
+      </div>
+
+      <p class="aerror" data-cat-error hidden role="alert"></p>
+    </main>
+  </div>
+
+  <script type="module" src="../../shared/js/main.js"></script>
+  <script type="module" src="../../modules/admin/admin-shell.js"></script>
+  <script type="module" src="../../modules/admin/admin-nav.js"></script>
+  <script type="module" src="../../modules/courier/courier-nav.js"></script>
+  <script type="module" src="../../modules/inventory/inventory-nav.js"></script>
+  <script type="module" src="../../modules/accounting/accounting-nav.js"></script>
+  <script type="module" src="../../modules/b2b/b2b-nav.js"></script>
+  <script type="module" src="../../modules/admin/categories-page.js"></script>
+</body>
+</html>
