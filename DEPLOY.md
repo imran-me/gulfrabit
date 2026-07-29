@@ -347,3 +347,62 @@ Never set `APP_DEBUG=true` on a live site to diagnose something. Read the log.
   find out whether your backups work.
 - **Real product photography, payment gateway, SMS, courier APIs** — these need
   accounts and credentials only you can supply. See `context.md` §8b.
+
+---
+
+# Appendix — when SSH will not connect
+
+If `ssh -p 65002 …` times out **without ever asking for a password**, nothing
+reached the server. That is a network path problem, not a credentials problem —
+a wrong password gets refused, it does not hang.
+
+Check in this order.
+
+### 1. Is it your connection?
+
+Tether to a phone and try the same command again. Many ISPs block outbound
+traffic on unusual ports, and 65002 is unusual. If it works on mobile data, the
+ISP is the answer and everything below still applies for whenever you are on
+that network.
+
+### 2. Is it Windows?
+
+Antivirus and third-party firewalls block outbound SSH more often than people
+expect. Temporarily disable, retry, re-enable.
+
+### 3. Is Hostinger restricting it?
+
+hPanel → **Advanced → IP Manager**. If SSH is limited to specific addresses,
+yours has to be on the list — and a home connection's address usually changes.
+
+---
+
+## The path that needs no SSH at all
+
+Everything can be done through hPanel in a browser. It is slower to set up and
+then identical to use.
+
+| Step | Where | What |
+|---|---|---|
+| 1 | **Advanced → GIT** | Clone `https://github.com/imran-me/gulfrabit.git` into `public_html`. Enable auto-deployment and copy the webhook URL. |
+| 2 | **GitHub → Settings → Webhooks** | Add that URL, content type `application/json`, "just the push event". Now a push pulls the code. |
+| 3 | **Files → File Manager** | Create `.env` in `public_html` — the contents are in Step 4 of this guide. |
+| 4 | **Advanced → Cron Jobs** | Add: `cd ~/domains/gulfrabit.com/public_html && bash deploy.sh` every 5 minutes. |
+
+Step 2 brings the code across. Step 4 is what makes it work: Hostinger's GIT
+feature only runs `git pull`, so something still has to run Composer and the
+migrations, and `deploy.sh` is that something. It exits in milliseconds when
+nothing has changed, so running it every five minutes costs nothing.
+
+### The one-off setup, without a shell
+
+`php artisan key:generate`, `migrate` and `db:seed` have to run once. Add a
+cron job set to run **once**, then delete it:
+
+```
+cd ~/domains/gulfrabit.com/public_html && php artisan key:generate --force && php artisan migrate --force && php artisan db:seed --force > storage/logs/setup.log 2>&1
+```
+
+Then read `storage/logs/setup.log` in the File Manager. **The seeder prints the
+generated admin password there — copy it before deleting the log**, because
+there is no staff password reset yet.
