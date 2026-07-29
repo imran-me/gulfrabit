@@ -6,6 +6,45 @@ Follow these in order. Do not skip step 0.
 
 ---
 
+## ⚠️ STOP — is there already a site on this hosting?
+
+hPanel showed a **live WordPress site on gulfrabit.com** (0.92 GB of files).
+
+The deploy in this repo uses `rsync --delete`, which makes the server match the
+repo exactly. Pointed at a `public_html` containing WordPress, **it deletes
+WordPress** — files, theme, uploads, everything. The WordPress *database* would
+survive, but the site would be gone.
+
+**So deploy to a subdomain first.** Not as a precaution — as the actual plan:
+
+1. It cannot touch the existing site, whatever goes wrong.
+2. You can test the storefront, the admin panel and the database against a real
+   server before anything customer-facing changes.
+3. Switching over later is a DNS/document-root change, not a redeployment.
+
+### Create the subdomain
+
+hPanel → **Domains → Subdomains** → create `app.gulfrabit.com`.
+
+Hostinger creates a directory for it, usually:
+
+```
+/home/uXXXXXXXX/domains/gulfrabit.com/public_html/app
+```
+
+Note the **exact** path it shows you — that is your `HOSTINGER_PATH` secret, and
+it must NOT be the WordPress `public_html`.
+
+### Before you switch the main domain over, later
+
+- Take a **full backup** of the WordPress site (hPanel → Backups) and download
+  it. Hostinger's daily backups are a safety net, not an archive.
+- Decide what happens to WordPress. If it is being replaced, keep the backup. If
+  parts of it stay, they need a different subdomain — two applications cannot
+  share one document root.
+
+---
+
 ## First, the thing people get wrong
 
 **Git deploys code. It does not deploy your database, and you do not want it to.**
@@ -51,7 +90,8 @@ assumes SSH exists.
 
 hPanel → **Hosting → Manage → PHP Configuration**.
 
-Select **PHP 8.2** (or higher if offered).
+hPanel reports **PHP 8.3** for this hosting, which is correct for Laravel 12 —
+leave it. The workflow is already set to 8.3 to match.
 
 Then open `.github/workflows/deploy.yml` in this repo and make sure the
 `php-version:` line matches what you selected. If the two disagree, dependencies

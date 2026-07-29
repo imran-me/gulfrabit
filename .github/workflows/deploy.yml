@@ -38,10 +38,11 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          # Match the PHP version selected in hPanel. A mismatch here compiles
-          # dependencies against the wrong runtime and fails at request time,
-          # not at deploy time — which is much harder to diagnose.
-          php-version: '8.2'
+          # Matches the PHP version hPanel reports for this hosting (8.3).
+          # A mismatch compiles dependencies against one runtime and executes
+          # them on another, and the failure shows up as a broken page long
+          # after the deploy reported success.
+          php-version: '8.3'
           extensions: mbstring, pdo_mysql, bcmath, gd, zip
           coverage: none
 
