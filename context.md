@@ -1429,3 +1429,32 @@ storefront never looks. **This is now the first job of 8.2.**
 
 Also: `deploy.sh` deliberately does not seed, so the 9 new categories only reach
 the live database when `db:seed` is run once by hand (a one-off cron).
+
+### 8.7 started — mobile hero (2026-07-30)
+
+Measured before: at 390px the hero was **702px tall and the first content
+section began at 1042px** — more than a full phone screen of scrolling before a
+single product or category appeared.
+
+Cause: `height: clamp(460px, 78vh, 760px)`. 78vh is a sensible desktop
+proportion and a poor mobile one — a phone viewport is tall and narrow, so the
+same fraction is far more vertical space.
+
+Fixed with two mobile steps (<640px and <380px): absolute heights, tighter type,
+a 34ch measure instead of 48ch, and full-width buttons. Result:
+
+| width | hero before → after | content starts |
+|---|---|---|
+| 360 | 702 → **400** | 1042 → **782** |
+| 390 | 702 → **460** | 1042 → **800** |
+| 768+ | 702 (unchanged) | unchanged |
+
+**OPEN QUESTION for the next session:** a 390px screenshot *looks* as though the
+hero button and the trust strip clip at the right edge, while a programmatic
+`scrollWidth` check reports no overflow at 360/390/414/768/1280. One of the two
+is wrong. Check the computed `right` of `.hero__actions .btn-gr` and
+`.trust-item` specifically before changing anything — do not "fix" it on the
+strength of the screenshot alone.
+
+Remaining 8.7 work: category tiles, product cards, PDP, cart and checkout on
+mobile; hover/press effects; alignment pass.

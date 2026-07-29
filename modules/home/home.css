@@ -89,3 +89,45 @@
 }
 .home-cat-grid .category-card:hover::before { opacity: 1; }
 .home-cat-grid .category-card > * { position: relative; z-index: 1; }
+
+/* ---- Mobile hero: shorter, so the shop starts above the fold ----------
+   Measured at 390px before this: the hero was 702px tall and the first content
+   section began at 1042px — more than a full phone screen of scrolling before
+   a single product or category appeared. A luxury storefront can afford a
+   generous hero on a desktop; on a phone it just delays the shop.
+
+   `78vh` is the culprit. It is a reasonable desktop proportion and a poor
+   mobile one, because a phone viewport is tall and narrow: 78% of it is far
+   more vertical space than the same fraction of a laptop screen. Below 640px
+   the hero is sized in absolute terms instead. */
+@media (max-width: 639.98px) {
+  .hero__viewport { height: clamp(380px, 52vh, 460px); }
+
+  /* The slide's own padding was tuned for the taller box. */
+  .hero__slide { padding-block: var(--space-6); }
+
+  .hero__title { font-size: var(--fs-31); line-height: var(--lh-tight); }
+  .hero__text {
+    font-size: var(--fs-16);
+    /* 34ch, not 48: at 390px a 48ch measure is most of the screen width and
+       runs to four or five lines, which pushes the button off-screen. */
+    max-width: 34ch;
+  }
+  .hero__actions { margin-top: var(--space-5); }
+
+  /* Full-width tap target. A phone thumb should not have to aim. */
+  .hero__actions .btn-gr { width: 100%; justify-content: center; }
+
+  /* Controls sat in the corners of a much taller box; tighten with it. */
+  .hero__controls,
+  .hero__dots { bottom: var(--space-4); }
+  .hero__controls { right: var(--space-4); }
+  .hero__dots { left: var(--space-4); }
+}
+
+/* Very small phones (360px and under) — one more step down, because at this
+   width the title was wrapping to four lines and eating the whole slide. */
+@media (max-width: 380px) {
+  .hero__viewport { height: clamp(340px, 48vh, 400px); }
+  .hero__title { font-size: var(--fs-25); }
+}
