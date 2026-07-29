@@ -1,3 +1,14 @@
+> **SUPERSEDED for the automated setup (2026-07-29).**
+>
+> This document describes deploying by cloning the repo on the server and
+> pulling by hand. That still works, and it is the right reference for what the
+> server needs.
+>
+> For **push-to-deploy**, follow [DEPLOY.md](DEPLOY.md) instead — GitHub builds
+> the application (Composer runs there, not on shared hosting) and ships the
+> finished result over SSH. Do not use both: `git pull` on the server and rsync
+> from GitHub will fight over the same directory.
+
 # Deploying to Hostinger
 
 Purpose: get **PHP running** so the Laravel modules can actually be developed

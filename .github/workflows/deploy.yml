@@ -1,0 +1,113 @@
+# Push to main -> build here -> ship to Hostinger -> migrate.
+#
+# WHY THE BUILD HAPPENS ON GITHUB AND NOT ON THE SERVER
+# -----------------------------------------------------
+# Hostinger shared hosting has no reliable Composer and no Node. GitHub's runner
+# has both. So the runner produces a finished application — vendor/ installed,
+# assets built — and only the result is copied across. That also means the
+# server never needs build tools, and a failed build never reaches the site.
+#
+# WHAT THIS DOES NOT DO
+# ---------------------
+# It never touches your data. `migrate` changes table STRUCTURE; it does not
+# copy rows. Your orders and customers live on the server and nowhere else, and
+# nothing in this file can overwrite them. There is no "sync the database" step
+# because a push that could replace live records is one bad push away from
+# losing the business's books.
+
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches: [main]
+  # Lets you re-run a deploy from the Actions tab without making a commit.
+  workflow_dispatch:
+
+concurrency:
+  # Two deploys overlapping would rsync half of one on top of the other.
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          # Match the PHP version selected in hPanel. A mismatch here compiles
+          # dependencies against the wrong runtime and fails at request time,
+          # not at deploy time — which is much harder to diagnose.
+          php-version: '8.2'
+          extensions: mbstring, pdo_mysql, bcmath, gd, zip
+          coverage: none
+
+      - name: Install PHP dependencies
+        run: |
+          # --no-dev: PHPUnit and friends have no business on a live server.
+          # --optimize-autoloader: one classmap instead of filesystem lookups.
+          if [ -f composer.lock ]; then
+            composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+          else
+            echo "No composer.lock yet — resolving and creating one."
+            composer update --no-dev --optimize-autoloader --no-interaction --prefer-dist
+          fi
+
+      - name: Rebuild static pages
+        run: |
+          python3 tools/assemble.py
+          python3 tools/sitemap.py
+
+      - name: Verify before shipping
+        run: |
+          # A deploy that fails these should never reach the site.
+          python3 tools/php-check.py
+          python3 tools/module-deps.py
+          python3 tools/htaccess-check.py
+          python3 tools/sync-delivery-copy.py --check
+          python3 tools/gen-sourcing-facts.py --check
+
+      - name: Ship to Hostinger
+        uses: burnett01/rsync-deployments@7.0.1
+        with:
+          # --delete keeps the server identical to the repo, so a file you
+          # remove here disappears there too. The excludes below are the things
+          # that must SURVIVE that: they live only on the server.
+          switches: >-
+            -avzr --delete
+            --exclude='.git*'
+            --exclude='.env'
+            --exclude='storage/'
+            --exclude='bootstrap/cache/'
+            --exclude='node_modules/'
+            --exclude='tools/'
+            --exclude='research/'
+            --exclude='*.md'
+          path: ./
+          remote_path: ${{ secrets.HOSTINGER_PATH }}
+          remote_host: ${{ secrets.HOSTINGER_HOST }}
+          remote_port: ${{ secrets.HOSTINGER_PORT }}
+          remote_user: ${{ secrets.HOSTINGER_USER }}
+          remote_key: ${{ secrets.HOSTINGER_SSH_KEY }}
+
+      - name: Migrate and warm caches
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            cd ${{ secrets.HOSTINGER_PATH }}
+            # --force because a production migrate prompts for confirmation and
+            # there is nobody at a keyboard to answer it.
+            php artisan migrate --force
+            # Caches are rebuilt AFTER the code lands, never before, or they
+            # would cache the previous release's config and routes.
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan storage:link || true
