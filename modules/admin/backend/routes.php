@@ -20,6 +20,23 @@ use Modules\Admin\Controllers\AdminProductController;
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
 
+    // Handing out the CSRF cookie.
+    //
+    // Every admin page in this project is a STATIC html file — Laravel never
+    // renders them, so it cannot inject the hidden @csrf field a Blade form
+    // would carry. The panel still authenticates by session cookie and so still
+    // runs through the `web` stack, which requires a token on every write.
+    //
+    // This endpoint closes that gap: a GET through `web` makes Laravel set the
+    // XSRF-TOKEN cookie, and the client echoes it back in the X-XSRF-TOKEN
+    // header on writes. That is the same handshake Sanctum's csrf-cookie route
+    // performs, done here without pulling in the dependency for one cookie.
+    //
+    // Exempting the admin routes from CSRF instead would have been one line and
+    // would have removed the protection from the highest-value surface on the
+    // site.
+    Route::get('/csrf', fn () => response()->noContent())->name('csrf');
+
     // Public, and heavily throttled. Five staff accounts exist; nobody needs
     // more than a handful of attempts a minute, and the limit is per IP AND
     // the account lock is per account, so neither axis alone gets an attacker

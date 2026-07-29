@@ -22,7 +22,7 @@
  * nothing.
  */
 
-import { getSession } from '../admin/backend/api.js';
+import { getSession, csrfHeader } from '../admin/backend/api.js';
 
 const PAGE = document.documentElement.dataset.cmsPage;
 const WANTED = new URLSearchParams(location.search).get('edit') === '1';
@@ -92,7 +92,12 @@ async function save(body, applyLocally) {
     const res = await fetch('/api/admin/cms/blocks', {
       method: 'PUT',
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      // Same CSRF handshake as every other admin write — see csrfHeader().
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        ...(await csrfHeader()),
+      },
       body: JSON.stringify(body),
     });
 

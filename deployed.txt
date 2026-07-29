@@ -1,6 +1,0 @@
-This file exists to prove push-to-deploy works.
-
-If you can see this at https://gulfrabit.com/deployed.txt then a `git push`
-reached the server on its own, with nobody clicking Redeploy in hPanel.
-
-Last edited: 2026-07-30 — first automatic deployment test.

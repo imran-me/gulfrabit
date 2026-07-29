@@ -61,6 +61,43 @@ const DEV_SESSION = {
   isFixture: true,
 };
 
+
+/**
+ * The CSRF token, as a header the server will accept.
+ *
+ * Admin pages are static files, so no @csrf field is ever rendered into them —
+ * but the panel authenticates by session cookie and therefore runs through
+ * Laravel's `web` stack, which rejects any write without a token. Laravel sets
+ * an XSRF-TOKEN cookie on any response through that stack; the client's job is
+ * to echo it back in X-XSRF-TOKEN.
+ *
+ * The cookie value is URL-encoded, so it must be decoded before it is sent — a
+ * raw `%3D` where a `=` belongs fails the comparison and produces exactly the
+ * same "CSRF token mismatch" as sending nothing at all, which makes it a
+ * miserable thing to debug.
+ */
+export async function csrfHeader() {
+  let token = readCookie('XSRF-TOKEN');
+
+  if (!token) {
+    // No cookie yet — this is a first visit, or the session expired. One GET
+    // through the web stack is enough to be issued one.
+    try {
+      await fetch(`${API}/csrf`, { credentials: 'same-origin' });
+      token = readCookie('XSRF-TOKEN');
+    } catch {
+      return {};      // no backend; the caller's own fallback handles it
+    }
+  }
+
+  return token ? { 'X-XSRF-TOKEN': token } : {};
+}
+
+function readCookie(name) {
+  const hit = document.cookie.split('; ').find((c) => c.startsWith(`${name}=`));
+  return hit ? decodeURIComponent(hit.slice(name.length + 1)) : null;
+}
+
 /**
  * The signed-in staff member, or null.
  * @returns {Promise<null|{id:number,name:string,email:string,role:string,capabilities:string[]}>}
@@ -108,7 +145,11 @@ export async function signIn(email, password) {
     const res = await fetch(`${API}/login`, {
       method: 'POST',
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        ...(await csrfHeader()),
+      },
       body: JSON.stringify({ email, password }),
     });
 
@@ -140,7 +181,11 @@ function devSignIn() {
 export async function signOut() {
   localStorage.removeItem(DEV_KEY);
   try {
-    await fetch(`${API}/logout`, { method: 'POST', credentials: 'same-origin' });
+    await fetch(`${API}/logout`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: await csrfHeader(),
+    });
   } catch {
     /* Signing out locally is what matters; a failed round-trip must not trap
        someone in a session they asked to leave. */
@@ -157,9 +202,14 @@ export async function signOut() {
  * @throws {Error & {status:number}} on any non-ok response
  */
 export async function adminFetch(path, options = {}) {
+  // Writes need the CSRF header; GETs do not, and fetching a cookie for every
+  // read would double the request count on screens that only ever read.
+  const method = (options.method || 'GET').toUpperCase();
+  const csrf = method === 'GET' || method === 'HEAD' ? {} : await csrfHeader();
+
   const res = await fetch(`${API}${path}`, {
     credentials: 'same-origin',
-    headers: { Accept: 'application/json', ...(options.headers || {}) },
+    headers: { Accept: 'application/json', ...csrf, ...(options.headers || {}) },
     ...options,
   });
 
