@@ -203,7 +203,7 @@ SESSION_LIFETIME=120
 # generates a strong password if you leave ADMIN_PASSWORD unset — see
 # modules/admin/backend/Seeders/AdminUserSeeder.php
 ADMIN_EMAIL=you@yourcompany.com
-ADMIN_NAME=Your Name
+ADMIN_NAME="Your Name"
 ```
 
 Save with `Ctrl+O`, `Enter`, then `Ctrl+X`.
