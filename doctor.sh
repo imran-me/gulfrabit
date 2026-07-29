@@ -47,6 +47,10 @@ done
 # fatal cannot hide the checks that come after — each is wrapped.
 out ""
 php -d display_errors=0 <<'PHP' 2>&1 | tee -a "$LOG"
+<?php
+// The opening tag is required. PHP reading a script from stdin still parses in
+// HTML mode until it sees <?php — without it the whole heredoc is echoed as
+// text, which is exactly what happened on the first run.
 require "vendor/autoload.php";
 $app = require_once "bootstrap/app.php";
 
