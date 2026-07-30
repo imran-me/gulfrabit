@@ -21,7 +21,15 @@ use Modules\Highlights\Models\Highlight;
  */
 class HighlightController extends Controller
 {
-    /** GET /api/highlights/{rail} */
+    /**
+     * GET /api/highlights/{rail}
+     *
+     * NEVER 500s. This runs on the home page, and a shelf that cannot be read
+     * must degrade to an empty list — the browser then falls back to its own
+     * tag filter, which is exactly the behaviour that existed before this
+     * module. Taking the front page down because a curation table is missing
+     * would be a self-inflicted outage over a merchandising feature.
+     */
     public function show(string $rail): JsonResponse
     {
         $config = Highlight::RAILS[$rail] ?? null;
@@ -30,6 +38,18 @@ class HighlightController extends Controller
             return response()->json(['message' => 'No such shelf.'], 404);
         }
 
+        try {
+            return $this->shelf($rail, $config);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json(['data' => [], 'source' => 'unavailable']);
+        }
+    }
+
+    /** @param array{fallbackTag: string} $config */
+    private function shelf(string $rail, array $config): JsonResponse
+    {
         $curated = Highlight::query()
             ->rail($rail)
             ->with('product.category')

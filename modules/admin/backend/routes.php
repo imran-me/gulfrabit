@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Admin\Controllers\AdminAuthController;
 use Modules\Admin\Controllers\AdminDashboardController;
+use Modules\Admin\Controllers\AdminHealthController;
 use Modules\Admin\Controllers\AdminCategoryController;
 use Modules\Admin\Controllers\AdminCustomerController;
 use Modules\Admin\Controllers\AdminOrderController;
@@ -54,6 +55,11 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         // The dashboard aggregates across modules that may not be installed,
         // so the controller asks each one and skips what is absent.
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+        // "Is the server actually set up?" — any signed-in staff member, so
+        // whoever is looking at a broken screen can answer it themselves
+        // instead of asking for a cron job and a log file.
+        Route::get('/health', [AdminHealthController::class, 'index'])->name('health');
 
         // Orders. `admin:orders` on the group, so a role without the capability
         // never reaches the controller — including the roles that exist today

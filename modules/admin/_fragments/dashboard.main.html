@@ -14,3 +14,13 @@
         No cards to show yet. Cards appear as modules are installed — orders,
         inventory and accounting each contribute their own.
       </p>
+
+      <!-- Setup check. Hidden entirely when everything passes: a permanent
+           green panel on the screen you see most is noise, and noise is what
+           stops a red one being noticed. It appears only when something is
+           actually wrong, and says what to do about it. -->
+      <section class="acard acard--danger" data-dash-health hidden
+               style="margin-top:var(--space-5)" aria-labelledby="dh-head">
+        <h2 class="h5" id="dh-head" style="margin:0 0 var(--space-2)">Something needs attention</h2>
+        <ul class="arefunds" data-dash-health-list role="list"></ul>
+      </section>

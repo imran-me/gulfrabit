@@ -8,6 +8,7 @@
  */
 
 import { adminFetch } from './backend/api.js';
+import { escapeHtml } from './admin-shell.js';
 const CARD_LABELS = {
   todayCount:       ['Orders today', false],
   awaitingPack:     ['Awaiting packing', true],
@@ -57,3 +58,47 @@ async function paint(session) {
       </div>`;
   }).join('');
 }
+
+/* ------------------------------------------------------------------ *
+ * Setup check
+ * ------------------------------------------------------------------ */
+
+/**
+ * Ask the server whether it is actually set up, and surface only the failures.
+ *
+ * Runs after the cards and never blocks them — a health check that delays the
+ * dashboard has made things worse. It renders nothing at all when everything
+ * passes: a permanent green panel on the screen you look at most often is
+ * noise, and noise is exactly what stops a red one from being noticed.
+ *
+ * This exists so a broken deploy is visible where the merchant already is,
+ * instead of needing a cron job and a log file to answer "did the migration
+ * run?".
+ */
+async function checkSetup() {
+  let data;
+  try {
+    ({ data } = await adminFetch('/health'));
+  } catch {
+    return;   // an older server without the endpoint; nothing to report
+  }
+
+  if (data.ok) return;
+
+  const section = document.querySelector('[data-dash-health]');
+  const list = document.querySelector('[data-dash-health-list]');
+  if (!section || !list) return;
+
+  list.innerHTML = data.checks
+    .filter((c) => !c.ok)
+    .map((c) => `
+      <li class="arefund">
+        <div><strong>${escapeHtml(c.name)}</strong> — ${escapeHtml(c.detail)}</div>
+        ${c.fix ? `<div class="atable__sub">${escapeHtml(c.fix)}</div>` : ''}
+      </li>`)
+    .join('');
+
+  section.hidden = false;
+}
+
+document.addEventListener('admin:ready', checkSetup);
