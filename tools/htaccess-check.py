@@ -57,7 +57,51 @@ must_block = [
     'tools/qa-viewport.html',
 ]
 
+# Headers the file must still be setting. Not a test of Apache's behaviour —
+# it is a test that nobody edited them away. Each one was added for a reason
+# and their absence is silent: the site works perfectly without a CSP, right
+# up until it does not.
+REQUIRED_HEADERS = {
+    'X-Content-Type-Options':        'MIME sniffing turns a .webp holding HTML into stored XSS',
+    'X-Frame-Options':               'clickjacking on the admin panel',
+    'Referrer-Policy':               'leaks order URLs to third parties',
+    'Permissions-Policy':            'camera/mic/geolocation on a shop that needs none',
+    'Strict-Transport-Security':     'first request of a session in cleartext',
+    'Content-Security-Policy':       'restricts where scripts may be loaded from',
+    'Cross-Origin-Opener-Policy':    'cross-window attacks from popups',
+    'X-Permitted-Cross-Domain-Policies': 'a crossdomain.xml in the media library',
+}
+
+# Directives the CSP must keep. These are the ones doing real work — see the
+# note in .htaccess about what the policy does and does not buy.
+REQUIRED_CSP = ['form-action', 'base-uri', 'object-src', 'frame-ancestors', 'default-src']
+
+htaccess = (pathlib.Path(__file__).resolve().parent.parent / '.htaccess').read_text(encoding='utf-8')
+
 fails = 0
+
+print('  SECURITY HEADERS:')
+for header, why in REQUIRED_HEADERS.items():
+    # Must be set, and not commented out.
+    present = any(
+        header in line and line.strip().startswith('Header')
+        for line in htaccess.splitlines()
+    )
+    if not present:
+        fails += 1
+    print(f'   {"MISSING - " + why if not present else "ok           "}  {header}')
+
+print()
+print('  CSP DIRECTIVES:')
+csp_line = next((l for l in htaccess.splitlines()
+                 if 'Content-Security-Policy' in l and l.strip().startswith('Header')), '')
+for directive in REQUIRED_CSP:
+    present = directive in csp_line
+    if not present:
+        fails += 1
+    print(f'   {"MISSING - BUG" if not present else "ok           "}  {directive}')
+
+print()
 print('  MUST BE REACHABLE:')
 for p in must_allow:
     bad = blocked(p)

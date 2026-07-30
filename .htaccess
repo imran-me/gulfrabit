@@ -126,10 +126,58 @@ RedirectMatch 404 ^/(composer\.(json|lock)|artisan|phpunit\.xml|context\.md|BACK
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
 
-    # Enable once the domain is HTTPS-only and you are confident:
-    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    # Opener isolation. `allow-popups` because bKash and the courier trackers
+    # open in a new window and need to keep their reference back.
+    Header always set Cross-Origin-Opener-Policy "same-origin-allow-popups"
+
+    # Nothing here is a Flash or Silverlight policy target. Cheap, and it stops
+    # a crossdomain.xml uploaded to the media library ever meaning anything.
+    Header always set X-Permitted-Cross-Domain-Policies "none"
+
+    # HSTS. The redirect at the top of this file already forces HTTPS; this
+    # stops the first request of a session being made in cleartext at all.
+    #
+    # 180 days rather than a year, and NO includeSubDomains or preload. HSTS is
+    # the one header that cannot be taken back quickly — a browser that has
+    # seen it refuses plain HTTP for the full duration whatever the server
+    # later says. Six months is long enough to be worth having and short
+    # enough to recover from. `includeSubDomains` is omitted because it would
+    # cover subdomains that do not exist yet and may not have certificates.
+    Header always set Strict-Transport-Security "max-age=15552000"
+
+    # ---- Content-Security-Policy --------------------------------------
+    #
+    # BE CLEAR ABOUT WHAT THIS DOES AND DOES NOT BUY, because a CSP with
+    # 'unsafe-inline' in script-src is often mistaken for XSS protection and
+    # this one is not that.
+    #
+    # WHAT IT STOPS:
+    #   - a script loaded from a host not named here (the usual outcome of a
+    #     compromised dependency or an injected <script src>)
+    #   - <base> injection, which silently repoints every relative URL
+    #   - a form posted to an attacker's domain — form-action is the one that
+    #     matters most on a checkout
+    #   - plugins, embeds, and framing by anyone else
+    #
+    # WHAT IT DOES NOT STOP: injected INLINE script. 'unsafe-inline' is
+    # currently required because the pages carry an inline no-js remover, two
+    # JSON-LD blocks per page, and 77 style="" attributes on the home page
+    # alone. Hashing would need every one of those enumerated and kept in step.
+    #
+    # 'unsafe-eval' is there for cdn.tailwindcss.com, which compiles CSS in the
+    # browser. THAT CDN IS THE REASON THIS POLICY IS WEAK. Building Tailwind
+    # ahead of time would let script-src drop to 'self' plus hashes, and is the
+    # single change that would make this a real defence rather than a
+    # meaningful-but-partial one. Recorded in context.md as the next step.
+    #
+    # NOTE THE TWO FONTSHARE HOSTS. api.fontshare.com serves the @font-face
+    # CSS; the font FILES come from cdn.fontshare.com. Listing only the first —
+    # which is the one written in the page — blocks the display typeface on
+    # every page, and the failure is a silent fallback to a system font rather
+    # than an error anybody notices. Verified by fetching the stylesheet.
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.fontshare.com data:; img-src 'self' data: blob:; connect-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests"
 </IfModule>
 
 Options -Indexes
