@@ -29,6 +29,7 @@ return [
     Modules\Cms\CmsServiceProvider::class,
     Modules\Checkout\CheckoutServiceProvider::class,
     Modules\Courier\CourierServiceProvider::class,
+    Modules\Highlights\HighlightsServiceProvider::class,
     Modules\Inventory\InventoryServiceProvider::class,
     Modules\Media\MediaServiceProvider::class,
     Modules\Delivery\DeliveryServiceProvider::class,

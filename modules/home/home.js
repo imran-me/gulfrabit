@@ -58,6 +58,34 @@ function initHeroCarousel() {
   start();
 }
 
+/**
+ * One home-page shelf: what the merchant curated, or the old tag behaviour.
+ *
+ * The Highlights screen in the admin panel decides the products and their
+ * order. That is a separate module, and this deliberately does not import it:
+ * a `fetch` that 404s is a fallback, an `import` that fails is a blank home
+ * page. Deleting modules/highlights/ has to cost the curation and nothing else.
+ *
+ * The server already falls back to the tag when a shelf is empty, so the
+ * `catch` here is for the endpoint being absent entirely.
+ */
+async function shelf(rail, limit) {
+  try {
+    const res = await fetch(`/api/highlights/${rail}`, {
+      headers: { Accept: 'application/json' },
+    });
+
+    if (res.ok) {
+      const { data } = await res.json();
+      if (Array.isArray(data) && data.length) return data.slice(0, limit);
+    }
+  } catch {
+    // Offline, or no API. Fall through.
+  }
+
+  return getFeatured(rail, limit);
+}
+
 /* ---- Product sections (skeleton → data) ------------------------------- */
 async function initProductSections() {
   const premiumRail = document.querySelector('[data-rail="premium"]');
@@ -70,8 +98,8 @@ async function initProductSections() {
 
   try {
     const [premium, fresh] = await Promise.all([
-      getFeatured('premium', 8),
-      getFeatured('new', 8),
+      shelf('premium', 8),
+      shelf('new', 8),
     ]);
     if (premiumRail) renderProductGrid(premiumRail, premium);
     if (newRail) renderProductGrid(newRail, fresh);
