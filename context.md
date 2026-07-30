@@ -718,13 +718,28 @@ quotes, couriers, customers, products, stock, P&L, journal.
 
 ### What is MISSING — the Phase 8 build order
 
-- [x] **8.1 Categories** DONE 2026-07-30 — — CRUD, **on/off toggle** (off = category AND its
+- [x] **8.1 Categories** DONE 2026-07-30 — CRUD, **on/off toggle** (off = category AND its
       products vanish from the site; on = they return), sort order, menu
       visibility. Do this first: the new categories below depend on it.
-- [ ] **8.2 Products** — create, delete (unlist, since orders reference them),
-      on/off toggle, bulk actions
-- [ ] **8.3 Images** — upload endpoint + gallery ordering. Also unblocks real
-      photography (§8b/B3). Currently all images are placeholder SVGs.
+- [x] **8.1b Sub-categories + images** DONE 2026-07-30 — parent selector, indented
+      cards, ONE level deep (enforced in `reparent()` both directions).
+      `Product::scopeActive()` now checks the grandparent, so a product in
+      `Dates > Ajwa` hides when `Dates` goes off — read at query time, NOT
+      cascaded onto child rows, so switching the parent back on does not
+      resurrect children that were off deliberately. Deleting a parent is
+      refused: the FK is `nullOnDelete` and would silently promote its children
+      into the header nav.
+- [x] **8.2 Products** DONE 2026-07-30 — create (4 fields + a photo, then straight
+      to the edit screen), delete = **soft delete** + `restore()`, move between
+      categories, ordered photo gallery. `nextSku()` reads the highest number
+      **including trashed rows** — a reused SKU would mean two products sharing
+      an identifier across order history. New products are created UNLISTED.
+- [x] **8.3 Images** DONE 2026-07-30 — `modules/media/`. See its README; the
+      security notes in `ImageStore.php` are the important part. Files go to
+      `/uploads/YYYY/MM/<sha256>.webp`, untracked by git except `.htaccess`
+      (`git reset --hard` leaves untracked files alone, so they survive
+      deploys). **Needs GD** — fails loudly rather than falling back to a plain
+      move, which is the hole the whole class exists to close.
 - [ ] **8.4 Highlights / showcase** — pick featured products by clicking, decide
       what appears on the home page
 - [ ] **8.5 Coupons** — create codes, min spend, cap, expiry, on/off.
@@ -759,6 +774,26 @@ hidden rather than deleted.
 3. **Check → review → test → compare against the previous look**
 4. Refine, re-apply, re-check
 5. Only at 100% satisfaction, move to the next
+
+### Two rules added while building 8.2 / 8.3
+
+**Assets are content-hashed, and the cache policy keys on that.**
+`tools/assemble.py`'s `asset()` appends `?v=<8 hex of the file's bytes>` to
+every CSS and JS link. `.htaccess` then caches for a year *only* when that
+query is present, and sends `no-cache` for everything else. This exists because
+a shipped admin screen was invisible in the browser while being present on the
+server — it read as a failed deploy. **Anything reached by a runtime
+`import()` cannot carry a hash** (the specifier is written in source), which is
+exactly why the unhashed case must revalidate rather than being cached.
+
+**One module may only hard-depend on another if it is the host shell.**
+`modules/admin` is the platform every admin screen imports. Everything else
+loads an optional module with a *dynamic* import and a `.catch(() => null)`,
+then degrades — see `categories-page.js` loading media. A static `import` would
+make deleting `modules/media/` blank out the Categories screen, which is the
+one thing the module structure exists to prevent. `tools/module-deps.py` now
+reads JS as well as PHP and **fails the build on a static cycle**; dynamic
+edges are listed as `(optional: …)` and never counted.
 
 ### Traps to remember
 
