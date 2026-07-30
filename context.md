@@ -780,7 +780,8 @@ quotes, couriers, customers, products, stock, P&L, journal.
       menu hooks missed it — `tools/header-drift.py` now fails the build when
       that hand-authored copy falls behind the partial.
 - [~] **8.7 Luxury UI/UX pass** — IN PROGRESS. Done 2026-07-30: mobile hero,
-      product cards, PDP, checkout. Remaining: cart page, category tiles.
+      product cards, PDP, checkout, cart, category tiles. 8.7 is COMPLETE
+      for the storefront; a further pass would be taste, not defects.
 
       Checkout: the order summary now paints FIRST on mobile (`order: -1`) and
       sticks under the header — it used to fall below all four steps, so the
@@ -788,6 +789,13 @@ quotes, couriers, customers, products, stock, P&L, journal.
       the aside holds no interactive element, so no focus order changes.
       The stepper labels were bare TEXT NODES; CSS cannot hide those, so they
       are wrapped in `.step__label` now.
+
+      **`tools/hover-audit.py` NOW ENFORCES THIS** — it fails on any `:hover`
+      that sets `transform` or `opacity` outside a `(hover: hover)` guard, on
+      storefront surfaces. Only those two, because they latch *visibly* and a
+      wrong-looking state is worse than no feedback; a colour change also
+      latches but reads as "I touched this". Admin is excluded — staff on a
+      laptop.
 
       **THE RULE THAT KEEPS COMING UP — `@media (hover: hover)`.** A phone
       applies `:hover` on tap and KEEPS it until you tap elsewhere. Three real
