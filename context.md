@@ -779,7 +779,26 @@ quotes, couriers, customers, products, stock, P&L, journal.
       ⚠ `index.html` is the one page assemble.py does not build. Adding the
       menu hooks missed it — `tools/header-drift.py` now fails the build when
       that hand-authored copy falls behind the partial.
-- [ ] **8.7 Luxury UI/UX pass** — see below
+- [~] **8.7 Luxury UI/UX pass** — IN PROGRESS. Done 2026-07-30: mobile hero,
+      product cards, PDP. Remaining: cart, checkout, category tiles.
+
+      **THE RULE THAT KEEPS COMING UP — `@media (hover: hover)`.** A phone
+      applies `:hover` on tap and KEEPS it until you tap elsewhere. Three real
+      bugs so far: product cards stayed lifted and outlined after a tap
+      (reading as "selected"), the PDP photo stuck at 1.6× zoom with no way
+      back, and the card's wishlist / quick view / compare buttons were
+      `opacity: 0` until hover — i.e. **unreachable on the primary device**.
+      Every new hover rule goes inside the guard, and touch gets `:active`
+      instead.
+
+      **Measure against 360×800**, the common Android size here — not a 390px
+      iPhone. Two cards across makes each ~160px, which is where desktop
+      proportions quietly break.
+
+      `modules/catalog/pdp-buybar.js` — the sticky Add to Cart is a DUPLICATE
+      that forwards its click to the real button, never a second
+      implementation. It reads the rendered price off the page rather than
+      re-formatting it.
 
 ### NEW CATEGORIES the owner wants (add these)
 
