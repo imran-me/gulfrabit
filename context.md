@@ -850,6 +850,21 @@ hidden rather than deleted.
 4. Refine, re-apply, re-check
 5. Only at 100% satisfaction, move to the next
 
+### §7f — CSS is BUILT, not @imported (2026-07-30)
+
+`tools/assemble.py` flattens `shared/css/style.css` + its ten partials into
+**`shared/css/gulfrabit.css`**, and that is what every page links. Eleven
+serial requests became one.
+
+**Edit the partials, then run `python tools/assemble.py`.** The bundle is
+generated — editing it directly is lost on the next build, and it says so at
+the top.
+
+`rebase_urls()` fixes relative `url()` when a partial moves up a directory.
+`_fonts.css` had `url('../../../assets/fonts/…')`, correct from
+`shared/css/partials/` and one level too high from `shared/css/` — the Bengali
+font would have 404'd to a system fallback with nothing reporting an error.
+
 ### §7e — DONE 2026-07-30: both CDNs removed
 
 The site loads **no third-party CSS and no third-party JavaScript**. Only the
