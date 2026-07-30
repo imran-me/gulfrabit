@@ -740,8 +740,15 @@ quotes, couriers, customers, products, stock, P&L, journal.
       (`git reset --hard` leaves untracked files alone, so they survive
       deploys). **Needs GD** — fails loudly rather than falling back to a plain
       move, which is the hole the whole class exists to close.
-- [ ] **8.4 Highlights / showcase** — pick featured products by clicking, decide
-      what appears on the home page
+- [x] **8.4 Highlights** DONE 2026-07-30 — `modules/highlights/`. A table of
+      (rail, product, position); the whole shelf is saved at once as an ordered
+      list of SKUs. `rail` is a plain string, so adding a shelf is an entry in
+      `Highlight::RAILS` plus a div in index.html — no migration.
+      **An empty shelf is not blank on the site**: it falls back to the old tag
+      filter. `modules/home/home.js` reaches it with `fetch`, never `import`, so
+      deleting the module costs the curation and nothing else.
+      ⚠ **The `highlights` table did not exist on the server as of 2026-07-30**
+      — see the migration note in §7d below.
 - [x] **8.5 Coupons** DONE 2026-07-30 — full manager at `modules/admin/coupons.html`.
       Percentage or flat, min spend, cap, start/end dates, usage limit, and TWO
       switches: `is_active` (redeemable) vs `is_public` (advertised).
@@ -787,6 +794,27 @@ hidden rather than deleted.
 3. **Check → review → test → compare against the previous look**
 4. Refine, re-apply, re-check
 5. Only at 100% satisfaction, move to the next
+
+### §7d — OPEN: three migrations have not run on the server (2026-07-30)
+
+`media_assets`, `promotion_targets` and `highlights` are all pending. The first
+one is the real failure; the other two are blocked behind it. Confirmed from
+outside by `/api/highlights/premium` returning `source: "tag"` — the curated
+read throws, the fallback works.
+
+**Diagnosis is now built in.** The admin dashboard runs `GET /api/admin/health`
+and shows a panel naming the first pending migration. `migrate.sh` applies them
+and prints the error. Neither needs a cron job or a log file, which is the
+whole point — the previous three of these cost the owner a round-trip each.
+
+`deploy.sh` now CHECKS the migrate exit code and shouts. It used to run bare,
+which is why this got as far as it did unnoticed.
+
+Statically I could not find the fault: ordering is correct
+(`tools/migration-order.py` passes, `admin_users` at 07_27 precedes
+`media_assets` at 07_31), index name lengths are within limits, and Laravel's
+MySQL grammar emits `COMMENT` before `AFTER` so the enum column is valid. The
+server's actual error is needed.
 
 ### Two rules added while building 8.2 / 8.3
 
