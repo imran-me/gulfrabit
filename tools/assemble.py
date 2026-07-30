@@ -106,8 +106,6 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None):
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/shared/css/tailwind.config.js"></script>
   <link rel="stylesheet" href="{asset('/shared/css/style.css')}">
   {extra}
   <script type="application/ld+json">

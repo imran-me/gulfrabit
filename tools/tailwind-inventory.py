@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """
-Every Tailwind utility class the site actually uses.
+Guard against a Tailwind class reappearing now that the CDN is gone.
 
 WHY
 ---
-The pages load `https://cdn.tailwindcss.com`, which compiles CSS in the browser
-on every single page load. Two costs:
+The pages used to load `https://cdn.tailwindcss.com` — a CSS compiler running
+in the browser before first paint, on phones, over mobile data. It was also the
+sole reason the Content-Security-Policy had to allow `'unsafe-eval'`.
 
-  1. It is why the Content-Security-Policy has to allow `'unsafe-eval'`, which
-     is the main thing keeping that policy from being a real defence.
-  2. It is a JIT compiler running before first paint, on phones, over mobile
-     data in Bangladesh.
+This tool is what made removing it safe: it reads every class attribute on
+every page, subtracts the ones our own stylesheets define, and reports what is
+left. The answer was ONE utility, `sr-only`, used twice. That moved into
+`shared/css/style.css` and the CDN was deleted on 2026-07-30.
 
-Replacing it means shipping a static stylesheet containing only the utilities
-that are used. This produces that list. It is the input to the swap, and it is
-also the honest measure of how big the job is — if the answer is 400 classes,
-that is worth knowing before starting.
+IT NOW FAILS THE BUILD if any Tailwind-shaped class appears in the markup,
+because with the CDN gone nothing styles it — and nothing errors either. A
+missing class is a silent visual regression, which is the worst kind.
 
 WHAT COUNTS AS A TAILWIND CLASS
 -------------------------------
@@ -119,6 +119,24 @@ def main() -> int:
         print("  build that scans only markup would drop these silently:")
         for name in sorted(js_dynamic):
             print(f"    {name}")
+
+    # The CDN is gone as of 2026-07-30, so any Tailwind class found now is a
+    # class that will not be styled — a silent visual regression, because
+    # nothing errors when a class simply does not exist.
+    cdn_present = any(
+        "cdn.tailwindcss.com" in f.read_text(encoding="utf-8")
+        for f in [ROOT / "tools" / "assemble.py", ROOT / "index.html"]
+    )
+
+    if not cdn_present and (used or js_dynamic):
+        print()
+        print("  FAIL: the Tailwind CDN has been removed, but these classes")
+        print("  are still in the markup and nothing will style them:")
+        for name in sorted(set(used) | js_dynamic):
+            print(f"    {name}  ({', '.join(sorted(where.get(name, ['(from JS)'])))})")
+        print()
+        print("  Either add the rule to our own CSS, or drop the class.")
+        return 1
 
     out = ROOT / "tools" / "tailwind-classes.txt"
     out.write_text(
