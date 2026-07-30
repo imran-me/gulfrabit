@@ -764,7 +764,21 @@ quotes, couriers, customers, products, stock, P&L, journal.
       Minimum spend is still judged on the WHOLE basket, not the eligible part.
       The code cannot be renamed after creation and a used coupon cannot be
       deleted (`used_count` is the only record of what a campaign cost).
-- [ ] **8.6 Menus / submenus** — manage the header nav from the panel
+- [x] **8.6 Menus / submenus** DONE 2026-07-30 — the header menu is now built from
+      the live categories by `shared/js/components/category-menu.js`. The
+      hand-written markup in `shared/components/header.html` stays as the
+      no-JS fallback and the first paint; the script replaces it.
+      **Fixed items (Deals, Industrial, About, Contact, My Account) stay
+      hand-authored** — they are not categories, and letting someone delete
+      Contact from the header is a footgun, not a feature.
+      **ONE ordering**: up/down arrows on the Categories screen set
+      `sort_order`, which drives the menu, the listing and the panel.
+      `menu_order` exists on the table and is deliberately not exposed.
+      Also fixed: the public categories endpoint was eager-loading EVERY
+      sub-category, so a switched-off one reached the menu.
+      ⚠ `index.html` is the one page assemble.py does not build. Adding the
+      menu hooks missed it — `tools/header-drift.py` now fails the build when
+      that hand-authored copy falls behind the partial.
 - [ ] **8.7 Luxury UI/UX pass** — see below
 
 ### NEW CATEGORIES the owner wants (add these)
