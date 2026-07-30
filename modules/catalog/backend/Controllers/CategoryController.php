@@ -24,7 +24,14 @@ class CategoryController extends Controller
             'audience' => ['sometimes', 'in:retail,b2b'],
         ]);
 
-        $query = Category::query()->active()->topLevel()->with('children')->orderBy('sort_order');
+        // Children are constrained to ACTIVE ones. `with('children')` loaded
+        // every sub-category regardless, so a switched-off sub-category still
+        // appeared in the header menu and led to an empty listing page.
+        $query = Category::query()
+            ->active()
+            ->topLevel()
+            ->with(['children' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')])
+            ->orderBy('sort_order');
 
         if (isset($validated['audience'])) {
             $query->forAudience($validated['audience']);

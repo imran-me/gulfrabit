@@ -12,6 +12,7 @@
  */
 
 import { initHeader } from './components/header-nav.js';
+import { initCategoryMenu } from './components/category-menu.js';
 import { initCartDrawer } from './components/cart-drawer.js';
 import { initScrollReveal } from './components/scroll-reveal.js';
 import { initSearchAutocomplete } from './components/search-autocomplete.js';
@@ -23,6 +24,10 @@ import { initCompareTray } from './components/compare-tray.js';
 
 function boot() {
   initHeader();
+  // After initHeader: it wires the mega-menu and drawer behaviour to the
+  // container elements, which this only refills. Swapping the contents does
+  // not disturb those listeners.
+  initCategoryMenu();
   initCartDrawer();
   initScrollReveal();
   initSearchAutocomplete();

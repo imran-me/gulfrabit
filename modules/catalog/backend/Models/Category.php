@@ -79,6 +79,12 @@ class Category extends Model
             'image'    => $this->image,
             'blurb'    => $this->blurb,
             'audience' => $this->audience,
+            // The header menu is built from these in the browser. Sent on the
+            // public payload because the nav is chrome on every page, and a
+            // second request just for two booleans would be a request on every
+            // page load.
+            'showInMenu' => $this->show_in_menu,
+            'menuOrder'  => $this->menu_order,
         ];
     }
 }

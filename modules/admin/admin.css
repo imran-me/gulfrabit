@@ -450,6 +450,30 @@
 /* Solid border once there is a picture: the dashes mean "empty, add one". */
 .acat:has(.acat__thumb img) .acat__thumb { border-style: solid; }
 
+/* Reorder arrows. Top-level cards only — this order is the header menu's
+   order, and sub-categories are not separately arranged there. */
+.acat__order { display: flex; gap: 2px; flex: 0 0 auto; }
+
+.acat__order button {
+  appearance: none;
+  border: 1px solid var(--gr-border);
+  background: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--fs-14);
+  line-height: 1;
+  color: var(--gr-ink);
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.acat__order button:hover:not(:disabled) {
+  border-color: var(--gr-cyan);
+  background: color-mix(in srgb, var(--gr-cyan) 10%, transparent);
+}
+.acat__order button:disabled { opacity: .3; cursor: default; }
+
 /* Sub-categories, indented under their parent with a rule down the left so the
    grouping survives when the cards wrap onto separate rows. */
 .acat-kids {

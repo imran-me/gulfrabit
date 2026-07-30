@@ -127,6 +127,7 @@ function card(c, parent = null) {
           <span class="acat__slug">/${escapeHtml(c.slug)}</span>
         </div>
         ${c.audience === 'b2b' ? '<span class="apill apill--info">B2B</span>' : ''}
+        ${parent ? '' : order(c)}
       </div>
 
       ${c.blurb ? `<p class="acat__blurb">${escapeHtml(c.blurb)}</p>` : ''}
@@ -179,9 +180,37 @@ function thumb(c) {
     </button>`;
 }
 
+/**
+ * Move a top-level category earlier or later.
+ *
+ * This order is the order of the header menu, the category listing and this
+ * screen — one arrangement, not three. A separate "menu order" field existed
+ * on the table and was never exposed, because two orderings a merchant has to
+ * keep in step is two orderings that drift apart.
+ *
+ * Sub-categories have no arrows: they sit under their parent and their order
+ * among themselves is not something the header menu makes visible.
+ */
+function order(c) {
+  const tops = categories.filter((t) => !t.parent);
+  const i = tops.findIndex((t) => t.slug === c.slug);
+
+  return `
+    <span class="acat__order">
+      <button type="button" data-order="up" ${i <= 0 ? 'disabled' : ''}
+              title="Move earlier" aria-label="Move earlier">&#8593;</button>
+      <button type="button" data-order="down" ${i === tops.length - 1 ? 'disabled' : ''}
+              title="Move later" aria-label="Move later">&#8595;</button>
+    </span>`;
+}
+
 function wire() {
   document.querySelectorAll('[data-cat] [data-toggle]').forEach((input) => {
     input.addEventListener('change', () => toggle(input));
+  });
+
+  document.querySelectorAll('[data-order]').forEach((btn) => {
+    btn.addEventListener('click', () => move(btn.closest('[data-cat]').dataset.cat, btn.dataset.order));
   });
 
   document.querySelectorAll('[data-cat-image]').forEach((btn) => {
@@ -255,6 +284,55 @@ async function toggle(input) {
   } else {
     note(`${record.name} ${value ? 'added to' : 'removed from'} the menu.`);
   }
+}
+
+/**
+ * Swap a top-level category with its neighbour.
+ *
+ * Both rows are written, because swapping two positions needs two writes and
+ * a half-applied swap leaves two categories claiming the same slot. If the
+ * second write fails the first is put back, so the shop never shows an order
+ * this screen is not showing.
+ */
+async function move(slug, direction) {
+  const tops = categories.filter((c) => !c.parent);
+  const i = tops.findIndex((c) => c.slug === slug);
+  const j = direction === 'up' ? i - 1 : i + 1;
+
+  if (i < 0 || j < 0 || j >= tops.length) return;
+
+  const a = tops[i];
+  const b = tops[j];
+
+  // Positions are rewritten from the list index rather than swapping the two
+  // stored numbers. Seeded categories share sort_order values, and swapping
+  // equal numbers changes nothing at all — which reads as a broken button.
+  const reordered = [...tops];
+  [reordered[i], reordered[j]] = [reordered[j], reordered[i]];
+
+  const before = new Map(tops.map((c) => [c.slug, c.sortOrder]));
+  reordered.forEach((c, n) => { c.sortOrder = (n + 1) * 10; });
+
+  categories.sort((x, y) => (x.sortOrder ?? 0) - (y.sortOrder ?? 0));
+  paint();
+
+  try {
+    // Only the two that actually moved need writing when the rest already had
+    // distinct positions; sending all of them is simpler and, at eighteen
+    // categories, cheaper than working out which is which.
+    await Promise.all(reordered.map((c) => adminFetch(`/categories/${encodeURIComponent(c.slug)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sortOrder: c.sortOrder }),
+    })));
+  } catch (err) {
+    reordered.forEach((c) => { c.sortOrder = before.get(c.slug); });
+    await load();
+    return fail(err.message);
+  }
+
+  note(`${a.name} moved ${direction === 'up' ? 'above' : 'below'} ${b.name}. `
+    + 'The header menu follows this order.');
 }
 
 async function changeImage(btn) {
