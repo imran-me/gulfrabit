@@ -87,7 +87,13 @@
   background: radial-gradient(120% 80% at 100% 0%, rgba(27,180,212,.12), transparent 58%);
   opacity: .65; transition: opacity var(--dur-base) var(--ease-out);
 }
-.home-cat-grid .category-card:hover::before { opacity: 1; }
+/* Guarded like every other hover rule: on touch it latches after a tap and
+   one tile keeps a brighter glow than its neighbours for no reason. Milder
+   than the card and checkout cases, but the same bug, and leaving one
+   unguarded is how the pattern erodes. */
+@media (hover: hover) {
+  .home-cat-grid .category-card:hover::before { opacity: 1; }
+}
 .home-cat-grid .category-card > * { position: relative; z-index: 1; }
 
 /* ---- Mobile hero: shorter, so the shop starts above the fold ----------

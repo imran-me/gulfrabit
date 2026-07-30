@@ -31,7 +31,15 @@
               box-shadow var(--dur-base) var(--ease-out),
               border-color var(--dur-base) var(--ease-out);
 }
-.btn-gr:hover  { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+/* The lift is a POINTER affordance. On touch, :hover applies on tap and stays,
+   so every button on the site sat 2px high with a shadow after being pressed —
+   permanently, until something else was tapped. Read as "this button is
+   waiting for you" on a form somebody had already submitted. */
+@media (hover: hover) {
+  .btn-gr:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+}
+/* Touch gets the press instead, and it is the more honest feedback anyway:
+   the finger pushes down, so the button goes down. */
 .btn-gr:active { transform: translateY(0); opacity: 0.9; }
 .btn-gr:focus-visible {
   outline: 2px solid var(--gr-cyan);
@@ -68,7 +76,9 @@
   min-height: 40px;
   padding: 0.5rem 0.9rem;
 }
-.btn-ghost-gr:hover { --_fg: var(--text-primary); background: var(--wash-hover); box-shadow: none; transform: none; }
+@media (hover: hover) {
+  .btn-ghost-gr:hover { --_fg: var(--text-primary); background: var(--wash-hover); box-shadow: none; transform: none; }
+}
 
 /* On light sections */
 .btn-outline-gr--light { --_fg: var(--text-primary); --_bd: var(--border-hairline); }

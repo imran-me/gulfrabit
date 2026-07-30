@@ -16,7 +16,9 @@
    forcing the document wider than the viewport on mobile. */
 .announce-bar__inner { position: relative; text-align: center; padding: 8px 2.75rem; line-height: 1.35; max-width: var(--container-max); margin-inline: auto; }
 .announce-bar__close { position: absolute; right: var(--space-3); top: 50%; transform: translateY(-50%); background: none; border: 0; color: #04222b; cursor: pointer; opacity: .7; line-height: 1; }
-.announce-bar__close:hover { opacity: 1; }
+@media (hover: hover) {
+  .announce-bar__close:hover { opacity: 1; }
+}
 .announce-bar[hidden] { display: none; }
 
 /* ---- Header shell ---------------------------------------------------- */
