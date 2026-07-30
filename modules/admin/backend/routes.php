@@ -83,8 +83,13 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         // editable here at all.
         Route::middleware('admin:products')->prefix('products')->name('products.')->group(function (): void {
             Route::get('/', [AdminProductController::class, 'index'])->name('index');
+            Route::post('/', [AdminProductController::class, 'store'])->name('store');
             Route::get('/{sku}', [AdminProductController::class, 'show'])->name('show');
             Route::patch('/{sku}', [AdminProductController::class, 'update'])->name('update');
+            // Unlists — soft delete, so past orders keep their product. The
+            // route below puts it back.
+            Route::delete('/{sku}', [AdminProductController::class, 'destroy'])->name('destroy');
+            Route::post('/{sku}/restore', [AdminProductController::class, 'restore'])->name('restore');
         });
 
         // Categories. Same capability as products — whoever curates the

@@ -8,17 +8,29 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Modules\Admin\Requests\ProductStoreRequest;
 use Modules\Admin\Requests\ProductUpdateRequest;
+use Modules\Catalog\Models\Category;
 use Modules\Catalog\Models\Product;
 
 /**
  * Editing the catalogue.
  *
- * Scoped deliberately narrowly: the fields a merchant changes week to week —
- * price, cost, stock flag, description, activity. Not the SKU, not the category
- * structure, not the barcode. Those are identity, and a screen that lets a busy
- * person retype a barcode is a screen that will eventually break the one
- * verifiable promise on the Sourcing page.
+ * WHAT THIS SCREEN WILL AND WILL NOT CHANGE
+ * -----------------------------------------
+ * It edits the fields a merchant changes week to week: price, cost, stock,
+ * description, photos, which category a product sits in, whether it is listed.
+ *
+ * It will not change the **SKU** or the **barcode** after creation. Those are
+ * identity. The SKU is in every order line ever placed, and the barcode is a
+ * claim the Sourcing page invites customers to verify against the physical
+ * pack — a screen that lets a busy person retype either is a screen that
+ * eventually breaks something nobody will connect back to this edit.
+ *
+ * DELETING IS UNLISTING. `products` is soft-deleting, and every `order_items`
+ * row points at a product id. A hard delete would take the product name and
+ * price out of orders already placed, which is both a broken order history and
+ * a bookkeeping problem. So delete() soft-deletes and restore() undoes it.
  */
 class AdminProductController extends Controller
 {
@@ -113,6 +125,129 @@ class AdminProductController extends Controller
         ]);
     }
 
+    /**
+     * POST /api/admin/products
+     *
+     * Asks for the four things a product cannot exist without — name, category,
+     * price, and a photo — and defaults everything else. A create form that
+     * demanded every column would be abandoned halfway; the edit screen is
+     * where the rest gets filled in, and it opens immediately afterwards.
+     *
+     * The product is created **unlisted**. Adding something to the catalogue
+     * and having it appear on the live shop mid-typo is the wrong default; the
+     * merchant switches it on when it is ready.
+     */
+    public function store(ProductStoreRequest $request): JsonResponse
+    {
+        $category = Category::where('slug', $request->input('category'))->firstOrFail();
+
+        $sub = null;
+
+        if ($slug = $request->input('subCategory')) {
+            $sub = Category::where('slug', $slug)->first();
+
+            if (! $sub || $sub->parent_id !== $category->id) {
+                return response()->json([
+                    'message' => 'That sub-category is not inside the category you picked.',
+                ], 422);
+            }
+        }
+
+        $images = array_values(array_filter((array) $request->input('images', [])));
+
+        $product = Product::create([
+            'sku'                   => $this->nextSku(),
+            'title'                 => $request->input('title'),
+            'brand'                 => $request->input('brand'),
+            'origin'                => $request->input('origin'),
+            'barcode'               => $request->input('barcode'),
+            'category_id'           => $category->id,
+            'sub_category_id'       => $sub?->id,
+            'price_poisha'          => $this->poisha($request->input('priceTaka')),
+            'original_price_poisha' => $this->poisha($request->input('originalPriceTaka')),
+            'cost_poisha'           => $this->poisha($request->input('costTaka')),
+            'image'                 => $images[0] ?? null,
+            'images'                => $images,
+            'short_description'     => $request->input('shortDescription'),
+            'description'           => $request->input('description'),
+            'in_stock'              => true,
+            // Off. See the docblock: a new product must not appear on the shop
+            // before anyone has looked at it.
+            'is_active'             => false,
+        ]);
+
+        return response()->json([
+            'data'    => $product->toAdminArray(),
+            'message' => "Created as {$product->sku}. It is not on the site yet — "
+                . 'switch Listed on when you are ready.',
+        ], 201);
+    }
+
+    /**
+     * DELETE /api/admin/products/{sku} — unlist, never erase.
+     *
+     * Soft delete: the row stays, so every order that ever contained this
+     * product still knows what it was. It leaves the shop, the search index and
+     * the admin list, and restore() brings it back with its price history and
+     * its stock ledger intact.
+     */
+    public function destroy(string $sku): JsonResponse
+    {
+        $product = Product::query()->where('sku', $sku)->firstOrFail();
+
+        DB::transaction(function () use ($product): void {
+            // Belt and braces. A restore() would otherwise bring the product
+            // back live on the shop the moment it returns, which is not what
+            // anyone means by "undo the delete".
+            $product->is_active = false;
+            $product->save();
+            $product->delete();
+        });
+
+        return response()->json([
+            'message' => "{$product->title} removed from the shop. Past orders still show it, "
+                . 'and it can be restored.',
+        ]);
+    }
+
+    /** POST /api/admin/products/{sku}/restore */
+    public function restore(string $sku): JsonResponse
+    {
+        $product = Product::withTrashed()->where('sku', $sku)->firstOrFail();
+
+        $product->restore();
+
+        return response()->json([
+            'data'    => $product->toAdminArray(),
+            'message' => "{$product->title} is back in the catalogue, still unlisted.",
+        ]);
+    }
+
+    /**
+     * The next `gr-NNNN`.
+     *
+     * Derived from the highest existing number rather than a row count, which
+     * would reuse a SKU after a delete — and a reused SKU means two different
+     * products sharing an identifier across order history. Trashed rows are
+     * included for exactly that reason.
+     */
+    private function nextSku(): string
+    {
+        $highest = Product::withTrashed()
+            ->where('sku', 'like', 'gr-%')
+            ->get(['sku'])
+            ->map(fn (Product $p): int => (int) substr($p->sku, 3))
+            ->max();
+
+        return 'gr-' . max(1001, (int) $highest + 1);
+    }
+
+    /** Taka to integer poisha. Null stays null — it means "not known". */
+    private function poisha(mixed $taka): ?int
+    {
+        return $taka === null || $taka === '' ? null : (int) round((float) $taka * 100);
+    }
+
     /** PATCH /api/admin/products/{sku} */
     public function update(ProductUpdateRequest $request, string $sku): JsonResponse
     {
@@ -150,6 +285,60 @@ class AdminProductController extends Controller
         }
         if ($request->has('isActive')) {
             $product->is_active = $request->boolean('isActive');
+        }
+
+        // Moving a product between categories. Needed the day the catalogue
+        // grew "Dry Fruits" and "Nuts & Makhana" alongside the older
+        // "Nuts & Dry Fruits" — without this, sorting that out means editing
+        // JSON and re-seeding.
+        if ($request->has('category')) {
+            $category = Category::where('slug', $request->input('category'))->first();
+
+            if (! $category) {
+                return response()->json(['message' => 'That category no longer exists.'], 422);
+            }
+
+            $product->category_id = $category->id;
+
+            // A sub-category from the previous parent would now be pointing
+            // somewhere unrelated, so it is cleared unless this same request
+            // sets a new one.
+            if (! $request->has('subCategory')) {
+                $product->sub_category_id = null;
+            }
+        }
+
+        if ($request->has('subCategory')) {
+            $slug = $request->input('subCategory');
+
+            if (! $slug) {
+                $product->sub_category_id = null;
+            } else {
+                $sub = Category::where('slug', $slug)->first();
+
+                if (! $sub || $sub->parent_id !== $product->category_id) {
+                    return response()->json([
+                        'message' => 'That sub-category is not inside this product\'s category.',
+                    ], 422);
+                }
+
+                $product->sub_category_id = $sub->id;
+            }
+        }
+
+        // The gallery arrives as a complete, ordered list — add, remove and
+        // reorder are all the same request. Sending a diff would need the
+        // client and server to agree on identity for images that have none
+        // beyond their URL, and the list is never more than a handful long.
+        if ($request->has('images')) {
+            $images = array_values(array_filter((array) $request->input('images')));
+
+            $product->images = $images;
+            // `image` is the single thumbnail every listing and cart line
+            // reads. Keeping it as element zero means "first photo is the
+            // main photo" — which is what dragging one to the front means to
+            // the person doing it.
+            $product->image = $images[0] ?? null;
         }
 
         DB::transaction(function () use ($product, $changes, $admin, $request): void {

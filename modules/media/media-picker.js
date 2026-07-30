@@ -65,6 +65,125 @@ export function mountImageFields(root = document) {
   });
 }
 
+/**
+ * Turn every [data-media-gallery] inside `root` into an ordered photo strip.
+ *
+ * Markup:
+ *   <div data-media-gallery="images" data-value='["/uploads/a.webp"]'></div>
+ *
+ * It keeps a hidden <input name="images"> holding the list as JSON, and emits
+ * `media:change` with the array whenever it moves. Read it with
+ * `JSON.parse(form.images.value)`.
+ */
+export function mountGalleryFields(root = document) {
+  root.querySelectorAll('[data-media-gallery]:not([data-mounted])').forEach((host) => {
+    host.dataset.mounted = '1';
+    renderGallery(host);
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * The gallery
+ * ------------------------------------------------------------------ */
+
+function renderGallery(host) {
+  const name = host.dataset.mediaGallery;
+  const max = Number(host.dataset.max || 12);
+
+  let list;
+  try { list = JSON.parse(host.dataset.value || '[]'); } catch { list = []; }
+  if (!Array.isArray(list)) list = [];
+
+  host.classList.add('mgal');
+  host.innerHTML = `
+    <div class="mgal__strip" data-strip></div>
+    <div class="mgal__foot">
+      <button type="button" class="mbtn" data-add>+ Add photo</button>
+      <span class="mgal__hint" data-hint></span>
+    </div>
+    <input type="hidden" name="${escape(name)}" value="">`;
+
+  const strip = host.querySelector('[data-strip]');
+  const hidden = host.querySelector('input');
+  const add = host.querySelector('[data-add]');
+  const hint = host.querySelector('[data-hint]');
+
+  const commit = () => {
+    hidden.value = JSON.stringify(list);
+    host.dataset.value = hidden.value;
+    add.disabled = list.length >= max;
+    hint.textContent = list.length
+      ? `${list.length} of ${max} · the first one is the main photo`
+      : 'No photos yet';
+
+    strip.innerHTML = list.map(frame).join('');
+
+    strip.querySelectorAll('[data-act]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const i = Number(btn.dataset.i);
+
+        if (btn.dataset.act === 'remove') list.splice(i, 1);
+        if (btn.dataset.act === 'left' && i > 0) swap(list, i, i - 1);
+        if (btn.dataset.act === 'right' && i < list.length - 1) swap(list, i, i + 1);
+        if (btn.dataset.act === 'main' && i > 0) list.unshift(...list.splice(i, 1));
+
+        commit();
+      });
+    });
+
+    host.dispatchEvent(new CustomEvent('media:change', {
+      bubbles: true,
+      detail: { name, images: [...list] },
+    }));
+  };
+
+  add.addEventListener('click', async () => {
+    const asset = await pickImage();
+    if (!asset) return;
+
+    // Silently ignoring a duplicate would look like the click did nothing, so
+    // it moves to the end instead — which is at least a visible result and is
+    // usually what someone re-picking an image meant.
+    const at = list.indexOf(asset.url);
+    if (at !== -1) list.splice(at, 1);
+
+    list.push(asset.url);
+    commit();
+  });
+
+  commit();
+}
+
+/**
+ * Arrows and an explicit "Make main", not drag-and-drop.
+ *
+ * Dragging a thumbnail on a touch screen fights the page scroll, and the
+ * fallbacks for it are worse than the buttons. Reordering four photos with two
+ * taps each is not the bottleneck; failing to reorder them at all is.
+ */
+function frame(url, i, all) {
+  const first = i === 0;
+  const last = i === all.length - 1;
+
+  return `
+    <figure class="mgal__item${first ? ' is-main' : ''}">
+      <img src="${escape(url)}" alt="">
+      ${first ? '<figcaption class="mgal__badge">Main</figcaption>' : ''}
+      <div class="mgal__acts">
+        <button type="button" data-act="left"  data-i="${i}" ${first ? 'disabled' : ''} title="Move earlier" aria-label="Move earlier">&#8592;</button>
+        ${first
+          ? ''
+          : `<button type="button" data-act="main" data-i="${i}" title="Make this the main photo" aria-label="Make main">&#9733;</button>`}
+        <button type="button" data-act="right" data-i="${i}" ${last ? 'disabled' : ''} title="Move later" aria-label="Move later">&#8594;</button>
+        <button type="button" data-act="remove" data-i="${i}" class="is-danger" title="Remove" aria-label="Remove">&times;</button>
+      </div>
+    </figure>`;
+}
+
+function swap(arr, a, b) {
+  [arr[a], arr[b]] = [arr[b], arr[a]];
+}
+
 /* ------------------------------------------------------------------ *
  * The declarative field
  * ------------------------------------------------------------------ */

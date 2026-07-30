@@ -23,6 +23,30 @@
               <input class="input-gr" id="pe-short" name="shortDescription" type="text">
             </div>
 
+            <!-- Which shelf this sits on. The sub-category list is refilled
+                 whenever the category changes, and is hidden when the chosen
+                 category has no sub-categories. -->
+            <div class="arefund-form" style="padding-top:0;border-top:0">
+              <div class="afilters__field">
+                <label for="pe-cat">Category</label>
+                <select class="input-gr" id="pe-cat" name="category" data-pe-cats></select>
+              </div>
+              <div class="afilters__field" data-pe-subwrap hidden>
+                <label for="pe-sub">Sub-category</label>
+                <select class="input-gr" id="pe-sub" name="subCategory" data-pe-subs>
+                  <option value="">None</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Mounted by modules/media/media-picker.js. Keeps a hidden
+                 <input name="images"> holding the ordered list as JSON. -->
+            <div class="afilters__field afilters__field--wide" style="margin-bottom:var(--space-4)"
+                 data-pe-photos>
+              <label style="display:block;margin-bottom:var(--space-2)">Photos</label>
+              <div data-media-gallery="images" data-max="12"></div>
+            </div>
+
             <div class="arefund-form" style="padding-top:var(--space-4)">
               <div class="afilters__field">
                 <label for="pe-price">Selling price ৳</label>
@@ -70,6 +94,20 @@
             the shelf price — not about what anyone was billed.
           </p>
           <ul class="arefunds" data-pe-history role="list"></ul>
+        </section>
+
+        <!-- Last, and visually separate, because it is the one control here
+             that removes something from the shop. -->
+        <section class="acard acard--danger" aria-labelledby="pd-head">
+          <h2 class="h5" id="pd-head">Remove from the shop</h2>
+          <p class="admin__sub" style="margin-top:0">
+            The product leaves the shop, search and this list. <strong>Orders that already
+            contain it are untouched</strong> — they keep the name and the price they were
+            charged. Nothing is erased, and you can put it back.
+          </p>
+          <button class="btn-gr btn-ghost-gr btn-danger-gr" type="button" data-pe-delete>
+            Remove this product
+          </button>
         </section>
       </div>
 

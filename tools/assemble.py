@@ -60,7 +60,7 @@ def asset(path):
 
 
 def head(title, desc, css_links, theme="#0A0A0A", cms_page=None):
-    extra = "\n  ".join(f'<link rel="stylesheet" href="{c}">' for c in css_links)
+    extra = "\n  ".join(f'<link rel="stylesheet" href="{asset(c)}">' for c in css_links)
     # data-cms-page is what modules/cms keys its overrides on. Absent means the
     # page is not editable, which is the correct default for anything rendered
     # entirely from data — an override there would be overwritten on the next
@@ -125,7 +125,7 @@ def scripts(module_js):
     adding one line here and detached by deleting it. That is the whole
     coupling: no module reaches into another module's fragment."""
     paths = [] if not module_js else ([module_js] if isinstance(module_js, str) else list(module_js))
-    js = "".join(f'\n  <script type="module" src="{p}"></script>' for p in paths)
+    js = "".join(f'\n  <script type="module" src="{asset(p)}"></script>' for p in paths)
     return f"""
   <script type="module" src="{asset('/shared/js/main.js')}"></script>{js}
 </body>
@@ -256,12 +256,12 @@ ADMIN_PAGES = [
 
     ("modules/admin/products.html", "Products — GulfRabit Admin",
      "modules/admin/_fragments/products.main.html",
-     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin.css", "/modules/media/media.css"],
      ["/modules/admin/admin-shell.js", "/modules/admin/products-page.js"], True),
 
     ("modules/admin/product-edit.html", "Edit product — GulfRabit Admin",
      "modules/admin/_fragments/product-edit.main.html",
-     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin.css", "/modules/media/media.css"],
      ["/modules/admin/admin-shell.js", "/modules/admin/product-edit-page.js"], True),
 
     ("modules/inventory/stock.html", "Stock — GulfRabit Admin",

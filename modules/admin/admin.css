@@ -340,6 +340,23 @@
 /* ---- Categories -------------------------------------------------------
    Cards rather than a table row: eighteen categories with two switches each
    needs more horizontal room than a phone has, and this panel is used on one. */
+/* A card whose contents remove something. Tinted rather than loud: it has to
+   read as "handle with care", not as an error that has already happened. */
+.acard--danger {
+  border-color: color-mix(in srgb, var(--gr-error) 40%, var(--gr-border));
+  background: color-mix(in srgb, var(--gr-error) 4%, var(--surface-raised, #fff));
+}
+
+.btn-danger-gr {
+  color: var(--gr-error);
+  border-color: color-mix(in srgb, var(--gr-error) 45%, transparent);
+}
+.btn-danger-gr:hover {
+  color: #fff;
+  background: var(--gr-error);
+  border-color: var(--gr-error);
+}
+
 .acat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

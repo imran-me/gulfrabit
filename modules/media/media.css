@@ -68,6 +68,96 @@
 }
 
 /* ------------------------------------------------------------------ *
+ * The gallery strip
+ * ------------------------------------------------------------------ */
+
+.mgal { display: block; }
+
+.mgal__strip {
+  display: flex;
+  gap: var(--space-3);
+  /* Scrolls sideways rather than wrapping. Twelve photos wrapping into four
+     rows pushes the Save button off a phone screen, and the order is easier
+     to read as one line. */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--space-2);
+  scroll-snap-type: x proximity;
+}
+
+.mgal__item {
+  position: relative;
+  flex: 0 0 auto;
+  width: 108px;
+  margin: 0;
+  scroll-snap-align: start;
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #fafafa;
+}
+
+.mgal__item.is-main { border-color: var(--gr-cyan); border-width: 2px; }
+
+.mgal__item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+}
+
+.mgal__badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: var(--gr-cyan);
+  color: #fff;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: var(--radius-pill);
+}
+
+.mgal__acts {
+  display: flex;
+  border-top: 1px solid var(--gr-border);
+}
+
+.mgal__acts button {
+  flex: 1 1 0;
+  appearance: none;
+  border: 0;
+  border-left: 1px solid var(--gr-border);
+  background: #fff;
+  /* 32px rather than 44px is a deliberate exception to the tap-target rule:
+     four controls have to fit under a 108px thumbnail, and every one of them
+     is reversible in one tap. */
+  height: 32px;
+  font-size: var(--fs-14);
+  line-height: 1;
+  cursor: pointer;
+  color: var(--gr-ink);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.mgal__acts button:first-child { border-left: 0; }
+.mgal__acts button:hover:not(:disabled) { background: color-mix(in srgb, var(--gr-cyan) 12%, transparent); }
+.mgal__acts button:disabled { opacity: .3; cursor: default; }
+.mgal__acts button.is-danger:hover { background: color-mix(in srgb, var(--gr-error) 14%, transparent); }
+
+.mgal__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+}
+
+.mgal__hint { font-size: var(--fs-12); color: color-mix(in srgb, var(--gr-ink) 55%, transparent); }
+
+/* ------------------------------------------------------------------ *
  * Buttons
  * ------------------------------------------------------------------ */
 

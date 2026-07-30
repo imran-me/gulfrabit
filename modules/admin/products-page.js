@@ -10,12 +10,19 @@ import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
 
 let page = 1;
+let categories = [];
+
+/** The media module, or null if it is not installed. See categories-page.js. */
+let media = null;
 
 document.addEventListener('admin:ready', init);
 
-function init() {
+async function init() {
   const form = document.querySelector('[data-prod-filters]');
   if (!form) return;
+
+  media = await import('/modules/media/media-picker.js').catch(() => null);
+  setupCreate();
 
   const params = new URLSearchParams(location.search);
   ['q', 'noCost'].forEach((k) => { if (params.has(k) && form[k]) form[k].value = params.get(k); });
@@ -33,6 +40,125 @@ function init() {
 
   load();
 }
+
+/* ------------------------------------------------------------------ *
+ * Creating a product
+ * ------------------------------------------------------------------ */
+
+async function setupCreate() {
+  const form = document.querySelector('[data-prod-form]');
+  if (!form) return;
+
+  document.querySelector('[data-prod-new]')?.addEventListener('click', () => {
+    form.hidden = !form.hidden;
+    if (!form.hidden) {
+      form.title.focus();
+      form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+
+  document.querySelector('[data-prod-cancel]')?.addEventListener('click', () => {
+    form.hidden = true;
+    form.reset();
+  });
+
+  form.addEventListener('submit', create);
+
+  if (media) {
+    media.mountGalleryFields(form);
+  } else {
+    // The API requires at least one photo, so without the media module there
+    // is no way to complete this form. Better to say that than to let someone
+    // fill it in and be refused on submit.
+    const photos = form.querySelector('[data-prod-photos]');
+    if (photos) {
+      photos.innerHTML = '<p class="admin__sub" style="margin:0">'
+        + 'Photos need the media module, which is not installed.</p>';
+    }
+    form.querySelector('button[type="submit"]').disabled = true;
+  }
+
+  try {
+    ({ data: categories } = await adminFetch('/categories'));
+  } catch {
+    return;      // the selects stay empty; the list below still works
+  }
+
+  const cats = form.querySelector('[data-prod-cats]');
+  const tops = categories.filter((c) => !c.parent);
+
+  // Switched-off categories are offered, and labelled. Building a product into
+  // a category you have not launched yet is a normal thing to do — it is the
+  // reason new products are created unlisted.
+  cats.innerHTML = tops.map((c) =>
+    `<option value="${escapeHtml(c.slug)}">${escapeHtml(c.name)}${
+      c.isActive ? '' : ' (switched off)'}</option>`).join('');
+
+  cats.addEventListener('change', () => fillSubs(form));
+  fillSubs(form);
+}
+
+function fillSubs(form) {
+  const wrap = form.querySelector('[data-prod-subwrap]');
+  const subs = form.querySelector('[data-prod-subs]');
+  const kids = categories.filter((c) => c.parent === form.category.value);
+
+  wrap.hidden = kids.length === 0;
+  subs.innerHTML = '<option value="">None</option>' + kids.map((c) =>
+    `<option value="${escapeHtml(c.slug)}">${escapeHtml(c.name)}</option>`).join('');
+}
+
+async function create(e) {
+  e.preventDefault();
+  const form = e.currentTarget;
+  const btn = form.querySelector('button[type="submit"]');
+
+  const images = form.images ? JSON.parse(form.images.value || '[]') : [];
+
+  if (!images.length) {
+    return problem('Add at least one photo — it becomes the product\'s main image.');
+  }
+
+  btn.disabled = true;
+
+  const was = form.originalPriceTaka.value.trim();
+
+  let result;
+  try {
+    result = await adminFetch('/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: form.title.value.trim(),
+        category: form.category.value,
+        subCategory: form.subCategory && !form.querySelector('[data-prod-subwrap]').hidden
+          ? form.subCategory.value || null
+          : null,
+        priceTaka: Number(form.priceTaka.value),
+        originalPriceTaka: was === '' ? null : Number(was),
+        images,
+      }),
+    });
+  } catch (err) {
+    btn.disabled = false;
+    return problem(err.message);
+  }
+
+  // Straight to the edit screen. The create form asked for four fields; brand,
+  // origin, barcode, cost and the description are the rest of the job, and
+  // dropping the merchant back onto a list means most of them never get filled.
+  location.assign(`/modules/admin/product-edit.html?sku=${encodeURIComponent(result.data.id)}`);
+}
+
+function problem(message) {
+  const el = document.querySelector('[data-prod-error]');
+  if (!el) return;
+  el.textContent = message;
+  el.hidden = false;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ------------------------------------------------------------------ */
 
 async function load() {
   const body = document.querySelector('[data-prod-body]');

@@ -41,7 +41,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="../../shared/css/tailwind.config.js"></script>
   <link rel="stylesheet" href="../../shared/css/style.css?v=3a173c78">
-  <link rel="stylesheet" href="../../modules/admin/admin.css">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=f55fb1ba">
+  <link rel="stylesheet" href="../../modules/media/media.css?v=200563ea">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -93,6 +94,30 @@
               <input class="input-gr" id="pe-short" name="shortDescription" type="text">
             </div>
 
+            <!-- Which shelf this sits on. The sub-category list is refilled
+                 whenever the category changes, and is hidden when the chosen
+                 category has no sub-categories. -->
+            <div class="arefund-form" style="padding-top:0;border-top:0">
+              <div class="afilters__field">
+                <label for="pe-cat">Category</label>
+                <select class="input-gr" id="pe-cat" name="category" data-pe-cats></select>
+              </div>
+              <div class="afilters__field" data-pe-subwrap hidden>
+                <label for="pe-sub">Sub-category</label>
+                <select class="input-gr" id="pe-sub" name="subCategory" data-pe-subs>
+                  <option value="">None</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Mounted by modules/media/media-picker.js. Keeps a hidden
+                 <input name="images"> holding the ordered list as JSON. -->
+            <div class="afilters__field afilters__field--wide" style="margin-bottom:var(--space-4)"
+                 data-pe-photos>
+              <label style="display:block;margin-bottom:var(--space-2)">Photos</label>
+              <div data-media-gallery="images" data-max="12"></div>
+            </div>
+
             <div class="arefund-form" style="padding-top:var(--space-4)">
               <div class="afilters__field">
                 <label for="pe-price">Selling price ৳</label>
@@ -141,6 +166,20 @@
           </p>
           <ul class="arefunds" data-pe-history role="list"></ul>
         </section>
+
+        <!-- Last, and visually separate, because it is the one control here
+             that removes something from the shop. -->
+        <section class="acard acard--danger" aria-labelledby="pd-head">
+          <h2 class="h5" id="pd-head">Remove from the shop</h2>
+          <p class="admin__sub" style="margin-top:0">
+            The product leaves the shop, search and this list. <strong>Orders that already
+            contain it are untouched</strong> — they keep the name and the price they were
+            charged. Nothing is erased, and you can put it back.
+          </p>
+          <button class="btn-gr btn-ghost-gr btn-danger-gr" type="button" data-pe-delete>
+            Remove this product
+          </button>
+        </section>
       </div>
 
       <p class="aerror" data-pe-error hidden role="alert"></p>
@@ -148,13 +187,13 @@
   </div>
 
   <script type="module" src="../../shared/js/main.js?v=c5ffe72b"></script>
-  <script type="module" src="../../modules/admin/admin-shell.js"></script>
-  <script type="module" src="../../modules/admin/admin-nav.js"></script>
-  <script type="module" src="../../modules/courier/courier-nav.js"></script>
-  <script type="module" src="../../modules/inventory/inventory-nav.js"></script>
-  <script type="module" src="../../modules/media/media-nav.js"></script>
-  <script type="module" src="../../modules/accounting/accounting-nav.js"></script>
-  <script type="module" src="../../modules/b2b/b2b-nav.js"></script>
-  <script type="module" src="../../modules/admin/product-edit-page.js"></script>
+  <script type="module" src="../../modules/admin/admin-shell.js?v=f1c653e6"></script>
+  <script type="module" src="../../modules/admin/admin-nav.js?v=424d41e5"></script>
+  <script type="module" src="../../modules/courier/courier-nav.js?v=8f34525c"></script>
+  <script type="module" src="../../modules/inventory/inventory-nav.js?v=ada58157"></script>
+  <script type="module" src="../../modules/media/media-nav.js?v=526e2641"></script>
+  <script type="module" src="../../modules/accounting/accounting-nav.js?v=ebff64a4"></script>
+  <script type="module" src="../../modules/b2b/b2b-nav.js?v=87de770c"></script>
+  <script type="module" src="../../modules/admin/product-edit-page.js?v=961b1929"></script>
 </body>
 </html>

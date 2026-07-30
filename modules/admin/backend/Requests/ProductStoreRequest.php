@@ -1,0 +1,75 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Admin\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+/**
+ * What is required to bring a product into existence.
+ *
+ * Four things are mandatory — title, category, price, and at least one photo.
+ * Everything else has a sensible default and can be filled in on the edit
+ * screen, which opens straight after creation.
+ *
+ * The photo is required deliberately. A catalogue of premium imported goods
+ * where a listing shows a grey placeholder undoes the positioning in one
+ * screen, and "I'll add the picture later" reliably means never. Making it a
+ * field the merchant cannot skip is the cheapest way to keep that from
+ * happening product by product.
+ *
+ * `barcode` and `origin` are accepted HERE and nowhere else. They are identity
+ * — the Sourcing page invites customers to check the barcode against the
+ * physical pack — so they are set once, when the person has the packaging in
+ * front of them, and are not editable afterwards.
+ */
+class ProductStoreRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;   // `admin:products` middleware already decided this
+    }
+
+    /** @return array<string, mixed> */
+    public function rules(): array
+    {
+        return [
+            'title'       => ['required', 'string', 'min:3', 'max:191'],
+            'category'    => ['required', 'string', 'exists:categories,slug'],
+            'subCategory' => ['sometimes', 'nullable', 'string', 'exists:categories,slug'],
+
+            'priceTaka' => ['required', 'numeric', 'gt:0', 'max:10000000'],
+
+            // The "was" price. Must be above the selling price or the discount
+            // it implies is a lie, and a struck-through number that is lower
+            // than the one beside it is the kind of detail customers notice.
+            'originalPriceTaka' => ['sometimes', 'nullable', 'numeric', 'gt:priceTaka', 'max:10000000'],
+
+            // Nullable, never defaulted to zero: a zero cost makes every sale
+            // report as pure profit in the P&L.
+            'costTaka' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:10000000'],
+
+            'images'   => ['required', 'array', 'min:1', 'max:12'],
+            'images.*' => ['string', 'max:255'],
+
+            'brand'   => ['sometimes', 'nullable', 'string', 'max:96'],
+            'origin'  => ['sometimes', 'nullable', 'string', 'max:64'],
+            'barcode' => ['sometimes', 'nullable', 'string', 'max:32', 'unique:products,barcode'],
+
+            'shortDescription' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'description'      => ['sometimes', 'nullable', 'string', 'max:5000'],
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return [
+            'images.required' => 'Add at least one photo. It becomes the product\'s main image.',
+            'category.exists' => 'Pick a category. Create one first if the right one does not exist.',
+            'originalPriceTaka.gt' => 'The "was" price has to be higher than the selling price.',
+            'barcode.unique' => 'Another product already has that barcode.',
+        ];
+    }
+}

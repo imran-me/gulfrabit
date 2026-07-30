@@ -41,7 +41,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="../../shared/css/tailwind.config.js"></script>
   <link rel="stylesheet" href="../../shared/css/style.css?v=3a173c78">
-  <link rel="stylesheet" href="../../modules/admin/admin.css">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=f55fb1ba">
+  <link rel="stylesheet" href="../../modules/media/media.css?v=200563ea">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -73,7 +74,62 @@
           <h1 class="admin__title">Products</h1>
           <p class="admin__sub" data-prod-count>Loading…</p>
         </div>
+        <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-prod-new>+ New product</button>
       </div>
+
+      <!-- Asks for the four things a product cannot exist without, and nothing
+           else. Everything optional lives on the edit screen, which opens
+           straight after this saves. A create form that demanded every column
+           is a form people abandon halfway and then work around. -->
+      <form class="acard acat-new" data-prod-form hidden style="margin-bottom:var(--space-5)">
+        <div class="afilters__field afilters__field--wide">
+          <label for="pn-title">Product name</label>
+          <input class="input-gr" id="pn-title" name="title" type="text" required minlength="3"
+                 placeholder="e.g. Ajwa Dates 1kg — Madinah">
+        </div>
+
+        <div class="afilters__field">
+          <label for="pn-cat">Category</label>
+          <select class="input-gr" id="pn-cat" name="category" required data-prod-cats></select>
+        </div>
+
+        <div class="afilters__field" data-prod-subwrap hidden>
+          <label for="pn-sub">Sub-category</label>
+          <select class="input-gr" id="pn-sub" name="subCategory" data-prod-subs>
+            <option value="">None</option>
+          </select>
+        </div>
+
+        <div class="afilters__field">
+          <label for="pn-price">Selling price ৳</label>
+          <input class="input-gr" id="pn-price" name="priceTaka" type="number"
+                 step="0.01" min="0.01" required placeholder="0.00">
+        </div>
+
+        <div class="afilters__field">
+          <label for="pn-was">“Was” price ৳ <span class="atable__sub">(optional)</span></label>
+          <input class="input-gr" id="pn-was" name="originalPriceTaka" type="number"
+                 step="0.01" min="0" placeholder="Higher than the selling price">
+        </div>
+
+        <div class="afilters__field afilters__field--wide" data-prod-photos>
+          <label style="display:block;margin-bottom:var(--space-2)">Photos</label>
+          <div data-media-gallery="images" data-max="12"></div>
+        </div>
+
+        <div class="acat-new__actions">
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Create product</button>
+          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-prod-cancel>Cancel</button>
+        </div>
+
+        <p class="admin__sub" style="flex:1 1 100%;margin:0">
+          It is created <strong>unlisted</strong>, so nothing appears on the shop until you say
+          so. Brand, origin, barcode, cost and the full description are on the next screen —
+          <strong>the barcode can only be set there once</strong>, so have the pack to hand.
+        </p>
+      </form>
+
+      <p class="aerror" data-prod-error hidden role="alert"></p>
 
       <!-- Shown only while cost is missing somewhere. It turns a vague blocker
            ("we cannot report margin") into a worklist with a number on it. -->
@@ -134,13 +190,13 @@
   </div>
 
   <script type="module" src="../../shared/js/main.js?v=c5ffe72b"></script>
-  <script type="module" src="../../modules/admin/admin-shell.js"></script>
-  <script type="module" src="../../modules/admin/admin-nav.js"></script>
-  <script type="module" src="../../modules/courier/courier-nav.js"></script>
-  <script type="module" src="../../modules/inventory/inventory-nav.js"></script>
-  <script type="module" src="../../modules/media/media-nav.js"></script>
-  <script type="module" src="../../modules/accounting/accounting-nav.js"></script>
-  <script type="module" src="../../modules/b2b/b2b-nav.js"></script>
-  <script type="module" src="../../modules/admin/products-page.js"></script>
+  <script type="module" src="../../modules/admin/admin-shell.js?v=f1c653e6"></script>
+  <script type="module" src="../../modules/admin/admin-nav.js?v=424d41e5"></script>
+  <script type="module" src="../../modules/courier/courier-nav.js?v=8f34525c"></script>
+  <script type="module" src="../../modules/inventory/inventory-nav.js?v=ada58157"></script>
+  <script type="module" src="../../modules/media/media-nav.js?v=526e2641"></script>
+  <script type="module" src="../../modules/accounting/accounting-nav.js?v=ebff64a4"></script>
+  <script type="module" src="../../modules/b2b/b2b-nav.js?v=87de770c"></script>
+  <script type="module" src="../../modules/admin/products-page.js?v=390ebd21"></script>
 </body>
 </html>

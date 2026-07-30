@@ -9,11 +9,17 @@ use Illuminate\Foundation\Http\FormRequest;
 /**
  * What may be edited on a product.
  *
- * Note what is absent: `sku`, `barcode`, `category_id`, `origin`. Those are
- * identity, not settings. A screen that lets a busy person retype a barcode is
- * a screen that will eventually break the one verifiable promise the Sourcing
- * page makes to customers — that the code on the pack matches the code we
- * published.
+ * Note what is absent: `sku`, `barcode` and `origin`. Those are identity, not
+ * settings. A screen that lets a busy person retype a barcode is a screen that
+ * will eventually break the one verifiable promise the Sourcing page makes to
+ * customers — that the code on the pack matches the code we published. They
+ * are set once, at creation, in ProductStoreRequest.
+ *
+ * `category` IS editable, unlike the other three. Which shelf a product sits
+ * on is a merchandising decision that changes — the catalogue grew "Dry Fruits"
+ * and "Nuts & Makhana" next to an older "Nuts & Dry Fruits", and sorting that
+ * out has to be possible from the panel rather than by re-seeding. Nothing
+ * outside the shop's own navigation depends on it.
  */
 class ProductUpdateRequest extends FormRequest
 {
@@ -40,6 +46,18 @@ class ProductUpdateRequest extends FormRequest
 
             'inStock'  => ['sometimes', 'boolean'],
             'isActive' => ['sometimes', 'boolean'],
+
+            // Where it sits in the catalogue. The controller checks that the
+            // sub-category is actually inside the category — a rule the
+            // validator cannot express, since it spans two fields and a row.
+            'category'    => ['sometimes', 'string', 'exists:categories,slug'],
+            'subCategory' => ['sometimes', 'nullable', 'string', 'exists:categories,slug'],
+
+            // The complete, ordered gallery. Element zero is the main photo.
+            // Bounded at 12 because a PDP nobody scrolls to the end of is not
+            // more persuasive, and every entry is another image to store.
+            'images'   => ['sometimes', 'array', 'max:12'],
+            'images.*' => ['string', 'max:255'],
 
             'reason' => ['sometimes', 'nullable', 'string', 'max:255'],
         ];

@@ -90,12 +90,33 @@ RedirectMatch 404 ^/(composer\.(json|lock)|artisan|phpunit\.xml|context\.md|BACK
     ExpiresByType text/html "access plus 0 seconds"
     # JSON is the mock data layer and changes with the catalog — keep it short.
     ExpiresByType application/json "access plus 1 hour"
-    ExpiresByType text/css "access plus 7 days"
-    ExpiresByType application/javascript "access plus 7 days"
+    # CSS and JS are handled by the Cache-Control block below instead, keyed on
+    # whether the URL carries a content hash. Leaving an Expires here as well
+    # would give two answers to the same question.
     ExpiresByType image/svg+xml "access plus 30 days"
     ExpiresByType image/png "access plus 30 days"
     ExpiresByType image/jpeg "access plus 30 days"
     ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+# ---- Script and stylesheet caching -------------------------------------
+# Keyed on whether the URL carries a content hash, not on file type.
+#
+# tools/assemble.py appends ?v=<8 hex> to every CSS and JS file it links, where
+# the hash is of that file's own bytes. Such a URL is content-addressed: it can
+# never point at different code than it did before, so it is safe to cache for
+# a year and it costs nothing when the file changes, because the URL changes
+# with it.
+#
+# Everything else — chiefly modules loaded by a runtime `import()`, whose
+# specifier is written in source and cannot carry a build hash — must
+# revalidate. A blanket 7-day rule used to cover those, and it is how a shipped
+# admin screen stayed invisible in the browser for a week while being present
+# on the server. `no-cache` still allows a 304, so the cost is one conditional
+# request, not a re-download.
+<IfModule mod_headers.c>
+    Header set Cache-Control "public, max-age=31536000, immutable" "expr=%{QUERY_STRING} =~ /(^|&)v=[0-9a-f]{8}($|&)/"
+    Header set Cache-Control "no-cache" "expr=%{REQUEST_URI} =~ /\.(js|css)$/ && ! %{QUERY_STRING} =~ /(^|&)v=[0-9a-f]{8}($|&)/"
 </IfModule>
 
 # ---- Security headers --------------------------------------------------
