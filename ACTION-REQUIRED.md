@@ -51,7 +51,34 @@ Until this works, you cannot add a product — a photo is required.
 
 ---
 
-## 3. Decide which categories to switch off — 5 minutes
+## 3. Get `composer.lock` into the repo — 5 minutes
+
+**Why:** it is the file that pins the exact version of every PHP dependency.
+Without it, each deploy resolves versions afresh, so the server can quietly end
+up on a different Laravel patch release than the one that was tested — and the
+first sign is a screen breaking for no reason anybody changed.
+
+It has never been committed, because Composer only runs on the server.
+
+**Steps:**
+
+1. hPanel → Files → File Manager → open `public_html`
+2. Find `composer.lock`, **Download** it
+3. Drop it into your local project folder (it will replace nothing — there is
+   no local copy)
+4. In VS Code: commit it and push
+
+If it is not there, create it first over SSH:
+
+```
+cd /home/u239665931/domains/gulfrabit.com/public_html && composer install --no-dev
+```
+
+Once it is in the repo, `deploy.sh` installs exactly those versions every time.
+
+---
+
+## 4. Decide which categories to switch off — 5 minutes
 
 **Admin → Categories.**
 
@@ -68,7 +95,7 @@ change **Category** → Save. Then switch off the two you are not using.
 
 ---
 
-## 4. Fill in cost prices — 20 minutes, and the cheapest real win
+## 5. Fill in cost prices — 20 minutes, and the cheapest real win
 
 **Admin → Products → "Show them"** on the missing-cost banner.
 
@@ -78,7 +105,7 @@ rather than reporting your entire revenue as profit.
 
 ---
 
-## 5. Get these accounts — the actual blockers
+## 6. Get these accounts — the actual blockers
 
 In order of how much each unblocks:
 
@@ -96,7 +123,7 @@ until you are taking orders.
 
 ---
 
-## 6. Security housekeeping — 5 minutes
+## 7. Security housekeeping — 5 minutes
 
 - The **SSH password** you pasted in chat — change it if you have not
   (hPanel → Advanced → SSH Access → Change).
@@ -107,7 +134,7 @@ until you are taking orders.
 
 ---
 
-## 7. Optional
+## 8. Optional
 
 - **Backups**: hPanel → Files → Backups. Confirm daily backups are on, and try
   a restore once — before there is real data to lose.
