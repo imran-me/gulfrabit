@@ -5,12 +5,37 @@ Last updated 2026-07-30.
 Everything here needs a human with hPanel access, an account, or a decision.
 Nothing on this list can be done from the code.
 
-Do them in this order — the first three take about fifteen minutes together and
-unblock the most.
+Do them in this order. The first four take about half an hour together and
+unblock everything else.
 
 ---
 
-## 1. Turn on GD — 2 minutes ⚠ blocks all image uploads
+## 1. Run the migrations — 2 minutes ⚠ do this one first
+
+Three migrations never ran on the server. `deploy.sh` used to run them without
+checking the exit code, so one failed and the deploy carried on and reported
+success. That is fixed — it shouts now — but the three still need applying.
+
+**The shop is fine.** The home page falls back to its old behaviour and
+customers see nothing wrong. What does not work until this is done: uploading
+images, coupons scoped to particular products, and the Home page screen.
+
+```
+ssh -p 65002 u239665931@145.79.58.223
+/bin/bash /home/u239665931/domains/gulfrabit.com/public_html/migrate.sh
+```
+
+It applies them, rebuilds the caches, and **prints the error if one fails**.
+If it fails, send me the FIRST error line — everything after it is blocked
+behind that one, not broken itself.
+
+> From now on the admin **dashboard** tells you when something like this
+> happens: a panel appears naming what is missing and what to do. It shows
+> nothing when all is well. No more cron jobs to find out.
+
+---
+
+## 2. Turn on GD — 2 minutes ⚠ blocks all image uploads
 
 **hPanel → Advanced → PHP Configuration → PHP Extensions → tick `gd` → Save.**
 
@@ -26,7 +51,7 @@ Until this works, you cannot add a product — a photo is required.
 
 ---
 
-## 2. Decide which categories to switch off — 5 minutes
+## 3. Decide which categories to switch off — 5 minutes
 
 **Admin → Categories.**
 
@@ -43,7 +68,7 @@ change **Category** → Save. Then switch off the two you are not using.
 
 ---
 
-## 3. Fill in cost prices — 20 minutes, and the cheapest real win
+## 4. Fill in cost prices — 20 minutes, and the cheapest real win
 
 **Admin → Products → "Show them"** on the missing-cost banner.
 
@@ -53,7 +78,7 @@ rather than reporting your entire revenue as profit.
 
 ---
 
-## 4. Get these accounts — the actual blockers
+## 5. Get these accounts — the actual blockers
 
 In order of how much each unblocks:
 
@@ -71,7 +96,7 @@ until you are taking orders.
 
 ---
 
-## 5. Security housekeeping — 5 minutes
+## 6. Security housekeeping — 5 minutes
 
 - The **SSH password** you pasted in chat — change it if you have not
   (hPanel → Advanced → SSH Access → Change).
@@ -82,7 +107,7 @@ until you are taking orders.
 
 ---
 
-## 6. Optional
+## 7. Optional
 
 - **Backups**: hPanel → Files → Backups. Confirm daily backups are on, and try
   a restore once — before there is real data to lose.
