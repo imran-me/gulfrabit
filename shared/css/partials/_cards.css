@@ -23,10 +23,29 @@
               box-shadow var(--dur-base) var(--ease-out),
               border-color var(--dur-base) var(--ease-out);
 }
-.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--gr-cyan-dark);
+/* Hover effects are gated on a device that HAS hover.
+ *
+ * Without the query, a phone applies :hover on tap and then keeps it until you
+ * tap something else — so a card you touched stays lifted and outlined, which
+ * reads as "selected" and is not. Every hover rule below is inside the guard;
+ * touch gets the press state instead, further down. */
+@media (hover: hover) {
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--gr-cyan-dark);
+  }
+}
+
+/* The press state, which is what a phone actually has. Settling INTO the page
+ * rather than lifting out of it — the gesture is a push, and matching it is
+ * the difference between a card that feels physical and one that feels like a
+ * div that changed colour. */
+.product-card:active { transform: scale(.985); }
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card, .product-card__img, .product-card__actions { transition: none; }
+  .product-card:active { transform: none; }
 }
 
 .product-card__media {
@@ -42,7 +61,9 @@
   /* subtle unifying vignette so mixed stock photography reads as one system */
   transition: transform var(--dur-slow) var(--ease-out);
 }
-.product-card:hover .product-card__img { transform: scale(1.04); }
+@media (hover: hover) {
+  .product-card:hover .product-card__img { transform: scale(1.04); }
+}
 .product-card__media::after {
   content: "";
   position: absolute; inset: 0;
@@ -50,16 +71,46 @@
   pointer-events: none;
 }
 
-/* Hover-reveal actions (quick view / wishlist) — desktop */
+/* Wishlist / quick view / compare.
+ *
+ * THESE USED TO BE opacity:0 UNTIL HOVER, WHICH MEANT THEY DID NOT EXIST ON A
+ * PHONE. Three actions, unreachable, on the device most of this shop is
+ * browsed from. They are visible by default now and the reveal is the
+ * exception, applied only where a pointer can hover.
+ *
+ * On touch they sit at 40px and slightly translucent so they read as secondary
+ * to the product image without becoming a guessing game. */
 .product-card__actions {
   position: absolute;
   top: var(--space-3); right: var(--space-3);
   display: flex; flex-direction: column; gap: var(--space-2);
-  opacity: 0; transform: translateX(8px);
+  z-index: 2;
   transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
 }
-.product-card:hover .product-card__actions,
-.product-card:focus-within .product-card__actions { opacity: 1; transform: translateX(0); }
+
+.product-card__actions .btn-icon-gr {
+  /* 40px, not the 44px minimum: three of them stack down a card that is 160px
+     wide on a small phone, and each sits on top of the product photo rather
+     than beside anything mis-tappable. */
+  width: 40px; height: 40px;
+  opacity: .92;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 1px 3px rgba(16, 19, 20, .12);
+  transition: transform var(--dur-fast) var(--ease-out),
+              opacity var(--dur-fast) var(--ease-out);
+}
+.product-card__actions .btn-icon-gr:active { transform: scale(.9); opacity: 1; }
+
+@media (hover: hover) {
+  /* Where there IS a pointer, keep the original reveal — it is cleaner, and a
+     mouse can find them the moment the card is approached. */
+  .product-card__actions { opacity: 0; transform: translateX(8px); }
+
+  .product-card:hover .product-card__actions,
+  .product-card:focus-within .product-card__actions { opacity: 1; transform: translateX(0); }
+
+  .product-card__actions .btn-icon-gr:hover { transform: scale(1.08); opacity: 1; }
+}
 
 .product-card__body { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); }
 .product-card__brand { font-size: var(--fs-12); color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; }
@@ -76,6 +127,58 @@
 .product-card__stars { display: inline-flex; align-items: center; gap: 1px; }
 .product-card__stars svg { display: block; }
 
+/* ---- The card on a phone ---------------------------------------------
+ *
+ * Two cards fit across a 360px screen, which makes each about 160px wide.
+ * Everything below is about what still works at that size — the desktop
+ * proportions were designed for a 280px card and quietly fall apart.
+ *
+ * Measured against a 360×800 viewport, which is the common Android size in
+ * Bangladesh, not a 390px iPhone.
+ */
+@media (max-width: 575.98px) {
+  /* 4:5 is 200px of image on a 160px card, and with the body underneath one
+     card nearly fills the fold. Square gives back 40px per card — the
+     difference between seeing one row and seeing two. */
+  .product-card__media { aspect-ratio: 1 / 1; }
+
+  .product-card__body { padding: var(--space-3); gap: 6px; }
+
+  .product-card__title {
+    font-size: var(--fs-14);
+    /* Two lines at 14px is ~30 characters, enough for "Ajwa Dates 1kg —
+       Madinah" to read as a product rather than a truncation. */
+    -webkit-line-clamp: 2;
+  }
+
+  .product-card__price { font-size: var(--fs-16); }
+
+  .product-card__brand {
+    font-size: 10px;
+    /* The origin is the whole proposition on an import shop — "Saudi Arabia"
+       earns its line even at this size. One line, ellipsis if it runs. */
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* "Add to Cart" wraps to two lines in a 136px button and the card grows a
+     ragged extra row. Smaller type, tighter tracking, one line. */
+  .product-card .btn-gr {
+    font-size: var(--fs-12);
+    padding-inline: var(--space-2);
+    white-space: nowrap;
+  }
+
+  /* Stars are decoration at this size and the review count is unreadable.
+     The rating still reaches assistive tech through the aria-label. */
+  .product-card__stars svg { width: 12px; height: 12px; }
+
+  .product-card__badges { top: 6px; left: 6px; gap: 3px; }
+  .badge-gr { padding: 2px 6px; font-size: 10px; }
+
+  .product-card__actions { top: 6px; right: 6px; gap: 6px; }
+  .product-card__actions .btn-icon-gr { width: 34px; height: 34px; }
+}
+
 /* ---- Category card --------------------------------------------------- */
 .category-card {
   position: relative;
@@ -88,7 +191,10 @@
   overflow: hidden;
   transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
 }
-.category-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--gr-cyan-dark); }
+@media (hover: hover) {
+  .category-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--gr-cyan-dark); }
+}
+.category-card:active { transform: scale(.985); }
 .category-card__icon { width: 40px; height: 40px; color: var(--link); margin-bottom: var(--space-3); }
 .category-card__title { font-family: var(--font-display); font-size: var(--fs-20); font-weight: var(--fw-semibold); }
 .category-card__count { font-size: var(--fs-14); color: var(--text-muted); }
