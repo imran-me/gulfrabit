@@ -364,10 +364,68 @@
 .acat.is-off { opacity: .62; }
 .acat.is-off .acat__name { text-decoration: line-through; text-decoration-thickness: 1px; }
 
-.acat__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.acat__head { display: flex; align-items: flex-start; gap: var(--space-3); }
+.acat__ident { flex: 1 1 auto; min-width: 0; }
 .acat__name { margin: 0; font-size: var(--fs-20); line-height: var(--lh-snug); }
 .acat__slug { font-size: var(--fs-12); color: var(--text-muted); font-family: monospace; }
 .acat__blurb { margin: 0; color: var(--text-secondary); font-size: var(--fs-14); line-height: var(--lh-normal); }
+
+/* The image doubles as the button that changes it. A separate "change image"
+   control would be a second thing to find; the picture is the obvious target,
+   and it is 56px so it clears the minimum tap size on a phone. */
+.acat__thumb {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 1px dashed var(--gr-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken, #fafafa);
+  overflow: hidden;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.acat__thumb:hover { border-color: var(--gr-cyan); transform: scale(1.04); }
+.acat__thumb:active { transform: scale(1); }
+.acat__thumb:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
+.acat__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.acat__thumb-empty {
+  font-size: 10px;
+  line-height: 1.15;
+  color: var(--text-muted);
+  text-align: center;
+}
+/* Solid border once there is a picture: the dashes mean "empty, add one". */
+.acat:has(.acat__thumb img) .acat__thumb { border-style: solid; }
+
+/* Sub-categories, indented under their parent with a rule down the left so the
+   grouping survives when the cards wrap onto separate rows. */
+.acat-kids {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-3);
+  margin: calc(var(--space-2) * -1) 0 var(--space-2) var(--space-5);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--gr-border);
+}
+.acat--child { padding: var(--space-4); }
+.acat--child .acat__name { font-size: var(--fs-16); }
+
+/* Why this child is hidden even though its own switch says Live. Without it,
+   the parent cascade looks like the switch is broken. */
+.acat__warn {
+  margin: 0;
+  font-size: var(--fs-12);
+  line-height: var(--lh-normal);
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--gr-error) 8%, transparent);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+}
 
 .acat__counts { display: flex; gap: var(--space-4); font-size: var(--fs-12); color: var(--text-muted); }
 .acat__counts strong { color: var(--text-primary); font-size: var(--fs-16); display: block; }

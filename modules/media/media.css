@@ -1,0 +1,403 @@
+/* media.css — the image picker sheet and the [data-media-field] control.
+ *
+ * Mobile first, and not as a slogan: the sheet is authored as a full-height
+ * panel rising from the bottom edge, and only widens into a centred dialog at
+ * the tablet breakpoint. Most of this catalogue will be maintained on a phone.
+ *
+ * Tokens come from shared/css/style.css. Nothing here invents a colour.
+ */
+
+/* ------------------------------------------------------------------ *
+ * The field: preview + choose/remove
+ * ------------------------------------------------------------------ */
+
+.mfield {
+  display: block;
+}
+
+.mfield__label {
+  display: block;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--gr-ink) 55%, transparent);
+  margin-bottom: var(--space-2);
+}
+
+.mfield__body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.mfield__thumb {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-sm);
+  border: var(--border-hairline);
+  background:
+    /* A chequerboard, so a transparent PNG reads as transparent rather than
+       as a white image on a white card. */
+    linear-gradient(45deg, #f3f3f3 25%, transparent 25%, transparent 75%, #f3f3f3 75%) 0 0 / 12px 12px,
+    linear-gradient(45deg, #f3f3f3 25%, #fff 25%, #fff 75%, #f3f3f3 75%) 6px 6px / 12px 12px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.mfield__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mfield__empty {
+  font-size: var(--fs-12);
+  color: color-mix(in srgb, var(--gr-ink) 40%, transparent);
+  text-align: center;
+  padding: 0 var(--space-2);
+}
+
+.mfield__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* ------------------------------------------------------------------ *
+ * Buttons
+ * ------------------------------------------------------------------ */
+
+.mbtn {
+  appearance: none;
+  border: var(--border-input);
+  background: #fff;
+  color: var(--gr-ink);
+  font: inherit;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  /* 44px minimum target. Anything smaller is a mis-tap on a phone. */
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.mbtn:hover { border-color: var(--gr-cyan); box-shadow: var(--shadow-sm); }
+.mbtn:active { transform: translateY(1px); }
+.mbtn--quiet { border-color: transparent; color: color-mix(in srgb, var(--gr-ink) 60%, transparent); }
+.mbtn--quiet:hover { border-color: var(--gr-border); color: var(--gr-ink); }
+
+/* ------------------------------------------------------------------ *
+ * The sheet
+ * ------------------------------------------------------------------ */
+
+.msheet {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+}
+
+.msheet__scrim {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--gr-ink) 45%, transparent);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+  backdrop-filter: blur(2px);
+}
+
+.msheet.is-open .msheet__scrim { opacity: 1; }
+
+.msheet__panel {
+  position: relative;
+  width: 100%;
+  /* Not 100dvh: leaving a strip of the page visible tells the user the work
+     underneath is still there and this is a layer, not a new screen. */
+  max-height: 88dvh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(100%);
+  transition: transform 320ms var(--ease-out);
+  /* Respect the home-indicator area on iOS. */
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.msheet.is-open .msheet__panel { transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .msheet__panel { transition: none; }
+}
+
+.msheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  border-bottom: var(--border-hairline);
+}
+
+.msheet__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-20);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  margin: 0;
+}
+
+.msheet__x {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  color: color-mix(in srgb, var(--gr-ink) 55%, transparent);
+  border-radius: 50%;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.msheet__x:hover { background: color-mix(in srgb, var(--gr-ink) 6%, transparent); }
+
+/* ---- upload zone ---- */
+
+.msheet__drop {
+  margin: var(--space-4) var(--space-4) 0;
+  padding: var(--space-5) var(--space-4);
+  border: 1.5px dashed var(--gr-border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out);
+}
+
+.msheet__drop:hover,
+.msheet__drop.is-over {
+  border-color: var(--gr-cyan);
+  background: color-mix(in srgb, var(--gr-cyan) 5%, transparent);
+}
+
+.msheet__droptext { margin: 0; display: grid; gap: 4px; }
+.msheet__droptext strong { font-size: var(--fs-16); font-weight: var(--fw-semibold); }
+.msheet__droptext span {
+  font-size: var(--fs-12);
+  color: color-mix(in srgb, var(--gr-ink) 55%, transparent);
+}
+
+/* ---- upload queue ---- */
+
+.msheet__queue {
+  margin: var(--space-3) var(--space-4) 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.mrow {
+  display: grid;
+  grid-template-columns: 1fr 80px auto;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--fs-12);
+}
+
+.mrow__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mrow__bar {
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--gr-ink) 10%, transparent);
+  overflow: hidden;
+}
+
+.mrow__bar i {
+  display: block;
+  height: 100%;
+  background: var(--gr-gradient, var(--gr-cyan));
+  transition: width 120ms linear;
+}
+
+.mrow__state { color: color-mix(in srgb, var(--gr-ink) 55%, transparent); }
+.mrow.is-done .mrow__state { color: #1a7f37; }
+.mrow.is-failed .mrow__state { color: var(--gr-error); }
+.mrow.is-failed .mrow__bar i { background: var(--gr-error); width: 100% !important; }
+
+/* ---- search ---- */
+
+.msheet__search { display: block; margin: var(--space-4) var(--space-4) 0; }
+
+.msheet__search input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  font: inherit;
+  font-size: var(--fs-14);
+  border: var(--border-input);
+  border-radius: var(--radius-pill);
+  background: #fff;
+}
+
+.msheet__search input:focus-visible {
+  outline: 2px solid var(--gr-cyan);
+  outline-offset: 1px;
+}
+
+/* ---- grid ---- */
+
+.msheet__grid {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-4);
+  display: grid;
+  /* Three across on the narrowest phone, more as room appears. auto-fill with
+     a minimum keeps the tiles square-ish without a media query per size. */
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: var(--space-3);
+  align-content: start;
+}
+
+.msheet__note {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--space-6) 0;
+  font-size: var(--fs-14);
+  color: color-mix(in srgb, var(--gr-ink) 55%, transparent);
+}
+
+.mtile {
+  position: relative;
+  appearance: none;
+  border: var(--border-hairline);
+  background: #fafafa;
+  padding: 0;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+
+.mtile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.mtile:hover {
+  transform: translateY(-2px);
+  border-color: var(--gr-cyan);
+  box-shadow: var(--shadow-sm);
+}
+
+.mtile:active { transform: translateY(0); }
+
+.mtile:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
+
+/* How many places use this image. Present so a merchant can tell a stock
+   placeholder from a photo the shop depends on, before replacing it. */
+.mtile__used {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--gr-ink) 78%, transparent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  line-height: 18px;
+  text-align: center;
+}
+
+.msheet__more { padding: 0 var(--space-4) var(--space-4); text-align: center; }
+
+/* ------------------------------------------------------------------ *
+ * The Images screen (modules/media/library.html)
+ * ------------------------------------------------------------------ */
+
+.mlib {
+  display: grid;
+  /* Two across on a phone. One would waste the width; three leaves no room
+     for the alt-text field under each. */
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-4);
+}
+
+.mlib__item {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--surface-raised, #fff);
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.mlib__item:hover { border-color: var(--gr-cyan); box-shadow: var(--shadow-sm); }
+
+.mlib__pic {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #fafafa;
+}
+
+.mlib__pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.mlib__meta { display: grid; gap: 2px; font-size: var(--fs-12); min-width: 0; }
+
+.mlib__name {
+  font-weight: var(--fw-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mlib__dims { color: var(--text-muted); }
+
+.mlib__alt { font-size: var(--fs-12); }
+
+.mlib__del { align-self: flex-start; color: var(--gr-error); }
+.mlib__del:hover { border-color: var(--gr-error); color: var(--gr-error); }
+
+/* ------------------------------------------------------------------ *
+ * Tablet and up: a centred dialog rather than a bottom sheet.
+ * ------------------------------------------------------------------ */
+
+@media (min-width: 768px) {
+  .msheet { align-items: center; justify-content: center; padding: var(--space-6); }
+
+  .msheet__panel {
+    max-width: 720px;
+    max-height: 82vh;
+    border-radius: var(--radius-lg);
+    transform: translateY(12px) scale(.98);
+    opacity: 0;
+    transition: transform 240ms var(--ease-out), opacity 240ms var(--ease-out);
+  }
+
+  .msheet.is-open .msheet__panel { transform: none; opacity: 1; }
+}

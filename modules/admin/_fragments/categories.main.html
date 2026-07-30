@@ -25,11 +25,30 @@
           <input class="input-gr" id="cn-name" name="name" type="text" required
                  placeholder="e.g. Saffron &amp; Rare Spices">
         </div>
+
+        <!-- Empty = a top-level category. The list is filled from the API, and
+             holds only categories that can legally be a parent — see
+             AdminCategoryController::reparent for why that is one level. -->
+        <div class="afilters__field">
+          <label for="cn-parent">Inside <span class="atable__sub">(optional)</span></label>
+          <select class="input-gr" id="cn-parent" name="parent" data-cat-parents>
+            <option value="">Top level — its own category</option>
+          </select>
+        </div>
+
         <div class="afilters__field afilters__field--wide">
           <label for="cn-blurb">Short description <span class="atable__sub">(shown on the category page)</span></label>
           <input class="input-gr" id="cn-blurb" name="blurb" type="text"
                  placeholder="One line about what belongs here">
         </div>
+
+        <div class="afilters__field afilters__field--wide">
+          <!-- Mounted by modules/media/media-picker.js. It keeps a hidden
+               <input name="image"> in step, so this form reads it like any
+               other field. -->
+          <div data-media-field="image" data-label="Category image"></div>
+        </div>
+
         <div class="acat-new__actions">
           <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Create</button>
           <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-cat-cancel>Cancel</button>

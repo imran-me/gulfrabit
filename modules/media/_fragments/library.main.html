@@ -1,0 +1,36 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Images</h1>
+          <p class="admin__sub" data-lib-count>Loading…</p>
+        </div>
+        <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-lib-upload>+ Upload images</button>
+      </div>
+
+      <!-- Said once, here, because it is the one thing about this screen that
+           is not obvious: images are shared. Replacing a picture from a product
+           screen changes it for that product only, but deleting it here removes
+           it everywhere it is used. -->
+      <div class="acard" style="margin-bottom:var(--space-5)">
+        <p class="admin__sub" style="margin:0">
+          Every image uploaded anywhere in the panel lands here. The number on a
+          thumbnail is <strong>how many places use it</strong> — deleting one of those
+          leaves a blank space on the live site, so the panel asks first.
+          Uploading the same picture twice reuses the copy already here.
+        </p>
+      </div>
+
+      <label class="afilters__field afilters__field--wide" style="margin-bottom:var(--space-4)">
+        <span class="sr-only">Search images</span>
+        <input class="input-gr" type="search" placeholder="Search by file name or description"
+               data-lib-search>
+      </label>
+
+      <div class="mlib" data-lib-grid>
+        <p class="admin__sub">Loading images…</p>
+      </div>
+
+      <div style="text-align:center;padding:var(--space-5) 0">
+        <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-lib-more hidden>Load more</button>
+      </div>
+
+      <p class="aerror" data-lib-note hidden role="alert"></p>

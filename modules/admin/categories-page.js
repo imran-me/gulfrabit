@@ -7,6 +7,12 @@
  *
  * The trade is that a failed request must put the switch back, or the panel
  * would show a state the server never accepted. Hence the revert on error.
+ *
+ * SUB-CATEGORIES are drawn as indented cards under their parent rather than as
+ * a collapsible tree. There is one level of nesting and rarely more than a
+ * handful of children, so a tree control would add interaction — expand,
+ * collapse, remember which — to buy nothing. Everything stays on screen and
+ * scannable, which matters more on the phone this panel is mostly used on.
  */
 
 import { adminFetch } from './backend/api.js';
@@ -14,21 +20,43 @@ import { escapeHtml } from './admin-shell.js';
 
 let categories = [];
 
+/**
+ * The media module, or null if it is not installed.
+ *
+ * A static `import` of another module would make this screen fail to load at
+ * all if modules/media/ were deleted — a blank Categories page, from removing
+ * an unrelated feature. The locked architecture says deleting a module folder
+ * cuts off that feature and nothing else, so the import is dynamic and its
+ * failure is a supported state: no image thumbnails, everything else intact.
+ */
+let media = null;
+
 document.addEventListener('admin:ready', init);
 
-function init() {
+async function init() {
   if (!document.querySelector('[data-cat-list]')) return;
 
+  media = await import('/modules/media/media-picker.js').catch(() => null);
+
   const form = document.querySelector('[data-cat-form]');
+
   document.querySelector('[data-cat-new]')?.addEventListener('click', () => {
     form.hidden = !form.hidden;
     if (!form.hidden) form.name.focus();
   });
   document.querySelector('[data-cat-cancel]')?.addEventListener('click', () => {
     form.hidden = true;
-    form.reset();
+    resetForm(form);
   });
   form?.addEventListener('submit', create);
+
+  if (media) {
+    media.mountImageFields(form);
+  } else {
+    // Nothing to mount into, so the placeholder would sit there as an empty
+    // box the merchant cannot use.
+    form.querySelector('[data-media-field]')?.closest('.afilters__field')?.remove();
+  }
 
   load();
 }
@@ -48,22 +76,53 @@ async function load() {
   }
 
   paint();
+  fillParentOptions();
 }
+
+/* ------------------------------------------------------------------ *
+ * Rendering
+ * ------------------------------------------------------------------ */
 
 function paint() {
   const live = categories.filter((c) => c.isActive).length;
-  document.querySelector('[data-cat-count]').textContent =
-    `${categories.length} categories · ${live} live on the site`;
+  const subs = categories.filter((c) => c.parent).length;
 
-  document.querySelector('[data-cat-list]').innerHTML = categories.map(card).join('');
+  document.querySelector('[data-cat-count]').textContent =
+    `${categories.length} categories${subs ? ` (${subs} sub)` : ''} · ${live} live on the site`;
+
+  const parents = categories.filter((c) => !c.parent);
+  const orphans = categories.filter((c) => c.parent && !byslug(c.parent));
+
+  const html = parents.map((p) => {
+    const children = categories.filter((c) => c.parent === p.slug);
+
+    return card(p) + (children.length
+      ? `<div class="acat-kids">${children.map((c) => card(c, p)).join('')}</div>`
+      : '');
+  }).join('');
+
+  // A child whose parent is missing would otherwise not be drawn at all — the
+  // merchant would see the count drop and have nothing to click.
+  document.querySelector('[data-cat-list]').innerHTML =
+    html + orphans.map((c) => card(c)).join('');
+
   wire();
 }
 
-function card(c) {
+function card(c, parent = null) {
+  // A sub-category under a switched-off parent is hidden from the site no
+  // matter what its own switch says (Product::scopeActive checks the parent).
+  // Saying so on the card is the difference between "my switch is on but the
+  // products are gone" being a bug and being an explanation.
+  const mutedByParent = parent && !parent.isActive;
+  const off = !c.isActive || mutedByParent;
+
   return `
-    <article class="acat${c.isActive ? '' : ' is-off'}" data-cat="${escapeHtml(c.slug)}">
+    <article class="acat${off ? ' is-off' : ''}${parent ? ' acat--child' : ''}"
+             data-cat="${escapeHtml(c.slug)}">
       <div class="acat__head">
-        <div>
+        ${thumb(c)}
+        <div class="acat__ident">
           <h2 class="acat__name">${escapeHtml(c.name)}</h2>
           <span class="acat__slug">/${escapeHtml(c.slug)}</span>
         </div>
@@ -72,9 +131,13 @@ function card(c) {
 
       ${c.blurb ? `<p class="acat__blurb">${escapeHtml(c.blurb)}</p>` : ''}
 
+      ${mutedByParent
+        ? `<p class="acat__warn">Hidden because <strong>${escapeHtml(parent.name)}</strong> is switched off.</p>`
+        : ''}
+
       <div class="acat__counts">
         <div><strong>${c.products}</strong> products</div>
-        <div><strong>${c.isActive ? c.liveProducts : 0}</strong> visible</div>
+        <div><strong>${off ? 0 : c.liveProducts}</strong> visible</div>
       </div>
 
       <div class="acat__switches">
@@ -93,11 +156,61 @@ function card(c) {
     </article>`;
 }
 
+/**
+ * The picture, which is also the button that changes it.
+ *
+ * Without the media module there is nothing to open, so it degrades to a plain
+ * <img> when an image is already set and disappears entirely when one is not —
+ * rather than offering a button that cannot do anything.
+ */
+function thumb(c) {
+  if (!media) {
+    return c.image
+      ? `<span class="acat__thumb"><img src="${escapeHtml(c.image)}" alt=""></span>`
+      : '';
+  }
+
+  return `
+    <button type="button" class="acat__thumb" data-cat-image
+            title="${c.image ? 'Change image' : 'Add an image'}">
+      ${c.image
+        ? `<img src="${escapeHtml(c.image)}" alt="">`
+        : '<span class="acat__thumb-empty">+<br>image</span>'}
+    </button>`;
+}
+
 function wire() {
   document.querySelectorAll('[data-cat] [data-toggle]').forEach((input) => {
     input.addEventListener('change', () => toggle(input));
   });
+
+  document.querySelectorAll('[data-cat-image]').forEach((btn) => {
+    btn.addEventListener('click', () => changeImage(btn));
+  });
 }
+
+/**
+ * Only top-level categories can be a parent, and a category that already has
+ * children cannot become one. Both rules are enforced server-side too — this
+ * list exists so the merchant is not offered a choice that will be refused.
+ */
+function fillParentOptions() {
+  const select = document.querySelector('[data-cat-parents]');
+  if (!select) return;
+
+  const eligible = categories.filter((c) => !c.parent);
+  const keep = select.value;
+
+  select.innerHTML = '<option value="">Top level — its own category</option>'
+    + eligible.map((c) =>
+      `<option value="${escapeHtml(c.slug)}">${escapeHtml(c.name)}</option>`).join('');
+
+  if (eligible.some((c) => c.slug === keep)) select.value = keep;
+}
+
+/* ------------------------------------------------------------------ *
+ * Actions
+ * ------------------------------------------------------------------ */
 
 async function toggle(input) {
   const slug = input.closest('[data-cat]').dataset.cat;
@@ -123,7 +236,7 @@ async function toggle(input) {
 
   input.disabled = false;
 
-  const record = categories.find((c) => c.slug === slug);
+  const record = byslug(slug);
   if (record) record[field] = value;
 
   // Switching a category off is the one action here with reach beyond itself,
@@ -131,13 +244,45 @@ async function toggle(input) {
   // needs, and the alternative is discovering the scale by looking at the shop.
   if (field === 'isActive') {
     const n = result.affectedProducts ?? 0;
+    const kids = categories.filter((c) => c.parent === slug).length;
+    const withSubs = kids ? ` and ${kids} sub-categor${kids === 1 ? 'y' : 'ies'}` : '';
+
     note(value
-      ? `${record.name} is live again${n ? ` — ${n} product${n === 1 ? '' : 's'} back on the site` : ''}.`
-      : `${record.name} is hidden${n ? ` — ${n} product${n === 1 ? '' : 's'} hidden with it` : ''}.`);
-    paint();   // redraw: the muted state and the "In menu" lock both follow it
+      ? `${record.name} is live again${withSubs}${n ? ` — ${n} product${n === 1 ? '' : 's'} back on the site` : ''}.`
+      : `${record.name} is hidden${withSubs}${n ? ` — ${n} product${n === 1 ? '' : 's'} hidden with it` : ''}.`);
+
+    paint();   // redraw: the muted state, the child warnings and the menu lock all follow it
   } else {
     note(`${record.name} ${value ? 'added to' : 'removed from'} the menu.`);
   }
+}
+
+async function changeImage(btn) {
+  const slug = btn.closest('[data-cat]').dataset.cat;
+  const asset = await media.pickImage();
+  if (!asset) return;
+
+  const record = byslug(slug);
+  const previous = record?.image ?? null;
+
+  // Paint first. The picker has already closed, and a thumbnail that only
+  // appears after a round-trip reads as the choice not having registered.
+  if (record) record.image = asset.url;
+  paint();
+
+  try {
+    await adminFetch(`/categories/${encodeURIComponent(slug)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: asset.url }),
+    });
+  } catch (err) {
+    if (record) record.image = previous;
+    paint();
+    return fail(err.message);
+  }
+
+  note(`Image set for ${record?.name ?? slug}.`);
 }
 
 async function create(e) {
@@ -146,6 +291,8 @@ async function create(e) {
   const btn = form.querySelector('button[type="submit"]');
   btn.disabled = true;
 
+  const parent = form.parent.value || null;
+
   try {
     await adminFetch('/categories', {
       method: 'POST',
@@ -153,6 +300,10 @@ async function create(e) {
       body: JSON.stringify({
         name: form.name.value.trim(),
         blurb: form.blurb.value.trim() || null,
+        // Absent when the media module is not installed — the field was
+        // removed in init(), so form.image does not exist.
+        image: form.image?.value || null,
+        parent,
       }),
     });
   } catch (err) {
@@ -161,11 +312,38 @@ async function create(e) {
   }
 
   btn.disabled = false;
-  form.reset();
+  resetForm(form);
   form.hidden = true;
   await load();
-  note('Category created. It is live and in the menu — switch either off if you are not ready.');
+
+  note(parent
+    ? `Sub-category created inside ${byslug(parent)?.name ?? parent}. It is live — switch it off if you are not ready.`
+    : 'Category created. It is live and in the menu — switch either off if you are not ready.');
 }
+
+/**
+ * form.reset() puts <input> and <select> back but knows nothing about the
+ * media field, which keeps its state in a data attribute and a rendered
+ * thumbnail. Left alone, the next category created would silently inherit the
+ * previous one's picture.
+ */
+function resetForm(form) {
+  form.reset();
+
+  const field = form.querySelector('[data-media-field]');
+  if (!field) return;
+
+  field.dataset.value = '';
+  field.querySelector('input[type="hidden"]').value = '';
+  field.querySelector('[data-thumb]').innerHTML =
+    '<span class="mfield__empty">No image</span>';
+  field.querySelector('[data-choose]').textContent = 'Choose image';
+  field.querySelector('[data-clear]').hidden = true;
+}
+
+/* ------------------------------------------------------------------ */
+
+const byslug = (slug) => categories.find((c) => c.slug === slug);
 
 function note(message) {
   const el = document.querySelector('[data-cat-error]');

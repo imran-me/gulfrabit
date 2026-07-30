@@ -29,6 +29,7 @@
       "Modules\\Bundle\\": "modules/bundle/backend/",
       "Modules\\Delivery\\": "modules/delivery/backend/",
       "Modules\\Catalog\\": "modules/catalog/backend/",
+      "Modules\\Media\\": "modules/media/backend/",
       "Modules\\Cart\\": "modules/cart/backend/",
       "Modules\\Checkout\\": "modules/checkout/backend/",
       "Modules\\Auth\\": "modules/auth/backend/",

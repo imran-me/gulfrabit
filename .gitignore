@@ -38,3 +38,15 @@ npm-debug.log*
 .env.production
 .phpunit.result.cache
 _laravel-skeleton/
+
+# Merchant-uploaded images. The files are data, like the database — they belong
+# on the server, not in the repo, and deploy.sh's `git reset --hard` leaves
+# untracked files alone so they survive every deploy.
+# The .htaccess IS tracked: it is what stops anything in here executing, and a
+# fresh clone must never produce an uploads folder without it.
+/uploads/*
+!/uploads/.htaccess
+
+# Python bytecode from the author-time tools in tools/.
+__pycache__/
+*.pyc

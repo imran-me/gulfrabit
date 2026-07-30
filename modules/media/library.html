@@ -14,7 +14,7 @@
     document.documentElement.classList.remove('no-js');
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Categories — GulfRabit Admin</title>
+  <title>Images — GulfRabit Admin</title>
   <meta name="description" content="GulfRabit staff panel.">
   <meta name="theme-color" content="#0A0A0A">
   <meta name="author" content="GulfRabit">
@@ -23,11 +23,11 @@
   <!-- Social / Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GulfRabit">
-  <meta property="og:title" content="Categories — GulfRabit Admin">
+  <meta property="og:title" content="Images — GulfRabit Admin">
   <meta property="og:description" content="GulfRabit staff panel.">
   <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Categories — GulfRabit Admin">
+  <meta name="twitter:title" content="Images — GulfRabit Admin">
   <meta name="twitter:description" content="GulfRabit staff panel.">
   <link rel="icon" href="../../favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
@@ -71,72 +71,40 @@
 
 <div class="admin__head">
         <div>
-          <h1 class="admin__title">Categories</h1>
-          <p class="admin__sub" data-cat-count>Loading…</p>
+          <h1 class="admin__title">Images</h1>
+          <p class="admin__sub" data-lib-count>Loading…</p>
         </div>
-        <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-cat-new>+ New category</button>
+        <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-lib-upload>+ Upload images</button>
       </div>
 
-      <!-- Stated once, plainly, because the two switches look similar and do
-           very different things. A merchant who confuses them either hides a
-           category they meant to keep selling, or leaves one on sale that they
-           thought they had taken down. -->
+      <!-- Said once, here, because it is the one thing about this screen that
+           is not obvious: images are shared. Replacing a picture from a product
+           screen changes it for that product only, but deleting it here removes
+           it everywhere it is used. -->
       <div class="acard" style="margin-bottom:var(--space-5)">
         <p class="admin__sub" style="margin:0">
-          <strong>Live</strong> off hides the category <em>and every product in it</em> from the
-          whole site — reversible, nothing is deleted.
-          <strong>In menu</strong> off only removes it from the header navigation; it stays
-          shoppable and searchable.
+          Every image uploaded anywhere in the panel lands here. The number on a
+          thumbnail is <strong>how many places use it</strong> — deleting one of those
+          leaves a blank space on the live site, so the panel asks first.
+          Uploading the same picture twice reuses the copy already here.
         </p>
       </div>
 
-      <form class="acard acat-new" data-cat-form hidden>
-        <div class="afilters__field">
-          <label for="cn-name">Category name</label>
-          <input class="input-gr" id="cn-name" name="name" type="text" required
-                 placeholder="e.g. Saffron &amp; Rare Spices">
-        </div>
+      <label class="afilters__field afilters__field--wide" style="margin-bottom:var(--space-4)">
+        <span class="sr-only">Search images</span>
+        <input class="input-gr" type="search" placeholder="Search by file name or description"
+               data-lib-search>
+      </label>
 
-        <!-- Empty = a top-level category. The list is filled from the API, and
-             holds only categories that can legally be a parent — see
-             AdminCategoryController::reparent for why that is one level. -->
-        <div class="afilters__field">
-          <label for="cn-parent">Inside <span class="atable__sub">(optional)</span></label>
-          <select class="input-gr" id="cn-parent" name="parent" data-cat-parents>
-            <option value="">Top level — its own category</option>
-          </select>
-        </div>
-
-        <div class="afilters__field afilters__field--wide">
-          <label for="cn-blurb">Short description <span class="atable__sub">(shown on the category page)</span></label>
-          <input class="input-gr" id="cn-blurb" name="blurb" type="text"
-                 placeholder="One line about what belongs here">
-        </div>
-
-        <div class="afilters__field afilters__field--wide">
-          <!-- Mounted by modules/media/media-picker.js. It keeps a hidden
-               <input name="image"> in step, so this form reads it like any
-               other field. -->
-          <div data-media-field="image" data-label="Category image"></div>
-        </div>
-
-        <div class="acat-new__actions">
-          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Create</button>
-          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-cat-cancel>Cancel</button>
-        </div>
-        <p class="admin__sub" style="flex:1 1 100%;margin:0">
-          The web address is set from the name and never changes afterwards — it is in every
-          product link a customer may have saved.
-        </p>
-      </form>
-
-      <!-- Cards, not a table. Eighteen categories with two switches each is a
-           lot of horizontal room, and this panel is used on a phone. -->
-      <div class="acat-grid" data-cat-list>
-        <p class="admin__sub">Loading categories…</p>
+      <div class="mlib" data-lib-grid>
+        <p class="admin__sub">Loading images…</p>
       </div>
 
-      <p class="aerror" data-cat-error hidden role="alert"></p>
+      <div style="text-align:center;padding:var(--space-5) 0">
+        <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-lib-more hidden>Load more</button>
+      </div>
+
+      <p class="aerror" data-lib-note hidden role="alert"></p>
     </main>
   </div>
 
@@ -148,6 +116,6 @@
   <script type="module" src="../../modules/media/media-nav.js"></script>
   <script type="module" src="../../modules/accounting/accounting-nav.js"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js"></script>
-  <script type="module" src="../../modules/admin/categories-page.js"></script>
+  <script type="module" src="../../modules/media/library-page.js"></script>
 </body>
 </html>

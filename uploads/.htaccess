@@ -1,0 +1,51 @@
+# /uploads — merchant-uploaded images. NOTHING HERE MAY EVER EXECUTE.
+#
+# This file is the last line of defence, not the first. ImageStore already
+# whitelists extensions, confirms the type with getimagesize(), and re-encodes
+# every image through GD so the bytes written are a pixel buffer and nothing
+# else. A PHP shell cannot survive that round-trip.
+#
+# This exists for the case where one of those checks has a hole. The document
+# root is the repo root on this host, so a writable folder inside it is one
+# Apache misconfiguration away from remote code execution. Cheap insurance.
+#
+# Do not delete this file. It is committed to git precisely so a fresh deploy
+# cannot land an uploads folder without it.
+
+# Refuse to hand anything in here to an interpreter, whatever it is called.
+<FilesMatch "\.(php|php\d|phtml|phps|phar|pl|py|cgi|sh|htaccess)$">
+    Require all denied
+</FilesMatch>
+
+# Belt and braces: if mod_php or a handler is configured elsewhere, turn it off
+# for this directory rather than relying on the filename match above. A file
+# named image.php.jpg is served by some configurations as PHP.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phar
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phar
+
+# No directory listing of the whole library.
+Options -Indexes -ExecCGI
+
+# Content sniffing is what turns "a .webp containing HTML" into stored XSS.
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Content-Disposition "inline"
+</IfModule>
+
+# These are content-addressed: the filename is a hash of the bytes, so a given
+# URL can never point at different pixels than it did before. Safe to cache
+# hard, and it is the difference between a fast and a slow catalogue on mobile.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/webp "access plus 1 year"
+</IfModule>

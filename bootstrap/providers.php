@@ -30,6 +30,7 @@ return [
     Modules\Checkout\CheckoutServiceProvider::class,
     Modules\Courier\CourierServiceProvider::class,
     Modules\Inventory\InventoryServiceProvider::class,
+    Modules\Media\MediaServiceProvider::class,
     Modules\Delivery\DeliveryServiceProvider::class,
 
     // Added as each module grows a Laravel layer. The frontend for these already

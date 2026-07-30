@@ -88,13 +88,25 @@ class Product extends Model
      *
      * A product with no category stays visible: null means uncategorised, not
      * hidden, and dropping those would silently delist anything mid-migration.
+     *
+     * THE PARENT IS CHECKED TOO. A product in "Dates > Ajwa" must disappear
+     * when "Dates" is switched off, even though "Ajwa" is still marked active.
+     * Cascading by writing is_active=false onto the children instead would be
+     * simpler to query and worse to live with: switching the parent back on
+     * could not tell which children had been off deliberately beforehand.
+     * Reading the parent at query time keeps every switch independently
+     * meaningful, and one extra EXISTS on an indexed key is cheap.
      */
     public function scopeActive(Builder $q): Builder
     {
         return $q->where('products.is_active', true)
             ->where(fn (Builder $w) => $w
                 ->whereNull('category_id')
-                ->orWhereHas('category', fn (Builder $c) => $c->where('is_active', true)));
+                ->orWhereHas('category', fn (Builder $c) => $c
+                    ->where('is_active', true)
+                    ->where(fn (Builder $p) => $p
+                        ->whereNull('parent_id')
+                        ->orWhereHas('parent', fn (Builder $g) => $g->where('is_active', true)))));
     }
 
     public function scopeDiscounted(Builder $q): Builder
