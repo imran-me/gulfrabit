@@ -20,8 +20,6 @@
 .cart-item__controls { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-3); }
 .cart-item__price { font-variant-numeric: tabular-nums; font-weight: var(--fw-semibold); font-size: var(--fs-20); white-space: nowrap; }
 .cart-item__link { background: none; border: 0; color: var(--text-muted); cursor: pointer; font-size: var(--fs-14); padding: 0; }
-.cart-item__link:hover { color: var(--link); }
-.cart-item__link--danger:hover { color: var(--gr-error); }
 
 /* Order summary */
 .order-summary { position: sticky; top: calc(var(--header-h) + var(--space-4)); }
@@ -32,6 +30,25 @@
 /* Sticky mobile checkout CTA */
 .cart-mobile-cta { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: var(--space-3) var(--space-4); background: rgba(255,255,255,.94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-top: 1px solid var(--border-hairline); display: flex; gap: var(--space-3); align-items: center; }
 @media (min-width: 1024px) { .cart-mobile-cta { display: none; } }
+
+/* Clears the iOS home indicator. Without it the lower third of Checkout sits
+   inside the system gesture area, where taps swipe the app away instead of
+   pressing the button — on the last control before payment. */
+.cart-mobile-cta { padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); }
+
+/* The bar is `position: fixed`, so it covers whatever the page ends with —
+   which here is the order summary and its total. Nothing reserved space for
+   it, so the last thing a customer wanted to read was permanently underneath
+   the button asking them to act on it. ~96px of bar plus the inset. */
+@media (max-width: 1023.98px) {
+  .cart-layout { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+}
+
+@media (hover: hover) {
+  .cart-item__link:hover { color: var(--link); }
+  .cart-item__link--danger:hover { color: var(--gr-error); }
+}
+.cart-item__link:active { opacity: .6; }
 
 /* ---- Gift-with-purchase progress --------------------------------------
    The named component; one-off layout inside it uses Tailwind utilities and
