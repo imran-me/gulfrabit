@@ -1449,12 +1449,21 @@ a 34ch measure instead of 48ch, and full-width buttons. Result:
 | 390 | 702 → **460** | 1042 → **800** |
 | 768+ | 702 (unchanged) | unchanged |
 
-**OPEN QUESTION for the next session:** a 390px screenshot *looks* as though the
-hero button and the trust strip clip at the right edge, while a programmatic
-`scrollWidth` check reports no overflow at 360/390/414/768/1280. One of the two
-is wrong. Check the computed `right` of `.hero__actions .btn-gr` and
-`.trust-item` specifically before changing anything — do not "fix" it on the
-strength of the screenshot alone.
+**RESOLVED — there was no clipping.** Measured every element's computed edge:
+
+| at 390px (clientWidth 380) | left | right |
+|---|---|---|
+| hero button | 24 | 356 |
+| trust strip | 24 | 356 |
+| hero content | 24 | 356 |
+
+Same proportions at 360. Nothing reaches the edge. The screenshot misled because
+a headless window of 390 renders a 380px viewport once the scrollbar is taken,
+and the capture is scaled — so content that ends at 356 can look cut off.
+
+**Lesson worth keeping: measure computed edges, do not trust a screenshot for
+overflow.** Had this been "fixed" on the strength of the image, the hero would
+have been narrowed for no reason.
 
 Remaining 8.7 work: category tiles, product cards, PDP, cart and checkout on
 mobile; hover/press effects; alignment pass.
