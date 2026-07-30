@@ -32,7 +32,11 @@ LOG="storage/logs/seed.log"
 echo "Catalogue seed — $(date)" | tee -a "$LOG"
 echo "" | tee -a "$LOG"
 
-php artisan db:seed --class=Modules\Catalog\Seeders\CatalogSeeder --force >> "$LOG" 2>&1
+# SINGLE quotes around the class. The namespace separator is a backslash, and
+# unquoted bash reads `\C` as an escaped C and drops the backslash — PHP then
+# received `ModulesCatalogSeedersCatalogSeeder` and could not find it. Double
+# quotes would not help either; only single quotes stop bash touching it.
+php artisan db:seed --class='Modules\Catalog\Seeders\CatalogSeeder' --force >> "$LOG" 2>&1
 echo "exit=$?" | tee -a "$LOG"
 
 echo "" | tee -a "$LOG"
