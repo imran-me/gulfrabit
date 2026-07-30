@@ -850,44 +850,38 @@ hidden rather than deleted.
 4. Refine, re-apply, re-check
 5. Only at 100% satisfaction, move to the next
 
-### §7e — NEXT SECURITY STEP: get off the Tailwind CDN
+### §7e — DONE 2026-07-30: both CDNs removed
 
-The CSP shipped 2026-07-30 carries `'unsafe-inline'` and `'unsafe-eval'` in
-`script-src`, so it restricts WHERE scripts load from but does not stop
-injected inline script. `'unsafe-eval'` exists solely for
-`cdn.tailwindcss.com`, which compiles CSS in the browser.
+The site loads **no third-party CSS and no third-party JavaScript**. Only the
+two font services remain.
 
-**THE SITE DOES NOT USE TAILWIND.** `tools/tailwind-inventory.py` reads every
-class attribute in every page, subtracts what our own stylesheets define, and
-found exactly ONE utility in use: `sr-only`, twice. That is now in
-`shared/css/style.css`, so nothing depends on the CDN for a class any more.
+`tools/tailwind-inventory.py` proved it was safe: it reads every class
+attribute on every page, subtracts what our stylesheets define, and reported
+ONE class in use (`sr-only`, twice). Bootstrap's only contribution was
+`d-lg-none`, already provided by the header's inline `<style>`.
 
-What it WAS still providing was preflight — the reset. `style.css` said so
-("light-touch; Tailwind's preflight handles most"). **That is done: the reset
-is complete on its own as of 2026-07-30**, and while the CDN is loaded those
-rules simply duplicate it, so the change was invisible.
+**What actually made these risky was the resets, not the classes.** Both were
+done in two commits — own the reset first (invisible, since the CDN still
+supplied it), then remove the CDN as a separate reversible change.
 
-**REMOVING THE CDN IS NOW A ONE-LINE CHANGE**, deliberately left unmade so it
-can be judged on its own rather than bundled with forty lines of reset:
+The two that would have broken things silently:
 
-1. Delete the two `<script>` lines from `head()` in `tools/assemble.py`
-   (`cdn.tailwindcss.com` and `/shared/css/tailwind.config.js`), and the same
-   two from the hand-authored `index.html`
-2. Delete `shared/css/tailwind.config.js`
-3. In `.htaccess`, drop `'unsafe-eval'` and `https://cdn.tailwindcss.com` from
-   `script-src`
-4. `python tools/assemble.py`, then LOOK at the site — form controls and
-   buttons are where a missed preflight rule would show first
+- **preflight**: `font-family: inherit` on form controls, `border-width: 0`.
+  Without it every `<select>` and `<input>` reverts to the browser's UI font.
+- **Reboot**: `[hidden] { display: none !important }`. `hidden` is an
+  attribute the UA implements at the same specificity as a class, so
+  `.acat-new { display: flex }` beat it — the New category, New product and
+  New coupon forms were hidden ONLY by Bootstrap's `!important`. 231 elements
+  site-wide carry the attribute; three components had already patched this
+  individually rather than globally.
 
-Bootstrap (`cdn.jsdelivr.net`) is the same story: the only Bootstrap-shaped
-class in the markup is `d-lg-none`, and the header partial provides it in its
-own inline `<style>`. Worth a second inventory before removing.
+`tools/tailwind-inventory.py` now FAILS the build if a Tailwind-shaped class
+reappears — with no CDN, such a class is styled by nothing and errors in
+nothing, which is a silent visual regression.
 
-Still blocking a strong CSP after that: an inline no-js remover, two JSON-LD
-blocks per page, and 77 `style=""` attributes on the home page alone.
-
-`tools/htaccess-check.py` asserts every header is present and that the CSP
-keeps its load-bearing directives.
+CSP is now `script-src 'self' 'unsafe-inline'`. The only thing left before it
+stops injected script outright: the inline no-js remover, two JSON-LD blocks
+per page, and 77 `style=""` attributes on the home page.
 
 ### §7d — OPEN: three migrations have not run on the server (2026-07-30)
 
