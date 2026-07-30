@@ -61,7 +61,21 @@ fi
 # --force because there is nobody at a keyboard to confirm the prompt.
 # Structure only. Your rows are untouched.
 say "Applying migrations"
-php artisan migrate --force
+
+# The exit code is CHECKED. This used to run bare, and a migration that failed
+# left the deploy carrying on to cache routes and report success — so new code
+# went live against an old schema, and the only symptom was a screen returning
+# 500 some time later with nothing in the deploy log to connect it to.
+#
+# It does not abort the deploy: the code is already on disk from the reset
+# above, so stopping here would leave the caches stale as well as the schema,
+# which is strictly worse. It makes the failure loud instead, and the panel's
+# setup check (GET /api/admin/health) reports the missing tables on the
+# dashboard so somebody actually sees it.
+if ! php artisan migrate --force; then
+    say "!!! MIGRATION FAILED — the schema is behind the code."
+    say "!!! Read the error above. The admin dashboard will list what is missing."
+fi
 
 # ---- 5. Caches ------------------------------------------------------------
 # Rebuilt AFTER the code lands, never before, or they would cache the previous

@@ -38,8 +38,28 @@ class HighlightController extends Controller
             return response()->json(['message' => 'No such shelf.'], 404);
         }
 
+        // The two reads are guarded SEPARATELY, and that is the point. If the
+        // curation table is unreadable — never migrated, say — the tag
+        // fallback is still perfectly able to fill the shelf, and one
+        // try/catch around both would have thrown that away and served an
+        // empty rail. It also makes the failure legible from outside: a
+        // response of `source: "tag"` says the curated read broke, while
+        // `source: "unavailable"` says both did.
         try {
-            return $this->shelf($rail, $config);
+            $curated = $this->curated($rail);
+
+            if ($curated !== []) {
+                return response()->json(['data' => $curated, 'source' => 'curated']);
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        try {
+            return response()->json([
+                'data'   => $this->tagged($config['fallbackTag']),
+                'source' => 'tag',
+            ]);
         } catch (\Throwable $e) {
             report($e);
 
@@ -47,10 +67,10 @@ class HighlightController extends Controller
         }
     }
 
-    /** @param array{fallbackTag: string} $config */
-    private function shelf(string $rail, array $config): JsonResponse
+    /** @return array<int, array<string, mixed>> */
+    private function curated(string $rail): array
     {
-        $curated = Highlight::query()
+        return Highlight::query()
             ->rail($rail)
             ->with('product.category')
             ->get()
@@ -60,26 +80,26 @@ class HighlightController extends Controller
             // same result with a harder-to-read query.
             ->map(fn (Highlight $h) => $h->product)
             ->filter(fn (?Product $p): bool => $p !== null && $this->sellable($p))
-            ->values();
+            ->map(fn (Product $p): array => $p->toStorefrontArray())
+            ->values()
+            ->all();
+    }
 
-        if ($curated->isNotEmpty()) {
-            return response()->json([
-                'data'   => $curated->map(fn (Product $p) => $p->toStorefrontArray())->all(),
-                'source' => 'curated',
-            ]);
-        }
-
-        $tagged = Product::query()
+    /**
+     * The old behaviour: whatever carries the tag.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function tagged(string $tag): array
+    {
+        return Product::query()
             ->active()
-            ->tagged($config['fallbackTag'])
+            ->tagged($tag)
             ->with('category')
             ->limit(8)
-            ->get();
-
-        return response()->json([
-            'data'   => $tagged->map(fn (Product $p) => $p->toStorefrontArray())->all(),
-            'source' => 'tag',
-        ]);
+            ->get()
+            ->map(fn (Product $p): array => $p->toStorefrontArray())
+            ->all();
     }
 
     /**
