@@ -32,10 +32,19 @@ final class PromotionService
             ->first();
     }
 
-    /** Discount in poisha for a code against a goods subtotal. 0 if it does not apply. */
-    public function discountPoisha(?string $code, int $subtotalPoisha): int
+    /**
+     * Discount in poisha for a code against a goods subtotal. 0 if it does not
+     * apply.
+     *
+     * `$lines` is required for any promotion scoped to particular products or
+     * categories — see CartService::discountLines. Omitting it does not
+     * silently widen the discount: a scoped promotion with no lines returns 0.
+     *
+     * @param array<int, array{product_id?:int|null, category_id?:int|null, total_poisha:int}>|null $lines
+     */
+    public function discountPoisha(?string $code, int $subtotalPoisha, ?array $lines = null): int
     {
-        return $this->find($code)?->discountPoisha($subtotalPoisha) ?? 0;
+        return $this->find($code)?->discountPoisha($subtotalPoisha, $lines) ?? 0;
     }
 
     /**
@@ -45,9 +54,10 @@ final class PromotionService
      * second one is actionable — the customer can add another item — and
      * collapsing both into "invalid code" loses a sale.
      *
+     * @param array<int, array{product_id?:int|null, category_id?:int|null, total_poisha:int}>|null $lines
      * @return array{valid:bool, reason:?string, discount:int, label:?string}
      */
-    public function validate(?string $code, int $subtotalPoisha): array
+    public function validate(?string $code, int $subtotalPoisha, ?array $lines = null): array
     {
         $promo = $this->find($code);
 
@@ -65,10 +75,25 @@ final class PromotionService
             ];
         }
 
+        $discount = $promo->discountPoisha($subtotalPoisha, $lines);
+
+        // A real code, a big enough basket, and still nothing off — the basket
+        // holds none of the items this offer is for. Distinct from "unknown"
+        // and from "too small", because it is the only one of the three the
+        // customer fixes by shopping rather than by giving up.
+        if ($discount === 0 && $promo->scope !== 'all') {
+            return [
+                'valid'    => false,
+                'reason'   => 'not_eligible',
+                'discount' => 0,
+                'label'    => $promo->label,
+            ];
+        }
+
         return [
             'valid'    => true,
             'reason'   => null,
-            'discount' => intdiv($promo->discountPoisha($subtotalPoisha), 100),
+            'discount' => intdiv($discount, 100),
             'label'    => $promo->label,
         ];
     }
@@ -92,8 +117,14 @@ final class PromotionService
     {
         return Promotion::query()
             ->public()
+            ->with('targets')
             ->orderBy('min_subtotal_poisha')
             ->get()
+            // A scoped promotion with nothing chosen applies to nothing, so
+            // advertising it is advertising a code that will be refused. The
+            // panel flags this state as "no items chosen"; here it is simply
+            // dropped, because a customer cannot act on it.
+            ->reject(fn (Promotion $p): bool => $p->scope !== 'all' && $p->targets->isEmpty())
             ->map(fn (Promotion $p): array => [
                 'kind'        => 'promo',
                 'code'        => $p->code,
@@ -104,7 +135,12 @@ final class PromotionService
                 'maxDiscount' => $p->max_discount_poisha === null
                     ? null
                     : intdiv($p->max_discount_poisha, 100),
+                // So the copy can say "on selected dates" rather than implying
+                // the code works on anything in the basket. A published offer
+                // that is refused at the cart is worse than one never shown.
+                'scope'       => $p->scope,
             ])
+            ->values()
             ->all();
     }
 

@@ -70,7 +70,12 @@ final class OrderService
 
             $subtotalPoisha = $cart->items->sum(fn (CartItem $i) => $i->lineTotalPoisha());
             $promo = $this->promotions->find($cart->promo_code);
-            $discountPoisha = $promo?->discountPoisha($subtotalPoisha) ?? 0;
+            // The lines matter: a promotion scoped to particular products or
+            // categories discounts only those, and returns zero without them.
+            $discountPoisha = $promo?->discountPoisha(
+                $subtotalPoisha,
+                $this->carts->discountLines($cart),
+            ) ?? 0;
             $deliveryPoisha = $chosenZone->charge_poisha;
 
             $goodsAfterDiscount = max(0, $subtotalPoisha - $discountPoisha);

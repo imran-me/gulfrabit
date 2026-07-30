@@ -108,13 +108,24 @@ class CartController extends Controller
         // Exact poisha. Using the taka figure from the payload and multiplying
         // by 100 would lose up to 99 poisha and could flip the basket across a
         // minimum-spend boundary.
-        $check = $this->promotions->validate($validated['code'], $this->carts->subtotalPoisha($cart));
+        $check = $this->promotions->validate(
+            $validated['code'],
+            $this->carts->subtotalPoisha($cart),
+            // A promotion scoped to particular products needs to see them.
+            $this->carts->discountLines($cart),
+        );
 
         if (! $check['valid']) {
             return response()->json([
-                'message' => $check['reason'] === 'min_subtotal'
-                    ? "Spend ৳ {$check['minSpend']} to use this code."
-                    : 'That code is not valid.',
+                // Three different situations, three different messages. Only
+                // "not valid" is a dead end; the other two tell the customer
+                // what would make the code work, which is the difference
+                // between a lost sale and a larger one.
+                'message' => match ($check['reason']) {
+                    'min_subtotal' => "Spend ৳ {$check['minSpend']} to use this code.",
+                    'not_eligible' => 'This code is for selected items, and none of them are in your basket.',
+                    default        => 'That code is not valid.',
+                },
                 'errors'  => ['code' => ['invalid']],
             ], 422);
         }

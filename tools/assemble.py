@@ -249,6 +249,11 @@ ADMIN_PAGES = [
      ["/modules/admin/admin.css", "/modules/media/media.css"],
      ["/modules/admin/admin-shell.js", "/modules/admin/categories-page.js"], True),
 
+    ("modules/admin/coupons.html", "Coupons & offers — GulfRabit Admin",
+     "modules/admin/_fragments/coupons.main.html",
+     ["/modules/admin/admin.css", "/modules/media/media.css"],
+     ["/modules/admin/admin-shell.js", "/modules/admin/coupons-page.js"], True),
+
     ("modules/media/library.html", "Images — GulfRabit Admin",
      "modules/media/_fragments/library.main.html",
      ["/modules/admin/admin.css", "/modules/media/media.css"],

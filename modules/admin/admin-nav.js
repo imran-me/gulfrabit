@@ -66,6 +66,17 @@ registerScreen({
 });
 
 registerScreen({
+  id: 'coupons',
+  label: 'Coupons & offers',
+  href: '/modules/admin/coupons.html',
+  area: 'products',
+  group: 'Catalogue',
+  // After Images (36). Pricing follows the catalogue it prices.
+  order: 38,
+  icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9V6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a3 3 0 0 0 0 6v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a3 3 0 0 0 0-6z"/><path d="M9.5 9.5l5 5M9.5 9.5h.01M14.5 14.5h.01"/></svg>',
+});
+
+registerScreen({
   id: 'categories',
   label: 'Categories',
   href: '/modules/admin/categories.html',

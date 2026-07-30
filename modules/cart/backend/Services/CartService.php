@@ -157,6 +157,28 @@ final class CartService
     }
 
     /**
+     * The basket as the discount maths needs to see it: what each line is
+     * worth, and which product and category it belongs to.
+     *
+     * A promotion scoped to specific products or categories cannot be applied
+     * from a subtotal alone, and `Promotion::discountPoisha` fails closed
+     * without this — a scoped code silently discounts nothing rather than
+     * quietly discounting everything.
+     *
+     * @return array<int, array{product_id:int|null, category_id:int|null, total_poisha:int}>
+     */
+    public function discountLines(Cart $cart): array
+    {
+        $cart->loadMissing('items.product');
+
+        return $cart->items->map(fn (CartItem $i): array => [
+            'product_id'   => $i->product?->id,
+            'category_id'  => $i->product?->category_id,
+            'total_poisha' => $i->lineTotalPoisha(),
+        ])->all();
+    }
+
+    /**
      * The full cart payload — lines plus every total, all server-computed.
      *
      * Delivery is deliberately NOT included. It depends on the district, which
@@ -170,7 +192,11 @@ final class CartService
         $items = $cart->items->map(fn (CartItem $i) => $i->toStorefrontArray())->all();
 
         $subtotalPoisha = $this->subtotalPoisha($cart);
-        $discountPoisha = $this->promotions->discountPoisha($cart->promo_code, $subtotalPoisha);
+        $discountPoisha = $this->promotions->discountPoisha(
+            $cart->promo_code,
+            $subtotalPoisha,
+            $this->discountLines($cart),
+        );
 
         return [
             'items'    => $items,

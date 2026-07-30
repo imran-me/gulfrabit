@@ -9,6 +9,7 @@ use Modules\Admin\Controllers\AdminCategoryController;
 use Modules\Admin\Controllers\AdminCustomerController;
 use Modules\Admin\Controllers\AdminOrderController;
 use Modules\Admin\Controllers\AdminProductController;
+use Modules\Admin\Controllers\AdminPromotionController;
 
 /**
  * Admin module routes — the module's entire routing surface.
@@ -90,6 +91,17 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             // route below puts it back.
             Route::delete('/{sku}', [AdminProductController::class, 'destroy'])->name('destroy');
             Route::post('/{sku}/restore', [AdminProductController::class, 'restore'])->name('restore');
+        });
+
+        // Coupons and offers. Bound by `code`, not id: the code is what the
+        // merchant and the customer both say out loud, and an id in the URL
+        // would be one more thing that means nothing to either of them.
+        Route::middleware('admin:products')->prefix('promotions')->name('promotions.')->group(function (): void {
+            Route::get('/', [AdminPromotionController::class, 'index'])->name('index');
+            Route::post('/', [AdminPromotionController::class, 'store'])->name('store');
+            Route::patch('/{promotion:code}', [AdminPromotionController::class, 'update'])->name('update');
+            // Refused once the code has been used — see the controller.
+            Route::delete('/{promotion:code}', [AdminPromotionController::class, 'destroy'])->name('destroy');
         });
 
         // Categories. Same capability as products — whoever curates the
