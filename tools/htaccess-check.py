@@ -31,7 +31,8 @@ must_allow = [
     'modules/delivery/data/districts.json',
     'modules/account/data/orders.json',
     'modules/auth/data/users.json',
-    'shared/css/style.css',
+    'shared/css/gulfrabit.css',   # the built bundle every page links
+    'shared/css/partials/_variables.css',  # still fetched by tools/font-test.html
     'shared/js/core/json-cache.js',
     'assets/images/products/gr-1001.svg',
     'sitemap.xml',
