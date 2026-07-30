@@ -13,6 +13,7 @@
 
 import { initHeader } from './components/header-nav.js';
 import { initCategoryMenu } from './components/category-menu.js';
+import { initImageSettle } from './components/image-settle.js';
 import { initCartDrawer } from './components/cart-drawer.js';
 import { initScrollReveal } from './components/scroll-reveal.js';
 import { initSearchAutocomplete } from './components/search-autocomplete.js';
@@ -28,6 +29,9 @@ function boot() {
   // container elements, which this only refills. Swapping the contents does
   // not disturb those listeners.
   initCategoryMenu();
+  // Early: it must be watching before the product grids paint, or the first
+  // screenful of images is already decoded by the time it looks.
+  initImageSettle();
   initCartDrawer();
   initScrollReveal();
   initSearchAutocomplete();

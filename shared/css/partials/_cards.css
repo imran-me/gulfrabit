@@ -127,6 +127,40 @@
 .product-card__stars { display: inline-flex; align-items: center; gap: 1px; }
 .product-card__stars svg { display: block; }
 
+/* ---- Premium products carry a gold hairline ---------------------------
+ *
+ * The shop's whole claim is that everything is imported and premium, and until
+ * now the only thing saying so on a card was a small gold badge competing with
+ * a lime SALE badge for the same corner.
+ *
+ * :has() keys the treatment off the badge that is already rendered, so no
+ * markup changes and nothing new to keep in step — a product tagged premium
+ * gets the border because it got the badge.
+ *
+ * Restraint is the point. A hairline and a barely-there warm wash, not a gold
+ * card: on a grid of twelve, anything louder stops reading as "this one is
+ * special" and starts reading as decoration.
+ *
+ * :has() is Chrome 105+ / Safari 15.4+ / Firefox 121+. On anything older the
+ * rule is simply skipped and the card renders normally — the badge still says
+ * premium. That is why the treatment is additive decoration and carries no
+ * information of its own: a browser without :has() must not lose a fact, only
+ * an emphasis.
+ */
+.product-card:has(.badge-premium) {
+  border-color: color-mix(in srgb, var(--gold-ink) 32%, var(--border-hairline));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold-ink) 3.5%, transparent), transparent 38%),
+    var(--surface-raised);
+}
+
+@media (hover: hover) {
+  .product-card:has(.badge-premium):hover {
+    border-color: color-mix(in srgb, var(--gold-ink) 60%, transparent);
+    box-shadow: 0 18px 48px rgba(138, 109, 34, .16), 0 6px 16px rgba(16, 19, 20, .07);
+  }
+}
+
 /* ---- The card on a phone ---------------------------------------------
  *
  * Two cards fit across a 360px screen, which makes each about 160px wide.

@@ -29,9 +29,20 @@ h1, h2, h3, h4, h5, h6 {
   text-wrap: balance;
 }
 
-h1, .h1 { font-size: clamp(2.25rem, 5vw, var(--fs-49)); font-weight: var(--fw-bold); }
-h2, .h2 { font-size: clamp(1.9rem, 4vw, var(--fs-39)); }
-h3, .h3 { font-size: clamp(1.5rem, 3vw, var(--fs-31)); }
+/* Tracking tightens as the type grows.
+ *
+ * Letter-spacing is optical, not a constant. The gaps a face needs at 16px are
+ * visibly loose at 49px — the word stops reading as one shape and starts
+ * reading as separate letters, which is the difference between a headline that
+ * looks set and one that looks typed. Every display face is drawn on this
+ * assumption; Clash Display especially.
+ *
+ * The values step with the size rather than being one -0.01em for everything,
+ * which is what the file did before.
+ */
+h1, .h1 { font-size: clamp(2.25rem, 5vw, var(--fs-49)); font-weight: var(--fw-bold); letter-spacing: -0.028em; }
+h2, .h2 { font-size: clamp(1.9rem, 4vw, var(--fs-39)); letter-spacing: -0.022em; }
+h3, .h3 { font-size: clamp(1.5rem, 3vw, var(--fs-31)); letter-spacing: -0.016em; }
 h4, .h4 { font-size: var(--fs-25); }
 h5, .h5 { font-size: var(--fs-20); font-weight: var(--fw-semibold); }
 h6, .h6 { font-size: var(--fs-16); font-weight: var(--fw-semibold); letter-spacing: 0; }

@@ -80,3 +80,31 @@ html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0)
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
   [data-reveal] { opacity: 1; transform: none; }
 }
+
+/* ---- Images settle in, rather than popping -----------------------------
+ *
+ * Driven by shared/js/components/image-settle.js. The selector deliberately
+ * requires BOTH classes to hide anything: `.settle` is added by the script, so
+ * an image is only ever hidden by code that is running and will un-hide it. If
+ * the script fails or never loads, nothing here applies and every photo shows
+ * normally — the same no-js contract as [data-reveal].
+ */
+img.settle {
+  opacity: 0;
+  transform: scale(1.015);
+  /* Slower fade than movement: the eye reads the opacity change as "arriving"
+     and the scale as "settling", and matching their durations makes it look
+     like one mechanical slide instead. */
+  transition: opacity 420ms var(--ease-out), transform 620ms var(--ease-out);
+}
+
+img.settle.is-settled {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The script bails before adding the class, but a stylesheet that only works
+     because a script agreed with it is a stylesheet waiting to be wrong. */
+  img.settle { opacity: 1; transform: none; transition: none; }
+}
