@@ -17,6 +17,7 @@ import { initWishlistButtons } from '../../shared/js/components/wishlist.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';
 import { siteURL } from '../../shared/js/core/paths.js';
 import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
+import { initBuyBar } from './pdp-buybar.js';
 
 const STAR = '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
 let currentQty = 1;
@@ -37,6 +38,11 @@ async function init() {
   loadRelated(product);
   recordRecent(product.id);
   loadRecentlyViewed(product);
+
+  // After paintInfo and wireActions: the bar reads the rendered price and
+  // forwards clicks to the real Add to Cart button, so both have to exist by
+  // the time it mounts.
+  initBuyBar();
 }
 
 /* ---- Recently viewed (localStorage history) --------------------------- */

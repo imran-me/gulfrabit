@@ -46,9 +46,44 @@
 .gallery { display: grid; gap: var(--space-3); }
 .gallery__main { position: relative; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-hairline); background: var(--surface-sunken); aspect-ratio: 1; }
 .gallery__main img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--dur-slow) var(--ease-out); }
-.gallery__main.zoomable:hover img { transform: scale(1.6); cursor: zoom-in; }
-.gallery__thumbs { display: flex; gap: var(--space-2); flex-wrap: wrap; }
-.gallery__thumb { width: 72px; height: 72px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-hairline); cursor: pointer; padding: 0; background: var(--surface-sunken); }
+/* Zoom only where a pointer exists. On a phone :hover latches on tap, so
+   touching the photo left it stuck at 1.6× with no way back — and pinch-zoom
+   is the gesture people actually use there. */
+@media (hover: hover) {
+  .gallery__main.zoomable:hover img { transform: scale(1.6); cursor: zoom-in; }
+}
+
+/* A scrolling strip, not a wrapping grid.
+   Twelve photos at 72px wrapped to three rows on a 360px screen — 216px of
+   thumbnails between the product image and its price, which is the one thing
+   the page exists to show. */
+.gallery__thumbs {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding-bottom: var(--space-1);
+  /* No visible scrollbar on desktop; the row is obviously scrollable from the
+     part-visible thumb at the edge. */
+  scrollbar-width: thin;
+}
+.gallery__thumb {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 64px; height: 64px;
+  border-radius: var(--radius-sm); overflow: hidden;
+  border: 1px solid var(--border-hairline);
+  cursor: pointer; padding: 0; background: var(--surface-sunken);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.gallery__thumb:active { transform: scale(.94); }
+
+@media (min-width: 768px) {
+  .gallery__thumbs { flex-wrap: wrap; overflow-x: visible; }
+  .gallery__thumb { width: 72px; height: 72px; }
+}
 .gallery__thumb.is-active { border-color: var(--gr-cyan-dark); box-shadow: 0 0 0 2px rgba(27,180,212,.3); }
 .gallery__thumb img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -57,6 +92,53 @@
 .pdp-price { display: flex; align-items: baseline; gap: var(--space-3); margin: var(--space-4) 0; }
 .pdp-price__now { font-family: var(--font-display); font-size: var(--fs-31); }
 .pdp-actions { display: flex; gap: var(--space-3); margin: var(--space-5) 0; }
+
+/* ---- Sticky buy bar (phones and small tablets) -------------------------
+ *
+ * A product page is long: gallery, price, description, specs, FAQ, reviews,
+ * related. By the time somebody has read enough to decide, the Add to Cart
+ * button is several screens above them, and the decision costs a scroll back.
+ * This puts it back within thumb reach the moment the real button leaves the
+ * viewport.
+ *
+ * NOT shown on desktop: the buy column there is already `position: sticky`, so
+ * the button never leaves. A second copy would be clutter.
+ *
+ * It is a DUPLICATE of the real control, not a replacement — pdp-buybar.js
+ * forwards its click to the button in the page, so there is one add-to-cart
+ * path and one place for its logic to live.
+ */
+.buybar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  /* Clears the iOS home indicator. Without it the button's lower third is
+     under the system gesture area and taps there do nothing. */
+  padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--surface-raised) 92%, transparent);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border-hairline);
+  box-shadow: 0 -2px 16px rgba(16, 19, 20, .07);
+  transform: translateY(110%);
+  transition: transform 260ms var(--ease-out);
+}
+
+.buybar.is-visible { transform: translateY(0); }
+
+.buybar__price { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+.buybar__now { font-family: var(--font-display); font-size: var(--fs-20); }
+.buybar__was { font-size: var(--fs-12); color: var(--text-muted); text-decoration: line-through; }
+.buybar__btn { flex: 1 1 auto; }
+
+@media (min-width: 1024px) { .buybar { display: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .buybar { transition: none; }
+}
 
 /* ---- Tabs ------------------------------------------------------------- */
 .tabs { border-bottom: 1px solid var(--border-hairline); display: flex; gap: var(--space-4); overflow-x: auto; }
