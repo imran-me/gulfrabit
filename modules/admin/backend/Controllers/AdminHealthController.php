@@ -45,6 +45,57 @@ class AdminHealthController extends Controller
         'journal_entries'   => 'Profit & loss',
     ];
 
+    /**
+     * Migration files the migrator knows about that the database has not run.
+     *
+     * Compared against the `migrations` table rather than by calling
+     * `migrate:status`, which shells out through Artisan and formats for a
+     * terminal. This wants the names, not a table.
+     *
+     * The FIRST pending one is the one that matters — Laravel stops at the
+     * first failure, so everything after it is pending as a consequence rather
+     * than a cause. The message says so, because chasing the last name in a
+     * list of eight is a wasted afternoon.
+     *
+     * @return array<string, mixed>
+     */
+    private function pendingMigrations(): array
+    {
+        try {
+            $migrator = app('migrator');
+
+            $files = array_keys($migrator->getMigrationFiles($migrator->paths()));
+            $ran = DB::table('migrations')->pluck('migration')->all();
+
+            $pending = array_values(array_diff($files, $ran));
+        } catch (\Throwable) {
+            return [
+                'name'   => 'Migrations',
+                'ok'     => false,
+                'detail' => 'Could not read the migrations table.',
+                'fix'    => 'Run `php artisan migrate --force` over SSH.',
+            ];
+        }
+
+        if ($pending === []) {
+            return [
+                'name'   => 'Migrations',
+                'ok'     => true,
+                'detail' => count($ran) . ' migrations applied, none pending.',
+                'fix'    => null,
+            ];
+        }
+
+        return [
+            'name'   => 'Migrations',
+            'ok'     => false,
+            'detail' => count($pending) . ' have not run. The first is `' . $pending[0] . '`'
+                . (count($pending) > 1 ? ' — the rest are blocked behind it.' : '.'),
+            'fix'    => 'Run `php artisan migrate --force` over SSH from the site folder and '
+                . 'read the error it prints for that file.',
+        ];
+    }
+
     /** GET /api/admin/health */
     public function index(): JsonResponse
     {
@@ -72,6 +123,12 @@ class AdminHealthController extends Controller
                 : 'A migration did not finish. Run `php artisan migrate --force` '
                     . 'over SSH and read what it prints — the first error is the real one.',
         ];
+
+        // ---- migrations that have not run -------------------------------
+        // Names the exact files, which is far more actionable than a list of
+        // missing tables: it points at the first one that failed, and that is
+        // the only error worth reading.
+        $checks[] = $this->pendingMigrations();
 
         // ---- image uploads ---------------------------------------------
         $gd = extension_loaded('gd');
