@@ -13,6 +13,7 @@ fragment or the shared partials change.
 
 Usage:  python assemble.py
 """
+import hashlib
 import os, re
 
 import pathlib
@@ -33,6 +34,30 @@ FOOTER = read("shared/components/footer.html")
 
 # Canonical site origin (placeholder domain — update when the domain is live).
 SITE = "https://gulfrabit.com"
+
+
+def asset(path):
+    """Append a content hash to a local asset URL, so browsers refetch it when
+    it changes and cache it forever when it does not.
+
+    Without this every deploy left people looking at yesterday's JavaScript.
+    The admin panel is the worst case: a new screen lands in the nav file, the
+    browser serves the copy it already has, and the screen appears to be
+    missing. That happened, and it reads as a failed deploy rather than a cache.
+
+    Hash of the file's own bytes, not a build timestamp — an unchanged file
+    keeps its URL, so a deploy that touches one script does not force every
+    visitor to redownload all of them.
+    """
+    if not path.startswith("/"):
+        return path
+    full = os.path.join(ROOT, path.lstrip("/"))
+    if not os.path.exists(full):
+        return path
+    with open(full, "rb") as f:
+        digest = hashlib.md5(f.read()).hexdigest()[:8]
+    return f"{path}?v={digest}"
+
 
 def head(title, desc, css_links, theme="#0A0A0A", cms_page=None):
     extra = "\n  ".join(f'<link rel="stylesheet" href="{c}">' for c in css_links)
@@ -83,7 +108,7 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None):
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/shared/css/tailwind.config.js"></script>
-  <link rel="stylesheet" href="/shared/css/style.css">
+  <link rel="stylesheet" href="{asset('/shared/css/style.css')}">
   {extra}
   <script type="application/ld+json">
   {{"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"{SITE}","logo":"{SITE}/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}}
@@ -102,7 +127,7 @@ def scripts(module_js):
     paths = [] if not module_js else ([module_js] if isinstance(module_js, str) else list(module_js))
     js = "".join(f'\n  <script type="module" src="{p}"></script>' for p in paths)
     return f"""
-  <script type="module" src="/shared/js/main.js"></script>{js}
+  <script type="module" src="{asset('/shared/js/main.js')}"></script>{js}
 </body>
 </html>
 """
