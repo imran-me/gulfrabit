@@ -4,6 +4,43 @@
 .checkout-layout { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
 @media (min-width: 1024px) { .checkout-layout { grid-template-columns: 1fr 380px; align-items: start; } }
 
+/* ---- The summary goes FIRST on a phone ---------------------------------
+ *
+ * In one column the aside falls below all four steps, so the total is off
+ * screen for the whole of checkout — the customer is typing an address with no
+ * idea what they are about to pay, and finds out after the last step. On a
+ * cash-on-delivery shop that is where orders get abandoned at the door.
+ *
+ * `order: -1` rather than moving it in the markup: the source order is right
+ * for a screen reader (fill the form, then hear the summary) and the aside
+ * holds no interactive element, so nothing's focus order is disturbed by
+ * painting it above.
+ *
+ * It stays stuck under the header while the steps scroll past, so the number
+ * is always on screen rather than only at the top of the page.
+ */
+@media (max-width: 1023.98px) {
+  .order-summary {
+    order: -1;
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-2));
+    z-index: 20;
+    /* Compact: this is a reference, not the main content, and a full-height
+       panel above the form would push the first field off the fold. */
+    padding: var(--space-4) !important;
+  }
+
+  .order-summary h2 { font-size: var(--fs-16); margin-bottom: var(--space-3) !important; }
+
+  /* The line items collapse away. The totals are what a customer checks
+     repeatedly; the list of what is in the basket they already know, and it
+     is one tap away in the cart. */
+  .order-summary [data-summary-items] { display: none; }
+
+  .summary-row { padding: 3px 0; font-size: var(--fs-14); }
+  .summary-row--total { font-size: var(--fs-16); }
+}
+
 /* Progress stepper */
 .stepper { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-7); flex-wrap: wrap; }
 .step { display: flex; align-items: center; gap: var(--space-2); color: var(--text-muted); font-size: var(--fs-14); }
@@ -21,7 +58,13 @@
 
 /* Delivery / payment option cards */
 .option-card { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-4); border: 1px solid var(--border-hairline); border-radius: var(--radius-lg); cursor: pointer; transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out); margin-bottom: var(--space-3); }
-.option-card:hover { border-color: var(--gr-cyan-dark); }
+/* Guarded: on touch, :hover latches after a tap, so a delivery option the
+   customer merely brushed past stayed outlined exactly like the selected one.
+   Two options looking chosen on a payment step is not a cosmetic problem. */
+@media (hover: hover) {
+  .option-card:hover { border-color: var(--gr-cyan-dark); }
+}
+.option-card:active { transform: scale(.995); }
 .option-card input { accent-color: var(--gr-cyan); margin-top: 3px; width: 20px; height: 20px; }
 .option-card.is-selected { border-color: var(--gr-cyan-dark); background: rgba(27,180,212,.06); }
 /* Both were unstyled inline spans, so they rendered as one run-on string —
@@ -34,6 +77,30 @@
 .review-line { display: flex; justify-content: space-between; padding: var(--space-2) 0; border-bottom: 1px solid var(--border-hairline); }
 
 .step-nav { display: flex; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-6); }
+
+/* ---- The stepper on a phone -------------------------------------------
+ * Four steps with labels and connecting lines need about 420px. At 360 it
+ * wrapped to two ragged rows and stopped reading as a sequence at all.
+ * Numbers only, connected — the current step's label is the heading right
+ * underneath it, so repeating all four buys nothing.
+ */
+@media (max-width: 575.98px) {
+  .stepper { gap: var(--space-1); margin-bottom: var(--space-5); flex-wrap: nowrap; }
+  .step { min-width: 0; }
+  /* The labels were bare text nodes, which CSS cannot hide — hence
+     .step__label in the fragment. Worth knowing before "just hide the text"
+     is tried again. */
+  .step__label { display: none; }
+  .step.is-active .step__label {
+    /* Except the current one. Knowing you are on "Delivery" and not "Payment"
+       is the whole purpose of a stepper. */
+    display: inline;
+    font-size: var(--fs-12);
+    white-space: nowrap;
+  }
+  .step__num { width: 26px; height: 26px; font-size: var(--fs-12); }
+  .step__line { min-width: 8px; }
+}
 
 /* ---- Order confirmation ---------------------------------------------- */
 .confirm-hero { text-align: center; padding: var(--space-8) 0 var(--space-6); }
