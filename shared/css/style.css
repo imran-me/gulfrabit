@@ -89,6 +89,50 @@ textarea { resize: vertical; }
    the other. */
 input::placeholder, textarea::placeholder { opacity: 1; color: var(--text-muted); }
 
+/* ---- What Bootstrap's Reboot was providing ----------------------------
+   Same story as preflight: the grid and the components are unused, but the
+   reset underneath was load-bearing. */
+
+/* THE IMPORTANT ONE.
+ *
+ * `hidden` is an attribute, and the UA stylesheet implements it as
+ * `[hidden] { display: none }` — a rule any class with a `display` beats,
+ * because they have the same specificity and ours comes later.
+ *
+ * `.acat-new { display: flex }` is used as `<form class="acat-new" hidden>`.
+ * So the New category, New product and New coupon forms were hidden ONLY
+ * because Reboot adds `!important` to that rule. Remove Bootstrap without
+ * this line and all three sit permanently open.
+ *
+ * 231 elements across the site carry the attribute. Three components had
+ * already patched it individually — .tab-panel[hidden], .checkout-step[hidden]
+ * and .announce-bar[hidden] — which is the same bug being found and fixed
+ * locally three times instead of once here.
+ *
+ * !important is right for this. `hidden` is the platform's own way of saying
+ * "not rendered"; a component that wants to override it should not be using
+ * the attribute at all. */
+[hidden] { display: none !important; }
+
+/* Reboot styles these; the UA defaults are inconsistent between browsers and
+   in Safari's case ugly. */
+hr {
+  margin: var(--space-6) 0;
+  border: 0;
+  border-top: 1px solid var(--border-hairline);
+  opacity: 1;                 /* Firefox and Chrome disagree on the default */
+}
+
+caption {
+  padding: var(--space-3) 0;
+  color: var(--text-muted);
+  text-align: left;           /* the UA centres it, which reads as a title */
+}
+
+label { display: inline-block; }
+[role="button"] { cursor: pointer; }
+summary { display: list-item; cursor: pointer; }
+
 /* Visually hidden, still read aloud. The ONLY Tailwind utility this site
    actually used, so it moves here rather than the CDN staying for it. */
 .sr-only {
