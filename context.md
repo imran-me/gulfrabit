@@ -857,12 +857,34 @@ The CSP shipped 2026-07-30 carries `'unsafe-inline'` and `'unsafe-eval'` in
 injected inline script. `'unsafe-eval'` exists solely for
 `cdn.tailwindcss.com`, which compiles CSS in the browser.
 
-Building Tailwind ahead of time would let `script-src` drop to `'self'` plus
-hashes and is the single change that turns the policy into a real defence. It
-would also remove a JIT compiler from every page load.
+**THE SITE DOES NOT USE TAILWIND.** `tools/tailwind-inventory.py` reads every
+class attribute in every page, subtracts what our own stylesheets define, and
+found exactly ONE utility in use: `sr-only`, twice. That is now in
+`shared/css/style.css`, so nothing depends on the CDN for a class any more.
 
-Blockers on top of that: an inline no-js remover, two JSON-LD blocks per page,
-and 77 `style=""` attributes on the home page alone.
+What it WAS still providing was preflight — the reset. `style.css` said so
+("light-touch; Tailwind's preflight handles most"). **That is done: the reset
+is complete on its own as of 2026-07-30**, and while the CDN is loaded those
+rules simply duplicate it, so the change was invisible.
+
+**REMOVING THE CDN IS NOW A ONE-LINE CHANGE**, deliberately left unmade so it
+can be judged on its own rather than bundled with forty lines of reset:
+
+1. Delete the two `<script>` lines from `head()` in `tools/assemble.py`
+   (`cdn.tailwindcss.com` and `/shared/css/tailwind.config.js`), and the same
+   two from the hand-authored `index.html`
+2. Delete `shared/css/tailwind.config.js`
+3. In `.htaccess`, drop `'unsafe-eval'` and `https://cdn.tailwindcss.com` from
+   `script-src`
+4. `python tools/assemble.py`, then LOOK at the site — form controls and
+   buttons are where a missed preflight rule would show first
+
+Bootstrap (`cdn.jsdelivr.net`) is the same story: the only Bootstrap-shaped
+class in the markup is `d-lg-none`, and the header partial provides it in its
+own inline `<style>`. Worth a second inventory before removing.
+
+Still blocking a strong CSP after that: an inline no-js remover, two JSON-LD
+blocks per page, and 77 `style=""` attributes on the home page alone.
 
 `tools/htaccess-check.py` asserts every header is present and that the CSP
 keeps its load-bearing directives.
