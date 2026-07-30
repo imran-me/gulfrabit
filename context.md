@@ -780,8 +780,15 @@ quotes, couriers, customers, products, stock, P&L, journal.
       menu hooks missed it — `tools/header-drift.py` now fails the build when
       that hand-authored copy falls behind the partial.
 - [~] **8.7 Luxury UI/UX pass** — IN PROGRESS. Done 2026-07-30: mobile hero,
-      product cards, PDP, checkout, cart, category tiles. 8.7 is COMPLETE
-      for the storefront; a further pass would be taste, not defects.
+      product cards, PDP, checkout, cart, category tiles, plus a visual pass:
+      optical tracking that steps with type size, a gold hairline on premium
+      products keyed off the badge with `:has()`, and images that settle in
+      rather than popping as they lazy-load.
+
+      **`img.settle` is added by SCRIPT, never written into the markup.** The
+      CSS hides only `img.settle:not(.is-settled)` — an element the script has
+      opted in — so a JS failure hides nothing. The other way round would leave
+      every photo on the site invisible if the script broke.
 
       Checkout: the order summary now paints FIRST on mobile (`order: -1`) and
       sticks under the header — it used to fall below all four steps, so the
@@ -842,6 +849,23 @@ hidden rather than deleted.
 3. **Check → review → test → compare against the previous look**
 4. Refine, re-apply, re-check
 5. Only at 100% satisfaction, move to the next
+
+### §7e — NEXT SECURITY STEP: get off the Tailwind CDN
+
+The CSP shipped 2026-07-30 carries `'unsafe-inline'` and `'unsafe-eval'` in
+`script-src`, so it restricts WHERE scripts load from but does not stop
+injected inline script. `'unsafe-eval'` exists solely for
+`cdn.tailwindcss.com`, which compiles CSS in the browser.
+
+Building Tailwind ahead of time would let `script-src` drop to `'self'` plus
+hashes and is the single change that turns the policy into a real defence. It
+would also remove a JIT compiler from every page load.
+
+Blockers on top of that: an inline no-js remover, two JSON-LD blocks per page,
+and 77 `style=""` attributes on the home page alone.
+
+`tools/htaccess-check.py` asserts every header is present and that the CSP
+keeps its load-bearing directives.
 
 ### §7d — OPEN: three migrations have not run on the server (2026-07-30)
 
