@@ -103,6 +103,12 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None):
   <link rel="manifest" href="/site.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Fontshare serves its @font-face CSS from api. and the font FILES from
+       cdn. Only the CSS host was preconnected, so the display face waited on a
+       fresh DNS + TLS handshake discovered halfway through the render — the
+       most expensive moment to find a new origin. -->
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{asset('/shared/css/gulfrabit.css')}">
