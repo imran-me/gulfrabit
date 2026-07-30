@@ -742,8 +742,21 @@ quotes, couriers, customers, products, stock, P&L, journal.
       move, which is the hole the whole class exists to close.
 - [ ] **8.4 Highlights / showcase** — pick featured products by clicking, decide
       what appears on the home page
-- [ ] **8.5 Coupons** — create codes, min spend, cap, expiry, on/off.
-      Currently GULF10/HOP500 are HARDCODED in `PromotionSeeder.php`.
+- [x] **8.5 Coupons** DONE 2026-07-30 — full manager at `modules/admin/coupons.html`.
+      Percentage or flat, min spend, cap, start/end dates, usage limit, and TWO
+      switches: `is_active` (redeemable) vs `is_public` (advertised).
+      **Scoping**: `promotion_targets` joins a promotion to categories or
+      products. `scope` is stored separately from the rows on purpose — scope=
+      products with zero targets applies to NOTHING, the safe state for a
+      half-configured coupon.
+      **`discountPoisha()` now takes the basket lines and FAILS CLOSED without
+      them** — a scoped promotion with no lines discounts nothing rather than
+      falling back to the whole subtotal. Three call sites pass them:
+      `CartService::toStorefrontArray`, `CartController::applyPromo`,
+      `OrderService`. If you add a fourth, pass `carts->discountLines($cart)`.
+      Minimum spend is still judged on the WHOLE basket, not the eligible part.
+      The code cannot be renamed after creation and a used coupon cannot be
+      deleted (`used_count` is the only record of what a campaign cost).
 - [ ] **8.6 Menus / submenus** — manage the header nav from the panel
 - [ ] **8.7 Luxury UI/UX pass** — see below
 
