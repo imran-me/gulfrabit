@@ -235,7 +235,8 @@ gulfrabit/
 ├── index.html · 404.html · sitemap.xml · robots.txt · site.webmanifest
 ├── assets/    logo/ icons/ images/{products,categories,hero}/ fonts/
 ├── research/  competitor-analysis.md · implementation-plan.md
-├── tools/     assemble.py · gen-product-images.py · sitemap.py · qa-viewport.html
+├── tools/     assemble.py (BUILDS pages + the CSS bundle) · 9 build checks,
+│             see §7g · gen-*.py generators · qa-viewport.html
 ├── shared/                          ONLY cross-cutting primitives live here
 │   ├── css/style.css + partials/{_variables,_typography,_buttons,_cards,
 │   │        _navigation,_forms,_modals-offcanvas,_animations,_utilities}.css
@@ -686,10 +687,21 @@ and cannot run migrations. The cron replaces it entirely.
 
 | Script | When |
 |---|---|
-| `deploy.sh` | **Permanent cron, every minute.** Do not remove. |
+| `deploy.sh` | **Permanent cron, every minute.** Do not remove. Now CHECKS the migrate exit code — it used to run bare, which is how a failed migration shipped unnoticed (§7d). |
+| `migrate.sh` | Applies pending migrations and **prints the error** if one fails. Prints to the terminal, not just a log — the message is the entire point of running it by hand. |
 | `doctor.sh` | Run on demand via a temporary cron when something breaks — reports EVERYTHING at once |
 | `setup.sh` | First install only |
 | `reset-db.sh` | Wipes and rebuilds. **Refuses once real orders exist.** |
+
+**Prefer the panel over any of these.** `GET /api/admin/health`, rendered on the
+admin dashboard, reports missing tables, pending migrations (naming the FIRST
+one — the rest are blocked behind it), whether GD is on, whether uploads is
+writable, and whether anything is listed. It shows nothing when all is well.
+
+That exists because "did the migration run?" was previously answered by asking
+the owner to create a cron job that wrote a log file they then opened in File
+Manager. That is a poor way to ask a yes/no question, and it happened three
+times.
 
 ### PERMANENT BACKUP
 
@@ -701,7 +713,10 @@ Before modifying a module, tag it: `git tag pre-<module>-<date>`.
 
 ---
 
-## 7c. PHASE 8 — CATALOGUE MANAGEMENT + LUXURY UI (owner brief, 2026-07-30)
+## 7c. PHASE 8 — CATALOGUE MANAGEMENT + LUXURY UI  ✅ COMPLETE 2026-07-30
+
+Every item below is built, deployed and verified live. The storefront UI pass
+(8.7) is done too. What remains is owner-side only — see ACTION-REQUIRED.md.
 
 **Owner's words:** "I will login, add product, delete products, add categories,
 what to show in highlights, what to showcase, how to change price listing,
@@ -849,6 +864,52 @@ hidden rather than deleted.
 3. **Check → review → test → compare against the previous look**
 4. Refine, re-apply, re-check
 5. Only at 100% satisfaction, move to the next
+
+### §7g — THE BUILD CHECKS (run all nine before pushing)
+
+```
+python tools/assemble.py          # BUILD — pages + shared/css/gulfrabit.css
+python tools/php-check.py
+python tools/migration-order.py
+python tools/htaccess-check.py
+python tools/module-deps.py
+python tools/header-drift.py
+python tools/hover-audit.py
+python tools/tailwind-inventory.py
+python tools/link-check.py
+python tools/a11y-check.py
+python tools/sitemap.py
+```
+
+All nine exit non-zero on failure. **Every one of them exists because
+something broke silently once** — that is the bar for adding another. None of
+them check taste; each catches a specific class of bug that produces no error
+at the moment it is introduced.
+
+| check | catches | the incident |
+|---|---|---|
+| `php-check` | unregistered seeders, structural faults | 5 seeders were never registered |
+| `migration-order` | a migration referencing a table created later | `cart_items` → `products` failed on first deploy |
+| `htaccess-check` | a blocking rule that 404s a needed file; a security header quietly removed | the regex is load-bearing and untestable without Apache |
+| `module-deps` | two modules importing each other | reads **JS as well as PHP** — the browser half was invisible |
+| `header-drift` | `index.html`'s hand-authored header falling behind the partial | the menu hooks updated 42 pages and missed the home page |
+| `hover-audit` | `:hover` that moves or reveals, unguarded | **five** touch bugs from one cause, incl. every button staying lifted after a tap |
+| `tailwind-inventory` | a Tailwind class with no CDN to style it | fails the build; a missing class errors nowhere |
+| `link-check` | an internal link or asset resolving to nothing | 1,904 refs; `relativize()` rewrites paths per page depth |
+| `a11y-check` | missing alt, unnamed controls, duplicate ids, heading skips | — |
+| `sitemap` | a new page silently unlisted, or a stale NOINDEX entry | the Sourcing page shipped and was never in the sitemap |
+
+**A green check you have not tried to break is not evidence.** Three times this
+session a guard reported success while the test had not actually applied —
+`hover-audit`, `tailwind-inventory` and `link-check` were each verified by
+deliberately introducing the fault, confirming exit 1, then confirming exit 0
+once removed. Do the same for anything added here.
+
+`a11y-check` is the cautionary tale in the other direction: its first run
+reported 19 findings and **all 19 were the checker's fault** — it did not strip
+HTML comments, and it did not know that `<label><input> text</label>` labels
+the control by containing it. A checker that cries wolf gets switched off, and
+then it protects nothing.
 
 ### §7f — CSS is BUILT, not @imported (2026-07-30)
 
@@ -1644,5 +1705,58 @@ and the capture is scaled — so content that ends at 356 can look cut off.
 overflow.** Had this been "fixed" on the strength of the image, the hero would
 have been narrowed for no reason.
 
-Remaining 8.7 work: category tiles, product cards, PDP, cart and checkout on
-mobile; hover/press effects; alignment pass.
+### 8.7 finished, and Phase 8 with it (2026-07-30)
+
+Cards, PDP, cart, checkout and category tiles all done. The findings that
+mattered were not cosmetic:
+
+- **Wishlist, quick view and compare did not exist on a phone.** `opacity: 0`
+  until `:hover`, on the most-used component on the site, on the primary
+  device. See the `hover-audit` row in §7g — five bugs, one cause.
+- **The cart total sat permanently under the Checkout button.** The mobile CTA
+  is `position: fixed` and nothing reserved space for it.
+- **The checkout total was off screen for the whole of checkout** — the summary
+  fell below all four steps in one column. Now `order: -1` and sticky.
+- **PDP: no sticky Add to Cart.** Added, as a duplicate that forwards its click
+  to the real button — never a second implementation.
+- iOS safe-area insets on both fixed bars: without them the lower third of the
+  button is in the system gesture area, where a tap swipes the app away.
+
+Visual pass: optical tracking that steps with type size, a gold hairline on
+premium products keyed off the badge with `:has()`, and images that settle in
+rather than popping (`img.settle` is added **by script, never in the markup** —
+so a JS failure hides nothing).
+
+### Dependencies removed, CSS bundled (2026-07-30)
+
+Both CDNs gone; CSS is one request instead of eleven. Full detail in §7e/§7f.
+The pattern worth repeating: **each removal shipped as two commits — own the
+dependency first (invisible, since the CDN still supplied it), then remove the
+CDN as a separate reversible change.** Bundling them would have made any
+regression ambiguous.
+
+All three looked like a one-line deletion and all three had a silent
+dependency underneath: `font-family: inherit` on form controls, `[hidden] {
+display: none !important }`, and a font `url()` one directory too high. None
+would have thrown an error.
+
+### Where things stand (2026-07-30)
+
+**Done and live:** Phase 8 entire, storefront 5.3 (CSP/HSTS/COOP), both CDNs
+removed, CSS bundled, nine build checks green.
+
+**Blocked on the owner** — ACTION-REQUIRED.md items 1–3:
+1. `migrate.sh` — three migrations pending (§7d). Images, product-scoped
+   coupons and the Home page screen stay dormant until it runs.
+2. GD — test by uploading a photo; only act if it complains.
+3. `composer.lock` — never committed; Composer only runs on the server.
+
+**Not yet verified by a human:** the reset replacements. Worth eyeballing form
+controls, buttons, the admin "New …" buttons and any Bengali text — those four
+cover every dependency that was swapped.
+
+**Next substantive item:** dropping `'unsafe-inline'` from `script-src`. Needs
+the inline no-js remover, two JSON-LD blocks per page, and 77 `style=""`
+attributes on the home page dealt with first. Check in a real browser whether
+CSP `script-src` even applies to `application/ld+json` before starting — if it
+does not, the job is much smaller than it looks.
