@@ -1,7 +1,7 @@
 {
   "_meta": {
     "owner": "modules/catalog",
-    "note": "Suggested queries shown when the search box is focused but empty, and merchandised placeholder rotation. Every query here is asserted to return >=1 product by tools/check-search-suggestions.py."
+    "note": "Suggested queries shown when the search box is focused but empty, and merchandised placeholder rotation. Every query here is asserted to return >=1 product by tools/check-search-suggestions.py — which is the reason the list changes whenever the catalogue does."
   },
   "popular": [
     {
@@ -13,28 +13,28 @@
       "label": "মধু · raw honey"
     },
     {
+      "q": "jafran",
+      "label": "জাফরান · saffron"
+    },
+    {
+      "q": "ghee",
+      "label": "Ghee · ঘি"
+    },
+    {
+      "q": "kaju",
+      "label": "কাজু · cashews"
+    },
+    {
+      "q": "olive oil",
+      "label": "Olive oil"
+    },
+    {
       "q": "sugar free",
-      "label": "Sugar-free snacks"
+      "label": "No added sugar"
     },
     {
-      "q": "milk powder",
-      "label": "Milk powder"
-    },
-    {
-      "q": "coffee",
-      "label": "Coffee beans"
-    },
-    {
-      "q": "headphones",
-      "label": "Headphones"
-    },
-    {
-      "q": "bulk",
-      "label": "Bulk / B2B pricing"
-    },
-    {
-      "q": "gift",
-      "label": "Gift boxes"
+      "q": "dry fruits",
+      "label": "Dry fruits & nuts"
     }
   ]
 }

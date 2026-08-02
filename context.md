@@ -1786,6 +1786,49 @@ rails, search and the rotating search placeholder. Tying them to it would leave
 the storefront with six products, so the rails stay as they are until real
 stock lands.
 
+### The demo catalogue is gone (2026-08-02)
+
+Twenty real products, photographed, replace all 44 demo SKUs. The owner supplied
+21 images; one was a screenshot of the site itself and was not used. They landed
+in `assets/images/categories/` and were **moved** to
+`assets/images/products/gr-NNNN.jpg` — nothing was lost, every source frame is
+still on disk under its product id.
+
+IDs are now blocked by category, which they were not before:
+`11xx` dates · `12xx` honey · `14xx` dry fruits · `15xx` spices · `16xx` nuts &
+makhana · `18xx` herbs · `19xx` oil & ghee. The three unstocked launch
+categories keep their blocks free (`10xx` imported food, `13xx` beverage,
+`17xx` baby food) so the first shipment does not need a renumbering.
+
+**Three of the images are packaging posters, not product shots** — the jar sits
+inside a layout with marketing copy around it. In a 4:5 card that copy is what
+survives the crop: the Oregano card read "EGANO" with a discount badge on top of
+it. Crop tighter and the jar loses its own edge. So those three are composited —
+jar cut to its bounds, set on a blurred, over-scaled copy of the same poster,
+which is the treatment the hero already uses to letterboard banners of mixed
+ratio. The untouched poster survives as the second gallery image, where its
+claims are worth reading. See the scratchpad note in the commit; the recipe is
+900×1125, blur 26, brightness 0.82, subject at 90% height.
+
+Rails, one product per stocked category each: **Premium Picks** is the `premium`
+tag, **New Arrivals** is `new`, **Best Sellers** is hand-authored HTML in
+index.html (content-first — home.js deliberately does not render it) and was
+regenerated from the same data.
+
+Everything that referenced a demo SKU moved with it: the curated bundles
+(rewritten, nine real pairings), the mock order history, the gift-with-purchase
+reward, the QA cart seed, the reachability probe in `htaccess-check.py`, and the
+search suggestions — which are asserted against the catalogue, so a stale
+suggestion list fails the build rather than teaching a customer the search is
+broken. `gen-search-terms.py` gained the Bangla that this catalogue actually
+needs (jafran, kalojira, jaitun tel, til tel, dumur, kaju, ghi) and its
+non-food keys are parked in place, not deleted.
+
+`searchTerms` and `faq` are generated — `tools/gen-search-terms.py` and
+`tools/gen-product-faq.py`. Never hand-write them; they are rewritten wholesale.
+Barcodes are mock EAN-13 with valid check digits, which `gen-sourcing-facts.py`
+verifies, and must be replaced with real supplier codes before launch.
+
 ### Where things stand (2026-07-30)
 
 **Done and live:** Phase 8 entire, storefront 5.3 (CSP/HSTS/COOP), both CDNs

@@ -1,33 +1,96 @@
 {
   "_meta": {
-    "note": "Mock catalog served by shared/js/core/data-service.js. Fields map 1:1 onto the future GET /api/products payload (see shared/backend/api-contract.md). `image` is the card/gallery primary; `images` is the PDP gallery. `specs` and `moq` drive the B2B/industrial spec-sheet treatment. `createdAt` is an epoch-ish sort key for 'Newest'.",
+    "note": "The live catalogue. Twenty products, photographed, across the seven stocked launch categories (dates, honey, dry-fruits, spices, nuts-makhana, herbs, oil-ghee). Imported Food, Beverage and Baby Food are open but unstocked — they show the 'Landing soon' state until their first shipment. Fields map 1:1 onto GET /api/products (shared/backend/api-contract.md). `image` is the card/gallery primary; `images` is the PDP gallery. `createdAt` is an epoch sort key for 'Newest'. `searchTerms` and `faq` are generated — run tools/gen-search-terms.py and tools/gen-product-faq.py after editing, never hand-write them.",
     "currency": "BDT",
-    "version": 1,
-    "barcodeNote": "MOCK EAN-13 codes (valid check digit, not GS1-registered) — replace with real supplier barcodes."
+    "version": 2,
+    "barcodeNote": "MOCK EAN-13 codes (valid check digit, not GS1-registered) — replace with the real supplier barcodes before launch. tools/gen-sourcing-facts.py verifies every check digit."
   },
   "products": [
     {
-      "id": "gr-1001",
-      "title": "Medjool Dates — Premium Jumbo (1kg)",
-      "brand": "Al Barakah",
-      "origin": "Jordan",
-      "categorySlug": "imported-food-grocery",
-      "categoryName": "Imported Food",
-      "subSlug": "dates-honey",
-      "price": 1450,
-      "originalPrice": 1800,
-      "image": "/assets/images/products/gr-1001.svg",
+      "id": "gr-1101",
+      "title": "Ajwa Dates — Madinah Select (1kg)",
+      "brand": "GulfRabit Select",
+      "origin": "Saudi Arabia",
+      "categorySlug": "dates",
+      "categoryName": "Dates",
+      "subSlug": null,
+      "price": 2850,
+      "originalPrice": 3400,
+      "image": "/assets/images/products/gr-1101.jpg",
       "images": [
-        "/assets/images/products/gr-1001.svg",
-        "/assets/images/products/gr-1001-2.svg",
-        "/assets/images/products/gr-1001-3.svg"
+        "/assets/images/products/gr-1101.jpg"
       ],
-      "rating": 4.8,
-      "reviewCount": 214,
+      "rating": 4.9,
+      "reviewCount": 168,
       "inStock": true,
       "tags": [
         "featured",
-        "premium",
+        "premium"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free",
+        "no-added-sugar"
+      ],
+      "shortDescription": "Soft, near-black Ajwa with a fine dry skin — the date people buy by name.",
+      "description": "Ajwa from the groves around Madinah, graded for size and packed at moisture. Dense and only faintly sweet, closer to a fig than a dessert date, with a texture that stays soft for months in a sealed jar. Sold the way it arrives: whole fruit, no glaze, no syrup.",
+      "createdAt": 1722500000,
+      "barcode": "8811010042070",
+      "searchTerms": [
+        "ajwa",
+        "dates",
+        "gulfrabit select",
+        "saudi arabia",
+        "khejur",
+        "khajur",
+        "dry dates",
+        "iftar dates",
+        "ajowa",
+        "azwa",
+        "madina khejur",
+        "black dates",
+        "vegan",
+        "plant based",
+        "gluten free",
+        "glutenfree",
+        "no added sugar",
+        "sugar free",
+        "sugarfree",
+        "diabetic friendly"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Saudi Arabia, and the barcode printed on the pack — 8811010042070 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan, gluten-free and made with no added sugar. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1102",
+      "title": "Medjool Dates — Jumbo Grade (1kg)",
+      "brand": "GulfRabit Select",
+      "origin": "Jordan",
+      "categorySlug": "dates",
+      "categoryName": "Dates",
+      "subSlug": null,
+      "price": 1950,
+      "originalPrice": 2300,
+      "image": "/assets/images/products/gr-1102.jpg",
+      "images": [
+        "/assets/images/products/gr-1102.jpg"
+      ],
+      "rating": 4.8,
+      "reviewCount": 241,
+      "inStock": true,
+      "tags": [
         "bestseller"
       ],
       "dietary": [
@@ -35,16 +98,18 @@
         "gluten-free",
         "no-added-sugar"
       ],
-      "shortDescription": "Soft, caramel-rich jumbo Medjool dates, hand-selected and cold-packed.",
-      "description": "Grown in the Jordan Valley and graded jumbo for size and moisture. Naturally sweet with a caramel finish — a table centrepiece and an everyday energy source. Sourced. Verified. Delivered.",
-      "createdAt": 1718000000,
-      "barcode": "7836240540692",
+      "shortDescription": "Jumbo Medjool, caramel-soft, hand-graded for size and moisture.",
+      "description": "Grown in the Jordan Valley and sorted to jumbo, which is a size grade and a moisture grade at once — the large fruit holds more of it, which is why these stay fudgy rather than drying to chew. The everyday table date, and the one that disappears fastest at iftar.",
+      "createdAt": 1722586400,
+      "barcode": "8811020043449",
       "searchTerms": [
         "medjool",
         "dates",
-        "al barakah",
+        "gulfrabit select",
         "jordan",
-        "imported food & grocery",
+        "medjul",
+        "mejdool",
+        "jumbo dates",
         "khejur",
         "khajur",
         "dry dates",
@@ -61,15 +126,7 @@
       "faq": [
         {
           "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Jordan, and the barcode printed on the pack — 7836240540692 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Keep sealed in a cool, dry place away from direct sunlight. Refrigerate after opening if the pack says so."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+          "a": "Every unit is import-verified. This batch is sourced from Jordan, and the barcode printed on the pack — 8811020043449 — matches the one listed under Specifications. Check them against each other when it arrives."
         },
         {
           "q": "Does it suit dietary restrictions?",
@@ -77,2072 +134,56 @@
         },
         {
           "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
-        }
-      ]
-    },
-    {
-      "id": "gr-1002",
-      "title": "Sidr Raw Honey (500g)",
-      "brand": "Hadramout",
-      "origin": "Yemen",
-      "categorySlug": "imported-food-grocery",
-      "categoryName": "Imported Food",
-      "subSlug": "dates-honey",
-      "price": 3200,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-1002.svg",
-      "images": [
-        "/assets/images/products/gr-1002.svg",
-        "/assets/images/products/gr-1002-2.svg",
-        "/assets/images/products/gr-1002-3.svg"
-      ],
-      "rating": 4.9,
-      "reviewCount": 88,
-      "inStock": true,
-      "tags": [
-        "premium",
-        "new"
-      ],
-      "dietary": [
-        "raw",
-        "unfiltered"
-      ],
-      "shortDescription": "Single-origin Sidr honey, raw and unfiltered.",
-      "description": "Harvested from Sidr trees and left raw to preserve enzymes and aroma. Deep amber, floral, and slow to crystallise.",
-      "createdAt": 1721000000,
-      "barcode": "1815491339893",
-      "searchTerms": [
-        "sidr",
-        "raw",
-        "honey",
-        "hadramout",
-        "yemen",
-        "imported food & grocery",
-        "modhu",
-        "modu",
-        "raw honey",
-        "natural honey",
-        "unprocessed",
-        "unfiltered",
-        "natural"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Yemen, and the barcode printed on the pack — 1815491339893 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Keep sealed in a cool, dry place away from direct sunlight. Refrigerate after opening if the pack says so."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
-        },
-        {
-          "q": "Does it suit dietary restrictions?",
-          "a": "This product is listed as raw and unprocessed and unfiltered. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
-        }
-      ]
-    },
-    {
-      "id": "gr-1003",
-      "title": "Arabica Coffee Beans — Medium Roast (1kg)",
-      "brand": "Qahwa Co.",
-      "origin": "Ethiopia",
-      "categorySlug": "imported-food-grocery",
-      "categoryName": "Imported Food",
-      "subSlug": "coffee-tea",
-      "price": 1650,
-      "originalPrice": 1900,
-      "image": "/assets/images/products/gr-1003.svg",
-      "images": [
-        "/assets/images/products/gr-1003.svg",
-        "/assets/images/products/gr-1003-2.svg",
-        "/assets/images/products/gr-1003-3.svg"
-      ],
-      "rating": 4.6,
-      "reviewCount": 132,
-      "inStock": true,
-      "tags": [
-        "featured",
-        "bestseller"
-      ],
-      "dietary": [
-        "vegan"
-      ],
-      "shortDescription": "Washed Ethiopian Arabica, medium roast, whole bean.",
-      "description": "Bright citrus acidity with a jasmine aroma and a clean, sweet finish. Roasted in small batches and shipped within days.",
-      "createdAt": 1719500000,
-      "barcode": "5234894833153",
-      "searchTerms": [
-        "arabica",
-        "coffee",
-        "beans",
-        "qahwa co.",
-        "ethiopia",
-        "imported food & grocery",
-        "kofi",
-        "coffee beans",
-        "ground coffee",
-        "vegan",
-        "plant based"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Ethiopia, and the barcode printed on the pack — 5234894833153 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Keep sealed in a cool, dry place away from direct sunlight. Refrigerate after opening if the pack says so."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
-        },
-        {
-          "q": "Does it suit dietary restrictions?",
-          "a": "This product is listed as vegan. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
-        }
-      ]
-    },
-    {
-      "id": "gr-1004",
-      "title": "Swiss Dark Chocolate 70% — Gift Box (12pc)",
-      "brand": "Alpenzart",
-      "origin": "Switzerland",
-      "categorySlug": "imported-food-grocery",
-      "categoryName": "Imported Food",
-      "subSlug": "chocolates-confectionery",
-      "price": 980,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-1004.svg",
-      "images": [
-        "/assets/images/products/gr-1004.svg",
-        "/assets/images/products/gr-1004-2.svg",
-        "/assets/images/products/gr-1004-3.svg"
-      ],
-      "rating": 4.7,
-      "reviewCount": 76,
-      "inStock": true,
-      "tags": [
-        "new"
-      ],
-      "dietary": [
-        "vegetarian"
-      ],
-      "shortDescription": "Single-origin 70% dark chocolate, gift boxed.",
-      "description": "Smooth, low-bitterness dark chocolate in a premium presentation box — a considered gift.",
-      "createdAt": 1720500000,
-      "barcode": "9764819319654",
-      "searchTerms": [
-        "swiss",
-        "dark",
-        "chocolate",
-        "alpenzart",
-        "switzerland",
-        "imported food & grocery",
-        "chocolet",
-        "cocolate",
-        "dark chocolate",
-        "gift chocolate",
-        "vegetarian",
-        "veg"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Switzerland, and the barcode printed on the pack — 9764819319654 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Keep sealed in a cool, dry place away from direct sunlight. Refrigerate after opening if the pack says so."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
-        },
-        {
-          "q": "Does it suit dietary restrictions?",
-          "a": "This product is listed as vegetarian. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
-        }
-      ]
-    },
-    {
-      "id": "gr-1005",
-      "title": "Ceylon Black Tea — Loose Leaf (250g)",
-      "brand": "Kandy Hills",
-      "origin": "Sri Lanka",
-      "categorySlug": "imported-food-grocery",
-      "categoryName": "Imported Food",
-      "subSlug": "coffee-tea",
-      "price": 620,
-      "originalPrice": 750,
-      "image": "/assets/images/products/gr-1005.svg",
-      "images": [
-        "/assets/images/products/gr-1005.svg",
-        "/assets/images/products/gr-1005-2.svg",
-        "/assets/images/products/gr-1005-3.svg"
-      ],
-      "rating": 4.5,
-      "reviewCount": 54,
-      "inStock": true,
-      "tags": [],
-      "dietary": [
-        "vegan"
-      ],
-      "shortDescription": "High-grown Ceylon black tea, full-leaf.",
-      "description": "Brisk, bright, and aromatic — a single-estate Ceylon for everyday brewing.",
-      "createdAt": 1717000000,
-      "barcode": "4661223618210",
-      "searchTerms": [
-        "ceylon",
-        "black",
-        "tea",
-        "kandy hills",
-        "sri lanka",
-        "imported food & grocery",
-        "cha",
-        "sha",
-        "black tea",
-        "green tea",
-        "loose leaf",
-        "vegan",
-        "plant based"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Sri Lanka, and the barcode printed on the pack — 4661223618210 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Keep sealed in a cool, dry place away from direct sunlight. Refrigerate after opening if the pack says so."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
-        },
-        {
-          "q": "Does it suit dietary restrictions?",
-          "a": "This product is listed as vegan. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
-        }
-      ]
-    },
-    {
-      "id": "gr-1101",
-      "title": "Full-Cream Milk Powder (2.25kg Tin)",
-      "brand": "Nord Dairy",
-      "origin": "New Zealand",
-      "categorySlug": "dairy-milk-powder",
-      "categoryName": "Dairy & Milk Powder",
-      "subSlug": "milk-powder",
-      "price": 2350,
-      "originalPrice": 2600,
-      "image": "/assets/images/products/gr-1101.svg",
-      "images": [
-        "/assets/images/products/gr-1101.svg",
-        "/assets/images/products/gr-1101-2.svg",
-        "/assets/images/products/gr-1101-3.svg"
-      ],
-      "rating": 4.7,
-      "reviewCount": 301,
-      "inStock": true,
-      "tags": [
-        "featured",
-        "bestseller"
-      ],
-      "dietary": [
-        "halal"
-      ],
-      "shortDescription": "Instant full-cream milk powder, cold-chain handled.",
-      "description": "Spray-dried full-cream milk powder that dissolves cleanly in hot or cold water. Sealed tin, cold-chain delivery for freshness.",
-      "createdAt": 1719000000,
-      "barcode": "7615164113140",
-      "searchTerms": [
-        "full",
-        "cream",
-        "milk",
-        "powder",
-        "nord dairy",
-        "new zealand",
-        "dairy & milk powder",
-        "gurer dudh",
-        "dudh",
-        "powdered milk",
-        "formula",
-        "full cream",
-        "halal"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from New Zealand, and the barcode printed on the pack — 7615164113140 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Store cool and dry, and seal the pack tightly after each use — powder absorbs moisture quickly in Dhaka humidity."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
-        }
-      ]
-    },
-    {
-      "id": "gr-1102",
-      "title": "Aged Gouda Wheel (500g)",
-      "brand": "Zuid",
-      "origin": "Netherlands",
-      "categorySlug": "dairy-milk-powder",
-      "categoryName": "Dairy & Milk Powder",
-      "subSlug": "cheese-butter",
-      "price": 1290,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-1102.svg",
-      "images": [
-        "/assets/images/products/gr-1102.svg",
-        "/assets/images/products/gr-1102-2.svg",
-        "/assets/images/products/gr-1102-3.svg"
-      ],
-      "rating": 4.8,
-      "reviewCount": 44,
-      "inStock": true,
-      "tags": [
-        "premium"
-      ],
-      "dietary": [
-        "vegetarian",
-        "halal"
-      ],
-      "shortDescription": "18-month aged Gouda, nutty and crystalline.",
-      "description": "Matured for eighteen months to develop deep, caramel-nutty notes and a crystalline bite. Cold-chain delivered.",
-      "createdAt": 1720000000,
-      "barcode": "6806709855323",
-      "searchTerms": [
-        "aged",
-        "gouda",
-        "wheel",
-        "zuid",
-        "netherlands",
-        "dairy & milk powder",
-        "cheese",
-        "panir",
-        "hard cheese",
-        "vegetarian",
-        "veg",
-        "halal"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Netherlands, and the barcode printed on the pack — 6806709855323 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Store cool and dry, and seal the pack tightly after each use — powder absorbs moisture quickly in Dhaka humidity."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
-        },
-        {
-          "q": "Does it suit dietary restrictions?",
-          "a": "This product is listed as vegetarian. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
         }
       ]
     },
     {
       "id": "gr-1103",
-      "title": "Grass-Fed Butter (unsalted, 400g)",
-      "brand": "Éire Gold",
-      "origin": "Ireland",
-      "categorySlug": "dairy-milk-powder",
-      "categoryName": "Dairy & Milk Powder",
-      "subSlug": "cheese-butter",
-      "price": 740,
-      "originalPrice": 890,
-      "image": "/assets/images/products/gr-1103.svg",
+      "title": "Sukkari Dates — Golden (1kg)",
+      "brand": "GulfRabit Select",
+      "origin": "Saudi Arabia",
+      "categorySlug": "dates",
+      "categoryName": "Dates",
+      "subSlug": null,
+      "price": 1450,
+      "originalPrice": 1700,
+      "image": "/assets/images/products/gr-1103.jpg",
       "images": [
-        "/assets/images/products/gr-1103.svg",
-        "/assets/images/products/gr-1103-2.svg",
-        "/assets/images/products/gr-1103-3.svg"
-      ],
-      "rating": 4.6,
-      "reviewCount": 67,
-      "inStock": false,
-      "tags": [],
-      "dietary": [
-        "vegetarian",
-        "halal"
-      ],
-      "shortDescription": "Rich, golden grass-fed butter.",
-      "description": "Churned from grass-fed cream for a naturally golden colour and clean, creamy flavour.",
-      "createdAt": 1716000000,
-      "barcode": "1746926816712",
-      "searchTerms": [
-        "grass",
-        "fed",
-        "butter",
-        "éire gold",
-        "ireland",
-        "dairy & milk powder",
-        "makhon",
-        "unsalted butter",
-        "grass fed butter",
-        "vegetarian",
-        "veg",
-        "halal"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Ireland, and the barcode printed on the pack — 1746926816712 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Store cool and dry, and seal the pack tightly after each use — powder absorbs moisture quickly in Dhaka humidity."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
-        },
-        {
-          "q": "Does it suit dietary restrictions?",
-          "a": "This product is listed as vegetarian. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
-        }
-      ]
-    },
-    {
-      "id": "gr-1201",
-      "title": "Roasted Salted Pistachios (500g)",
-      "brand": "Kerman",
-      "origin": "Iran",
-      "categorySlug": "nuts-dry-fruits",
-      "categoryName": "Nuts & Dry Fruits",
-      "price": 1180,
-      "originalPrice": 1350,
-      "image": "/assets/images/products/gr-1201.svg",
-      "images": [
-        "/assets/images/products/gr-1201.svg",
-        "/assets/images/products/gr-1201-2.svg",
-        "/assets/images/products/gr-1201-3.svg"
+        "/assets/images/products/gr-1103.jpg"
       ],
       "rating": 4.7,
-      "reviewCount": 156,
+      "reviewCount": 96,
       "inStock": true,
       "tags": [
-        "featured",
-        "bestseller"
-      ],
-      "dietary": [
-        "vegan",
-        "gluten-free"
-      ],
-      "shortDescription": "Long-grain Kerman pistachios, roasted and lightly salted.",
-      "description": "Naturally opened, generously sized pistachios roasted for crunch and lightly salted.",
-      "createdAt": 1719800000,
-      "barcode": "9526426403139",
-      "searchTerms": [
-        "roasted",
-        "salted",
-        "pistachios",
-        "kerman",
-        "iran",
-        "nuts & dry fruits",
-        "pesta",
-        "pista",
-        "pistachio",
-        "badam",
-        "vegan",
-        "plant based",
-        "gluten free",
-        "glutenfree"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Iran, and the barcode printed on the pack — 9526426403139 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Airtight and away from heat. Refrigeration extends freshness in warm months and is worth it here."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
-        },
-        {
-          "q": "Does it suit dietary restrictions?",
-          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
-        }
-      ]
-    },
-    {
-      "id": "gr-1202",
-      "title": "California Almonds — Raw (1kg)",
-      "brand": "Sunvale",
-      "origin": "USA",
-      "categorySlug": "nuts-dry-fruits",
-      "categoryName": "Nuts & Dry Fruits",
-      "price": 1290,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-1202.svg",
-      "images": [
-        "/assets/images/products/gr-1202.svg",
-        "/assets/images/products/gr-1202-2.svg",
-        "/assets/images/products/gr-1202-3.svg"
-      ],
-      "rating": 4.6,
-      "reviewCount": 210,
-      "inStock": true,
-      "tags": [
-        "bestseller"
+        "new"
       ],
       "dietary": [
         "vegan",
         "gluten-free",
-        "keto"
+        "no-added-sugar"
       ],
-      "shortDescription": "Whole raw almonds, premium grade.",
-      "description": "Crisp, sweet whole almonds — snack, roast, or blend. Nitrogen-flushed for freshness.",
-      "createdAt": 1718500000,
-      "barcode": "2149843702349",
+      "shortDescription": "Golden, honey-sweet and tender — the mildest of the three.",
+      "description": "Sukkari means sugary, and it earns it: pale gold flesh, a crumbly-soft bite and none of the deep molasses note Ajwa carries. The one to hand to someone who says they do not like dates. Cold-packed from Qassim.",
+      "createdAt": 1722672800,
+      "barcode": "8811030044818",
       "searchTerms": [
-        "california",
-        "almonds",
-        "sunvale",
-        "usa",
-        "nuts & dry fruits",
-        "kath badam",
-        "badam",
-        "almond",
-        "raw almonds",
+        "sukkari",
+        "dates",
+        "gulfrabit select",
+        "saudi arabia",
+        "sukari",
+        "sokari",
+        "golden dates",
+        "soft dates",
+        "khejur",
+        "khajur",
+        "dry dates",
+        "iftar dates",
         "vegan",
         "plant based",
         "gluten free",
         "glutenfree",
-        "keto"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from USA, and the barcode printed on the pack — 2149843702349 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Airtight and away from heat. Refrigeration extends freshness in warm months and is worth it here."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
-        },
-        {
-          "q": "Does it suit dietary restrictions?",
-          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
-        }
-      ]
-    },
-    {
-      "id": "gr-1203",
-      "title": "Jumbo Cashews W240 (500g)",
-      "brand": "Malabar",
-      "origin": "India",
-      "categorySlug": "nuts-dry-fruits",
-      "categoryName": "Nuts & Dry Fruits",
-      "price": 980,
-      "originalPrice": 1150,
-      "image": "/assets/images/products/gr-1203.svg",
-      "images": [
-        "/assets/images/products/gr-1203.svg",
-        "/assets/images/products/gr-1203-2.svg",
-        "/assets/images/products/gr-1203-3.svg"
-      ],
-      "rating": 4.5,
-      "reviewCount": 98,
-      "inStock": true,
-      "tags": [
-        "new"
-      ],
-      "dietary": [
-        "vegan",
-        "gluten-free"
-      ],
-      "shortDescription": "W240-grade whole cashews.",
-      "description": "Large, unbroken W240 cashews with a buttery snap.",
-      "createdAt": 1720800000,
-      "barcode": "4622454867242",
-      "searchTerms": [
-        "jumbo",
-        "cashews",
-        "malabar",
-        "india",
-        "nuts & dry fruits",
-        "kaju",
-        "kaju badam",
-        "cashew nuts",
-        "vegan",
-        "plant based",
-        "gluten free",
-        "glutenfree"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from India, and the barcode printed on the pack — 4622454867242 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Airtight and away from heat. Refrigeration extends freshness in warm months and is worth it here."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
-        },
-        {
-          "q": "Does it suit dietary restrictions?",
-          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
-        }
-      ]
-    },
-    {
-      "id": "gr-2001",
-      "title": "Wireless Noise-Cancelling Headphones",
-      "brand": "Aurio",
-      "origin": "Japan",
-      "categorySlug": "gadgets-electronics",
-      "categoryName": "Gadgets & Electronics",
-      "subSlug": "audio",
-      "price": 18900,
-      "originalPrice": 22500,
-      "image": "/assets/images/products/gr-2001.svg",
-      "images": [
-        "/assets/images/products/gr-2001.svg",
-        "/assets/images/products/gr-2001-2.svg",
-        "/assets/images/products/gr-2001-3.svg"
-      ],
-      "rating": 4.8,
-      "reviewCount": 342,
-      "inStock": true,
-      "tags": [
-        "featured",
-        "premium",
-        "bestseller"
-      ],
-      "shortDescription": "Adaptive ANC, 40-hour battery, spatial audio.",
-      "description": "Hybrid active noise cancellation, plush memory-foam cups, and a 40-hour battery. USB-C fast charge and multipoint Bluetooth.",
-      "specs": {
-        "Driver": "40mm dynamic",
-        "Battery": "40 h (ANC on)",
-        "Bluetooth": "5.3, multipoint",
-        "Charge": "USB-C, 10 min = 5 h",
-        "Weight": "255 g"
-      },
-      "createdAt": 1721500000,
-      "barcode": "6510205353480",
-      "searchTerms": [
-        "wireless",
-        "noise",
-        "cancelling",
-        "headphones",
-        "aurio",
-        "japan",
-        "gadgets & electronics",
-        "headphone",
-        "headset",
-        "hedphone",
-        "over ear",
-        "anc"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 6510205353480 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-2002",
-      "title": "Smartwatch Series X (AMOLED)",
-      "brand": "Pulse",
-      "origin": "South Korea",
-      "categorySlug": "gadgets-electronics",
-      "categoryName": "Gadgets & Electronics",
-      "subSlug": "wearables",
-      "price": 15400,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-2002.svg",
-      "images": [
-        "/assets/images/products/gr-2002.svg",
-        "/assets/images/products/gr-2002-2.svg",
-        "/assets/images/products/gr-2002-3.svg"
-      ],
-      "rating": 4.5,
-      "reviewCount": 187,
-      "inStock": true,
-      "tags": [
-        "new",
-        "featured"
-      ],
-      "shortDescription": "AMOLED display, SpO2, 7-day battery.",
-      "description": "A refined smartwatch with an always-on AMOLED display, health tracking, and a week of battery life.",
-      "specs": {
-        "Display": "1.4\" AMOLED",
-        "Battery": "7 days",
-        "Sensors": "HR, SpO2, accel",
-        "Water": "5 ATM"
-      },
-      "createdAt": 1721200000,
-      "barcode": "8121326266405",
-      "searchTerms": [
-        "smartwatch",
-        "pulse",
-        "south korea",
-        "gadgets & electronics",
-        "smart watch",
-        "watch",
-        "ghori",
-        "fitness watch"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from South Korea, and the barcode printed on the pack — 8121326266405 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-2003",
-      "title": "Smart Home Hub (Matter-ready)",
-      "brand": "Nest+",
-      "origin": "Germany",
-      "categorySlug": "gadgets-electronics",
-      "categoryName": "Gadgets & Electronics",
-      "subSlug": "smart-home",
-      "price": 9800,
-      "originalPrice": 11000,
-      "image": "/assets/images/products/gr-2003.svg",
-      "images": [
-        "/assets/images/products/gr-2003.svg",
-        "/assets/images/products/gr-2003-2.svg",
-        "/assets/images/products/gr-2003-3.svg"
-      ],
-      "rating": 4.4,
-      "reviewCount": 64,
-      "inStock": true,
-      "tags": [],
-      "shortDescription": "Matter + Thread border router, local control.",
-      "description": "A privacy-first hub with Matter and Thread support and local automation that keeps working offline.",
-      "specs": {
-        "Protocols": "Matter, Thread, Zigbee",
-        "Connectivity": "Wi-Fi 6, Ethernet",
-        "Power": "USB-C"
-      },
-      "createdAt": 1719900000,
-      "barcode": "6872521572410",
-      "searchTerms": [
-        "smart",
-        "home",
-        "hub",
-        "nest+",
-        "germany",
-        "gadgets & electronics",
-        "home automation",
-        "smart hub",
-        "matter hub"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Germany, and the barcode printed on the pack — 6872521572410 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-2004",
-      "title": "True Wireless Earbuds Pro",
-      "brand": "Aurio",
-      "origin": "Japan",
-      "categorySlug": "gadgets-electronics",
-      "categoryName": "Gadgets & Electronics",
-      "subSlug": "audio",
-      "price": 7200,
-      "originalPrice": 8500,
-      "image": "/assets/images/products/gr-2004.svg",
-      "images": [
-        "/assets/images/products/gr-2004.svg",
-        "/assets/images/products/gr-2004-2.svg",
-        "/assets/images/products/gr-2004-3.svg"
-      ],
-      "rating": 4.6,
-      "reviewCount": 233,
-      "inStock": true,
-      "tags": [
-        "bestseller"
-      ],
-      "shortDescription": "ANC earbuds, wireless charging case.",
-      "description": "Compact ANC earbuds with a wireless-charging case and low-latency game mode.",
-      "specs": {
-        "Battery": "8 h + 24 h case",
-        "ANC": "Hybrid",
-        "Case": "Qi wireless"
-      },
-      "createdAt": 1718800000,
-      "barcode": "6935805139157",
-      "searchTerms": [
-        "true",
-        "wireless",
-        "earbuds",
-        "aurio",
-        "japan",
-        "gadgets & electronics",
-        "earbud",
-        "airpods alternative",
-        "tws",
-        "wireless earphone"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 6935805139157 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-2501",
-      "title": "Cast-Iron Dutch Oven (5.5L)",
-      "brand": "Fôyer",
-      "origin": "France",
-      "categorySlug": "kitchen-home",
-      "categoryName": "Kitchen & Home",
-      "price": 8900,
-      "originalPrice": 10500,
-      "image": "/assets/images/products/gr-2501.svg",
-      "images": [
-        "/assets/images/products/gr-2501.svg",
-        "/assets/images/products/gr-2501-2.svg",
-        "/assets/images/products/gr-2501-3.svg"
-      ],
-      "rating": 4.9,
-      "reviewCount": 121,
-      "inStock": true,
-      "tags": [
-        "featured",
-        "premium"
-      ],
-      "shortDescription": "Enamelled cast iron, oven-to-table.",
-      "description": "A heirloom-grade enamelled cast-iron pot with even heat retention — braise, bake, and serve from the same vessel.",
-      "createdAt": 1720300000,
-      "barcode": "5192653665783",
-      "searchTerms": [
-        "cast",
-        "iron",
-        "dutch",
-        "oven",
-        "fôyer",
-        "france",
-        "kitchen & home",
-        "casserole",
-        "cast iron pot",
-        "handi"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from France, and the barcode printed on the pack — 5192653665783 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-2502",
-      "title": "Japanese Chef's Knife (Damascus, 20cm)",
-      "brand": "Kirha",
-      "origin": "Japan",
-      "categorySlug": "kitchen-home",
-      "categoryName": "Kitchen & Home",
-      "price": 6400,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-2502.svg",
-      "images": [
-        "/assets/images/products/gr-2502.svg",
-        "/assets/images/products/gr-2502-2.svg",
-        "/assets/images/products/gr-2502-3.svg"
-      ],
-      "rating": 4.8,
-      "reviewCount": 89,
-      "inStock": true,
-      "tags": [
-        "premium",
-        "bestseller"
-      ],
-      "shortDescription": "67-layer Damascus, VG-10 core.",
-      "description": "A hand-finished gyuto with a VG-10 core and a 67-layer Damascus cladding — precise, balanced, and enduring.",
-      "createdAt": 1719300000,
-      "barcode": "1640015913354",
-      "searchTerms": [
-        "japanese",
-        "chef",
-        "knife",
-        "kirha",
-        "japan",
-        "kitchen & home",
-        "chef knife",
-        "chaku",
-        "kitchen knife",
-        "damascus"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 1640015913354 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-2503",
-      "title": "Borosilicate Pour-Over Set",
-      "brand": "Clear",
-      "origin": "Germany",
-      "categorySlug": "kitchen-home",
-      "categoryName": "Kitchen & Home",
-      "price": 2100,
-      "originalPrice": 2500,
-      "image": "/assets/images/products/gr-2503.svg",
-      "images": [
-        "/assets/images/products/gr-2503.svg",
-        "/assets/images/products/gr-2503-2.svg",
-        "/assets/images/products/gr-2503-3.svg"
-      ],
-      "rating": 4.5,
-      "reviewCount": 41,
-      "inStock": true,
-      "tags": [
-        "new"
-      ],
-      "shortDescription": "Heat-proof carafe + dripper.",
-      "description": "A minimal borosilicate pour-over set for a clean, bright cup.",
-      "createdAt": 1720900000,
-      "barcode": "9546759804403",
-      "searchTerms": [
-        "borosilicate",
-        "pour",
-        "over",
-        "clear",
-        "germany",
-        "kitchen & home",
-        "coffee dripper",
-        "v60",
-        "filter coffee"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Germany, and the barcode printed on the pack — 9546759804403 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-3001",
-      "title": "Merino Wool Crew Sweater",
-      "brand": "Nordfell",
-      "origin": "Italy",
-      "categorySlug": "fashion",
-      "categoryName": "Fashion",
-      "price": 5600,
-      "originalPrice": 7000,
-      "image": "/assets/images/products/gr-3001.svg",
-      "images": [
-        "/assets/images/products/gr-3001.svg",
-        "/assets/images/products/gr-3001-2.svg",
-        "/assets/images/products/gr-3001-3.svg"
-      ],
-      "rating": 4.6,
-      "reviewCount": 52,
-      "inStock": true,
-      "tags": [
-        "featured"
-      ],
-      "shortDescription": "Fine-gauge merino, temperature-regulating.",
-      "description": "A fine-gauge extra-fine merino crew — soft, breathable, and quietly refined.",
-      "createdAt": 1719600000,
-      "barcode": "6832073803837",
-      "searchTerms": [
-        "merino",
-        "wool",
-        "crew",
-        "sweater",
-        "nordfell",
-        "italy",
-        "fashion",
-        "sweter",
-        "pullover",
-        "jumper",
-        "winter wear"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Italy, and the barcode printed on the pack — 6832073803837 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-3002",
-      "title": "Full-Grain Leather Weekender",
-      "brand": "Atlas",
-      "origin": "Italy",
-      "categorySlug": "fashion",
-      "categoryName": "Fashion",
-      "price": 14900,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-3002.svg",
-      "images": [
-        "/assets/images/products/gr-3002.svg",
-        "/assets/images/products/gr-3002-2.svg",
-        "/assets/images/products/gr-3002-3.svg"
-      ],
-      "rating": 4.8,
-      "reviewCount": 34,
-      "inStock": true,
-      "tags": [
-        "premium"
-      ],
-      "shortDescription": "Vegetable-tanned full-grain leather holdall.",
-      "description": "A vegetable-tanned full-grain weekender that ages beautifully — brass hardware, cotton-twill lining.",
-      "createdAt": 1720100000,
-      "barcode": "4712485330867",
-      "searchTerms": [
-        "full",
-        "grain",
-        "leather",
-        "weekender",
-        "atlas",
-        "italy",
-        "fashion",
-        "chamra",
-        "genuine leather"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Italy, and the barcode printed on the pack — 4712485330867 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-3003",
-      "title": "Polarised Acetate Sunglasses",
-      "brand": "Meridian",
-      "origin": "Italy",
-      "categorySlug": "fashion",
-      "categoryName": "Fashion",
-      "price": 3900,
-      "originalPrice": 4600,
-      "image": "/assets/images/products/gr-3003.svg",
-      "images": [
-        "/assets/images/products/gr-3003.svg",
-        "/assets/images/products/gr-3003-2.svg",
-        "/assets/images/products/gr-3003-3.svg"
-      ],
-      "rating": 4.4,
-      "reviewCount": 61,
-      "inStock": true,
-      "tags": [
-        "new"
-      ],
-      "shortDescription": "Hand-polished acetate, polarised lenses.",
-      "description": "Hand-polished Italian acetate frames with polarised, UV400 lenses.",
-      "createdAt": 1720700000,
-      "barcode": "4596185592875",
-      "searchTerms": [
-        "polarised",
-        "acetate",
-        "sunglasses",
-        "meridian",
-        "italy",
-        "fashion",
-        "sunglass",
-        "shades",
-        "chosma",
-        "goggles"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Italy, and the barcode printed on the pack — 4596185592875 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-3501",
-      "title": "Vitamin-C Brightening Serum (30ml)",
-      "brand": "Lumen",
-      "origin": "South Korea",
-      "categorySlug": "beauty-personal-care",
-      "categoryName": "Beauty & Personal Care",
-      "price": 2400,
-      "originalPrice": 2900,
-      "image": "/assets/images/products/gr-3501.svg",
-      "images": [
-        "/assets/images/products/gr-3501.svg",
-        "/assets/images/products/gr-3501-2.svg",
-        "/assets/images/products/gr-3501-3.svg"
-      ],
-      "rating": 4.7,
-      "reviewCount": 288,
-      "inStock": true,
-      "tags": [
-        "featured",
-        "bestseller"
-      ],
-      "shortDescription": "15% L-ascorbic acid, stabilised.",
-      "description": "A stabilised vitamin-C serum that brightens and evens tone, formulated with ferulic acid.",
-      "createdAt": 1719400000,
-      "barcode": "0287660635180",
-      "searchTerms": [
-        "vitamin",
-        "brightening",
-        "serum",
-        "lumen",
-        "south korea",
-        "beauty & personal care",
-        "face serum",
-        "vitamin c serum"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from South Korea, and the barcode printed on the pack — 0287660635180 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Room temperature, out of direct sunlight. Check the period-after-opening symbol on the pack."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-3502",
-      "title": "Sandalwood Grooming Set",
-      "brand": "Ébène",
-      "origin": "France",
-      "categorySlug": "beauty-personal-care",
-      "categoryName": "Beauty & Personal Care",
-      "price": 3300,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-3502.svg",
-      "images": [
-        "/assets/images/products/gr-3502.svg",
-        "/assets/images/products/gr-3502-2.svg",
-        "/assets/images/products/gr-3502-3.svg"
-      ],
-      "rating": 4.5,
-      "reviewCount": 47,
-      "inStock": true,
-      "tags": [
-        "premium"
-      ],
-      "shortDescription": "Beard oil, balm, and comb.",
-      "description": "A warm sandalwood grooming trio presented in a linen-lined box.",
-      "createdAt": 1720400000,
-      "barcode": "9257151035967",
-      "searchTerms": [
-        "sandalwood",
-        "grooming",
-        "ébène",
-        "france",
-        "beauty & personal care",
-        "shaving set",
-        "beard care"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from France, and the barcode printed on the pack — 9257151035967 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Room temperature, out of direct sunlight. Check the period-after-opening symbol on the pack."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-4001",
-      "title": "Gel Ink Rollerball — Set of 12",
-      "brand": "Kanji",
-      "origin": "Japan",
-      "categorySlug": "office-supplies",
-      "categoryName": "Office Supplies",
-      "price": 890,
-      "originalPrice": 1100,
-      "image": "/assets/images/products/gr-4001.svg",
-      "images": [
-        "/assets/images/products/gr-4001.svg",
-        "/assets/images/products/gr-4001-2.svg",
-        "/assets/images/products/gr-4001-3.svg"
-      ],
-      "rating": 4.6,
-      "reviewCount": 73,
-      "inStock": true,
-      "tags": [
-        "bestseller"
-      ],
-      "shortDescription": "0.5mm gel rollerballs, smear-free.",
-      "description": "Smooth, quick-drying gel rollerballs favoured for clean, consistent lines.",
-      "createdAt": 1719100000,
-      "barcode": "8910676623453",
-      "searchTerms": [
-        "gel",
-        "ink",
-        "rollerball",
-        "kanji",
-        "japan",
-        "office supplies",
-        "pen",
-        "kolom",
-        "gel pen"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 8910676623453 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-4002",
-      "title": "Hardcover Dotted Notebook (A5)",
-      "brand": "Leaf",
-      "origin": "Germany",
-      "categorySlug": "office-supplies",
-      "categoryName": "Office Supplies",
-      "price": 640,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-4002.svg",
-      "images": [
-        "/assets/images/products/gr-4002.svg",
-        "/assets/images/products/gr-4002-2.svg",
-        "/assets/images/products/gr-4002-3.svg"
-      ],
-      "rating": 4.7,
-      "reviewCount": 129,
-      "inStock": true,
-      "tags": [
-        "featured"
-      ],
-      "shortDescription": "120gsm dotted, lay-flat binding.",
-      "description": "A dotted A5 notebook on bleed-resistant 120gsm paper with a lay-flat binding.",
-      "createdAt": 1720600000,
-      "barcode": "6567875957654",
-      "searchTerms": [
-        "hardcover",
-        "dotted",
-        "notebook",
-        "leaf",
-        "germany",
-        "office supplies",
-        "khata",
-        "diary",
-        "journal",
-        "dotted notebook"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Germany, and the barcode printed on the pack — 6567875957654 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-9001",
-      "title": "FR-4 Double-Sided PCB Blank (100×160mm)",
-      "brand": "Circuiton",
-      "origin": "China",
-      "categorySlug": "industrial-raw-materials",
-      "categoryName": "Industrial Raw Materials",
-      "subSlug": "pcb-components",
-      "price": 220,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-9001.svg",
-      "images": [
-        "/assets/images/products/gr-9001.svg",
-        "/assets/images/products/gr-9001-2.svg",
-        "/assets/images/products/gr-9001-3.svg"
-      ],
-      "rating": 4.5,
-      "reviewCount": 38,
-      "inStock": true,
-      "tags": [
-        "b2b",
-        "bestseller"
-      ],
-      "moq": 50,
-      "priceTiers": [
-        {
-          "min": 50,
-          "price": 220
-        },
-        {
-          "min": 500,
-          "price": 190
-        },
-        {
-          "min": 2000,
-          "price": 165
-        }
-      ],
-      "shortDescription": "Copper-clad FR-4 laminate, 1.6mm, 1oz copper.",
-      "description": "Double-sided copper-clad FR-4 laminate for prototyping and small-run manufacturing. RoHS compliant.",
-      "specs": {
-        "Substrate": "FR-4",
-        "Thickness": "1.6 mm",
-        "Copper": "1 oz (35µm) both sides",
-        "Tg": "140°C",
-        "Dimensions": "100 × 160 mm",
-        "Compliance": "RoHS, REACH"
-      },
-      "datasheet": "#",
-      "createdAt": 1718200000,
-      "barcode": "6134536012634",
-      "searchTerms": [
-        "double",
-        "sided",
-        "pcb",
-        "blank",
-        "circuiton",
-        "china",
-        "industrial raw materials",
-        "circuit board",
-        "printed circuit board",
-        "fr4",
-        "fr-4",
-        "bulk",
-        "wholesale",
-        "b2b",
-        "moq"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from China, and the barcode printed on the pack — 6134536012634 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "What is the minimum order quantity?",
-          "a": "The minimum order is 50 units. Volume pricing steps in at 500, 2000 units — request a quote and the B2B desk confirms stock and lead time."
-        },
-        {
-          "q": "Is a datasheet available?",
-          "a": "Yes — download it from the Specifications tab. It carries the full electrical and mechanical detail."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-9002",
-      "title": "Tactile Push Switch 6×6mm (SMD) — Reel 1000",
-      "brand": "Omniswitch",
-      "origin": "China",
-      "categorySlug": "industrial-raw-materials",
-      "categoryName": "Industrial Raw Materials",
-      "subSlug": "switches-relays",
-      "price": 3.2,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-9002.svg",
-      "images": [
-        "/assets/images/products/gr-9002.svg",
-        "/assets/images/products/gr-9002-2.svg",
-        "/assets/images/products/gr-9002-3.svg"
-      ],
-      "rating": 4.6,
-      "reviewCount": 51,
-      "inStock": true,
-      "tags": [
-        "b2b"
-      ],
-      "moq": 1000,
-      "priceTiers": [
-        {
-          "min": 1000,
-          "price": 3.2
-        },
-        {
-          "min": 10000,
-          "price": 2.6
-        },
-        {
-          "min": 50000,
-          "price": 2.1
-        }
-      ],
-      "shortDescription": "6×6×5mm tactile switch, 160gf, SMD, tape & reel.",
-      "description": "Surface-mount tactile push switch rated for 100,000 cycles. Supplied on tape and reel.",
-      "specs": {
-        "Type": "Tactile, momentary",
-        "Force": "160 gf",
-        "Rating": "50 mA / 12 VDC",
-        "Life": "100,000 cycles",
-        "Mount": "SMD",
-        "Packaging": "Tape & reel (1000)"
-      },
-      "datasheet": "#",
-      "createdAt": 1718300000,
-      "barcode": "5055605007324",
-      "searchTerms": [
-        "tactile",
-        "push",
-        "switch",
-        "omniswitch",
-        "china",
-        "industrial raw materials",
-        "push button",
-        "tactile switch",
-        "smd switch",
-        "bulk",
-        "wholesale",
-        "b2b",
-        "moq"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from China, and the barcode printed on the pack — 5055605007324 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "What is the minimum order quantity?",
-          "a": "The minimum order is 1000 units. Volume pricing steps in at 10000, 50000 units — request a quote and the B2B desk confirms stock and lead time."
-        },
-        {
-          "q": "Is a datasheet available?",
-          "a": "Yes — download it from the Specifications tab. It carries the full electrical and mechanical detail."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-9003",
-      "title": "PCB Power Relay 5V SPDT 10A",
-      "brand": "Relko",
-      "origin": "Taiwan",
-      "categorySlug": "industrial-raw-materials",
-      "categoryName": "Industrial Raw Materials",
-      "subSlug": "switches-relays",
-      "price": 42,
-      "originalPrice": 55,
-      "image": "/assets/images/products/gr-9003.svg",
-      "images": [
-        "/assets/images/products/gr-9003.svg",
-        "/assets/images/products/gr-9003-2.svg",
-        "/assets/images/products/gr-9003-3.svg"
-      ],
-      "rating": 4.7,
-      "reviewCount": 29,
-      "inStock": true,
-      "tags": [
-        "b2b",
-        "featured"
-      ],
-      "moq": 100,
-      "priceTiers": [
-        {
-          "min": 100,
-          "price": 42
-        },
-        {
-          "min": 1000,
-          "price": 36
-        },
-        {
-          "min": 5000,
-          "price": 31
-        }
-      ],
-      "shortDescription": "5V coil, SPDT, 10A @ 250VAC, PCB mount.",
-      "description": "A compact PCB power relay for switching resistive loads up to 10A. UL/TÜV recognised.",
-      "specs": {
-        "Coil": "5 VDC",
-        "Contact": "SPDT (1C)",
-        "Rating": "10 A / 250 VAC",
-        "Coil Power": "360 mW",
-        "Isolation": "5 kV",
-        "Compliance": "UL, TÜV, RoHS"
-      },
-      "datasheet": "#",
-      "createdAt": 1718400000,
-      "barcode": "1859042263800",
-      "searchTerms": [
-        "pcb",
-        "power",
-        "relay",
-        "spdt",
-        "relko",
-        "taiwan",
-        "industrial raw materials",
-        "power relay",
-        "spdt relay",
-        "5v relay",
-        "circuit board",
-        "printed circuit board",
-        "fr4",
-        "fr-4",
-        "bulk",
-        "wholesale",
-        "b2b",
-        "moq"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Taiwan, and the barcode printed on the pack — 1859042263800 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "What is the minimum order quantity?",
-          "a": "The minimum order is 100 units. Volume pricing steps in at 1000, 5000 units — request a quote and the B2B desk confirms stock and lead time."
-        },
-        {
-          "q": "Is a datasheet available?",
-          "a": "Yes — download it from the Specifications tab. It carries the full electrical and mechanical detail."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-9004",
-      "title": "Digital Temp/Humidity Sensor (I²C)",
-      "brand": "Sensecore",
-      "origin": "Switzerland",
-      "categorySlug": "industrial-raw-materials",
-      "categoryName": "Industrial Raw Materials",
-      "subSlug": "sensors",
-      "price": 185,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-9004.svg",
-      "images": [
-        "/assets/images/products/gr-9004.svg",
-        "/assets/images/products/gr-9004-2.svg",
-        "/assets/images/products/gr-9004-3.svg"
-      ],
-      "rating": 4.8,
-      "reviewCount": 63,
-      "inStock": true,
-      "tags": [
-        "b2b",
-        "premium"
-      ],
-      "moq": 100,
-      "priceTiers": [
-        {
-          "min": 100,
-          "price": 185
-        },
-        {
-          "min": 1000,
-          "price": 158
-        },
-        {
-          "min": 10000,
-          "price": 132
-        }
-      ],
-      "shortDescription": "±0.2°C, ±2%RH, I²C, DFN package.",
-      "description": "A calibrated digital temperature and humidity sensor with an I²C interface, ideal for HVAC and cold-chain monitoring.",
-      "specs": {
-        "Interface": "I²C",
-        "Temp Accuracy": "±0.2 °C",
-        "RH Accuracy": "±2 %RH",
-        "Supply": "2.4–5.5 V",
-        "Package": "DFN-8",
-        "Compliance": "RoHS"
-      },
-      "datasheet": "#",
-      "createdAt": 1718600000,
-      "barcode": "2004201250897",
-      "searchTerms": [
-        "digital",
-        "temp",
-        "humidity",
-        "sensor",
-        "sensecore",
-        "switzerland",
-        "industrial raw materials",
-        "temperature sensor",
-        "humidity sensor",
-        "i2c sensor",
-        "dht",
-        "bulk",
-        "wholesale",
-        "b2b",
-        "moq"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Switzerland, and the barcode printed on the pack — 2004201250897 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "What is the minimum order quantity?",
-          "a": "The minimum order is 100 units. Volume pricing steps in at 1000, 10000 units — request a quote and the B2B desk confirms stock and lead time."
-        },
-        {
-          "q": "Is a datasheet available?",
-          "a": "Yes — download it from the Specifications tab. It carries the full electrical and mechanical detail."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-9005",
-      "title": "ABS Polymer Pellets — Natural (25kg Sack)",
-      "brand": "Polychem",
-      "origin": "South Korea",
-      "categorySlug": "industrial-raw-materials",
-      "categoryName": "Industrial Raw Materials",
-      "subSlug": "polymers",
-      "price": 6800,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-9005.svg",
-      "images": [
-        "/assets/images/products/gr-9005.svg",
-        "/assets/images/products/gr-9005-2.svg",
-        "/assets/images/products/gr-9005-3.svg"
-      ],
-      "rating": 4.4,
-      "reviewCount": 22,
-      "inStock": true,
-      "tags": [
-        "b2b"
-      ],
-      "moq": 10,
-      "priceTiers": [
-        {
-          "min": 10,
-          "price": 6800
-        },
-        {
-          "min": 40,
-          "price": 6300
-        },
-        {
-          "min": 200,
-          "price": 5850
-        }
-      ],
-      "shortDescription": "Injection-grade ABS, natural, MFI 20.",
-      "description": "General-purpose injection-moulding ABS pellets with balanced impact strength and flow. Supplied in 25kg moisture-barrier sacks.",
-      "specs": {
-        "Grade": "Injection",
-        "MFI": "20 g/10min",
-        "Density": "1.04 g/cm³",
-        "Colour": "Natural",
-        "Pack": "25 kg sack",
-        "Compliance": "REACH, RoHS"
-      },
-      "datasheet": "#",
-      "createdAt": 1718700000,
-      "barcode": "4957252310295",
-      "searchTerms": [
-        "abs",
-        "polymer",
-        "pellets",
-        "polychem",
-        "south korea",
-        "industrial raw materials",
-        "abs pellets",
-        "plastic granules",
-        "raw plastic",
-        "bulk",
-        "wholesale",
-        "b2b",
-        "moq"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from South Korea, and the barcode printed on the pack — 4957252310295 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "What is the minimum order quantity?",
-          "a": "The minimum order is 10 units. Volume pricing steps in at 40, 200 units — request a quote and the B2B desk confirms stock and lead time."
-        },
-        {
-          "q": "Is a datasheet available?",
-          "a": "Yes — download it from the Specifications tab. It carries the full electrical and mechanical detail."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-9006",
-      "title": "Aluminium Electrolytic Capacitor 1000µF 25V — Bag 200",
-      "brand": "Voltcore",
-      "origin": "Japan",
-      "categorySlug": "industrial-raw-materials",
-      "categoryName": "Industrial Raw Materials",
-      "subSlug": "pcb-components",
-      "price": 9,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-9006.svg",
-      "images": [
-        "/assets/images/products/gr-9006.svg",
-        "/assets/images/products/gr-9006-2.svg",
-        "/assets/images/products/gr-9006-3.svg"
-      ],
-      "rating": 4.6,
-      "reviewCount": 40,
-      "inStock": true,
-      "tags": [
-        "b2b",
-        "new"
-      ],
-      "moq": 200,
-      "priceTiers": [
-        {
-          "min": 200,
-          "price": 9
-        },
-        {
-          "min": 2000,
-          "price": 7.4
-        },
-        {
-          "min": 20000,
-          "price": 6.1
-        }
-      ],
-      "shortDescription": "1000µF 25V, 105°C, radial, low-ESR.",
-      "description": "Low-ESR radial electrolytic capacitors rated to 105°C with a 5,000-hour endurance.",
-      "specs": {
-        "Capacitance": "1000 µF",
-        "Voltage": "25 V",
-        "Temp": "105 °C",
-        "Endurance": "5,000 h",
-        "ESR": "Low",
-        "Mount": "Radial THT"
-      },
-      "datasheet": "#",
-      "createdAt": 1718900000,
-      "barcode": "7263350363918",
-      "searchTerms": [
-        "aluminium",
-        "electrolytic",
-        "capacitor",
-        "voltcore",
-        "japan",
-        "industrial raw materials",
-        "electrolytic capacitor",
-        "cap",
-        "1000uf",
-        "bulk",
-        "wholesale",
-        "b2b",
-        "moq"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 7263350363918 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "What is the minimum order quantity?",
-          "a": "The minimum order is 200 units. Volume pricing steps in at 2000, 20000 units — request a quote and the B2B desk confirms stock and lead time."
-        },
-        {
-          "q": "Is a datasheet available?",
-          "a": "Yes — download it from the Specifications tab. It carries the full electrical and mechanical detail."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-1006",
-      "title": "Organic Green Tea — Sencha (200g)",
-      "brand": "Yamacha",
-      "origin": "Japan",
-      "categorySlug": "imported-food-grocery",
-      "categoryName": "Imported Food",
-      "subSlug": "coffee-tea",
-      "price": 880,
-      "originalPrice": 1050,
-      "image": "/assets/images/products/gr-1006.svg",
-      "images": [
-        "/assets/images/products/gr-1006.svg",
-        "/assets/images/products/gr-1006-2.svg",
-        "/assets/images/products/gr-1006-3.svg"
-      ],
-      "rating": 4.6,
-      "reviewCount": 61,
-      "inStock": true,
-      "tags": [
-        "new"
-      ],
-      "dietary": [
-        "vegan",
-        "organic"
-      ],
-      "shortDescription": "First-flush organic Sencha, vivid and grassy.",
-      "description": "A bright, first-flush Sencha with a clean, grassy sweetness. Shade-grown and stone-milled fresh.",
-      "createdAt": 1720750000,
-      "barcode": "2242530345284",
-      "searchTerms": [
-        "organic",
-        "green",
-        "tea",
-        "yamacha",
-        "japan",
-        "imported food & grocery",
-        "sobuj cha",
-        "sencha",
-        "matcha alternative",
-        "cha",
-        "sha",
-        "black tea",
-        "green tea",
-        "loose leaf",
-        "vegan",
-        "plant based",
-        "jaibo"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 2242530345284 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Keep sealed in a cool, dry place away from direct sunlight. Refrigerate after opening if the pack says so."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
-        },
-        {
-          "q": "Does it suit dietary restrictions?",
-          "a": "This product is listed as vegan and organic. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
-        }
-      ]
-    },
-    {
-      "id": "gr-1204",
-      "title": "Chilean Walnut Halves (500g)",
-      "brand": "Andes",
-      "origin": "Chile",
-      "categorySlug": "nuts-dry-fruits",
-      "categoryName": "Nuts & Dry Fruits",
-      "price": 890,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-1204.svg",
-      "images": [
-        "/assets/images/products/gr-1204.svg",
-        "/assets/images/products/gr-1204-2.svg",
-        "/assets/images/products/gr-1204-3.svg"
-      ],
-      "rating": 4.5,
-      "reviewCount": 44,
-      "inStock": true,
-      "tags": [],
-      "dietary": [
-        "vegan",
-        "gluten-free"
-      ],
-      "shortDescription": "Light-halves walnuts, buttery and fresh.",
-      "description": "Premium light-quarter walnut halves — mild, buttery and never bitter.",
-      "createdAt": 1719700000,
-      "barcode": "6646400475426",
-      "searchTerms": [
-        "chilean",
-        "walnut",
-        "halves",
-        "andes",
-        "chile",
-        "nuts & dry fruits",
-        "akhrot",
-        "walnuts",
-        "vegan",
-        "plant based",
-        "gluten free",
-        "glutenfree"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Chile, and the barcode printed on the pack — 6646400475426 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Airtight and away from heat. Refrigeration extends freshness in warm months and is worth it here."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
-        },
-        {
-          "q": "Does it suit dietary restrictions?",
-          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
-        }
-      ]
-    },
-    {
-      "id": "gr-1205",
-      "title": "Turkish Dried Apricots (500g)",
-      "brand": "Malatya",
-      "origin": "Turkey",
-      "categorySlug": "nuts-dry-fruits",
-      "categoryName": "Nuts & Dry Fruits",
-      "price": 720,
-      "originalPrice": 860,
-      "image": "/assets/images/products/gr-1205.svg",
-      "images": [
-        "/assets/images/products/gr-1205.svg",
-        "/assets/images/products/gr-1205-2.svg",
-        "/assets/images/products/gr-1205-3.svg"
-      ],
-      "rating": 4.7,
-      "reviewCount": 73,
-      "inStock": true,
-      "tags": [
-        "bestseller"
-      ],
-      "dietary": [
-        "vegan",
-        "no-added-sugar"
-      ],
-      "shortDescription": "Soft, sun-dried Malatya apricots.",
-      "description": "Naturally sun-dried apricots from Malatya — plump, tangy-sweet, unsulphured.",
-      "createdAt": 1719200000,
-      "barcode": "7311413955850",
-      "searchTerms": [
-        "turkish",
-        "dried",
-        "apricots",
-        "malatya",
-        "turkey",
-        "nuts & dry fruits",
-        "khubani",
-        "dried apricot",
-        "vegan",
-        "plant based",
         "no added sugar",
         "sugar free",
         "sugarfree",
@@ -2151,135 +192,74 @@
       "faq": [
         {
           "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Turkey, and the barcode printed on the pack — 7311413955850 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "How should I store it?",
-          "a": "Airtight and away from heat. Refrigeration extends freshness in warm months and is worth it here."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
+          "a": "Every unit is import-verified. This batch is sourced from Saudi Arabia, and the barcode printed on the pack — 8811030044818 — matches the one listed under Specifications. Check them against each other when it arrives."
         },
         {
           "q": "Does it suit dietary restrictions?",
-          "a": "This product is listed as vegan and made with no added sugar. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+          "a": "This product is listed as vegan, gluten-free and made with no added sugar. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
         },
         {
           "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
         }
       ]
     },
     {
-      "id": "gr-1104",
-      "title": "Skimmed Milk Powder (1kg Pouch)",
-      "brand": "Nord Dairy",
+      "id": "gr-1201",
+      "title": "Mānuka Honey UMF 25+ (250g)",
+      "brand": "GulfRabit Select",
       "origin": "New Zealand",
-      "categorySlug": "dairy-milk-powder",
-      "categoryName": "Dairy & Milk Powder",
-      "subSlug": "milk-powder",
-      "price": 1180,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-1104.svg",
+      "categorySlug": "honey",
+      "categoryName": "Honey",
+      "subSlug": null,
+      "price": 12500,
+      "originalPrice": 14900,
+      "image": "/assets/images/products/gr-1201.jpg",
       "images": [
-        "/assets/images/products/gr-1104.svg",
-        "/assets/images/products/gr-1104-2.svg",
-        "/assets/images/products/gr-1104-3.svg"
+        "/assets/images/products/gr-1201.jpg"
       ],
-      "rating": 4.5,
-      "reviewCount": 96,
+      "rating": 4.9,
+      "reviewCount": 74,
       "inStock": true,
       "tags": [
-        "new"
+        "featured",
+        "premium"
       ],
       "dietary": [
-        "halal"
+        "raw",
+        "unfiltered",
+        "gluten-free"
       ],
-      "shortDescription": "Instant skimmed milk powder, resealable pouch.",
-      "description": "Low-fat instant skimmed milk powder that dissolves cleanly. Cold-chain handled, resealable pouch.",
-      "createdAt": 1720650000,
-      "barcode": "3908888194422",
+      "shortDescription": "UMF 25+ / MGO 1200+, raw and unpasteurised, in the licensed grade.",
+      "description": "The top of the Mānuka scale that is sold in retail sizes. UMF 25+ is a licensed grade, not a marketing number — it certifies the methylglyoxal level printed beside it, MGO 1200+, along with two other markers of authenticity. Raw and unpasteurised, so it will crystallise in a cool room; that is the honey behaving normally.",
+      "createdAt": 1722759200,
+      "barcode": "8812010046181",
       "searchTerms": [
-        "skimmed",
-        "milk",
-        "powder",
-        "nord dairy",
+        "nuka",
+        "honey",
+        "umf",
+        "gulfrabit select",
         "new zealand",
-        "dairy & milk powder",
-        "gurer dudh",
-        "dudh",
-        "powdered milk",
-        "formula",
-        "full cream",
-        "halal"
+        "modhu",
+        "modu",
+        "raw honey",
+        "natural honey",
+        "khati modhu",
+        "raw",
+        "unprocessed",
+        "unfiltered",
+        "natural",
+        "gluten free",
+        "glutenfree"
       ],
       "faq": [
         {
           "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from New Zealand, and the barcode printed on the pack — 3908888194422 — matches the one listed under Specifications. Check them against each other when it arrives."
+          "a": "Every unit is import-verified. This batch is sourced from New Zealand, and the barcode printed on the pack — 8812010046181 — matches the one listed under Specifications. Check them against each other when it arrives."
         },
         {
-          "q": "How should I store it?",
-          "a": "Store cool and dry, and seal the pack tightly after each use — powder absorbs moisture quickly in Dhaka humidity."
-        },
-        {
-          "q": "Is it shipped cold-chain?",
-          "a": "Yes, at no extra charge. Cold-chain handling on perishables is part of what you are buying here, not an add-on — and the delivery charge is the same flat rate either way."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Perishables are non-returnable for safety reasons unless they arrive damaged, incorrect, or with an authenticity concern — tell us within 48 hours and we replace or refund in full."
-        }
-      ]
-    },
-    {
-      "id": "gr-2005",
-      "title": "Portable Bluetooth Speaker (Waterproof)",
-      "brand": "Pulse",
-      "origin": "South Korea",
-      "categorySlug": "gadgets-electronics",
-      "categoryName": "Gadgets & Electronics",
-      "subSlug": "audio",
-      "price": 4900,
-      "originalPrice": 5900,
-      "image": "/assets/images/products/gr-2005.svg",
-      "images": [
-        "/assets/images/products/gr-2005.svg",
-        "/assets/images/products/gr-2005-2.svg",
-        "/assets/images/products/gr-2005-3.svg"
-      ],
-      "rating": 4.5,
-      "reviewCount": 118,
-      "inStock": true,
-      "tags": [
-        "new"
-      ],
-      "shortDescription": "IP67, 20-hour battery, stereo pairing.",
-      "description": "A rugged IP67 waterproof speaker with punchy bass, 20-hour battery and true-wireless stereo pairing.",
-      "specs": {
-        "Battery": "20 h",
-        "Water": "IP67",
-        "Bluetooth": "5.3",
-        "Output": "20 W"
-      },
-      "createdAt": 1721000000,
-      "barcode": "3278211515461",
-      "searchTerms": [
-        "portable",
-        "bluetooth",
-        "speaker",
-        "pulse",
-        "south korea",
-        "gadgets & electronics",
-        "bluetooth speaker",
-        "sound box",
-        "portable speaker"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from South Korea, and the barcode printed on the pack — 3278211515461 — matches the one listed under Specifications. Check them against each other when it arrives."
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as raw and unprocessed, unfiltered and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
         },
         {
           "q": "Can I return it?",
@@ -2288,242 +268,65 @@
       ]
     },
     {
-      "id": "gr-2506",
-      "title": "Nonstick Frying Pan — Granite (28cm)",
-      "brand": "Fôyer",
-      "origin": "France",
-      "categorySlug": "kitchen-home",
-      "categoryName": "Kitchen & Home",
-      "price": 3200,
-      "originalPrice": 3800,
-      "image": "/assets/images/products/gr-2506.svg",
+      "id": "gr-1202",
+      "title": "Iranian Wildflower Honey (500g)",
+      "brand": "GulfRabit Select",
+      "origin": "Iran",
+      "categorySlug": "honey",
+      "categoryName": "Honey",
+      "subSlug": null,
+      "price": 1650,
+      "originalPrice": 1950,
+      "image": "/assets/images/products/gr-1202.jpg",
       "images": [
-        "/assets/images/products/gr-2506.svg",
-        "/assets/images/products/gr-2506-2.svg",
-        "/assets/images/products/gr-2506-3.svg"
-      ],
-      "rating": 4.5,
-      "reviewCount": 57,
-      "inStock": true,
-      "tags": [
-        "bestseller"
-      ],
-      "shortDescription": "PFOA-free granite coating, induction-ready.",
-      "description": "A durable granite-coated frying pan — PFOA-free, even heating, induction-ready.",
-      "createdAt": 1719950000,
-      "barcode": "6637995503465",
-      "searchTerms": [
-        "nonstick",
-        "frying",
-        "pan",
-        "fôyer",
-        "france",
-        "kitchen & home",
-        "korai",
-        "nonstick pan",
-        "tawa"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from France, and the barcode printed on the pack — 6637995503465 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-2507",
-      "title": "Double-Wall Glass Mugs (Set of 2)",
-      "brand": "Clear",
-      "origin": "Germany",
-      "categorySlug": "kitchen-home",
-      "categoryName": "Kitchen & Home",
-      "price": 1400,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-2507.svg",
-      "images": [
-        "/assets/images/products/gr-2507.svg",
-        "/assets/images/products/gr-2507-2.svg",
-        "/assets/images/products/gr-2507-3.svg"
-      ],
-      "rating": 4.6,
-      "reviewCount": 39,
-      "inStock": true,
-      "tags": [
-        "new"
-      ],
-      "shortDescription": "Borosilicate double-wall, keeps drinks hot.",
-      "description": "Hand-blown double-wall borosilicate mugs — insulating, lightweight and elegant.",
-      "createdAt": 1720850000,
-      "barcode": "4089031776012",
-      "searchTerms": [
-        "double",
-        "wall",
-        "glass",
-        "mugs",
-        "clear",
-        "germany",
-        "kitchen & home",
-        "mug",
-        "cup",
-        "glass cup"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Germany, and the barcode printed on the pack — 4089031776012 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-3004",
-      "title": "Full-Grain Leather Belt",
-      "brand": "Atlas",
-      "origin": "Italy",
-      "categorySlug": "fashion",
-      "categoryName": "Fashion",
-      "price": 2600,
-      "originalPrice": 3200,
-      "image": "/assets/images/products/gr-3004.svg",
-      "images": [
-        "/assets/images/products/gr-3004.svg",
-        "/assets/images/products/gr-3004-2.svg",
-        "/assets/images/products/gr-3004-3.svg"
-      ],
-      "rating": 4.6,
-      "reviewCount": 48,
-      "inStock": true,
-      "tags": [
-        "bestseller"
-      ],
-      "shortDescription": "Vegetable-tanned leather, brass buckle.",
-      "description": "A vegetable-tanned full-grain belt with a solid brass buckle that patinas beautifully.",
-      "createdAt": 1719450000,
-      "barcode": "3386125118958",
-      "searchTerms": [
-        "full",
-        "grain",
-        "leather",
-        "belt",
-        "atlas",
-        "italy",
-        "fashion",
-        "chamra",
-        "genuine leather",
-        "leather belt",
-        "waist belt"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Italy, and the barcode printed on the pack — 3386125118958 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-3005",
-      "title": "Cashmere-Blend Scarf",
-      "brand": "Nordfell",
-      "origin": "Italy",
-      "categorySlug": "fashion",
-      "categoryName": "Fashion",
-      "price": 3400,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-3005.svg",
-      "images": [
-        "/assets/images/products/gr-3005.svg",
-        "/assets/images/products/gr-3005-2.svg",
-        "/assets/images/products/gr-3005-3.svg"
+        "/assets/images/products/gr-1202.jpg"
       ],
       "rating": 4.7,
-      "reviewCount": 31,
-      "inStock": true,
-      "tags": [
-        "premium",
-        "new"
-      ],
-      "shortDescription": "Cashmere-merino blend, feather-light.",
-      "description": "A feather-light cashmere-merino scarf — warm without weight, in a quiet palette.",
-      "createdAt": 1720950000,
-      "barcode": "5466656600936",
-      "searchTerms": [
-        "cashmere",
-        "blend",
-        "scarf",
-        "nordfell",
-        "italy",
-        "fashion",
-        "muffler",
-        "shawl",
-        "chador"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Italy, and the barcode printed on the pack — 5466656600936 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-3505",
-      "title": "Hyaluronic Acid Moisturiser (50ml)",
-      "brand": "Lumen",
-      "origin": "South Korea",
-      "categorySlug": "beauty-personal-care",
-      "categoryName": "Beauty & Personal Care",
-      "price": 1900,
-      "originalPrice": 2300,
-      "image": "/assets/images/products/gr-3505.svg",
-      "images": [
-        "/assets/images/products/gr-3505.svg",
-        "/assets/images/products/gr-3505-2.svg",
-        "/assets/images/products/gr-3505-3.svg"
-      ],
-      "rating": 4.6,
-      "reviewCount": 142,
+      "reviewCount": 203,
       "inStock": true,
       "tags": [
         "bestseller"
       ],
-      "shortDescription": "Multi-weight hyaluronic acid, lightweight gel.",
-      "description": "A lightweight gel moisturiser with multi-weight hyaluronic acid for lasting, non-greasy hydration.",
-      "createdAt": 1719650000,
-      "barcode": "9139788804836",
+      "dietary": [
+        "raw",
+        "unfiltered",
+        "no-added-sugar"
+      ],
+      "shortDescription": "Raw, unprocessed, single-season — bright amber and floral.",
+      "description": "Pressed and strained, never heated, from high-meadow hives in the Zagros. Light amber in the jar and distinctly floral rather than caramel — it goes on bread and into tea without taking the flavour over. Unprocessed honey sets over time; warm the jar in water to bring it back.",
+      "createdAt": 1722845600,
+      "barcode": "8812020047550",
       "searchTerms": [
-        "hyaluronic",
-        "acid",
-        "moisturiser",
-        "lumen",
-        "south korea",
-        "beauty & personal care",
-        "moisturizer",
-        "cream",
-        "face cream",
-        "hydrating"
+        "iranian",
+        "wildflower",
+        "honey",
+        "gulfrabit select",
+        "iran",
+        "bon ful modhu",
+        "multiflora",
+        "polyfloral",
+        "modhu",
+        "modu",
+        "raw honey",
+        "natural honey",
+        "khati modhu",
+        "raw",
+        "unprocessed",
+        "unfiltered",
+        "natural",
+        "no added sugar",
+        "sugar free",
+        "sugarfree",
+        "diabetic friendly"
       ],
       "faq": [
         {
           "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from South Korea, and the barcode printed on the pack — 9139788804836 — matches the one listed under Specifications. Check them against each other when it arrives."
+          "a": "Every unit is import-verified. This batch is sourced from Iran, and the barcode printed on the pack — 8812020047550 — matches the one listed under Specifications. Check them against each other when it arrives."
         },
         {
-          "q": "How should I store it?",
-          "a": "Room temperature, out of direct sunlight. Check the period-after-opening symbol on the pack."
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as raw and unprocessed, unfiltered and made with no added sugar. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
         },
         {
           "q": "Can I return it?",
@@ -2532,48 +335,64 @@
       ]
     },
     {
-      "id": "gr-3506",
-      "title": "Mineral Sunscreen SPF 50 (50ml)",
-      "brand": "Lumen",
-      "origin": "South Korea",
-      "categorySlug": "beauty-personal-care",
-      "categoryName": "Beauty & Personal Care",
-      "price": 1600,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-3506.svg",
+      "id": "gr-1203",
+      "title": "Sidr Honey — Raw & Unfiltered (500g)",
+      "brand": "GulfRabit Select",
+      "origin": "Yemen",
+      "categorySlug": "honey",
+      "categoryName": "Honey",
+      "subSlug": null,
+      "price": 3900,
+      "originalPrice": 4500,
+      "image": "/assets/images/products/gr-1203.jpg",
       "images": [
-        "/assets/images/products/gr-3506.svg",
-        "/assets/images/products/gr-3506-2.svg",
-        "/assets/images/products/gr-3506-3.svg"
+        "/assets/images/products/gr-1203.jpg"
       ],
-      "rating": 4.5,
+      "rating": 4.8,
       "reviewCount": 88,
       "inStock": true,
       "tags": [
         "new"
       ],
-      "shortDescription": "Broad-spectrum SPF 50, no white cast.",
-      "description": "A broad-spectrum mineral sunscreen that absorbs cleanly with no white cast — daily-wear finish.",
-      "createdAt": 1720450000,
-      "barcode": "3765883382250",
+      "dietary": [
+        "raw",
+        "unfiltered",
+        "no-added-sugar"
+      ],
+      "shortDescription": "Single-origin Sidr from the autumn flow — thick, dark and resinous.",
+      "description": "Sidr trees flower once a year and the harvest is one narrow window, which is most of why this honey costs what it does. Thick enough to hold the dipper upright, with a deep resinous finish nothing else on the shelf tastes like. Unfiltered, so a little pollen and wax comes with it.",
+      "createdAt": 1722932000,
+      "barcode": "8812030048929",
       "searchTerms": [
-        "mineral",
-        "sunscreen",
-        "spf",
-        "lumen",
-        "south korea",
-        "beauty & personal care",
-        "sun cream",
-        "sunblock"
+        "sidr",
+        "honey",
+        "gulfrabit select",
+        "yemen",
+        "modhu",
+        "modu",
+        "raw honey",
+        "natural honey",
+        "khati modhu",
+        "sidr modhu",
+        "ber honey",
+        "yemeni honey",
+        "raw",
+        "unprocessed",
+        "unfiltered",
+        "natural",
+        "no added sugar",
+        "sugar free",
+        "sugarfree",
+        "diabetic friendly"
       ],
       "faq": [
         {
           "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from South Korea, and the barcode printed on the pack — 3765883382250 — matches the one listed under Specifications. Check them against each other when it arrives."
+          "a": "Every unit is import-verified. This batch is sourced from Yemen, and the barcode printed on the pack — 8812030048929 — matches the one listed under Specifications. Check them against each other when it arrives."
         },
         {
-          "q": "How should I store it?",
-          "a": "Room temperature, out of direct sunlight. Check the period-after-opening symbol on the pack."
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as raw and unprocessed, unfiltered and made with no added sugar. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
         },
         {
           "q": "Can I return it?",
@@ -2582,92 +401,848 @@
       ]
     },
     {
-      "id": "gr-4003",
-      "title": "Walnut Desk Organiser",
-      "brand": "Leaf",
-      "origin": "Germany",
-      "categorySlug": "office-supplies",
-      "categoryName": "Office Supplies",
-      "price": 2100,
-      "originalPrice": 2500,
-      "image": "/assets/images/products/gr-4003.svg",
+      "id": "gr-1401",
+      "title": "Afghan Dried Figs (500g)",
+      "brand": "GulfRabit Select",
+      "origin": "Afghanistan",
+      "categorySlug": "dry-fruits",
+      "categoryName": "Dry Fruits",
+      "subSlug": null,
+      "price": 1850,
+      "originalPrice": 2200,
+      "image": "/assets/images/products/gr-1401.jpg",
       "images": [
-        "/assets/images/products/gr-4003.svg",
-        "/assets/images/products/gr-4003-2.svg",
-        "/assets/images/products/gr-4003-3.svg"
+        "/assets/images/products/gr-1401.jpg"
       ],
-      "rating": 4.6,
-      "reviewCount": 34,
-      "inStock": true,
-      "tags": [
-        "premium"
-      ],
-      "shortDescription": "Solid walnut, felt-lined compartments.",
-      "description": "A solid walnut desk organiser with felt-lined compartments — quiet order for the desk.",
-      "createdAt": 1720250000,
-      "barcode": "5137174655646",
-      "searchTerms": [
-        "walnut",
-        "desk",
-        "organiser",
-        "leaf",
-        "germany",
-        "office supplies",
-        "organizer",
-        "desk tidy",
-        "akhrot",
-        "walnuts"
-      ],
-      "faq": [
-        {
-          "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Germany, and the barcode printed on the pack — 5137174655646 — matches the one listed under Specifications. Check them against each other when it arrives."
-        },
-        {
-          "q": "Can I return it?",
-          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
-        }
-      ]
-    },
-    {
-      "id": "gr-4004",
-      "title": "Drafting Mechanical Pencil Set (0.3/0.5/0.7)",
-      "brand": "Kanji",
-      "origin": "Japan",
-      "categorySlug": "office-supplies",
-      "categoryName": "Office Supplies",
-      "price": 1250,
-      "originalPrice": null,
-      "image": "/assets/images/products/gr-4004.svg",
-      "images": [
-        "/assets/images/products/gr-4004.svg",
-        "/assets/images/products/gr-4004-2.svg",
-        "/assets/images/products/gr-4004-3.svg"
-      ],
-      "rating": 4.7,
-      "reviewCount": 52,
+      "rating": 4.8,
+      "reviewCount": 132,
       "inStock": true,
       "tags": [
         "bestseller"
       ],
-      "shortDescription": "Metal-body drafting pencils, three gauges.",
-      "description": "A three-gauge set of metal-body drafting pencils with cushioned lead and knurled grips.",
-      "createdAt": 1720150000,
-      "barcode": "0468805192502",
+      "dietary": [
+        "vegan",
+        "gluten-free",
+        "no-added-sugar"
+      ],
+      "shortDescription": "Sun-dried whole figs, hand-twisted, nothing added.",
+      "description": "Dried in the open air on the northern plains and twisted closed by hand — the shape is how they are finished, not a machine press. Chewy, seedy and honey-sweet, with none of the sulphur pallor that comes with treated fruit. No glucose syrup, no preservative.",
+      "createdAt": 1723018400,
+      "barcode": "8814010050298",
       "searchTerms": [
-        "drafting",
-        "mechanical",
-        "pencil",
-        "kanji",
-        "japan",
-        "office supplies",
-        "mechanical pencil",
-        "drafting pencil"
+        "afghan",
+        "dried",
+        "figs",
+        "gulfrabit select",
+        "afghanistan",
+        "dry fruits",
+        "dumur",
+        "anjeer",
+        "anjir",
+        "dried fig",
+        "vegan",
+        "plant based",
+        "gluten free",
+        "glutenfree",
+        "no added sugar",
+        "sugar free",
+        "sugarfree",
+        "diabetic friendly"
       ],
       "faq": [
         {
           "q": "How do I know this is genuine?",
-          "a": "Every unit is import-verified. This batch is sourced from Japan, and the barcode printed on the pack — 0468805192502 — matches the one listed under Specifications. Check them against each other when it arrives."
+          "a": "Every unit is import-verified. This batch is sourced from Afghanistan, and the barcode printed on the pack — 8814010050298 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan, gluten-free and made with no added sugar. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1402",
+      "title": "Royal Dry Fruit & Nut Mix (750g)",
+      "brand": "GulfRabit Select",
+      "origin": "UAE",
+      "categorySlug": "dry-fruits",
+      "categoryName": "Dry Fruits",
+      "subSlug": null,
+      "price": 2450,
+      "originalPrice": 2900,
+      "image": "/assets/images/products/gr-1402.jpg",
+      "images": [
+        "/assets/images/products/gr-1402.jpg"
+      ],
+      "rating": 4.9,
+      "reviewCount": 157,
+      "inStock": true,
+      "tags": [
+        "featured",
+        "premium"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free"
+      ],
+      "shortDescription": "Figs, apricots, raisins, almonds, cashews, walnuts and pistachios in one jar.",
+      "description": "Seven items, packed loose rather than pressed into a tray, in the proportions people actually eat them: more nuts than fruit, and the fruit whole rather than diced. Assembled and sealed in Dubai from single-origin lots. The default gift when you do not know what someone likes.",
+      "createdAt": 1723104800,
+      "barcode": "8814020051667",
+      "searchTerms": [
+        "royal",
+        "dry",
+        "fruit",
+        "nut",
+        "mix",
+        "gulfrabit select",
+        "uae",
+        "dry fruits",
+        "shukno fol",
+        "mixed dry fruits",
+        "nut mix",
+        "vegan",
+        "plant based",
+        "gluten free",
+        "glutenfree"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from UAE, and the barcode printed on the pack — 8814020051667 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1501",
+      "title": "Premium Keshar Saffron — Boxed (1g)",
+      "brand": "GulfRabit Select",
+      "origin": "Afghanistan",
+      "categorySlug": "spices",
+      "categoryName": "Spices",
+      "subSlug": null,
+      "price": 1290,
+      "originalPrice": 1550,
+      "image": "/assets/images/products/gr-1501.jpg",
+      "images": [
+        "/assets/images/products/gr-1501.jpg"
+      ],
+      "rating": 4.8,
+      "reviewCount": 119,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free"
+      ],
+      "shortDescription": "Hand-picked highland saffron in a gift box — all-red threads.",
+      "description": "Only the red stigma, cut above the yellow style where the colour and none of the weight is. Grown on high-altitude farms in Herat, dried the same day it is picked and boxed for giving. A pinch bloomed in warm milk is enough for a pot of biryani.",
+      "createdAt": 1723191200,
+      "barcode": "8815010053036",
+      "searchTerms": [
+        "keshar",
+        "saffron",
+        "gulfrabit select",
+        "afghanistan",
+        "spices",
+        "jafran",
+        "zafran",
+        "kesar",
+        "safron",
+        "vegan",
+        "plant based",
+        "gluten free",
+        "glutenfree"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Afghanistan, and the barcode printed on the pack — 8815010053036 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1502",
+      "title": "Super Negin Saffron — Grade A1 (1g)",
+      "brand": "GulfRabit Select",
+      "origin": "Afghanistan",
+      "categorySlug": "spices",
+      "categoryName": "Spices",
+      "subSlug": null,
+      "price": 1450,
+      "originalPrice": 1700,
+      "image": "/assets/images/products/gr-1502.jpg",
+      "images": [
+        "/assets/images/products/gr-1502.jpg"
+      ],
+      "rating": 4.9,
+      "reviewCount": 143,
+      "inStock": true,
+      "tags": [
+        "bestseller"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free"
+      ],
+      "shortDescription": "Super Negin: the longest, thickest, all-red threads of the crop.",
+      "description": "Super Negin is the top cut — longer and heavier threads than Negin or Sargol, entirely free of the yellow style, which is what puts it at the top of the colouring scale. Sealed in glass rather than a sachet, because saffron loses its aroma to light faster than it loses it to time.",
+      "createdAt": 1723277600,
+      "barcode": "8815020054405",
+      "searchTerms": [
+        "super",
+        "negin",
+        "saffron",
+        "gulfrabit select",
+        "afghanistan",
+        "spices",
+        "jafran",
+        "zafran",
+        "keshar",
+        "kesar",
+        "safron",
+        "vegan",
+        "plant based",
+        "gluten free",
+        "glutenfree"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Afghanistan, and the barcode printed on the pack — 8815020054405 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1503",
+      "title": "Saffron — Heritage Jar (2g)",
+      "brand": "GulfRabit Select",
+      "origin": "Iran",
+      "categorySlug": "spices",
+      "categoryName": "Spices",
+      "subSlug": null,
+      "price": 2700,
+      "originalPrice": 3200,
+      "image": "/assets/images/products/gr-1503.jpg",
+      "images": [
+        "/assets/images/products/gr-1503.jpg"
+      ],
+      "rating": 4.8,
+      "reviewCount": 61,
+      "inStock": true,
+      "tags": [
+        "featured",
+        "premium"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free"
+      ],
+      "shortDescription": "Two grams of Iranian threads in a brass-lidded jar.",
+      "description": "Iranian saffron from Khorasan, where most of the world's crop grows, in a heavier 2g fill for a kitchen that actually cooks with it. The brass-lidded jar seals against light and air and is worth keeping once the saffron is gone.",
+      "createdAt": 1723364000,
+      "barcode": "8815030055775",
+      "searchTerms": [
+        "saffron",
+        "gulfrabit select",
+        "iran",
+        "spices",
+        "jafran",
+        "zafran",
+        "keshar",
+        "kesar",
+        "safron",
+        "vegan",
+        "plant based",
+        "gluten free",
+        "glutenfree"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Iran, and the barcode printed on the pack — 8815030055775 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1601",
+      "title": "Iranian Pistachios — Roasted & Salted (500g)",
+      "brand": "GulfRabit Select",
+      "origin": "Iran",
+      "categorySlug": "nuts-makhana",
+      "categoryName": "Nuts & Makhana",
+      "subSlug": null,
+      "price": 1780,
+      "originalPrice": 2100,
+      "image": "/assets/images/products/gr-1601.jpg",
+      "images": [
+        "/assets/images/products/gr-1601.jpg"
+      ],
+      "rating": 4.8,
+      "reviewCount": 187,
+      "inStock": true,
+      "tags": [
+        "featured",
+        "premium"
+      ],
+      "dietary": [
+        "vegetarian",
+        "gluten-free"
+      ],
+      "shortDescription": "Naturally split, roasted in-shell, lightly salted.",
+      "description": "Akbari pistachios, long-shelled and naturally open — the split happens on the tree as the kernel swells, which is why a closed shell in a good lot is rare rather than normal. Roasted in-shell so the kernel steams in its own moisture, then salted lightly enough to still taste like pistachio.",
+      "createdAt": 1723450400,
+      "barcode": "8816010057147",
+      "searchTerms": [
+        "iranian",
+        "pistachios",
+        "gulfrabit select",
+        "iran",
+        "nuts & makhana",
+        "pesta",
+        "pista",
+        "pistachio",
+        "badam",
+        "vegetarian",
+        "veg",
+        "gluten free",
+        "glutenfree"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Iran, and the barcode printed on the pack — 8816010057147 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegetarian and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1602",
+      "title": "Cashew Nuts W320 — Whole (500g)",
+      "brand": "GulfRabit Select",
+      "origin": "India",
+      "categorySlug": "nuts-makhana",
+      "categoryName": "Nuts & Makhana",
+      "subSlug": null,
+      "price": 1320,
+      "originalPrice": 1550,
+      "image": "/assets/images/products/gr-1602.jpg",
+      "images": [
+        "/assets/images/products/gr-1602.jpg"
+      ],
+      "rating": 4.7,
+      "reviewCount": 164,
+      "inStock": true,
+      "tags": [
+        "bestseller"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free"
+      ],
+      "shortDescription": "W320 whole white kernels — the grade cooks ask for by name.",
+      "description": "W320 is a count, not a marketing word: about 320 kernels to the pound, whole and unbroken, ivory rather than yellowed. Raw, so they take a roast or go straight into a korma without turning to paste. The grade below is smaller; the grade above costs more and cooks the same.",
+      "createdAt": 1723536800,
+      "barcode": "8816020058516",
+      "searchTerms": [
+        "cashew",
+        "nuts",
+        "gulfrabit select",
+        "india",
+        "nuts & makhana",
+        "kaju",
+        "kaju badam",
+        "cashews",
+        "cashew nuts",
+        "w320",
+        "vegan",
+        "plant based",
+        "gluten free",
+        "glutenfree"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from India, and the barcode printed on the pack — 8816020058516 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1801",
+      "title": "Oregano — Naturally Dried (100g)",
+      "brand": "Sara Al Salam",
+      "origin": "Turkey",
+      "categorySlug": "herbs",
+      "categoryName": "Herbs",
+      "subSlug": null,
+      "price": 480,
+      "originalPrice": 590,
+      "image": "/assets/images/products/gr-1801.jpg",
+      "images": [
+        "/assets/images/products/gr-1801.jpg",
+        "/assets/images/products/gr-1801-2.jpg"
+      ],
+      "rating": 4.7,
+      "reviewCount": 92,
+      "inStock": true,
+      "tags": [
+        "featured",
+        "premium",
+        "bestseller"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free",
+        "organic"
+      ],
+      "shortDescription": "Hand-selected leaf, shade-dried, no stalk and no filler.",
+      "description": "Shade-dried whole leaf rubbed off the stalk, not the stalk-and-leaf dust that fills most jars. Strong enough that a pinch does a pizza and a teaspoon does a pot of sauce. Packed in glass with a gold seal — oregano fades in a paper sachet within a season.",
+      "createdAt": 1723623200,
+      "barcode": "8818010059886",
+      "searchTerms": [
+        "oregano",
+        "sara al salam",
+        "turkey",
+        "herbs",
+        "origano",
+        "oregano leaves",
+        "pizza herb",
+        "pizza masala",
+        "vegan",
+        "plant based",
+        "gluten free",
+        "glutenfree",
+        "organic",
+        "jaibo"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Turkey, and the barcode printed on the pack — 8818010059886 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan, gluten-free and organic. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1901",
+      "title": "Deshi Buffalo Ghee (1L)",
+      "brand": "GulfRabit Select",
+      "origin": "India",
+      "categorySlug": "oil-ghee",
+      "categoryName": "Oil & Ghee",
+      "subSlug": null,
+      "price": 2150,
+      "originalPrice": 2500,
+      "image": "/assets/images/products/gr-1901.jpg",
+      "images": [
+        "/assets/images/products/gr-1901.jpg",
+        "/assets/images/products/gr-1901-2.jpg"
+      ],
+      "rating": 4.8,
+      "reviewCount": 214,
+      "inStock": true,
+      "tags": [
+        "bestseller"
+      ],
+      "dietary": [
+        "vegetarian",
+        "gluten-free"
+      ],
+      "shortDescription": "Slow-cooked on a low flame from deshi buffalo milk. 905g net.",
+      "description": "Buffalo milk carries more fat than cow milk, and ghee made from it sets harder, browns later and smells of the grain it was cooked over. Made the traditional way on a low flame, with nothing added to hold it — no preservative, no colour, no vanaspati.",
+      "createdAt": 1723709600,
+      "barcode": "8819010061251",
+      "searchTerms": [
+        "deshi",
+        "buffalo",
+        "ghee",
+        "gulfrabit select",
+        "india",
+        "oil & ghee",
+        "mohisher ghee",
+        "buffalo ghee",
+        "ghi",
+        "clarified butter",
+        "khati ghee",
+        "desi ghee",
+        "vegetarian",
+        "veg",
+        "gluten free",
+        "glutenfree"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from India, and the barcode printed on the pack — 8819010061251 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegetarian and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1902",
+      "title": "Gawa Ghee — Bilona Hand-Churned (1L)",
+      "brand": "Sara Al Salam",
+      "origin": "India",
+      "categorySlug": "oil-ghee",
+      "categoryName": "Oil & Ghee",
+      "subSlug": null,
+      "price": 2390,
+      "originalPrice": 2750,
+      "image": "/assets/images/products/gr-1902.jpg",
+      "images": [
+        "/assets/images/products/gr-1902.jpg",
+        "/assets/images/products/gr-1902-2.jpg"
+      ],
+      "rating": 4.9,
+      "reviewCount": 176,
+      "inStock": true,
+      "tags": [
+        "featured",
+        "premium"
+      ],
+      "dietary": [
+        "vegetarian",
+        "gluten-free"
+      ],
+      "shortDescription": "Bilona method, from grass-fed cow milk. 905g net.",
+      "description": "Bilona is the long way round: curd the whole milk, hand-churn the curd to butter, then simmer the butter to ghee. It costs about thirty litres of milk to fill this jar, and it is the reason the grain is coarse and the aroma carries across a room. Grass-fed Indian cows, chemical free.",
+      "createdAt": 1723796000,
+      "barcode": "8819020062620",
+      "searchTerms": [
+        "gawa",
+        "ghee",
+        "sara al salam",
+        "india",
+        "oil & ghee",
+        "ghi",
+        "clarified butter",
+        "khati ghee",
+        "desi ghee",
+        "vegetarian",
+        "veg",
+        "gluten free",
+        "glutenfree"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from India, and the barcode printed on the pack — 8819020062620 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegetarian and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1903",
+      "title": "Desi Cow Ghee — Clay-Pot Cured (500g)",
+      "brand": "GulfRabit Select",
+      "origin": "India",
+      "categorySlug": "oil-ghee",
+      "categoryName": "Oil & Ghee",
+      "subSlug": null,
+      "price": 1290,
+      "originalPrice": 1500,
+      "image": "/assets/images/products/gr-1903.jpg",
+      "images": [
+        "/assets/images/products/gr-1903.jpg"
+      ],
+      "rating": 4.7,
+      "reviewCount": 128,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
+      "dietary": [
+        "vegetarian",
+        "gluten-free"
+      ],
+      "shortDescription": "Cured and sold in unglazed clay — grainy, golden, aromatic.",
+      "description": "Finished and rested in unglazed terracotta, which breathes and pulls the last of the moisture out; the result sets grainy rather than smooth, which is what a cured ghee is supposed to do. Half-kilo size for a household that uses it on rotis rather than by the spoon.",
+      "createdAt": 1723882400,
+      "barcode": "8819030063990",
+      "searchTerms": [
+        "desi",
+        "cow",
+        "ghee",
+        "gulfrabit select",
+        "india",
+        "oil & ghee",
+        "ghi",
+        "clarified butter",
+        "khati ghee",
+        "desi ghee",
+        "vegetarian",
+        "veg",
+        "gluten free",
+        "glutenfree"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from India, and the barcode printed on the pack — 8819030063990 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegetarian and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1904",
+      "title": "Extra Virgin Olive Oil — First Cold Press (1L)",
+      "brand": "GulfRabit Select",
+      "origin": "Spain",
+      "categorySlug": "oil-ghee",
+      "categoryName": "Oil & Ghee",
+      "subSlug": null,
+      "price": 1890,
+      "originalPrice": 2250,
+      "image": "/assets/images/products/gr-1904.jpg",
+      "images": [
+        "/assets/images/products/gr-1904.jpg"
+      ],
+      "rating": 4.8,
+      "reviewCount": 152,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free",
+        "organic"
+      ],
+      "shortDescription": "First cold press, single harvest, peppery at the back of the throat.",
+      "description": "Pressed within hours of picking and never heated, which is the whole of what extra virgin means. Green-gold, grassy, with the pepper catch at the back of the throat that tells you the polyphenols survived the press. For finishing and dressing — heat it hard and you have paid for something you burnt off.",
+      "createdAt": 1723968800,
+      "barcode": "8819040065366",
+      "searchTerms": [
+        "extra",
+        "virgin",
+        "olive",
+        "oil",
+        "gulfrabit select",
+        "spain",
+        "oil & ghee",
+        "jaitun tel",
+        "jaitun",
+        "extra virgin",
+        "evoo",
+        "vegan",
+        "plant based",
+        "gluten free",
+        "glutenfree",
+        "organic",
+        "jaibo"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Spain, and the barcode printed on the pack — 8819040065366 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan, gluten-free and organic. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1905",
+      "title": "Cold-Pressed Sesame Oil (500ml)",
+      "brand": "GulfRabit Select",
+      "origin": "India",
+      "categorySlug": "oil-ghee",
+      "categoryName": "Oil & Ghee",
+      "subSlug": null,
+      "price": 690,
+      "originalPrice": 850,
+      "image": "/assets/images/products/gr-1905.jpg",
+      "images": [
+        "/assets/images/products/gr-1905.jpg"
+      ],
+      "rating": 4.6,
+      "reviewCount": 118,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free"
+      ],
+      "shortDescription": "Wood-pressed from raw white sesame — light, nutty, unrefined.",
+      "description": "Pressed cold from raw seed rather than roasted, so it stays pale gold and mild instead of turning into the dark toasted oil used by the drop. Unrefined and unbleached. Cooks at everyday heat, and it is the traditional oil for an oil bath.",
+      "createdAt": 1724055200,
+      "barcode": "8819050066735",
+      "searchTerms": [
+        "cold",
+        "pressed",
+        "sesame",
+        "oil",
+        "gulfrabit select",
+        "india",
+        "oil & ghee",
+        "til tel",
+        "til",
+        "gingelly",
+        "sesame seed oil",
+        "vegan",
+        "plant based",
+        "gluten free",
+        "glutenfree"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from India, and the barcode printed on the pack — 8819050066735 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan and gluten-free. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
+        },
+        {
+          "q": "Can I return it?",
+          "a": "Unopened items can be returned within 7 days of delivery. Refunds go back by the route you paid — see the refund timeline on Shipping & Returns."
+        }
+      ]
+    },
+    {
+      "id": "gr-1906",
+      "title": "Black Seed Oil — Kalonji (250ml)",
+      "brand": "GulfRabit Select",
+      "origin": "Egypt",
+      "categorySlug": "oil-ghee",
+      "categoryName": "Oil & Ghee",
+      "subSlug": null,
+      "price": 950,
+      "originalPrice": 1150,
+      "image": "/assets/images/products/gr-1906.jpg",
+      "images": [
+        "/assets/images/products/gr-1906.jpg"
+      ],
+      "rating": 4.7,
+      "reviewCount": 104,
+      "inStock": true,
+      "tags": [
+        "new"
+      ],
+      "dietary": [
+        "vegan",
+        "gluten-free",
+        "raw"
+      ],
+      "shortDescription": "Cold-pressed Nigella sativa, unfiltered — take it by the spoon.",
+      "description": "Egyptian black seed, cold-pressed and left unfiltered, which is why it is dark and slightly cloudy in the bottle. Sharp and peppery — it is taken by the half-spoon or stirred into honey rather than cooked with. Keep it out of the light.",
+      "createdAt": 1724141600,
+      "barcode": "8819060068101",
+      "searchTerms": [
+        "black",
+        "seed",
+        "oil",
+        "gulfrabit select",
+        "egypt",
+        "oil & ghee",
+        "kalojira",
+        "kalonji",
+        "nigella",
+        "kalo jira tel",
+        "habbatus sauda",
+        "vegan",
+        "plant based",
+        "gluten free",
+        "glutenfree",
+        "raw",
+        "unprocessed"
+      ],
+      "faq": [
+        {
+          "q": "How do I know this is genuine?",
+          "a": "Every unit is import-verified. This batch is sourced from Egypt, and the barcode printed on the pack — 8819060068101 — matches the one listed under Specifications. Check them against each other when it arrives."
+        },
+        {
+          "q": "Does it suit dietary restrictions?",
+          "a": "This product is listed as vegan, gluten-free and raw and unprocessed. The full ingredient statement is on the pack — check it if you have a specific allergy, since we do not repackage anything."
         },
         {
           "q": "Can I return it?",

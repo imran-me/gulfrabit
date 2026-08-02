@@ -39,23 +39,48 @@ PRODUCTS = ROOT / "modules" / "catalog" / "data" / "products.json"
 # keyword found in the title  ->  extra terms a customer might type instead.
 # Romanised Bangla first, then English synonyms, then common misspellings.
 KEYWORD_TERMS = {
-    # --- food -----------------------------------------------------------
-    "dates":       ["khejur", "khajur", "medjool", "dry dates", "iftar dates"],
-    "honey":       ["modhu", "modu", "raw honey", "sidr", "natural honey"],
+    # --- dates ----------------------------------------------------------
+    "dates":       ["khejur", "khajur", "dry dates", "iftar dates"],
+    "ajwa":        ["ajowa", "azwa", "madina khejur", "black dates"],
+    "medjool":     ["medjul", "mejdool", "jumbo dates"],
+    "sukkari":     ["sukari", "sokari", "golden dates", "soft dates"],
+    # --- honey ----------------------------------------------------------
+    "honey":       ["modhu", "modu", "raw honey", "natural honey", "khati modhu"],
+    "manuka":      ["monuka", "umf", "mgo", "medical honey"],
+    "sidr":        ["sidr modhu", "ber honey", "yemeni honey"],
+    "wildflower":  ["bon ful modhu", "multiflora", "polyfloral"],
+    # --- dry fruits ------------------------------------------------------
+    "figs":        ["dumur", "anjeer", "anjir", "dried fig"],
+    "dry fruit":   ["dry fruits", "shukno fol", "mixed dry fruits", "nut mix"],
+    "apricots":    ["khubani", "dried apricot"],
+    # --- spices & herbs ---------------------------------------------------
+    "saffron":     ["jafran", "zafran", "keshar", "kesar", "safron"],
+    "keshar":      ["kesar", "saffron", "jafran"],
+    "oregano":     ["origano", "oregano leaves", "pizza herb", "pizza masala"],
+    # --- nuts -------------------------------------------------------------
+    "pistachios":  ["pesta", "pista", "pistachio", "badam"],
+    "cashew":      ["kaju", "kaju badam", "cashews", "cashew nuts", "w320"],
+    "makhana":     ["fox nuts", "lotus seeds", "phool makhana", "makhna"],
+    "almonds":     ["kath badam", "badam", "almond", "raw almonds"],
+    "walnut":      ["akhrot", "walnuts"],
+    # --- oil & ghee --------------------------------------------------------
+    "ghee":        ["ghi", "ghee", "clarified butter", "khati ghee", "desi ghee"],
+    "buffalo":     ["mohisher ghee", "buffalo ghee"],
+    "olive oil":   ["jaitun tel", "jaitun", "extra virgin", "evoo"],
+    "sesame":      ["til tel", "til", "gingelly", "sesame seed oil"],
+    "black seed":  ["kalojira", "kalonji", "nigella", "kalo jira tel", "habbatus sauda"],
+    # --- parked with their categories --------------------------------------
+    # These keys match nothing in the current food-only catalogue. They are
+    # kept, not deleted, for the same reason the categories themselves are:
+    # switching Electronics back on should not also mean rewriting its search
+    # synonyms from memory.
     "coffee":      ["kofi", "coffee beans", "arabica", "ground coffee"],
     "chocolate":   ["chocolet", "cocolate", "dark chocolate", "gift chocolate"],
     "tea":         ["cha", "sha", "black tea", "green tea", "loose leaf"],
     "green tea":   ["sobuj cha", "sencha", "matcha alternative"],
-    # --- dairy ----------------------------------------------------------
     "milk powder": ["gurer dudh", "dudh", "powdered milk", "formula", "full cream"],
     "butter":      ["makhon", "unsalted butter", "grass fed butter"],
     "gouda":       ["cheese", "panir", "hard cheese"],
-    # --- nuts -----------------------------------------------------------
-    "pistachios":  ["pesta", "pista", "pistachio", "badam"],
-    "almonds":     ["kath badam", "badam", "almond", "raw almonds"],
-    "cashews":     ["kaju", "kaju badam", "cashew nuts"],
-    "walnut":      ["akhrot", "walnuts"],
-    "apricots":    ["khubani", "dried apricot"],
     # --- electronics ----------------------------------------------------
     "headphones":  ["headphone", "headset", "hedphone", "over ear", "anc"],
     "earbuds":     ["earbud", "airpods alternative", "tws", "wireless earphone"],

@@ -34,7 +34,7 @@ must_allow = [
     'shared/css/gulfrabit.css',   # the built bundle every page links
     'shared/css/partials/_variables.css',  # still fetched by tools/font-test.html
     'shared/js/core/json-cache.js',
-    'assets/images/products/gr-1001.svg',
+    'assets/images/products/gr-1101.jpg',   # product photography must serve
     'sitemap.xml',
     'robots.txt',
 ]

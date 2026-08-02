@@ -1,28 +1,29 @@
 {
   "_meta": {
-    "note": "Mock order history for the account area. Replace with GET /api/orders (Laravel) — see modules/account/backend/endpoints.md. Status values: processing | shipped | delivered | cancelled.",
-    "version": 1
+    "note": "Mock order history for the account area. Replace with GET /api/orders (Laravel) — see modules/account/backend/endpoints.md. Status values: processing | shipped | delivered | cancelled. Every item id and price here must exist in modules/catalog/data/products.json, or the order history links to a product page that 404s.",
+    "version": 2
   },
   "orders": [
     {
-      "id": "GR-2026-1043", "date": "2026-07-14", "status": "delivered", "total": 4180,
+      "id": "GR-2026-1043", "date": "2026-07-14", "status": "delivered", "total": 5680,
       "items": [
-        { "id": "gr-1001", "title": "Medjool Dates — Premium Jumbo (1kg)", "qty": 2, "price": 1450, "image": "/assets/images/products/food.svg" },
-        { "id": "gr-1201", "title": "Roasted Salted Pistachios (500g)", "qty": 1, "price": 1180, "image": "/assets/images/products/nuts.svg" }
+        { "id": "gr-1102", "title": "Medjool Dates — Jumbo Grade (1kg)", "qty": 2, "price": 1950, "image": "/assets/images/products/gr-1102.jpg" },
+        { "id": "gr-1601", "title": "Iranian Pistachios — Roasted & Salted (500g)", "qty": 1, "price": 1780, "image": "/assets/images/products/gr-1601.jpg" }
       ],
       "address": "House 12, Road 7, Dhanmondi, Dhaka 1205"
     },
     {
-      "id": "GR-2026-1051", "date": "2026-07-18", "status": "shipped", "total": 18900,
+      "id": "GR-2026-1051", "date": "2026-07-18", "status": "shipped", "total": 12500,
       "items": [
-        { "id": "gr-2001", "title": "Wireless Noise-Cancelling Headphones", "qty": 1, "price": 18900, "image": "/assets/images/products/electronics.svg" }
+        { "id": "gr-1201", "title": "Mānuka Honey UMF 25+ (250g)", "qty": 1, "price": 12500, "image": "/assets/images/products/gr-1201.jpg" }
       ],
       "address": "Level 6, Gulshan Avenue, Dhaka 1212"
     },
     {
-      "id": "GR-2026-1058", "date": "2026-07-20", "status": "processing", "total": 2350,
+      "id": "GR-2026-1058", "date": "2026-07-20", "status": "processing", "total": 2630,
       "items": [
-        { "id": "gr-1101", "title": "Full-Cream Milk Powder (2.25kg Tin)", "qty": 1, "price": 2350, "image": "/assets/images/products/dairy.svg" }
+        { "id": "gr-1901", "title": "Deshi Buffalo Ghee (1L)", "qty": 1, "price": 2150, "image": "/assets/images/products/gr-1901.jpg" },
+        { "id": "gr-1801", "title": "Oregano — Naturally Dried (100g)", "qty": 1, "price": 480, "image": "/assets/images/products/gr-1801.jpg" }
       ],
       "address": "House 12, Road 7, Dhanmondi, Dhaka 1205"
     }
