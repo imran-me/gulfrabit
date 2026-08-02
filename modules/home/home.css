@@ -118,6 +118,98 @@
 
 /* ---- Trust strip ------------------------------------------------------ */
 .trust-band { border-top: 1px solid var(--border-hairline); border-bottom: 1px solid var(--border-hairline); background: var(--surface-band); }
+.trust-band__inner { padding-block: var(--space-5); }
+
+/* The clone home.js appends for the loop is a phone-only device. Hidden by
+   default so the four-column desktop grid never sprouts eight cells. */
+.trust-marquee__clone { display: none; }
+
+/* ---- Trust strip on phones: one row, looping ---------------------------
+ *
+ * The shared .trust-strip is a 2×2 grid below 768px. Two rows of full-size
+ * icons and 14/12 type is about 150px of the first screen spent on four short
+ * claims, and it pushed Shop by Category off the fold entirely. Here the same
+ * four items become a single ~40px row that travels.
+ *
+ * Nothing is truncated and no copy is dropped — the icons step 32→20px and the
+ * type 14/12→11/10, and the loop carries whatever doesn't fit the viewport.
+ * That is the point of looping it: on a 360px screen four chips of real copy
+ * cannot all be on screen at once, so instead of shrinking the text until it
+ * fits, the row shows ~2.5 at a time and keeps moving.
+ */
+@media (max-width: 767.98px) {
+  .trust-band__inner { padding-block: var(--space-3); }
+
+  .trust-marquee {
+    --trust-icon: 20px;
+    /* Deliberately below the type scale: --fs-12 is the smallest token and
+       this is a supporting band, not body copy. 11/10 is what keeps a title
+       and its subtitle on one 40px chip. */
+    --trust-title: 0.6875rem;
+    --trust-sub: 0.625rem;
+
+    /* Base state is a finger-scrollable row. The animation is layered on top
+       by .is-looping, which home.js only adds AFTER it has cloned the set —
+       so a page with JS off gets a row it can swipe, never half a loop. */
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    /* Fade both ends, so a chip entering or leaving reads as travel rather
+       than as a card being guillotined by the viewport edge. Kept to 14px and
+       started at 40% rather than full transparency: a wider or harder fade
+       washes out the leading chip's icon, which sits only 8px in from its own
+       edge and is the first thing at rest on page load. */
+    -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.4), #000 14px, #000 calc(100% - 14px), rgba(0,0,0,.4));
+            mask-image: linear-gradient(90deg, rgba(0,0,0,.4), #000 14px, #000 calc(100% - 14px), rgba(0,0,0,.4));
+  }
+  .trust-marquee::-webkit-scrollbar { display: none; }
+
+  .trust-marquee .trust-strip { display: flex; flex-wrap: nowrap; width: max-content; gap: 0; }
+
+  /* Spacing lives on the chip as a trailing margin instead of the flex `gap`.
+     A cloned set gives eight items but only seven gaps, so with `gap` the
+     halfway point of the track lands half a gap short of one full set and the
+     loop hitches, once, every cycle. Margins make every item the same width
+     including its space, and -50% is then exactly one set. */
+  .trust-marquee .trust-item {
+    flex: 0 0 auto;
+    gap: var(--space-2);
+    margin-inline-end: var(--space-2);
+    padding: 0.375rem 0.75rem 0.375rem 0.5rem;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-pill);
+    background: var(--surface-page);
+  }
+  .trust-marquee .trust-item__icon { width: var(--trust-icon); height: var(--trust-icon); }
+  .trust-marquee .trust-item__title { font-size: var(--trust-title); line-height: 1.3; white-space: nowrap; }
+  .trust-marquee .trust-item__sub { font-size: var(--trust-sub); line-height: 1.3; white-space: nowrap; }
+
+  .trust-marquee.is-looping { overflow: hidden; }
+  .trust-marquee.is-looping .trust-item.trust-marquee__clone { display: flex; }
+  .trust-marquee.is-looping .trust-strip {
+    animation: trust-marquee 26s linear infinite;
+    will-change: transform;
+  }
+}
+
+/* One set is exactly half the cloned track, so -50% wraps seamlessly.
+   home.js drives this animation's SPEED from scroll velocity: it drifts on its
+   own and surges while the page is being scrolled, up or down alike. */
+@keyframes trust-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The global reduced-motion rule clamps every animation to 0.001ms and a
+     single iteration. Applied here that would snap the track to -50% and park
+     it there — a band permanently frozen mid-loop. Stop the loop outright and
+     give the row back to the finger. */
+  .trust-marquee.is-looping { overflow-x: auto; }
+  .trust-marquee.is-looping .trust-strip { animation: none !important; transform: none !important; }
+  .trust-marquee.is-looping .trust-item.trust-marquee__clone { display: none; }
+}
 
 /* ---- Industry / B2B band --------------------------------------------- */
 .industry-band {
@@ -271,51 +363,6 @@
      industry band uses .hero__actions, and the rule still suits it. */
   .hero__actions { margin-top: var(--space-5); }
   .hero__actions .btn-gr { width: 100%; justify-content: center; }
-}
-
-/* ---- Premium Picks · the shelf that advances itself -------------------
- *
- * On a phone the rail shows one and a half cards and nothing says the other
- * six exist. A scrollbar would say it; .snap-rail hides the scrollbar, and the
- * two arrows sit in the header where a thumb is not. So the shelf moves on its
- * own — one product every few seconds, always right-to-left, which is the
- * direction the remaining products are in.
- *
- * The travel itself is driven from home.js (a rAF tween, not scroll-behavior:
- * smooth — the browser picks its own duration for that and the brief calls for
- * exactly 400ms). What CSS owns is the two things that make it look designed
- * rather than merely animated:
- *
- *   1. THE SNAP IS OFF WHILE IT AUTOPLAYS. scroll-snap-type: mandatory
- *      re-snaps after every programmatic scroll, which fights a tween frame by
- *      frame and lands the rail a few pixels off. The tween already lands on
- *      exact card boundaries, so snap has nothing to correct; it comes back the
- *      moment a finger touches the rail and manual swiping needs it again.
- *
- *   2. THE RIGHT EDGE DISSOLVES. Without it the next card is sliced off by the
- *      viewport mid-motion, and a hard vertical cut travelling across a moving
- *      row is the single thing that makes a carousel look cheap. A 56px fade
- *      lets the incoming card arrive out of the page rather than out of a
- *      guillotine. Purely decorative — mask-image is unsupported nowhere that
- *      matters, and where it is the rail simply has a hard edge again.
- */
-[data-rail-autoplay].is-autoplaying { scroll-snap-type: none; }
-
-@media (max-width: 767.98px) {
-  [data-rail-autoplay] {
-    -webkit-mask-image: linear-gradient(to right, #000 0 calc(100% - 56px), transparent 100%);
-            mask-image: linear-gradient(to right, #000 0 calc(100% - 56px), transparent 100%);
-  }
-}
-
-/* The rail is the only thing moving on the screen while it plays, so the card
-   under the fade needs to look like it is arriving, not like it is faulty. A
-   0.4s ease matched to the tween keeps the two reading as one gesture. */
-@media (prefers-reduced-motion: reduce) {
-  [data-rail-autoplay] {
-    -webkit-mask-image: none;
-            mask-image: none;
-  }
 }
 
 /* Very small phones (380px and under) — the band is a fixed 100px against a

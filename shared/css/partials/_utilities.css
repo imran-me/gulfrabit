@@ -20,6 +20,68 @@
 .section-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); }
 .section-head__titles { display: flex; flex-direction: column; gap: var(--space-2); }
 
+/* ---- The section header on a phone ------------------------------------
+ *
+ * Every shelf opened with a header sized for a 1400px canvas: a 12px eyebrow
+ * over a 1.9rem title, 24px of air beneath it. At 393px that block was taller
+ * than the product photo it was introducing — the header announced the shelf
+ * more loudly than the shelf sold anything.
+ *
+ * The whole thing comes down to 75%. Not the title alone: shrinking the h2 and
+ * leaving the eyebrow, the trailing link and the gaps at full size just moves
+ * the imbalance around. Type, tracking, gaps and the chrome beside it all step
+ * down together, which is the only way a smaller header still reads as one
+ * deliberate object rather than a title someone typed in the wrong size.
+ *
+ * .home-cat overrides this further for the category directory (higher
+ * specificity, modules/home/home.css) — that block still wins where it applies.
+ */
+@media (max-width: 575.98px) {
+  .section-head {
+    align-items: baseline;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+  .section-head__titles { gap: 1px; min-width: 0; }
+
+  /* 12px → 10px. Uppercase at 10px needs its tracking eased back or the
+     letters stop cohering into words; .12em is the measured floor here. */
+  .section-head .overline {
+    font-size: .625rem;
+    letter-spacing: .12em;
+  }
+
+  /* 1.9rem → 1.425rem, exactly 75%, matching the category directory. */
+  .section-head h2 {
+    font-size: 1.425rem;
+    line-height: 1.18;
+    letter-spacing: -0.018em;
+  }
+
+  /* "Shop all →" at 16px in a bordered pill now outweighs the title it sits
+     beside. A text link with a padded tap area carries the same job — the
+     same trade .home-cat already made, applied to every shelf. */
+  .section-head > .btn-gr {
+    flex: none;
+    min-height: 0;
+    padding: .4rem 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    font-size: var(--fs-14);
+    font-weight: var(--fw-semibold);
+    color: var(--link);
+    white-space: nowrap;
+  }
+  .section-head > .btn-gr:hover,
+  .section-head > .btn-gr:active { background: none; box-shadow: none; transform: none; }
+
+  /* Rail arrows follow the title down — 44px circles either side of a
+     1.425rem heading read as the primary control on the row. */
+  .section-head .btn-icon-gr { width: 34px; height: 34px; }
+  .section-head .btn-icon-gr svg { width: 17px; height: 17px; }
+}
+
 /* ---- Gradient divider ------------------------------------------------ */
 .divider-gradient { height: 2px; border: 0; background: var(--gr-gradient); border-radius: var(--radius-pill); opacity: .8; }
 .divider-hairline { height: 1px; border: 0; background: var(--border-hairline); }

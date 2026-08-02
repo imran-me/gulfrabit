@@ -574,38 +574,69 @@ a:hover { color: var(--link-hover); }
      difference between seeing one row and seeing two. */
   .product-card__media { aspect-ratio: 1 / 1; }
 
-  .product-card__body { padding: var(--space-3); gap: 6px; }
+  /* ---- The body is where the height went -----------------------------
+   *
+   * THE IMAGE IS NOT TOUCHED BELOW THIS LINE. The square media well above is
+   * the product, and shrinking it to save space would be saving space by
+   * selling less. Every reduction here is type and padding.
+   *
+   * Measured on a 393px viewport before this block: media 161px, body 152px.
+   * The photo and the paragraph about the photo were the same size, and the
+   * card cleared 310px — two of them and a phone screen is full.
+   *
+   * The body now runs ~128px. Nothing was removed: brand, title, price, the
+   * struck-through original and the CTA are all still there, set at the size
+   * a 160px column actually wants rather than the size a 280px desktop card
+   * was designed at.
+   */
+  .product-card__body { padding: 10px 10px 11px; gap: 3px; }
 
   .product-card__title {
-    font-size: var(--fs-14);
-    /* Two lines at 14px is ~30 characters, enough for "Ajwa Dates 1kg —
-       Madinah" to read as a product rather than a truncation. */
+    /* 14px → 12px. Two lines still clears ~34 characters at this width —
+       "Medjool Dates — Premium Jumbo (1kg)" lands without truncating. */
+    font-size: .75rem;
+    line-height: 1.28;
+    letter-spacing: -0.002em;
     -webkit-line-clamp: 2;
   }
 
-  .product-card__price { font-size: var(--fs-16); }
+  /* The price stays the loudest thing in the body — it drops by the same
+     proportion as everything else, not more, so the hierarchy is unchanged. */
+  .product-card__price { font-size: .875rem; }
+  .product-card__price-row { gap: 5px; }
+  .price--strike { font-size: .75rem; }
+  .price-saving { font-size: 10px; }
 
   .product-card__brand {
-    font-size: 10px;
+    font-size: 9px;
+    letter-spacing: .07em;
     /* The origin is the whole proposition on an import shop — "Saudi Arabia"
        earns its line even at this size. One line, ellipsis if it runs. */
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
   /* "Add to Cart" wraps to two lines in a 136px button and the card grows a
-     ragged extra row. Smaller type, tighter tracking, one line. */
+     ragged extra row. Smaller type, tighter tracking, one line.
+     34px rather than 38: this is a secondary path — the whole card is a link
+     to the PDP, and the cart drawer is reachable from the header — so it can
+     sit under the 44px target that primary controls hold to. */
   .product-card .btn-gr {
-    font-size: var(--fs-12);
+    font-size: 11px;
+    min-height: 34px;
     padding-inline: var(--space-2);
+    letter-spacing: .01em;
     white-space: nowrap;
   }
 
   /* Stars are decoration at this size and the review count is unreadable.
      The rating still reaches assistive tech through the aria-label. */
-  .product-card__stars svg { width: 12px; height: 12px; }
+  .product-card__stars svg { width: 11px; height: 11px; }
+  /* .caption is 14px — larger than the product title once the title is 12px,
+     which put the loudest type in the body on "(44)". */
+  .product-card__body .caption { font-size: 10px; }
 
   .product-card__badges { top: 6px; left: 6px; gap: 3px; }
-  .badge-gr { padding: 2px 6px; font-size: 10px; }
+  .badge-gr { padding: 2px 6px; font-size: 9px; letter-spacing: .03em; }
 
   .product-card__actions { top: 6px; right: 6px; gap: 6px; }
   .product-card__actions .btn-icon-gr { width: 34px; height: 34px; }
@@ -1107,6 +1138,68 @@ img.settle.is-settled {
 /* ---- Section heading block ------------------------------------------- */
 .section-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); }
 .section-head__titles { display: flex; flex-direction: column; gap: var(--space-2); }
+
+/* ---- The section header on a phone ------------------------------------
+ *
+ * Every shelf opened with a header sized for a 1400px canvas: a 12px eyebrow
+ * over a 1.9rem title, 24px of air beneath it. At 393px that block was taller
+ * than the product photo it was introducing — the header announced the shelf
+ * more loudly than the shelf sold anything.
+ *
+ * The whole thing comes down to 75%. Not the title alone: shrinking the h2 and
+ * leaving the eyebrow, the trailing link and the gaps at full size just moves
+ * the imbalance around. Type, tracking, gaps and the chrome beside it all step
+ * down together, which is the only way a smaller header still reads as one
+ * deliberate object rather than a title someone typed in the wrong size.
+ *
+ * .home-cat overrides this further for the category directory (higher
+ * specificity, modules/home/home.css) — that block still wins where it applies.
+ */
+@media (max-width: 575.98px) {
+  .section-head {
+    align-items: baseline;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+  .section-head__titles { gap: 1px; min-width: 0; }
+
+  /* 12px → 10px. Uppercase at 10px needs its tracking eased back or the
+     letters stop cohering into words; .12em is the measured floor here. */
+  .section-head .overline {
+    font-size: .625rem;
+    letter-spacing: .12em;
+  }
+
+  /* 1.9rem → 1.425rem, exactly 75%, matching the category directory. */
+  .section-head h2 {
+    font-size: 1.425rem;
+    line-height: 1.18;
+    letter-spacing: -0.018em;
+  }
+
+  /* "Shop all →" at 16px in a bordered pill now outweighs the title it sits
+     beside. A text link with a padded tap area carries the same job — the
+     same trade .home-cat already made, applied to every shelf. */
+  .section-head > .btn-gr {
+    flex: none;
+    min-height: 0;
+    padding: .4rem 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    font-size: var(--fs-14);
+    font-weight: var(--fw-semibold);
+    color: var(--link);
+    white-space: nowrap;
+  }
+  .section-head > .btn-gr:hover,
+  .section-head > .btn-gr:active { background: none; box-shadow: none; transform: none; }
+
+  /* Rail arrows follow the title down — 44px circles either side of a
+     1.425rem heading read as the primary control on the row. */
+  .section-head .btn-icon-gr { width: 34px; height: 34px; }
+  .section-head .btn-icon-gr svg { width: 17px; height: 17px; }
+}
 
 /* ---- Gradient divider ------------------------------------------------ */
 .divider-gradient { height: 2px; border: 0; background: var(--gr-gradient); border-radius: var(--radius-pill); opacity: .8; }

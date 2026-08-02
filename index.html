@@ -244,12 +244,19 @@
 
     <!-- ---- TRUST STRIP ---- -->
     <section class="trust-band" aria-label="Why GulfRabit">
-      <div class="gr-container" style="padding-block:var(--space-5)">
-        <div class="trust-strip" data-reveal-stagger="80">
-          <div class="trust-item" data-reveal><svg class="trust-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg><div><div class="trust-item__title">Import-Verified</div><div class="trust-item__sub">Authenticity checked</div></div></div>
-          <div class="trust-item" data-reveal><svg class="trust-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg><div><div class="trust-item__title">Cold-Chain Delivery</div><div class="trust-item__sub">For perishables</div></div></div>
-          <div class="trust-item" data-reveal><svg class="trust-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg><div><div class="trust-item__title">Secure Payment</div><div class="trust-item__sub">bKash · Nagad · Cards</div></div></div>
-          <div class="trust-item" data-reveal><svg class="trust-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div><div class="trust-item__title">24/7 Support</div><div class="trust-item__sub">We’re here to help</div></div></div>
+      <div class="gr-container trust-band__inner">
+        <!-- Below 768px this becomes a single-row loop (see modules/home/home.css
+             and initTrustMarquee in home.js). The four claims stay one flat list
+             in the DOM — the duplicate set the loop needs is cloned at runtime
+             and marked aria-hidden, so the markup a reader or crawler sees is
+             still four items, and with JS off it is simply a scrollable row. -->
+        <div class="trust-marquee" data-trust-marquee>
+          <div class="trust-strip" data-trust-track data-reveal-stagger="80">
+            <div class="trust-item" data-reveal><svg class="trust-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg><div><div class="trust-item__title">Import-Verified</div><div class="trust-item__sub">Authenticity checked</div></div></div>
+            <div class="trust-item" data-reveal><svg class="trust-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg><div><div class="trust-item__title">Cold-Chain Delivery</div><div class="trust-item__sub">For perishables</div></div></div>
+            <div class="trust-item" data-reveal><svg class="trust-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg><div><div class="trust-item__title">Secure Payment</div><div class="trust-item__sub">bKash · Nagad · Cards</div></div></div>
+            <div class="trust-item" data-reveal><svg class="trust-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div><div class="trust-item__title">24/7 Support</div><div class="trust-item__sub">We’re here to help</div></div></div>
+          </div>
         </div>
       </div>
     </section>
@@ -303,7 +310,11 @@
             <button class="btn-icon-gr" data-rail-next="premium" aria-label="Scroll right" style="border:1px solid var(--border-hairline)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M9 6l6 6-6 6"/></svg></button>
           </div>
         </div>
-        <div class="snap-rail" data-rail="premium" role="list" aria-label="Premium picks"></div>
+        <!-- data-rail-autoplay: home.js walks this shelf leftward one product
+             at a time on phones (400ms per step). The attribute is also what
+             tells initRailArrows to leave the arrows to the autoplay
+             controller, so a tap and a tick are the same movement. -->
+        <div class="snap-rail" data-rail="premium" data-rail-autoplay role="list" aria-label="Premium picks"></div>
       </div>
     </section>
 
