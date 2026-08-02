@@ -28,10 +28,12 @@ function initHeroCarousel() {
   if (!viewport) return;
   const slides = [...viewport.querySelectorAll('[data-hero-slide]')];
   const dots = [...document.querySelectorAll('[data-hero-dot]')];
-  const prev = document.querySelector('[data-hero-prev]');
-  const next = document.querySelector('[data-hero-next]');
+  const hero = viewport.closest('.hero');
   let index = 0;
   let timer = null;
+  // The dot fill is a 6s CSS animation (.hero__dot.is-active::before). Keep
+  // the two in step or the bar will finish early or still be running when the
+  // slide changes under it.
   const INTERVAL = 6000;
 
   const show = (i) => {
@@ -40,18 +42,18 @@ function initHeroCarousel() {
     dots.forEach((d, n) => { d.classList.toggle('is-active', n === index); d.setAttribute('aria-selected', String(n === index)); });
   };
   const advance = () => show(index + 1);
-  const start = () => { stop(); timer = setInterval(advance, INTERVAL); };
-  const stop = () => { if (timer) clearInterval(timer); timer = null; };
+  // .is-paused freezes the progress fill along with the timer — a bar that
+  // keeps filling while the slide it measures is parked is worse than none.
+  const start = () => { stop(); hero.classList.remove('is-paused'); timer = setInterval(advance, INTERVAL); };
+  const stop = () => { if (timer) clearInterval(timer); timer = null; hero.classList.add('is-paused'); };
 
-  next?.addEventListener('click', () => { advance(); start(); });
-  prev?.addEventListener('click', () => { show(index - 1); start(); });
   dots.forEach((d, n) => d.addEventListener('click', () => { show(n); start(); }));
 
   // Pause on hover / focus (a considered detail).
-  viewport.closest('.hero').addEventListener('mouseenter', stop);
-  viewport.closest('.hero').addEventListener('mouseleave', start);
-  viewport.closest('.hero').addEventListener('focusin', stop);
-  viewport.closest('.hero').addEventListener('focusout', start);
+  hero.addEventListener('mouseenter', stop);
+  hero.addEventListener('mouseleave', start);
+  hero.addEventListener('focusin', stop);
+  hero.addEventListener('focusout', start);
   // Pause when tab is hidden.
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
 

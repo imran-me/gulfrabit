@@ -29,11 +29,13 @@
    in one token so the viewport height can account for it. */
 .hero {
   position: relative; overflow: hidden;
-  --hero-cta-band: clamp(100px, 11vw, 132px);
-  --hero-cta-w: min(280px, 68vw);
-  --hero-cta-h: 56px;                       /* = .btn-lg-gr min-height */
-  --hero-cta-bottom: calc(var(--space-4) + 16px);
-  --hero-arrow: 44px;
+  background: var(--surface-page);           /* the control strip's surface */
+  /* The band is now a control strip, not a stage. 92px on a phone bought one
+     oversized button, two arrows and a dot row; 34px buys a small pill and a
+     progress line, and hands 58px back to the page. */
+  --hero-cta-band: clamp(34px, 4.4vw, 56px);
+  --hero-cta-h: 24px;
+  --hero-progress: 3px;
 }
 
 /* Artwork area + button band. The artwork area is ~2.2:1 at most widths —
@@ -48,7 +50,13 @@
 }
 .hero__slide.is-active { opacity: 1; visibility: visible; }
 
-.hero__media { position: absolute; inset: 0; overflow: hidden; background: var(--surface-band); }
+/* The media box stops at the control strip rather than running under it.
+   It used to fill the whole hero, which let the blurred backdrop bleed behind
+   the strip — and since that blur is the banner, the strip's background
+   changed with every slide. The progress segments disappeared entirely on the
+   acacia honey banner, which is nearly white. Ending the media here gives the
+   controls one constant surface to sit on. */
+.hero__media { position: absolute; inset: 0 0 var(--hero-cta-band) 0; overflow: hidden; background: var(--surface-band); }
 
 /* Blurred fill for the letterbox. Over-scaled because a blur samples past its
    own edges and would otherwise leave a pale rim around the slide. Dimmed so
@@ -61,60 +69,98 @@
   transform: scale(1.18);
 }
 
-/* The banner itself — whole, uncropped, never overlaid. Height stops short of
-   the button band so the two never share space. */
+/* The banner itself — whole, uncropped, never overlaid. It fills the media
+   box, which already stops above the control strip. */
 .hero__art {
   position: absolute; top: 0; left: 0;
-  width: 100%; height: calc(100% - var(--hero-cta-band));
+  width: 100%; height: 100%;
   object-fit: contain;
   object-position: center;
 }
 
-/* Buy Now. Centred with auto margins rather than a translate, because
-   .btn-gr lifts itself on hover with a transform and a centring transform
-   here would be overwritten by it — the button would jump off-centre. */
+/* THE WHOLE SLIDE IS THE BUTTON.
+ *
+ * The brief was to put Buy Now on the artwork and shrink it. Half of that is
+ * right and half of it cannot be done: all four banners carry the logo top
+ * left, a quality badge top right, their own painted SHOP NOW bottom left, and
+ * two of them (figs, acacia honey) run a full feature bar along the bottom.
+ * There is no corner free on all four, and a pill dropped on any of them lands
+ * on finished design.
+ *
+ * So the tap target moved instead of the pixels: this link covers the entire
+ * slide, artwork included. Tapping anywhere on the banner buys — which is what
+ * putting the button on the image was actually for — while the visible pill
+ * shrinks to a label sitting in the strip below, covering nothing. */
+.hero__link { position: absolute; inset: 0; display: block; }
+
+/* Buy Now, at 24px tall and ~85px wide against the old 48×223. Centred with
+   auto margins rather than a translate: .btn-gr lifts itself on hover with a
+   transform, which would overwrite a centring one and throw it off-centre. */
 .hero__cta {
   position: absolute; z-index: 3;
-  left: 0; right: 0; bottom: var(--hero-cta-bottom);
-  width: var(--hero-cta-w); min-height: var(--hero-cta-h);
+  left: 0; right: 0;
+  bottom: calc((var(--hero-cta-band) - var(--hero-progress) - var(--hero-cta-h)) / 2);
+  width: fit-content; min-height: var(--hero-cta-h);
   margin-inline: auto;
+  padding: 0 .85rem;
+  font-size: var(--fs-12);
+  border-radius: var(--radius-pill);
   justify-content: center;
 }
+@media (min-width: 1024px) { .hero { --hero-cta-h: 34px; } .hero__cta { font-size: var(--fs-14); padding: 0 1.25rem; } }
 
 .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
 
-/* Arrows flank the button rather than floating over the artwork at its
-   vertical centre, which is where a carousel would normally put them.
+/* The arrows are gone. Two 38px circles existed to move a carousel that
+   advances itself every 6s, and they cost more room than the control they
+   offered was worth. What replaced them is the dot row doing a second job.
 
-   They were there first and it was wrong. The banners run edge to edge
-   whenever the artwork area is wider than the slide is tall — at 390px the
-   left arrow sat squarely on the M of MAKHANA — and an arrow parked on the
-   headline of a finished banner is exactly the covering-up this hero is
-   built to avoid. Down here they cover nothing at any width, and [<][Buy
-   Now][>] reads as one control cluster instead of three loose objects.
+   A DOT ROW THAT IS ALSO A PROGRESS BAR.
+   Four segments flush against the bottom of the artwork, and the active one
+   fills left-to-right over exactly the autoplay interval. Dots say which of
+   four you are on; this says that and when it will move, which is the
+   question a carousel that advances on its own actually raises. It costs 3px
+   where the old row cost 4px plus the space to sit clear of the button.
 
-   The offsets are driven off --hero-cta-w so the gap beside the button stays
-   constant as the button resizes. */
-.hero__controls { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
-.hero__arrow {
-  position: absolute;
-  bottom: calc(var(--hero-cta-bottom) + (var(--hero-cta-h) - var(--hero-arrow)) / 2);
-  width: var(--hero-arrow); height: var(--hero-arrow);
-  pointer-events: auto;
-  background: rgba(16,19,20,.45);
-  color: #fff;
-  backdrop-filter: blur(6px);
+   They are still <button>s and still jump to their slide — the progress fill
+   is a ::before inside, so tapping loses nothing. */
+.hero__dots {
+  position: absolute; z-index: 3;
+  bottom: calc(var(--hero-cta-band) - var(--hero-progress));
+  left: 0; right: 0;
+  display: flex; justify-content: center; gap: 4px;
 }
-.hero__arrow:hover { background: rgba(16,19,20,.72); color: #fff; }
-.hero__arrow--prev { right: calc(50% + var(--hero-cta-w) / 2 + var(--space-3)); }
-.hero__arrow--next { left: calc(50% + var(--hero-cta-w) / 2 + var(--space-3)); }
+.hero__dot {
+  position: relative;
+  width: 26px; height: var(--hero-progress);
+  border: 0; border-radius: var(--radius-pill);
+  /* Not --border-hairline: at #E5E9E7 a 3px bar on white is barely there. */
+  background: rgba(16,19,20,.16);
+  cursor: pointer; padding: 0; overflow: hidden;
+}
+/* The fill starts the moment a dot gains .is-active — a CSS animation restarts
+   when its element begins matching the selector, so the bar re-arms on every
+   slide change without a line of JS. Same 6s as INTERVAL in home.js; if one
+   moves, move the other. */
+.hero__dot.is-active::before {
+  content: ""; position: absolute; inset: 0;
+  border-radius: inherit;
+  background: var(--gr-gradient);
+  transform-origin: left center;
+  animation: hero-progress 6s linear forwards;
+}
+/* Autoplay stops on hover, focus and a hidden tab. A bar that keeps filling
+   while the slide it measures is parked is worse than no bar. */
+.hero.is-paused .hero__dot.is-active::before { animation-play-state: paused; }
 
-/* Dots ride the bottom of the band, under the button. Light-on-dark now:
-   the band is dimmed artwork, and the old near-black inactive dot was
-   invisible against it. */
-.hero__dots { position: absolute; z-index: 3; bottom: var(--space-4); left: 0; right: 0; display: flex; justify-content: center; gap: var(--space-2); }
-.hero__dot { width: 32px; height: 4px; border: 0; border-radius: var(--radius-pill); background: rgba(255,255,255,.42); cursor: pointer; padding: 0; overflow: hidden; }
-.hero__dot.is-active { background: var(--gr-gradient); }
+@keyframes hero-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  /* The global rule clamps this to 0.001ms, which reads as "already full" and
+     happens to be the right answer — but say it outright rather than relying
+     on a clamp to land somewhere useful. */
+  .hero__dot.is-active::before { animation: none; transform: none; }
+}
 
 /* ---- Trust strip ------------------------------------------------------ */
 .trust-band { border-top: 1px solid var(--border-hairline); border-bottom: 1px solid var(--border-hairline); background: var(--surface-band); }
@@ -284,6 +330,12 @@
    Desktop keeps the eyebrow and the large cards — this whole block is
    scoped to .home-cat and below 768px, so no other section moves. */
 @media (max-width: 767px) {
+  /* Hiding the overline left .section-gr's 64px top padding sitting under the
+     trust band as a stripe of nothing — the eyebrow it was cushioning is not
+     there any more. The band's own border already separates the two sections;
+     16px is all the gap that is needed on top of it. */
+  .home-cat { padding-top: var(--space-4); }
+
   /* One line: title left, View all right, baselines aligned. */
   .home-cat .section-head {
     flex-wrap: nowrap;
@@ -358,38 +410,20 @@
    before anything was for sale.
 
    The vw-based height above already satisfies that — 50vw of artwork plus a
-   100px band is ~295px at 390px wide, well under half the old figure — so
-   there is no height override to make. What is left is fit: the artwork is
-   the same width as the phone, and the button wants a wider target than its
-   own label. */
+   34px strip is ~229px at 390px wide — so there is no height override to
+   make, and none of the old per-width button tuning survives: at 24px tall
+   and its own label wide, the pill has clearance at 320px. */
 @media (max-width: 639.98px) {
-  /* 44px circles either side of a 68vw button leave each arrow only ~12px of
-     clearance from the screen edge at 390px, and less below that. 38px buys
-     the margin back without going under the tap-target floor. */
-  .hero { --hero-arrow: 38px; }
-
   /* Kept from the previous hero: full-width buttons on phones. Now only the
      industry band uses .hero__actions, and the rule still suits it. */
   .hero__actions { margin-top: var(--space-5); }
   .hero__actions .btn-gr { width: 100%; justify-content: center; }
 }
 
-/* Very small phones (380px and under) — the band is a fixed 100px against a
-   shrinking artwork area, so trim it back before it starts to dominate. The
-   arrows follow the button down on their own: their offsets are computed
-   from --hero-cta-h and --hero-cta-bottom. */
-@media (max-width: 380px) {
-  .hero {
-    --hero-cta-band: 92px;
-    --hero-cta-h: 48px;
-    --hero-cta-bottom: calc(var(--space-3) + 14px);
-    /* 68vw leaves the outer arrow about 1px from the screen edge at 320px —
-       measured, not guessed. 62vw restores a real margin at both 320 and
-       360 without making the button look mean. */
-    --hero-cta-w: 62vw;
-  }
-  .hero__cta { font-size: var(--fs-16); padding: .7rem 1.5rem; }
-}
+/* Very small phones (380px and under). The strip is already at its 34px floor
+   and the pill is sized by its own label, so only the progress row needs a
+   word: four 26px segments plus gaps is 116px, which still centres cleanly at
+   320px. Nothing to override. */
 
 /* ---- Premium Picks · the shelf that advances itself -------------------
  *
