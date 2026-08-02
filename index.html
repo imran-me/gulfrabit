@@ -188,52 +188,57 @@
   <!-- ============================ MAIN ============================ -->
   <main id="main">
 
-    <!-- ---- HERO CAROUSEL ---- -->
+    <!-- ---- HERO CAROUSEL ----
+         The four slides are finished campaign banners: the headline, the
+         product shot and the branding are all baked into the artwork. So the
+         markup carries no copy of its own — a second headline over a banner
+         that already has one is just noise. Every slide is the image, plus
+         one Buy Now.
+
+         The banners are not a single aspect ratio (2.00, 1.50, 1.88, 2.11),
+         so the image is `contain`-fitted and never cropped; the leftover
+         letterbox is filled by a blurred copy of the same slide. See
+         modules/home/home.css. -->
     <section class="hero" aria-label="Featured" aria-roledescription="carousel">
       <div class="hero__viewport" data-hero>
-        <article class="hero__slide is-active" data-hero-slide aria-roledescription="slide" aria-label="1 of 3">
-          <div class="hero__media"><img src="assets/images/hero/hero-food.svg" alt="Premium imported foods" loading="eager"></div>
-          <div class="gr-container"><div class="hero__content" data-reveal>
-            <p class="overline hero__eyebrow">Imported Food &amp; Grocery</p>
-            <h1 class="hero__title">Sourced with care.<br><span class="text-gradient">Delivered with speed.</span></h1>
-            <p class="hero__text lead">Dates, honey, coffee and pantry staples from trusted origins — verified for authenticity, handled cold where it counts.</p>
-            <div class="hero__actions">
-              <a href="modules/catalog/category.html?slug=imported-food-grocery" class="btn-gr btn-primary-gr btn-lg-gr">Shop Food</a>
-              <a href="modules/content/sourcing.html" class="btn-gr btn-outline-gr btn-lg-gr">Our Sourcing</a>
-            </div>
-          </div></div>
+        <article class="hero__slide is-active" data-hero-slide aria-roledescription="slide" aria-label="1 of 4">
+          <div class="hero__media">
+            <img class="hero__backdrop" src="assets/images/hero/hero-saffron.jpg" alt="" aria-hidden="true" loading="eager">
+            <img class="hero__art" src="assets/images/hero/hero-saffron.jpg" width="1600" height="800" alt="Premium Iranian Saffron — 100% pure, handpicked, red gold of Iran." loading="eager" fetchpriority="high">
+          </div>
+          <a href="modules/catalog/category.html?slug=imported-food-grocery" class="btn-gr btn-gradient-gr btn-lg-gr hero__cta">Buy Now</a>
         </article>
-        <article class="hero__slide" data-hero-slide aria-roledescription="slide" aria-label="2 of 3">
-          <div class="hero__media"><img src="assets/images/hero/hero-electronics.svg" alt="Electronics and gadgets" loading="lazy"></div>
-          <div class="gr-container"><div class="hero__content">
-            <p class="overline hero__eyebrow">Gadgets &amp; Electronics</p>
-            <h1 class="hero__title">Technology,<br><span class="text-gradient">verified at import.</span></h1>
-            <p class="hero__text lead">Audio, wearables and smart-home — genuine stock, warranty-backed, ready to hop to your door.</p>
-            <div class="hero__actions">
-              <a href="modules/catalog/category.html?slug=gadgets-electronics" class="btn-gr btn-primary-gr btn-lg-gr">Shop Electronics</a>
-            </div>
-          </div></div>
+        <article class="hero__slide" data-hero-slide aria-roledescription="slide" aria-label="2 of 4">
+          <div class="hero__media">
+            <img class="hero__backdrop" src="assets/images/hero/hero-figs.jpg" alt="" aria-hidden="true" loading="lazy">
+            <img class="hero__art" src="assets/images/hero/hero-figs.jpg" width="1536" height="1024" alt="Premium Afghanistan Twisted Figs — 100% natural, hand twisted, no additives." loading="lazy">
+          </div>
+          <a href="modules/catalog/category.html?slug=imported-food-grocery" class="btn-gr btn-gradient-gr btn-lg-gr hero__cta">Buy Now</a>
         </article>
-        <article class="hero__slide" data-hero-slide aria-roledescription="slide" aria-label="3 of 3">
-          <div class="hero__media"><img src="assets/images/hero/hero-industrial.svg" alt="Industrial raw materials" loading="lazy"></div>
-          <div class="gr-container"><div class="hero__content">
-            <p class="overline hero__eyebrow" style="color:var(--gold-ink)">Industrial Raw Materials</p>
-            <h1 class="hero__title">PCBs, switches,<br><span class="text-gradient">polymers — at scale.</span></h1>
-            <p class="hero__text lead">Spec-driven components and raw materials for the electronics industry. Tiered pricing, MOQ-ready, RFQ in minutes.</p>
-            <div class="hero__actions">
-              <a href="modules/b2b/b2b-industrial.html" class="btn-gr btn-gradient-gr btn-lg-gr">Explore B2B</a>
-            </div>
-          </div></div>
+        <article class="hero__slide" data-hero-slide aria-roledescription="slide" aria-label="3 of 4">
+          <div class="hero__media">
+            <img class="hero__backdrop" src="assets/images/hero/hero-acacia-honey.jpg" alt="" aria-hidden="true" loading="lazy">
+            <img class="hero__art" src="assets/images/hero/hero-acacia-honey.jpg" width="1600" height="853" alt="Yemeni Acacia Honey for kids — 100% pure and natural, from the blossoms of Yemen." loading="lazy">
+          </div>
+          <a href="modules/catalog/category.html?slug=imported-food-grocery" class="btn-gr btn-gradient-gr btn-lg-gr hero__cta">Buy Now</a>
+        </article>
+        <article class="hero__slide" data-hero-slide aria-roledescription="slide" aria-label="4 of 4">
+          <div class="hero__media">
+            <img class="hero__backdrop" src="assets/images/hero/hero-makhana.jpg" alt="" aria-hidden="true" loading="lazy">
+            <img class="hero__art" src="assets/images/hero/hero-makhana.jpg" width="1600" height="757" alt="Premium Indian Makhana — 100% natural, rich in protein, low calorie, gluten free." loading="lazy">
+          </div>
+          <a href="modules/catalog/category.html?slug=imported-food-grocery" class="btn-gr btn-gradient-gr btn-lg-gr hero__cta">Buy Now</a>
         </article>
       </div>
       <div class="hero__dots" role="tablist" aria-label="Choose slide">
         <button class="hero__dot is-active" data-hero-dot aria-label="Slide 1"></button>
         <button class="hero__dot" data-hero-dot aria-label="Slide 2"></button>
         <button class="hero__dot" data-hero-dot aria-label="Slide 3"></button>
+        <button class="hero__dot" data-hero-dot aria-label="Slide 4"></button>
       </div>
       <div class="hero__controls">
-        <button class="btn-icon-gr" data-hero-prev aria-label="Previous slide" style="background:rgba(21,21,21,.6)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M15 18l-6-6 6-6"/></svg></button>
-        <button class="btn-icon-gr" data-hero-next aria-label="Next slide" style="background:rgba(21,21,21,.6)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button class="btn-icon-gr hero__arrow hero__arrow--prev" data-hero-prev aria-label="Previous slide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="btn-icon-gr hero__arrow hero__arrow--next" data-hero-next aria-label="Next slide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M9 6l6 6-6 6"/></svg></button>
       </div>
     </section>
 
@@ -250,7 +255,7 @@
     </section>
 
     <!-- ---- SHOP BY CATEGORY ---- -->
-    <section class="section-gr" aria-labelledby="cat-head">
+    <section class="section-gr home-cat" aria-labelledby="cat-head">
       <div class="gr-container">
         <div class="section-head">
           <div class="section-head__titles">

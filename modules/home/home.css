@@ -5,36 +5,115 @@
    system. Load AFTER shared/css/style.css.
    ========================================================================= */
 
-/* ---- Hero carousel ---------------------------------------------------- */
-.hero { position: relative; overflow: hidden; }
-.hero__viewport { position: relative; height: clamp(460px, 78vh, 760px); }
+/* ---- Hero carousel ----------------------------------------------------
+   The slides are finished campaign banners — headline, product shot and
+   branding are painted into the artwork. Two consequences drive everything
+   below.
+
+   1. Nothing may cover the image. The old hero laid a 96%-white gradient over
+      a decorative photo so authored copy could sit on top; do that to a
+      finished banner and you have washed out the design. There is no scrim
+      and no overlaid text now, and the Buy Now button sits *below* the
+      artwork rather than on it — every banner already paints its own SHOP NOW
+      at the bottom-left, and one of the four (figs) carries a full-width
+      feature bar along the bottom that a centred overlay would sit on top of.
+
+   2. Nothing may crop it either. `cover` is the usual carousel answer and it
+      is wrong here: these four are 2.00, 1.50, 1.88 and 2.11 wide, so any
+      single box crops at least three of them, and what gets cropped is the
+      headline. `contain` fits each one whole; the leftover letterbox is
+      filled with a blurred, over-scaled copy of the same slide, so the bars
+      read as ambient colour from the artwork instead of dead space.
+
+   The band under the artwork carries the button and the dots. It is sized
+   in one token so the viewport height can account for it. */
+.hero {
+  position: relative; overflow: hidden;
+  --hero-cta-band: clamp(100px, 11vw, 132px);
+  --hero-cta-w: min(280px, 68vw);
+  --hero-cta-h: 56px;                       /* = .btn-lg-gr min-height */
+  --hero-cta-bottom: calc(var(--space-4) + 16px);
+  --hero-arrow: 44px;
+}
+
+/* Artwork area + button band. The artwork area is ~2.2:1 at most widths —
+   wider than every banner — so all four fit by height and render at the same
+   scale, which keeps the slide-to-slide transition from jumping. */
+.hero__viewport { position: relative; height: calc(clamp(170px, 50vw, 640px) + var(--hero-cta-band)); }
+
 .hero__slide {
   position: absolute; inset: 0;
-  display: grid; align-items: center;
-  grid-template-columns: minmax(0, 1fr);   /* prevent content min-width from overflowing on mobile */
   opacity: 0; visibility: hidden;
   transition: opacity 700ms var(--ease-out), visibility 700ms;
 }
-@media (max-width: 520px) { .hero__actions .btn-lg-gr { flex: 1 1 auto; } }
 .hero__slide.is-active { opacity: 1; visibility: visible; }
-.hero__media { position: absolute; inset: 0; }
-.hero__media img { width: 100%; height: 100%; object-fit: cover; }
-/* brand-gradient duotone overlay ties disparate imagery into one system */
-.hero__media::after {
-  content: ""; position: absolute; inset: 0;
-  background:
-    linear-gradient(90deg, rgba(255,255,255,.96) 0%, rgba(255,255,255,.78) 42%, rgba(255,255,255,.30) 100%),
-    var(--gr-gradient-soft);
+
+.hero__media { position: absolute; inset: 0; overflow: hidden; background: var(--surface-band); }
+
+/* Blurred fill for the letterbox. Over-scaled because a blur samples past its
+   own edges and would otherwise leave a pale rim around the slide. Dimmed so
+   the crisp artwork in front of it clearly reads as the foreground. */
+.hero__backdrop {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: blur(34px) saturate(1.15) brightness(.78);
+  transform: scale(1.18);
 }
-.hero__content { position: relative; z-index: 2; max-width: 640px; }
-.hero__eyebrow { color: var(--link); }
-.hero__title { margin: var(--space-3) 0; }
-.hero__text { color: var(--text-secondary); max-width: 48ch; }
+
+/* The banner itself — whole, uncropped, never overlaid. Height stops short of
+   the button band so the two never share space. */
+.hero__art {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: calc(100% - var(--hero-cta-band));
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Buy Now. Centred with auto margins rather than a translate, because
+   .btn-gr lifts itself on hover with a transform and a centring transform
+   here would be overwritten by it — the button would jump off-centre. */
+.hero__cta {
+  position: absolute; z-index: 3;
+  left: 0; right: 0; bottom: var(--hero-cta-bottom);
+  width: var(--hero-cta-w); min-height: var(--hero-cta-h);
+  margin-inline: auto;
+  justify-content: center;
+}
+
 .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
 
-.hero__controls { position: absolute; z-index: 3; bottom: var(--space-6); right: var(--space-6); display: flex; gap: var(--space-2); }
-.hero__dots { position: absolute; z-index: 3; bottom: var(--space-6); left: var(--space-6); display: flex; gap: var(--space-2); }
-.hero__dot { width: 32px; height: 4px; border: 0; border-radius: var(--radius-pill); background: rgba(16,19,20,.18); cursor: pointer; padding: 0; overflow: hidden; }
+/* Arrows flank the button rather than floating over the artwork at its
+   vertical centre, which is where a carousel would normally put them.
+
+   They were there first and it was wrong. The banners run edge to edge
+   whenever the artwork area is wider than the slide is tall — at 390px the
+   left arrow sat squarely on the M of MAKHANA — and an arrow parked on the
+   headline of a finished banner is exactly the covering-up this hero is
+   built to avoid. Down here they cover nothing at any width, and [<][Buy
+   Now][>] reads as one control cluster instead of three loose objects.
+
+   The offsets are driven off --hero-cta-w so the gap beside the button stays
+   constant as the button resizes. */
+.hero__controls { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.hero__arrow {
+  position: absolute;
+  bottom: calc(var(--hero-cta-bottom) + (var(--hero-cta-h) - var(--hero-arrow)) / 2);
+  width: var(--hero-arrow); height: var(--hero-arrow);
+  pointer-events: auto;
+  background: rgba(16,19,20,.45);
+  color: #fff;
+  backdrop-filter: blur(6px);
+}
+.hero__arrow:hover { background: rgba(16,19,20,.72); color: #fff; }
+.hero__arrow--prev { right: calc(50% + var(--hero-cta-w) / 2 + var(--space-3)); }
+.hero__arrow--next { left: calc(50% + var(--hero-cta-w) / 2 + var(--space-3)); }
+
+/* Dots ride the bottom of the band, under the button. Light-on-dark now:
+   the band is dimmed artwork, and the old near-black inactive dot was
+   invisible against it. */
+.hero__dots { position: absolute; z-index: 3; bottom: var(--space-4); left: 0; right: 0; display: flex; justify-content: center; gap: var(--space-2); }
+.hero__dot { width: 32px; height: 4px; border: 0; border-radius: var(--radius-pill); background: rgba(255,255,255,.42); cursor: pointer; padding: 0; overflow: hidden; }
 .hero__dot.is-active { background: var(--gr-gradient); }
 
 /* ---- Trust strip ------------------------------------------------------ */
@@ -96,44 +175,162 @@
 }
 .home-cat-grid .category-card > * { position: relative; z-index: 1; }
 
-/* ---- Mobile hero: shorter, so the shop starts above the fold ----------
-   Measured at 390px before this: the hero was 702px tall and the first content
-   section began at 1042px — more than a full phone screen of scrolling before
-   a single product or category appeared. A luxury storefront can afford a
-   generous hero on a desktop; on a phone it just delays the shop.
+/* ---- Category section on phones --------------------------------------
+   At 390px the two-up layout spent a full screen on eight tiles, and the
+   header ate three lines before the first one (overline, title, then the
+   View-all button wrapping under it). Phones get a directory instead of a
+   showcase: one header line, four tiles per row, icon and label only.
 
-   `78vh` is the culprit. It is a reasonable desktop proportion and a poor
-   mobile one, because a phone viewport is tall and narrow: 78% of it is far
-   more vertical space than the same fraction of a laptop screen. Below 640px
-   the hero is sized in absolute terms instead. */
-@media (max-width: 639.98px) {
-  .hero__viewport { height: clamp(380px, 52vh, 460px); }
-
-  /* The slide's own padding was tuned for the taller box. */
-  .hero__slide { padding-block: var(--space-6); }
-
-  .hero__title { font-size: var(--fs-31); line-height: var(--lh-tight); }
-  .hero__text {
-    font-size: var(--fs-16);
-    /* 34ch, not 48: at 390px a 48ch measure is most of the screen width and
-       runs to four or five lines, which pushes the button off-screen. */
-    max-width: 34ch;
+   Desktop keeps the eyebrow and the large cards — this whole block is
+   scoped to .home-cat and below 768px, so no other section moves. */
+@media (max-width: 767px) {
+  /* One line: title left, View all right, baselines aligned. */
+  .home-cat .section-head {
+    flex-wrap: nowrap;
+    align-items: baseline;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
   }
-  .hero__actions { margin-top: var(--space-5); }
+  .home-cat .section-head__titles { gap: 0; min-width: 0; }
+  .home-cat .overline { display: none; }
+  /* 75% of the 1.9rem phone h2 — still the loudest thing on the row. */
+  .home-cat .section-head h2 {
+    font-size: 1.425rem;
+    line-height: 1.2;
+    letter-spacing: -0.018em;
+  }
+  /* The button chrome reads as clutter next to a smaller title; a text
+     link with a padded tap area carries it. */
+  .home-cat .section-head .btn-gr {
+    flex: none;
+    min-height: 0;
+    padding: .4rem 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    font-size: var(--fs-14);
+    font-weight: var(--fw-semibold);
+    color: var(--link);
+    white-space: nowrap;
+  }
+  .home-cat .section-head .btn-gr:hover,
+  .home-cat .section-head .btn-gr:active { background: none; box-shadow: none; transform: none; }
 
-  /* Full-width tap target. A phone thumb should not have to aim. */
-  .hero__actions .btn-gr { width: 100%; justify-content: center; }
-
-  /* Controls sat in the corners of a much taller box; tighten with it. */
-  .hero__controls,
-  .hero__dots { bottom: var(--space-4); }
-  .hero__controls { right: var(--space-4); }
-  .hero__dots { left: var(--space-4); }
+  .home-cat-grid {
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 1fr;   /* both rows match, whether the label wraps or not */
+    gap: var(--space-2);
+  }
+  .home-cat-grid .category-card {
+    min-height: 0;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    padding: 12px 6px 11px;
+    border-radius: 12px;   /* between the token pair: 16px is a bubble at 80px wide */
+  }
+  .home-cat-grid .category-card__icon {
+    width: 22px; height: 22px;
+    margin-bottom: 0;
+  }
+  /* Two lines reserved so "Imported Food" and "Beauty" sit at the same
+     height; anything longer clamps rather than pushing the tile taller. */
+  .home-cat-grid .category-card__title {
+    font-size: .6875rem;
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+    min-height: calc(2 * 1.25em);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* No room for "Dates · Coffee · Chocolate" in an 80px tile. */
+  .home-cat-grid .category-card__count { display: none; }
 }
 
-/* Very small phones (360px and under) — one more step down, because at this
-   width the title was wrapping to four lines and eating the whole slide. */
+/* ---- Mobile hero ------------------------------------------------------
+   The standing rule here is that the shop must start near the fold: an
+   earlier measurement at 390px found the hero 702px tall with the first
+   product section only beginning at 1042px, more than a screen of scrolling
+   before anything was for sale.
+
+   The vw-based height above already satisfies that — 50vw of artwork plus a
+   100px band is ~295px at 390px wide, well under half the old figure — so
+   there is no height override to make. What is left is fit: the artwork is
+   the same width as the phone, and the button wants a wider target than its
+   own label. */
+@media (max-width: 639.98px) {
+  /* 44px circles either side of a 68vw button leave each arrow only ~12px of
+     clearance from the screen edge at 390px, and less below that. 38px buys
+     the margin back without going under the tap-target floor. */
+  .hero { --hero-arrow: 38px; }
+
+  /* Kept from the previous hero: full-width buttons on phones. Now only the
+     industry band uses .hero__actions, and the rule still suits it. */
+  .hero__actions { margin-top: var(--space-5); }
+  .hero__actions .btn-gr { width: 100%; justify-content: center; }
+}
+
+/* ---- Premium Picks · the shelf that advances itself -------------------
+ *
+ * On a phone the rail shows one and a half cards and nothing says the other
+ * six exist. A scrollbar would say it; .snap-rail hides the scrollbar, and the
+ * two arrows sit in the header where a thumb is not. So the shelf moves on its
+ * own — one product every few seconds, always right-to-left, which is the
+ * direction the remaining products are in.
+ *
+ * The travel itself is driven from home.js (a rAF tween, not scroll-behavior:
+ * smooth — the browser picks its own duration for that and the brief calls for
+ * exactly 400ms). What CSS owns is the two things that make it look designed
+ * rather than merely animated:
+ *
+ *   1. THE SNAP IS OFF WHILE IT AUTOPLAYS. scroll-snap-type: mandatory
+ *      re-snaps after every programmatic scroll, which fights a tween frame by
+ *      frame and lands the rail a few pixels off. The tween already lands on
+ *      exact card boundaries, so snap has nothing to correct; it comes back the
+ *      moment a finger touches the rail and manual swiping needs it again.
+ *
+ *   2. THE RIGHT EDGE DISSOLVES. Without it the next card is sliced off by the
+ *      viewport mid-motion, and a hard vertical cut travelling across a moving
+ *      row is the single thing that makes a carousel look cheap. A 56px fade
+ *      lets the incoming card arrive out of the page rather than out of a
+ *      guillotine. Purely decorative — mask-image is unsupported nowhere that
+ *      matters, and where it is the rail simply has a hard edge again.
+ */
+[data-rail-autoplay].is-autoplaying { scroll-snap-type: none; }
+
+@media (max-width: 767.98px) {
+  [data-rail-autoplay] {
+    -webkit-mask-image: linear-gradient(to right, #000 0 calc(100% - 56px), transparent 100%);
+            mask-image: linear-gradient(to right, #000 0 calc(100% - 56px), transparent 100%);
+  }
+}
+
+/* The rail is the only thing moving on the screen while it plays, so the card
+   under the fade needs to look like it is arriving, not like it is faulty. A
+   0.4s ease matched to the tween keeps the two reading as one gesture. */
+@media (prefers-reduced-motion: reduce) {
+  [data-rail-autoplay] {
+    -webkit-mask-image: none;
+            mask-image: none;
+  }
+}
+
+/* Very small phones (380px and under) — the band is a fixed 100px against a
+   shrinking artwork area, so trim it back before it starts to dominate. The
+   arrows follow the button down on their own: their offsets are computed
+   from --hero-cta-h and --hero-cta-bottom. */
 @media (max-width: 380px) {
-  .hero__viewport { height: clamp(340px, 48vh, 400px); }
-  .hero__title { font-size: var(--fs-25); }
+  .hero {
+    --hero-cta-band: 92px;
+    --hero-cta-h: 48px;
+    --hero-cta-bottom: calc(var(--space-3) + 14px);
+    /* 68vw leaves the outer arrow about 1px from the screen edge at 320px —
+       measured, not guessed. 62vw restores a real margin at both 320 and
+       360 without making the button look mean. */
+    --hero-cta-w: 62vw;
+  }
+  .hero__cta { font-size: var(--fs-16); padding: .7rem 1.5rem; }
 }
