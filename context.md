@@ -1740,6 +1740,52 @@ dependency underneath: `font-family: inherit` on form controls, `[hidden] {
 display: none !important }`, and a font `url()` one directory too high. None
 would have thrown an error.
 
+### Food-first launch set + the drawer rebuild (2026-08-02)
+
+The ten categories in "NEW CATEGORIES the owner wants" are now the whole
+storefront. The other eight are **parked, not deleted**, exactly as that section
+asks: `"active": false` in `modules/catalog/data/categories.json`, which is the
+static mirror of the DB's `is_active`. Two readers enforce it —
+`modules/catalog/backend/api.js` `getCategories()` and
+`shared/js/components/category-menu.js` — plus `tools/sitemap.py`, which no
+longer submits parked slugs. **Both readers matter:** category-menu.js fetches
+`/api` directly with no JSON fallback, so with PHP down the hand-authored lists
+in `shared/components/header.html` + `index.html` are what ships. Those were
+edited to match, and any future change has to touch all three.
+
+`CatalogSeeder` used to write `is_active => true` on every run, which would
+switch a category back on that a merchant had deliberately switched off. It now
+seeds the flag on create only; after that the admin panel is the authority.
+
+The mobile drawer was rebuilt to the owner's marked-up screenshot: **56vw wide
+(clamped 208–304px), 44px rows, one flat list.** The Shop accordion is gone —
+it spent the first row hiding the categories behind a tap. Contact and B2B are
+out on request; My Account and About sit in a quieter group at the foot.
+Sizing moved from an inline `style` on the `<aside>` (26 copies) into
+`_navigation.css`.
+
+Two defects found while measuring, both pre-existing and neither cosmetic:
+
+- **The mega-menu's first column was off screen.** `left: 50%` centred an 880px
+  panel on the Shop item, putting column one at **x = −179** on a 1280px
+  window. Left-anchored now, width `min(816px, 100vw - 15rem)`.
+- **The footer payment chips scrolled the whole document sideways at 320px** —
+  five chips measure 325px in a `display:flex` with no `flex-wrap`.
+
+`markActiveNav()` matched `location.pathname` only, so every `?slug=` nav
+shortcut was dead as an active-state indicator. It reads `pathname + search`
+now.
+
+Nine of the ten launch categories hold **zero products**, so the PLP empty state
+learned a second message: "Landing soon" with a browse link, instead of "no
+products match those filters" and a Clear-filters button with nothing to clear.
+
+**Still open:** 38 of the 44 demo products sit in parked categories, and product
+visibility is *not* tied to the category flag — they still appear in the home
+rails, search and the rotating search placeholder. Tying them to it would leave
+the storefront with six products, so the rails stay as they are until real
+stock lands.
+
 ### Where things stand (2026-07-30)
 
 **Done and live:** Phase 8 entire, storefront 5.3 (CSP/HSTS/COOP), both CDNs

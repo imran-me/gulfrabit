@@ -162,13 +162,26 @@ export async function suggest(query, limit = 6) {
 
 /* ---- Categories -------------------------------------------------------- */
 
+/**
+ * The categories the storefront is allowed to show.
+ *
+ * The API has already applied ->active() server-side, so what comes back is
+ * live-only. The JSON fallback has not been filtered by anyone, which is why
+ * the same rule is applied here: categories.json carries the full set — the
+ * eight non-food categories are parked, not deleted — and shipping the raw file
+ * would put Fashion and Industrial back in the menu the moment PHP is not
+ * serving /api. Absent flag means on, so a category added without one behaves
+ * the way whoever added it expected.
+ */
 export async function getCategories() {
   const live = await fromApi('/categories');
-  if (live) return live;
+  if (live) return live.filter(isActive);
 
   const { categories } = await loadJSON(CATEGORIES_URL);
-  return categories;
+  return categories.filter(isActive);
 }
+
+const isActive = (c) => c.active !== false && c.isActive !== false;
 
 export async function getCategoryBySlug(slug) {
   const categories = await getCategories();

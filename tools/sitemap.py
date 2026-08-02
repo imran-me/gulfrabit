@@ -108,8 +108,12 @@ def main() -> int:
 
     urls = list(ALWAYS) + [f"/{p}" for p in built if p not in NOINDEX]
 
+    # Switched-off categories still have a page — category.html renders whatever
+    # slug it is handed — but submitting a URL we have deliberately taken out of
+    # the navigation is asking Google to index a dead end.
     for c in load("categories")["categories"]:
-        urls.append(f"/modules/catalog/category.html?slug={c['slug']}")
+        if c.get("active", True):
+            urls.append(f"/modules/catalog/category.html?slug={c['slug']}")
     for p in load("products")["products"]:
         urls.append(f"/modules/catalog/product.html?id={p['id']}")
 

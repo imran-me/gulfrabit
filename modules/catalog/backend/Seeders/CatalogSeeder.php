@@ -32,18 +32,28 @@ class CatalogSeeder extends Seeder
         $payload = $this->readJson('categories.json');
 
         foreach ($payload['categories'] ?? [] as $i => $row) {
-            Category::updateOrCreate(
-                ['slug' => $row['slug']],
-                [
-                    'name'       => $row['name'],
-                    'icon'       => $row['icon'] ?? null,
-                    'image'      => $row['image'] ?? null,
-                    'blurb'      => $row['blurb'] ?? null,
-                    'audience'   => $row['audience'] ?? 'retail',
-                    'sort_order' => $i,
-                    'is_active'  => true,
-                ],
-            );
+            $category = Category::firstOrNew(['slug' => $row['slug']]);
+
+            $category->fill([
+                'name'       => $row['name'],
+                'icon'       => $row['icon'] ?? null,
+                'image'      => $row['image'] ?? null,
+                'blurb'      => $row['blurb'] ?? null,
+                'audience'   => $row['audience'] ?? 'retail',
+                'sort_order' => $i,
+            ]);
+
+            // is_active is seeded, not synced. The JSON flag is the launch
+            // default — currently the food-only set, see categories.json _meta —
+            // but once a row exists the admin panel's switch is the authority,
+            // and a re-seed must not silently switch a category back on that a
+            // merchant deliberately turned off. (It used to hardcode true here,
+            // which did exactly that.)
+            if (! $category->exists) {
+                $category->is_active = $row['active'] ?? true;
+            }
+
+            $category->save();
         }
 
         return Category::query()->pluck('id', 'slug')->all();

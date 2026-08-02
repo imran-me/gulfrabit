@@ -4,7 +4,8 @@
  * Enhances (never renders) the header:
  *  - sticky "glass" state: adds .is-scrolled past a threshold (blur + elevation)
  *  - desktop mega-menu: open on hover + keyboard focus, close on blur/Escape
- *  - mobile drawer: hamburger toggles the offcanvas; category accordion inside
+ *  - mobile drawer: hamburger toggles the offcanvas (the accordion handler
+ *    below is generic and fires only if a drawer carries one)
  *  - live cart / wishlist count badges synced to shared state
  *  - dismissible announcement bar (remembers dismissal via storage)
  *  - full-screen search overlay toggle
@@ -153,7 +154,10 @@ function initSearchOverlay() {
 
 /* ---- Mark the active top-level nav item ------------------------------- */
 function markActiveNav() {
-  const path = window.location.pathname;
+  // Query string included: the category shortcuts in the nav are all one page
+  // (category.html) told apart by ?slug=, so matching on the pathname alone
+  // meant every category item was either all highlighted or none of them were.
+  const path = window.location.pathname + window.location.search;
   document.querySelectorAll('.nav-link[data-nav-match]').forEach((link) => {
     if (path.includes(link.getAttribute('data-nav-match'))) link.setAttribute('aria-current', 'page');
   });

@@ -189,21 +189,38 @@ function initRailAutoplay(rail) {
      Below the threshold it stays a plain swipeable rail. */
   const canLoop = () => rail.children.length >= 4 && maxScroll() >= stepOf(rail.firstElementChild) * 2;
 
-  let frame = null;
+  /* Every write to scrollLeft below happens with .is-stepping on the rail,
+     which switches scroll-snap off for the duration.
+     THIS IS NOT OPTIONAL. scroll-snap-type: x mandatory re-snaps after every
+     programmatic scroll, so a tween that starts ON a snap point has each of its
+     frames dragged straight back to it — the rail sits perfectly still for
+     400ms and only the recycle at the end moves anything. That is exactly what
+     the arrows did before this: card order changed, nothing animated. */
+  let cancelTween = null;
   const tweenTo = (to) => new Promise((resolve) => {
     const from = rail.scrollLeft;
     const dist = to - from;
     if (Math.abs(dist) < 1) return resolve();
     let t0 = null;
+    let frame = null;
+    const done = () => { frame = null; cancelTween = null; resolve(); };
+    // Cancelling RESOLVES rather than abandoning: whoever is awaiting this owns
+    // the `busy` flag, and a promise that never settles strands it forever.
+    cancelTween = () => { if (frame) cancelAnimationFrame(frame); done(); };
     const tick = (now) => {
       if (t0 === null) t0 = now;
       const p = Math.min(1, (now - t0) / RAIL_STEP_MS);
       rail.scrollLeft = from + dist * easeOut(p);
       if (p < 1) frame = requestAnimationFrame(tick);
-      else { frame = null; resolve(); }
+      else done();
     };
     frame = requestAnimationFrame(tick);
   });
+
+  const stepping = async (run) => {
+    rail.classList.add('is-stepping');
+    try { await run(); } finally { rail.classList.remove('is-stepping'); }
+  };
 
   /* Send every card that is now fully behind the left edge to the back of the
      queue, paying back its width so the view does not jump. Bounded by the
@@ -219,16 +236,16 @@ function initRailAutoplay(rail) {
     }
   };
 
-  const forward = async () => {
+  const forward = () => stepping(async () => {
     if (!canLoop()) return;
     await tweenTo(Math.min(rail.scrollLeft + stepOf(rail.firstElementChild), maxScroll()));
     recycle();
-  };
+  });
 
   /* Backwards has to borrow before it spends: the card that should slide in
      from the left is currently at the end, so it is moved to the front and paid
      for up front, then the rail travels back over it. */
-  const backward = async () => {
+  const backward = () => stepping(async () => {
     if (!canLoop()) return;
     const last = rail.lastElementChild;
     const w = stepOf(last);
@@ -236,7 +253,7 @@ function initRailAutoplay(rail) {
     rail.insertBefore(last, rail.firstElementChild);
     rail.scrollLeft += w;
     await tweenTo(Math.max(0, rail.scrollLeft - w));
-  };
+  });
 
   /* ---- Scheduling ---- */
   let timer = null;
@@ -252,7 +269,6 @@ function initRailAutoplay(rail) {
   const stop = () => { clearTimeout(timer); timer = null; };
   const schedule = () => {
     stop();
-    rail.classList.toggle('is-autoplaying', canPlay());
     if (canPlay()) timer = setTimeout(step, RAIL_HOLD_MS);
   };
   const step = async () => {
@@ -265,24 +281,31 @@ function initRailAutoplay(rail) {
 
   /* A finger takes precedence and keeps it for a few seconds after letting go —
      a shelf that starts moving again the instant you stop dragging is a shelf
-     that is arguing with you. Snap comes back with the finger (the class is
-     what turns it off) so the manual gesture still lands on a card. */
-  const handoff = () => {
+     that is arguing with you. */
+  const hold = () => {
     touched = true;
-    if (frame) { cancelAnimationFrame(frame); frame = null; busy = false; }
     stop();
-    rail.classList.remove('is-autoplaying');
     clearTimeout(resumeTimer);
-    resumeTimer = setTimeout(() => {
+    resumeTimer = setTimeout(async () => {
       touched = false;
-      // Re-align to a card edge before taking over, or the treadmill inherits
-      // whatever half-card offset the swipe finished on and keeps it forever.
-      recycle();
-      const w = stepOf(rail.firstElementChild);
-      if (w >= 1 && rail.scrollLeft > 0.5) tweenTo(rail.scrollLeft > w / 2 ? Math.min(w, maxScroll()) : 0).then(recycle).then(schedule);
-      else schedule();
+      /* Re-align to a card edge before taking over. A swipe ends wherever the
+         finger left it, and without this the treadmill inherits that half-card
+         offset and carries it for the rest of the session — every subsequent
+         step lands a fixed few pixels wrong. */
+      await stepping(async () => {
+        recycle();
+        const w = stepOf(rail.firstElementChild);
+        if (w < 1 || rail.scrollLeft <= 0.5) return;
+        await tweenTo(rail.scrollLeft > w / 2 ? Math.min(w, maxScroll()) : 0);
+        recycle();
+      });
+      schedule();
     }, RAIL_RESUME_MS);
   };
+
+  /* A gesture also stops whatever is mid-flight — a tween still writing
+     scrollLeft under a moving finger is the rail fighting the user. */
+  const handoff = () => { cancelTween?.(); hold(); };
 
   ['pointerdown', 'touchstart', 'wheel'].forEach((evt) =>
     rail.addEventListener(evt, handoff, { passive: true }));
@@ -308,9 +331,11 @@ function initRailAutoplay(rail) {
 
   /* The arrows initRailArrows deliberately left alone. They drive the same two
      functions, so a tap and an autoplay tick are the same 400ms movement — and
-     tapping one hands control over exactly as a swipe does. */
+     tapping one hands control over exactly as a swipe does.
+     hold(), not handoff(): a tap is a request for one more step, not an
+     interruption of the one in flight, so the current tween is left to land. */
   const arrow = (sel, run) => document.querySelector(sel)?.addEventListener('click', async () => {
-    handoff();
+    hold();
     if (busy) return;
     busy = true;
     await run();

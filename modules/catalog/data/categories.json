@@ -1,16 +1,18 @@
 {
   "_meta": {
     "note": "Seeded by CatalogSeeder. Adding a category here creates it; it never deletes one, because a category with products in it is not something a data file should be able to remove. Use the admin panel's on/off switch to hide a category instead — that hides its products too, reversibly.",
-    "version": 1
+    "active": "The launch set is food-only: imported-food-grocery, dates, honey, beverage, dry-fruits, spices, nuts-makhana, baby-food, herbs, oil-ghee. Everything else is \"active\": false — kept in full (slug, blurb, children, seeder row) so switching it back on is one boolean, not a re-authoring job. This flag is the static-site mirror of the DB's is_active column: the front end reads it in modules/catalog/backend/api.js getCategories() and shared/js/components/category-menu.js, and tools/sitemap.py skips inactive slugs. Turning one back on: flip it here, then re-run tools/assemble.py and tools/sitemap.py, and add it back to the hand-authored lists in shared/components/header.html + index.html.",
+    "version": 2
   },
   "categories": [
     {
       "slug": "imported-food-grocery",
-      "name": "Imported Food & Grocery",
+      "name": "Imported Food",
       "icon": "basket",
       "image": "/assets/images/categories/food.svg",
       "audience": "retail",
-      "blurb": "Sourced from trusted origins. Dates, chocolates, coffee, tea and pantry staples.",
+      "active": true,
+      "blurb": "Sourced from trusted origins. Chocolates, coffee, tea and pantry staples.",
       "children": [
         {
           "slug": "dates-honey",
@@ -32,6 +34,7 @@
       "icon": "milk",
       "image": "/assets/images/categories/dairy.svg",
       "audience": "retail",
+      "active": false,
       "blurb": "Cold-chain delivered. Imported milk powders, cheese and butter.",
       "children": [
         {
@@ -50,6 +53,7 @@
       "icon": "nut",
       "image": "/assets/images/categories/nuts.svg",
       "audience": "retail",
+      "active": false,
       "blurb": "Grade-A almonds, cashews, pistachios and premium dried fruit.",
       "children": []
     },
@@ -59,6 +63,7 @@
       "icon": "cpu",
       "image": "/assets/images/categories/electronics.svg",
       "audience": "retail",
+      "active": false,
       "blurb": "Verified imports. Audio, wearables, smart-home and accessories.",
       "children": [
         {
@@ -81,6 +86,7 @@
       "icon": "home",
       "image": "/assets/images/categories/kitchen.svg",
       "audience": "retail",
+      "active": false,
       "blurb": "Considered tools for the everyday kitchen and home.",
       "children": []
     },
@@ -90,6 +96,7 @@
       "icon": "shirt",
       "image": "/assets/images/categories/fashion.svg",
       "audience": "retail",
+      "active": false,
       "blurb": "Understated pieces and accessories, imported with intent.",
       "children": []
     },
@@ -99,6 +106,7 @@
       "icon": "sparkle",
       "image": "/assets/images/categories/beauty.svg",
       "audience": "retail",
+      "active": false,
       "blurb": "Skincare and grooming from origin brands.",
       "children": []
     },
@@ -108,6 +116,7 @@
       "icon": "clip",
       "image": "/assets/images/categories/office.svg",
       "audience": "retail",
+      "active": false,
       "blurb": "Workspace essentials with a premium finish.",
       "children": []
     },
@@ -117,6 +126,7 @@
       "icon": "chip",
       "image": "/assets/images/categories/industrial.svg",
       "audience": "b2b",
+      "active": false,
       "blurb": "PCBs, switches, relays, sensors and polymers. Spec-driven, bulk-ready.",
       "children": [
         {
@@ -144,6 +154,7 @@
       "image": "/assets/images/categories/dates.svg",
       "blurb": "Medjool, Ajwa, Sukkari — graded and cold-packed.",
       "audience": "retail",
+      "active": true,
       "children": []
     },
     {
@@ -153,6 +164,7 @@
       "image": "/assets/images/categories/honey.svg",
       "blurb": "Raw, unfiltered, single-origin. Sidr, Manuka, wildflower.",
       "audience": "retail",
+      "active": true,
       "children": []
     },
     {
@@ -162,6 +174,7 @@
       "image": "/assets/images/categories/beverage.svg",
       "blurb": "Coffee, tea and imported soft drinks.",
       "audience": "retail",
+      "active": true,
       "children": []
     },
     {
@@ -171,6 +184,7 @@
       "image": "/assets/images/categories/dry-fruits.svg",
       "blurb": "Apricots, figs, raisins and prunes.",
       "audience": "retail",
+      "active": true,
       "children": []
     },
     {
@@ -180,6 +194,7 @@
       "image": "/assets/images/categories/spices.svg",
       "blurb": "Whole and ground, from their growing regions.",
       "audience": "retail",
+      "active": true,
       "children": []
     },
     {
@@ -189,6 +204,7 @@
       "image": "/assets/images/categories/nuts-makhana.svg",
       "blurb": "Pistachios, cashews, almonds, walnuts and fox nuts.",
       "audience": "retail",
+      "active": true,
       "children": []
     },
     {
@@ -198,6 +214,7 @@
       "image": "/assets/images/categories/baby-food.svg",
       "blurb": "Formula, cereals and purees from trusted brands.",
       "audience": "retail",
+      "active": true,
       "children": []
     },
     {
@@ -207,6 +224,7 @@
       "image": "/assets/images/categories/herbs.svg",
       "blurb": "Culinary and wellness herbs, whole and dried.",
       "audience": "retail",
+      "active": true,
       "children": []
     },
     {
@@ -216,6 +234,7 @@
       "image": "/assets/images/categories/oil-ghee.svg",
       "blurb": "Olive, cold-pressed oils, and pure ghee.",
       "audience": "retail",
+      "active": true,
       "children": []
     }
   ]

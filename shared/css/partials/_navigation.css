@@ -84,10 +84,16 @@
   background: var(--gr-gradient); border-radius: var(--radius-pill);
 }
 
+/* Anchored to the left edge of the Shop item, not centred on it.
+   Centred, an 880px panel hung ~180px off the left of a 1280px window and the
+   entire first column was outside the viewport — measured: column one sat at
+   x = -179, so "Imported Food" and its three links were simply not on screen.
+   The width formula reserves the nav item's own offset so the panel cannot
+   run off the right either at the 992px breakpoint where it first appears. */
 .mega-menu {
-  position: absolute; top: calc(100% + 10px); left: 50%;
-  transform: translateX(-50%) translateY(8px);
-  width: min(880px, 90vw);
+  position: absolute; top: calc(100% + 10px); left: 0;
+  transform: translateY(8px);
+  width: min(816px, calc(100vw - 15rem));
   background: var(--surface-raised);
   border: 1px solid var(--border-hairline);
   border-radius: var(--radius-lg);
@@ -96,7 +102,7 @@
   opacity: 0; visibility: hidden; pointer-events: none;
   transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), visibility var(--dur-base);
 }
-.nav-item.is-open .mega-menu { opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+.nav-item.is-open .mega-menu { opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0); }
 .mega-menu__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); }
 .mega-menu__col-title { font-size: var(--fs-12); text-transform: uppercase; letter-spacing: .1em; color: var(--link); margin-bottom: var(--space-3); }
 .mega-menu__link { display: block; padding: 6px 0; color: var(--text-secondary); font-size: var(--fs-14); }
@@ -129,15 +135,129 @@
 }
 .action-badge.is-active { transform: scale(1); }
 
-/* ---- Mobile offcanvas drawer (Bootstrap offcanvas, re-skinned) ------- */
-.gr-offcanvas { background: var(--surface-raised); color: var(--text-primary); border-left: 1px solid var(--border-hairline); }
-.gr-offcanvas .offcanvas-header { border-bottom: 1px solid var(--border-hairline); }
-.mobile-nav__link {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: var(--space-4) var(--space-2);
-  font-size: var(--fs-20); color: var(--text-primary);
-  border-bottom: 1px solid var(--border-hairline);
+/* ---- Mobile offcanvas drawer ------------------------------------------
+   A narrow category rail, not a full-width menu. It holds one flat list —
+   the live categories, then the two account/company links — because the
+   drawer it replaced spent its first row on a "Shop" accordion that hid the
+   categories behind a tap, and the categories are the whole point of it.
+
+   Sizing lives here rather than inline on the <aside> so it is one edit for
+   all 26 pages the header is inlined into. Everything the JS toggles
+   (transform via #mobileNav.is-open) still works off the class. */
+.gr-offcanvas {
+  position: fixed; top: 0; left: 0;
+  height: 100%;
+  width: clamp(208px, 56vw, 304px);
+  z-index: 1050;
+  display: flex; flex-direction: column;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-hairline);
+  /* Long and soft: at this width the drawer reads as a panel lifted off the
+     page, and a tight shadow would read as a border with a smudge. */
+  box-shadow: 24px 0 60px -20px rgba(10, 19, 22, .28);
+  transform: translateX(-100%);
+  transition: transform .34s var(--ease-out);
+  overscroll-behavior: contain;
 }
+/* A single wash of brand colour behind the logo. The panel is white on white
+   otherwise, and white on white at this width looks unfinished rather than
+   minimal. */
+.gr-offcanvas::before {
+  content: ""; position: absolute; inset: 0 0 auto; height: 240px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(27,180,212,.075), rgba(154,205,60,.035) 42%, transparent);
+}
+
+.mobile-nav__head {
+  position: relative; z-index: 1;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--space-2);
+  padding: 14px 14px 16px 16px;
+}
+.mobile-nav__logo { width: 80px; height: auto; }
+.mobile-nav__head .btn-icon-gr { margin-top: -2px; flex: none; }
+
+.mobile-nav__body {
+  position: relative; z-index: 1;
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: var(--space-5);
+}
+.mobile-nav__list { list-style: none; margin: 0; padding: 0; }
+
+.mobile-nav__link {
+  position: relative;
+  display: flex; align-items: center; gap: var(--space-2);
+  min-height: 44px;                 /* the AAA target size, and the row rhythm */
+  padding: 9px 16px;
+  font-size: .9375rem;              /* 15 — one step under the body size */
+  font-weight: var(--fw-semibold);
+  letter-spacing: -.006em;
+  line-height: 1.25;
+  color: var(--text-primary);
+  transition: background var(--dur-fast) var(--ease-out),
+              padding-left var(--dur-base) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+/* Hairlines between rows, inset to the text column. Ruled edge to edge they
+   look like a table; inset they look like a considered list. */
+.mobile-nav__list > li + li > .mobile-nav__link::before {
+  content: ""; position: absolute; top: 0; left: 16px; right: 16px;
+  height: 1px; background: var(--border-hairline);
+}
+/* Brand spine, scaled from nothing on press. Cheaper than a colour change and
+   it points at the row the finger is on. */
+.mobile-nav__link::after {
+  content: ""; position: absolute; left: 0; top: 7px; bottom: 7px;
+  width: 3px; border-radius: 0 3px 3px 0;
+  background: var(--gr-gradient);
+  transform: scaleY(0);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+@media (hover: hover) {
+  .mobile-nav__link:hover { background: var(--wash-hover); padding-left: 21px; color: var(--link-hover); }
+  .mobile-nav__link:hover::after { transform: scaleY(1); }
+}
+.mobile-nav__link:active { background: var(--wash-hover); }
+.mobile-nav__link:active::after { transform: scaleY(1); }
+.mobile-nav__link[aria-current="page"] { color: var(--link); }
+.mobile-nav__link[aria-current="page"]::after { transform: scaleY(1); }
+
+/* Account / company. Pushed to the foot of the panel and set quieter, so the
+   categories own the list and these stay reachable without competing. */
+.mobile-nav__list--minor { margin-top: auto; padding-top: var(--space-3); }
+.mobile-nav__list--minor::before {
+  content: ""; display: block; height: 1px; margin: 0 16px var(--space-2);
+  background: var(--border-hairline);
+}
+.mobile-nav__list--minor .mobile-nav__link {
+  min-height: 40px;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+  color: var(--text-secondary);
+}
+.mobile-nav__list--minor > li + li > .mobile-nav__link::before { display: none; }
+
+/* Rows arrive just behind the panel, ~26ms apart, so the drawer resolves into
+   a list instead of appearing whole. --i is set per row in the markup and by
+   category-menu.js when it re-renders from the API. */
+#mobileNav.is-open .mobile-nav__link {
+  animation: navRowIn .32s var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 26ms + 70ms);
+}
+@keyframes navRowIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gr-offcanvas { transition: none; }
+  #mobileNav.is-open .mobile-nav__link { animation: none; }
+  .mobile-nav__link { transition: none; }
+}
+
+/* Kept for the API-rendered child rows in category-menu.js. */
 .mobile-nav__sublink { display: block; padding: var(--space-2) var(--space-4); color: var(--text-secondary); font-size: var(--fs-16); }
 
 /* ---- Search autocomplete panel --------------------------------------- */

@@ -28,10 +28,10 @@
         <ul role="list" class="stack-2" style="font-size:var(--fs-14)">
           <li><a href="/modules/deals/deals.html">Deals &amp; Offers</a></li>
           <li><a href="/modules/catalog/category.html?slug=imported-food-grocery">Imported Food</a></li>
-          <li><a href="/modules/catalog/category.html?slug=nuts-dry-fruits">Nuts &amp; Dry Fruits</a></li>
-          <li><a href="/modules/catalog/category.html?slug=gadgets-electronics">Electronics</a></li>
-          <li><a href="/modules/catalog/category.html?slug=kitchen-home">Kitchen &amp; Home</a></li>
-          <li><a href="/modules/b2b/b2b-industrial.html">Industrial / B2B</a></li>
+          <li><a href="/modules/catalog/category.html?slug=dates">Dates</a></li>
+          <li><a href="/modules/catalog/category.html?slug=honey">Honey</a></li>
+          <li><a href="/modules/catalog/category.html?slug=nuts-makhana">Nuts &amp; Makhana</a></li>
+          <li><a href="/modules/catalog/category.html?slug=oil-ghee">Oil &amp; Ghee</a></li>
         </ul>
       </nav>
       <nav aria-label="Company"><p class="mega-menu__col-title">Company</p>
@@ -56,7 +56,10 @@
     <div style="display:flex;flex-wrap:wrap;gap:var(--space-4);align-items:center;justify-content:space-between">
       <p class="caption">© 2026 GulfRabit. All rights reserved.</p>
       <!-- Payment methods (placeholder chips) -->
-      <div style="display:flex;gap:.5rem;align-items:center" aria-label="Accepted payment methods">
+      <!-- flex-wrap: five chips measure 325px, so on a 320px phone this row was
+           the one thing on the page wide enough to scroll the whole document
+           sideways. -->
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center" aria-label="Accepted payment methods">
         <span class="badge-gr badge-origin">bKash</span>
         <span class="badge-gr badge-origin">Nagad</span>
         <span class="badge-gr badge-origin">Visa</span>

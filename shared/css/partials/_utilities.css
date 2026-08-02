@@ -37,8 +37,12 @@
  * specificity, modules/home/home.css) — that block still wins where it applies.
  */
 @media (max-width: 575.98px) {
+  /* align-items stays `end` from the base rule. Baseline is the tempting
+     choice for "put the link on the title's line" and it is wrong here:
+     .section-head__titles is a flex column, so its baseline is its FIRST
+     line — the eyebrow. Everything beside it then hangs off "CURATED FOR
+     YOU" and floats a full line above the heading it belongs to. */
   .section-head {
-    align-items: baseline;
     gap: var(--space-3);
     margin-bottom: var(--space-4);
   }

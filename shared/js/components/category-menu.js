@@ -9,11 +9,10 @@
  *
  * WHAT IT REPLACES AND WHAT IT LEAVES ALONE
  * -----------------------------------------
- * Only the Shop column grid and the Shop accordion in the drawer. The fixed
- * items — Deals, Industrial, About, Contact, My Account — are hand-authored
- * and stay hand-authored. They are not categories, and a "menu manager" that
- * let someone delete Contact from the header would be a footgun, not a
- * feature.
+ * Only the Shop column grid and the drawer's category list. The fixed items —
+ * Deals, About, My Account — are hand-authored and stay hand-authored. They
+ * are not categories, and a "menu manager" that let someone delete My Account
+ * from the header would be a footgun, not a feature.
  *
  * WHY IT FETCHES RATHER THAN IMPORTS
  * ----------------------------------
@@ -60,6 +59,10 @@ async function load() {
     const { data } = await res.json();
 
     return (Array.isArray(data) ? data : [])
+      // is_active is applied server-side, but this endpoint is also read by the
+      // static build, and a category that is off must never reappear in the
+      // navigation just because one of the two paths forgot to check.
+      .filter((c) => c.active !== false && c.isActive !== false)
       .filter((c) => c.showInMenu !== false)
       // menuOrder first, then whatever order the server sent. Sorting by name
       // instead would ignore the merchant's arrangement, which is the one
@@ -89,7 +92,10 @@ function columns(categories) {
 
   for (let i = 0; i < singles.length && out.length < MAX_COLUMNS; i += PACK_SIZE) {
     out.push({
-      title: out.length === 0 ? 'Shop' : 'More',
+      // Only the first packed column is headed. A second "More" beside the
+      // first reads as two different things; an empty heading keeps the
+      // columns on one baseline and says nothing twice.
+      title: i > 0 ? '' : (out.length === 0 ? 'Shop' : 'More'),
       href: null,
       links: singles.slice(i, i + PACK_SIZE).map((c) => ({ name: c.name, href: url(c.slug) })),
     });
@@ -105,7 +111,9 @@ function column(col) {
   const title = col.href
     ? `<a class="mega-menu__col-title" href="${esc(col.href)}"
           style="display:block;text-decoration:none">${esc(col.title)}</a>`
-    : `<p class="mega-menu__col-title">${esc(col.title)}</p>`;
+    // An unheaded column still needs the heading's height, or its first link
+    // sits a line above the column next to it.
+    : `<p class="mega-menu__col-title" ${col.title ? '' : 'aria-hidden="true"'}>${esc(col.title) || '&nbsp;'}</p>`;
 
   return `<div>${title}${col.links.map(
     (l) => `<a class="mega-menu__link" href="${esc(l.href)}">${esc(l.name)}</a>`
@@ -113,19 +121,22 @@ function column(col) {
 }
 
 /**
- * The drawer is a flat list, with sub-categories indented under their parent.
+ * The drawer is one flat list of top-level categories — one tap from opening
+ * the menu to a product listing.
  *
- * Not a nested accordion. This is already inside one, and a second level of
- * tap-to-open on a phone means three taps to reach a product listing.
+ * Sub-categories are deliberately not here. They used to be, indented under
+ * their parent, and on a 208px rail that turned ten rows into nineteen with
+ * half of them reading as a second-class version of the row above. The parent
+ * page lists its children at the top of the listing; that is where they are
+ * useful.
+ *
+ * --i drives the staggered entrance in _navigation.css. It is 1-based and
+ * continues past the list, so the account rows below it stay in sequence.
  */
-function drawerRows(c) {
-  const parent = `<a class="mobile-nav__sublink" href="${esc(url(c.slug))}">${esc(c.name)}</a>`;
-
-  if (!c.children?.length) return parent;
-
-  return parent + c.children.map((child) =>
-    `<a class="mobile-nav__sublink" href="${esc(url(child.slug))}"
-        style="padding-left:1.5rem;opacity:.85">${esc(child.name)}</a>`).join('');
+function drawerRows(c, i) {
+  return `<li style="--i:${i + 1}">
+      <a class="mobile-nav__link" href="${esc(url(c.slug))}">${esc(c.name)}</a>
+    </li>`;
 }
 
 const url = (slug) => `/modules/catalog/category.html?slug=${encodeURIComponent(slug)}`;

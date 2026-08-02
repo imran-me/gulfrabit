@@ -522,6 +522,10 @@ a:hover { color: var(--link-hover); }
 }
 .product-card__price-row { display: flex; align-items: baseline; gap: var(--space-2); margin-top: auto; }
 .product-card__price { font-size: var(--fs-20); color: var(--text-primary); }
+/* The CTA's offset from the price used to be an inline style on every card —
+   duplicated in productCardHTML and eight times in index.html, so the phone
+   layout could not tune it without !important. It is one rule now. */
+.product-card__body .btn-gr { margin-top: var(--space-2); }
 .product-card__stars { display: inline-flex; align-items: center; gap: 1px; }
 .product-card__stars svg { display: block; }
 
@@ -580,22 +584,27 @@ a:hover { color: var(--link-hover); }
    * the product, and shrinking it to save space would be saving space by
    * selling less. Every reduction here is type and padding.
    *
-   * Measured on a 393px viewport before this block: media 161px, body 152px.
+   * Measured on a 393px viewport before this block: media 162px, body 156px.
    * The photo and the paragraph about the photo were the same size, and the
    * card cleared 310px — two of them and a phone screen is full.
    *
-   * The body now runs ~128px. Nothing was removed: brand, title, price, the
-   * struck-through original and the CTA are all still there, set at the size
-   * a 160px column actually wants rather than the size a 280px desktop card
-   * was designed at.
+   * The body now runs ~116px, a 26% cut. Nothing was removed: brand, title,
+   * price, the struck-through original and the CTA are all still there, set at
+   * the size a 164px column actually wants rather than the size a 280px
+   * desktop card was designed at.
+   *
+   * A third of the saving is leading, not type size. At 12px the body's
+   * default 1.6 line-height reserves 19px per 12px line — nine wasted pixels
+   * on every row, four rows deep. Each element below gets the leading its own
+   * size needs.
    */
-  .product-card__body { padding: 10px 10px 11px; gap: 3px; }
+  .product-card__body { padding: 8px 10px 9px; gap: 2px; }
 
   .product-card__title {
     /* 14px → 12px. Two lines still clears ~34 characters at this width —
        "Medjool Dates — Premium Jumbo (1kg)" lands without truncating. */
     font-size: .75rem;
-    line-height: 1.28;
+    line-height: 1.25;
     letter-spacing: -0.002em;
     -webkit-line-clamp: 2;
   }
@@ -603,12 +612,20 @@ a:hover { color: var(--link-hover); }
   /* The price stays the loudest thing in the body — it drops by the same
      proportion as everything else, not more, so the hierarchy is unchanged. */
   .product-card__price { font-size: .875rem; }
-  .product-card__price-row { gap: 5px; }
+  .product-card__price-row { gap: 5px; line-height: 1.15; }
   .price--strike { font-size: .75rem; }
-  .price-saving { font-size: 10px; }
+
+  /* "Save ৳ 350" is the discount stated a THIRD time — the badge on the photo
+     already says -19% and the struck-through ৳ 1,800 already says what it was.
+     On a 280px desktop card that repetition is emphasis; in a 240px rail card
+     on a phone it is a whole extra line of body for no new fact, and it is the
+     line that pushed the premium card past the grid card's height. The PDP
+     keeps it (.pdp-price .price-saving), where there is room to labour it. */
+  .product-card .price-saving { display: none; }
 
   .product-card__brand {
     font-size: 9px;
+    line-height: 1.25;
     letter-spacing: .07em;
     /* The origin is the whole proposition on an import shop — "Saudi Arabia"
        earns its line even at this size. One line, ellipsis if it runs. */
@@ -617,12 +634,14 @@ a:hover { color: var(--link-hover); }
 
   /* "Add to Cart" wraps to two lines in a 136px button and the card grows a
      ragged extra row. Smaller type, tighter tracking, one line.
-     34px rather than 38: this is a secondary path — the whole card is a link
-     to the PDP, and the cart drawer is reachable from the header — so it can
-     sit under the 44px target that primary controls hold to. */
-  .product-card .btn-gr {
+     32px rather than 38: this is a secondary path — the whole card is a link
+     to the PDP and the cart is reachable from the header — so it can sit under
+     the 44px floor that primary controls hold to. It is still a 144×32 target,
+     comfortably past WCAG 2.5.8's 24×24 minimum. */
+  .product-card__body .btn-gr {
     font-size: 11px;
-    min-height: 34px;
+    min-height: 32px;
+    margin-top: 6px;
     padding-inline: var(--space-2);
     letter-spacing: .01em;
     white-space: nowrap;
@@ -632,8 +651,9 @@ a:hover { color: var(--link-hover); }
      The rating still reaches assistive tech through the aria-label. */
   .product-card__stars svg { width: 11px; height: 11px; }
   /* .caption is 14px — larger than the product title once the title is 12px,
-     which put the loudest type in the body on "(44)". */
-  .product-card__body .caption { font-size: 10px; }
+     which put the loudest type in the body on "(44)". The leading matters as
+     much as the size: at 1.6 a 10px caption still reserves a 16px row. */
+  .product-card__body .caption { font-size: 10px; line-height: 1.2; }
 
   .product-card__badges { top: 6px; left: 6px; gap: 3px; }
   .badge-gr { padding: 2px 6px; font-size: 9px; letter-spacing: .03em; }
@@ -786,10 +806,16 @@ a:hover { color: var(--link-hover); }
   background: var(--gr-gradient); border-radius: var(--radius-pill);
 }
 
+/* Anchored to the left edge of the Shop item, not centred on it.
+   Centred, an 880px panel hung ~180px off the left of a 1280px window and the
+   entire first column was outside the viewport — measured: column one sat at
+   x = -179, so "Imported Food" and its three links were simply not on screen.
+   The width formula reserves the nav item's own offset so the panel cannot
+   run off the right either at the 992px breakpoint where it first appears. */
 .mega-menu {
-  position: absolute; top: calc(100% + 10px); left: 50%;
-  transform: translateX(-50%) translateY(8px);
-  width: min(880px, 90vw);
+  position: absolute; top: calc(100% + 10px); left: 0;
+  transform: translateY(8px);
+  width: min(816px, calc(100vw - 15rem));
   background: var(--surface-raised);
   border: 1px solid var(--border-hairline);
   border-radius: var(--radius-lg);
@@ -798,7 +824,7 @@ a:hover { color: var(--link-hover); }
   opacity: 0; visibility: hidden; pointer-events: none;
   transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), visibility var(--dur-base);
 }
-.nav-item.is-open .mega-menu { opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+.nav-item.is-open .mega-menu { opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0); }
 .mega-menu__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); }
 .mega-menu__col-title { font-size: var(--fs-12); text-transform: uppercase; letter-spacing: .1em; color: var(--link); margin-bottom: var(--space-3); }
 .mega-menu__link { display: block; padding: 6px 0; color: var(--text-secondary); font-size: var(--fs-14); }
@@ -831,15 +857,129 @@ a:hover { color: var(--link-hover); }
 }
 .action-badge.is-active { transform: scale(1); }
 
-/* ---- Mobile offcanvas drawer (Bootstrap offcanvas, re-skinned) ------- */
-.gr-offcanvas { background: var(--surface-raised); color: var(--text-primary); border-left: 1px solid var(--border-hairline); }
-.gr-offcanvas .offcanvas-header { border-bottom: 1px solid var(--border-hairline); }
-.mobile-nav__link {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: var(--space-4) var(--space-2);
-  font-size: var(--fs-20); color: var(--text-primary);
-  border-bottom: 1px solid var(--border-hairline);
+/* ---- Mobile offcanvas drawer ------------------------------------------
+   A narrow category rail, not a full-width menu. It holds one flat list —
+   the live categories, then the two account/company links — because the
+   drawer it replaced spent its first row on a "Shop" accordion that hid the
+   categories behind a tap, and the categories are the whole point of it.
+
+   Sizing lives here rather than inline on the <aside> so it is one edit for
+   all 26 pages the header is inlined into. Everything the JS toggles
+   (transform via #mobileNav.is-open) still works off the class. */
+.gr-offcanvas {
+  position: fixed; top: 0; left: 0;
+  height: 100%;
+  width: clamp(208px, 56vw, 304px);
+  z-index: 1050;
+  display: flex; flex-direction: column;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-hairline);
+  /* Long and soft: at this width the drawer reads as a panel lifted off the
+     page, and a tight shadow would read as a border with a smudge. */
+  box-shadow: 24px 0 60px -20px rgba(10, 19, 22, .28);
+  transform: translateX(-100%);
+  transition: transform .34s var(--ease-out);
+  overscroll-behavior: contain;
 }
+/* A single wash of brand colour behind the logo. The panel is white on white
+   otherwise, and white on white at this width looks unfinished rather than
+   minimal. */
+.gr-offcanvas::before {
+  content: ""; position: absolute; inset: 0 0 auto; height: 240px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(27,180,212,.075), rgba(154,205,60,.035) 42%, transparent);
+}
+
+.mobile-nav__head {
+  position: relative; z-index: 1;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--space-2);
+  padding: 14px 14px 16px 16px;
+}
+.mobile-nav__logo { width: 80px; height: auto; }
+.mobile-nav__head .btn-icon-gr { margin-top: -2px; flex: none; }
+
+.mobile-nav__body {
+  position: relative; z-index: 1;
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: var(--space-5);
+}
+.mobile-nav__list { list-style: none; margin: 0; padding: 0; }
+
+.mobile-nav__link {
+  position: relative;
+  display: flex; align-items: center; gap: var(--space-2);
+  min-height: 44px;                 /* the AAA target size, and the row rhythm */
+  padding: 9px 16px;
+  font-size: .9375rem;              /* 15 — one step under the body size */
+  font-weight: var(--fw-semibold);
+  letter-spacing: -.006em;
+  line-height: 1.25;
+  color: var(--text-primary);
+  transition: background var(--dur-fast) var(--ease-out),
+              padding-left var(--dur-base) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+/* Hairlines between rows, inset to the text column. Ruled edge to edge they
+   look like a table; inset they look like a considered list. */
+.mobile-nav__list > li + li > .mobile-nav__link::before {
+  content: ""; position: absolute; top: 0; left: 16px; right: 16px;
+  height: 1px; background: var(--border-hairline);
+}
+/* Brand spine, scaled from nothing on press. Cheaper than a colour change and
+   it points at the row the finger is on. */
+.mobile-nav__link::after {
+  content: ""; position: absolute; left: 0; top: 7px; bottom: 7px;
+  width: 3px; border-radius: 0 3px 3px 0;
+  background: var(--gr-gradient);
+  transform: scaleY(0);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+@media (hover: hover) {
+  .mobile-nav__link:hover { background: var(--wash-hover); padding-left: 21px; color: var(--link-hover); }
+  .mobile-nav__link:hover::after { transform: scaleY(1); }
+}
+.mobile-nav__link:active { background: var(--wash-hover); }
+.mobile-nav__link:active::after { transform: scaleY(1); }
+.mobile-nav__link[aria-current="page"] { color: var(--link); }
+.mobile-nav__link[aria-current="page"]::after { transform: scaleY(1); }
+
+/* Account / company. Pushed to the foot of the panel and set quieter, so the
+   categories own the list and these stay reachable without competing. */
+.mobile-nav__list--minor { margin-top: auto; padding-top: var(--space-3); }
+.mobile-nav__list--minor::before {
+  content: ""; display: block; height: 1px; margin: 0 16px var(--space-2);
+  background: var(--border-hairline);
+}
+.mobile-nav__list--minor .mobile-nav__link {
+  min-height: 40px;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+  color: var(--text-secondary);
+}
+.mobile-nav__list--minor > li + li > .mobile-nav__link::before { display: none; }
+
+/* Rows arrive just behind the panel, ~26ms apart, so the drawer resolves into
+   a list instead of appearing whole. --i is set per row in the markup and by
+   category-menu.js when it re-renders from the API. */
+#mobileNav.is-open .mobile-nav__link {
+  animation: navRowIn .32s var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 26ms + 70ms);
+}
+@keyframes navRowIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gr-offcanvas { transition: none; }
+  #mobileNav.is-open .mobile-nav__link { animation: none; }
+  .mobile-nav__link { transition: none; }
+}
+
+/* Kept for the API-rendered child rows in category-menu.js. */
 .mobile-nav__sublink { display: block; padding: var(--space-2) var(--space-4); color: var(--text-secondary); font-size: var(--fs-16); }
 
 /* ---- Search autocomplete panel --------------------------------------- */
@@ -1156,8 +1296,12 @@ img.settle.is-settled {
  * specificity, modules/home/home.css) — that block still wins where it applies.
  */
 @media (max-width: 575.98px) {
+  /* align-items stays `end` from the base rule. Baseline is the tempting
+     choice for "put the link on the title's line" and it is wrong here:
+     .section-head__titles is a flex column, so its baseline is its FIRST
+     line — the eyebrow. Everything beside it then hangs off "CURATED FOR
+     YOU" and floats a full line above the heading it belongs to. */
   .section-head {
-    align-items: baseline;
     gap: var(--space-3);
     margin-bottom: var(--space-4);
   }

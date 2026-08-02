@@ -77,10 +77,43 @@ function applyAndRender(filters) {
 
 function paintGrid() {
   countEl.textContent = `${filtered.length} product${filtered.length === 1 ? '' : 's'}`;
-  if (!filtered.length) { grid.innerHTML = ''; emptyEl.hidden = false; loadMoreBtn.hidden = true; return; }
+  if (!filtered.length) {
+    grid.innerHTML = '';
+    paintEmpty(all.length === 0);
+    emptyEl.hidden = false;
+    loadMoreBtn.hidden = true;
+    return;
+  }
   emptyEl.hidden = true;
   renderProductGrid(grid, filtered.slice(0, shown));
   loadMoreBtn.hidden = shown >= filtered.length;
+}
+
+/**
+ * Two different empty states share one box.
+ *
+ * "No products match those filters — clear all filters" is a lie on a category
+ * that holds nothing at all: there is no filter to clear, and the button that
+ * offers to clear them does nothing. Most of the launch categories start
+ * unstocked and fill up as shipments land, so this is the common case, not the
+ * edge one.
+ */
+function paintEmpty(unstocked) {
+  const title = document.querySelector('[data-empty-title]');
+  const text = document.querySelector('[data-empty-text]');
+  const clearBtn = document.querySelector('[data-clear-filters]');
+  const browse = document.querySelector('[data-empty-browse]');
+
+  if (title) {
+    title.textContent = unstocked ? 'Landing soon' : 'No products match those filters';
+  }
+  if (text) {
+    text.textContent = unstocked
+      ? 'This category is open but not stocked yet — the first shipment is on its way.'
+      : 'Try widening your price range or clearing a filter.';
+  }
+  if (clearBtn) clearBtn.hidden = unstocked;
+  if (browse) browse.hidden = !unstocked;
 }
 
 /* ---- Local filter/sort (mirrors backend/api.js, in memory) ------------ */
