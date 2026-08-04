@@ -43,7 +43,7 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=0054fb6a">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=ffe12170">
   <link rel="stylesheet" href="../../modules/checkout/checkout.css?v=247726fe">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
@@ -103,37 +103,32 @@
                markup and not an empty div. -->
           <div class="mega-menu__grid" data-mega-grid>
             <div>
-              <a class="mega-menu__col-title" href="../../modules/catalog/category.html?slug=imported-food-grocery" style="display:block;text-decoration:none">Imported Food</a>
-              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=dates-honey">Dates &amp; Honey</a>
-              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=coffee-tea">Coffee &amp; Tea</a>
-              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=chocolates-confectionery">Chocolates &amp; Confectionery</a>
+              <p class="mega-menu__col-title">Food &amp; Pantry</p>
+              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=dates-nuts">Dates &amp; Nuts</a>
+              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=chocolates-dairy">Chocolates &amp; Dairy</a>
             </div>
             <div>
-              <p class="mega-menu__col-title">Pantry</p>
-              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=dates">Dates</a>
-              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=honey">Honey</a>
-              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=beverage">Beverage</a>
-              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=dry-fruits">Dry Fruits</a>
-              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=spices">Spices</a>
+              <p class="mega-menu__col-title">Home &amp; Kitchen</p>
+              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=kitchen-appliances">Kitchen Appliances</a>
+              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=home-decor">Home Decor</a>
             </div>
             <div>
-              <p class="mega-menu__col-title">Everyday</p>
-              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=nuts-makhana">Nuts &amp; Makhana</a>
-              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=baby-food">Baby Food</a>
-              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=herbs">Herbs</a>
-              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=oil-ghee">Oil &amp; Ghee</a>
+              <p class="mega-menu__col-title">Family &amp; Style</p>
+              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=fashion-clothes">Fashion &amp; Clothes</a>
+              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=kids-toys">Kids &amp; Toys</a>
+              <a class="mega-menu__link" href="../../modules/deals/deals.html">Flash Sale</a>
             </div>
           </div>
         </div>
       </div>
-      <!-- Shortcuts to the launch categories. Electronics and Industrial used
-           to sit here; both are switched off in categories.json for now, and a
-           nav item pointing at a category the storefront no longer lists is a
-           dead end with a promoted position. -->
-      <div class="nav-item"><a class="nav-link" href="../../modules/catalog/category.html?slug=dates" data-nav-match="slug=dates">Dates</a></div>
-      <div class="nav-item"><a class="nav-link" href="../../modules/catalog/category.html?slug=honey" data-nav-match="slug=honey">Honey</a></div>
-      <div class="nav-item"><a class="nav-link" href="../../modules/catalog/category.html?slug=nuts-makhana" data-nav-match="nuts-makhana">Nuts &amp; Makhana</a></div>
-      <div class="nav-item"><a class="nav-link" href="../../modules/deals/deals.html" data-nav-match="modules/deals" style="color:var(--lime-ink)">Deals</a></div>
+      <!-- Shortcuts to the launch categories. Only categories that are active
+           in categories.json belong here: a nav item pointing at a category the
+           storefront no longer lists is a dead end with a promoted position.
+           Dates & Nuts leads because it is the only one carrying stock today. -->
+      <div class="nav-item"><a class="nav-link" href="../../modules/catalog/category.html?slug=dates-nuts" data-nav-match="dates-nuts">Dates &amp; Nuts</a></div>
+      <div class="nav-item"><a class="nav-link" href="../../modules/catalog/category.html?slug=chocolates-dairy" data-nav-match="chocolates-dairy">Chocolates &amp; Dairy</a></div>
+      <div class="nav-item"><a class="nav-link" href="../../modules/catalog/category.html?slug=fashion-clothes" data-nav-match="fashion-clothes">Fashion</a></div>
+      <div class="nav-item"><a class="nav-link" href="../../modules/deals/deals.html" data-nav-match="modules/deals" style="color:var(--lime-ink)">Flash Sale</a></div>
       <div class="nav-item"><a class="nav-link" href="../../modules/content/about.html" data-nav-match="about">About</a></div>
     </nav>
 
@@ -181,20 +176,17 @@
   </div>
   <nav class="mobile-nav__body" aria-label="Mobile">
     <ul class="mobile-nav__list" role="list" data-mobile-shop>
-      <li style="--i:1"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=imported-food-grocery">Imported Food</a></li>
-      <li style="--i:2"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=dates">Dates</a></li>
-      <li style="--i:3"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=honey">Honey</a></li>
-      <li style="--i:4"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=beverage">Beverage</a></li>
-      <li style="--i:5"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=dry-fruits">Dry Fruits</a></li>
-      <li style="--i:6"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=spices">Spices</a></li>
-      <li style="--i:7"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=nuts-makhana">Nuts &amp; Makhana</a></li>
-      <li style="--i:8"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=baby-food">Baby Food</a></li>
-      <li style="--i:9"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=herbs">Herbs</a></li>
-      <li style="--i:10"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=oil-ghee">Oil &amp; Ghee</a></li>
+      <li style="--i:1"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=chocolates-dairy">Chocolates &amp; Dairy</a></li>
+      <li style="--i:2"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=home-decor">Home Decor</a></li>
+      <li style="--i:3"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=kitchen-appliances">Kitchen Appliances</a></li>
+      <li style="--i:4"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=dates-nuts">Dates &amp; Nuts</a></li>
+      <li style="--i:5"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=kids-toys">Kids &amp; Toys</a></li>
+      <li style="--i:6"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=fashion-clothes">Fashion &amp; Clothes</a></li>
+      <li style="--i:7"><a class="mobile-nav__link" href="../../modules/deals/deals.html">Flash Sale</a></li>
     </ul>
     <ul class="mobile-nav__list mobile-nav__list--minor" role="list">
-      <li style="--i:11"><a class="mobile-nav__link" href="../../modules/account/dashboard.html">My Account</a></li>
-      <li style="--i:12"><a class="mobile-nav__link" href="../../modules/content/about.html">About</a></li>
+      <li style="--i:8"><a class="mobile-nav__link" href="../../modules/account/dashboard.html">My Account</a></li>
+      <li style="--i:9"><a class="mobile-nav__link" href="../../modules/content/about.html">About</a></li>
     </ul>
   </nav>
 </aside>
@@ -278,12 +270,13 @@
       <!-- Link columns -->
       <nav aria-label="Shop"><p class="mega-menu__col-title">Shop</p>
         <ul role="list" class="stack-2" style="font-size:var(--fs-14)">
-          <li><a href="../../modules/deals/deals.html">Deals &amp; Offers</a></li>
-          <li><a href="../../modules/catalog/category.html?slug=imported-food-grocery">Imported Food</a></li>
-          <li><a href="../../modules/catalog/category.html?slug=dates">Dates</a></li>
-          <li><a href="../../modules/catalog/category.html?slug=honey">Honey</a></li>
-          <li><a href="../../modules/catalog/category.html?slug=nuts-makhana">Nuts &amp; Makhana</a></li>
-          <li><a href="../../modules/catalog/category.html?slug=oil-ghee">Oil &amp; Ghee</a></li>
+          <li><a href="../../modules/deals/deals.html">Flash Sale</a></li>
+          <li><a href="../../modules/catalog/category.html?slug=dates-nuts">Dates &amp; Nuts</a></li>
+          <li><a href="../../modules/catalog/category.html?slug=chocolates-dairy">Chocolates &amp; Dairy</a></li>
+          <li><a href="../../modules/catalog/category.html?slug=kitchen-appliances">Kitchen Appliances</a></li>
+          <li><a href="../../modules/catalog/category.html?slug=home-decor">Home Decor</a></li>
+          <li><a href="../../modules/catalog/category.html?slug=fashion-clothes">Fashion &amp; Clothes</a></li>
+          <li><a href="../../modules/catalog/category.html?slug=kids-toys">Kids &amp; Toys</a></li>
         </ul>
       </nav>
       <nav aria-label="Company"><p class="mega-menu__col-title">Company</p>
@@ -336,7 +329,7 @@
   @media (min-width: 768px)  { .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; } }
 </style>
 
-  <script type="module" src="../../shared/js/main.js?v=0075d1b6"></script>
+  <script type="module" src="../../shared/js/main.js?v=b67929f0"></script>
   <script type="module" src="../../modules/checkout/confirmation-page.js?v=a4a1aaa7"></script>
 </body>
 </html>

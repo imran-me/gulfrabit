@@ -38,6 +38,20 @@ export function initBuyBar() {
     real.click();
   });
 
+  // The price is read out of the page once, at mount. A size picker changes it
+  // afterwards, and a sticky bar quoting the price of a pack the customer has
+  // moved off is worse than no bar. The PDP fires this when it repaints.
+  document.addEventListener('pdp:pricechange', () => {
+    const now = bar.querySelector('.buybar__now');
+    const was = bar.querySelector('.buybar__was');
+    if (now) now.textContent = readPrice('.pdp-price__now');
+    const struck = readPrice('.pdp-price .price--strike');
+    if (was) was.textContent = struck;
+    else if (struck) {
+      now?.insertAdjacentHTML('afterend', `<span class="buybar__was">${escapeHtml(struck)}</span>`);
+    }
+  });
+
   const observer = new IntersectionObserver(([entry]) => {
     const offScreen = !entry.isIntersecting;
     const narrow = window.innerWidth < HIDE_ABOVE;
@@ -67,9 +81,11 @@ export function initBuyBar() {
  * place for currency formatting to be slightly different, and the two would
  * disagree on exactly the product where it mattered.
  */
+const readPrice = (sel) => document.querySelector(sel)?.textContent?.trim() ?? '';
+
 function build(real) {
-  const now = document.querySelector('.pdp-price__now')?.textContent?.trim() ?? '';
-  const was = document.querySelector('.pdp-price .price--strike')?.textContent?.trim() ?? '';
+  const now = readPrice('.pdp-price__now');
+  const was = readPrice('.pdp-price .price--strike');
 
   const bar = document.createElement('div');
   bar.className = 'buybar';

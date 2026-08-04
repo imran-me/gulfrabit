@@ -93,6 +93,50 @@
 .pdp-price__now { font-family: var(--font-display); font-size: var(--fs-31); }
 .pdp-actions { display: flex; gap: var(--space-3); margin: var(--space-5) 0; }
 
+/* ---- Size ladder -------------------------------------------------------
+   Sits between the stock line and Add to Cart, which is the order the decision
+   is made in: is it here, which size, buy. Each option carries its own price,
+   so choosing does not mean clicking to find out what it costs. */
+.variant-picker { margin-top: var(--space-5); }
+.variant-picker__head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--space-3); margin-bottom: var(--space-3);
+}
+.variant-picker__label {
+  font-size: var(--fs-12); font-weight: var(--fw-semibold);
+  letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted);
+}
+/* The unit rate. It is the only honest way to compare rungs — 500 g at ৳1,380
+   against 1 kg at ৳2,650 is not arithmetic anyone should do in a shop. */
+.variant-picker__unit { font-size: var(--fs-12); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+.variant-picker__options { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.variant-opt {
+  flex: 1 1 92px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-height: 60px; padding: var(--space-2) var(--space-3);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out);
+}
+.variant-opt__label { font-size: var(--fs-14); font-weight: var(--fw-semibold); white-space: nowrap; }
+.variant-opt__price { font-size: var(--fs-12); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+@media (hover: hover) {
+  .variant-opt:hover:not(:disabled) { border-color: var(--gr-cyan-dark); }
+}
+.variant-opt.is-selected {
+  border-color: var(--gr-cyan-dark);
+  box-shadow: inset 0 0 0 1px var(--gr-cyan-dark);
+  background: rgba(27,180,212,.06);
+}
+.variant-opt.is-selected .variant-opt__price { color: var(--link-hover); }
+.variant-opt:disabled { opacity: .45; cursor: not-allowed; text-decoration: line-through; }
+
 /* ---- Sticky buy bar (phones and small tablets) -------------------------
  *
  * A product page is long: gallery, price, description, specs, FAQ, reviews,

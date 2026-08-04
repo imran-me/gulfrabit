@@ -1829,6 +1829,49 @@ non-food keys are parked in place, not deleted.
 Barcodes are mock EAN-13 with valid check digits, which `gen-sourcing-facts.py`
 verifies, and must be replaced with real supplier codes before launch.
 
+### Pricing model and the size ladder (2026-08-02)
+
+**list = landed cost × 1.20. sale = list × 0.95 on eight products.** The
+struck-through number on a card is the list price; the 5% is the only discount
+on the site, and the eight that carry it are exactly the Best Sellers plus the
+olive oil — so the Deals page is a real shelf rather than every product marked
+down, which is what "everything is on sale" always ends up meaning.
+
+Cost prices are **not** in `products.json` — that file is served to the public,
+and a margin is not something to publish. The rates live in the build script
+noted in the commit; only list and sale ship.
+
+Every product now has a size ladder: 200 g / 500 g / 1 kg for dry goods,
+250 ml–1 L for the oils, 1–5 g for saffron, 50–250 g for oregano, 250 g / 500 g
+for Mānuka. **The smallest rung pays the full per-unit rate, the middle takes 4%
+off it and the largest 8%** — the reason to trade up is real, and the per-unit
+rate is printed beside the picker (`৳ 2,760 / kg` at 500 g against `৳ 2,650 / kg`
+at 1 kg) because nobody should have to do that division in a shop.
+
+Sizes came **out of the titles**. A title that says "(1kg)" above a picker
+offering 200 g contradicts itself; the size is a property of the price, so it
+lives on the price row on cards and in the picker on the PDP.
+
+What that touched, and why each one was not optional:
+
+- `product.price` / `originalPrice` still exist and mirror the **default**
+  variant, so cards, sorting, filters, the Deals query and the compare table
+  never had to learn what a variant is.
+- Cart lines are keyed on `id + variant` — that already existed in
+  `state.js` — but nothing **displayed** the variant, so two sizes of the same
+  product were two identical-looking rows. Drawer, cart page, checkout summary,
+  checkout review and the saved order record now all carry it.
+- `saveForLater` dropped the variant, which quietly moved a 1 kg line back into
+  the cart as the default size.
+- The sticky buy bar reads the price out of the DOM once, at mount. A picker
+  changes it afterwards, so the PDP fires `pdp:pricechange` and the bar re-reads
+  — it still never re-derives the price itself.
+- The WhatsApp order message carries the size. Without it, an order placed from
+  that button opens with the agent asking which pack — the one question the
+  prefilled message exists to prevent.
+- A product with one size shows **no picker**. A picker with a single button in
+  it reads as a page that lost its other options.
+
 ### Where things stand (2026-07-30)
 
 **Done and live:** Phase 8 entire, storefront 5.3 (CSP/HSTS/COOP), both CDNs

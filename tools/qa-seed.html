@@ -17,14 +17,15 @@
   var qs = new URLSearchParams(location.search);
 
   // Two lines, one with qty 2, so totals exercise real arithmetic:
-  //   1950*2 + 1650 = 5550 subtotal — which also clears the ৳4,000 gift
-  //   threshold in modules/cart/data/rewards.json, so the reward row is on
-  //   screen without anyone having to add a third item by hand.
+  //   1680*2 + 1425 = 4785 subtotal. Two different pack sizes, so the cart
+  //   renders the variant label, and the subtotal clears the ৳4,000 gift
+  //   threshold in modules/cart/data/rewards.json — the reward row is on screen
+  //   without anyone having to add a third item by hand.
   var CART = [
-    { id: 'gr-1102', title: 'Medjool Dates — Jumbo Grade (1kg)', brand: 'GulfRabit Select',
-      price: 1950, image: '/assets/images/products/gr-1102.jpg', variant: null, qty: 2 },
-    { id: 'gr-1202', title: 'Iranian Wildflower Honey (500g)', brand: 'GulfRabit Select',
-      price: 1650, image: '/assets/images/products/gr-1202.jpg', variant: null, qty: 1 }
+    { id: 'gr-1102', title: 'Medjool Dates — Jumbo Grade', brand: 'GulfRabit Select',
+      price: 1680, image: '/assets/images/products/gr-1102.jpg', variant: '1 kg', qty: 2 },
+    { id: 'gr-1202', title: 'Iranian Wildflower Honey', brand: 'GulfRabit Select',
+      price: 1425, image: '/assets/images/products/gr-1202.jpg', variant: '500 g', qty: 1 }
   ];
 
   if (qs.get('cart') === 'empty') localStorage.removeItem('gr:cart');

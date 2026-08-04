@@ -265,6 +265,16 @@
 }
 
 /* ---- Category card --------------------------------------------------- */
+/* The pack size the card price is for. Muted, and on the price row rather than
+   in the title, because the size is a property of the price — the title is the
+   same product at every rung of the ladder. */
+.product-card__size {
+  margin-left: auto;
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 .category-card {
   position: relative;
   display: flex; flex-direction: column; justify-content: flex-end;

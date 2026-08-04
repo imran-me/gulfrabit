@@ -25,7 +25,7 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table): void {
             $table->id();
 
-            // Public SKU — 'gr-1001'. Appears in URLs, orders and the barcode
+            // Public SKU — 'gr-1101'. Appears in URLs, orders and the barcode
             // block, so it is immutable once an order references it.
             $table->string('sku', 32)->unique();
 

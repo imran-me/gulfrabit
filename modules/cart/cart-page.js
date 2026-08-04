@@ -68,7 +68,10 @@ function itemHTML(l) {
       <a class="cart-item__media" href="${siteURL(`modules/catalog/product.html?id=${l.id}`)}"><img src="${l.image}" alt="${escapeAttr(l.title)}" loading="lazy"></a>
       <div>
         <a href="${siteURL(`modules/catalog/product.html?id=${l.id}`)}"><div class="cart-item__title">${escapeHtml(l.title)}</div></a>
-        <div class="cart-item__meta">${l.brand ? escapeHtml(l.brand) : ''}</div>
+        <!-- The size leads. Two lines of the same product in different packs are
+             otherwise identical on screen, and the customer cannot tell which
+             one they are about to remove. -->
+        <div class="cart-item__meta">${l.variant ? `<strong>${escapeHtml(l.variant)}</strong>${l.brand ? ' · ' : ''}` : ''}${l.brand ? escapeHtml(l.brand) : ''}</div>
         <div class="cart-item__controls">
           <div class="qty-stepper" data-qty>
             <button class="qty-stepper__btn" type="button" data-dec aria-label="Decrease">−</button>
@@ -128,7 +131,11 @@ function wireSaved(saved) {
 
 function saveForLater(line) {
   const saved = storage.get(KEYS.SAVED_FOR_LATER, []);
-  if (!saved.some((s) => s.id === line.id)) saved.push({ id: line.id, title: line.title, brand: line.brand, price: line.price, image: line.image });
+  // variant travels with it, or Save for later on a 1 kg line moves a 500 g one
+  // back into the cart when it returns.
+  if (!saved.some((s) => s.id === line.id && (s.variant ?? null) === (line.variant ?? null))) {
+    saved.push({ id: line.id, title: line.title, brand: line.brand, price: line.price, image: line.image, variant: line.variant ?? null });
+  }
   storage.set(KEYS.SAVED_FOR_LATER, saved);
   store.removeFromCart(line.id, line.variant);
   toast.info('Saved for later');

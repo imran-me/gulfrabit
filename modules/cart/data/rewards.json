@@ -9,11 +9,12 @@
       "id": "gift-oregano",
       "thresholdTaka": 4000,
       "productSku": "gr-1801",
-      "label": "Oregano — Naturally Dried (100g)",
+      "label": "Oregano — Naturally Dried (50 g)",
       "teaser": "a free jar of dried oregano",
       "image": "/assets/images/products/gr-1801.jpg",
-      "valueTaka": 480,
-      "isActive": true
+      "valueTaka": 220,
+      "isActive": true,
+      "variant": "50 g"
     }
   ]
 }

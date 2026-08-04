@@ -1,8 +1,8 @@
 /**
  * router-helpers — read/write URL query params without a router library.
  * PLP/PDP/search pages read their identity from the query string, e.g.
- *   modules/catalog/category.html?slug=nuts-dry-fruits&sort=price-asc
- *   modules/catalog/product.html?id=gr-1042
+ *   modules/catalog/category.html?slug=nuts-makhana&sort=price-asc
+ *   modules/catalog/product.html?id=gr-1101
  *   modules/catalog/search-results.html?q=medjool%20dates
  */
 

@@ -27,10 +27,10 @@ cacheable at the edge.
     "title": "The dates-and-honey table",
     "reason": "Medjool dates, Sidr honey and pistachios are the three things that end up on the same plate at iftar and at every gathering after it.",
     "source": "curated",
-    "anchor": { "id": "gr-1001", "title": "…", "price": 1450, "originalPrice": 1800, "moq": null, "…": "…" },
+    "anchor": { "id": "gr-1102", "title": "…", "price": 875, "originalPrice": 920, "moq": null, "…": "…" },
     "companions": [
-      { "id": "gr-1002", "…": "…" },
-      { "id": "gr-1201", "…": "…" }
+      { "id": "gr-1202", "…": "…" },
+      { "id": "gr-1601", "…": "…" }
     ]
   }
 }

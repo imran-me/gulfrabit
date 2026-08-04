@@ -30,6 +30,17 @@
         <p class="text-muted-gr" data-pdp-short style="max-width:56ch"></p>
         <p data-pdp-stock style="margin-top:.75rem"></p>
 
+        <!-- Size ladder. Rendered by product-page.js from product.variants and
+             hidden when a product has only one size, so a single-size product
+             never shows a picker with one button in it. -->
+        <div class="variant-picker" data-pdp-variants hidden>
+          <div class="variant-picker__head">
+            <span class="variant-picker__label" id="size-label">Size</span>
+            <span class="variant-picker__unit" data-variant-unit></span>
+          </div>
+          <div class="variant-picker__options" role="radiogroup" aria-labelledby="size-label" data-variant-options></div>
+        </div>
+
         <div class="pdp-actions">
           <div class="qty-stepper" data-qty-stepper data-min="1" data-max="99">
             <button class="qty-stepper__btn" type="button" data-qty-dec aria-label="Decrease quantity">−</button>

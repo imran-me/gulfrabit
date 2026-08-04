@@ -79,7 +79,7 @@ function render() {
       <img class="cart-line__thumb" src="${l.image}" alt="${escapeAttr(l.title)}" loading="lazy">
       <div>
         <div class="cart-line__title">${escapeHtml(l.title)}</div>
-        <div class="cart-line__meta">${l.brand ? escapeHtml(l.brand) + ' · ' : ''}Qty
+        <div class="cart-line__meta">${l.variant ? `<strong>${escapeHtml(l.variant)}</strong> · ` : ''}${l.brand ? escapeHtml(l.brand) + ' · ' : ''}Qty
           <button class="cart-line__qty-dec" aria-label="Decrease quantity" style="background:none;border:0;color:inherit;cursor:pointer">−</button>
           <span class="tabular">${l.qty}</span>
           <button class="cart-line__qty-inc" aria-label="Increase quantity" style="background:none;border:0;color:inherit;cursor:pointer">+</button>

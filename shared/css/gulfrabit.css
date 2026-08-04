@@ -663,6 +663,16 @@ a:hover { color: var(--link-hover); }
 }
 
 /* ---- Category card --------------------------------------------------- */
+/* The pack size the card price is for. Muted, and on the price row rather than
+   in the title, because the size is a property of the price — the title is the
+   same product at every rung of the ladder. */
+.product-card__size {
+  margin-left: auto;
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 .category-card {
   position: relative;
   display: flex; flex-direction: column; justify-content: flex-end;
@@ -736,8 +746,19 @@ a:hover { color: var(--link-hover); }
 }
 /* Block-centered (not flex) so long text wraps within the bar instead of
    forcing the document wider than the viewport on mobile. */
-.announce-bar__inner { position: relative; text-align: center; padding: 8px 2.75rem; line-height: 1.35; max-width: var(--container-max); margin-inline: auto; }
-.announce-bar__close { position: absolute; right: var(--space-3); top: 50%; transform: translateY(-50%); background: none; border: 0; color: #04222b; cursor: pointer; opacity: .7; line-height: 1; }
+.announce-bar__inner { position: relative; text-align: center; padding: 8px 3rem; line-height: 1.35; max-width: var(--container-max); margin-inline: auto; }
+/* The ✕ glyph is 11×14. Sized as a button rather than left to shrink-wrap it,
+   because a bare glyph is what it was: an 11×14 target on every page of the
+   site, under even WCAG 2.5.8's 24×24 minimum, sitting in the corner a thumb
+   reaches for first. The mark stays the same size — only the box around it
+   grows — and .announce-bar__inner's side padding went 2.75rem → 3rem so a
+   44px box clears the centred text instead of landing on top of it. */
+.announce-bar__close {
+  position: absolute; right: 2px; top: 50%; transform: translateY(-50%);
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  background: none; border: 0; color: #04222b; cursor: pointer; opacity: .7; line-height: 1;
+}
 @media (hover: hover) {
   .announce-bar__close:hover { opacity: 1; }
 }
@@ -1483,8 +1504,21 @@ button, input, optgroup, select, textarea {
 
 /* Buttons and tables carry a UA border otherwise. Our components set their
    own where they want one; this stops the ones that do not from sprouting a
-   grey 2px bevel. */
-button, [type="button"], [type="reset"], [type="submit"] {
+   grey 2px bevel.
+
+   :where() ZEROES THE SPECIFICITY, and it is load-bearing, not tidiness.
+   `[type="button"]` is an attribute selector — specificity (0,1,0), the same
+   as a class. So this rule TIED with .btn-primary-gr / .btn-gradient-gr /
+   .btn-gr's own `background: var(--_bg)`, and because style.css's own rules
+   are concatenated after every partial (see bundle_css in tools/assemble.py),
+   the tie broke in favour of the reset. Every `<button type="button">` and
+   `<button type="submit">` carrying a .btn-gr variant rendered with a
+   transparent background — 142 of them across the site, including Place Order
+   on the cart. Anchors and bare <button>s were unaffected, which is why it
+   survived: the buttons people looked at hardest were the styled <a>s.
+
+   A reset must lose every argument with a component. :where() guarantees it. */
+:where(button, [type="button"], [type="reset"], [type="submit"]) {
   appearance: button;
   background-color: transparent;
   background-image: none;

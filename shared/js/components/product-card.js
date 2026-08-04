@@ -77,7 +77,7 @@ export function productBadges(product, max = 2) {
 export function productCardHTML(product) {
   const {
     id, title, brand, origin, price, originalPrice, image, rating = 0,
-    reviewCount = 0, inStock = true, tags = [],
+    reviewCount = 0, inStock = true, tags = [], defaultVariant = null,
   } = product;
 
   const badges = productBadges(product);
@@ -86,7 +86,8 @@ export function productCardHTML(product) {
   return `
   <article class="product-card" data-product-card
            data-id="${id}" data-title="${escapeAttr(title)}" data-brand="${escapeAttr(brand || '')}"
-           data-price="${price}" data-image="${escapeAttr(image)}">
+           data-price="${price}" data-image="${escapeAttr(image)}"
+           data-variant="${escapeAttr(defaultVariant || '')}">
     <div class="product-card__media">
       <div class="product-card__badges">${badges.join('')}</div>
       <div class="product-card__actions">
@@ -109,6 +110,10 @@ export function productCardHTML(product) {
       <div class="product-card__price-row">
         <span class="price product-card__price">${formatBDT(price)}</span>
         ${originalPrice && originalPrice > price ? `<span class="price price--strike">${formatBDT(originalPrice)}</span>` : ''}
+        ${/* Which size that price buys. Without it a card reading ৳ 875 beside
+              one reading ৳ 1,380 looks like a price difference when it is a
+              pack-size difference. */
+          defaultVariant ? `<span class="product-card__size">${escapeHtml(defaultVariant)}</span>` : ''}
       </div>
       ${originalPrice && originalPrice > price ? `<span class="price-saving">${savingsLabel(originalPrice, price)}</span>` : ''}
       <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart"
@@ -134,6 +139,11 @@ function cardPayload(card) {
     brand: card.dataset.brand,
     price: Number(card.dataset.price),
     image: card.dataset.image,
+    // The size the card is priced at. Cart lines are keyed on id + variant, so
+    // this is what stops a card add and a PDP add of the same size becoming two
+    // lines — and what stops a card add of the default size merging into a line
+    // the customer built at 1 kg on the product page.
+    variant: card.dataset.variant || null,
   };
 }
 

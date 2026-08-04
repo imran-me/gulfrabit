@@ -33,7 +33,7 @@ return new class extends Migration
             // silently leave carts advertising a gift that cannot be fulfilled.
             $table->foreignId('product_id')->constrained('products')->restrictOnDelete();
 
-            $table->string('teaser')->comment('"a free pack of Ceylon Black Tea"');
+            $table->string('teaser')->comment('"a free jar of dried oregano"');
 
             $table->timestamp('starts_at')->nullable();
             $table->timestamp('ends_at')->nullable();
