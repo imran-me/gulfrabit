@@ -2,7 +2,12 @@
   "name": "gulfrabit/storefront",
   "type": "project",
   "description": "GulfRabit — premium imports for Bangladesh. Laravel backend, one module per feature.",
-  "keywords": ["laravel", "ecommerce", "bangladesh", "modular"],
+  "keywords": [
+    "laravel",
+    "ecommerce",
+    "bangladesh",
+    "modular"
+  ],
   "license": "proprietary",
   "require": {
     "php": "^8.2",
@@ -37,7 +42,8 @@
       "Modules\\Account\\": "modules/account/backend/",
       "Modules\\B2b\\": "modules/b2b/backend/",
       "Modules\\Deals\\": "modules/deals/backend/",
-      "Modules\\Content\\": "modules/content/backend/"
+      "Modules\\Content\\": "modules/content/backend/",
+      "Modules\\Marketing\\": "modules/marketing/backend/"
     }
   },
   "autoload-dev": {

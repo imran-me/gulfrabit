@@ -32,6 +32,7 @@ return [
     Modules\Highlights\HighlightsServiceProvider::class,
     Modules\Inventory\InventoryServiceProvider::class,
     Modules\Media\MediaServiceProvider::class,
+    Modules\Marketing\MarketingServiceProvider::class,
     Modules\Delivery\DeliveryServiceProvider::class,
 
     // Added as each module grows a Laravel layer. The frontend for these already

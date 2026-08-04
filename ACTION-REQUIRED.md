@@ -123,6 +123,33 @@ until you are taking orders.
 
 ---
 
+## 6b. Meta ads — two .env keys and one paste — 5 minutes
+
+The tracking is built on both sides and ships switched off. Turning it on:
+
+1. **Events Manager → your pixel → Settings → Conversions API → Generate
+   access token.** In hPanel, add to `.env`:
+
+   ```
+   META_PIXEL_ID=<the 15-16 digit pixel id>
+   META_CAPI_TOKEN=<the token — this file is the ONLY place it goes>
+   ```
+
+   Then `php artisan config:cache` (or just wait for the next deploy, which
+   runs it).
+
+2. **Paste the same pixel id** into the `metaPixelId` field of
+   `shared/js/core/site-config.js` and push.
+
+Until both are done: no tracking script loads, nothing is sent anywhere, and
+the shop behaves exactly as it does today. When both are done, every ad
+click, checkout and purchase reports to Meta twice (browser + server) and
+deduplicates — which is what lets Meta optimise for buyers instead of
+clickers. Each order also records which campaign sold it, visible on the
+order screen in the panel.
+
+---
+
 ## 7. Security housekeeping — 5 minutes
 
 - The **SSH password** you pasted in chat — change it if you have not

@@ -27,10 +27,10 @@ export const CONFIG = {
    * prevention, ad blockers and in-app browsers; the Conversions API exists to
    * recover them. Both sides send the same event_id and Meta deduplicates.
    *
-   * // TODO(backend): implement this route — it must attach the access token
-   * // server-side and POST to https://graph.facebook.com/v21.0/<pixel>/events.
-   * // Until it exists the fetch 404s and is swallowed, which is why the pixel
-   * // still works on its own today.
+   * The route is modules/marketing (TrackController). It answers 204 until
+   * META_PIXEL_ID and META_CAPI_TOKEN are set in the server's .env — the
+   * token lives there and ONLY there. On a static host the fetch 404s once
+   * and the circuit breaker stops calling; the pixel works alone.
    */
   capiEndpoint: '/api/track',
 
