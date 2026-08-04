@@ -67,12 +67,23 @@ const CATEGORIES_URL = siteURL('modules/catalog/data/categories.json');
 
 /* ---- Products ---------------------------------------------------------- */
 
+/**
+ * Every product read in the storefront goes through here — category pages,
+ * search, the suggest dropdown, deals, related rails and the home shelves all
+ * call it — which makes it the one place the active flag has to be applied.
+ *
+ * Same shape as getCategories() below, and for the same reason: the API has
+ * already filtered server-side, the JSON file has not. Shipping the raw file
+ * would put every parked product back into search the moment PHP is not
+ * serving /api, and "turned off" has to mean gone from the whole shop, not
+ * gone from the category page it used to sit on.
+ */
 export async function getAllProducts() {
   const live = await fromApi('/products');
-  if (live) return live;
+  if (live) return live.filter(isActive);
 
   const { products } = await loadJSON(PRODUCTS_URL);
-  return products;
+  return products.filter(isActive);
 }
 
 export async function getProductById(id) {
@@ -181,6 +192,12 @@ export async function getCategories() {
   return categories.filter(isActive);
 }
 
+/**
+ * Shared by categories and products. Absent flag means on, so a row added
+ * without one behaves the way whoever added it expected. Declared here rather
+ * than beside getAllProducts because both callers are equal owners of it —
+ * `const` is fine below its first caller since nothing runs at import time.
+ */
 const isActive = (c) => c.active !== false && c.isActive !== false;
 
 export async function getCategoryBySlug(slug) {

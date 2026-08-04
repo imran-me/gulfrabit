@@ -73,39 +73,54 @@ class CatalogSeeder extends Seeder
                 );
             }
 
-            Product::updateOrCreate(
-                ['sku' => $row['id']],
-                [
-                    'title'                 => $row['title'],
-                    'brand'                 => $row['brand'] ?? null,
-                    'origin'                => $row['origin'] ?? null,
-                    'barcode'               => $row['barcode'] ?? null,
-                    'category_id'           => $categoryId,
-                    // Sub-categories are a slug on the product in the mock data.
-                    // They become real rows once the taxonomy is managed in admin.
-                    'sub_category_id'       => $categoryIds[$row['subSlug'] ?? ''] ?? null,
-                    'price_poisha'          => $this->toPoisha($row['price']),
-                    'original_price_poisha' => isset($row['originalPrice']) && $row['originalPrice'] > $row['price']
-                        ? $this->toPoisha($row['originalPrice'])
-                        : null,
-                    'image'                 => $row['image'] ?? null,
-                    'images'                => $row['images'] ?? [],
-                    'rating'                => $row['rating'] ?? 0,
-                    'review_count'          => $row['reviewCount'] ?? 0,
-                    'in_stock'              => $row['inStock'] ?? true,
-                    'tags'                  => $row['tags'] ?? [],
-                    'dietary'               => $row['dietary'] ?? [],
-                    'search_terms'          => $row['searchTerms'] ?? [],
-                    'short_description'     => $row['shortDescription'] ?? null,
-                    'description'           => $row['description'] ?? null,
-                    'moq'                   => $row['moq'] ?? null,
-                    'price_tiers'           => $this->tiersToPoisha($row['priceTiers'] ?? null),
-                    'faq'                   => $row['faq'] ?? null,
-                    'specs'                 => $row['specs'] ?? null,
-                    'datasheet'             => $row['datasheet'] ?? null,
-                    'is_active'             => true,
-                ],
-            );
+            $product = Product::firstOrNew(['sku' => $row['id']]);
+
+            // Same rule as categories above: is_active is SEEDED, not synced.
+            // It used to be hardcoded true in the attribute list below, which
+            // meant a re-seed silently re-listed every product a merchant had
+            // switched off — and, once products.json grew its own `active`
+            // flag, quietly ignored it too.
+            if (! $product->exists) {
+                $product->is_active = $row['active'] ?? true;
+            }
+
+            $product->fill([
+                'title'                 => $row['title'],
+                'brand'                 => $row['brand'] ?? null,
+                'origin'                => $row['origin'] ?? null,
+                'barcode'               => $row['barcode'] ?? null,
+                'category_id'           => $categoryId,
+                // Sub-categories are a slug on the product in the mock data.
+                // They become real rows once the taxonomy is managed in admin.
+                'sub_category_id'       => $categoryIds[$row['subSlug'] ?? ''] ?? null,
+                'price_poisha'          => $this->toPoisha($row['price']),
+                'original_price_poisha' => isset($row['originalPrice']) && $row['originalPrice'] > $row['price']
+                    ? $this->toPoisha($row['originalPrice'])
+                    : null,
+                'image'                 => $row['image'] ?? null,
+                'images'                => $row['images'] ?? [],
+                // Both have been in products.json since launch with no column
+                // to land in — see the 2026_08_04 migration. Taka in the file,
+                // poisha in the column.
+                'unit'                  => $row['unit'] ?? null,
+                'variants'              => $this->variantsToPoisha($row['variants'] ?? null),
+                'default_variant'       => $row['defaultVariant'] ?? null,
+                'rating'                => $row['rating'] ?? 0,
+                'review_count'          => $row['reviewCount'] ?? 0,
+                'in_stock'              => $row['inStock'] ?? true,
+                'tags'                  => $row['tags'] ?? [],
+                'dietary'               => $row['dietary'] ?? [],
+                'search_terms'          => $row['searchTerms'] ?? [],
+                'short_description'     => $row['shortDescription'] ?? null,
+                'description'           => $row['description'] ?? null,
+                'moq'                   => $row['moq'] ?? null,
+                'price_tiers'           => $this->tiersToPoisha($row['priceTiers'] ?? null),
+                'faq'                   => $row['faq'] ?? null,
+                'specs'                 => $row['specs'] ?? null,
+                'datasheet'             => $row['datasheet'] ?? null,
+            ]);
+
+            $product->save();
         }
     }
 
@@ -113,6 +128,35 @@ class CatalogSeeder extends Seeder
     private function toPoisha(int|float|string $taka): int
     {
         return (int) round((float) $taka * 100);
+    }
+
+    /**
+     * Variant rows from the JSON, priced in poisha.
+     *
+     * The shape mirrors what the storefront actually consumes (see
+     * paintVariants in modules/catalog/product-page.js): LABEL is the key —
+     * cart lines and order rows record the chosen variant by label, so it is
+     * required and everything else is optional. `amount` is how much of the
+     * product's `unit` the pack holds; it exists for the "৳ X / kg" line.
+     * Taka in the file, poisha in the column.
+     *
+     * @return array<int, array<string, mixed>>|null
+     */
+    private function variantsToPoisha(?array $variants): ?array
+    {
+        if (empty($variants)) {
+            return null;
+        }
+
+        return array_values(array_map(fn (array $v): array => [
+            'label'                 => (string) ($v['label'] ?? ''),
+            'amount'                => $v['amount'] ?? null,
+            'price_poisha'          => $this->toPoisha($v['price'] ?? 0),
+            'original_price_poisha' => isset($v['originalPrice']) && $v['originalPrice'] > ($v['price'] ?? 0)
+                ? $this->toPoisha($v['originalPrice'])
+                : null,
+            'in_stock'              => (bool) ($v['inStock'] ?? true),
+        ], $variants));
     }
 
     /** @return array<int, array{qty:int, price_poisha:int}>|null */

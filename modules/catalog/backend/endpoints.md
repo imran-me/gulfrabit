@@ -21,7 +21,7 @@ admin writes will live behind an auth group in their own module.
 
 ```ts
 type Product = {
-  id: string;                   // SKU — 'gr-1001'. Immutable once ordered.
+  id: string;                   // SKU — 'gr-1101'. Immutable once ordered.
   title: string;
   brand: string | null;
   origin: string | null;        // country of origin — a trust signal

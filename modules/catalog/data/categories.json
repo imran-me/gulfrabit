@@ -1,8 +1,8 @@
 {
   "_meta": {
     "note": "Seeded by CatalogSeeder. Adding a category here creates it; it never deletes one, because a category with products in it is not something a data file should be able to remove. Use the admin panel's on/off switch to hide a category instead — that hides its products too, reversibly.",
-    "active": "The launch set is food-only: imported-food-grocery, dates, honey, beverage, dry-fruits, spices, nuts-makhana, baby-food, herbs, oil-ghee. Everything else is \"active\": false — kept in full (slug, blurb, children, seeder row) so switching it back on is one boolean, not a re-authoring job. This flag is the static-site mirror of the DB's is_active column: the front end reads it in modules/catalog/backend/api.js getCategories() and shared/js/components/category-menu.js, and tools/sitemap.py skips inactive slugs. Turning one back on: flip it here, then re-run tools/assemble.py and tools/sitemap.py, and add it back to the hand-authored lists in shared/components/header.html + index.html.",
-    "version": 2
+    "active": "The live set is the seven launch categories: chocolates-dairy, home-decor, kitchen-appliances, dates-nuts, kids-toys, fashion-clothes, flash-sale. Every earlier category is \"active\": false — kept in full (slug, blurb, children, image, seeder row) so switching one back on is one boolean, not a re-authoring job. This flag is the static-site mirror of the DB's is_active column: the front end reads it in modules/catalog/backend/api.js getCategories() and shared/js/components/category-menu.js, and tools/sitemap.py skips inactive slugs. Turning one on: flip it here, then re-run tools/assemble.py and tools/sitemap.py, and add it to the hand-authored lists in shared/components/header.html + index.html.",
+    "version": 3
   },
   "categories": [
     {
@@ -11,7 +11,7 @@
       "icon": "basket",
       "image": "/assets/images/categories/food.svg",
       "audience": "retail",
-      "active": true,
+      "active": false,
       "blurb": "Sourced from trusted origins. Chocolates, coffee, tea and pantry staples.",
       "children": [
         {
@@ -154,7 +154,7 @@
       "image": "/assets/images/categories/dates.svg",
       "blurb": "Medjool, Ajwa, Sukkari — graded and cold-packed.",
       "audience": "retail",
-      "active": true,
+      "active": false,
       "children": []
     },
     {
@@ -164,7 +164,7 @@
       "image": "/assets/images/categories/honey.svg",
       "blurb": "Raw, unfiltered, single-origin. Sidr, Manuka, wildflower.",
       "audience": "retail",
-      "active": true,
+      "active": false,
       "children": []
     },
     {
@@ -174,7 +174,7 @@
       "image": "/assets/images/categories/beverage.svg",
       "blurb": "Coffee, tea and imported soft drinks.",
       "audience": "retail",
-      "active": true,
+      "active": false,
       "children": []
     },
     {
@@ -184,7 +184,7 @@
       "image": "/assets/images/categories/dry-fruits.svg",
       "blurb": "Apricots, figs, raisins and prunes.",
       "audience": "retail",
-      "active": true,
+      "active": false,
       "children": []
     },
     {
@@ -194,7 +194,7 @@
       "image": "/assets/images/categories/spices.svg",
       "blurb": "Whole and ground, from their growing regions.",
       "audience": "retail",
-      "active": true,
+      "active": false,
       "children": []
     },
     {
@@ -204,7 +204,7 @@
       "image": "/assets/images/categories/nuts-makhana.svg",
       "blurb": "Pistachios, cashews, almonds, walnuts and fox nuts.",
       "audience": "retail",
-      "active": true,
+      "active": false,
       "children": []
     },
     {
@@ -214,7 +214,7 @@
       "image": "/assets/images/categories/baby-food.svg",
       "blurb": "Formula, cereals and purees from trusted brands.",
       "audience": "retail",
-      "active": true,
+      "active": false,
       "children": []
     },
     {
@@ -224,7 +224,7 @@
       "image": "/assets/images/categories/herbs.svg",
       "blurb": "Culinary and wellness herbs, whole and dried.",
       "audience": "retail",
-      "active": true,
+      "active": false,
       "children": []
     },
     {
@@ -234,7 +234,77 @@
       "image": "/assets/images/categories/oil-ghee.svg",
       "blurb": "Olive, cold-pressed oils, and pure ghee.",
       "audience": "retail",
+      "active": false,
+      "children": []
+    },
+    {
+      "slug": "chocolates-dairy",
+      "name": "Chocolates & Dairy",
+      "icon": "cocoa",
+      "image": "/assets/images/categories/dairy.svg",
+      "audience": "retail",
       "active": true,
+      "blurb": "Imported chocolate, cheese, butter and milk powder — cold-chain the whole way.",
+      "children": []
+    },
+    {
+      "slug": "home-decor",
+      "name": "Home Decor",
+      "icon": "lamp",
+      "image": null,
+      "audience": "retail",
+      "active": true,
+      "blurb": "Pieces that finish a room: lighting, textiles, tableware and wall art.",
+      "children": []
+    },
+    {
+      "slug": "kitchen-appliances",
+      "name": "Kitchen Appliances",
+      "icon": "blender",
+      "image": "/assets/images/categories/kitchen.svg",
+      "audience": "retail",
+      "active": true,
+      "blurb": "Blenders, air fryers, kettles and the countertop machines worth the space.",
+      "children": []
+    },
+    {
+      "slug": "dates-nuts",
+      "name": "Dates & Nuts",
+      "icon": "nut",
+      "image": "/assets/images/categories/nuts.svg",
+      "audience": "retail",
+      "active": true,
+      "blurb": "Ajwa, Medjool and Sukkari dates, pistachios, cashews, figs and makhana.",
+      "children": []
+    },
+    {
+      "slug": "kids-toys",
+      "name": "Kids & Toys",
+      "icon": "blocks",
+      "image": null,
+      "audience": "retail",
+      "active": true,
+      "blurb": "Play that lasts — building sets, soft toys, books and outdoor games.",
+      "children": []
+    },
+    {
+      "slug": "fashion-clothes",
+      "name": "Fashion & Clothes",
+      "icon": "shirt",
+      "image": "/assets/images/categories/fashion.svg",
+      "audience": "retail",
+      "active": true,
+      "blurb": "Everyday and occasion wear for men, women and children.",
+      "children": []
+    },
+    {
+      "slug": "flash-sale",
+      "name": "Flash Sale",
+      "icon": "bolt",
+      "image": null,
+      "audience": "retail",
+      "active": true,
+      "blurb": "Deepest discounts in the shop, live for a limited window.",
       "children": []
     }
   ]

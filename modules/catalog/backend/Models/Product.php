@@ -26,10 +26,10 @@ class Product extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'sku', 'title', 'brand', 'origin', 'barcode',
+        'sku', 'title', 'brand', 'origin', 'barcode', 'unit',
         'category_id', 'sub_category_id',
         'price_poisha', 'original_price_poisha', 'cost_poisha',
-        'image', 'images', 'rating', 'review_count',
+        'image', 'images', 'variants', 'default_variant', 'rating', 'review_count',
         'in_stock', 'stock_qty', 'tags', 'dietary', 'search_terms',
         'short_description', 'description', 'faq',
         'moq', 'price_tiers', 'specs', 'datasheet',
@@ -40,6 +40,7 @@ class Product extends Model
     {
         return [
             'images'                => 'array',
+            'variants'              => 'array',
             'tags'                  => 'array',
             'dietary'               => 'array',
             'search_terms'          => 'array',
@@ -128,6 +129,32 @@ class Product extends Model
         return intdiv($this->price_poisha, 100);
     }
 
+    /**
+     * Variant rows with prices converted back to taka for the API.
+     *
+     * The output shape is exactly what products.json has always given the
+     * storefront — {label, amount, price, originalPrice, inStock} — so the PDP
+     * cannot tell whether a product came from the file or the database.
+     * Returns [] rather than null so callers can always iterate. The
+     * `?? $this->price_poisha` fallback covers rows written before this column
+     * existed — a variant with no price of its own sells at the product price
+     * rather than at zero.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function variantsTaka(): array
+    {
+        return array_map(fn (array $v): array => [
+            'label'         => $v['label'] ?? '',
+            'amount'        => $v['amount'] ?? null,
+            'price'         => intdiv((int) ($v['price_poisha'] ?? $this->price_poisha), 100),
+            'originalPrice' => isset($v['original_price_poisha']) && $v['original_price_poisha'] !== null
+                ? intdiv((int) $v['original_price_poisha'], 100)
+                : null,
+            'inStock'       => (bool) ($v['in_stock'] ?? true),
+        ], $this->variants ?? []);
+    }
+
     public function originalPriceTaka(): ?int
     {
         return $this->original_price_poisha === null
@@ -180,6 +207,12 @@ class Product extends Model
             // Deliberately NOT in the storefront payload — see toAdminArray().
             'image'            => $this->image,
             'images'           => $this->images ?? [],
+            // Pack size and the packs on offer. Taka on the way out, poisha in
+            // the column — same contract as `price` above, so the PDP never
+            // sees a poisha value and never has to know the column exists.
+            'unit'             => $this->unit,
+            'variants'         => $this->variantsTaka(),
+            'defaultVariant'   => $this->default_variant,
             'rating'           => $this->rating,
             'reviewCount'      => $this->review_count,
             'inStock'          => $this->in_stock,

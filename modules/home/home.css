@@ -29,19 +29,19 @@
    in one token so the viewport height can account for it. */
 .hero {
   position: relative; overflow: hidden;
-  background: var(--surface-page);           /* the control strip's surface */
-  /* The band is now a control strip, not a stage. 92px on a phone bought one
-     oversized button, two arrows and a dot row; 34px buys a small pill and a
-     progress line, and hands 58px back to the page. */
-  --hero-cta-band: clamp(34px, 4.4vw, 56px);
-  --hero-cta-h: 24px;
+  --hero-h: clamp(170px, 50vw, 640px);
+  /* Phones get the smaller pill deliberately. It does NOT have to be a 44px
+     tap target: .hero__link covers the entire slide, so the finger target is
+     the whole banner and this is a label on top of it. At 40px it covered a
+     fifth of a 195px-tall banner and sat over the feature icons. */
+  --hero-cta-h: 30px;
+  --hero-cta-min: 96px;
   --hero-progress: 3px;
 }
+@media (min-width: 768px)  { .hero { --hero-cta-h: 38px; --hero-cta-min: 124px; } }
+@media (min-width: 1024px) { .hero { --hero-cta-h: 44px; --hero-cta-min: 132px; } }
 
-/* Artwork area + button band. The artwork area is ~2.2:1 at most widths —
-   wider than every banner — so all four fit by height and render at the same
-   scale, which keeps the slide-to-slide transition from jumping. */
-.hero__viewport { position: relative; height: calc(clamp(170px, 50vw, 640px) + var(--hero-cta-band)); }
+.hero__viewport { position: relative; height: var(--hero-h); }
 
 .hero__slide {
   position: absolute; inset: 0;
@@ -50,13 +50,7 @@
 }
 .hero__slide.is-active { opacity: 1; visibility: visible; }
 
-/* The media box stops at the control strip rather than running under it.
-   It used to fill the whole hero, which let the blurred backdrop bleed behind
-   the strip — and since that blur is the banner, the strip's background
-   changed with every slide. The progress segments disappeared entirely on the
-   acacia honey banner, which is nearly white. Ending the media here gives the
-   controls one constant surface to sit on. */
-.hero__media { position: absolute; inset: 0 0 var(--hero-cta-band) 0; overflow: hidden; background: var(--surface-band); }
+.hero__media { position: absolute; inset: 0; overflow: hidden; background: var(--surface-band); }
 
 /* Blurred fill for the letterbox. Over-scaled because a blur samples past its
    own edges and would otherwise leave a pale rim around the slide. Dimmed so
@@ -69,45 +63,62 @@
   transform: scale(1.18);
 }
 
-/* The banner itself — whole, uncropped, never overlaid. It fills the media
-   box, which already stops above the control strip. */
-.hero__art {
-  position: absolute; top: 0; left: 0;
-  width: 100%; height: 100%;
-  object-fit: contain;
-  object-position: center;
+/* The whole slide is still the tap target — tapping anywhere on the banner
+   buys. The visible pill now sits on the artwork as well (see .hero__cta). */
+.hero__link { position: absolute; inset: 0; display: grid; place-items: center; }
+
+/* THE ARTWORK FRAME — the piece that makes an on-image button possible.
+ *
+ * A `contain`-fitted <img> is letterboxed, and how much depends on the slide:
+ * these four are 2.00, 1.50, 1.88 and 2.11 wide. So a button positioned in
+ * percentages of the *viewport* drifts off its mark as the bars change size —
+ * fine on one banner, halfway up the next.
+ *
+ * This frame is exactly the rendered artwork and nothing else: its width is
+ * whichever of the two limits binds first, and --ar then fixes its height.
+ * Percentages inside it are percentages of the picture, so --cta-x / --cta-cb
+ * mean the same thing on every slide and at every width. */
+.hero__fit {
+  position: relative;
+  display: block;
+  width: min(100%, calc(var(--hero-h) * var(--arn)));
+  aspect-ratio: var(--ar);
 }
+.hero__art { display: block; width: 100%; height: 100%; object-fit: contain; }
 
-/* THE WHOLE SLIDE IS THE BUTTON.
+/* BUY NOW, ON THE ARTWORK.
  *
- * The brief was to put Buy Now on the artwork and shrink it. Half of that is
- * right and half of it cannot be done: all four banners carry the logo top
- * left, a quality badge top right, their own painted SHOP NOW bottom left, and
- * two of them (figs, acacia honey) run a full feature bar along the bottom.
- * There is no corner free on all four, and a pill dropped on any of them lands
- * on finished design.
+ * Every banner paints its own SHOP NOW pill at the lower left. Rather than
+ * put a second button somewhere else and have the slide read as two calls to
+ * action, the real one is anchored onto the painted one: --cta-x is that
+ * pill's left edge and --cta-cb its centre line, both measured off the source
+ * files and carried per slide in the markup. They differ more than they look
+ * — the figs banner has a feature bar across its bottom, so its pill sits at
+ * 31% from the bottom where the others are at 8–13%.
  *
- * So the tap target moved instead of the pixels: this link covers the entire
- * slide, artwork included. Tapping anywhere on the banner buys — which is what
- * putting the button on the image was actually for — while the visible pill
- * shrinks to a label sitting in the strip below, covering nothing. */
-.hero__link { position: absolute; inset: 0; display: block; }
-
-/* Buy Now, at 24px tall and ~85px wide against the old 48×223. Centred with
-   auto margins rather than a translate: .btn-gr lifts itself on hover with a
-   transform, which would overwrite a centring one and throw it off-centre. */
+ * Sized by max(), not by the painted pill alone. Matching it exactly would be
+ * 47×9 CSS px on a 390px phone: legible in the artwork, useless as a tap
+ * target. So the 132px floor wins on small screens and --cta-w — the painted
+ * pill's own width plus a hair — wins on desktop.
+ *
+ * --cta-w has to be per slide. A single 12% was tried first and left the paint
+ * sticking out from behind the button on three of the four at 1440px: these
+ * pills are 11.9%, 16.1%, 12.7% and 13.6% of their banner, and the widest is
+ * half again the narrowest. One number cannot cover all four. */
 .hero__cta {
   position: absolute; z-index: 3;
-  left: 0; right: 0;
-  bottom: calc((var(--hero-cta-band) - var(--hero-progress) - var(--hero-cta-h)) / 2);
-  width: fit-content; min-height: var(--hero-cta-h);
-  margin-inline: auto;
-  padding: 0 .85rem;
-  font-size: var(--fs-12);
+  left: var(--cta-x);
+  bottom: calc(var(--cta-cb) - var(--hero-cta-h) / 2);
+  width: max(var(--hero-cta-min), var(--cta-w));
+  min-height: var(--hero-cta-h); height: var(--hero-cta-h);
+  padding: 0 .75rem;
+  font-size: 0.6875rem;
   border-radius: var(--radius-pill);
   justify-content: center;
+  box-shadow: 0 2px 12px rgba(16,19,20,.28);
 }
-@media (min-width: 1024px) { .hero { --hero-cta-h: 34px; } .hero__cta { font-size: var(--fs-14); padding: 0 1.25rem; } }
+@media (min-width: 768px)  { .hero__cta { font-size: var(--fs-12); } }
+@media (min-width: 1024px) { .hero__cta { font-size: var(--fs-14); padding: 0 1.25rem; } }
 
 .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
 
@@ -125,8 +136,8 @@
    They are still <button>s and still jump to their slide — the progress fill
    is a ::before inside, so tapping loses nothing. */
 .hero__dots {
-  position: absolute; z-index: 3;
-  bottom: calc(var(--hero-cta-band) - var(--hero-progress));
+  position: absolute; z-index: 4;
+  bottom: var(--space-3);
   left: 0; right: 0;
   display: flex; justify-content: center; gap: 4px;
 }
@@ -134,8 +145,12 @@
   position: relative;
   width: 26px; height: var(--hero-progress);
   border: 0; border-radius: var(--radius-pill);
-  /* Not --border-hairline: at #E5E9E7 a 3px bar on white is barely there. */
-  background: rgba(16,19,20,.16);
+  /* Dark, not hairline-grey. The strip these used to sit in is gone — they
+     now lie on the artwork, which is near-white on the acacia honey banner
+     and near-black on the makhana one. An opaque dark track with a light
+     outline reads on both; the grey it used to have vanished on honey. */
+  background: rgba(16,19,20,.42);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.45);
   cursor: pointer; padding: 0; overflow: hidden;
 }
 /* The fill starts the moment a dot gains .is-active — a CSS animation restarts
@@ -299,12 +314,12 @@
 .home-cat-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, 1fr); }
 @media (min-width: 768px)  {
   .home-cat-grid { grid-template-columns: repeat(4, 1fr); }
-  /* Ten tiles into four columns leaves the last two hard left under a full
-     row — it reads as two tiles that failed to load. Pushing the ninth into
-     column 2 centres the pair. The :nth-last-child(2) half of the selector
-     means this only fires on a grid of exactly ten, so it switches itself off
-     if the launch set grows. */
-  .home-cat-grid > :nth-child(9):nth-last-child(2) { grid-column: 2; }
+  /* There used to be a nudge here pushing the ninth of ten tiles into column 2,
+     because two tiles hard left under a full row read as two that failed to
+     load. The launch set is seven now, so the last row carries three of four
+     columns — which reads as a row, not as breakage — and the rule was written
+     to switch itself off at any count but ten. Removed rather than left as a
+     selector that can never match. */
 }
 /* Clean icon-led tiles with a faint brand glow that lifts on hover. */
 .home-cat-grid .category-card::before {
@@ -373,7 +388,6 @@
     grid-auto-rows: 1fr;   /* every row matches, whether the label wraps or not */
     gap: var(--space-2);
   }
-  .home-cat-grid > :nth-child(9):nth-last-child(2) { grid-column: 2; }
   .home-cat-grid .category-card {
     min-height: 0;
     justify-content: flex-start;
