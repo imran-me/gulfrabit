@@ -79,6 +79,23 @@
           <label for="pf-q">Search</label>
           <input class="input-gr" id="pf-q" name="q" type="search" placeholder="Title, SKU or brand">
         </div>
+        <!-- Filled by products-page.js from the same /categories fetch the
+             create form uses. The server has accepted ?category= since the
+             list API existed; this is the first control that sends it. -->
+        <div class="afilters__field">
+          <label for="pf-cat">Category</label>
+          <select class="select-gr" id="pf-cat" name="category" data-pf-category>
+            <option value="">All categories</option>
+          </select>
+        </div>
+        <div class="afilters__field">
+          <label for="pf-sort">Order</label>
+          <select class="select-gr" id="pf-sort" name="sort">
+            <option value="">Title A–Z</option>
+            <option value="newest">Newest first</option>
+            <option value="price-desc">Highest price</option>
+          </select>
+        </div>
         <div class="afilters__field">
           <label for="pf-nocost">Show</label>
           <select class="select-gr" id="pf-nocost" name="noCost">
@@ -102,10 +119,11 @@
               <th scope="col">Cost</th>
               <th scope="col">Margin</th>
               <th scope="col">Status</th>
+              <th scope="col"><span class="visually-hidden">Actions</span></th>
             </tr>
           </thead>
           <tbody data-prod-body>
-            <tr><td colspan="6" class="atable__empty">Loading products…</td></tr>
+            <tr><td colspan="7" class="atable__empty">Loading products…</td></tr>
           </tbody>
         </table>
       </div>

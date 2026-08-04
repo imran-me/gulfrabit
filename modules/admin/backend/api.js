@@ -207,10 +207,17 @@ export async function adminFetch(path, options = {}) {
   const method = (options.method || 'GET').toUpperCase();
   const csrf = method === 'GET' || method === 'HEAD' ? {} : await csrfHeader();
 
+  // options is split so its `headers` cannot clobber the composed object.
+  // The old shape spread `...options` AFTER `headers:` — and since every JSON
+  // write passes options.headers ({'Content-Type': ...}), the spread replaced
+  // the whole header set on exactly the requests that needed X-XSRF-TOKEN.
+  // Every admin write would have 419'd the day the real backend went live.
+  const { headers: extraHeaders, ...rest } = options;
+
   const res = await fetch(`${API}${path}`, {
     credentials: 'same-origin',
-    headers: { Accept: 'application/json', ...csrf, ...(options.headers || {}) },
-    ...options,
+    ...rest,
+    headers: { Accept: 'application/json', ...csrf, ...(extraHeaders || {}) },
   });
 
   if (res.status === 401) {

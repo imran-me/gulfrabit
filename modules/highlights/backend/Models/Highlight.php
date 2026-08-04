@@ -42,6 +42,25 @@ class Highlight extends Model
             'blurb'       => 'Further down the home page.',
             'fallbackTag' => 'new',
         ],
+        // Best Sellers was the one home rail no screen could touch: authored
+        // as static HTML in index.html. The static markup is still there and
+        // still ships — it is the no-JS content and the no-backend fallback —
+        // but when this shelf has a curation, home.js swaps it in. See
+        // initProductSections in modules/home/home.js.
+        //
+        // `emptyNote` overrides the generic empty-shelf copy. The generic line
+        // says "the site is showing products tagged X until you pick some",
+        // which is true of the other rails and FALSE here: home.js only swaps
+        // the static grid for a curated shelf, never for a tag fallback, so an
+        // uncurated Best Sellers shows the authored HTML. Telling a merchant
+        // otherwise sends them debugging a tag that is working as designed.
+        'bestseller' => [
+            'label'       => 'Best sellers',
+            'blurb'       => 'The big grid mid-page. Static until you curate it.',
+            'fallbackTag' => 'bestseller',
+            'emptyNote'   => 'Nothing chosen. The home page is showing its built-in '
+                           . 'Best Sellers grid; pick products here to replace it with your own.',
+        ],
     ];
 
     protected $fillable = ['rail', 'product_id', 'position'];

@@ -89,15 +89,51 @@ async function shelf(rail, limit) {
   return getFeatured(rail, limit);
 }
 
+/**
+ * A shelf ONLY when the merchant has actually curated it — null otherwise.
+ *
+ * Best Sellers needs the distinction shelf() doesn't make. That grid is real
+ * authored HTML in index.html: the no-JS content, the SEO content, and the
+ * no-backend fallback. Swapping it for client-rendered cards is only an
+ * improvement when the replacement is something a person chose — the server
+ * says so with `source: "curated"`. A tag fallback would repaint the same
+ * products with none of the static markup's benefits, so it is not taken.
+ */
+async function curatedShelf(rail, limit) {
+  try {
+    const res = await fetch(`/api/highlights/${rail}`, {
+      headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) return null;
+
+    const { data, source } = await res.json();
+    if (source === 'curated' && Array.isArray(data) && data.length) {
+      return data.slice(0, limit);
+    }
+  } catch {
+    // Offline, or no API — the authored HTML stands.
+  }
+  return null;
+}
+
 /* ---- Product sections (skeleton → data) ------------------------------- */
 async function initProductSections() {
   const premiumRail = document.querySelector('[data-rail="premium"]');
   const newRail = document.querySelector('[data-rail="new"]');
-  // Best Sellers are authored as real HTML in index.html (content-first) and
-  // enhanced by main.js — we don't render them here. Only the dynamic rails load.
+  // Best Sellers stays authored HTML until the merchant curates the
+  // 'bestseller' shelf in the Home page screen — then their picks replace it,
+  // in their order. No skeleton for it: the static grid is already content,
+  // and blanking real cards to show placeholders would be a downgrade.
+  const bestGrid = document.querySelector('[data-grid="bestseller"]');
 
   if (premiumRail) renderProductSkeletons(premiumRail, 6);
   if (newRail) renderProductSkeletons(newRail, 6);
+
+  if (bestGrid) {
+    curatedShelf('bestseller', 8).then((picks) => {
+      if (picks) renderProductGrid(bestGrid, picks);
+    }).catch(() => {});
+  }
 
   try {
     const [premium, fresh] = await Promise.all([

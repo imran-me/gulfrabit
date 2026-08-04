@@ -59,6 +59,25 @@ class ProductStoreRequest extends FormRequest
 
             'shortDescription' => ['sometimes', 'nullable', 'string', 'max:255'],
             'description'      => ['sometimes', 'nullable', 'string', 'max:5000'],
+
+            // Kept identical to ProductUpdateRequest so a product cannot be
+            // created in a shape the edit screen is then unable to express.
+            'unit' => ['sometimes', 'nullable', 'string', 'max:32'],
+
+            'tags'          => ['sometimes', 'array', 'max:12'],
+            'tags.*'        => ['string', 'max:32'],
+            'dietary'       => ['sometimes', 'array', 'max:12'],
+            'dietary.*'     => ['string', 'max:32'],
+            'searchTerms'   => ['sometimes', 'array', 'max:40'],
+            'searchTerms.*' => ['string', 'max:48'],
+
+            'variants'                     => ['sometimes', 'array', 'max:12'],
+            'variants.*.label'             => ['required', 'string', 'max:96'],
+            'variants.*.amount'            => ['sometimes', 'nullable', 'numeric', 'gt:0'],
+            'variants.*.priceTaka'         => ['required', 'numeric', 'gt:0', 'max:10000000'],
+            'variants.*.originalPriceTaka' => ['sometimes', 'nullable', 'numeric', 'max:10000000'],
+            'variants.*.inStock'           => ['sometimes', 'boolean'],
+            'defaultVariant'               => ['sometimes', 'nullable', 'string', 'max:96'],
         ];
     }
 

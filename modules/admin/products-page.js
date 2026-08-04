@@ -22,10 +22,14 @@ async function init() {
   if (!form) return;
 
   media = await import('/modules/media/media-picker.js').catch(() => null);
-  setupCreate();
+  // Awaited, and it must be: restoring ?category= into a <select> that has no
+  // options yet silently yields "", and the first load()'s replaceState then
+  // deletes the parameter from the URL — a refreshed or shared filter link
+  // came back unfiltered. setupCreate() is what fills the options.
+  await setupCreate();
 
   const params = new URLSearchParams(location.search);
-  ['q', 'noCost'].forEach((k) => { if (params.has(k) && form[k]) form[k].value = params.get(k); });
+  ['q', 'noCost', 'category', 'sort'].forEach((k) => { if (params.has(k) && form[k]) form[k].value = params.get(k); });
   page = Math.max(1, Number(params.get('page')) || 1);
 
   form.addEventListener('submit', (e) => { e.preventDefault(); page = 1; load(); });
@@ -96,6 +100,15 @@ async function setupCreate() {
 
   cats.addEventListener('change', () => fillSubs(form));
   fillSubs(form);
+
+  // The filter select shares the fetch. Options only — init() restores the
+  // URL state itself after this function resolves, which is why it awaits us.
+  const filter = document.querySelector('[data-pf-category]');
+  if (filter) {
+    filter.innerHTML = '<option value="">All categories</option>' + tops.map((c) =>
+      `<option value="${escapeHtml(c.slug)}">${escapeHtml(c.name)}${
+        c.isActive ? '' : ' (switched off)'}</option>`).join('');
+  }
 }
 
 function fillSubs(form) {
@@ -165,20 +178,20 @@ async function load() {
   const form = document.querySelector('[data-prod-filters]');
 
   const qs = new URLSearchParams();
-  ['q', 'noCost'].forEach((k) => {
+  ['q', 'noCost', 'category', 'sort'].forEach((k) => {
     const v = form[k]?.value.trim();
     if (v) qs.set(k, v);
   });
   if (page > 1) qs.set('page', String(page));
   history.replaceState(null, '', qs.toString() ? `?${qs}` : location.pathname);
 
-  body.innerHTML = '<tr><td colspan="6" class="atable__empty">Loading…</td></tr>';
+  body.innerHTML = '<tr><td colspan="7" class="atable__empty">Loading…</td></tr>';
 
   let payload;
   try {
     payload = await adminFetch(`/products?${qs}`);
   } catch (err) {
-    body.innerHTML = `<tr><td colspan="6" class="atable__empty">${
+    body.innerHTML = `<tr><td colspan="7" class="atable__empty">${
       err.status === 404 || !err.status
         ? 'No backend connected yet — products appear once the API is live.'
         : escapeHtml(err.message)
@@ -204,18 +217,18 @@ function paint({ data, meta }) {
   }
 
   if (!data.length) {
-    body.innerHTML = '<tr><td colspan="6" class="atable__empty">Nothing matches these filters.</td></tr>';
+    body.innerHTML = '<tr><td colspan="7" class="atable__empty">Nothing matches these filters.</td></tr>';
     document.querySelector('[data-prod-pager]').hidden = true;
     return;
   }
 
-  body.innerHTML = data.map((p) => `
+  body.innerHTML = data.map((p, i) => `
     <tr>
       <td>
         <a href="/modules/admin/product-edit.html?sku=${encodeURIComponent(p.sku)}">${escapeHtml(p.title)}</a>
         <div class="atable__sub">${escapeHtml(p.sku)}${p.brand ? ` · ${escapeHtml(p.brand)}` : ''}</div>
       </td>
-      <td class="atable__sub">${escapeHtml(p.category || '—')}</td>
+      <td class="atable__sub">${escapeHtml(p.category || '—')}${placement(p)}</td>
       <td class="atable__num">৳ ${Number(p.priceTaka).toLocaleString('en-BD')}</td>
       <td class="atable__num">${
         // "Not recorded" rather than a dash or a zero. The distinction is the
@@ -226,13 +239,74 @@ function paint({ data, meta }) {
       }</td>
       <td class="atable__num">${p.marginPct == null ? '<span class="atable__sub">—</span>' : `${p.marginPct}%`}</td>
       <td>${status(p)}</td>
+      <td class="atable__actions">
+        <a class="btn-gr btn-ghost-gr btn-sm-gr" href="/modules/admin/product-edit.html?sku=${encodeURIComponent(p.sku)}">Edit</a>
+        <button class="btn-gr btn-ghost-gr btn-sm-gr aact-remove" type="button"
+                data-prod-remove="${i}">Remove</button>
+      </td>
     </tr>`).join('');
+
+  // The button carries only the row INDEX; sku and title are read back from
+  // the data array. escapeHtml() is the textContent trick, which does not
+  // escape double quotes — safe between tags, not inside an attribute — so a
+  // title like Dates "Royal" interpolated into data-prod-title would break
+  // out of it. An integer cannot.
+  body.querySelectorAll('[data-prod-remove]').forEach((btn) =>
+    btn.addEventListener('click', () => remove(btn, data[Number(btn.dataset.prodRemove)])));
 
   const pager = document.querySelector('[data-prod-pager]');
   pager.hidden = meta.lastPage <= 1;
   document.querySelector('[data-ppage-label]').textContent = `Page ${meta.currentPage} of ${meta.lastPage}`;
   document.querySelector('[data-ppage-prev]').disabled = meta.currentPage <= 1;
   document.querySelector('[data-ppage-next]').disabled = meta.currentPage >= meta.lastPage;
+}
+
+/**
+ * Where this product is promoted, as small chips under the category name.
+ * Same vocabulary the Placement card on the edit page writes; anything beyond
+ * the four known tags is a merchant's own label and not a placement, so it is
+ * not shown here.
+ */
+function placement(p) {
+  const NAMES = { featured: 'Featured', premium: 'Premium', bestseller: 'Best seller', new: 'New' };
+  const chips = (p.tags ?? []).filter((t) => NAMES[t]).map((t) =>
+    `<span class="achip">${NAMES[t]}</span>`);
+  return chips.length ? `<div class="achips">${chips.join('')}</div>` : '';
+}
+
+/**
+ * Remove from the shop, from the list. Same endpoint and same promise as the
+ * edit page's button: soft delete, past orders untouched, restorable.
+ */
+async function remove(btn, row) {
+  if (!row) return;
+  const skuVal = row.sku;
+  const title = row.title;
+
+  if (!confirm(
+    `Remove "${title}" from the shop?\n\n`
+    + 'It disappears from the site and from search. Orders that already contain it '
+    + 'are not affected, and nothing is erased — it can be restored.'
+  )) return;
+
+  btn.disabled = true;
+
+  try {
+    await adminFetch(`/products/${encodeURIComponent(skuVal)}`, { method: 'DELETE' });
+  } catch (err) {
+    btn.disabled = false;
+    return problem(err.message);
+  }
+
+  // If that was the only row on this page, the page number now points past
+  // the end: the server would answer with zero rows, paint() would say
+  // "Nothing matches these filters" and hide the pager — no way back except
+  // re-submitting the filters. Step back before reloading instead.
+  if (page > 1 && document.querySelectorAll('[data-prod-remove]').length === 1) {
+    page -= 1;
+  }
+
+  load();   // the row is gone from server truth; repaint from it
 }
 
 function status(p) {

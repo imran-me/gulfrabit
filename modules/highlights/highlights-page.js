@@ -73,7 +73,10 @@ function paint() {
 function shelf(rail) {
   const chosen = new Set(rail.items.map((i) => i.sku));
 
-  const available = catalogue.filter((p) => !chosen.has(p.id));
+  // Admin list rows are keyed `sku` (the storefront serialiser is the one
+  // that aliases it to `id`). Reading p.id here made every option's value
+  // empty and the picker inert against the real backend.
+  const available = catalogue.filter((p) => !chosen.has(p.sku));
 
   return `
     <section class="acard hlrail" data-hl-rail="${escapeHtml(rail.rail)}"
@@ -91,15 +94,21 @@ function shelf(rail) {
       ${rail.items.length
         ? `<ol class="hllist" data-hl-list>${rail.items.map(row).join('')}</ol>`
         : `<p class="admin__sub" data-hl-list>
-             Nothing chosen. The site is showing products tagged
-             <code>${escapeHtml(rail.fallbackTag)}</code> until you pick some.
+             ${rail.emptyNote
+               // Per-rail truth from the server: Best Sellers falls back to
+               // its authored HTML grid, not to the tag, and saying "showing
+               // tagged products" there sent merchants debugging a tag that
+               // was working exactly as designed.
+               ? escapeHtml(rail.emptyNote)
+               : `Nothing chosen. The site is showing products tagged
+                  <code>${escapeHtml(rail.fallbackTag)}</code> until you pick some.`}
            </p>`}
 
       <div class="hlrail__foot">
         <select class="input-gr hlrail__add" data-hl-add>
           <option value="">Add a product…</option>
           ${available.map((p) =>
-            `<option value="${escapeHtml(p.id)}">${escapeHtml(p.title)}${
+            `<option value="${escapeHtml(p.sku)}">${escapeHtml(p.title)}${
               p.isActive ? '' : ' (unlisted)'}</option>`).join('')}
         </select>
         <button type="button" class="btn-gr btn-primary-gr btn-sm-gr" data-hl-save disabled>
@@ -158,14 +167,14 @@ function wire() {
       const sku = e.target.value;
       if (!sku) return;
 
-      const product = catalogue.find((p) => p.id === sku);
+      const product = catalogue.find((p) => p.sku === sku);
       if (!product) return;
 
       rail.items.push({
-        sku: product.id,
+        sku: product.sku,
         title: product.title,
         image: product.image,
-        price: product.price,
+        price: product.priceTaka,
         // The server recomputes this on reload; the optimistic value only has
         // to be right about the product's own switch, which is what the
         // catalogue list already told us.

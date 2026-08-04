@@ -539,3 +539,46 @@
 @media (prefers-reduced-motion: reduce) {
   .acat, .aswitch__track, .aswitch__track::after { transition: none; }
 }
+
+/* ---- Pack-size editor (product edit) ----------------------------------
+   One bordered box per variant. The Details card lives in the .aorder grid,
+   whose auto-fit columns keep every card at roughly 320-450px NO MATTER the
+   viewport — so there is no width at which a six-column spreadsheet row fits,
+   and a viewport media query cannot know that. These rows use the same
+   pattern as the price block above them: labelled mini-fields that wrap. */
+.avariants { display: grid; gap: var(--space-3); margin-bottom: var(--space-3); }
+.avariant {
+  display: flex; flex-wrap: wrap; gap: var(--space-2);
+  border: 1px solid var(--gr-border); border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+.avariant__f { display: flex; flex-direction: column; gap: 2px; flex: 1 1 72px; min-width: 0; }
+.avariant__f--label { flex: 1 1 100%; }
+.avariant__f > span { font-size: var(--fs-12); color: var(--text-muted); }
+.avariant .input-gr { min-height: 40px; padding-block: .4rem; width: 100%; }
+.avariant__foot { flex-basis: 100%; display: flex; justify-content: space-between; align-items: center; }
+.avariant__stock { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-12); color: var(--text-muted); }
+.avariant__del {
+  min-height: 32px; padding-inline: .6rem;
+  background: none; border: 1px solid transparent; border-radius: var(--radius-sm);
+  font-size: var(--fs-12);
+  color: var(--text-muted); cursor: pointer;
+}
+.avariant__del:hover { color: var(--gr-error); border-color: currentColor; }
+
+/* ---- Placement chips + row actions (products list) -------------------- */
+.achips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.achip {
+  display: inline-block; padding: 1px 7px;
+  border: 1px solid var(--gr-border); border-radius: var(--radius-pill);
+  font-size: 10px; letter-spacing: .02em; text-transform: uppercase;
+  color: var(--text-secondary); background: var(--surface-raised);
+}
+.atable__actions { white-space: nowrap; text-align: right; }
+.atable__actions .btn-gr { min-height: 32px; padding: .3rem .7rem; font-size: var(--fs-12); }
+.aact-remove:hover { color: var(--gr-error); }
+
+/* ---- Placement fieldset (product edit) -------------------------------- */
+.apane { border: 1px solid var(--gr-border); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4) var(--space-4); }
+.apane__row { display: flex; align-items: flex-start; gap: var(--space-2); padding: 6px 0; cursor: pointer; }
+.apane__row input { margin-top: 3px; accent-color: var(--gr-cyan); width: 18px; height: 18px; flex-shrink: 0; }

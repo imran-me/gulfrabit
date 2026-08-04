@@ -43,8 +43,8 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=0054fb6a">
-  <link rel="stylesheet" href="../../modules/admin/admin.css?v=e503011e">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=ffe12170">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=ff327c79">
   <link rel="stylesheet" href="../../modules/media/media.css?v=200563ea">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
@@ -153,6 +153,23 @@
           <label for="pf-q">Search</label>
           <input class="input-gr" id="pf-q" name="q" type="search" placeholder="Title, SKU or brand">
         </div>
+        <!-- Filled by products-page.js from the same /categories fetch the
+             create form uses. The server has accepted ?category= since the
+             list API existed; this is the first control that sends it. -->
+        <div class="afilters__field">
+          <label for="pf-cat">Category</label>
+          <select class="select-gr" id="pf-cat" name="category" data-pf-category>
+            <option value="">All categories</option>
+          </select>
+        </div>
+        <div class="afilters__field">
+          <label for="pf-sort">Order</label>
+          <select class="select-gr" id="pf-sort" name="sort">
+            <option value="">Title A–Z</option>
+            <option value="newest">Newest first</option>
+            <option value="price-desc">Highest price</option>
+          </select>
+        </div>
         <div class="afilters__field">
           <label for="pf-nocost">Show</label>
           <select class="select-gr" id="pf-nocost" name="noCost">
@@ -176,10 +193,11 @@
               <th scope="col">Cost</th>
               <th scope="col">Margin</th>
               <th scope="col">Status</th>
+              <th scope="col"><span class="visually-hidden">Actions</span></th>
             </tr>
           </thead>
           <tbody data-prod-body>
-            <tr><td colspan="6" class="atable__empty">Loading products…</td></tr>
+            <tr><td colspan="7" class="atable__empty">Loading products…</td></tr>
           </tbody>
         </table>
       </div>
@@ -192,7 +210,7 @@
     </main>
   </div>
 
-  <script type="module" src="../../shared/js/main.js?v=0075d1b6"></script>
+  <script type="module" src="../../shared/js/main.js?v=b67929f0"></script>
   <script type="module" src="../../modules/admin/admin-shell.js?v=f1c653e6"></script>
   <script type="module" src="../../modules/admin/admin-nav.js?v=0ecf6647"></script>
   <script type="module" src="../../modules/courier/courier-nav.js?v=8f34525c"></script>
@@ -201,6 +219,6 @@
   <script type="module" src="../../modules/highlights/highlights-nav.js?v=041907b8"></script>
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=ebff64a4"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=87de770c"></script>
-  <script type="module" src="../../modules/admin/products-page.js?v=390ebd21"></script>
+  <script type="module" src="../../modules/admin/products-page.js?v=9c4e699d"></script>
 </body>
 </html>

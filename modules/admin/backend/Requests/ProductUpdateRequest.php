@@ -37,11 +37,56 @@ class ProductUpdateRequest extends FormRequest
             'shortDescription' => ['sometimes', 'nullable', 'string', 'max:255'],
             'description'      => ['sometimes', 'nullable', 'string', 'max:5000'],
 
+            // origin and barcode are still absent, on purpose — see the note
+            // above. They were the obvious things to add while filling this
+            // list out, and the class docblock is the reason not to: a barcode
+            // the panel can retype is a barcode that stops matching the pack.
+            // If origin ever needs correcting, do it deliberately and say so
+            // there, rather than letting it arrive as part of a form tidy-up.
+
+            // Display pack size — "500 g". Never parsed, only printed.
+            'unit' => ['sometimes', 'nullable', 'string', 'max:32'],
+
+            // Merchandising lists. Bounded so a paste accident cannot put a
+            // thousand entries in a JSON column that is read on every render.
+            'tags'          => ['sometimes', 'array', 'max:12'],
+            'tags.*'        => ['string', 'max:32'],
+            'dietary'       => ['sometimes', 'array', 'max:12'],
+            'dietary.*'     => ['string', 'max:32'],
+            'searchTerms'   => ['sometimes', 'array', 'max:40'],
+            'searchTerms.*' => ['string', 'max:48'],
+
+            // Selectable packs. THE LABEL IS THE IDENTITY: cart lines and
+            // order rows record the chosen pack by label, and the PDP selects
+            // by it. Renaming a label therefore orphans past carts' claim to
+            // it — allowed, but it is a real change, not cosmetics. `amount`
+            // is how much of the product's `unit` the pack holds; it drives
+            // the "৳ X / kg" line and nothing else.
+            'variants'                      => ['sometimes', 'array', 'max:12'],
+            'variants.*.label'              => ['required', 'string', 'max:96'],
+            'variants.*.amount'             => ['sometimes', 'nullable', 'numeric', 'gt:0'],
+            'variants.*.priceTaka'          => ['required', 'numeric', 'gt:0', 'max:10000000'],
+            'variants.*.originalPriceTaka'  => ['sometimes', 'nullable', 'numeric', 'max:10000000'],
+            'variants.*.inStock'            => ['sometimes', 'boolean'],
+            'defaultVariant'                => ['sometimes', 'nullable', 'string', 'max:96'],
+
             // `nullable` on cost is load-bearing: clearing it means "we no
             // longer claim to know this", which is a different and more honest
             // state than zero.
             'priceTaka'         => ['sometimes', 'numeric', 'gt:0', 'max:10000000'],
-            'originalPriceTaka' => ['sometimes', 'nullable', 'numeric', 'gte:priceTaka', 'max:10000000'],
+            // gte:priceTaka compares against the OTHER FIELD IN THE REQUEST,
+            // not the stored price — and this endpoint receives diff-only
+            // PATCHes, so "set a was-price without touching the price" arrived
+            // without priceTaka and the comparison against null failed every
+            // time. The merchant literally could not create a discount except
+            // by re-typing the selling price in the same save. The rule only
+            // applies when both fields travel together; the controller enforces
+            // the invariant against the stored price for every other shape.
+            'originalPriceTaka' => array_values(array_filter([
+                'sometimes', 'nullable', 'numeric',
+                $this->has('priceTaka') ? 'gte:priceTaka' : null,
+                'max:10000000',
+            ])),
             'costTaka'          => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:10000000'],
 
             'inStock'  => ['sometimes', 'boolean'],

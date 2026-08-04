@@ -12,6 +12,23 @@ import { escapeHtml } from './admin-shell.js';
 let product = null;
 let categories = [];
 
+/**
+ * The pack sizes as the form currently has them, in the same taka shape the
+ * API returns: [{ label, amount, price, originalPrice, inStock }]. Kept as
+ * state rather than read back out of the DOM because rows are added and
+ * removed, and rebuilding an array from inputs that may be mid-edit is how a
+ * half-typed price becomes a saved zero.
+ */
+let variantRows = [];
+
+/**
+ * The tag strings the storefront rails filter on, in the order they are kept
+ * in the column. Checkboxes on this page are the only writers, so the
+ * vocabulary cannot drift again ("best-seller" with a hyphen was a silent
+ * no-op — the rail tag has none).
+ */
+const PLACEMENT_TAGS = ['featured', 'premium', 'bestseller', 'new'];
+
 /** The media module, or null if it is not installed. See categories-page.js. */
 let media = null;
 
@@ -20,6 +37,14 @@ document.addEventListener('admin:ready', load);
 const sku = () => new URLSearchParams(location.search).get('sku');
 
 async function load() {
+  // Before anything can fail: the form has a type=submit button and fifteen
+  // text inputs, and without this a Save click (or Enter in any field) on the
+  // no-backend error state performed a NATIVE GET submit — full reload with
+  // every field as a query param, destroying the ?sku= the page needs. The
+  // real save handler is added later and does its own preventDefault; two
+  // listeners are fine, the first one only vetoes the browser default.
+  document.querySelector('[data-pe-form]')?.addEventListener('submit', (e) => e.preventDefault());
+
   if (!sku()) return fail('No SKU in the URL.');
 
   media = await import('/modules/media/media-picker.js').catch(() => null);
@@ -59,15 +84,142 @@ function fill() {
   f.title.value = product.title ?? '';
   f.brand.value = product.brand ?? '';
   f.shortDescription.value = product.shortDescription ?? '';
+  f.description.value = product.description ?? '';
   f.priceTaka.value = product.price ?? '';
   f.originalPriceTaka.value = product.originalPrice ?? '';
   // Empty means unknown. Not zero — see the note next to the field.
   f.costTaka.value = product.costTaka ?? '';
+  f.unit.value = product.unit ?? '';
   f.inStock.checked = !!product.inStock;
   f.isActive.checked = !!product.isActive;
 
+  // Placement: the four rail tags become checkboxes; anything else the
+  // product carries is a merchant's own label and goes to the "other tags"
+  // box. Comma-joined for editing; split back apart on save.
+  const tags = product.tags ?? [];
+  f.placeFeatured.checked = tags.includes('featured');
+  f.placePremium.checked = tags.includes('premium');
+  f.placeBestseller.checked = tags.includes('bestseller');
+  f.placeNew.checked = tags.includes('new');
+  f.tags.value = tags.filter((t) => !PLACEMENT_TAGS.includes(t)).join(', ');
+  f.dietary.value = (product.dietary ?? []).join(', ');
+  f.searchTerms.value = (product.searchTerms ?? []).join(', ');
+
+  fillAdLink();
+
+  variantRows = (product.variants ?? []).map((v) => ({ ...v }));
+  paintVariants();
+  document.querySelector('[data-pe-var-add]')?.addEventListener('click', addVariant);
+
   fillCategories(f);
   fillPhotos();
+}
+
+/* ------------------------------------------------------------------ *
+ * Pack sizes
+ * ------------------------------------------------------------------ */
+
+function paintVariants() {
+  const host = document.querySelector('[data-pe-variants]');
+  if (!host) return;
+
+  host.innerHTML = '';
+
+  variantRows.forEach((v, i) => {
+    const row = document.createElement('div');
+    row.className = 'avariant';
+    row.innerHTML = `
+      <label class="avariant__f avariant__f--label"><span>Label</span>
+        <input class="input-gr" type="text" maxlength="96" placeholder="500 g" data-vf="label"></label>
+      <label class="avariant__f"><span>Size</span>
+        <input class="input-gr" type="number" step="any" min="0" placeholder="0.5" data-vf="amount" value="${v.amount ?? ''}"></label>
+      <label class="avariant__f"><span>Price ৳</span>
+        <input class="input-gr" type="number" step="0.01" min="0.01" placeholder="0.00" data-vf="price" value="${v.price ?? ''}"></label>
+      <label class="avariant__f"><span>“Was” ৳</span>
+        <input class="input-gr" type="number" step="0.01" min="0" placeholder="—" data-vf="originalPrice" value="${v.originalPrice ?? ''}"></label>
+      <div class="avariant__foot">
+        <label class="avariant__stock"><input type="checkbox" data-vf="inStock"${v.inStock === false ? '' : ' checked'}> in stock</label>
+        <button class="avariant__del" type="button">✕ Remove</button>
+      </div>`;
+
+    // By property, not by attribute interpolation: escapeHtml() does not
+    // escape double quotes, and a label is free text. The numeric inputs
+    // above are safe as-is — a number cannot carry a quote.
+    row.querySelector('[data-vf="label"]').value = v.label ?? '';
+
+    row.querySelectorAll('[data-vf]').forEach((input) => {
+      input.addEventListener('input', () => {
+        const k = input.dataset.vf;
+        if (k === 'inStock') variantRows[i].inStock = input.checked;
+        else if (k === 'label') variantRows[i].label = input.value;
+        else variantRows[i][k] = input.value === '' ? null : Number(input.value);
+        if (k === 'label') refreshDefaultVariant();
+      });
+    });
+    row.querySelector('.avariant__del').addEventListener('click', () => {
+      variantRows.splice(i, 1);
+      paintVariants();
+    });
+
+    host.append(row);
+  });
+
+  refreshDefaultVariant();
+}
+
+function addVariant() {
+  variantRows.push({ label: '', amount: null, price: null, originalPrice: null, inStock: true });
+  paintVariants();
+  // Straight into the new row's label — the reason the button was pressed.
+  const labels = document.querySelectorAll('[data-pe-variants] [data-vf="label"]');
+  labels[labels.length - 1]?.focus();
+}
+
+/**
+ * The URL to paste into a Facebook ad for this product: the one-page express
+ * checkout, with UTMs so the order records which ad sold it. Origin comes from
+ * the page so a staging panel hands out staging links, not production ones.
+ */
+function fillAdLink() {
+  const input = document.querySelector('[data-pe-adlink]');
+  const btn = document.querySelector('[data-pe-adcopy]');
+  if (!input) return;
+
+  const url = new URL('/modules/checkout/express.html', location.origin);
+  url.searchParams.set('sku', product.id);
+  url.searchParams.set('utm_source', 'facebook');
+  url.searchParams.set('utm_medium', 'paid');
+  url.searchParams.set('utm_content', product.id);
+  input.value = url.toString();
+
+  btn?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(input.value);
+      btn.textContent = 'Copied';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    } catch {
+      // Clipboard needs a secure context; selecting the text still lets
+      // the merchant copy by hand.
+      input.select();
+    }
+  });
+}
+
+function refreshDefaultVariant() {
+  const wrap = document.querySelector('[data-pe-defwrap]');
+  const select = document.querySelector('[data-pe-defvar]');
+  if (!wrap || !select) return;
+
+  const labels = variantRows.map((v) => (v.label ?? '').trim()).filter(Boolean);
+  // One pack needs no chooser — hidden, same reasoning as the sub-category box.
+  wrap.hidden = labels.length < 2;
+
+  const current = select.value || product.defaultVariant || '';
+  // new Option(text, value) sets both by property — no attribute quoting to
+  // get wrong, since a label is free text and escapeHtml leaves quotes alone.
+  select.innerHTML = '';
+  labels.forEach((l) => select.append(new Option(l, l)));
+  select.value = labels.includes(current) ? current : (labels[0] ?? '');
 }
 
 /* ------------------------------------------------------------------ *
@@ -161,9 +313,37 @@ async function save(e) {
     title: product.title ?? '',
     brand: product.brand ?? '',
     shortDescription: product.shortDescription ?? '',
+    description: product.description ?? '',
+    unit: product.unit ?? '',
   };
   for (const [key, was] of Object.entries(textFields)) {
     if (f[key].value.trim() !== String(was)) body[key] = f[key].value.trim();
+  }
+
+  // The comma-separated lists.
+  const listFields = {
+    dietary: product.dietary ?? [],
+    searchTerms: product.searchTerms ?? [],
+  };
+  for (const [key, was] of Object.entries(listFields)) {
+    const now = f[key].value.split(',').map((s) => s.trim()).filter(Boolean);
+    if (JSON.stringify(now) !== JSON.stringify(was)) body[key] = now;
+  }
+
+  // Tags = placement checkboxes + the merchant's own labels. Compared as
+  // SETS: no storefront reader cares about tag order (the rails filter on
+  // membership), so splitting one field into five controls must not create a
+  // phantom "changed" just because the pieces reassemble in a new order.
+  {
+    const boxes = { featured: f.placeFeatured, premium: f.placePremium, bestseller: f.placeBestseller, new: f.placeNew };
+    const placements = PLACEMENT_TAGS.filter((t) => boxes[t].checked);
+    const extras = f.tags.value.split(',').map((s) => s.trim()).filter(Boolean)
+      // A placement typed into the free box would duplicate a checkbox and
+      // make the set depend on which control you believe — checkboxes win.
+      .filter((t) => !PLACEMENT_TAGS.includes(t));
+    const now = [...placements, ...extras];
+    const was = product.tags ?? [];
+    if (JSON.stringify([...now].sort()) !== JSON.stringify([...was].sort())) body.tags = now;
   }
 
   const money = {
@@ -183,7 +363,13 @@ async function save(e) {
   if (f.inStock.checked !== !!product.inStock) body.inStock = f.inStock.checked;
   if (f.isActive.checked !== !!product.isActive) body.isActive = f.isActive.checked;
 
-  if (f.category && f.category.value !== (product.categorySlug ?? '')) {
+  // Guarded on the select actually having options: when the /categories fetch
+  // fails, the select is empty and its value is "" — which is not the product
+  // moving anywhere, it is the form not knowing. Without the guard, every
+  // save on that degraded page carried category:"" and 422'd, blocking edits
+  // that had nothing to do with categories.
+  if (f.category && f.category.options.length > 0
+      && f.category.value !== (product.categorySlug ?? '')) {
     body.category = f.category.value;
   }
 
@@ -201,6 +387,49 @@ async function save(e) {
   const gallery = f.images ? JSON.parse(f.images.value || '[]') : null;
   if (gallery && JSON.stringify(gallery) !== JSON.stringify(product.images ?? [])) {
     body.images = gallery;
+  }
+
+  // Pack sizes. Validated here because the rows are dynamic — the browser's
+  // own required/min can't span "every row that exists right now".
+  {
+    const rows = variantRows
+      .map((v) => ({ ...v, label: (v.label ?? '').trim() }))
+      .filter((v) => v.label || v.price != null);   // a fully blank row is just noise, drop it
+
+    for (const v of rows) {
+      if (!v.label) { btn.disabled = false; return fail('Every pack size needs a label.'); }
+      if (!(v.price > 0)) { btn.disabled = false; return fail(`Pack "${v.label}" needs a price above zero.`); }
+    }
+
+    const before = (product.variants ?? []).map((v) => ({
+      label: v.label, amount: v.amount ?? null, price: v.price, originalPrice: v.originalPrice ?? null, inStock: v.inStock !== false,
+    }));
+    const now = rows.map((v) => ({
+      label: v.label, amount: v.amount ?? null, price: v.price, originalPrice: v.originalPrice ?? null, inStock: v.inStock !== false,
+    }));
+
+    if (JSON.stringify(now) !== JSON.stringify(before)) {
+      // The server's field names: taka amounts are explicit about being taka.
+      body.variants = now.map((v) => ({
+        label: v.label,
+        amount: v.amount,
+        priceTaka: v.price,
+        originalPriceTaka: v.originalPrice,
+        inStock: v.inStock,
+      }));
+
+      // A renamed label orphans the claim past order lines have on it. Warn,
+      // don't block — corrections ("500g" → "500 g") are the common case.
+      const lost = before.filter((b) => b.label && !now.some((n) => n.label === b.label));
+      if (lost.length && !confirm(
+        `These pack sizes are being removed or renamed:\n\n  ${lost.map((v) => v.label).join(', ')}\n\n`
+        + 'Past orders that name them keep their records, but customers can no longer buy them. Continue?'
+      )) { btn.disabled = false; return; }
+    }
+
+    const defSel = document.querySelector('[data-pe-defvar]');
+    const defNow = now.length >= 2 ? (defSel?.value || null) : null;
+    if (defNow !== (product.defaultVariant ?? null)) body.defaultVariant = defNow;
   }
 
   if (f.reason.value.trim()) body.reason = f.reason.value.trim();

@@ -22,6 +22,11 @@
               <label for="pe-short">Short description</label>
               <input class="input-gr" id="pe-short" name="shortDescription" type="text">
             </div>
+            <div class="afilters__field" style="margin-bottom:var(--space-4)">
+              <label for="pe-desc">Full description <span class="atable__sub">(the PDP's Description tab)</span></label>
+              <textarea class="input-gr" id="pe-desc" name="description" rows="6"
+                        style="min-height:120px;resize:vertical"></textarea>
+            </div>
 
             <!-- Which shelf this sits on. The sub-category list is refilled
                  whenever the category changes, and is hidden when the chosen
@@ -60,12 +65,92 @@
                 <label for="pe-cost">Unit cost ৳</label>
                 <input class="input-gr" id="pe-cost" name="costTaka" type="number" step="0.01" min="0" placeholder="Unknown">
               </div>
+              <div class="afilters__field">
+                <label for="pe-unit">Sold in <span class="atable__sub">(unit)</span></label>
+                <input class="input-gr" id="pe-unit" name="unit" type="text" maxlength="32" placeholder="kg · g · pc">
+              </div>
               <!-- Says what an empty box means, because "unknown" and "zero"
                    are different facts and only one of them is honest. -->
               <p class="admin__sub" style="flex:1 1 100%;margin:0">
                 Leave cost empty if you genuinely do not know it — that is recorded as unknown,
                 not as zero. A zero cost would report every sale as pure profit.
               </p>
+            </div>
+
+            <!-- Pack sizes. The rows are rendered by product-edit-page.js from
+                 the product's variants; the markup here is only the shell. The
+                 LABEL is the identity — order lines record "500 g", not an id —
+                 so the JS warns rather than blocks when one is renamed. -->
+            <div class="afilters__field" style="margin-bottom:var(--space-4)" data-pe-variants-wrap>
+              <label style="display:block;margin-bottom:var(--space-1)">Pack sizes</label>
+              <p class="admin__sub" style="margin:0 0 var(--space-3)">
+                The selectable packs on the product page. Price is per pack; “size” is how much
+                of the unit above one pack holds (0.5 for 500&nbsp;g when the unit is kg) — it
+                drives the “৳&nbsp;per&nbsp;kg” line. Leave the list empty for a one-size product.
+              </p>
+              <div class="avariants" data-pe-variants></div>
+              <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-pe-var-add>+ Add a pack size</button>
+              <div class="afilters__field" style="margin-top:var(--space-3)" data-pe-defwrap hidden>
+                <label for="pe-defvar">Pack preselected on the product page</label>
+                <select class="input-gr" id="pe-defvar" data-pe-defvar></select>
+              </div>
+            </div>
+
+            <!-- Placement. These four checkboxes ARE the tags featured /
+                 premium / bestseller / new — the same strings the storefront
+                 rails filter on — presented as the decisions they actually
+                 are. The old free-text tags box exposed the raw vocabulary,
+                 and its placeholder taught "best-seller", which the rails
+                 would silently ignore (the real tag has no hyphen). A
+                 checkbox cannot misspell. -->
+            <fieldset class="afilters__field apane" style="margin-bottom:var(--space-4)" data-pe-placement>
+              <legend class="label-gr" style="margin-bottom:var(--space-2)">Show this product in</legend>
+              <label class="apane__row">
+                <input type="checkbox" name="placePremium">
+                <span><strong>Premium picks</strong> <span class="atable__sub">— first rail under the hero</span></span>
+              </label>
+              <label class="apane__row">
+                <input type="checkbox" name="placeBestseller">
+                <span><strong>Best sellers</strong> <span class="atable__sub">— the big grid mid-page</span></span>
+              </label>
+              <label class="apane__row">
+                <input type="checkbox" name="placeNew">
+                <span><strong>New arrivals</strong> <span class="atable__sub">— rail further down the home page</span></span>
+              </label>
+              <label class="apane__row">
+                <input type="checkbox" name="placeFeatured">
+                <span><strong>Featured</strong> <span class="atable__sub">— floats to the top of its category page</span></span>
+              </label>
+              <p class="admin__sub" style="margin:var(--space-2) 0 0">
+                Ticking a rail makes the product a <em>candidate</em>; the exact picks and their
+                order are set on the <a href="/modules/highlights/highlights.html">Home page</a> screen.
+                Until a rail is curated there, tagged products fill it automatically.
+              </p>
+            </fieldset>
+
+            <!-- The ad link. "Run an ad for this product" means pasting a URL
+                 into Meta's ad form; this is that URL, pre-built for the
+                 express checkout so the click lands on one screen with COD
+                 preselected. UTMs included so the order records which ad sold. -->
+            <div class="afilters__field" style="margin-bottom:var(--space-4)">
+              <label for="pe-adlink">Ad link <span class="atable__sub">(paste into the Facebook ad — opens the one-page checkout)</span></label>
+              <div style="display:flex;gap:var(--space-2)">
+                <input class="input-gr" id="pe-adlink" type="text" readonly data-pe-adlink style="flex:1;min-width:0">
+                <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-pe-adcopy>Copy</button>
+              </div>
+            </div>
+
+            <div class="afilters__field" style="margin-bottom:var(--space-4)">
+              <label for="pe-tags">Other tags <span class="atable__sub">(comma-separated — your own labels; not shown to customers)</span></label>
+              <input class="input-gr" id="pe-tags" name="tags" type="text" placeholder="ramadan, gift">
+            </div>
+            <div class="afilters__field" style="margin-bottom:var(--space-4)">
+              <label for="pe-dietary">Dietary <span class="atable__sub">(comma-separated)</span></label>
+              <input class="input-gr" id="pe-dietary" name="dietary" type="text" placeholder="halal, sugar-free">
+            </div>
+            <div class="afilters__field" style="margin-bottom:var(--space-4)">
+              <label for="pe-search">Search synonyms <span class="atable__sub">(comma-separated — Bangla spellings help most: khejur, modhu)</span></label>
+              <input class="input-gr" id="pe-search" name="searchTerms" type="text" placeholder="khejur, dates, khurma">
             </div>
 
             <div class="arefund-form" style="border-top:0">

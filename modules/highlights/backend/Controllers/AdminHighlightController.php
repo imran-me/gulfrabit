@@ -37,6 +37,9 @@ class AdminHighlightController extends Controller
                 'label' => $config['label'],
                 'blurb' => $config['blurb'],
                 'fallbackTag' => $config['fallbackTag'],
+                // Per-rail truth about what an empty shelf shows. Null means
+                // the generic "showing tagged products" line applies.
+                'emptyNote' => $config['emptyNote'] ?? null,
                 'items' => $rows
                     ->filter(fn (Highlight $h): bool => $h->product !== null)
                     ->map(fn (Highlight $h): array => [
@@ -109,8 +112,13 @@ class AdminHighlightController extends Controller
         return response()->json([
             'message' => $skus === []
                 // Says what happens next, because an empty shelf is not blank
-                // on the site — it falls back to the tag.
-                ? 'Shelf cleared. It will show tagged products until you pick some.'
+                // on the site. What "next" is differs per rail: most fall back
+                // to the tag, but Best Sellers falls back to its authored HTML
+                // grid (see emptyNote in Highlight::RAILS) — and telling the
+                // merchant the wrong one sends them hunting for a bug.
+                ? (isset(Highlight::RAILS[$rail]['emptyNote'])
+                    ? 'Shelf cleared. ' . Highlight::RAILS[$rail]['emptyNote']
+                    : 'Shelf cleared. It will show tagged products until you pick some.')
                 : count($skus) . ' product' . (count($skus) === 1 ? '' : 's') . ' on this shelf.',
         ]);
     }

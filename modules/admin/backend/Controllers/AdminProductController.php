@@ -49,9 +49,24 @@ class AdminProductController extends Controller
             'category'  => ['sometimes', 'string', 'max:96'],
             'noCost'    => ['sometimes', 'boolean'],
             'perPage'   => ['sometimes', 'integer', 'min:10', 'max:100'],
+            'sort'      => ['sometimes', 'in:title,newest,price-desc'],
         ]);
 
-        $query = Product::query()->with('category:id,slug,name')->orderBy('title');
+        $query = Product::query()->with('category:id,slug,name');
+
+        // Title A→Z stays the default: this screen is mostly "find the product
+        // I already know the name of". Newest-first exists for the other
+        // errand — getting back to the product you created a minute ago, which
+        // alphabetical order files somewhere in the middle of the catalogue.
+        $query = match ($data['sort'] ?? 'title') {
+            'newest'     => $query->orderByDesc('created_at')->orderByDesc('id'),
+            // The id tiebreak is load-bearing on every branch that sorts a
+            // non-unique column: OFFSET pagination over an unspecified order
+            // among ties can show one product on two pages and another on
+            // neither. Prices cluster on round figures, so ties are the norm.
+            'price-desc' => $query->orderByDesc('price_poisha')->orderByDesc('id'),
+            default      => $query->orderBy('title')->orderBy('id'),
+        };
 
         if (! empty($data['q'])) {
             $term = trim($data['q']);
@@ -79,6 +94,12 @@ class AdminProductController extends Controller
                 'title'      => $p->title,
                 'brand'      => $p->brand,
                 'category'   => $p->category?->name,
+                // For the placement chips — which home-page rails this product
+                // is a candidate for. The list never edits them, so names only.
+                'tags'       => $p->tags ?? [],
+                // The Highlights picker builds its optimistic shelf rows from
+                // this payload and needs the thumbnail.
+                'image'      => $p->image,
                 'priceTaka'  => intdiv($p->price_poisha, 100),
                 'costTaka'   => $p->cost_poisha === null ? null : intdiv($p->cost_poisha, 100),
                 'marginPct'  => $this->marginPercent($p),
@@ -168,6 +189,12 @@ class AdminProductController extends Controller
             'cost_poisha'           => $this->poisha($request->input('costTaka')),
             'image'                 => $images[0] ?? null,
             'images'                => $images,
+            'unit'                  => $request->input('unit'),
+            'variants'              => $this->variantsToPoisha($request->input('variants')),
+            'default_variant'       => $request->input('defaultVariant'),
+            'tags'                  => $request->input('tags', []),
+            'dietary'               => $request->input('dietary', []),
+            'search_terms'          => $request->input('searchTerms', []),
             'short_description'     => $request->input('shortDescription'),
             'description'           => $request->input('description'),
             'in_stock'              => true,
@@ -248,6 +275,37 @@ class AdminProductController extends Controller
         return $taka === null || $taka === '' ? null : (int) round((float) $taka * 100);
     }
 
+    /**
+     * Variant rows arrive with prices in taka and are stored in poisha, like
+     * every other money value in the schema — never as a float, which is how a
+     * 1,450.00 becomes a 1,449.99 three joins later. Same stored shape as
+     * CatalogSeeder::variantsToPoisha writes; the model's variantsTaka() is
+     * the only reader of both.
+     *
+     * Returns null rather than [] for an empty list, so "this product has no
+     * pack sizes" reads the same in the column as it does for a product that
+     * never had any.
+     *
+     * @param  array<int, array<string, mixed>>|null $rows
+     * @return array<int, array<string, mixed>>|null
+     */
+    private function variantsToPoisha(?array $rows): ?array
+    {
+        if (empty($rows)) {
+            return null;
+        }
+
+        return array_values(array_map(fn (array $r): array => [
+            'label'                 => (string) $r['label'],
+            'amount'                => isset($r['amount']) && $r['amount'] !== '' ? (float) $r['amount'] : null,
+            'price_poisha'          => $this->poisha($r['priceTaka'] ?? 0),
+            'original_price_poisha' => isset($r['originalPriceTaka']) && (float) $r['originalPriceTaka'] > (float) ($r['priceTaka'] ?? 0)
+                ? $this->poisha($r['originalPriceTaka'])
+                : null,
+            'in_stock'              => (bool) ($r['inStock'] ?? true),
+        ], $rows));
+    }
+
     /** PATCH /api/admin/products/{sku} */
     public function update(ProductUpdateRequest $request, string $sku): JsonResponse
     {
@@ -273,11 +331,38 @@ class AdminProductController extends Controller
             }
         }
 
-        foreach (['title', 'brand', 'short_description', 'description'] as $field) {
+        // The strike-price invariant, checked against what the product will
+        // actually hold. The request rule can only compare fields that arrive
+        // together; a diff-only PATCH may carry either price alone, so the
+        // real comparison has to happen here, after both columns are settled.
+        if ($product->original_price_poisha !== null
+            && $product->original_price_poisha < $product->price_poisha) {
+            return response()->json([
+                'message' => 'The “was” price cannot be lower than the selling price.',
+            ], 422);
+        }
+
+        foreach (['title', 'brand', 'short_description', 'description', 'unit'] as $field) {
             $input = lcfirst(str_replace('_', '', ucwords($field, '_')));
             if ($request->has($input)) {
                 $product->{$field} = $request->input($input);
             }
+        }
+
+        // The JSON list columns. `has` rather than a truthiness check on
+        // purpose: an empty array is a legitimate edit — it is how the last tag
+        // is removed — and `if ($tags)` would silently refuse to clear them.
+        foreach (['tags' => 'tags', 'dietary' => 'dietary', 'searchTerms' => 'search_terms'] as $input => $column) {
+            if ($request->has($input)) {
+                $product->{$column} = array_values($request->input($input, []));
+            }
+        }
+
+        if ($request->has('variants')) {
+            $product->variants = $this->variantsToPoisha($request->input('variants'));
+        }
+        if ($request->has('defaultVariant')) {
+            $product->default_variant = $request->input('defaultVariant');
         }
 
         if ($request->has('inStock')) {
