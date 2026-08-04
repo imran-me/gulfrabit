@@ -50,8 +50,15 @@ async function load() {
 
 function paintHeader() {
   document.querySelector('[data-order-number]').textContent = order.orderNumber;
+  // Which ad sold it belongs in the header line: for a shop acquiring through
+  // paid social, campaign-or-organic is as much a fact of the order as how it
+  // was paid. utm_campaign names the ad set; utm_source alone still says
+  // where; nothing means the customer found the shop themselves.
+  const ad = order.adSource
+    ? ` · via ${order.adSource.utm_campaign || order.adSource.utm_source || 'ad'}`
+    : '';
   document.querySelector('[data-order-meta]').textContent =
-    `${order.status} · ${order.paymentStatus} via ${order.paymentMethod} · placed ${when(order.placedAt)}`;
+    `${order.status} · ${order.paymentStatus} via ${order.paymentMethod} · placed ${when(order.placedAt)}${ad}`;
   document.title = `${order.orderNumber} — GulfRabit Admin`;
 }
 

@@ -15,6 +15,7 @@ import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { validateForm, validateField, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 import { track, cartPayload, getAttribution } from '../../shared/js/core/analytics.js';
+import { createOrder, persistOrderLocally } from './backend/api.js';
 
 const form = document.querySelector('[data-checkout-form]');
 const steps = [...document.querySelectorAll('.checkout-step')];
@@ -231,49 +232,89 @@ function paintReview() {
     + `<div class="review-line" style="border:0;font-weight:600"><span>Total</span><span class="tabular">${formatBDT(total())}</span></div>`;
 }
 
-/* ---- Place order (mock) ---------------------------------------------- */
-function placeOrder(e) {
+/* ---- Place order ------------------------------------------------------ */
+/**
+ * Server first, localStorage always.
+ *
+ * placeOrder() (the module API) answers one of three ways and each gets its
+ * own path: `ok:true` means the server's order — every figure recomputed
+ * there — becomes the local record too; `ok:false` means the server REFUSED
+ * (stock, promo, validation) and the sale stops with the reason on screen and
+ * the cart intact; `null` means there is no backend, and the order is written
+ * locally exactly as this page always did, so the shop works identically the
+ * day before and the day after the API deploys.
+ */
+async function placeOrder(e) {
   e.preventDefault();
   const { valid } = validateForm(form);
   if (!valid && anyVisibleInvalid()) { showStep(1); toast.error('Please complete your address.'); return; }
 
+  // A slow server plus an anxious double-click must not become two orders.
+  const btn = form.querySelector('[data-place-order]');
+  if (btn?.disabled) return;
+  if (btn) btn.disabled = true;
+
   const g = (n) => form.querySelector(`[name="${n}"]`)?.value || '';
   const cart = store.getCart();
-  const orderId = 'GR-2026-' + Math.floor(1000 + performance.now() % 9000);
-  const order = {
-    id: orderId,
-    date: new Date().toISOString().slice(0, 10),
-    status: 'processing',
-    total: total(),
-    // variant is part of what was bought: an order record that says "Ajwa Dates"
-    // without the pack size cannot be picked, packed or refunded correctly.
-    items: cart.map((l) => ({ id: l.id, title: l.title, variant: l.variant ?? null, qty: l.qty, price: l.price, image: l.image })),
-    address: [g('address'), g('area'), form.querySelector('[data-district]')?.selectedOptions[0]?.textContent]
-      .filter(Boolean).join(', '),
-    phone: g('phone'),
-    email: g('email') || null,
-    delivery: form.querySelector('[data-delivery]:checked')?.value,
-    payment: form.querySelector('[data-payment]:checked')?.value,
-    // Which ad recruited this customer, if any — the cart checkout gets the
-    // same attribution as express, because a visitor can arrive from an ad and
-    // still take the ordinary route through the shop.
-    source: getAttribution(),
-  };
 
   // Before the redirect. `track` sends the server mirror with keepalive, so
-  // the request survives the navigation on the next line — without it the
-  // browser cancels it and the conversion is lost at the last step.
-  order.eventId = track('Purchase', { ...cartPayload(cart, total()), value: Number(total().toFixed(2)) });
+  // the request survives the navigation — without it the browser cancels it
+  // and the conversion is lost at the last step. Fired before the POST so the
+  // event id can ride on the order for Conversions-API dedupe.
+  const eventId = track('Purchase', { ...cartPayload(cart, total()), value: Number(total().toFixed(2)) });
 
-  // Persist to the user's local order history + stash "last order" for confirmation.
-  const orders = storage.get(KEYS.ORDERS, []);
-  orders.unshift(order);
-  storage.set(KEYS.ORDERS, orders);
-  storage.set('last-order', order);
+  const result = await createOrder({
+    items: cart.map((l) => ({ sku: l.id, qty: l.qty, variant: l.variant ?? null })),
+    name: g('fullName'),
+    phone: g('phone'),
+    email: g('email') || null,
+    address: g('address'),
+    area: g('area') || null,
+    district: form.querySelector('[data-district]')?.value || '',
+    notes: g('notes') || null,
+    delivery: form.querySelector('[data-delivery]:checked')?.value,
+    payment: form.querySelector('[data-payment]:checked')?.value,
+    promoCode: storage.get('cart-promo', null),
+    source: getAttribution(),
+    eventId,
+  });
+
+  if (result && result.ok === false) {
+    // The server said no and said why — stock, promo, district. The cart is
+    // untouched; the customer fixes the named problem and tries again.
+    if (btn) btn.disabled = false;
+    toast.error(result.message);
+    return;
+  }
+
+  const order = result?.ok
+    // The server's record, which the whole local UI can already read: the
+    // confirmation, track and account pages consume exactly this shape.
+    ? { ...result.order, eventId }
+    // No backend — the local mock, unchanged from the day it was written.
+    : {
+        id: 'GR-2026-' + Math.floor(1000 + performance.now() % 9000),
+        date: new Date().toISOString().slice(0, 10),
+        status: 'processing',
+        total: total(),
+        // variant is part of what was bought: an order record that says
+        // "Ajwa Dates" without the pack size cannot be picked or refunded.
+        items: cart.map((l) => ({ id: l.id, title: l.title, variant: l.variant ?? null, qty: l.qty, price: l.price, image: l.image })),
+        address: [g('address'), g('area'), form.querySelector('[data-district]')?.selectedOptions[0]?.textContent]
+          .filter(Boolean).join(', '),
+        phone: g('phone'),
+        email: g('email') || null,
+        delivery: form.querySelector('[data-delivery]:checked')?.value,
+        payment: form.querySelector('[data-payment]:checked')?.value,
+        source: getAttribution(),
+        eventId,
+      };
+
+  persistOrderLocally(order);
 
   store.clearCart();
   storage.remove('cart-promo');
-  window.location.href = siteURL(`modules/checkout/order-confirmation.html?id=${encodeURIComponent(orderId)}`);
+  window.location.href = siteURL(`modules/checkout/order-confirmation.html?id=${encodeURIComponent(order.id)}`);
 }
 
 function setText(sel, v) { const el = document.querySelector(sel); if (el) el.textContent = v; }

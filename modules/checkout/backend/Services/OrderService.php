@@ -108,6 +108,11 @@ final class OrderService
                 // Neither is 'paid' — only a gateway callback may set that.
                 'payment_status' => 'pending',
                 'status'         => 'placed',
+
+                // Which ad sold it, if one did. Reporting only — nothing
+                // downstream branches on these. See the 2026_08_04 migration.
+                'ad_source'      => $input['source'] ?? null,
+                'pixel_event_id' => $input['eventId'] ?? null,
                 'placed_at'      => now(),
             ]);
 

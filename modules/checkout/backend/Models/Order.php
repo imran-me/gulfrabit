@@ -34,6 +34,7 @@ class Order extends Model
         'subtotal_poisha', 'discount_poisha', 'total_poisha', 'promo_code',
         'payment_method', 'payment_status', 'payment_reference',
         'status', 'placed_at',
+        'ad_source', 'pixel_event_id',
     ];
 
     protected function casts(): array
@@ -44,6 +45,7 @@ class Order extends Model
             'discount_poisha'        => 'integer',
             'delivery_charge_poisha' => 'integer',
             'total_poisha'           => 'integer',
+            'ad_source'              => 'array',
         ];
     }
 

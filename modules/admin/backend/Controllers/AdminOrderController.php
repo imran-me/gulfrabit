@@ -136,6 +136,11 @@ class AdminOrderController extends Controller
                 ],
                 'promoCode' => $order->promo_code,
 
+                // Which ad recruited this customer, or null for organic. The
+                // campaign name is the figure a merchant actually reads;
+                // the full UTM set rides along for anything finer.
+                'adSource' => $order->ad_source,
+
                 'history' => $order->statusEvents->map->toAdminArray()->all(),
                 'refunds' => $order->refunds->map->toAdminArray()->all(),
 

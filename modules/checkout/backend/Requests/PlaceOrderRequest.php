@@ -42,6 +42,15 @@ class PlaceOrderRequest extends FormRequest
 
             'delivery' => ['required', 'string', 'exists:delivery_zones,key'],
             'payment'  => ['required', Rule::in(['bkash', 'nagad', 'card', 'cod'])],
+
+            // Ad attribution. The one exception to "the client proposes
+            // nothing": these cost no money and buy the report that ties spend
+            // to sales. Bounded hard — a UTM set is a handful of short strings,
+            // and anything larger is someone using the column as a dumping
+            // ground. Nullable throughout: organic orders carry neither.
+            'source'    => ['sometimes', 'nullable', 'array', 'max:10'],
+            'source.*'  => ['string', 'max:255'],
+            'eventId'   => ['sometimes', 'nullable', 'string', 'max:64'],
         ];
     }
 

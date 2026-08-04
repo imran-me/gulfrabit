@@ -38,6 +38,7 @@ import { validateForm, attachLiveValidation } from '../../shared/js/utils/valida
 import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 import { track, productPayload, getAttribution } from '../../shared/js/core/analytics.js';
+import { createOrder, persistOrderLocally } from './backend/api.js';
 
 const root = document.querySelector('[data-express]');
 const form = document.querySelector('[data-express-form]');
@@ -204,26 +205,66 @@ function closeConfirm() {
 }
 
 /* ---- Place ------------------------------------------------------------ */
-function confirmOrder() {
+/**
+ * Server first, localStorage always — same three-way contract as the cart
+ * checkout, through the same createOrder() seam. `ok:false` is the one path
+ * with UI here: the sheet closes, the reason lands as a toast, and the form
+ * stays exactly as typed so the customer can fix the named problem.
+ */
+async function confirmOrder() {
   // Double-tap on a slow phone would otherwise write two orders.
   if (placing) return;
   placing = true;
 
-  const order = buildOrder();
+  // The round-trip to a shared-hosting backend can take a second or two, and
+  // a button that goes silent for that long reads as broken — which invites
+  // exactly the second tap the guard above exists to swallow.
+  const yes = document.querySelector('[data-express-confirm-yes]');
+  yes.disabled = true;
+  yes.textContent = 'Placing…';
+  const restore = () => { yes.disabled = false; yes.textContent = 'Yes, order now'; };
 
-  // Before persisting, so the event_id lands ON the order. When the server
-  // later forwards the same purchase to the Conversions API it must reuse this
-  // id or Meta counts the sale twice.
-  order.eventId = track('Purchase', {
+  const local = buildOrder();
+
+  // Before placing, so the event_id lands ON the order. When the server
+  // forwards the same purchase to the Conversions API it must reuse this id
+  // or Meta counts the sale twice.
+  const eventId = track('Purchase', {
     ...productPayload(product, qty),
-    value: Number(order.total.toFixed(2)),
+    value: Number(local.total.toFixed(2)),
+  });
+  local.eventId = eventId;
+
+  const g = (n) => form.querySelector(`[name="${n}"]`)?.value.trim() || '';
+  const result = await createOrder({
+    items: [{ sku: product.id, qty, variant: null }],
+    name: g('fullName'),
+    phone: g('phone'),
+    email: g('email') || null,
+    address: g('address'),
+    area: g('area') || null,
+    district: form.querySelector('[data-district]')?.value || '',
+    notes: null,
+    delivery: quote.id,
+    payment: form.querySelector('[data-payment]:checked')?.value || 'cod',
+    promoCode: null,
+    source: adSource(),
+    eventId,
   });
 
-  const orders = storage.get(KEYS.ORDERS, []);
-  orders.unshift(order);
-  storage.set(KEYS.ORDERS, orders);
-  storage.set('last-order', order);
+  if (result && result.ok === false) {
+    // Refused — stock, district, validation. Nothing was written anywhere.
+    placing = false;
+    restore();
+    sheet.hidden = true;
+    toast.error(result.message);
+    return;
+  }
 
+  const order = result?.ok ? { ...result.order, eventId } : local;
+  persistOrderLocally(order);
+
+  restore();
   sheet.hidden = true;
   showDone(order);
 }
@@ -285,7 +326,7 @@ async function showDone(order) {
 
   const done = document.querySelector('[data-express-state="done"]');
   setText('[data-done-id]', order.id);
-  setText('[data-done-eta]', quote.eta || '');
+  setText('[data-done-eta]', order.eta || quote.eta || '');
   setText('[data-done-pay]', order.payment === 'cod'
     ? `Pay ${formatBDT(order.total)} in cash when the rider arrives.`
     : `We’ll contact you on ${order.phone} to collect payment by ${paymentLabel()}.`);
