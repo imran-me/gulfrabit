@@ -64,3 +64,17 @@
 .qty-stepper__btn:hover:not(:disabled) { background: var(--wash-hover); color: var(--link); }
 .qty-stepper__btn:disabled { opacity: .4; cursor: not-allowed; }
 .qty-stepper__input { width: 48px; height: 46px; text-align: center; background: none; border: 0; color: var(--text-primary); font-variant-numeric: tabular-nums; font-weight: var(--fw-semibold); outline: none; }
+
+/* ---- Honeypot -----------------------------------------------------------
+   A field for bots. Offscreen rather than display:none, because the cruder
+   form-fillers skip anything display:none but happily complete what is merely
+   out of view. aria-hidden + tabindex=-1 keep it out of every human path:
+   screen readers never announce it, Tab never lands on it. */
+.hp-field {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}

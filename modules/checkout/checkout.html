@@ -43,7 +43,7 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=ffe12170">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=9785c854">
   <link rel="stylesheet" href="../../modules/checkout/checkout.css?v=247726fe">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
@@ -236,6 +236,11 @@
 
     <div class="checkout-layout">
       <form data-checkout-form novalidate>
+            <!-- Bots only. See .hp-field in shared/css/partials/_forms.css. -->
+            <div class="hp-field" aria-hidden="true">
+              <label for="co-hp">Leave this field empty</label>
+              <input id="co-hp" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
         <!-- STEP 1 · Address -->
         <section class="checkout-step" data-step="1">
           <h2 class="h4 checkout-step__title">Delivery Address</h2>
@@ -433,6 +438,6 @@
 </style>
 
   <script type="module" src="../../shared/js/main.js?v=b67929f0"></script>
-  <script type="module" src="../../modules/checkout/checkout-page.js?v=01eaa2fa"></script>
+  <script type="module" src="../../modules/checkout/checkout-page.js?v=95d0da30"></script>
 </body>
 </html>

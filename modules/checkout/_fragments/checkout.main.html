@@ -18,6 +18,11 @@
 
     <div class="checkout-layout">
       <form data-checkout-form novalidate>
+            <!-- Bots only. See .hp-field in shared/css/partials/_forms.css. -->
+            <div class="hp-field" aria-hidden="true">
+              <label for="co-hp">Leave this field empty</label>
+              <input id="co-hp" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
         <!-- STEP 1 · Address -->
         <section class="checkout-step" data-step="1">
           <h2 class="h4 checkout-step__title">Delivery Address</h2>

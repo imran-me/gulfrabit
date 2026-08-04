@@ -43,7 +43,7 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=ffe12170">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=9785c854">
   <link rel="stylesheet" href="../../modules/checkout/checkout.css?v=247726fe">
   <link rel="stylesheet" href="../../modules/checkout/express.css?v=5f81edca">
   <script type="application/ld+json">
@@ -267,6 +267,11 @@
           </div>
 
           <form class="express-form" data-express-form novalidate hidden>
+            <!-- Bots only. See .hp-field in shared/css/partials/_forms.css. -->
+            <div class="hp-field" aria-hidden="true">
+              <label for="ex-hp">Leave this field empty</label>
+              <input id="ex-hp" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
             <h2 class="h5 express__legend">Delivery details</h2>
             <div class="express-grid">
               <div class="field-gr" data-field>
@@ -487,6 +492,6 @@
 </style>
 
   <script type="module" src="../../shared/js/main.js?v=b67929f0"></script>
-  <script type="module" src="../../modules/checkout/express-page.js?v=11358226"></script>
+  <script type="module" src="../../modules/checkout/express-page.js?v=39d509a8"></script>
 </body>
 </html>

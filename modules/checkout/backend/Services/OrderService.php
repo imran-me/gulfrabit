@@ -79,6 +79,14 @@ final class OrderService
             $deliveryPoisha = $chosenZone->charge_poisha;
 
             $goodsAfterDiscount = max(0, $subtotalPoisha - $discountPoisha);
+            $totalPoisha = $goodsAfterDiscount + $deliveryPoisha;
+
+            // COD abuse guards, both phrased as things a human can act on.
+            // Cash on delivery with one-tap checkout is how this shop sells,
+            // and it is also how fake orders cost real courier fees: every
+            // junk order that ships is money burned twice, outbound and back.
+            $this->assertNotDuplicate($input['phone'], $totalPoisha);
+            $this->assertUnderDailyCap($input['phone']);
 
             $order = Order::create([
                 'order_number'  => $this->generateOrderNumber(),
@@ -100,7 +108,7 @@ final class OrderService
 
                 'subtotal_poisha' => $subtotalPoisha,
                 'discount_poisha' => $discountPoisha,
-                'total_poisha'    => $goodsAfterDiscount + $deliveryPoisha,
+                'total_poisha'    => $totalPoisha,
                 'promo_code'      => $promo?->code,
 
                 'payment_method' => $input['payment'],
@@ -197,6 +205,56 @@ final class OrderService
     }
 
     /** Store one canonical form so lookups by phone actually match. */
+    /**
+     * The same phone placing the same total twice inside ten minutes is,
+     * overwhelmingly, one of two things: a double-tap the client-side guards
+     * missed, or someone testing how many orders a script can create. A
+     * customer genuinely reordering hits neither — a second identical order
+     * ten minutes later goes through.
+     *
+     * Keyed on total rather than items because it needs no join and a spam
+     * run repeats the same basket; a legitimate different order almost never
+     * lands on the identical poisha total within the window.
+     */
+    private function assertNotDuplicate(string $phone, int $totalPoisha): void
+    {
+        $duplicate = Order::query()
+            ->where('customer_phone', $this->normalisePhone($phone))
+            ->where('total_poisha', $totalPoisha)
+            ->where('created_at', '>=', now()->subMinutes(10))
+            ->exists();
+
+        if ($duplicate) {
+            throw new RuntimeException(
+                'You placed this exact order a few minutes ago — it is already on its way. '
+                . 'Check the tracking page, or wait ten minutes if you really do want it twice.'
+            );
+        }
+    }
+
+    /**
+     * Five COD orders from one phone in one day is not shopping. The cap is
+     * generous for a household and a hard wall for the standard fake-order
+     * attack (a rival feeding addresses into a shop to burn its courier fees).
+     * Cancelled orders do not count against it — a customer whose orders WE
+     * cancelled should not also lose the ability to order.
+     */
+    private function assertUnderDailyCap(string $phone): void
+    {
+        $today = Order::query()
+            ->where('customer_phone', $this->normalisePhone($phone))
+            ->where('status', '!=', 'cancelled')
+            ->where('created_at', '>=', now()->startOfDay())
+            ->count();
+
+        if ($today >= 5) {
+            throw new RuntimeException(
+                'This phone number has reached today's order limit. '
+                . 'Call us if you need a larger order — bulk is what our B2B desk is for.'
+            );
+        }
+    }
+
     private function normalisePhone(string $phone): string
     {
         $digits = preg_replace('/\D/', '', $phone) ?? '';

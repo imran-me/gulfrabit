@@ -248,6 +248,7 @@ async function confirmOrder() {
     delivery: quote.id,
     payment: form.querySelector('[data-payment]:checked')?.value || 'cod',
     promoCode: null,
+    website: g('website') || null,
     source: adSource(),
     eventId,
   });

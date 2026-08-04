@@ -48,6 +48,11 @@
           </div>
 
           <form class="express-form" data-express-form novalidate hidden>
+            <!-- Bots only. See .hp-field in shared/css/partials/_forms.css. -->
+            <div class="hp-field" aria-hidden="true">
+              <label for="ex-hp">Leave this field empty</label>
+              <input id="ex-hp" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
             <h2 class="h5 express__legend">Delivery details</h2>
             <div class="express-grid">
               <div class="field-gr" data-field>

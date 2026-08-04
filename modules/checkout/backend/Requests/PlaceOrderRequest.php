@@ -43,6 +43,15 @@ class PlaceOrderRequest extends FormRequest
             'delivery' => ['required', 'string', 'exists:delivery_zones,key'],
             'payment'  => ['required', Rule::in(['bkash', 'nagad', 'card', 'cod'])],
 
+            // The honeypot. A field humans never see (visually hidden, out of
+            // the tab order, autocomplete off) and form-filling bots reliably
+            // fill. `prohibited` = present-and-non-empty fails, so real
+            // customers — whose browsers submit it empty — never trip it.
+            // The error message is deliberately generic: a honeypot that
+            // explains itself is a honeypot with instructions for stepping
+            // around it.
+            'website' => ['prohibited'],
+
             // Ad attribution. The one exception to "the client proposes
             // nothing": these cost no money and buy the report that ties spend
             // to sales. Bounded hard — a UTM set is a handful of short strings,

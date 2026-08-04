@@ -275,6 +275,7 @@ async function placeOrder(e) {
     delivery: form.querySelector('[data-delivery]:checked')?.value,
     payment: form.querySelector('[data-payment]:checked')?.value,
     promoCode: storage.get('cart-promo', null),
+    website: g('website') || null,
     source: getAttribution(),
     eventId,
   });

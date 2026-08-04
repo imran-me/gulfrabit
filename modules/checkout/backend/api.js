@@ -114,6 +114,9 @@ export async function createOrder(p) {
         payment: p.payment,
         source: p.source || null,
         eventId: p.eventId || null,
+        // The honeypot, forwarded ONLY when a bot filled it. Humans' browsers
+        // submit it empty and it never appears in their payload at all.
+        ...(p.website ? { website: p.website } : {}),
       }),
     });
 
