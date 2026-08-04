@@ -34,6 +34,10 @@ NOINDEX = {
     "modules/account/track.html":           "personal — order-specific",
     "modules/auth/forgot-password.html":    "no indexable content; invites scraping",
     "modules/checkout/order-confirmation.html": "personal — order-specific",
+    # A paid-traffic landing page. It is a checkout, it is meaningless without
+    # ?sku=, and an indexed copy would rank against the product page it is
+    # supposed to convert — the ad is the only thing that should link here.
+    "modules/checkout/express.html":        "ad landing page — reached from paid links only",
     "modules/admin/index.html":             "staff panel — noindex, and disallowed in robots.txt",
     "modules/admin/login.html":             "staff sign-in — never a search result",
     "modules/admin/orders.html":            "staff panel",

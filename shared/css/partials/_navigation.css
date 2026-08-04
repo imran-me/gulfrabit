@@ -14,8 +14,19 @@
 }
 /* Block-centered (not flex) so long text wraps within the bar instead of
    forcing the document wider than the viewport on mobile. */
-.announce-bar__inner { position: relative; text-align: center; padding: 8px 2.75rem; line-height: 1.35; max-width: var(--container-max); margin-inline: auto; }
-.announce-bar__close { position: absolute; right: var(--space-3); top: 50%; transform: translateY(-50%); background: none; border: 0; color: #04222b; cursor: pointer; opacity: .7; line-height: 1; }
+.announce-bar__inner { position: relative; text-align: center; padding: 8px 3rem; line-height: 1.35; max-width: var(--container-max); margin-inline: auto; }
+/* The ✕ glyph is 11×14. Sized as a button rather than left to shrink-wrap it,
+   because a bare glyph is what it was: an 11×14 target on every page of the
+   site, under even WCAG 2.5.8's 24×24 minimum, sitting in the corner a thumb
+   reaches for first. The mark stays the same size — only the box around it
+   grows — and .announce-bar__inner's side padding went 2.75rem → 3rem so a
+   44px box clears the centred text instead of landing on top of it. */
+.announce-bar__close {
+  position: absolute; right: 2px; top: 50%; transform: translateY(-50%);
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  background: none; border: 0; color: #04222b; cursor: pointer; opacity: .7; line-height: 1;
+}
 @media (hover: hover) {
   .announce-bar__close:hover { opacity: 1; }
 }

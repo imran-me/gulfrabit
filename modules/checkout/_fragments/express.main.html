@@ -1,0 +1,180 @@
+  <!-- ============================ MAIN ============================ -->
+  <main id="main">
+
+    <!-- ---- EXPRESS CHECKOUT ----
+         The landing page for paid social traffic. Someone who taps "Buy" in a
+         Facebook ad has already decided; the four-step cart checkout re-asks
+         them to decide four more times. This is the same order, on one screen.
+
+         Entered as express.html?sku=gr-1101&qty=1 — the item comes from the
+         URL, not the cart, because an ad click arrives with an empty cart and
+         checkout.html turns that into "Your cart is empty".
+
+         Three states live in this one document and swap in place, so placing
+         an order never navigates: the form, the confirm sheet, and the
+         receipt. See modules/checkout/express-page.js. -->
+    <section class="express" data-express aria-labelledby="express-head">
+      <div class="gr-container express__container">
+
+        <!-- STATE 1 · the order form -->
+        <div data-express-state="form">
+          <h1 class="h3 express__head" id="express-head">Complete your order</h1>
+
+          <!-- What they tapped, restated. An ad click is a promise about a
+               specific product; showing it back is what makes the page feel
+               like a continuation of the ad rather than a generic form. -->
+          <div class="express-item" data-express-item hidden>
+            <img class="express-item__thumb" data-express-img src="" alt="" width="72" height="72">
+            <div class="express-item__body">
+              <p class="express-item__title" data-express-title></p>
+              <p class="express-item__meta" data-express-meta></p>
+            </div>
+            <div class="express-item__qty">
+              <div class="qty-stepper" role="group" aria-label="Quantity">
+                <button class="qty-stepper__btn" type="button" data-qty-dec aria-label="Decrease quantity">−</button>
+                <input class="qty-stepper__input" data-qty-input type="text" inputmode="numeric" value="1" aria-label="Quantity">
+                <button class="qty-stepper__btn" type="button" data-qty-inc aria-label="Increase quantity">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product could not be loaded / is no longer sold. An ad outlives
+               the thing it advertises, so this is a real state, not an edge
+               case: 6 of 7 launch categories carry no stock today. -->
+          <div class="express-gone" data-express-gone hidden>
+            <h2 class="h4">This item isn’t available</h2>
+            <p class="text-muted-gr" data-express-gone-msg>It may have sold out or been withdrawn.</p>
+            <a class="btn-gr btn-primary-gr" data-express-gone-link href="../../index.html">Browse the shop</a>
+          </div>
+
+          <form class="express-form" data-express-form novalidate hidden>
+            <h2 class="h5 express__legend">Delivery details</h2>
+            <div class="express-grid">
+              <div class="field-gr" data-field>
+                <label class="label-gr" for="ex-name">Full name <span class="req">*</span></label>
+                <input id="ex-name" class="input-gr" name="fullName" autocomplete="name" data-validate="required|min:3" data-label="Full name">
+                <span class="field-error" data-error></span>
+              </div>
+              <div class="field-gr" data-field>
+                <label class="label-gr" for="ex-phone">Phone <span class="req">*</span></label>
+                <input id="ex-phone" class="input-gr" name="phone" type="tel" inputmode="numeric" autocomplete="tel" data-validate="required|phone" data-label="Phone" placeholder="01XXXXXXXXX">
+                <span class="field-error" data-error></span>
+              </div>
+              <div class="field-gr" data-field>
+                <label class="label-gr" for="ex-district">District <span class="req">*</span></label>
+                <select id="ex-district" class="select-gr" name="district" autocomplete="address-level1" data-district data-validate="required" data-label="District">
+                  <option value="">Select district</option>
+                </select>
+                <span class="field-error" data-error></span>
+              </div>
+              <div class="field-gr" data-field>
+                <label class="label-gr" for="ex-area">Thana / Upazila <span class="req">*</span></label>
+                <input id="ex-area" class="input-gr" name="area" autocomplete="address-level2" data-validate="required|min:2" data-label="Thana" placeholder="e.g. Gulshan">
+                <span class="field-error" data-error></span>
+              </div>
+              <div class="field-gr express-grid__wide" data-field>
+                <label class="label-gr" for="ex-address">Street address <span class="req">*</span></label>
+                <input id="ex-address" class="input-gr" name="address" autocomplete="street-address" data-validate="required|min:6" data-label="Street address" placeholder="House, road, block">
+                <span class="field-error" data-error></span>
+              </div>
+              <div class="field-gr express-grid__wide" data-field>
+                <label class="label-gr" for="ex-email">Email <span class="text-muted-gr">(optional)</span></label>
+                <input id="ex-email" class="input-gr" name="email" type="email" autocomplete="email" data-validate="email" data-label="Email" placeholder="For the receipt — we’ll text you either way">
+                <span class="field-error" data-error></span>
+              </div>
+            </div>
+
+            <h2 class="h5 express__legend">Payment</h2>
+            <!-- Cash on delivery is pre-selected because it is how most of
+                 Bangladesh buys online. Pre-selecting the majority choice is
+                 the difference between one tap and three on this screen. -->
+            <div class="express-pay" data-express-pay>
+              <label class="option-card">
+                <input type="radio" name="payment" value="cod" data-payment checked>
+                <span>
+                  <span class="option-card__title">Cash on Delivery</span>
+                  <span class="option-card__sub">Pay the rider when it arrives</span>
+                </span>
+              </label>
+              <label class="option-card">
+                <input type="radio" name="payment" value="bkash" data-payment>
+                <span>
+                  <span class="option-card__title">bKash</span>
+                  <span class="option-card__sub">Pay now from your wallet</span>
+                </span>
+              </label>
+              <label class="option-card">
+                <input type="radio" name="payment" value="nagad" data-payment>
+                <span>
+                  <span class="option-card__title">Nagad</span>
+                  <span class="option-card__sub">Pay now from your wallet</span>
+                </span>
+              </label>
+              <label class="option-card">
+                <input type="radio" name="payment" value="card" data-payment>
+                <span>
+                  <span class="option-card__title">Card</span>
+                  <span class="option-card__sub">Visa / Mastercard</span>
+                </span>
+              </label>
+            </div>
+
+            <dl class="express-total">
+              <div><dt>Subtotal</dt><dd class="tabular" data-sum-subtotal>—</dd></div>
+              <div><dt>Delivery <span class="text-muted-gr" data-sum-zone></span></dt><dd class="tabular" data-sum-delivery>—</dd></div>
+              <div class="express-total__grand"><dt>Total</dt><dd class="tabular" data-sum-total>—</dd></div>
+            </dl>
+          </form>
+        </div>
+
+        <!-- STATE 3 · the receipt. Replaces the form in place — no navigation,
+             so the browser back button cannot resubmit an order. -->
+        <div class="express-done" data-express-state="done" hidden>
+          <div class="express-done__mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" width="34" height="34"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <h1 class="h3">You have successfully ordered</h1>
+          <p class="express-done__sub">Order <strong data-done-id></strong> · <span data-done-eta></span></p>
+          <p class="express-done__pay" data-done-pay></p>
+
+          <div class="express-done__actions">
+            <a class="btn-gr btn-primary-gr btn-lg-gr" data-done-track href="#">Track order</a>
+            <a class="btn-gr btn-outline-gr btn-lg-gr" href="../../index.html">Shop more</a>
+          </div>
+
+          <section class="express-more" aria-labelledby="more-head">
+            <h2 class="h5" id="more-head">You might also like</h2>
+            <div class="express-more__grid" data-express-more></div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Sticky action bar. Outside the scrolling column so the price and the
+           button are on screen at every scroll position — on a 390px phone the
+           form is taller than the viewport and a button at the bottom of it is
+           a button nobody sees. -->
+      <div class="express-bar" data-express-bar hidden>
+        <div class="express-bar__price">
+          <span class="express-bar__label">Total</span>
+          <strong class="tabular" data-bar-total>—</strong>
+        </div>
+        <button class="btn-gr btn-gradient-gr btn-lg-gr express-bar__cta" type="button" data-express-place>Place Order</button>
+      </div>
+
+      <!-- STATE 2 · confirm. A bottom sheet rather than a page, because the
+           only thing being asked is "sure?" and taking the form off screen to
+           ask it invites a re-check of everything already filled in. -->
+      <div class="express-sheet" data-express-confirm hidden>
+        <div class="express-sheet__scrim" data-express-cancel-scrim></div>
+        <div class="express-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="confirm-head">
+          <h2 class="h4" id="confirm-head">Place this order?</h2>
+          <p class="express-sheet__line" data-confirm-line></p>
+          <p class="express-sheet__addr" data-confirm-addr></p>
+          <div class="express-sheet__actions">
+            <button class="btn-gr btn-outline-gr" type="button" data-express-cancel>Go back</button>
+            <button class="btn-gr btn-gradient-gr" type="button" data-express-confirm-yes>Yes, order now</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>

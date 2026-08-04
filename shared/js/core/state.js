@@ -15,6 +15,7 @@
  */
 
 import { storage, KEYS } from './storage.js';
+import { track, productPayload } from './analytics.js';
 
 export const EVENTS = {
   CART: 'cart:change',
@@ -85,6 +86,12 @@ export function addToCart(product, qty = 1) {
     cart.push(line);
   }
   persistCart();
+
+  // Fired here rather than at the buttons. Every route into the cart — the
+  // PDP, a product card, quick view, the buy bar, a re-order — ends up in this
+  // function, so this is the one place the event cannot be forgotten when a
+  // seventh route is added.
+  track('AddToCart', productPayload(product, qty));
 }
 
 export function updateQty(id, qty, variant = null) {

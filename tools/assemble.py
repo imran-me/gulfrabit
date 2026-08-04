@@ -150,14 +150,21 @@ def relativize(html, out):
         html = html.replace('="/', f'="{prefix}').replace("url('/", f"url('{prefix}").replace('url("/', f'url("{prefix}').replace("url(/", f"url({prefix}")
     return html
 
-def assemble(out, title, desc, main_html, css_links=None, module_js=None, cms_page=None):
+def assemble(out, title, desc, main_html, css_links=None, module_js=None, cms_page=None,
+             noindex=False):
     """`cms_page` opts a page into live content editing.
 
     Both additions are enhancements: cms.js only swaps text the server sent for
     keys the developer marked, and cms-editor.js does nothing without ?edit=1
     AND a staff session the server recognises. A page without a cms_page is
     simply not editable, which is the right default for anything rendered
-    entirely from data."""
+    entirely from data.
+
+    `noindex` is for storefront pages that must stay out of search. Keeping the
+    sitemap and the meta tag in agreement matters: tools/sitemap.py already
+    omits these, but omission only means "not submitted" — a crawler that finds
+    the URL in an ad, a referrer header or a shared link will index it anyway
+    unless the page says otherwise."""
     if cms_page:
         css_links = list(css_links or []) + ["/modules/cms/cms.css"]
         existing = list(module_js) if isinstance(module_js, list) else ([module_js] if module_js else [])
@@ -170,9 +177,22 @@ def assemble(out, title, desc, main_html, css_links=None, module_js=None, cms_pa
     page += "  <!-- FOOTER (inlined from shared/components/footer.html) -->\n"
     page += FOOTER
     page += scripts(module_js)
+    if noindex:
+        page = page.replace('<meta name="robots" content="index, follow">',
+                            '<meta name="robots" content="noindex, follow">')
     page = relativize(page, out)
     write(out, page)
     print("wrote", out)
+
+# Storefront pages that must carry <meta name="robots" content="noindex">.
+# Keep this in step with NOINDEX in tools/sitemap.py — that file decides what
+# is submitted, this one decides what is indexed if found another way. Admin
+# pages are not listed here; assemble_admin() noindexes all of them already.
+STOREFRONT_NOINDEX = {
+    # A checkout, meaningless without ?sku=, and an indexed copy would compete
+    # with the product page it exists to convert.
+    "modules/checkout/express.html",
+}
 
 # ---- Admin pages --------------------------------------------------------
 # The panel gets its own build path because it must NOT carry the storefront
@@ -357,6 +377,15 @@ PAGES = [
      "Your GulfRabit order is confirmed.",
      "modules/checkout/_fragments/confirmation.main.html",
      ["/modules/checkout/checkout.css"], "/modules/checkout/confirmation-page.js"),
+
+    # Landing page for paid social. checkout.css first — express.css borrows
+    # .option-card from it and overrides the layout around it.
+    ("modules/checkout/express.html",
+     "Complete your order — GulfRabit",
+     "Confirm your GulfRabit order in one step — cash on delivery available.",
+     "modules/checkout/_fragments/express.main.html",
+     ["/modules/checkout/checkout.css", "/modules/checkout/express.css"],
+     "/modules/checkout/express-page.js"),
 
     ("modules/account/dashboard.html",
      "My Account — GulfRabit",
@@ -547,13 +576,19 @@ if __name__ == "__main__":
     sheets = bundle_css()
     print(f"bundled {sheets} stylesheets -> shared/css/gulfrabit.css")
 
+    for path in STOREFRONT_NOINDEX:
+        if not any(p[0] == path for p in PAGES):
+            print(f"WARNING: STOREFRONT_NOINDEX lists {path}, which PAGES does not build")
+
     built = 0
     for out, title, desc, frag, css, mjs, *rest in PAGES:
         fp = os.path.join(ROOT, frag)
         if not os.path.exists(fp):
             print("SKIP (no fragment yet):", frag)
             continue
-        assemble(out, title, desc, read(frag), css, mjs, cms_page=(rest[0] if rest else None))
+        assemble(out, title, desc, read(frag), css, mjs,
+                 cms_page=(rest[0] if rest else None),
+                 noindex=(out in STOREFRONT_NOINDEX))
         built += 1
 
     for out, title, frag, css, ajs, chrome in ADMIN_PAGES:

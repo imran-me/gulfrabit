@@ -22,8 +22,13 @@ import { initWishlistButtons } from './components/wishlist.js';
 import { initQuantitySteppers } from './components/quantity-stepper.js';
 import { enhanceProductCards } from './components/product-card.js';
 import { initCompareTray } from './components/compare-tray.js';
+import { initAnalytics } from './core/analytics.js';
 
 function boot() {
+  // First, before anything can navigate. It reads the UTMs off the landing URL
+  // and they are only there on the first page of a visit — a redirect or an
+  // early click and the campaign that paid for the visitor is unknowable.
+  initAnalytics();
   initHeader();
   // After initHeader: it wires the mega-menu and drawer behaviour to the
   // container elements, which this only refills. Swapping the contents does

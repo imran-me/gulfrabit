@@ -1,0 +1,147 @@
+/* =========================================================================
+   GulfRabit · Express checkout (ad → order, one screen)
+
+   Loaded AFTER checkout.css, which this page borrows .option-card from — the
+   payment choices are the same control as on the four-step checkout and there
+   is no reason for them to look different on the two pages.
+
+   Designed phone-first and not just phone-tolerant. The traffic is a Facebook
+   in-app browser on a mid-range Android: one column, a sticky action bar, and
+   nothing that needs a hover to be discoverable.
+   ========================================================================= */
+
+.express { position: relative; }
+.express__container { padding-block: var(--space-6); max-width: 720px; }
+/* Room for the sticky bar so the last field is never trapped under it. */
+.express__container { padding-bottom: calc(var(--space-6) + 96px); }
+.express__head { margin-bottom: var(--space-5); }
+.express__legend { margin: var(--space-6) 0 var(--space-4); }
+
+/* ---- The item being bought -------------------------------------------- */
+.express-item {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  background: var(--surface-band);
+}
+.express-item__thumb { width: 72px; height: 72px; object-fit: cover; border-radius: var(--radius-sm); background: var(--surface-sunken); }
+.express-item__title { font-weight: var(--fw-semibold); line-height: var(--lh-snug); }
+.express-item__meta { margin-top: 2px; font-size: var(--fs-14); color: var(--text-muted); }
+/* Below 420px the stepper and a two-line title fight for the same row. */
+@media (max-width: 419.98px) {
+  .express-item { grid-template-columns: 56px minmax(0, 1fr); }
+  .express-item__thumb { width: 56px; height: 56px; }
+  .express-item__qty { grid-column: 1 / -1; }
+}
+
+.express-gone { padding: var(--space-7) var(--space-4); text-align: center; }
+.express-gone .btn-gr { margin-top: var(--space-5); }
+
+/* ---- Form ------------------------------------------------------------- */
+/* Two columns from 560px, one below. Every field is visible at once by
+   design: the whole point of this page is that nothing is behind a step. */
+.express-grid { display: grid; gap: var(--space-4); grid-template-columns: 1fr; }
+@media (min-width: 560px) {
+  .express-grid { grid-template-columns: 1fr 1fr; }
+  .express-grid__wide { grid-column: 1 / -1; }
+}
+
+/* One column of payment cards on a phone; two where there is room. */
+.express-pay { display: grid; gap: 0; }
+@media (min-width: 560px) {
+  .express-pay { grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+  .express-pay .option-card { margin-bottom: 0; }
+}
+/* The selected method needs to be obvious at a glance — it is the one thing
+   on this screen that is pre-decided for the customer. */
+.express-pay .option-card:has(input:checked) {
+  border-color: var(--gr-cyan-dark);
+  background: var(--wash-hover);
+}
+
+/* ---- Totals ----------------------------------------------------------- */
+.express-total {
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+}
+.express-total > div { display: flex; justify-content: space-between; gap: var(--space-4); padding: 6px 0; font-size: var(--fs-14); color: var(--text-secondary); }
+.express-total dt, .express-total dd { margin: 0; }
+.express-total__grand {
+  margin-top: 6px; padding-top: var(--space-3) !important;
+  border-top: 1px solid var(--border-hairline);
+  font-size: var(--fs-16) !important;
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary) !important;
+}
+
+/* ---- Sticky action bar ------------------------------------------------ */
+/* The form is taller than a phone viewport. A Place Order button at the
+   bottom of it is a button the customer has to go looking for, and the price
+   is the one number they want in view while they type an address. */
+.express-bar {
+  position: fixed; z-index: 40; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  padding-bottom: max(var(--space-3), env(safe-area-inset-bottom));
+  background: var(--surface-page);
+  border-top: 1px solid var(--border-hairline);
+  box-shadow: 0 -6px 24px rgba(16,19,20,.10);
+}
+.express-bar__price { display: flex; flex-direction: column; line-height: 1.2; }
+.express-bar__label { font-size: var(--fs-12); color: var(--text-muted); }
+.express-bar__price strong { font-size: var(--fs-20); }
+.express-bar__cta { flex: 1; justify-content: center; max-width: 320px; margin-left: auto; }
+
+/* ---- Confirm sheet ---------------------------------------------------- */
+/* Above .site-header, which is sticky at z-index 1000. At 60 the scrim dimmed
+   the page but left the header bright and tappable at the top of it, so the
+   "are you sure" sheet sat under a live menu button. */
+.express-sheet { position: fixed; inset: 0; z-index: 1200; }
+.express-sheet[hidden] { display: none; }
+.express-sheet__scrim { position: absolute; inset: 0; background: rgba(16,19,20,.5); }
+.express-sheet__panel {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: var(--surface-page);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: var(--space-6) var(--space-5);
+  padding-bottom: max(var(--space-6), env(safe-area-inset-bottom));
+  max-width: 560px; margin-inline: auto;
+  animation: express-sheet-up var(--dur-base) var(--ease-out);
+}
+@media (min-width: 560px) {
+  /* On a desktop a sheet glued to the bottom edge reads as a cookie banner. */
+  .express-sheet__panel { bottom: auto; top: 50%; transform: translateY(-50%); border-radius: var(--radius-lg); animation: none; }
+}
+@keyframes express-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .express-sheet__panel { animation: none; } }
+
+.express-sheet__line { margin-top: var(--space-3); }
+.express-sheet__addr { margin-top: var(--space-2); font-size: var(--fs-14); color: var(--text-muted); }
+.express-sheet__actions { display: flex; gap: var(--space-3); margin-top: var(--space-6); }
+.express-sheet__actions .btn-gr { flex: 1; justify-content: center; }
+
+/* ---- Receipt ---------------------------------------------------------- */
+.express-done { text-align: center; padding-block: var(--space-6); }
+.express-done__mark {
+  width: 64px; height: 64px; margin: 0 auto var(--space-5);
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--gr-gradient); color: #04222b;
+}
+.express-done__sub { margin-top: var(--space-3); color: var(--text-secondary); }
+.express-done__pay { margin-top: var(--space-2); color: var(--text-muted); font-size: var(--fs-14); }
+.express-done__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center; margin-top: var(--space-6); }
+.express-done__actions .btn-gr { flex: 1 1 200px; justify-content: center; max-width: 260px; }
+
+/* Four more products under the receipt — the cheapest impression the shop
+   gets, since the customer has already converted and is still on screen. */
+.express-more { margin-top: var(--space-8); text-align: left; }
+.express-more h2 { margin-bottom: var(--space-4); }
+.express-more__grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 720px) { .express-more__grid { grid-template-columns: repeat(4, 1fr); } }

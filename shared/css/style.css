@@ -69,8 +69,21 @@ button, input, optgroup, select, textarea {
 
 /* Buttons and tables carry a UA border otherwise. Our components set their
    own where they want one; this stops the ones that do not from sprouting a
-   grey 2px bevel. */
-button, [type="button"], [type="reset"], [type="submit"] {
+   grey 2px bevel.
+
+   :where() ZEROES THE SPECIFICITY, and it is load-bearing, not tidiness.
+   `[type="button"]` is an attribute selector — specificity (0,1,0), the same
+   as a class. So this rule TIED with .btn-primary-gr / .btn-gradient-gr /
+   .btn-gr's own `background: var(--_bg)`, and because style.css's own rules
+   are concatenated after every partial (see bundle_css in tools/assemble.py),
+   the tie broke in favour of the reset. Every `<button type="button">` and
+   `<button type="submit">` carrying a .btn-gr variant rendered with a
+   transparent background — 142 of them across the site, including Place Order
+   on the cart. Anchors and bare <button>s were unaffected, which is why it
+   survived: the buttons people looked at hardest were the styled <a>s.
+
+   A reset must lose every argument with a component. :where() guarantees it. */
+:where(button, [type="button"], [type="reset"], [type="submit"]) {
   appearance: button;
   background-color: transparent;
   background-image: none;

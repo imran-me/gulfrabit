@@ -14,6 +14,7 @@ import { DEFAULT_OPTION, getDistrictsByDivision, quoteForDistrict } from '../del
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { validateForm, validateField, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
+import { track, cartPayload, getAttribution } from '../../shared/js/core/analytics.js';
 
 const form = document.querySelector('[data-checkout-form]');
 const steps = [...document.querySelectorAll('.checkout-step')];
@@ -41,6 +42,10 @@ async function init() {
   wirePayment();
   paintSummary();
   form.addEventListener('submit', placeOrder);
+
+  // After the empty-cart guard has returned, so an abandoned cart page does
+  // not report a checkout that never started.
+  track('InitiateCheckout', cartPayload(store.getCart(), subtotal()));
 }
 
 /* ---- Step navigation -------------------------------------------------- */
@@ -207,7 +212,7 @@ function paintSummary() {
   const cart = store.getCart();
   document.querySelector('[data-summary-items]').innerHTML = cart.map((l) => `
     <div class="cart-line" style="grid-template-columns:48px 1fr auto">
-      <img class="cart-line__thumb" style="width:48px;height:48px" src="${l.image}" alt=""><div><div class="cart-line__title">${escapeHtml(l.title)}</div><div class="cart-line__meta">Qty ${l.qty}</div></div>
+      <img class="cart-line__thumb" style="width:48px;height:48px" src="${l.image}" alt=""><div><div class="cart-line__title">${escapeHtml(l.title)}</div><div class="cart-line__meta">${l.variant ? `${escapeHtml(l.variant)} · ` : ''}Qty ${l.qty}</div></div>
       <div class="cart-line__price">${formatBDT(l.price * l.qty)}</div>
     </div>`).join('');
   setText('[data-sum-subtotal]', formatBDT(subtotal()));
@@ -222,7 +227,7 @@ function paintReview() {
   setText('[data-review-delivery]', form.querySelector('[data-delivery]:checked')?.closest('.option-card').querySelector('.option-card__title').textContent || '');
   setText('[data-review-payment]', form.querySelector('[data-payment]:checked')?.closest('.option-card').querySelector('.option-card__title').textContent || '');
   document.querySelector('[data-review-items]').innerHTML = store.getCart().map((l) =>
-    `<div class="review-line"><span>${l.qty} × ${escapeHtml(l.title)}</span><span class="tabular">${formatBDT(l.price * l.qty)}</span></div>`).join('')
+    `<div class="review-line"><span>${l.qty} × ${escapeHtml(l.title)}${l.variant ? ` (${escapeHtml(l.variant)})` : ''}</span><span class="tabular">${formatBDT(l.price * l.qty)}</span></div>`).join('')
     + `<div class="review-line" style="border:0;font-weight:600"><span>Total</span><span class="tabular">${formatBDT(total())}</span></div>`;
 }
 
@@ -240,14 +245,25 @@ function placeOrder(e) {
     date: new Date().toISOString().slice(0, 10),
     status: 'processing',
     total: total(),
-    items: cart.map((l) => ({ id: l.id, title: l.title, qty: l.qty, price: l.price, image: l.image })),
+    // variant is part of what was bought: an order record that says "Ajwa Dates"
+    // without the pack size cannot be picked, packed or refunded correctly.
+    items: cart.map((l) => ({ id: l.id, title: l.title, variant: l.variant ?? null, qty: l.qty, price: l.price, image: l.image })),
     address: [g('address'), g('area'), form.querySelector('[data-district]')?.selectedOptions[0]?.textContent]
       .filter(Boolean).join(', '),
     phone: g('phone'),
     email: g('email') || null,
     delivery: form.querySelector('[data-delivery]:checked')?.value,
     payment: form.querySelector('[data-payment]:checked')?.value,
+    // Which ad recruited this customer, if any — the cart checkout gets the
+    // same attribution as express, because a visitor can arrive from an ad and
+    // still take the ordinary route through the shop.
+    source: getAttribution(),
   };
+
+  // Before the redirect. `track` sends the server mirror with keepalive, so
+  // the request survives the navigation on the next line — without it the
+  // browser cancels it and the conversion is lost at the last step.
+  order.eventId = track('Purchase', { ...cartPayload(cart, total()), value: Number(total().toFixed(2)) });
 
   // Persist to the user's local order history + stash "last order" for confirmation.
   const orders = storage.get(KEYS.ORDERS, []);

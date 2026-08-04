@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="UTF-8">
+  <script>
+    /* Removes .no-js before first paint. Everything with [data-reveal] is
+       hidden by CSS until IntersectionObserver reveals it — which means with
+       JavaScript off it stayed hidden forever, taking the whole Sourcing
+       process, the About values and most of the home page with it. Scoping the
+       hide to html:not(.no-js) makes the animation an enhancement again
+       instead of a precondition for reading the site.
+       Inline and first on purpose: a deferred file would let the page paint
+       blank before it ran. */
+    document.documentElement.classList.remove('no-js');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete your order — GulfRabit</title>
+  <meta name="description" content="Confirm your GulfRabit order in one step — cash on delivery available.">
+  <meta name="theme-color" content="#0A0A0A">
+  <meta name="author" content="GulfRabit">
+  <meta name="robots" content="noindex, follow">
+  <meta name="color-scheme" content="light">
+  <!-- Social / Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GulfRabit">
+  <meta property="og:title" content="Complete your order — GulfRabit">
+  <meta property="og:description" content="Confirm your GulfRabit order in one step — cash on delivery available.">
+  <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Complete your order — GulfRabit">
+  <meta name="twitter:description" content="Confirm your GulfRabit order in one step — cash on delivery available.">
+  <link rel="icon" href="../../favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
+  <link rel="apple-touch-icon" href="../../assets/logo/apple-touch-icon.png">
+  <link rel="manifest" href="../../site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Fontshare serves its @font-face CSS from api. and the font FILES from
+       cdn. Only the CSS host was preconnected, so the display face waited on a
+       fresh DNS + TLS handshake discovered halfway through the render — the
+       most expensive moment to find a new origin. -->
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=ffe12170">
+  <link rel="stylesheet" href="../../modules/checkout/checkout.css?v=247726fe">
+  <link rel="stylesheet" href="../../modules/checkout/express.css?v=5f81edca">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
+  </script>
+</head>
+<body>
+  <!-- HEADER (inlined from shared/components/header.html) -->
+<!-- =========================================================================
+     GulfRabit · Canonical HEADER partial
+     Paste this block at the top of every page's <body>. It is real, semantic
+     HTML (content-first) — the site header is fully usable with JS disabled.
+     shared/js/components/header-nav.js only *enhances* it (sticky glass,
+     mega-menu, mobile drawer, live count badges, search overlay).
+
+     Paths are root-absolute (/…) so this works from any page depth.
+     Keep this file as the single source of truth — when the header changes,
+     update here and re-sync into the pages.
+     ========================================================================= -->
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- Announcement bar (dismissible; remembers dismissal) -->
+<div class="announce-bar" role="region" aria-label="Announcement">
+  <div class="announce-bar__inner">
+<!-- GENERATED-DELIVERY-BEGIN -->
+    <span>Flat ৳ 70 delivery in Dhaka &amp; Chattogram · ৳ 130 nationwide · Cold-chain on all perishables</span>
+<!-- GENERATED-DELIVERY-END -->
+    <button class="announce-bar__close" type="button" aria-label="Dismiss announcement">✕</button>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <!-- Mobile: hamburger -->
+    <button class="btn-icon-gr d-lg-none" type="button" data-open-mobile-nav aria-controls="mobileNav" aria-expanded="false" aria-label="Open menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+
+    <!-- Logo -->
+    <a class="site-header__logo" href="../../index.html" aria-label="GulfRabit home">
+      <img src="../../assets/logo/gulfrabit-mark.png" alt="" width="38" height="38">
+      <span class="site-header__wordmark">GulfRabit</span>
+    </a>
+
+    <!-- Primary nav (desktop) -->
+    <nav class="primary-nav" aria-label="Primary">
+      <div class="nav-item has-mega">
+        <button class="nav-link" aria-haspopup="true" aria-expanded="false" data-nav-match="modules/catalog/">Shop
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="mega-menu" role="menu">
+          <!-- The columns below are the NO-JAVASCRIPT fallback and the first
+               paint. shared/js/components/category-menu.js replaces them with
+               the live categories, so switching one off in the admin panel
+               takes it out of this menu. If that script or the API is missing,
+               what is written here is what ships — which is why it is real
+               markup and not an empty div. -->
+          <div class="mega-menu__grid" data-mega-grid>
+            <div>
+              <p class="mega-menu__col-title">Food &amp; Pantry</p>
+              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=dates-nuts">Dates &amp; Nuts</a>
+              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=chocolates-dairy">Chocolates &amp; Dairy</a>
+            </div>
+            <div>
+              <p class="mega-menu__col-title">Home &amp; Kitchen</p>
+              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=kitchen-appliances">Kitchen Appliances</a>
+              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=home-decor">Home Decor</a>
+            </div>
+            <div>
+              <p class="mega-menu__col-title">Family &amp; Style</p>
+              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=fashion-clothes">Fashion &amp; Clothes</a>
+              <a class="mega-menu__link" href="../../modules/catalog/category.html?slug=kids-toys">Kids &amp; Toys</a>
+              <a class="mega-menu__link" href="../../modules/deals/deals.html">Flash Sale</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Shortcuts to the launch categories. Only categories that are active
+           in categories.json belong here: a nav item pointing at a category the
+           storefront no longer lists is a dead end with a promoted position.
+           Dates & Nuts leads because it is the only one carrying stock today. -->
+      <div class="nav-item"><a class="nav-link" href="../../modules/catalog/category.html?slug=dates-nuts" data-nav-match="dates-nuts">Dates &amp; Nuts</a></div>
+      <div class="nav-item"><a class="nav-link" href="../../modules/catalog/category.html?slug=chocolates-dairy" data-nav-match="chocolates-dairy">Chocolates &amp; Dairy</a></div>
+      <div class="nav-item"><a class="nav-link" href="../../modules/catalog/category.html?slug=fashion-clothes" data-nav-match="fashion-clothes">Fashion</a></div>
+      <div class="nav-item"><a class="nav-link" href="../../modules/deals/deals.html" data-nav-match="modules/deals" style="color:var(--lime-ink)">Flash Sale</a></div>
+      <div class="nav-item"><a class="nav-link" href="../../modules/content/about.html" data-nav-match="about">About</a></div>
+    </nav>
+
+    <!-- Header search (desktop) -->
+    <div class="header-search">
+      <form data-search role="search" method="get" action="../../modules/catalog/search-results.html">
+        <div class="header-search__field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="color:var(--text-muted)"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input class="header-search__input" type="search" name="q" data-search-input placeholder="Search imported products…" aria-label="Search products" autocomplete="off">
+        </div>
+        <div class="search-suggest" data-search-results hidden></div>
+      </form>
+    </div>
+
+    <!-- Actions -->
+    <div class="site-header__actions">
+      <button class="btn-icon-gr d-lg-none" type="button" data-open-search aria-label="Search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+      <a class="btn-icon-gr header-action-optional" href="../../modules/account/dashboard.html" aria-label="Account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      </a>
+      <a class="btn-icon-gr header-action-optional" href="../../modules/account/wishlist.html" aria-label="Wishlist">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        <span class="action-badge" data-wishlist-count aria-live="polite">0</span>
+      </a>
+      <button class="btn-icon-gr" type="button" data-open-cart aria-label="Open cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="action-badge" data-cart-count aria-live="polite">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile offcanvas drawer.
+     The category rows below are the no-JS fallback and the first paint;
+     category-menu.js replaces the [data-mobile-shop] list with the live
+     categories. Keep the two in step — same order, same flat shape. -->
+<aside id="mobileNav" class="gr-offcanvas" aria-hidden="true" aria-label="Menu">
+  <div class="mobile-nav__head">
+    <img class="mobile-nav__logo" src="../../assets/logo/gulfrabit-logo.png" alt="GulfRabit" width="80" height="80">
+    <button class="btn-icon-gr" type="button" data-close-mobile-nav aria-label="Close menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <nav class="mobile-nav__body" aria-label="Mobile">
+    <ul class="mobile-nav__list" role="list" data-mobile-shop>
+      <li style="--i:1"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=chocolates-dairy">Chocolates &amp; Dairy</a></li>
+      <li style="--i:2"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=home-decor">Home Decor</a></li>
+      <li style="--i:3"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=kitchen-appliances">Kitchen Appliances</a></li>
+      <li style="--i:4"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=dates-nuts">Dates &amp; Nuts</a></li>
+      <li style="--i:5"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=kids-toys">Kids &amp; Toys</a></li>
+      <li style="--i:6"><a class="mobile-nav__link" href="../../modules/catalog/category.html?slug=fashion-clothes">Fashion &amp; Clothes</a></li>
+      <li style="--i:7"><a class="mobile-nav__link" href="../../modules/deals/deals.html">Flash Sale</a></li>
+    </ul>
+    <ul class="mobile-nav__list mobile-nav__list--minor" role="list">
+      <li style="--i:8"><a class="mobile-nav__link" href="../../modules/account/dashboard.html">My Account</a></li>
+      <li style="--i:9"><a class="mobile-nav__link" href="../../modules/content/about.html">About</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<!-- Full-screen search overlay (mobile & keyboard) -->
+<div class="search-overlay" role="dialog" aria-modal="true" aria-label="Search">
+  <div class="search-overlay__box">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
+      <button class="btn-icon-gr" type="button" data-close-search aria-label="Close search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form data-search role="search" method="get" action="../../modules/catalog/search-results.html">
+      <div class="header-search__field" style="height:60px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" style="color:var(--text-muted)"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="header-search__input" type="search" name="q" data-search-input placeholder="Search GulfRabit…" aria-label="Search products" autocomplete="off" style="font-size:var(--fs-20)">
+      </div>
+      <div class="search-suggest" data-search-results hidden></div>
+    </form>
+  </div>
+</div>
+
+<style>
+  /* Header-local helpers that don't warrant a global partial. */
+  #mobileNav.is-open { transform: translateX(0) !important; }
+  @media (min-width: 992px) { .d-lg-none { display: none !important; } }
+</style>
+
+
+<!-- ============================ MAIN ============================ -->
+  <main id="main">
+
+    <!-- ---- EXPRESS CHECKOUT ----
+         The landing page for paid social traffic. Someone who taps "Buy" in a
+         Facebook ad has already decided; the four-step cart checkout re-asks
+         them to decide four more times. This is the same order, on one screen.
+
+         Entered as express.html?sku=gr-1101&qty=1 — the item comes from the
+         URL, not the cart, because an ad click arrives with an empty cart and
+         checkout.html turns that into "Your cart is empty".
+
+         Three states live in this one document and swap in place, so placing
+         an order never navigates: the form, the confirm sheet, and the
+         receipt. See modules/checkout/express-page.js. -->
+    <section class="express" data-express aria-labelledby="express-head">
+      <div class="gr-container express__container">
+
+        <!-- STATE 1 · the order form -->
+        <div data-express-state="form">
+          <h1 class="h3 express__head" id="express-head">Complete your order</h1>
+
+          <!-- What they tapped, restated. An ad click is a promise about a
+               specific product; showing it back is what makes the page feel
+               like a continuation of the ad rather than a generic form. -->
+          <div class="express-item" data-express-item hidden>
+            <img class="express-item__thumb" data-express-img src="" alt="" width="72" height="72">
+            <div class="express-item__body">
+              <p class="express-item__title" data-express-title></p>
+              <p class="express-item__meta" data-express-meta></p>
+            </div>
+            <div class="express-item__qty">
+              <div class="qty-stepper" role="group" aria-label="Quantity">
+                <button class="qty-stepper__btn" type="button" data-qty-dec aria-label="Decrease quantity">−</button>
+                <input class="qty-stepper__input" data-qty-input type="text" inputmode="numeric" value="1" aria-label="Quantity">
+                <button class="qty-stepper__btn" type="button" data-qty-inc aria-label="Increase quantity">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product could not be loaded / is no longer sold. An ad outlives
+               the thing it advertises, so this is a real state, not an edge
+               case: 6 of 7 launch categories carry no stock today. -->
+          <div class="express-gone" data-express-gone hidden>
+            <h2 class="h4">This item isn’t available</h2>
+            <p class="text-muted-gr" data-express-gone-msg>It may have sold out or been withdrawn.</p>
+            <a class="btn-gr btn-primary-gr" data-express-gone-link href="../../index.html">Browse the shop</a>
+          </div>
+
+          <form class="express-form" data-express-form novalidate hidden>
+            <h2 class="h5 express__legend">Delivery details</h2>
+            <div class="express-grid">
+              <div class="field-gr" data-field>
+                <label class="label-gr" for="ex-name">Full name <span class="req">*</span></label>
+                <input id="ex-name" class="input-gr" name="fullName" autocomplete="name" data-validate="required|min:3" data-label="Full name">
+                <span class="field-error" data-error></span>
+              </div>
+              <div class="field-gr" data-field>
+                <label class="label-gr" for="ex-phone">Phone <span class="req">*</span></label>
+                <input id="ex-phone" class="input-gr" name="phone" type="tel" inputmode="numeric" autocomplete="tel" data-validate="required|phone" data-label="Phone" placeholder="01XXXXXXXXX">
+                <span class="field-error" data-error></span>
+              </div>
+              <div class="field-gr" data-field>
+                <label class="label-gr" for="ex-district">District <span class="req">*</span></label>
+                <select id="ex-district" class="select-gr" name="district" autocomplete="address-level1" data-district data-validate="required" data-label="District">
+                  <option value="">Select district</option>
+                </select>
+                <span class="field-error" data-error></span>
+              </div>
+              <div class="field-gr" data-field>
+                <label class="label-gr" for="ex-area">Thana / Upazila <span class="req">*</span></label>
+                <input id="ex-area" class="input-gr" name="area" autocomplete="address-level2" data-validate="required|min:2" data-label="Thana" placeholder="e.g. Gulshan">
+                <span class="field-error" data-error></span>
+              </div>
+              <div class="field-gr express-grid__wide" data-field>
+                <label class="label-gr" for="ex-address">Street address <span class="req">*</span></label>
+                <input id="ex-address" class="input-gr" name="address" autocomplete="street-address" data-validate="required|min:6" data-label="Street address" placeholder="House, road, block">
+                <span class="field-error" data-error></span>
+              </div>
+              <div class="field-gr express-grid__wide" data-field>
+                <label class="label-gr" for="ex-email">Email <span class="text-muted-gr">(optional)</span></label>
+                <input id="ex-email" class="input-gr" name="email" type="email" autocomplete="email" data-validate="email" data-label="Email" placeholder="For the receipt — we’ll text you either way">
+                <span class="field-error" data-error></span>
+              </div>
+            </div>
+
+            <h2 class="h5 express__legend">Payment</h2>
+            <!-- Cash on delivery is pre-selected because it is how most of
+                 Bangladesh buys online. Pre-selecting the majority choice is
+                 the difference between one tap and three on this screen. -->
+            <div class="express-pay" data-express-pay>
+              <label class="option-card">
+                <input type="radio" name="payment" value="cod" data-payment checked>
+                <span>
+                  <span class="option-card__title">Cash on Delivery</span>
+                  <span class="option-card__sub">Pay the rider when it arrives</span>
+                </span>
+              </label>
+              <label class="option-card">
+                <input type="radio" name="payment" value="bkash" data-payment>
+                <span>
+                  <span class="option-card__title">bKash</span>
+                  <span class="option-card__sub">Pay now from your wallet</span>
+                </span>
+              </label>
+              <label class="option-card">
+                <input type="radio" name="payment" value="nagad" data-payment>
+                <span>
+                  <span class="option-card__title">Nagad</span>
+                  <span class="option-card__sub">Pay now from your wallet</span>
+                </span>
+              </label>
+              <label class="option-card">
+                <input type="radio" name="payment" value="card" data-payment>
+                <span>
+                  <span class="option-card__title">Card</span>
+                  <span class="option-card__sub">Visa / Mastercard</span>
+                </span>
+              </label>
+            </div>
+
+            <dl class="express-total">
+              <div><dt>Subtotal</dt><dd class="tabular" data-sum-subtotal>—</dd></div>
+              <div><dt>Delivery <span class="text-muted-gr" data-sum-zone></span></dt><dd class="tabular" data-sum-delivery>—</dd></div>
+              <div class="express-total__grand"><dt>Total</dt><dd class="tabular" data-sum-total>—</dd></div>
+            </dl>
+          </form>
+        </div>
+
+        <!-- STATE 3 · the receipt. Replaces the form in place — no navigation,
+             so the browser back button cannot resubmit an order. -->
+        <div class="express-done" data-express-state="done" hidden>
+          <div class="express-done__mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" width="34" height="34"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <h1 class="h3">You have successfully ordered</h1>
+          <p class="express-done__sub">Order <strong data-done-id></strong> · <span data-done-eta></span></p>
+          <p class="express-done__pay" data-done-pay></p>
+
+          <div class="express-done__actions">
+            <a class="btn-gr btn-primary-gr btn-lg-gr" data-done-track href="#">Track order</a>
+            <a class="btn-gr btn-outline-gr btn-lg-gr" href="../../index.html">Shop more</a>
+          </div>
+
+          <section class="express-more" aria-labelledby="more-head">
+            <h2 class="h5" id="more-head">You might also like</h2>
+            <div class="express-more__grid" data-express-more></div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Sticky action bar. Outside the scrolling column so the price and the
+           button are on screen at every scroll position — on a 390px phone the
+           form is taller than the viewport and a button at the bottom of it is
+           a button nobody sees. -->
+      <div class="express-bar" data-express-bar hidden>
+        <div class="express-bar__price">
+          <span class="express-bar__label">Total</span>
+          <strong class="tabular" data-bar-total>—</strong>
+        </div>
+        <button class="btn-gr btn-gradient-gr btn-lg-gr express-bar__cta" type="button" data-express-place>Place Order</button>
+      </div>
+
+      <!-- STATE 2 · confirm. A bottom sheet rather than a page, because the
+           only thing being asked is "sure?" and taking the form off screen to
+           ask it invites a re-check of everything already filled in. -->
+      <div class="express-sheet" data-express-confirm hidden>
+        <div class="express-sheet__scrim" data-express-cancel-scrim></div>
+        <div class="express-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="confirm-head">
+          <h2 class="h4" id="confirm-head">Place this order?</h2>
+          <p class="express-sheet__line" data-confirm-line></p>
+          <p class="express-sheet__addr" data-confirm-addr></p>
+          <div class="express-sheet__actions">
+            <button class="btn-gr btn-outline-gr" type="button" data-express-cancel>Go back</button>
+            <button class="btn-gr btn-gradient-gr" type="button" data-express-confirm-yes>Yes, order now</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER (inlined from shared/components/footer.html) -->
+<!-- =========================================================================
+     GulfRabit · Canonical FOOTER partial
+     Paste before </body> on every page. Real HTML content (SEO-friendly).
+     The newsletter form is enhanced by newsletter-signup.js.
+     ========================================================================= -->
+<footer class="site-footer canvas-panel" style="border-top:1px solid var(--border-hairline);margin-top:var(--space-9)">
+  <div class="gr-container" style="padding-block:var(--space-8)">
+    <div style="display:grid;gap:var(--space-7);grid-template-columns:1fr" class="footer-grid">
+      <!-- Brand + newsletter -->
+      <div class="stack-4">
+        <a href="../../index.html" aria-label="GulfRabit home"><img src="../../assets/logo/gulfrabit-logo.png" alt="GulfRabit" width="160" height="42"></a>
+        <p class="text-muted-gr" style="max-width:34ch">Premium imports for Bangladesh. Sourced. Verified. Delivered.</p>
+        <form data-newsletter class="stack-2" novalidate>
+          <label class="label-gr" for="footer-email">Get import drops &amp; restocks</label>
+          <div style="display:flex;gap:.5rem;max-width:360px">
+            <div class="field-gr" data-field style="margin:0;flex:1">
+              <input id="footer-email" class="input-gr" type="email" name="email" placeholder="you@email.com"
+                     data-validate="required|email" data-label="Email" aria-label="Email address">
+              <span class="field-error" data-error></span>
+            </div>
+            <button class="btn-gr btn-primary-gr" type="submit">Subscribe</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Link columns -->
+      <nav aria-label="Shop"><p class="mega-menu__col-title">Shop</p>
+        <ul role="list" class="stack-2" style="font-size:var(--fs-14)">
+          <li><a href="../../modules/deals/deals.html">Flash Sale</a></li>
+          <li><a href="../../modules/catalog/category.html?slug=dates-nuts">Dates &amp; Nuts</a></li>
+          <li><a href="../../modules/catalog/category.html?slug=chocolates-dairy">Chocolates &amp; Dairy</a></li>
+          <li><a href="../../modules/catalog/category.html?slug=kitchen-appliances">Kitchen Appliances</a></li>
+          <li><a href="../../modules/catalog/category.html?slug=home-decor">Home Decor</a></li>
+          <li><a href="../../modules/catalog/category.html?slug=fashion-clothes">Fashion &amp; Clothes</a></li>
+          <li><a href="../../modules/catalog/category.html?slug=kids-toys">Kids &amp; Toys</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Company"><p class="mega-menu__col-title">Company</p>
+        <ul role="list" class="stack-2" style="font-size:var(--fs-14)">
+          <li><a href="../../modules/content/about.html">About</a></li>
+          <li><a href="../../modules/content/contact.html">Contact</a></li>
+          <li><a href="../../modules/content/sourcing.html">Sourcing &amp; Authenticity</a></li>
+          <li><a href="../../modules/content/about.html#values">Our Values</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Customer care"><p class="mega-menu__col-title">Customer Care</p>
+        <ul role="list" class="stack-2" style="font-size:var(--fs-14)">
+          <li><a href="../../modules/content/faq.html">FAQ</a></li>
+          <li><a href="../../modules/content/shipping-returns.html">Shipping &amp; Returns</a></li>
+          <li><a href="../../modules/account/track.html">Track Order</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <hr class="divider-hairline" style="margin-block:var(--space-6)">
+
+    <div style="display:flex;flex-wrap:wrap;gap:var(--space-4);align-items:center;justify-content:space-between">
+      <p class="caption">© 2026 GulfRabit. All rights reserved.</p>
+      <!-- Payment methods (placeholder chips) -->
+      <!-- flex-wrap: five chips measure 325px, so on a 320px phone this row was
+           the one thing on the page wide enough to scroll the whole document
+           sideways. -->
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center" aria-label="Accepted payment methods">
+        <span class="badge-gr badge-origin">bKash</span>
+        <span class="badge-gr badge-origin">Nagad</span>
+        <span class="badge-gr badge-origin">Visa</span>
+        <span class="badge-gr badge-origin">Mastercard</span>
+        <span class="badge-gr badge-origin">COD</span>
+      </div>
+      <div style="display:flex;gap:.75rem;align-items:center">
+        <a href="#" aria-label="Instagram" class="btn-icon-gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+        <a href="#" aria-label="Facebook" class="btn-icon-gr"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v2H7v3h3v6h3v-6h3l1-3h-4v-2c0-.6.4-1 1-1z"/></svg></a>
+        <a href="#" aria-label="LinkedIn" class="btn-icon-gr"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5zM3 9h4v12H3zM10 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.77-1.95 4 0 4.38 2.4 4.38 5.5V21h-4v-5.3c0-1.27-.02-2.9-1.77-2.9s-2.03 1.38-2.03 2.8V21h-4z"/></svg></a>
+      </div>
+    </div>
+    <div style="margin-top:var(--space-3)">
+      <a href="../../modules/content/shipping-returns.html" class="caption" style="margin-right:1rem">Shipping</a>
+      <a href="../../modules/content/faq.html" class="caption" style="margin-right:1rem">FAQ</a>
+      <a href="#" class="caption" style="margin-right:1rem">Privacy</a>
+      <a href="#" class="caption">Terms</a>
+    </div>
+  </div>
+</footer>
+<style>
+  @media (min-width: 768px)  { .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; } }
+</style>
+
+  <script type="module" src="../../shared/js/main.js?v=b67929f0"></script>
+  <script type="module" src="../../modules/checkout/express-page.js?v=11358226"></script>
+</body>
+</html>

@@ -15,12 +15,21 @@ import { renderProductGrid, productBadges } from '../../shared/js/components/pro
 import { setup as setupStepper } from '../../shared/js/components/quantity-stepper.js';
 import { initWishlistButtons } from '../../shared/js/components/wishlist.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';
+import { track, productPayload } from '../../shared/js/core/analytics.js';
 import { siteURL } from '../../shared/js/core/paths.js';
 import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 import { initBuyBar } from './pdp-buybar.js';
 
 const STAR = '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
 let currentQty = 1;
+
+/**
+ * The size the customer has chosen, or a stand-in for products sold in one size
+ * only. Everything downstream — the price block, the cart line, the wishlist
+ * button, the WhatsApp message — reads from here rather than from the product,
+ * so there is one answer to "which size is this page currently about".
+ */
+let currentVariant = null;
 
 init();
 
@@ -30,6 +39,8 @@ async function init() {
   if (!product) return renderNotFound();
 
   document.title = `${product.title} — GulfRabit`;
+  // After the not-found guard, so a bad ?id= does not report a product view.
+  track('ViewContent', productPayload(product));
   injectProductSchema(product);
   paintGallery(product);
   paintInfo(product);
@@ -135,12 +146,10 @@ function paintInfo(p) {
   document.querySelector('[data-pdp-rating]').innerHTML =
     `<span style="display:inline-flex;color:var(--lime-ink)">${STAR.repeat(full)}</span><span style="display:inline-flex;color:var(--border-input)">${STAR.repeat(5 - full)}</span><span class="caption">${p.rating || 0} · ${p.reviewCount || 0} reviews</span>`;
 
-  document.querySelector('[data-pdp-price]').textContent = formatBDT(p.price);
-  document.querySelector('[data-pdp-original]').textContent = p.originalPrice > p.price ? formatBDT(p.originalPrice) : '';
-  document.querySelector('[data-pdp-discount]').innerHTML = p.originalPrice > p.price
-    ? `<span class="badge-gr badge-sale">${discountLabel(p.originalPrice, p.price)}</span>`
-      + `<span class="price-saving">${savingsLabel(p.originalPrice, p.price)}</span>`
-    : '';
+  currentVariant = pickVariant(p, p.defaultVariant);
+  paintVariants(p);
+  paintPrice(p);
+
   document.querySelector('[data-pdp-short]').textContent = p.shortDescription || '';
   document.querySelector('[data-pdp-stock]').innerHTML = p.inStock
     ? '<span style="color:var(--lime-ink)">● In stock</span>'
@@ -160,12 +169,89 @@ function paintInfo(p) {
   // set the real product data, then re-bind so Save targets THIS product.
   const wbOld = document.querySelector('[data-wishlist-toggle]');
   const wb = wbOld.cloneNode(true);
-  Object.assign(wb.dataset, { id: p.id, title: p.title, brand: p.brand || '', price: p.price, image: p.image });
+  Object.assign(wb.dataset, { id: p.id, title: p.title, brand: p.brand || '', price: currentVariant.price, image: p.image });
   delete wb.dataset.ready;
   wbOld.replaceWith(wb);
   initWishlistButtons(document);
 
   paintOrderChannels(p);
+}
+
+/* ---- Size ladder -------------------------------------------------------
+   Products are one product at every size — same origin, same grade, same
+   barcode series — so the size is a property of the price, not of the title.
+   That is why the picker sits directly above Add to Cart and why the title
+   above it never changes when you use it. */
+
+function pickVariant(p, label) {
+  const list = p.variants?.length ? p.variants : null;
+  if (!list) {
+    // Single-size products still get a variant object, so every caller below
+    // can read .price and .label without asking which kind of product it is.
+    return { label: null, price: p.price, originalPrice: p.originalPrice, inStock: p.inStock !== false };
+  }
+  return list.find((v) => v.label === label) ?? list[0];
+}
+
+function paintVariants(p) {
+  const host = document.querySelector('[data-pdp-variants]');
+  if (!host) return;
+
+  // One size is not a choice. Showing a picker with a single button in it makes
+  // the page look like it lost the other options.
+  if (!p.variants?.length || p.variants.length < 2) { host.hidden = true; return; }
+
+  host.hidden = false;
+  const options = host.querySelector('[data-variant-options]');
+  options.innerHTML = p.variants.map((v) => `
+    <button class="variant-opt${v.label === currentVariant.label ? ' is-selected' : ''}" type="button"
+            role="radio" aria-checked="${v.label === currentVariant.label}"
+            data-variant="${escapeAttr(v.label)}" ${v.inStock === false ? 'disabled' : ''}>
+      <span class="variant-opt__label">${escapeHtml(v.label)}</span>
+      <span class="variant-opt__price">${formatBDT(v.price)}</span>
+    </button>`).join('');
+
+  options.querySelectorAll('[data-variant]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      currentVariant = pickVariant(p, btn.dataset.variant);
+      options.querySelectorAll('[data-variant]').forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle('is-selected', on);
+        b.setAttribute('aria-checked', String(on));
+      });
+      paintPrice(p);
+      // Everything that quotes a price has to move with the picker, or the page
+      // contradicts itself: the buy bar on a phone, the Save button's stored
+      // price, and the message that gets sent to WhatsApp.
+      const wb = document.querySelector('[data-wishlist-toggle]');
+      if (wb) wb.dataset.price = String(currentVariant.price);
+      paintOrderChannels(p);
+    });
+  });
+}
+
+/** The unit rate, so 500 g at ৳1,380 and 1 kg at ৳2,650 can be compared. */
+function unitRate(p, v) {
+  if (!p.unit || !v.amount) return '';
+  return `${formatBDT(Math.round(v.price / v.amount))} / ${p.unit}`;
+}
+
+function paintPrice(p) {
+  const v = currentVariant;
+  document.querySelector('[data-pdp-price]').textContent = formatBDT(v.price);
+  document.querySelector('[data-pdp-original]').textContent = v.originalPrice > v.price ? formatBDT(v.originalPrice) : '';
+  document.querySelector('[data-pdp-discount]').innerHTML = v.originalPrice > v.price
+    ? `<span class="badge-gr badge-sale">${discountLabel(v.originalPrice, v.price)}</span>`
+      + `<span class="price-saving">${savingsLabel(v.originalPrice, v.price)}</span>`
+    : '';
+
+  const unit = document.querySelector('[data-variant-unit]');
+  if (unit) unit.textContent = unitRate(p, v);
+
+  // The sticky buy bar reads the price out of the DOM rather than being told it
+  // (see pdp-buybar.js). It only reads once, at mount, so it has to be told
+  // when to read again.
+  document.dispatchEvent(new CustomEvent('pdp:pricechange'));
 }
 
 /**
@@ -176,10 +262,15 @@ function paintInfo(p) {
  */
 function paintOrderChannels(p) {
   const link = siteURL(`modules/catalog/product.html?id=${encodeURIComponent(p.id)}`);
+  const v = currentVariant ?? { label: null, price: p.price };
   const message = [
     'Hello GulfRabit, I would like to order:',
     `Product: ${p.title}`,
-    `Price: ${formatBDT(p.price)}`,
+    // The size goes in the message, or an order placed from this button starts
+    // with the agent asking which pack — which is the one question this button
+    // exists to prevent.
+    ...(v.label ? [`Size: ${v.label}`] : []),
+    `Price: ${formatBDT(v.price)}`,
     `SKU: ${p.id}`,
     `Link: ${link}`,
   ].join('\n');
@@ -390,8 +481,10 @@ function wireActions(p) {
   if (!p.inStock) { addBtn.disabled = true; addBtn.textContent = 'Sold out'; }
   addBtn.addEventListener('click', () => {
     if (!p.inStock) return;
-    store.addToCart(p, currentQty);
-    toast.success(`Added to cart · ${currentQty} × ${p.title}`);
+    // The chosen size, at the chosen size's price — not the product's default.
+    const line = { ...p, price: currentVariant.price, variant: currentVariant.label };
+    store.addToCart(line, currentQty);
+    toast.success(`Added to cart · ${currentQty} × ${p.title}${currentVariant.label ? ` (${currentVariant.label})` : ''}`);
     openCartDrawer();
   });
 }
