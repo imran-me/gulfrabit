@@ -6,6 +6,7 @@ Owned by `modules/marketing`. Base path `/api/track`, mounted by
 | Status | Endpoint |
 |---|---|
 | **authored** | `POST /track` |
+| **authored** | `GET /admin/marketing/campaigns` (admin, admin:orders) |
 
 ## POST /track
 
@@ -36,3 +37,13 @@ The browser event mirror. Body, all from `shared/js/core/analytics.js`:
 
 **The rule this module exists to enforce:** the same `event_id` the pixel
 used, always — deduplication is the entire point of the second copy.
+
+## GET /admin/marketing/campaigns
+
+Orders and revenue grouped by the recruiting ad. `?days=7|30|90|365` (default
+30). Rows: `{campaign, source, medium, orders, cancelled, revenueTaka,
+lastOrderAt}` — grouped by `utm_campaign` falling back to `utm_source`, with
+one `(organic)` bucket for orders no ad produced. Cancelled orders are counted
+per row but excluded from revenue: a campaign whose orders cancel is producing
+junk, and averaging that away is how junk keeps getting bought. Meta:
+`{days, totalOrders, adOrders, adRevenueTaka, revenueTaka}`.

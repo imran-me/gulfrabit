@@ -19,6 +19,8 @@ blocker can do.
 | `backend/routes.php` | `POST /api/track`, throttled 120/min/IP |
 | `backend/Controllers/TrackController.php` | validate → whitelist → forward to Meta, never fail the page |
 | `config/services.php` (repo root) | `META_PIXEL_ID`, `META_CAPI_TOKEN`, `META_TEST_EVENT_CODE` out of `.env` |
+| `campaigns.html` + `campaigns-page.js` | the Campaigns screen — what each ad sold, per period |
+| `backend/Controllers/AdminCampaignController.php` | the grouping behind it, off orders.ad_source |
 
 The browser side lives in `shared/js/core/analytics.js` (event generation,
 first-touch UTM capture, the mirror POST) and `shared/js/core/site-config.js`

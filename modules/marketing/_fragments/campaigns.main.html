@@ -1,0 +1,62 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Campaigns</h1>
+          <p class="admin__sub" data-cg-sub>What each ad sold, next to the organic baseline.</p>
+        </div>
+        <!-- Range as a select, not tabs: four options, one decision, and it
+             reads at a glance which window the whole screen is showing. -->
+        <div class="afilters__field" style="max-width:180px">
+          <label for="cg-days">Period</label>
+          <select class="select-gr" id="cg-days" data-cg-days>
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="365">Last year</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="aerror" data-cg-error hidden role="alert"></p>
+
+      <!-- The three numbers a budget decision needs: how much selling the ads
+           did, how much of all selling that is, and how many orders it took. -->
+      <div class="acards" data-cg-cards hidden>
+        <div class="acard">
+          <span class="acard__n" data-cg-ad-revenue>—</span>
+          <span class="acard__l">Revenue from ads</span>
+        </div>
+        <div class="acard">
+          <span class="acard__n" data-cg-ad-share>—</span>
+          <span class="acard__l">Share of all revenue</span>
+        </div>
+        <div class="acard">
+          <span class="acard__n" data-cg-ad-orders>—</span>
+          <span class="acard__l">Orders from ads</span>
+        </div>
+      </div>
+
+      <div class="atable-wrap" style="margin-top:var(--space-5)">
+        <table class="atable">
+          <thead>
+            <tr>
+              <th scope="col">Campaign</th>
+              <th scope="col">Source</th>
+              <th scope="col" class="atable__num">Orders</th>
+              <th scope="col" class="atable__num">Cancelled</th>
+              <th scope="col" class="atable__num">Revenue</th>
+              <th scope="col">Last order</th>
+            </tr>
+          </thead>
+          <tbody data-cg-body>
+            <tr><td colspan="6" class="atable__empty">Loading campaigns…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Spend lives in Meta on purpose — see the module README. Saying so
+           here stops the next person hunting for a column that was never
+           meant to exist. -->
+      <p class="admin__sub" style="margin-top:var(--space-4)">
+        Ad <em>spend</em> stays in Meta Ads Manager; this screen shows what each campaign
+        <em>sold</em>. Put the two side by side and the budget writes itself.
+      </p>

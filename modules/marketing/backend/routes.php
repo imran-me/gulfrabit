@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Modules\Marketing\Controllers\AdminCampaignController;
 use Modules\Marketing\Controllers\TrackController;
 
 /*
@@ -16,3 +17,13 @@ use Modules\Marketing\Controllers\TrackController;
 Route::post('track', TrackController::class)
     ->middleware('throttle:120,1')
     ->name('marketing.track');
+
+/*
+ * The campaigns report — which ad sold what. Behind the same capability as
+ * the orders screen, because it is the orders screen's data wearing a
+ * different grouping; anyone allowed to see revenue per order may see it
+ * per campaign, and nobody else.
+ */
+Route::get('admin/marketing/campaigns', [AdminCampaignController::class, 'index'])
+    ->middleware(['admin', 'admin:orders'])
+    ->name('marketing.campaigns');
