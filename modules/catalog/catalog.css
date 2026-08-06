@@ -44,6 +44,12 @@
 @media (min-width: 1024px) { .pdp { grid-template-columns: 1.1fr 1fr; align-items: start; } }
 
 .gallery { display: grid; gap: var(--space-3); }
+/* <picture> carries the WebP source only. Both the main image and the thumbs
+   are sized width/height 100% against their frame, so an inline picture box
+   between them would make each image size to its own ratio instead — the
+   third time this exact trap has appeared, after the hero and the cards. */
+.gallery__main picture, .gallery__thumb picture { display: contents; }
+
 .gallery__main { position: relative; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-hairline); background: var(--surface-sunken); aspect-ratio: 1; }
 .gallery__main img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--dur-slow) var(--ease-out); }
 /* Zoom only where a pointer exists. On a phone :hover latches on tap, so

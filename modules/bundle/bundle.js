@@ -41,7 +41,17 @@ const state = {
 
 init();
 
-async function init() {
+async /**
+ * The 640px WebP beside a photograph, for an 88px thumbnail. The build writes
+ * one next to every product JPEG; anything else (the placeholder SVGs) falls
+ * through untouched.
+ */
+function cardImage(src) {
+  const s = String(src || '');
+  return s.toLowerCase().endsWith('.jpg') ? s.slice(0, -4) + '-card.webp' : s;
+}
+
+function init() {
   const id = getParam('id');
   if (!id) return;
 
@@ -132,7 +142,8 @@ function itemHtml(p, isAnchor) {
         <span class="visually-hidden">Include ${escapeHtml(p.title)}</span>
       </label>
       <a class="bundle__thumb" href="/modules/catalog/product.html?id=${encodeURIComponent(p.id)}">
-        <img src="${escapeHtml(p.image)}" alt="" loading="lazy" width="88" height="88">
+        <picture><source srcset="${escapeHtml(cardImage(p.image))}" type="image/webp">
+          <img src="${escapeHtml(p.image)}" alt="" loading="lazy" width="88" height="88"></picture>
       </a>
       <div class="bundle__meta">
         ${isAnchor ? '<span class="bundle__tag" id="bundle-anchor-note">This item</span>' : ''}

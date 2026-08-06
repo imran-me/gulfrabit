@@ -118,14 +118,46 @@ function appendLd(obj) {
   document.head.appendChild(el);
 }
 
+/**
+ * The variant of a photograph to actually fetch.
+ *
+ * `full` is the WebP beside the JPEG — same pixels, ~22% fewer bytes.
+ * `card` is 640px, which is four times the size a 96px thumbnail needs and
+ * still a twentieth of the source. The build writes both; a source with no
+ * variants (the placeholder SVGs) falls through unchanged, so this is safe
+ * for any image the catalogue holds.
+ */
+function variant(src, kind) {
+  const s = String(src || '');
+  if (!s.toLowerCase().endsWith('.jpg')) return s;
+  return s.slice(0, -4) + (kind === 'card' ? '-card.webp' : '.webp');
+}
+
 function paintGallery(p) {
   const main = document.querySelector('[data-gallery-main]');
   const thumbs = document.querySelector('[data-gallery-thumbs]');
   const images = p.images?.length ? p.images : [p.image];
-  main.innerHTML = `<img src="${images[0]}" alt="${escapeAttr(p.title)}" decoding="async" data-main-img>`;
+
+  // <picture> so a browser without WebP still gets the JPEG. The main image
+  // is the page's LCP element, so it is eager and high priority; every
+  // thumbnail is a 96px button and takes the 640px file.
+  main.innerHTML = `
+    <picture>
+      <source srcset="${escapeAttr(variant(images[0], 'full'))}" type="image/webp">
+      <img src="${escapeAttr(images[0])}" alt="${escapeAttr(p.title)}" decoding="async"
+           fetchpriority="high" data-main-img>
+    </picture>`;
+
   thumbs.innerHTML = images.map((src, i) => `
-    <button class="gallery__thumb ${i === 0 ? 'is-active' : ''}" data-thumb aria-label="View image ${i + 1}"><img src="${src}" alt=""></button>`).join('');
+    <button class="gallery__thumb ${i === 0 ? 'is-active' : ''}" data-thumb aria-label="View image ${i + 1}">
+      <picture><source srcset="${escapeAttr(variant(src, 'card'))}" type="image/webp">
+        <img src="${escapeAttr(src)}" alt="" loading="lazy" decoding="async"></picture>
+    </button>`).join('');
+
   thumbs.querySelectorAll('[data-thumb]').forEach((btn, i) => btn.addEventListener('click', () => {
+    // Swap BOTH, or the <source> keeps winning and the picture never changes
+    // — the img.src alone is only the fallback branch.
+    main.querySelector('source').srcset = variant(images[i], 'full');
     main.querySelector('[data-main-img]').src = images[i];
     thumbs.querySelectorAll('[data-thumb]').forEach((b) => b.classList.remove('is-active'));
     btn.classList.add('is-active');

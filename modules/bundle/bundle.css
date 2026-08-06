@@ -77,6 +77,8 @@
   background: var(--surface-sunken);
   flex-shrink: 0;
 }
+/* picture must not become a layout box — see the hero, cards and gallery. */
+.bundle__thumb picture { display: contents; }
 .bundle__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .bundle__meta { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
