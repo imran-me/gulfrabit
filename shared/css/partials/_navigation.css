@@ -44,11 +44,20 @@
 }
 /* toggled by header-nav.js once scrolled past a threshold */
 .site-header.is-scrolled {
-  background: var(--glass-header);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  backdrop-filter: blur(16px) saturate(140%);
+  /* Near-opaque by default. The glass value below is an ENHANCEMENT, applied
+     only where backdrop-filter actually works — without the blur, 82% white
+     is not frosted glass, it is a header you can read the page through, and
+     the section overline ends up printed across the wordmark. */
+  background: rgba(255,255,255,.97);
   border-bottom-color: var(--border-hairline);
   box-shadow: var(--shadow-md);
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-header.is-scrolled {
+    background: var(--glass-header);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+  }
 }
 .site-header__inner {
   display: flex; align-items: center; gap: var(--space-5);

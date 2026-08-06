@@ -25,28 +25,45 @@ import { initCompareTray } from './components/compare-tray.js';
 import { initFooterSocial } from './components/footer-social.js';
 import { initAnalytics } from './core/analytics.js';
 
+/**
+ * Each init is isolated.
+ *
+ * They used to run as a bare sequence, so the first one to throw took every
+ * one after it with it — and because [data-reveal] starts at opacity 0, a
+ * failure anywhere before initScrollReveal left whole sections of the shop
+ * invisible rather than merely unanimated. One broken component should cost
+ * its own feature and nothing else.
+ */
 function boot() {
-  // First, before anything can navigate. It reads the UTMs off the landing URL
-  // and they are only there on the first page of a visit — a redirect or an
-  // early click and the campaign that paid for the visitor is unknowable.
-  initAnalytics();
-  initHeader();
-  // After initHeader: it wires the mega-menu and drawer behaviour to the
-  // container elements, which this only refills. Swapping the contents does
-  // not disturb those listeners.
-  initCategoryMenu();
-  // Early: it must be watching before the product grids paint, or the first
-  // screenful of images is already decoded by the time it looks.
-  initImageSettle();
-  initCartDrawer();
-  initScrollReveal();
-  initSearchAutocomplete();
-  initNewsletter();
-  initWishlistButtons();
-  initQuantitySteppers();
-  initCompareTray();
-  initFooterSocial();
-  enhanceProductCards();          // wire any HTML-authored product cards
+  const steps = [
+    // First, before anything can navigate: it reads the UTMs off the landing
+    // URL and they are only there on the first page of a visit.
+    ['analytics', initAnalytics],
+    ['header', initHeader],
+    // After initHeader: it wires the mega-menu and drawer behaviour to the
+    // container elements, which this only refills.
+    ['category-menu', initCategoryMenu],
+    // Early: it must be watching before the product grids paint.
+    ['image-settle', initImageSettle],
+    ['cart-drawer', initCartDrawer],
+    ['scroll-reveal', initScrollReveal],
+    ['search', initSearchAutocomplete],
+    ['newsletter', initNewsletter],
+    ['wishlist', initWishlistButtons],
+    ['quantity-steppers', initQuantitySteppers],
+    ['compare-tray', initCompareTray],
+    ['footer-social', initFooterSocial],
+    ['product-cards', enhanceProductCards],
+  ];
+
+  for (const [name, fn] of steps) {
+    try {
+      fn();
+    } catch (err) {
+      console.error(`[boot] ${name} failed`, err);
+    }
+  }
+
   document.documentElement.classList.add('js-ready');
 }
 
