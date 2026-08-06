@@ -1,7 +1,7 @@
 {
   "_meta": {
     "note": "Seeded by CatalogSeeder. Adding a category here creates it; it never deletes one, because a category with products in it is not something a data file should be able to remove. Use the admin panel's on/off switch to hide a category instead — that hides its products too, reversibly. `image` must name a file that exists in assets/images/categories/ or be null: the admin renders a thumbnail when it is set and an 'Add an image' affordance when it is not, so a path to a missing file is the one value that produces a broken picture.",
-    "active": "The live set is the seven launch categories: chocolates-dairy, home-decor, kitchen-appliances, dates-nuts, kids-toys, fashion-clothes, flash-sale. Every earlier category is \"active\": false — kept in full (slug, blurb, children, image, seeder row) so switching one back on is one boolean, not a re-authoring job. This flag is the static-site mirror of the DB's is_active column: the front end reads it in modules/catalog/backend/api.js getCategories() and shared/js/components/category-menu.js, and tools/sitemap.py skips inactive slugs. Turning one on: flip it here, then re-run tools/assemble.py and tools/sitemap.py, and add it to the hand-authored lists in shared/components/header.html + index.html.",
+    "active": "Mirrors the LIVE shop as of 6 August 2026. The database is the authority, not this file: CatalogSeeder sets is_active only when it CREATES a row, so a merchant's on/off decisions in the admin panel are never overwritten by a re-seed. That is deliberate — but it means this file drifts, and a drifted file will reproduce the wrong shop on a fresh install. Re-sync it from GET /api/catalog/categories after a merchandising change. The live set is: chocolates-dairy, dates-nuts, fashion-clothes, flash-sale, home-decor, kids-toys, kitchen-appliances, oil-ghee.",
     "version": 3
   },
   "categories": [
@@ -234,7 +234,7 @@
       "image": null,
       "blurb": "Olive, cold-pressed oils, and pure ghee.",
       "audience": "retail",
-      "active": false,
+      "active": true,
       "children": []
     },
     {

@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "note": "The live catalogue. Seven active products, all in dates-nuts (Ajwa/Medjool/Sukkari dates, Afghan figs, the dry fruit & nut mix, pistachios and cashews). The other thirteen — honey, saffron, oregano, oils and ghee — are \"active\": false: their categories were parked in the launch reshuffle and a product whose category is off has nowhere to live. They are kept in full so re-listing one is a single boolean. getAllProducts() in modules/catalog/backend/api.js filters on this flag, and every other read goes through it, so an inactive product is absent from category pages, search, suggestions, deals, related rails and the home shelves alike. Fields map 1:1 onto GET /api/products (shared/backend/api-contract.md).",
+    "note": "Mirrors the LIVE catalogue as of 6 August 2026 — thirteen products across dates-nuts and oil-ghee. Same rule as categories.json: the database is the authority, because CatalogSeeder writes is_active only on create and never overwrites a merchant's decision. Re-sync from GET /api/catalog/products after a merchandising change, or a fresh install rebuilds a shop that no longer exists. getAllProducts() in modules/catalog/backend/api.js filters on this flag, so an inactive product is absent from category pages, search, suggestions, deals, related rails and the home shelves alike.",
     "currency": "BDT",
     "version": 2,
     "barcodeNote": "MOCK EAN-13 codes (valid check digit, not GS1-registered) — replace with the real supplier barcodes before launch. tools/gen-sourcing-facts.py verifies every check digit."
@@ -1312,7 +1312,7 @@
         }
       ],
       "defaultVariant": "1 L (905 g)",
-      "active": false
+      "active": true
     },
     {
       "id": "gr-1902",
@@ -1391,7 +1391,7 @@
         }
       ],
       "defaultVariant": "1 L (905 g)",
-      "active": false
+      "active": true
     },
     {
       "id": "gr-1903",
@@ -1476,7 +1476,7 @@
         }
       ],
       "defaultVariant": "500 g",
-      "active": false
+      "active": true
     },
     {
       "id": "gr-1904",
@@ -1565,7 +1565,7 @@
         }
       ],
       "defaultVariant": "1 L",
-      "active": false
+      "active": true
     },
     {
       "id": "gr-1905",
@@ -1651,7 +1651,7 @@
         }
       ],
       "defaultVariant": "500 ml",
-      "active": false
+      "active": true
     },
     {
       "id": "gr-1906",
@@ -1740,7 +1740,7 @@
         }
       ],
       "defaultVariant": "250 ml",
-      "active": false
+      "active": true
     }
   ]
 }

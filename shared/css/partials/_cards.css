@@ -48,6 +48,14 @@
   .product-card:active { transform: none; }
 }
 
+/* <picture> carries only the WebP source and must not become a layout box.
+   .product-card__img is width/height 100%, which resolves against its PARENT
+   — so an inline-block picture makes the image size to its own intrinsic
+   ratio instead of the 4/5 frame. The photographs are square, so on a phone
+   (frame 1/1) it looked right and on desktop (frame 4/5) it left a 60px gap
+   under every card. display:contents removes the box and the bug. */
+.product-card__media picture { display: contents; }
+
 .product-card__media {
   position: relative;
   aspect-ratio: 4 / 5;

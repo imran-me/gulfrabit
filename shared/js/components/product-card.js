@@ -74,6 +74,28 @@ export function productBadges(product, max = 2) {
   return candidates.filter(Boolean).slice(0, max);
 }
 
+/**
+ * WebP sources for a card image, when the build has produced them.
+ *
+ * A card is 160px wide on a phone and ~280px on a desktop grid; the source
+ * photographs are 1254px square. Serving those to a grid of eight meant
+ * decoding twenty times the pixels the card can show — the single biggest
+ * cost on every listing page. `-card.webp` is 640px, which still covers a
+ * 320px card on a 2x screen.
+ *
+ * The JPEG stays as the <img> src, so a browser without WebP (and any build
+ * where these files were not generated) renders exactly what it did before.
+ * Only .jpg sources get the treatment — the placeholder SVGs are already
+ * tiny and have no raster variants.
+ */
+function cardSources(image) {
+  const src = String(image || '');
+  if (!src.toLowerCase().endsWith('.jpg')) return '';
+  const base = escapeAttr(src.slice(0, -4));
+  return `
+          <source srcset="${base}-card.webp" type="image/webp">`;
+}
+
 export function productCardHTML(product) {
   const {
     id, title, brand, origin, price, originalPrice, image, rating = 0,
@@ -100,7 +122,9 @@ export function productCardHTML(product) {
                 aria-label="Add to compare" style="background:var(--surface-sunken);${store.isInCompare(id) ? 'color:var(--link)' : ''}">${SCALE}</button>
       </div>
       <a href="${productURL(product)}" aria-label="${escapeAttr(title)}">
-        <img class="product-card__img" src="${escapeAttr(image)}" alt="${escapeAttr(title)}" loading="lazy" decoding="async" width="400" height="500">
+        <picture>${cardSources(image)}
+          <img class="product-card__img" src="${escapeAttr(image)}" alt="${escapeAttr(title)}" loading="lazy" decoding="async" width="400" height="500">
+        </picture>
       </a>
     </div>
     <div class="product-card__body">
