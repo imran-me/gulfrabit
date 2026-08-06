@@ -1502,6 +1502,33 @@ img.settle.is-settled {
 @media (min-width: 768px)  { .section-gr { padding-block: var(--space-8); } }
 @media (min-width: 1024px) { .section-gr { padding-block: var(--space-10); } }
 
+/* A section that carries less weight than its neighbours — a logo wall, a
+   newsletter strip — and says so with less room. Only at desktop sizes: the
+   phone rhythm above is already tight, and taking more off it would make the
+   section read as attached to the one before it. */
+@media (min-width: 768px) { .section-gr--tight { padding-block: var(--space-7); } }
+
+/* ---- Spacing that has to respond, and therefore cannot be inline ------
+   These three replaced `style="padding-block:…"` / `style="margin-top:…"`
+   attributes repeated across 21 page fragments. A style attribute beats every
+   stylesheet rule and answers no media query, so those pages kept their
+   desktop spacing on a 390px phone no matter what the section rhythm said —
+   96px of nothing above the footer, 96px between a product's tabs and its
+   related rail. The values below are the authored desktop ones; the phone
+   gets roughly a third of them, in line with .section-gr above. */
+.page-main { padding-block: var(--space-5) var(--space-6); }
+.page-head { margin-bottom: var(--space-4); }
+.page-head--lg { margin-bottom: var(--space-5); }
+.section-sep { margin-top: var(--space-6); }
+.section-sep--lg { margin-top: var(--space-6); }
+@media (min-width: 768px) {
+  .page-main { padding-block: var(--space-6) var(--space-9); }
+  .page-head { margin-bottom: var(--space-6); }
+  .page-head--lg { margin-bottom: var(--space-7); }
+  .section-sep { margin-top: var(--space-8); }
+  .section-sep--lg { margin-top: var(--space-9); }
+}
+
 /* Light / dark section canvases (80/20 neutral system) */
 .canvas-dark  { background: var(--surface-page);     color: var(--text-primary); }
 .canvas-panel { background: var(--surface-band);   color: var(--text-primary); }
