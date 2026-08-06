@@ -116,7 +116,18 @@
    little height and nothing else, and it only ever happens on a screen too
    narrow for one. Inline buttons keep their single line, where the nowrap is
    load-bearing for the row they sit in. */
-.btn-block-gr { flex-wrap: wrap; }
+/* Any bilingual button may stack its two halves when its row squeezes it.
+   This is what keeps the nowrap above affordable: with the halves on one
+   line a button's MINIMUM width is English + Bangla added together, and with
+   wrap allowed it is only the wider of the two. The product page's Add to
+   Cart sits beside a quantity stepper and was 10px past a 390px phone on that
+   sum alone. Where there is room nothing wraps and nothing moves — this only
+   fires when the alternative is a page that scrolls sideways.
+
+   A full-width button additionally lets its English wrap: it is already as
+   wide as its column, so there is no narrower place for it to go, and
+   "Proceed to Checkout" on its own needed 334px of a 336px summary column. */
+.btn-gr { flex-wrap: wrap; }
 .btn-block-gr .btn-gr__en { white-space: normal; }
 .btn-bn {
   font-size: 0.76em;

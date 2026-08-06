@@ -20,17 +20,14 @@ import { track, productPayload } from './analytics.js';
 export const EVENTS = {
   CART: 'cart:change',
   WISHLIST: 'wishlist:change',
-  COMPARE: 'compare:change',
   USER: 'user:change',
 };
 
-const listeners = { [EVENTS.CART]: new Set(), [EVENTS.WISHLIST]: new Set(), [EVENTS.COMPARE]: new Set(), [EVENTS.USER]: new Set() };
+const listeners = { [EVENTS.CART]: new Set(), [EVENTS.WISHLIST]: new Set(), [EVENTS.USER]: new Set() };
 
-export const COMPARE_MAX = 4;
 
 let cart = storage.get(KEYS.CART, []);          // [{ id, title, brand, price, image, qty, variant, moq }]
 let wishlist = storage.get(KEYS.WISHLIST, []);  // [{ id, title, brand, price, image }]
-let compare = storage.get(KEYS.COMPARE, []);    // [productId] — compare selection
 let user = storage.get(KEYS.USER, null);        // { id, name, email } | null
 
 function emit(event) {
@@ -141,27 +138,6 @@ export function removeFromWishlist(id) {
 
 export function wishlistCount() { return wishlist.length; }
 
-/* ---- Compare ----------------------------------------------------------- */
-export function getCompare() { return compare.slice(); }
-export function isInCompare(id) { return compare.includes(id); }
-export function compareCount() { return compare.length; }
-
-/** Toggle a product id in the compare set (capped at COMPARE_MAX).
- *  Returns { active, full } — full=true means it was rejected for being at cap. */
-export function toggleCompare(id) {
-  if (compare.includes(id)) {
-    compare = compare.filter((x) => x !== id);
-    persistCompare();
-    return { active: false, full: false };
-  }
-  if (compare.length >= COMPARE_MAX) return { active: false, full: true };
-  compare.push(id);
-  persistCompare();
-  return { active: true, full: false };
-}
-export function removeFromCompare(id) { compare = compare.filter((x) => x !== id); persistCompare(); }
-export function clearCompare() { compare = []; persistCompare(); }
-function persistCompare() { storage.set(KEYS.COMPARE, compare); emit(EVENTS.COMPARE); }
 
 /* ---- User session (mock) ---------------------------------------------- */
 // TODO: backend — replace localStorage session with JWT-backed auth.
@@ -175,7 +151,6 @@ window.addEventListener('storage', (e) => {
   if (!e.key) return;
   if (e.key.endsWith(KEYS.CART))     { cart = storage.get(KEYS.CART, []); emit(EVENTS.CART); }
   if (e.key.endsWith(KEYS.WISHLIST)) { wishlist = storage.get(KEYS.WISHLIST, []); emit(EVENTS.WISHLIST); }
-  if (e.key.endsWith(KEYS.COMPARE))  { compare = storage.get(KEYS.COMPARE, []); emit(EVENTS.COMPARE); }
   if (e.key.endsWith(KEYS.USER))     { user = storage.get(KEYS.USER, null); emit(EVENTS.USER); }
 });
 
@@ -183,6 +158,5 @@ window.addEventListener('storage', (e) => {
 export const state = {
   getCart, addToCart, updateQty, removeFromCart, clearCart, cartCount, cartSubtotal,
   getWishlist, isWishlisted, toggleWishlist, removeFromWishlist, wishlistCount,
-  getCompare, isInCompare, toggleCompare, removeFromCompare, clearCompare, compareCount, COMPARE_MAX,
   getUser, setUser, clearUser, isLoggedIn, subscribe, EVENTS,
 };

@@ -61,7 +61,6 @@ export const KEYS = {
   THEME: 'theme',
   CART: 'cart',
   WISHLIST: 'wishlist',
-  COMPARE: 'compare',
   USER: 'user',
   ADDRESSES: 'addresses',
   ORDERS: 'orders',

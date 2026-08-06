@@ -21,7 +21,6 @@ import { initNewsletter } from './components/newsletter-signup.js';
 import { initWishlistButtons } from './components/wishlist.js';
 import { initQuantitySteppers } from './components/quantity-stepper.js';
 import { enhanceProductCards } from './components/product-card.js';
-import { initCompareTray } from './components/compare-tray.js';
 import { initFooterSocial } from './components/footer-social.js';
 import { initAnalytics } from './core/analytics.js';
 
@@ -51,7 +50,6 @@ function boot() {
     ['newsletter', initNewsletter],
     ['wishlist', initWishlistButtons],
     ['quantity-steppers', initQuantitySteppers],
-    ['compare-tray', initCompareTray],
     ['footer-social', initFooterSocial],
     ['product-cards', enhanceProductCards],
   ];

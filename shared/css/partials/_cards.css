@@ -79,7 +79,7 @@
   pointer-events: none;
 }
 
-/* Wishlist / quick view / compare.
+/* Wishlist / quick view.
  *
  * THESE USED TO BE opacity:0 UNTIL HOVER, WHICH MEANT THEY DID NOT EXIST ON A
  * PHONE. Three actions, unreachable, on the device most of this shop is
@@ -120,7 +120,16 @@
   .product-card__actions .btn-icon-gr:hover { transform: scale(1.08); opacity: 1; }
 }
 
-.product-card__body { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); }
+/* flex-grow so the body fills whatever height the grid gave the card. Without
+   it the body is only as tall as its content and the leftover space collects
+   at the BOTTOM — so a card with no "Save ৳ 80" line, or a one-line title,
+   put its Add to Cart button higher than its neighbours. Three different
+   button heights across one row of New Arrivals, measured at 499/520/547.
+
+   With the body stretched, .product-card__price-row's existing margin-top:auto
+   finally has slack to push against, and price, saving and button all settle
+   to the bottom edge — so the buttons line up whatever is above them. */
+.product-card__body { display: flex; flex-direction: column; flex-grow: 1; gap: var(--space-2); padding: var(--space-4); }
 .product-card__brand { font-size: var(--fs-12); color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; }
 .product-card__title {
   font-family: var(--font-body);

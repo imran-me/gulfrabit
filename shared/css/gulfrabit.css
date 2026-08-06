@@ -430,7 +430,18 @@ a:hover { color: var(--link-hover); }
    little height and nothing else, and it only ever happens on a screen too
    narrow for one. Inline buttons keep their single line, where the nowrap is
    load-bearing for the row they sit in. */
-.btn-block-gr { flex-wrap: wrap; }
+/* Any bilingual button may stack its two halves when its row squeezes it.
+   This is what keeps the nowrap above affordable: with the halves on one
+   line a button's MINIMUM width is English + Bangla added together, and with
+   wrap allowed it is only the wider of the two. The product page's Add to
+   Cart sits beside a quantity stepper and was 10px past a 390px phone on that
+   sum alone. Where there is room nothing wraps and nothing moves — this only
+   fires when the alternative is a page that scrolls sideways.
+
+   A full-width button additionally lets its English wrap: it is already as
+   wide as its column, so there is no narrower place for it to go, and
+   "Proceed to Checkout" on its own needed 334px of a 336px summary column. */
+.btn-gr { flex-wrap: wrap; }
 .btn-block-gr .btn-gr__en { white-space: normal; }
 .btn-bn {
   font-size: 0.76em;
@@ -542,7 +553,7 @@ a:hover { color: var(--link-hover); }
   pointer-events: none;
 }
 
-/* Wishlist / quick view / compare.
+/* Wishlist / quick view.
  *
  * THESE USED TO BE opacity:0 UNTIL HOVER, WHICH MEANT THEY DID NOT EXIST ON A
  * PHONE. Three actions, unreachable, on the device most of this shop is
@@ -583,7 +594,16 @@ a:hover { color: var(--link-hover); }
   .product-card__actions .btn-icon-gr:hover { transform: scale(1.08); opacity: 1; }
 }
 
-.product-card__body { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); }
+/* flex-grow so the body fills whatever height the grid gave the card. Without
+   it the body is only as tall as its content and the leftover space collects
+   at the BOTTOM — so a card with no "Save ৳ 80" line, or a one-line title,
+   put its Add to Cart button higher than its neighbours. Three different
+   button heights across one row of New Arrivals, measured at 499/520/547.
+
+   With the body stretched, .product-card__price-row's existing margin-top:auto
+   finally has slack to push against, and price, saving and button all settle
+   to the bottom edge — so the buttons line up whatever is above them. */
+.product-card__body { display: flex; flex-direction: column; flex-grow: 1; gap: var(--space-2); padding: var(--space-4); }
 .product-card__brand { font-size: var(--fs-12); color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; }
 .product-card__title {
   font-family: var(--font-body);
@@ -1754,26 +1774,6 @@ img.settle.is-settled {
 .empty-state__text { color: var(--text-muted); max-width: 40ch; margin: 0 auto var(--space-5); }
 
 /* ---- Compare tray (floating, global) --------------------------------- */
-.compare-tray {
-  position: fixed; left: 50%; transform: translateX(-50%);
-  bottom: var(--space-4); z-index: 40;
-  width: min(880px, calc(100vw - 2rem));
-  background: var(--glass-overlay);
-  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
-  border: 1px solid var(--border-hairline);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  animation: gr-fade-up var(--dur-slow) var(--ease-out) both;
-}
-.compare-tray__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) var(--space-4); flex-wrap: wrap; }
-.compare-tray__items { display: flex; gap: var(--space-2); }
-.compare-tray__item { position: relative; width: 52px; height: 52px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-hairline); background: var(--surface-sunken); }
-.compare-tray__item img { width: 100%; height: 100%; object-fit: cover; }
-.compare-tray__remove { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: var(--radius-pill); border: 1px solid var(--border-hairline); background: var(--surface-page); color: var(--text-secondary); font-size: 11px; cursor: pointer; line-height: 1; }
-.compare-tray__remove:hover { color: var(--gr-error); border-color: var(--gr-error); }
-.compare-tray__slot { width: 52px; height: 52px; border-radius: var(--radius-sm); border: 1px dashed var(--border-hairline); }
-.compare-tray__actions { display: flex; align-items: center; gap: var(--space-2); }
-@media (max-width: 640px) { .compare-tray__inner { justify-content: center; } .compare-tray__slot { display: none; } }
 
 /* ---- No-JS fallback note --------------------------------------------- */
 .noscript-note {

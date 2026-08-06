@@ -118,8 +118,6 @@ export function productCardHTML(product) {
                 style="background:var(--surface-sunken);${wished ? 'color:var(--lime-ink)' : ''}">${HEART}</button>
         <button class="btn-icon-gr" data-action="quickview" aria-label="Quick view"
                 style="background:var(--surface-sunken)">${EYE}</button>
-        <button class="btn-icon-gr" data-action="compare" aria-pressed="${store.isInCompare(id)}"
-                aria-label="Add to compare" style="background:var(--surface-sunken);${store.isInCompare(id) ? 'color:var(--link)' : ''}">${SCALE}</button>
       </div>
       <a href="${productURL(product)}" aria-label="${escapeAttr(title)}">
         <picture>${cardSources(image)}
@@ -142,7 +140,7 @@ export function productCardHTML(product) {
       ${originalPrice && originalPrice > price ? `<span class="price-saving">${savingsLabel(originalPrice, price)}</span>` : ''}
       <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart"
               ${inStock ? '' : 'disabled'}>
-        ${inStock ? '<span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে</span>' : 'Notify Me'}
+        ${inStock ? '<span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">। কার্টে যোগ করুন</span>' : 'Notify Me'}
       </button>
     </div>
   </article>`;
@@ -195,15 +193,6 @@ export function enhanceProductCards(root = document) {
       wishBtn.style.color = active ? 'var(--lime-ink)' : '';
       wishBtn.setAttribute('aria-label', active ? 'Remove from wishlist' : 'Add to wishlist');
       toast.info(active ? 'Saved to wishlist' : 'Removed from wishlist');
-    });
-
-    const cmpBtn = card.querySelector('[data-action="compare"]');
-    cmpBtn?.addEventListener('click', () => {
-      const { active, full } = store.toggleCompare(product.id);
-      if (full) { toast.error(`Compare holds up to ${store.COMPARE_MAX} — remove one first`); return; }
-      cmpBtn.setAttribute('aria-pressed', String(active));
-      cmpBtn.style.color = active ? 'var(--link)' : '';
-      toast.info(active ? 'Added to compare' : 'Removed from compare');
     });
 
     card.querySelector('[data-action="quickview"]')?.addEventListener('click', () => {
