@@ -41,17 +41,28 @@ const state = {
 
 init();
 
-async /**
+/**
  * The 640px WebP beside a photograph, for an 88px thumbnail. The build writes
  * one next to every product JPEG; anything else (the placeholder SVGs) falls
  * through untouched.
+ *
+ * Emphatically NOT async — it returns a string that goes straight into a
+ * src=. It carried a stray `async` (parked in front of this comment, which is
+ * whitespace to the parser, so it bound here) that had come off init() below:
+ * one keyword in the wrong place broke the module's parse AND would have put
+ * "[object Promise]" in every thumbnail if it had ever got that far.
  */
 function cardImage(src) {
   const s = String(src || '');
   return s.toLowerCase().endsWith('.jpg') ? s.slice(0, -4) + '-card.webp' : s;
 }
 
-function init() {
+/* `async` is load-bearing, not decoration. Without it the `await` below is a
+   reserved word in the wrong place, this module fails to PARSE, and the whole
+   file — not just the pairing — never runs. It failed silently too: the block
+   is self-mounting, so a missing section looked exactly like a product with no
+   pairing, and the only trace was one console error on every product page. */
+async function init() {
   const id = getParam('id');
   if (!id) return;
 
@@ -124,7 +135,7 @@ function render(b) {
         <p class="bundle__count" data-bundle-count></p>
         <p class="bundle__total price" data-bundle-total></p>
         <p class="bundle__save" data-bundle-save hidden></p>
-        <button class="btn-gr btn-primary-gr btn-block-gr" type="button" data-bundle-add>Add selected to cart</button>
+        <button class="btn-gr btn-primary-gr btn-block-gr" type="button" data-bundle-add><span class="btn-gr__en">Add selected to cart</span><span class="btn-bn bn" lang="bn">কার্টে</span></button>
         <p class="caption bundle__note">Ticking items only changes what goes in your cart — each is charged at its own listed price.</p>
       </div>
     </div>
@@ -196,7 +207,12 @@ function paintTotals() {
 
   const btn = root.querySelector('[data-bundle-add]');
   btn.disabled = chosen.length === 0;
-  btn.textContent = chosen.length === 1 ? 'Add 1 item to cart' : `Add ${chosen.length} items to cart`;
+  // innerHTML rather than textContent because the label carries the Bangla
+  // gloss every other cart button on the site carries, and textContent would
+  // strip the span on the first tick. `chosen.length` is a number we counted,
+  // so there is nothing here to escape.
+  const en = chosen.length === 1 ? 'Add 1 item to cart' : `Add ${chosen.length} items to cart`;
+  btn.innerHTML = `<span class="btn-gr__en">${en}</span><span class="btn-bn bn" lang="bn">কার্টে</span>`;
 }
 
 function addPicked() {

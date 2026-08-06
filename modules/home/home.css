@@ -370,15 +370,20 @@
 
    Then the picture became the whole tile with the name over a gradient. The
    contrast sampler was happy and the result was black bars across a white
-   premium storefront: I had tuned a number instead of looking at the page.
-   Scrims belong over bright art. These masters are already dark; darkening
-   them further to float type is the wrong tool.
+   premium storefront: a number had been tuned instead of the page being
+   looked at. Scrims belong over bright art; darkening an already-dark
+   photograph to float type on it is the wrong tool.
 
-   So: the art stays a square, edge to edge, and the name goes UNDERNEATH it
-   on white. Nothing is laid over the photograph, so nothing has to be
-   darkened to stay readable, and the tile reads bright next to everything
-   else on the page. The card's white foot is what makes it a control — a
-   surface, a hairline, and a lift. */
+   Neither was really a layout problem. The masters were replaced with the
+   subject on a seamless white ground, shot as one set, and the tiles came
+   right on their own — which is the actual lesson, and why the prompts and
+   the reason they must match now live in tools/gen-category-images.py.
+
+   What remains is deliberately plain: the art stays square and edge to edge,
+   the name sits UNDERNEATH it, nothing is laid over the photograph, so
+   nothing has to be darkened to stay readable. White art on a white card
+   would dissolve, so the card's hairline, its shadow and the lift on hover
+   are what make it a control rather than a picture. */
 @media (min-width: 768px) {
   .home-cat-grid .category-card {
     min-height: 0;

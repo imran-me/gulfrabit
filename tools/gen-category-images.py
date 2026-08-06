@@ -98,9 +98,48 @@ JPG_Q = 86
 WEBP_Q = 80
 
 
+WHITE_CUT = 244    # below this is subject, at or above is the white ground
+MARGIN = 1.20      # the square is 20% wider than the subject's longest side
+
+
+def content_box(im):
+    """The subject's bounding box on a white ground, or None if there is none.
+
+    Only meaningful for the white-background masters. A dark-vignette master
+    has no white ground, the mask covers the whole frame, and this returns the
+    full image — which is exactly the right answer for it, since square() then
+    falls through to the geometric crop below.
+    """
+    mask = im.convert("L").point(lambda v: 255 if v < WHITE_CUT else 0)
+    return mask.getbbox()
+
+
 def square(im):
-    """Crop to 1:1, biased upward so the subject is not clipped."""
+    """Crop to 1:1 around the subject, so every tile frames its product alike.
+
+    Framing used to be geometric — centre a landscape, and hold a fixed offset
+    down a portrait — which keeps a subject whole but says nothing about how
+    BIG it lands. Across eight masters that produced eight different product
+    sizes on one row: the thing the tiles are supposed to have in common.
+
+    On a white ground the subject can simply be found. The square is centred on
+    it and sized to its longest side plus a fixed margin, so a tall bottle and a
+    wide bowl of nuts arrive at the same visual weight. Only the geometric path
+    remains for anything without a white ground.
+    """
     w, h = im.size
+    box = content_box(im)
+
+    # A box covering essentially the whole frame means no white ground was
+    # found; do not pretend the numbers mean anything.
+    if box and (box[2] - box[0]) < w * .97 and (box[3] - box[1]) < h * .97:
+        cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
+        side = max(box[2] - box[0], box[3] - box[1]) * MARGIN
+        side = int(min(side, w, h))                       # never exceed the master
+        x = int(max(0, min(cx - side / 2, w - side)))     # clamp inside the frame
+        y = int(max(0, min(cy - side / 2, h - side)))
+        return im.crop((x, y, x + side, y + side))
+
     if w == h:
         return im
     if h < w:                                   # landscape master: plain centre

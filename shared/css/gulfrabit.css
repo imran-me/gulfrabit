@@ -1304,6 +1304,41 @@ a:hover { color: var(--link-hover); }
   padding-right: 2.5rem;
 }
 
+/* ---- The "Sort by" control -------------------------------------------
+   Shared rather than owned by catalog, because three modules render the same
+   control — the category listing, search results and deals — and the first
+   version of this lived in catalog.css, which deals does not load. A control
+   that exists on a page whose stylesheet cannot style it is the same coupling
+   bug as .summary-row in checkout; once is a mistake, twice is a pattern.
+
+   width:auto so it is as wide as its widest option rather than the full width
+   every other select on the site wants to be. */
+.sort-field { display: flex; align-items: center; gap: .5rem; }
+.sort-field .select-gr { min-height: 40px; width: auto; }
+
+/* On a phone the word "Sort" goes and the control shrinks to the size of the
+   button beside it. The meaning does not go with the word — the select keeps
+   its aria-label, so a screen reader still announces "Sort by".
+
+   Capped rather than auto-width: "Price: Low to High" is the widest option,
+   and sizing to it would make the control twice the button it sits next to.
+   The closed select ellipsises at the cap, which is what a phone's native
+   picker does anyway the moment it opens. */
+@media (max-width: 767px) {
+  .sort-field { margin-left: auto; flex: none; }
+  .sort-field__label { display: none; }
+  .sort-field .select-gr {
+    min-height: 38px; height: 38px;
+    max-width: 132px;
+    padding: 0 1.9rem 0 .7rem;
+    font-size: var(--fs-14);
+    background-position: right .6rem center;
+    background-color: var(--surface-raised);
+    border-color: var(--border-hairline);
+    text-overflow: ellipsis;
+  }
+}
+
 /* Validation states (toggled by utils/validate-form.js) */
 .field-gr.is-invalid .input-gr,
 .field-gr.is-invalid .select-gr,
