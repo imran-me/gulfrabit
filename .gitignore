@@ -23,6 +23,12 @@ npm-debug.log*
 # ── Keep the source logo out of the repo root once copied ────────
 # (working copy lives in assets/logo/) — comment out if you want it tracked.
 
+# ── Photographic masters, kept locally, never shipped ────────────
+# tools/gen-category-images.py crops these into the tile art that IS
+# committed (<slug>.jpg + the WebP tiers). The masters are ~2.5MB each and
+# nothing on the site ever requests them.
+assets/images/categories/_src/
+
 # ---- Laravel (see BACKEND.md) ----------------------------------------
 /vendor/
 /node_modules/

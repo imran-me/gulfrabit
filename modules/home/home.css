@@ -409,8 +409,9 @@
 /* ---- Category section on phones --------------------------------------
    At 390px the two-up layout spent a full screen on eight tiles, and the
    header ate three lines before the first one (overline, title, then the
-   View-all button wrapping under it). Phones get a directory instead of a
-   showcase: one header line, four tiles per row, icon and label only.
+   View-all button wrapping under it). Phones get four tiles per row and a
+   one-line header — picture and label, no blurb, which is all that fits in
+   an 80px tile.
 
    Desktop keeps the eyebrow and the large cards — this whole block is
    scoped to .home-cat and below 768px, so no other section moves. */
@@ -467,10 +468,22 @@
     padding: 12px 6px 11px;
     border-radius: 12px;   /* between the token pair: 16px is a bubble at 80px wide */
   }
+  /* The photo well fills the tile's inner width — about 68px at 390px — and
+     stays square, so the same crop serves both breakpoints and no phone
+     downloads the desktop tier (see the sizes= on the img).
+
+     It costs roughly 30px per row over the 22px icon it replaced, which is
+     the price of the section being a showcase again rather than a directory.
+     The header above is still one line, so the first row of tiles is where
+     it was. */
+  .home-cat-grid .category-card__media {
+    margin-bottom: 0;
+    border-radius: 10px;   /* matches the 12px tile at this size */
+  }
   .home-cat-grid .category-card__icon {
     width: 22px; height: 22px;
-    margin-bottom: 0;
   }
+  .home-cat-grid .category-card > .category-card__icon { margin-bottom: 0; }
   /* Two lines reserved so "Imported Food" and "Beauty" sit at the same
      height; anything longer clamps rather than pushing the tile taller. */
   .home-cat-grid .category-card__title {

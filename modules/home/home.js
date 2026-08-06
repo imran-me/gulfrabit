@@ -178,16 +178,32 @@ async function initCategoryGrid() {
 
   // Repainting eight identical tiles would restart their reveal for nothing,
   // so the common case — admin and markup agree — costs one comparison.
-  const authored = [...grid.querySelectorAll('.category-card')]
-    .map((a) => new URL(a.href, location.href).searchParams.get('slug') || a.getAttribute('href'));
-  const live = cats.map((c) => CAT_HREF[c.slug] ?? c.slug);
+  // Both sides go through the URL parser first: the authored Flash Sale tile
+  // is a relative "modules/deals/deals.html" and the generated one is rooted,
+  // and comparing the raw strings made every load a mismatch. The grid faded
+  // in, blanked, and faded in again a second later, on every visit.
+  const key = (href) => {
+    const u = new URL(href, location.href);
+    return u.searchParams.get('slug') || u.pathname;
+  };
+  const authored = [...grid.querySelectorAll('.category-card')].map((a) => key(a.getAttribute('href')));
+  const live = cats.map((c) => key(CAT_HREF[c.slug]
+    ?? `/modules/catalog/category.html?slug=${encodeURIComponent(c.slug)}`));
   if (authored.join('|') === live.join('|')) return;
 
+  // Has the visitor already watched this grid arrive? Then the API is late and
+  // replaying the animation would look like a glitch, not a flourish — the new
+  // tiles go straight to visible. Only a grid still below the fold gets to
+  // animate. Either way they must be handled: [data-reveal] starts at opacity
+  // 0, so tiles built after scroll-reveal ran would otherwise paint themselves
+  // invisible — exactly the failure this is replacing.
+  const alreadyRevealed = !!grid.querySelector('.category-card.is-visible');
   grid.innerHTML = cats.map(categoryTile).join('');
-  // These tiles were built after scroll-reveal ran, so nothing is watching
-  // them — and [data-reveal] starts at opacity 0. Without this the grid would
-  // paint itself invisible, which is exactly the failure it is replacing.
-  initScrollReveal(grid.closest('.home-cat') || grid.parentElement);
+  if (alreadyRevealed) {
+    grid.querySelectorAll('[data-reveal]').forEach((el) => el.classList.add('is-visible'));
+  } else {
+    initScrollReveal(grid.closest('.home-cat') || grid.parentElement);
+  }
 }
 
 /* ---- Product sections (skeleton → data) ------------------------------- */
