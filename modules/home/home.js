@@ -155,6 +155,12 @@ const CAT_HREF = { 'flash-sale': '/modules/deals/deals.html' };
    path, and the home page would show one thing while the files say another.
    Art we ship wins; `c.image` is the fallback for a category the merchant
    added themselves, and the icon is the fallback for that. */
+/* Stamped by tools/gen-category-images.py from a hash of the delivered bytes.
+   The tiers have fixed names, so without this a cache cannot tell that the art
+   behind a URL changed — and one did survive 55 minutes at the edge under a
+   `max-age` of a week. Do not hand-edit; re-run the generator. */
+const ART_V = '2477f36b';
+
 const CAT_ART = new Set([
   'oil-ghee', 'chocolates-dairy', 'home-decor', 'kitchen-appliances',
   'dates-nuts', 'kids-toys', 'fashion-clothes', 'flash-sale',
@@ -172,13 +178,14 @@ const esc = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => (
    no icons at all. The one-line onerror is what actually removes it. */
 function categoryMedia(c, icon) {
   const art = CAT_ART.has(c.slug) ? `/assets/images/categories/${c.slug}` : null;
+  const V = ART_V ? `?v=${ART_V}` : '';
   const pic = art
-    ? `<picture><source srcset="${art}-160.webp 160w, ${art}-280.webp 280w, ${art}-560.webp 560w"`
+    ? `<picture><source srcset="${art}-160.webp${V} 160w, ${art}-280.webp${V} 280w, ${art}-560.webp${V} 560w"`
       /* Measured, not guessed: the well is 66px on a 390px phone and 131px in
          the eight-across desktop row, so these pick the 160w and 280w tiers at
          2x with no upscaling. Re-measure if the grid's column count changes. */
       + ` sizes="(max-width: 767px) 18vw, 140px" type="image/webp">`
-      + `<img class="category-card__img" onerror="this.hidden=true" src="${art}.jpg" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>`
+      + `<img class="category-card__img" onerror="this.hidden=true" src="${art}.jpg${V}" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>`
     : (c.image ? `<img class="category-card__img" onerror="this.hidden=true" src="${esc(c.image)}" alt="" loading="lazy" decoding="async">` : '');
   return `<span class="category-card__media">`
     + `<svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${icon}</svg>`

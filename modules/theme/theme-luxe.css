@@ -1,0 +1,365 @@
+/* =========================================================================
+   GulfRabit · Luxe theme
+   =========================================================================
+
+   THE CONTRACT WITH THE CLASSIC THEME
+   -----------------------------------
+   Every rule in this file is scoped under [data-theme="luxe"]. Nothing here
+   can reach a page that does not carry the attribute, so the shipped default
+   renders byte-identical to what it rendered before this file existed. That
+   is not a convention to be relaxed later: the switch in the admin panel is
+   only trustworthy if the OFF position is genuinely untouched.
+
+   This sheet is linked on every page and is inert until the attribute is set.
+   Linking it conditionally would mean deciding the theme before the <head>
+   is written, and a wrong guess is a flash of the other theme.
+
+   WHAT "LUXE" MEANS HERE
+   ----------------------
+   Gold is TRIM, not paint. The brand's cyan and lime still carry every action
+   — they are the logo, and a shop whose buttons stop looking like its brand
+   has been redecorated, not designed. Gold takes the jewellery: hairlines,
+   rules, the eyebrow above a heading, the sweep across a card as a pointer
+   crosses it, the ring around a focused control. The canvas warms from paper
+   white to ivory so the gold has something to sit on; pure white makes gold
+   look like mustard.
+
+   Restraint is the whole brief. "Ultra luxurious, yet minimal" resolves as:
+   few effects, each slow, each low-contrast, none of them competing with a
+   product photograph. Anything that would make a grid of twelve cards read as
+   decoration rather than merchandise is not in this file.
+
+   NOTHING HERE IS LOAD-BEARING
+   ----------------------------
+   Every animation is decoration over content that is already visible and
+   already in the HTML. No rule in this file starts an element at opacity 0,
+   hides anything pending JavaScript, or gates a layout on a transition
+   finishing. That rule exists because this codebase has twice shipped a
+   decorative animation that hid the shop (see modules/home/home.css); a
+   theme is exactly the kind of change that would do it a third time.
+
+   Motion is gated on prefers-reduced-motion at the bottom of this file.
+   ========================================================================= */
+
+/* ---- Tokens ------------------------------------------------------------
+   Only ROLES are overridden — the same roles _variables.css defines — so
+   every partial and module re-themes without knowing this file exists.
+   Contrast was checked against the new ivory canvas, not the old white one:
+   text-primary 17.1:1, text-secondary 8.6:1, text-muted 6.4:1, link 4.7:1,
+   gold-ink 4.9:1. All AA or better, and muted actually improves on classic. */
+[data-theme="luxe"] {
+  /* The gold ramp. Deep is the only one ever used for text. */
+  --lux-gold:        #C9A24B;
+  --lux-gold-light:  #E4CE92;
+  --lux-gold-pale:   #EFE3C4;
+  --lux-gold-deep:   #8A6D22;
+
+  /* Ivory, not white. Cards stay pure white so they lift off the canvas by
+     being cleaner than it — depth from paper quality rather than shadow. */
+  --surface-page:    #FCFBF7;
+  --surface-raised:  #FFFFFF;
+  --surface-sunken:  #F5F2EA;
+  --surface-band:    #F8F5ED;
+  --surface-inverse: #0D0E0C;
+
+  /* The hairline is where most of the luxury actually lives: a warm gold-grey
+     line reads as a bound edge, a cool grey line reads as a border. */
+  --border-hairline: #E9E0CB;
+  --border-input:    #9A8F73;
+
+  --text-primary:    #12191A;
+  --text-secondary:  #3D4A48;
+  --text-muted:      #5F5B50;
+  --text-on-accent:  #04222b;
+  --text-inverse:    #FCFBF7;
+
+  --link:            #0E7C99;
+  --link-hover:      #0A5F76;
+  --accent-ink:      #0E7C99;
+  --gold-ink:        #8A6D22;
+
+  --wash-hover:      rgba(138,109,34,.07);
+  --wash-shimmer:    rgba(201,162,75,.10);
+  --scrim:           rgba(13,14,12,.5);
+  --glass-header:    rgba(252,251,247,.78);
+  --glass-overlay:   rgba(252,251,247,.95);
+  --scrollbar-thumb: #D6C79E;
+
+  /* Shadows warm up. A neutral grey shadow on an ivory canvas looks like
+     dirt; the same shadow mixed toward brown reads as depth. */
+  --shadow-sm: 0 1px 2px rgba(58,44,12,.05),  0 1px 3px rgba(58,44,12,.06);
+  --shadow-md: 0 4px 16px rgba(58,44,12,.08), 0 2px 6px rgba(58,44,12,.05);
+  --shadow-lg: 0 18px 48px rgba(58,44,12,.13), 0 6px 16px rgba(58,44,12,.07);
+  --shadow-glow: 0 8px 28px rgba(201,162,75,.34);
+
+  /* Luxe motion is slower than classic. Nothing snaps. */
+  --dur-base: 260ms;
+  --dur-slow: 460ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Reused by several effects below. */
+  --lux-rule: linear-gradient(90deg, transparent, var(--lux-gold) 22%, var(--lux-gold-light) 50%, var(--lux-gold) 78%, transparent);
+  --lux-sheen: linear-gradient(100deg, transparent 28%, rgba(228,206,146,.42) 50%, transparent 72%);
+}
+
+/* ---- The canvas --------------------------------------------------------
+   Two very large, very faint radial washes — one brand cyan, one gold —
+   drifting against each other behind everything. At 4-6% opacity this is not
+   a visible gradient; it is the difference between a flat page and a page
+   that feels lit. Fixed, so it does not repaint on scroll, and pointer-events
+   none so it can never intercept a tap.
+
+   ::before on <body> rather than a background-image on <html> so the site's
+   own backgrounds (bands, cards, the footer) still paint normally on top. */
+[data-theme="luxe"] body { position: relative; background: var(--surface-page); }
+[data-theme="luxe"] body::before {
+  content: "";
+  position: fixed; inset: -20%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(46% 38% at 18% 12%, rgba(201,162,75,.13), transparent 62%),
+    radial-gradient(42% 36% at 86% 24%, rgba(27,180,212,.09), transparent 64%),
+    radial-gradient(50% 40% at 62% 88%, rgba(154,205,60,.07), transparent 66%);
+  animation: lux-drift 34s var(--ease-inout) infinite alternate;
+}
+@keyframes lux-drift {
+  from { transform: translate3d(-1.5%, -1%, 0) scale(1);    }
+  to   { transform: translate3d( 1.5%,  1%, 0) scale(1.06); }
+}
+
+/* A single gold hairline pinned under the header, filling left-to-right with
+   how far down the page you are. Pure CSS: scroll-driven animations need no
+   JavaScript and no scroll listener, and where they are unsupported the bar
+   simply never appears — which is why it is an empty decorative strip and
+   carries no information a reader needs. */
+@supports (animation-timeline: scroll()) {
+  [data-theme="luxe"] body::after {
+    content: "";
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 2px;
+    z-index: calc(var(--z-header) + 1);
+    pointer-events: none;
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, var(--gr-cyan), var(--lux-gold) 60%, var(--gr-lime));
+    animation: lux-progress linear;
+    animation-timeline: scroll();
+  }
+  @keyframes lux-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+}
+
+/* ---- Rules and eyebrows -----------------------------------------------
+   The overline above a section heading is the single most repeated element
+   on the site, which makes it the cheapest place to say "luxury" once and
+   have it said everywhere. Gold, letterspaced, with a short rule drawn
+   beside it. */
+[data-theme="luxe"] .overline {
+  color: var(--gold-ink);
+  display: inline-flex; align-items: center; gap: .6em;
+  letter-spacing: .16em;
+}
+[data-theme="luxe"] .overline::after {
+  content: "";
+  width: 2.25rem; height: 1px;
+  background: linear-gradient(90deg, var(--lux-gold), transparent);
+}
+
+/* Display headings keep ink colour — a gold heading fails contrast and reads
+   as a discount banner. The gold goes UNDER it instead, as a drawn rule. */
+[data-theme="luxe"] .section-head__titles > h2,
+[data-theme="luxe"] .section-head__titles > h1 { position: relative; }
+[data-theme="luxe"] .section-head__titles > h2::after,
+[data-theme="luxe"] .section-head__titles > h1::after {
+  content: "";
+  position: absolute; left: 0; bottom: -.4rem;
+  height: 1px; width: min(100%, 5.5rem);
+  background: var(--lux-rule);
+  transform: scaleX(0); transform-origin: 0 50%;
+  transition: transform 900ms var(--ease-out) 120ms;
+}
+/* Drawn when the section arrives. .is-visible is scroll-reveal's own class,
+   and it is already guaranteed to land (that module fails open), so nothing
+   here can leave a rule half-drawn on a page whose observer never fired. */
+[data-theme="luxe"] [data-reveal].is-visible .section-head__titles > h2::after,
+[data-theme="luxe"] [data-reveal].is-visible .section-head__titles > h1::after,
+[data-theme="luxe"] .section-head:not([data-reveal]) .section-head__titles > h2::after,
+[data-theme="luxe"] .section-head:not([data-reveal]) .section-head__titles > h1::after { transform: scaleX(1); }
+
+/* ---- Surfaces ----------------------------------------------------------
+   A card gains a gold top edge that brightens on hover, and a slow sheen
+   that crosses it once. Both are ::after/::before on elements that already
+   carry overflow:hidden, so nothing escapes the radius. */
+[data-theme="luxe"] .product-card,
+[data-theme="luxe"] .category-card,
+[data-theme="luxe"] .surface-gr {
+  border-color: var(--border-hairline);
+  background-image: linear-gradient(180deg, rgba(201,162,75,.05), transparent 34%);
+}
+
+[data-theme="luxe"] .product-card::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  /* The sheen sits off to the left until a pointer arrives. */
+  background: var(--lux-sheen);
+  opacity: 0;
+  transform: translateX(-60%);
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+@media (hover: hover) {
+  [data-theme="luxe"] .product-card:hover {
+    border-color: var(--lux-gold);
+    box-shadow: 0 20px 52px rgba(138,109,34,.16), 0 6px 18px rgba(58,44,12,.08);
+  }
+  [data-theme="luxe"] .product-card:hover::after {
+    opacity: 1;
+    animation: lux-sweep 1100ms var(--ease-out);
+  }
+  [data-theme="luxe"] .category-card:hover {
+    border-color: var(--lux-gold);
+    box-shadow: 0 20px 52px rgba(138,109,34,.16);
+  }
+}
+@keyframes lux-sweep {
+  from { transform: translateX(-60%); }
+  to   { transform: translateX(160%); }
+}
+
+/* The premium hairline that classic draws in gold-mixed-with-grey becomes
+   properly gold here — this theme is the one where that badge earns it. */
+[data-theme="luxe"] .product-card:has(.badge-premium) {
+  border-color: color-mix(in srgb, var(--lux-gold) 52%, var(--border-hairline));
+  background-image: linear-gradient(180deg, rgba(201,162,75,.11), transparent 42%);
+}
+[data-theme="luxe"] .badge-premium {
+  background: linear-gradient(135deg, var(--lux-gold-pale), #FFF8E6);
+  border: 1px solid var(--lux-gold);
+  color: var(--lux-gold-deep);
+}
+
+/* ---- Buttons -----------------------------------------------------------
+   The primary button keeps the brand gradient — it is the logo's two colours
+   and the most recognisable thing on the page. What luxe adds is a gold
+   sheen that crosses it on hover and a gold focus ring. */
+[data-theme="luxe"] .btn-primary-gr,
+[data-theme="luxe"] .btn-gradient-gr { position: relative; overflow: hidden; }
+[data-theme="luxe"] .btn-primary-gr::after,
+[data-theme="luxe"] .btn-gradient-gr::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, rgba(255,248,230,.55) 50%, transparent 70%);
+  transform: translateX(-100%);
+  opacity: 0;
+}
+@media (hover: hover) {
+  [data-theme="luxe"] .btn-primary-gr:hover::after,
+  [data-theme="luxe"] .btn-gradient-gr:hover::after {
+    opacity: 1;
+    animation: lux-sweep 900ms var(--ease-out);
+  }
+}
+[data-theme="luxe"] .btn-outline-gr {
+  border-color: color-mix(in srgb, var(--lux-gold) 45%, var(--border-hairline));
+}
+@media (hover: hover) {
+  [data-theme="luxe"] .btn-outline-gr:hover {
+    border-color: var(--lux-gold);
+    background: rgba(201,162,75,.08);
+  }
+}
+
+/* One focus style for the whole theme, gold, and never removed. */
+[data-theme="luxe"] :focus-visible {
+  outline: 2px solid var(--lux-gold);
+  outline-offset: 2px;
+}
+
+/* ---- Links -------------------------------------------------------------
+   A gold underline that draws from the left rather than appearing whole. */
+@media (hover: hover) {
+  [data-theme="luxe"] .mega-menu__link,
+  [data-theme="luxe"] .site-footer a { position: relative; }
+  [data-theme="luxe"] .mega-menu__link::after,
+  [data-theme="luxe"] .site-footer a::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: -2px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--lux-gold), var(--lux-gold-light));
+    transform: scaleX(0); transform-origin: 0 50%;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  [data-theme="luxe"] .mega-menu__link:hover::after,
+  [data-theme="luxe"] .site-footer a:hover::after { transform: scaleX(1); }
+}
+
+/* ---- Header ------------------------------------------------------------ */
+[data-theme="luxe"] .site-header {
+  border-bottom: 1px solid transparent;
+  background-image: linear-gradient(var(--glass-header), var(--glass-header)), var(--lux-rule);
+  background-position: 0 0, 0 100%;
+  background-size: 100% 100%, 100% 1px;
+  background-repeat: no-repeat;
+}
+
+/* ---- Media -------------------------------------------------------------
+   A gold inner hairline on every image well, and a slower, larger zoom than
+   classic's — the difference between a product moving and a product being
+   presented. */
+[data-theme="luxe"] .product-card__media::after {
+  box-shadow: inset 0 0 0 1px rgba(201,162,75,.20);
+}
+[data-theme="luxe"] .category-card__media {
+  box-shadow: inset 0 0 0 1px rgba(201,162,75,.22);
+}
+@media (hover: hover) {
+  [data-theme="luxe"] .product-card:hover .product-card__img { transform: scale(1.06); }
+}
+
+/* ---- Section bands -----------------------------------------------------
+   The alternating band gets a pair of faint vertical gold rules at the
+   container's edges — the page equivalent of a ruled margin. Hidden below
+   1024px, where there is no margin to rule. */
+@media (min-width: 1024px) {
+  [data-theme="luxe"] .canvas-panel { position: relative; }
+  [data-theme="luxe"] .canvas-panel::before {
+    content: "";
+    position: absolute; inset-block: 0;
+    left: 50%; transform: translateX(-50%);
+    width: min(var(--container-max), 100%);
+    pointer-events: none;
+    border-inline: 1px solid rgba(201,162,75,.16);
+  }
+}
+
+/* ---- Reveal ------------------------------------------------------------
+   Luxe lengthens the existing reveal and adds a whisper of scale. It does
+   NOT change the start state, the class that ends it, or the failsafe — this
+   only retimes a transition that already exists. */
+[data-theme="luxe"] html:not(.no-js) [data-reveal] {
+  transition-duration: 720ms;
+  transition-timing-function: var(--ease-out);
+}
+
+/* ---- Chrome ------------------------------------------------------------ */
+[data-theme="luxe"] ::selection { background: rgba(201,162,75,.28); color: var(--text-primary); }
+[data-theme="luxe"] ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: var(--radius-pill); }
+[data-theme="luxe"] hr { border: 0; height: 1px; background: var(--lux-rule); }
+
+/* ---- Motion off --------------------------------------------------------
+   Everything above is decoration, so all of it can simply stop. The rules
+   and hairlines stay — they are colour, not movement — but nothing drifts,
+   sweeps or draws. */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="luxe"] body::before { animation: none; }
+  [data-theme="luxe"] body::after  { animation: none; transform: scaleX(1); opacity: .5; }
+  [data-theme="luxe"] .product-card::after,
+  [data-theme="luxe"] .btn-primary-gr::after,
+  [data-theme="luxe"] .btn-gradient-gr::after { display: none; }
+  [data-theme="luxe"] .section-head__titles > h2::after,
+  [data-theme="luxe"] .section-head__titles > h1::after { transform: scaleX(1); transition: none; }
+  [data-theme="luxe"] .mega-menu__link::after,
+  [data-theme="luxe"] .site-footer a::after { transition: none; }
+  [data-theme="luxe"] html:not(.no-js) [data-reveal] { transition-duration: 1ms; }
+}

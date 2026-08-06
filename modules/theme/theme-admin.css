@@ -1,0 +1,115 @@
+/* =========================================================================
+   GulfRabit · Appearance screen (admin)
+
+   Only the picker. The admin panel itself is NOT re-themed by the storefront
+   theme — a merchant switching the shop to Luxe has not asked for their tools
+   to change under them, and a panel that restyles itself on save makes it
+   impossible to tell what you just did to the shop from what you just did to
+   the screen you are standing on.
+   ========================================================================= */
+
+.theme-set {
+  display: grid; gap: var(--space-4);
+  grid-template-columns: 1fr;
+  border: 0; padding: 0; margin: 0;
+}
+@media (min-width: 768px) { .theme-set { grid-template-columns: 1fr 1fr; } }
+
+/* The whole card is the control. The radio itself is visually hidden but NOT
+   display:none — it has to stay focusable and reachable, and :focus-visible
+   on it is what draws the ring on the frame below. */
+.theme-option { display: block; cursor: pointer; }
+.theme-option__input {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+.theme-option__frame {
+  display: block;
+  padding: var(--space-4);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) {
+  .theme-option:hover .theme-option__frame { border-color: var(--gr-cyan-dark); }
+}
+.theme-option__input:checked + .theme-option__frame {
+  border-color: var(--gr-cyan-dark);
+  box-shadow: 0 0 0 2px var(--gr-cyan-dark) inset;
+}
+.theme-option__input:focus-visible + .theme-option__frame {
+  outline: 2px solid var(--gr-cyan);
+  outline-offset: 2px;
+}
+
+.theme-option__body { display: block; margin-top: var(--space-3); }
+.theme-option__name {
+  display: flex; align-items: center; gap: var(--space-2);
+  font-weight: var(--fw-semibold); color: var(--text-primary);
+}
+.theme-option__desc {
+  display: block; margin-top: 2px;
+  font-size: var(--fs-14); color: var(--text-muted);
+}
+.theme-option__flag {
+  font-size: var(--fs-12); font-weight: var(--fw-semibold);
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--lime-ink);
+  border: 1px solid var(--gr-lime);
+  border-radius: var(--radius-pill);
+  padding: 1px .5rem;
+}
+.theme-option__flag[hidden] { display: none; }
+
+/* ---- The miniatures ----------------------------------------------------
+   A header bar, a row of three cards and a button, painted in each theme's
+   own colours. Enough to answer "what changes?" at a glance without
+   pretending to be a screenshot of a page that will have moved on. */
+.theme-swatch {
+  display: block;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-hairline);
+  padding: 10px;
+  overflow: hidden;
+}
+.theme-swatch__bar { display: block; height: 8px; border-radius: 3px; }
+.theme-swatch__row { display: flex; gap: 6px; margin-top: 9px; }
+.theme-swatch__row i { flex: 1; display: block; height: 34px; border-radius: 4px; }
+.theme-swatch__cta { display: block; width: 46%; height: 10px; border-radius: 999px; margin-top: 9px; }
+
+.theme-swatch--classic {
+  background: #FFFFFF;
+  border-color: #E5E9E7;
+}
+.theme-swatch--classic .theme-swatch__bar { background: #F4F6F5; }
+.theme-swatch--classic .theme-swatch__row i { background: #F4F6F5; border: 1px solid #E5E9E7; }
+.theme-swatch--classic .theme-swatch__cta { background: linear-gradient(135deg, #1BB4D4, #9ACD3C); }
+
+.theme-swatch--luxe {
+  background:
+    radial-gradient(60% 70% at 20% 10%, rgba(201,162,75,.16), transparent 60%),
+    radial-gradient(50% 60% at 85% 25%, rgba(27,180,212,.10), transparent 62%),
+    #FCFBF7;
+  border-color: #E9E0CB;
+}
+.theme-swatch--luxe .theme-swatch__bar {
+  background: #FFFFFF;
+  box-shadow: 0 1px 0 #C9A24B;
+}
+.theme-swatch--luxe .theme-swatch__row i {
+  background: #FFFFFF;
+  border: 1px solid #E9E0CB;
+  box-shadow: inset 0 6px 10px -8px rgba(201,162,75,.55);
+}
+.theme-swatch--luxe .theme-swatch__cta { background: linear-gradient(135deg, #1BB4D4, #C9A24B 60%, #9ACD3C); }
+
+.theme-actions {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}

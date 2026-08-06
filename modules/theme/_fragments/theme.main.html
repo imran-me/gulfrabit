@@ -1,0 +1,65 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Appearance</h1>
+          <p class="admin__sub">How the storefront looks. Publishing takes effect for every visitor straight away — nothing is redeployed.</p>
+        </div>
+      </div>
+
+      <!-- The two options are radio inputs inside labels, not buttons: a theme
+           is one choice from a fixed set, which is what a radio group IS. The
+           keyboard behaviour — arrow between options, space to choose — then
+           arrives correct rather than being rebuilt badly. -->
+      <form data-theme-form>
+        <fieldset class="theme-set">
+          <legend class="visually-hidden">Storefront theme</legend>
+
+          <label class="theme-option">
+            <input type="radio" name="theme" value="classic" class="theme-option__input" checked>
+            <span class="theme-option__frame">
+              <!-- A drawn miniature, not a screenshot. A screenshot goes stale
+                   the first time anyone touches the storefront, and a stale
+                   preview of a theme is worse than none. These are painted
+                   from each theme's own colours, so they cannot drift. -->
+              <span class="theme-swatch theme-swatch--classic" aria-hidden="true">
+                <span class="theme-swatch__bar"></span>
+                <span class="theme-swatch__row"><i></i><i></i><i></i></span>
+                <span class="theme-swatch__cta"></span>
+              </span>
+              <span class="theme-option__body">
+                <span class="theme-option__name">Classic<span class="theme-option__flag" data-live-for="classic" hidden>Live</span></span>
+                <span class="theme-option__desc">The shop as it is today. White canvas, cyan and lime, quick and quiet.</span>
+              </span>
+            </span>
+          </label>
+
+          <label class="theme-option">
+            <input type="radio" name="theme" value="luxe" class="theme-option__input">
+            <span class="theme-option__frame">
+              <span class="theme-swatch theme-swatch--luxe" aria-hidden="true">
+                <span class="theme-swatch__bar"></span>
+                <span class="theme-swatch__row"><i></i><i></i><i></i></span>
+                <span class="theme-swatch__cta"></span>
+              </span>
+              <span class="theme-option__body">
+                <span class="theme-option__name">Luxe<span class="theme-option__flag" data-live-for="luxe" hidden>Live</span></span>
+                <span class="theme-option__desc">Ivory canvas, gold trim, slower motion. The brand colours still carry every button.</span>
+              </span>
+            </span>
+          </label>
+        </fieldset>
+
+        <div class="acard" style="margin-top:var(--space-5)">
+          <p class="admin__sub" style="margin:0">
+            Luxe adds movement — a drifting background, a sheen across cards and buttons, rules that draw in as sections arrive.
+            A visitor who has asked their device to <strong>reduce motion</strong> gets the colours and none of the movement, automatically.
+            <br>
+            Neither theme changes a price, a product or a page. Switching back is the same two clicks.
+          </p>
+        </div>
+
+        <div class="theme-actions">
+          <button class="btn-gr btn-primary-gr" type="submit" data-theme-save>Publish theme</button>
+          <a class="btn-gr btn-outline-gr" href="/index.html" target="_blank" rel="noopener">Open the shop</a>
+          <span class="admin__sub" role="status" data-theme-status></span>
+        </div>
+      </form>

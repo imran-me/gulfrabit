@@ -52,6 +52,13 @@ export const session = makeStore(window.sessionStorage);
 
 /** Known storage keys — reference these, don't scatter string literals. */
 export const KEYS = {
+  /* The storefront theme the merchant last published. A CACHE of a server
+     value, not the setting itself — modules/theme/theme.js corrects it on
+     every page load. It exists so a returning visitor gets the right theme
+     on the first paint instead of a flash of the other one. The inline
+     bootstrap in tools/assemble.py reads this key by hand, before any module
+     has loaded, so its name and JSON shape are load-bearing in two places. */
+  THEME: 'theme',
   CART: 'cart',
   WISHLIST: 'wishlist',
   COMPARE: 'compare',

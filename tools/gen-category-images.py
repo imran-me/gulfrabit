@@ -67,7 +67,9 @@ enough for a re-run but not a substitute for the original.
 
 Usage:  python tools/gen-category-images.py
 """
+import hashlib
 import pathlib
+import re
 import sys
 
 try:
@@ -151,6 +153,40 @@ def square(im):
     return im.crop((0, top, w, top + w))
 
 
+ART_URL = re.compile(
+    r"(assets/images/categories/[a-z0-9-]+(?:-\d+)?\.(?:webp|jpg))(\?v=[0-9a-f]+)?")
+
+
+def stamp(version):
+    """Put `?v=<version>` on every tile-art URL in the pages that use them.
+
+    WHY THIS EXISTS
+    ---------------
+    The tiers are written to fixed names, so replacing the art changes the
+    bytes and not the URL, and nothing downstream can tell. Caught live: the
+    CDN kept serving a 55-minute-old copy of the old art under a URL whose
+    bytes had changed, and the response carried `max-age=604800` — every
+    visitor who had seen the page would have kept the previous artwork for a
+    week, with no way to fix it from here short of renaming files by hand.
+
+    A version derived from the art's own bytes makes the URL change whenever
+    the art does, so no cache anywhere — edge or browser — can hold a stale
+    copy, and nobody has to remember to bump anything.
+    """
+    targets = [ROOT / "index.html", ROOT / "modules" / "home" / "home.js"]
+    for f in targets:
+        if not f.exists():
+            print(f"  stamp: {f.name} missing, skipped")
+            continue
+        txt = f.read_text(encoding="utf-8")
+        # `?v=` is stripped and reapplied, so re-running never stacks tokens.
+        new = ART_URL.sub(lambda m: f"{m.group(1)}?v={version}", txt)
+        new = re.sub(r"(const ART_V = ')[0-9a-f]*(')", rf"\g<1>{version}\g<2>", new)
+        if new != txt:
+            f.write_text(new, encoding="utf-8")
+            print(f"  stamped {f.name}")
+
+
 def main():
     if not CDIR.exists():
         sys.exit(f"missing {CDIR}")
@@ -174,7 +210,15 @@ def main():
                 CDIR / f"{slug}-{w}.webp", quality=WEBP_Q, method=6)
         written += 1
         print(f"  {slug}: {im.width}px master + {', '.join(str(w) for w in TIERS)}")
-    print(f"generated tile art for {written} categories")
+
+    # Hash what was written, not the masters: the masters are not committed,
+    # and it is the delivered bytes a cache is holding.
+    h = hashlib.sha256()
+    for f in sorted(CDIR.glob("*.webp")) + sorted(CDIR.glob("*.jpg")):
+        h.update(f.read_bytes())
+    version = h.hexdigest()[:8]
+    stamp(version)
+    print(f"generated tile art for {written} categories (v={version})")
 
 
 if __name__ == "__main__":

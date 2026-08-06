@@ -80,6 +80,26 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None):
        Inline and first on purpose: a deferred file would let the page paint
        blank before it ran. */
     document.documentElement.classList.remove('no-js');
+
+    /* THEME, BEFORE THE FIRST PAINT.
+       The storefront theme is a runtime setting (the merchant flips it in the
+       admin panel), but this HTML is static — so the page has to find out
+       which theme it is in before it paints, or a Luxe shop shows a frame of
+       Classic on every single navigation.
+
+       modules/theme/theme.js caches the published theme in localStorage and
+       corrects it from the API on every load. This reads that cache and
+       nothing else: no network, no module graph, one localStorage hit. It is
+       inline and above the stylesheet on purpose — a deferred script runs
+       after the first paint, which is the flash it exists to prevent.
+
+       Absence of the attribute IS Classic. Only the exact string 'luxe' sets
+       anything, so a corrupt or half-written cache degrades to the default
+       rather than to a broken third state. */
+    try {
+      var t = localStorage.getItem('gr:theme');
+      if (t && JSON.parse(t) === 'luxe') document.documentElement.setAttribute('data-theme', 'luxe');
+    } catch (e) { /* private mode, or nothing stored — Classic stands. */ }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
@@ -112,6 +132,12 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None):
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{asset('/shared/css/gulfrabit.css')}">
+  <!-- The Luxe layer. Linked on every page and completely inert without
+       [data-theme="luxe"] on <html>, so the default theme renders exactly as
+       it did before this file existed. Linking it conditionally would mean
+       knowing the theme before the <head> is written, and this HTML is built
+       once and served to everyone. -->
+  <link rel="stylesheet" href="{asset('/modules/theme/theme-luxe.css')}">
   {extra}
   <script type="application/ld+json">
   {{"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"{SITE}","logo":"{SITE}/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}}
@@ -119,8 +145,15 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None):
 </head>
 <body>"""
 
-def scripts(module_js):
+def scripts(module_js, theme=True):
     """`module_js` is one path or a list of them.
+
+    `theme=False` for the admin panel. The Appearance screen changes how the
+    SHOP looks; the panel is the merchant's tool and must not restyle itself
+    under them mid-task — if it did, there would be no way to tell what you
+    just did to the storefront from what you just did to the screen you are
+    standing on. So the storefront gets modules/theme/theme.js and admin pages
+    do not, which leaves [data-theme] unset there and theme-luxe.css inert.
 
     A page can carry more than one module's script — the PDP is catalog's page
     but the bundle module puts its own block on it. Each entry is a separate
@@ -128,6 +161,8 @@ def scripts(module_js):
     adding one line here and detached by deleting it. That is the whole
     coupling: no module reaches into another module's fragment."""
     paths = [] if not module_js else ([module_js] if isinstance(module_js, str) else list(module_js))
+    if theme:
+        paths = ["/modules/theme/theme.js"] + paths
     js = "".join(f'\n  <script type="module" src="{asset(p)}"></script>' for p in paths)
     return f"""
   <script type="module" src="{asset('/shared/js/main.js')}"></script>{js}
@@ -212,6 +247,7 @@ ADMIN_NAV = [
     "/modules/marketing/marketing-nav.js",
     "/modules/accounting/accounting-nav.js",
     "/modules/b2b/b2b-nav.js",
+    "/modules/theme/theme-nav.js",
 ]
 
 ADMIN_SHELL = read("modules/admin/_fragments/_shell.html")
@@ -229,7 +265,7 @@ def assemble_admin(out, title, main_html, css_links, module_js, chrome=True):
         page += ADMIN_SHELL + "\n" + main_html.strip() + "\n" + ADMIN_SHELL_END
     else:
         page += main_html.strip() + "\n"
-    page += scripts(module_js)
+    page += scripts(module_js, theme=False)
     write(out, relativize(page, out))
     print("wrote", out)
 
@@ -278,6 +314,11 @@ ADMIN_PAGES = [
      "modules/admin/_fragments/coupons.main.html",
      ["/modules/admin/admin.css", "/modules/media/media.css"],
      ["/modules/admin/admin-shell.js", "/modules/admin/coupons-page.js"], True),
+
+    ("modules/theme/appearance.html", "Appearance — GulfRabit Admin",
+     "modules/theme/_fragments/theme.main.html",
+     ["/modules/admin/admin.css", "/modules/theme/theme-admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/theme/theme-page.js"], True),
 
     ("modules/highlights/highlights.html", "Home page — GulfRabit Admin",
      "modules/highlights/_fragments/highlights.main.html",
