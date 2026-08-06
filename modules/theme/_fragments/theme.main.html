@@ -50,6 +50,8 @@
 
         <div class="acard" style="margin-top:var(--space-5)">
           <p class="admin__sub" style="margin:0">
+            <strong>One theme, everyone.</strong> Publishing changes the shop for every visitor — there is no per-visitor setting.
+            <br>
             Luxe adds movement — a drifting background, a sheen across cards and buttons, rules that draw in as sections arrive.
             A visitor who has asked their device to <strong>reduce motion</strong> gets the colours and none of the movement, automatically.
             <br>
@@ -57,9 +59,28 @@
           </p>
         </div>
 
+        <!-- Shown only when there is no backend to publish to. It is not an
+             error — a static deployment is a supported way to run this shop —
+             but the merchant has to know that the button below cannot reach
+             their visitors, and what can. -->
+        <div class="acard theme-offline" data-theme-offline hidden>
+          <p class="admin__sub" style="margin:0">
+            <strong>No backend connected.</strong> The shop is serving the theme that was built into its pages, and this screen
+            cannot change that for visitors — a universal setting needs somewhere central to store it.
+            <br>
+            <strong>Preview</strong> still works, and it is safe: it only changes the shop in the tab it opens.
+            To change it for everyone on a static deployment, rebuild with
+            <code>python tools/assemble.py --theme luxe</code> and deploy.
+          </p>
+        </div>
+
         <div class="theme-actions">
-          <button class="btn-gr btn-primary-gr" type="submit" data-theme-save>Publish theme</button>
-          <a class="btn-gr btn-outline-gr" href="/index.html" target="_blank" rel="noopener">Open the shop</a>
+          <button class="btn-gr btn-primary-gr" type="submit" data-theme-save>Publish to every visitor</button>
+          <!-- ?theme= is a preview, not a setting: it lasts as long as the tab
+               and is never stored as the published theme. The URL is shareable,
+               which is most of what asking someone "does this look right?"
+               needs. -->
+          <a class="btn-gr btn-outline-gr" data-theme-preview href="/index.html?theme=classic" target="_blank" rel="noopener">Preview in a new tab</a>
           <span class="admin__sub" role="status" data-theme-status></span>
         </div>
       </form>

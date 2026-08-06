@@ -35,6 +35,11 @@ FOOTER = read("shared/components/footer.html")
 # Canonical site origin (placeholder domain — update when the domain is live).
 SITE = "https://gulfrabit.com"
 
+# The storefront theme baked into this build; --theme overrides it in __main__.
+# Declared here, not only there, so importing this module (a test, another
+# tool) cannot hit a NameError inside head().
+BUILD_THEME = "classic"
+
 
 def asset(path):
     """Append a content hash to a local asset URL, so browsers refetch it when
@@ -77,8 +82,15 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True):
     # entirely from data — an override there would be overwritten on the next
     # render and look like the edit silently failed.
     cms_attr = f' data-cms-page="{cms_page}"' if cms_page else ""
+    # The theme baked into the build. On a deployment WITH a backend this is
+    # only the first paint — modules/theme/theme.js corrects it from the API.
+    # On a static deployment there is nothing to correct it, so this attribute
+    # IS the universal theme: every visitor gets it, identically, and changing
+    # it means `python tools/assemble.py --theme luxe` and a deploy. Never set
+    # on admin pages (luxe=False), which do not follow the storefront.
+    theme_attr = ' data-theme="luxe"' if (luxe and BUILD_THEME == "luxe") else ""
     return f"""<!DOCTYPE html>
-<html lang="en" class="no-js"{cms_attr}>
+<html lang="en" class="no-js"{cms_attr}{theme_attr}>
 <head>
   <meta charset="UTF-8">
   <script>
@@ -93,24 +105,32 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True):
     document.documentElement.classList.remove('no-js');
 
     /* THEME, BEFORE THE FIRST PAINT.
-       The storefront theme is a runtime setting (the merchant flips it in the
-       admin panel), but this HTML is static — so the page has to find out
-       which theme it is in before it paints, or a Luxe shop shows a frame of
+       The theme is universal — one setting for the whole shop — and the server
+       is its authority. But this HTML is static, so a page has to decide what
+       to paint before it can ask anything, or a Luxe shop shows a frame of
        Classic on every single navigation.
 
-       modules/theme/theme.js caches the published theme in localStorage and
-       corrects it from the API on every load. This reads that cache and
-       nothing else: no network, no module graph, one localStorage hit. It is
-       inline and above the stylesheet on purpose — a deferred script runs
-       after the first paint, which is the flash it exists to prevent.
+       `gr:theme` is a MIRROR of the last answer the server gave, written only
+       by modules/theme/theme.js after a successful read. So:
+         - a mirror exists  -> the visitor has been told the published theme
+                               before; paint that, and let theme.js confirm.
+         - no mirror        -> leave whatever was baked in at build time, which
+                               on a static deployment is the universal theme.
 
-       Absence of the attribute IS Classic. Only the exact string 'luxe' sets
-       anything, so a corrupt or half-written cache degrades to the default
-       rather than to a broken third state. */
+       Both directions matter. A page built as Luxe whose mirror says Classic
+       must REMOVE the attribute, not ignore the mirror — otherwise switching
+       the shop back would never reach anyone who had already visited.
+
+       Inline and above the stylesheet on purpose: a deferred script runs after
+       the first paint, which is the flash it exists to prevent. */
     try {{
       var t = localStorage.getItem('gr:theme');
-      if (t && JSON.parse(t) === 'luxe') document.documentElement.setAttribute('data-theme', 'luxe');
-    }} catch (e) {{ /* private mode, or nothing stored — Classic stands. */ }}
+      if (t) {{
+        var el = document.documentElement;
+        if (JSON.parse(t) === 'luxe') el.setAttribute('data-theme', 'luxe');
+        else el.removeAttribute('data-theme');
+      }}
+    }} catch (e) {{ /* private mode, or nothing stored — the built-in theme stands. */ }}
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
@@ -636,9 +656,49 @@ def bundle_css():
     return len(imports) + 1
 
 
+def sync_index_theme():
+    """Keep the hand-authored home page's theme in step with --theme.
+
+    index.html is not built from a fragment, so it is the one page the theme
+    flag would otherwise miss — and it is the page most visitors land on. A
+    shop whose home page is Classic and whose every other page is Luxe is not
+    a theme, it is a bug, so this is not optional polish.
+
+    Rewrites only the <html> tag's data-theme attribute, and is idempotent.
+    """
+    path = os.path.join(ROOT, "index.html")
+    with open(path, encoding="utf-8") as f:
+        html = f.read()
+
+    want = ' data-theme="luxe"' if BUILD_THEME == "luxe" else ""
+    new = re.sub(r'(<html\b[^>]*?)(?:\s+data-theme="[^"]*")?(\s*>)',
+                 lambda m: m.group(1) + want + m.group(2), html, count=1)
+
+    if new != html:
+        with open(path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(new)
+        print(f"index.html: theme -> {BUILD_THEME}")
+
+
 if __name__ == "__main__":
+    # --theme bakes the storefront theme into every page. It exists for
+    # deployments with no backend, where there is no server to hold a universal
+    # setting and the build is therefore the only thing every visitor shares.
+    # With a backend running, the API overrides this on load and the flag only
+    # decides what the first paint looks like.
+    import argparse
+
+    _ap = argparse.ArgumentParser(description="Assemble GulfRabit's static pages.")
+    _ap.add_argument("--theme", choices=["classic", "luxe"], default="classic",
+                     help="storefront theme to build in (default: classic)")
+    BUILD_THEME = _ap.parse_args().theme          # noqa: F811 — overrides the module default
+    if BUILD_THEME != "classic":
+        print(f"building storefront with the {BUILD_THEME} theme")
+
     sheets = bundle_css()
     print(f"bundled {sheets} stylesheets -> shared/css/gulfrabit.css")
+
+    sync_index_theme()
 
     for path in STOREFRONT_NOINDEX:
         if not any(p[0] == path for p in PAGES):

@@ -14,24 +14,32 @@
     document.documentElement.classList.remove('no-js');
 
     /* THEME, BEFORE THE FIRST PAINT.
-       The storefront theme is a runtime setting (the merchant flips it in the
-       admin panel), but this HTML is static — so the page has to find out
-       which theme it is in before it paints, or a Luxe shop shows a frame of
+       The theme is universal — one setting for the whole shop — and the server
+       is its authority. But this HTML is static, so a page has to decide what
+       to paint before it can ask anything, or a Luxe shop shows a frame of
        Classic on every single navigation.
 
-       modules/theme/theme.js caches the published theme in localStorage and
-       corrects it from the API on every load. This reads that cache and
-       nothing else: no network, no module graph, one localStorage hit. It is
-       inline and above the stylesheet on purpose — a deferred script runs
-       after the first paint, which is the flash it exists to prevent.
+       `gr:theme` is a MIRROR of the last answer the server gave, written only
+       by modules/theme/theme.js after a successful read. So:
+         - a mirror exists  -> the visitor has been told the published theme
+                               before; paint that, and let theme.js confirm.
+         - no mirror        -> leave whatever was baked in at build time, which
+                               on a static deployment is the universal theme.
 
-       Absence of the attribute IS Classic. Only the exact string 'luxe' sets
-       anything, so a corrupt or half-written cache degrades to the default
-       rather than to a broken third state. */
+       Both directions matter. A page built as Luxe whose mirror says Classic
+       must REMOVE the attribute, not ignore the mirror — otherwise switching
+       the shop back would never reach anyone who had already visited.
+
+       Inline and above the stylesheet on purpose: a deferred script runs after
+       the first paint, which is the flash it exists to prevent. */
     try {
       var t = localStorage.getItem('gr:theme');
-      if (t && JSON.parse(t) === 'luxe') document.documentElement.setAttribute('data-theme', 'luxe');
-    } catch (e) { /* private mode, or nothing stored — Classic stands. */ }
+      if (t) {
+        var el = document.documentElement;
+        if (JSON.parse(t) === 'luxe') el.setAttribute('data-theme', 'luxe');
+        else el.removeAttribute('data-theme');
+      }
+    } catch (e) { /* private mode, or nothing stored — the built-in theme stands. */ }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout — GulfRabit</title>
@@ -63,14 +71,14 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=67fcfff1">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=12da8318">
   <!-- The Luxe layer. Linked on every storefront page and completely
        inert without [data-theme="luxe"] on <html>, so the default theme
        renders exactly as it did before this file existed. Linking it
        conditionally would mean knowing the theme before the <head> is
        written, and this HTML is built once and served to everyone. -->
   <link rel="stylesheet" href="../../modules/theme/theme-luxe.css?v=9a2e1f4b">
-  <link rel="stylesheet" href="../../modules/checkout/checkout.css?v=adac52aa">
+  <link rel="stylesheet" href="../../modules/checkout/checkout.css?v=73f16cd3">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -247,7 +255,7 @@
       <a href="../../index.html">Home</a><span class="breadcrumb-gr__sep">/</span>
       <a href="../../modules/cart/cart.html">Cart</a><span class="breadcrumb-gr__sep">/</span><span>Checkout</span>
     </nav>
-    <h1 class="h2 page-head">Checkout</h1>
+    <h1 class="h2 page-head">Checkout <span class="head-gr__bn bn" lang="bn">চেকআউট</span></h1>
 
     <!-- Progress stepper -->
     <div class="stepper" data-stepper aria-label="Checkout progress">
@@ -269,7 +277,7 @@
             </div>
         <!-- STEP 1 · Address -->
         <section class="checkout-step" data-step="1">
-          <h2 class="h4 checkout-step__title">Delivery Address</h2>
+          <h2 class="h4 checkout-step__title">Delivery Address <span class="head-gr__bn bn" lang="bn">ডেলিভারি ঠিকানা</span></h2>
           <!-- Four required fields and a district. The phone number is the
                identity primitive in this market, not the email — so email is
                optional and labelled as such, and there is no postcode field
@@ -297,12 +305,12 @@
 
             <div class="field-gr col-span-2" data-field><label class="label-gr" for="notes">Delivery notes (optional) <span class="label-gr__bn bn" lang="bn">নোট</span></label><textarea id="notes" class="textarea-gr" name="notes" style="min-height:80px" placeholder="Landmark, floor, or a time that suits you"></textarea></div>
           </div>
-          <div class="step-nav"><a class="btn-gr btn-ghost-gr" href="../../modules/cart/cart.html">← Back to cart</a><button class="btn-gr btn-primary-gr" type="button" data-next>Continue to Delivery</button></div>
+          <div class="step-nav"><a class="btn-gr btn-ghost-gr" href="../../modules/cart/cart.html"><span class="btn-gr__en">← Back to cart</span><span class="btn-bn bn" lang="bn">কার্টে ফিরুন</span></a><button class="btn-gr btn-primary-gr" type="button" data-next><span class="btn-gr__en">Continue to Delivery</span><span class="btn-bn bn" lang="bn">ডেলিভারি</span></button></div>
         </section>
 
         <!-- STEP 2 · Delivery -->
         <section class="checkout-step" data-step="2" hidden>
-          <h2 class="h4 checkout-step__title">Delivery Method</h2>
+          <h2 class="h4 checkout-step__title">Delivery Method <span class="head-gr__bn bn" lang="bn">ডেলিভারি পদ্ধতি</span></h2>
 
           <!-- The zone follows from the district chosen in step 1 — the customer
                should not have to work out which tier they are in. checkout-page.js
@@ -317,12 +325,12 @@
 <!-- GENERATED-DELIVERY-END -->
 
           <p class="caption" style="margin-top:var(--space-3)">The same charge whatever your order is worth or weighs. Perishables ship cold-chain at no extra cost.</p>
-          <div class="step-nav"><button class="btn-gr btn-ghost-gr" type="button" data-prev>← Back</button><button class="btn-gr btn-primary-gr" type="button" data-next>Continue to Payment</button></div>
+          <div class="step-nav"><button class="btn-gr btn-ghost-gr" type="button" data-prev><span class="btn-gr__en">← Back</span><span class="btn-bn bn" lang="bn">ফিরুন</span></button><button class="btn-gr btn-primary-gr" type="button" data-next><span class="btn-gr__en">Continue to Payment</span><span class="btn-bn bn" lang="bn">পেমেন্ট</span></button></div>
         </section>
 
         <!-- STEP 3 · Payment -->
         <section class="checkout-step" data-step="3" hidden>
-          <h2 class="h4 checkout-step__title">Payment</h2>
+          <h2 class="h4 checkout-step__title">Payment <span class="head-gr__bn bn" lang="bn">পেমেন্ট</span></h2>
           <p class="caption" style="margin-bottom:var(--space-4)">This is a demo checkout — no real payment is processed.</p>
           <label class="option-card is-selected"><input type="radio" name="payment" value="bkash" data-payment checked><span><span class="option-card__title">bKash</span><span class="option-card__sub">Mobile financial service</span></span></label>
           <label class="option-card"><input type="radio" name="payment" value="nagad" data-payment><span><span class="option-card__title">Nagad</span><span class="option-card__sub">Mobile financial service</span></span></label>
@@ -346,25 +354,25 @@
             </div>
           </div>
           <!-- TODO: connect to payment gateway -->
-          <div class="step-nav"><button class="btn-gr btn-ghost-gr" type="button" data-prev>← Back</button><button class="btn-gr btn-primary-gr" type="button" data-next>Review Order</button></div>
+          <div class="step-nav"><button class="btn-gr btn-ghost-gr" type="button" data-prev><span class="btn-gr__en">← Back</span><span class="btn-bn bn" lang="bn">ফিরুন</span></button><button class="btn-gr btn-primary-gr" type="button" data-next><span class="btn-gr__en">Review Order</span><span class="btn-bn bn" lang="bn">রিভিউ</span></button></div>
         </section>
 
         <!-- STEP 4 · Review -->
         <section class="checkout-step" data-step="4" hidden>
-          <h2 class="h4 checkout-step__title">Review &amp; Place Order</h2>
+          <h2 class="h4 checkout-step__title">Review &amp; Place Order <span class="head-gr__bn bn" lang="bn">রিভিউ ও অর্ডার</span></h2>
           <div class="surface-gr" style="padding:var(--space-5);margin-bottom:var(--space-4)">
             <div class="review-line"><span class="text-muted-gr">Ship to</span><span data-review-address>—</span></div>
             <div class="review-line"><span class="text-muted-gr">Delivery</span><span data-review-delivery>—</span></div>
             <div class="review-line"><span class="text-muted-gr">Payment</span><span data-review-payment>—</span></div>
           </div>
           <div class="surface-gr" style="padding:var(--space-5)" data-review-items></div>
-          <div class="step-nav"><button class="btn-gr btn-ghost-gr" type="button" data-prev>← Back</button><button class="btn-gr btn-gradient-gr btn-lg-gr" type="submit" data-place-order>Place Order</button></div>
+          <div class="step-nav"><button class="btn-gr btn-ghost-gr" type="button" data-prev><span class="btn-gr__en">← Back</span><span class="btn-bn bn" lang="bn">ফিরুন</span></button><button class="btn-gr btn-gradient-gr btn-lg-gr" type="submit" data-place-order><span class="btn-gr__en">Place Order</span><span class="btn-bn bn" lang="bn">অর্ডার করুন</span></button></div>
         </section>
       </form>
 
       <!-- Sticky order summary -->
       <aside class="surface-gr order-summary" style="padding:var(--space-5)">
-        <h2 class="h5" style="margin-bottom:var(--space-4)">Order Summary</h2>
+        <h2 class="h5" style="margin-bottom:var(--space-4)">Order Summary <span class="head-gr__bn bn" lang="bn">অর্ডার সারাংশ</span></h2>
         <div data-summary-items style="max-height:280px;overflow:auto;margin-bottom:var(--space-4)"></div>
         <div class="summary-row"><span>Subtotal</span><span class="tabular" data-sum-subtotal>৳ 0</span></div>
         <!-- GENERATED-DELIVERY-BEGIN checkout-summary -->
@@ -477,7 +485,7 @@
 </footer>
 
   <script type="module" src="../../shared/js/main.js?v=1b8847af"></script>
-  <script type="module" src="../../modules/theme/theme.js?v=ed2c6a97"></script>
+  <script type="module" src="../../modules/theme/theme.js?v=2a6ced09"></script>
   <script type="module" src="../../modules/checkout/checkout-page.js?v=95d0da30"></script>
 </body>
 </html>

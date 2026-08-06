@@ -35,7 +35,11 @@ function isLocalOrigin() {
  * is what a static file server does with /api/*. Neither is a decision about
  * this user; both mean "PHP is not running here".
  */
-function isBackendAbsent(errOrResponse) {
+/* Exported because "is there a backend at all?" is a question more than one
+   screen has to answer, and the answer is subtle enough (see the 405 note
+   below) that a second copy would get it wrong. modules/theme uses it to tell
+   "saved locally, no backend yet" apart from a genuine save failure. */
+export function isBackendAbsent(errOrResponse) {
   if (errOrResponse instanceof TypeError) return true;
 
   // 404: something answered, but the route does not exist — what a static file

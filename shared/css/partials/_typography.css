@@ -85,3 +85,29 @@ a:hover { color: var(--link-hover); }
 
 /* ---- Arabic content inherits the Kufi fallback automatically --------- */
 [lang="ar"], .arabic { font-family: 'Noto Kufi Arabic', var(--font-body); direction: rtl; }
+
+/* ---- The Bangla on a heading -----------------------------------------
+   Same argument and the same shape as .label-gr__bn (_forms.css): the
+   customers this shop is built for read Bangla first, and the page that
+   takes their money should not need translating.
+
+   Sized in `em` so one rule serves the h1 and the h4 step titles alike, and
+   set at regular weight and muted, so the heading still reads as one heading
+   with a gloss rather than as two headings. line-height 1 because Bangla's
+   default 1.75 would tug the heading's line box taller than its Latin half
+   and shift everything under it — the layout must not move for this.
+
+   NO nowrap here, unlike .btn-bn. On a button it is right: the button is a
+   flex row and a wrapped label takes the button's height with it. On a
+   heading it sets a min-content floor, and a grid column cannot shrink below
+   its content — "Order Summary অর্ডার সারাংশ" held the checkout's summary
+   column at 473px inside a 390px phone and scrolled the whole page sideways.
+   A heading is allowed to wrap; that is what headings do. */
+.head-gr__bn {
+  font-family: 'Noto Sans Bengali', var(--font-body);
+  font-weight: var(--fw-regular);
+  font-size: 0.62em;
+  line-height: 1;
+  color: var(--text-muted);
+  letter-spacing: 0;
+}

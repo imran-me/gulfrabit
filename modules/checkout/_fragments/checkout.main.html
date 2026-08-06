@@ -3,7 +3,7 @@
       <a href="/index.html">Home</a><span class="breadcrumb-gr__sep">/</span>
       <a href="/modules/cart/cart.html">Cart</a><span class="breadcrumb-gr__sep">/</span><span>Checkout</span>
     </nav>
-    <h1 class="h2 page-head">Checkout</h1>
+    <h1 class="h2 page-head">Checkout <span class="head-gr__bn bn" lang="bn">চেকআউট</span></h1>
 
     <!-- Progress stepper -->
     <div class="stepper" data-stepper aria-label="Checkout progress">
@@ -25,7 +25,7 @@
             </div>
         <!-- STEP 1 · Address -->
         <section class="checkout-step" data-step="1">
-          <h2 class="h4 checkout-step__title">Delivery Address</h2>
+          <h2 class="h4 checkout-step__title">Delivery Address <span class="head-gr__bn bn" lang="bn">ডেলিভারি ঠিকানা</span></h2>
           <!-- Four required fields and a district. The phone number is the
                identity primitive in this market, not the email — so email is
                optional and labelled as such, and there is no postcode field
@@ -53,12 +53,12 @@
 
             <div class="field-gr col-span-2" data-field><label class="label-gr" for="notes">Delivery notes (optional) <span class="label-gr__bn bn" lang="bn">নোট</span></label><textarea id="notes" class="textarea-gr" name="notes" style="min-height:80px" placeholder="Landmark, floor, or a time that suits you"></textarea></div>
           </div>
-          <div class="step-nav"><a class="btn-gr btn-ghost-gr" href="/modules/cart/cart.html">← Back to cart</a><button class="btn-gr btn-primary-gr" type="button" data-next>Continue to Delivery</button></div>
+          <div class="step-nav"><a class="btn-gr btn-ghost-gr" href="/modules/cart/cart.html"><span class="btn-gr__en">← Back to cart</span><span class="btn-bn bn" lang="bn">কার্টে ফিরুন</span></a><button class="btn-gr btn-primary-gr" type="button" data-next><span class="btn-gr__en">Continue to Delivery</span><span class="btn-bn bn" lang="bn">ডেলিভারি</span></button></div>
         </section>
 
         <!-- STEP 2 · Delivery -->
         <section class="checkout-step" data-step="2" hidden>
-          <h2 class="h4 checkout-step__title">Delivery Method</h2>
+          <h2 class="h4 checkout-step__title">Delivery Method <span class="head-gr__bn bn" lang="bn">ডেলিভারি পদ্ধতি</span></h2>
 
           <!-- The zone follows from the district chosen in step 1 — the customer
                should not have to work out which tier they are in. checkout-page.js
@@ -73,12 +73,12 @@
 <!-- GENERATED-DELIVERY-END -->
 
           <p class="caption" style="margin-top:var(--space-3)">The same charge whatever your order is worth or weighs. Perishables ship cold-chain at no extra cost.</p>
-          <div class="step-nav"><button class="btn-gr btn-ghost-gr" type="button" data-prev>← Back</button><button class="btn-gr btn-primary-gr" type="button" data-next>Continue to Payment</button></div>
+          <div class="step-nav"><button class="btn-gr btn-ghost-gr" type="button" data-prev><span class="btn-gr__en">← Back</span><span class="btn-bn bn" lang="bn">ফিরুন</span></button><button class="btn-gr btn-primary-gr" type="button" data-next><span class="btn-gr__en">Continue to Payment</span><span class="btn-bn bn" lang="bn">পেমেন্ট</span></button></div>
         </section>
 
         <!-- STEP 3 · Payment -->
         <section class="checkout-step" data-step="3" hidden>
-          <h2 class="h4 checkout-step__title">Payment</h2>
+          <h2 class="h4 checkout-step__title">Payment <span class="head-gr__bn bn" lang="bn">পেমেন্ট</span></h2>
           <p class="caption" style="margin-bottom:var(--space-4)">This is a demo checkout — no real payment is processed.</p>
           <label class="option-card is-selected"><input type="radio" name="payment" value="bkash" data-payment checked><span><span class="option-card__title">bKash</span><span class="option-card__sub">Mobile financial service</span></span></label>
           <label class="option-card"><input type="radio" name="payment" value="nagad" data-payment><span><span class="option-card__title">Nagad</span><span class="option-card__sub">Mobile financial service</span></span></label>
@@ -102,25 +102,25 @@
             </div>
           </div>
           <!-- TODO: connect to payment gateway -->
-          <div class="step-nav"><button class="btn-gr btn-ghost-gr" type="button" data-prev>← Back</button><button class="btn-gr btn-primary-gr" type="button" data-next>Review Order</button></div>
+          <div class="step-nav"><button class="btn-gr btn-ghost-gr" type="button" data-prev><span class="btn-gr__en">← Back</span><span class="btn-bn bn" lang="bn">ফিরুন</span></button><button class="btn-gr btn-primary-gr" type="button" data-next><span class="btn-gr__en">Review Order</span><span class="btn-bn bn" lang="bn">রিভিউ</span></button></div>
         </section>
 
         <!-- STEP 4 · Review -->
         <section class="checkout-step" data-step="4" hidden>
-          <h2 class="h4 checkout-step__title">Review &amp; Place Order</h2>
+          <h2 class="h4 checkout-step__title">Review &amp; Place Order <span class="head-gr__bn bn" lang="bn">রিভিউ ও অর্ডার</span></h2>
           <div class="surface-gr" style="padding:var(--space-5);margin-bottom:var(--space-4)">
             <div class="review-line"><span class="text-muted-gr">Ship to</span><span data-review-address>—</span></div>
             <div class="review-line"><span class="text-muted-gr">Delivery</span><span data-review-delivery>—</span></div>
             <div class="review-line"><span class="text-muted-gr">Payment</span><span data-review-payment>—</span></div>
           </div>
           <div class="surface-gr" style="padding:var(--space-5)" data-review-items></div>
-          <div class="step-nav"><button class="btn-gr btn-ghost-gr" type="button" data-prev>← Back</button><button class="btn-gr btn-gradient-gr btn-lg-gr" type="submit" data-place-order>Place Order</button></div>
+          <div class="step-nav"><button class="btn-gr btn-ghost-gr" type="button" data-prev><span class="btn-gr__en">← Back</span><span class="btn-bn bn" lang="bn">ফিরুন</span></button><button class="btn-gr btn-gradient-gr btn-lg-gr" type="submit" data-place-order><span class="btn-gr__en">Place Order</span><span class="btn-bn bn" lang="bn">অর্ডার করুন</span></button></div>
         </section>
       </form>
 
       <!-- Sticky order summary -->
       <aside class="surface-gr order-summary" style="padding:var(--space-5)">
-        <h2 class="h5" style="margin-bottom:var(--space-4)">Order Summary</h2>
+        <h2 class="h5" style="margin-bottom:var(--space-4)">Order Summary <span class="head-gr__bn bn" lang="bn">অর্ডার সারাংশ</span></h2>
         <div data-summary-items style="max-height:280px;overflow:auto;margin-bottom:var(--space-4)"></div>
         <div class="summary-row"><span>Subtotal</span><span class="tabular" data-sum-subtotal>৳ 0</span></div>
         <!-- GENERATED-DELIVERY-BEGIN checkout-summary -->

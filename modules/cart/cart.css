@@ -29,6 +29,12 @@
 
 /* Sticky mobile checkout CTA */
 .cart-mobile-cta { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: var(--space-3) var(--space-4); background: rgba(255,255,255,.94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-top: 1px solid var(--border-hairline); display: flex; gap: var(--space-3); align-items: center; }
+/* Same reason as .step-nav: the bar holds a total and a button whose
+   bilingual label cannot wrap, and at 390px the pair overflowed and
+   scrolled the page sideways. The button takes the room that is left and
+   the total keeps its own; neither is allowed to force the bar wider. */
+.cart-mobile-cta > .btn-gr { flex: 1 1 auto; min-width: 0; justify-content: center; }
+.cart-mobile-cta > :not(.btn-gr) { flex: 0 1 auto; min-width: 0; }
 @media (min-width: 1024px) { .cart-mobile-cta { display: none; } }
 
 /* Clears the iOS home indicator. Without it the lower third of Checkout sits

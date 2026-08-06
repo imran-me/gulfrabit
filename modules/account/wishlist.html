@@ -14,24 +14,32 @@
     document.documentElement.classList.remove('no-js');
 
     /* THEME, BEFORE THE FIRST PAINT.
-       The storefront theme is a runtime setting (the merchant flips it in the
-       admin panel), but this HTML is static — so the page has to find out
-       which theme it is in before it paints, or a Luxe shop shows a frame of
+       The theme is universal — one setting for the whole shop — and the server
+       is its authority. But this HTML is static, so a page has to decide what
+       to paint before it can ask anything, or a Luxe shop shows a frame of
        Classic on every single navigation.
 
-       modules/theme/theme.js caches the published theme in localStorage and
-       corrects it from the API on every load. This reads that cache and
-       nothing else: no network, no module graph, one localStorage hit. It is
-       inline and above the stylesheet on purpose — a deferred script runs
-       after the first paint, which is the flash it exists to prevent.
+       `gr:theme` is a MIRROR of the last answer the server gave, written only
+       by modules/theme/theme.js after a successful read. So:
+         - a mirror exists  -> the visitor has been told the published theme
+                               before; paint that, and let theme.js confirm.
+         - no mirror        -> leave whatever was baked in at build time, which
+                               on a static deployment is the universal theme.
 
-       Absence of the attribute IS Classic. Only the exact string 'luxe' sets
-       anything, so a corrupt or half-written cache degrades to the default
-       rather than to a broken third state. */
+       Both directions matter. A page built as Luxe whose mirror says Classic
+       must REMOVE the attribute, not ignore the mirror — otherwise switching
+       the shop back would never reach anyone who had already visited.
+
+       Inline and above the stylesheet on purpose: a deferred script runs after
+       the first paint, which is the flash it exists to prevent. */
     try {
       var t = localStorage.getItem('gr:theme');
-      if (t && JSON.parse(t) === 'luxe') document.documentElement.setAttribute('data-theme', 'luxe');
-    } catch (e) { /* private mode, or nothing stored — Classic stands. */ }
+      if (t) {
+        var el = document.documentElement;
+        if (JSON.parse(t) === 'luxe') el.setAttribute('data-theme', 'luxe');
+        else el.removeAttribute('data-theme');
+      }
+    } catch (e) { /* private mode, or nothing stored — the built-in theme stands. */ }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Wishlist — GulfRabit</title>
@@ -63,7 +71,7 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=67fcfff1">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=12da8318">
   <!-- The Luxe layer. Linked on every storefront page and completely
        inert without [data-theme="luxe"] on <html>, so the default theme
        renders exactly as it did before this file existed. Linking it
@@ -366,7 +374,7 @@
 </footer>
 
   <script type="module" src="../../shared/js/main.js?v=1b8847af"></script>
-  <script type="module" src="../../modules/theme/theme.js?v=ed2c6a97"></script>
+  <script type="module" src="../../modules/theme/theme.js?v=2a6ced09"></script>
   <script type="module" src="../../modules/account/wishlist-page.js?v=7d958c10"></script>
 </body>
 </html>

@@ -1,41 +1,51 @@
 /**
  * theme-page.js — the Appearance screen.
  *
- * One radio group, one save. Small enough that the interesting decisions are
- * all about failure:
+ * One radio group, one publish. Small enough that the interesting decisions
+ * are all about telling the truth.
  *
- * NO BACKEND IS A WORKING STATE, NOT AN ERROR
+ * PUBLISHING IS A SERVER ACTION OR IT IS NOTHING
+ * ----------------------------------------------
+ * The theme is universal — one setting, every visitor. So this screen writes
+ * it in exactly one place, the server, and it does NOT mirror the value into
+ * localStorage on the way past.
+ *
+ * It used to. That was a bug in the shape of a convenience: with no backend
+ * the write "succeeded" locally, the merchant opened the shop and saw Luxe,
+ * and every actual visitor still saw Classic. A control that shows you a shop
+ * nobody else is looking at is worse than a control that fails, because the
+ * failure is invisible until a customer mentions it. Now the only writer of
+ * that cache is modules/theme/theme.js, after a successful server READ — so
+ * the cache can only ever be a mirror of what the world is seeing.
+ *
+ * PREVIEW IS A DIFFERENT VERB, AND IT SAYS SO
  * -------------------------------------------
- * The storefront reads its theme from localStorage first and corrects it from
- * the API second (modules/theme/theme.js). That means this screen can publish
- * a theme with no backend at all — it writes the same cache key, and the shop
- * picks it up. So a 404 from the API is reported honestly ("saved on this
- * device only") rather than as a failure, because the merchant WILL see the
- * change when they open the shop, and telling them it failed would be a lie
- * they can disprove in one click.
- *
- * THE CACHE IS WRITTEN EVEN WHEN THE SERVER SUCCEEDS
- * --------------------------------------------------
- * Same origin, so the admin panel and the storefront share localStorage.
- * Writing it here means the merchant's own next page load is already correct
- * instead of showing them the old theme once while theme.js catches up — the
- * one person guaranteed to be looking for the change.
+ * Looking at a theme before committing to it is a real need, and it is not
+ * publishing. Preview opens the shop with ?theme=… — no storage beyond the
+ * tab, nothing published, and a URL the merchant can send to somebody else.
  */
 
-import { adminFetch } from '/modules/admin/backend/api.js';
-import { storage, KEYS } from '/shared/js/core/storage.js';
+import { adminFetch, isBackendAbsent } from '/modules/admin/backend/api.js';
 
 const THEMES = ['classic', 'luxe'];
 
-/** What the shop is currently set to, best-effort, most authoritative first. */
+/**
+ * What the shop is serving, and whether anyone can change it from here.
+ *
+ * `reachable: false` means there is no backend — so the live theme is
+ * whichever one was baked into the HTML at build time, and this screen cannot
+ * change it for visitors. Saying so plainly is the entire job of this return
+ * value.
+ */
 async function loadTheme() {
   try {
     const { data } = await adminFetch('/theme');
-    if (THEMES.includes(data?.theme)) return { theme: data.theme, source: 'server' };
-  } catch { /* fall through — no backend, or not permitted */ }
-
-  const cached = storage.get(KEYS.THEME, null);
-  return { theme: THEMES.includes(cached) ? cached : 'classic', source: 'cache' };
+    if (THEMES.includes(data?.theme)) return { theme: data.theme, reachable: true };
+    return { theme: 'classic', reachable: true };
+  } catch (err) {
+    if (isBackendAbsent(err)) return { theme: null, reachable: false };
+    throw err;
+  }
 }
 
 document.addEventListener('admin:ready', init);
@@ -46,11 +56,39 @@ async function init() {
 
   const status = form.querySelector('[data-theme-status]');
   const saveBtn = form.querySelector('[data-theme-save]');
+  const previewLink = form.querySelector('[data-theme-preview]');
+  const offline = form.querySelector('[data-theme-offline]');
 
-  const { theme: live } = await loadTheme();
+  let live = null;
+  try {
+    const res = await loadTheme();
+    live = res.theme;
+    if (!res.reachable) {
+      // Not an error state — a static deployment is a supported way to run
+      // this shop. But the merchant has to know that this button cannot reach
+      // the visitors, and what does.
+      offline.hidden = false;
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Publishing needs the backend';
+    }
+  } catch (err) {
+    status.textContent = `Couldn’t read the current theme: ${err.message}`;
+  }
+
   markLive(form, live);
-  const input = form.querySelector(`input[name="theme"][value="${live}"]`);
-  if (input) input.checked = true;
+  if (live) {
+    const input = form.querySelector(`input[name="theme"][value="${live}"]`);
+    if (input) input.checked = true;
+  }
+
+  // The preview URL tracks the selection, so "Preview" always previews the
+  // option the merchant is actually looking at rather than the published one.
+  const syncPreview = () => {
+    const chosen = new FormData(form).get('theme');
+    previewLink.href = `/index.html?theme=${encodeURIComponent(chosen)}`;
+  };
+  form.addEventListener('change', syncPreview);
+  syncPreview();
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -60,27 +98,20 @@ async function init() {
     saveBtn.disabled = true;
     status.textContent = 'Publishing…';
 
-    // Written first and unconditionally: this is the value the storefront
-    // actually reads on the next paint, and it must not depend on a server
-    // this deployment may not have yet.
-    storage.set(KEYS.THEME, chosen);
-
-    let message;
     try {
       await adminFetch('/theme', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ theme: chosen }),
       });
-      message = `${label(chosen)} is live for everyone.`;
+      markLive(form, chosen);
+      status.textContent = `${label(chosen)} is live. Every visitor sees it from their next page load.`;
     } catch (err) {
-      message = (err.status === 404 || !err.status)
-        ? `${label(chosen)} is live on this device. Connect the backend to publish it to every visitor.`
+      status.textContent = isBackendAbsent(err)
+        ? 'Not published — there is no backend to publish to. Nothing changed for visitors.'
         : `Couldn’t publish: ${err.message}`;
     }
 
-    markLive(form, chosen);
-    status.textContent = message;
     saveBtn.disabled = false;
   });
 }

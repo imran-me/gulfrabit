@@ -14,24 +14,32 @@
     document.documentElement.classList.remove('no-js');
 
     /* THEME, BEFORE THE FIRST PAINT.
-       The storefront theme is a runtime setting (the merchant flips it in the
-       admin panel), but this HTML is static — so the page has to find out
-       which theme it is in before it paints, or a Luxe shop shows a frame of
+       The theme is universal — one setting for the whole shop — and the server
+       is its authority. But this HTML is static, so a page has to decide what
+       to paint before it can ask anything, or a Luxe shop shows a frame of
        Classic on every single navigation.
 
-       modules/theme/theme.js caches the published theme in localStorage and
-       corrects it from the API on every load. This reads that cache and
-       nothing else: no network, no module graph, one localStorage hit. It is
-       inline and above the stylesheet on purpose — a deferred script runs
-       after the first paint, which is the flash it exists to prevent.
+       `gr:theme` is a MIRROR of the last answer the server gave, written only
+       by modules/theme/theme.js after a successful read. So:
+         - a mirror exists  -> the visitor has been told the published theme
+                               before; paint that, and let theme.js confirm.
+         - no mirror        -> leave whatever was baked in at build time, which
+                               on a static deployment is the universal theme.
 
-       Absence of the attribute IS Classic. Only the exact string 'luxe' sets
-       anything, so a corrupt or half-written cache degrades to the default
-       rather than to a broken third state. */
+       Both directions matter. A page built as Luxe whose mirror says Classic
+       must REMOVE the attribute, not ignore the mirror — otherwise switching
+       the shop back would never reach anyone who had already visited.
+
+       Inline and above the stylesheet on purpose: a deferred script runs after
+       the first paint, which is the flash it exists to prevent. */
     try {
       var t = localStorage.getItem('gr:theme');
-      if (t && JSON.parse(t) === 'luxe') document.documentElement.setAttribute('data-theme', 'luxe');
-    } catch (e) { /* private mode, or nothing stored — Classic stands. */ }
+      if (t) {
+        var el = document.documentElement;
+        if (JSON.parse(t) === 'luxe') el.setAttribute('data-theme', 'luxe');
+        else el.removeAttribute('data-theme');
+      }
+    } catch (e) { /* private mode, or nothing stored — the built-in theme stands. */ }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Appearance — GulfRabit Admin</title>
@@ -63,9 +71,9 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=67fcfff1">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=12da8318">
   <link rel="stylesheet" href="../../modules/admin/admin.css?v=ff327c79">
-  <link rel="stylesheet" href="../../modules/theme/theme-admin.css?v=a3ed09aa">
+  <link rel="stylesheet" href="../../modules/theme/theme-admin.css?v=156dd714">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -144,6 +152,8 @@
 
         <div class="acard" style="margin-top:var(--space-5)">
           <p class="admin__sub" style="margin:0">
+            <strong>One theme, everyone.</strong> Publishing changes the shop for every visitor — there is no per-visitor setting.
+            <br>
             Luxe adds movement — a drifting background, a sheen across cards and buttons, rules that draw in as sections arrive.
             A visitor who has asked their device to <strong>reduce motion</strong> gets the colours and none of the movement, automatically.
             <br>
@@ -151,9 +161,28 @@
           </p>
         </div>
 
+        <!-- Shown only when there is no backend to publish to. It is not an
+             error — a static deployment is a supported way to run this shop —
+             but the merchant has to know that the button below cannot reach
+             their visitors, and what can. -->
+        <div class="acard theme-offline" data-theme-offline hidden>
+          <p class="admin__sub" style="margin:0">
+            <strong>No backend connected.</strong> The shop is serving the theme that was built into its pages, and this screen
+            cannot change that for visitors — a universal setting needs somewhere central to store it.
+            <br>
+            <strong>Preview</strong> still works, and it is safe: it only changes the shop in the tab it opens.
+            To change it for everyone on a static deployment, rebuild with
+            <code>python tools/assemble.py --theme luxe</code> and deploy.
+          </p>
+        </div>
+
         <div class="theme-actions">
-          <button class="btn-gr btn-primary-gr" type="submit" data-theme-save>Publish theme</button>
-          <a class="btn-gr btn-outline-gr" href="../../index.html" target="_blank" rel="noopener">Open the shop</a>
+          <button class="btn-gr btn-primary-gr" type="submit" data-theme-save>Publish to every visitor</button>
+          <!-- ?theme= is a preview, not a setting: it lasts as long as the tab
+               and is never stored as the published theme. The URL is shareable,
+               which is most of what asking someone "does this look right?"
+               needs. -->
+          <a class="btn-gr btn-outline-gr" data-theme-preview href="../../index.html?theme=classic" target="_blank" rel="noopener">Preview in a new tab</a>
           <span class="admin__sub" role="status" data-theme-status></span>
         </div>
       </form>
@@ -171,6 +200,6 @@
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=ebff64a4"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=87de770c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=db43fd3d"></script>
-  <script type="module" src="../../modules/theme/theme-page.js?v=9b728d34"></script>
+  <script type="module" src="../../modules/theme/theme-page.js?v=0ec9695b"></script>
 </body>
 </html>

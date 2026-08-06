@@ -106,6 +106,18 @@
    button's height with it — which is exactly the layout change this is not
    allowed to make. */
 .btn-gr__en { white-space: nowrap; }
+/* ...except on a full-width button, which has nowhere to escape sideways.
+   nowrap makes the button's MINIMUM width its English plus its Bangla on one
+   line, and a grid column cannot shrink below its content: "Proceed to
+   Checkout চেকআউট" needed 334px inside a 336px summary column and pushed the
+   whole cart page to 410px on a 390px phone — the page scrolled sideways.
+
+   A block button is already as wide as its column, so a second line costs a
+   little height and nothing else, and it only ever happens on a screen too
+   narrow for one. Inline buttons keep their single line, where the nowrap is
+   load-bearing for the row they sit in. */
+.btn-block-gr { flex-wrap: wrap; }
+.btn-block-gr .btn-gr__en { white-space: normal; }
 .btn-bn {
   font-size: 0.76em;
   font-weight: var(--fw-regular);

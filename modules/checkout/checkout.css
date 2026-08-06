@@ -112,7 +112,23 @@
 
 .review-line { display: flex; justify-content: space-between; padding: var(--space-2) 0; border-bottom: 1px solid var(--border-hairline); }
 
-.step-nav { display: flex; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-6); }
+/* Both halves of a bilingual label are nowrap — correct on a button, since a
+   wrapped label takes the button's height with it — so a button's MINIMUM
+   width is now its English and its Bangla on one line. Two of those side by
+   side ("← Back ফিরুন" next to "Continue to Payment পেমেন্ট") do not fit a
+   390px phone, and a flex row that cannot shrink pushes the page sideways
+   instead: the checkout scrolled horizontally at 390px.
+
+   Wrapping the ROW is the fix, not wrapping the labels. Where the pair fits
+   it stays one line exactly as before; where it does not the second button
+   drops beneath the first, which is the normal answer for a narrow phone and
+   leaves every button's own shape untouched. */
+.step-nav {
+  display: flex; flex-wrap: wrap;
+  justify-content: space-between; gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+.step-nav > .btn-gr { flex: 1 1 auto; justify-content: center; }
 
 /* ---- The stepper on a phone -------------------------------------------
  * Four steps with labels and connecting lines need about 420px. At 360 it

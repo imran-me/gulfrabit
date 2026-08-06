@@ -1,50 +1,61 @@
 /**
- * theme.js — applies the merchant's chosen storefront theme.
+ * theme.js — applies the storefront theme every visitor is meant to see.
  *
- * WHY THIS IS RUNTIME AND NOT A BUILD FLAG
- * ----------------------------------------
- * The storefront is static HTML written by tools/assemble.py. If the theme
- * lived only in that build, changing it would mean a developer re-running the
- * assembler and redeploying — which is not a switch, it is a release. The
- * merchant flips this in the admin panel, so the choice has to be readable at
- * runtime by every page.
+ * THE SETTING IS UNIVERSAL. THAT IS THE WHOLE POINT.
+ * -------------------------------------------------
+ * One theme is published for the shop and everybody gets it. There is no
+ * per-visitor preference here and there must never be one: the merchant
+ * chooses how their shop looks, the same way they choose its prices.
  *
- * THREE SOURCES, IN PRIORITY ORDER
- * --------------------------------
- *   1. the inline bootstrap in <head> (see tools/assemble.py) applies the
- *      LAST KNOWN theme from localStorage before the first paint, so a
- *      returning visitor never sees the other theme flash;
- *   2. this module asks the server what the theme actually is and corrects
- *      the page if the cache was stale;
- *   3. if the server cannot be reached, whatever step 1 applied stands.
+ * A universal setting needs somewhere central to live, so the SERVER is the
+ * only authority. `localStorage` appears below purely as a mirror of the last
+ * answer the server gave, so a returning visitor paints the right theme
+ * immediately instead of flashing the other one. Nothing writes that mirror
+ * except a successful server read — in particular the admin panel does not,
+ * because a value written locally by the merchant would show them a shop no
+ * visitor is seeing, which is the exact opposite of universal.
  *
- * Step 3 is the important one and it is the same rule the header menu and the
- * home page shelves follow: a fetch that fails leaves the authored page
- * standing. A theme is decoration — the shop must never be unreachable
- * because a preference endpoint is down.
+ * WITHOUT A BACKEND, THE BUILD IS THE AUTHORITY
+ * ---------------------------------------------
+ * On a static deployment there is no server to ask. Then the theme baked into
+ * the HTML by `tools/assemble.py --theme <name>` is what every visitor gets —
+ * still universal, just changed by a rebuild rather than a click. No cache is
+ * ever written in that case (nothing succeeds at reading the server), so the
+ * baked default stands for everyone, identically.
  *
- * ONE PAINT OF THE DEFAULT, ONCE
- * ------------------------------
- * A visitor arriving for the very first time on a shop set to Luxe has no
- * cache, so they get one paint of Classic before this corrects it. That is
- * the honest cost of a static build plus a runtime setting, it happens once
- * per browser, and the alternative — blocking the render on a network call —
- * is worse for every visit after it.
+ * PRIORITY, HIGHEST FIRST
+ * -----------------------
+ *   1. ?theme= in the URL — a PREVIEW. Never stored beyond the tab, never
+ *      published, and it suppresses the server correction so the person
+ *      previewing can actually see the thing they came to look at.
+ *   2. the server, via GET /api/theme.
+ *   3. the mirror of the server's last answer, applied before first paint by
+ *      the inline bootstrap in <head>.
+ *   4. whatever theme was baked into the HTML at build time.
+ *
+ * A failure at 2 falls through to 3, and a failure at 3 to 4. The shop must
+ * never be unreachable because a decoration endpoint is down.
  */
 
-import { storage, KEYS } from '../../shared/js/core/storage.js';
+import { storage, session, KEYS } from '../../shared/js/core/storage.js';
 
 /** The only values that may ever reach the DOM. */
 const THEMES = ['classic', 'luxe'];
+
+/** Preview lives in sessionStorage: it dies with the tab, so it cannot be
+ *  mistaken later for the published theme, and it cannot leak to a visitor. */
+const PREVIEW_KEY = 'theme-preview';
 
 export function currentTheme() {
   return document.documentElement.getAttribute('data-theme') === 'luxe' ? 'luxe' : 'classic';
 }
 
 /**
- * Put a theme on the page. Classic is the ABSENCE of the attribute, not a
- * value of it — that is what keeps modules/theme/theme-luxe.css inert and the
- * default rendering identical to a site where this module does not exist.
+ * Put a theme on the page.
+ *
+ * Classic is the ABSENCE of the attribute, not a value of it — that is what
+ * keeps theme-luxe.css inert. It is removed rather than left alone, because a
+ * page baked as Luxe that the server says is Classic has to actually change.
  */
 export function applyTheme(name) {
   const theme = THEMES.includes(name) ? name : 'classic';
@@ -54,27 +65,51 @@ export function applyTheme(name) {
   return theme;
 }
 
-export function cacheTheme(name) {
-  try { storage.set(KEYS.THEME, THEMES.includes(name) ? name : 'classic'); } catch { /* private mode */ }
+/** The ?theme= preview, if one is in play for this tab. */
+function previewTheme() {
+  let name = null;
+  try {
+    name = new URLSearchParams(location.search).get('theme');
+  } catch { /* malformed URL — no preview */ }
+
+  if (THEMES.includes(name)) {
+    // Remembered for the tab so the preview survives clicking around the shop,
+    // which is most of what previewing a theme means.
+    try { session.set(PREVIEW_KEY, name); } catch { /* private mode */ }
+    return name;
+  }
+
+  const held = (() => { try { return session.get(PREVIEW_KEY, null); } catch { return null; } })();
+  return THEMES.includes(held) ? held : null;
 }
 
 /**
- * Ask the server, correct the page, refresh the cache.
+ * Ask the server, correct the page, refresh the mirror.
  *
- * Deliberately does NOT await anything the page needs. It is called for its
- * effect and its rejection is swallowed — see the module comment.
+ * Called for its effect; its rejection is swallowed. Nothing the page needs
+ * awaits it.
  */
 export async function syncTheme() {
+  const preview = previewTheme();
+  if (preview) {
+    // Deliberately does NOT touch the mirror. A preview must leave no trace
+    // that could later be read as the published theme.
+    return applyTheme(preview);
+  }
+
   try {
     const res = await fetch('/api/theme', { headers: { Accept: 'application/json' } });
     if (!res.ok) return currentTheme();
+
     const body = await res.json();
     const name = body?.data?.theme ?? body?.theme;
     if (!THEMES.includes(name)) return currentTheme();
-    cacheTheme(name);
+
+    // The ONLY write to the mirror in the codebase.
+    try { storage.set(KEYS.THEME, name); } catch { /* private mode */ }
     return applyTheme(name);
   } catch {
-    return currentTheme();   // offline, or no backend — the cache stands.
+    return currentTheme();   // offline, or no backend — 3 then 4 stand.
   }
 }
 
