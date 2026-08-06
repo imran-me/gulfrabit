@@ -377,6 +377,33 @@ a:hover { color: var(--link-hover); }
 .btn-lg-gr { min-height: 56px; padding: 1rem 2rem; font-size: var(--fs-20); }
 .btn-block-gr { width: 100%; }
 
+/* ---- The Bangla on a call to action -----------------------------------
+   Same argument as the form labels (see .label-gr__bn): most of this shop's
+   customers read Bangla first, and the button that takes their money is the
+   last place that should need translating.
+
+   Everything here is sized so the button does not change. `em`, not rem, so
+   the gloss tracks whatever size button it lands in — 11px inside a card's
+   small button, 16px inside the product page's. The pair is set tight and
+   the flex gap is pulled in, because "Add to Cart" already nearly filled the
+   163px card button and a second word at the default 8px gap would have
+   pushed it out. No padding, height or width is touched.
+
+   nowrap on the Latin half: the button is a flex row, so without it a
+   squeezed card would break "Add to Cart" over two lines and take the
+   button's height with it — which is exactly the layout change this is not
+   allowed to make. */
+.btn-gr__en { white-space: nowrap; }
+.btn-bn {
+  font-size: 0.76em;
+  font-weight: var(--fw-regular);
+  line-height: 1;
+  opacity: .82;
+  white-space: nowrap;
+  /* Cancels most of .btn-gr's 8px gap — the two halves are one label. */
+  margin-inline-start: calc(0.3em - var(--space-2));
+}
+
 /* ---- Icon-only round button (header actions, steppers) --------------- */
 .btn-icon-gr {
   display: inline-flex;

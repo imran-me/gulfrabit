@@ -58,7 +58,7 @@ export async function openQuickView(id) {
           </div>
           <p class="text-muted-gr" style="margin-bottom:1.5rem">${escapeHtml(p.shortDescription || p.description || '')}</p>
           <div style="display:flex;gap:.75rem">
-            <button class="btn-gr btn-primary-gr btn-block-gr" data-qv-add ${p.inStock ? '' : 'disabled'}>${p.inStock ? 'Add to Cart' : 'Sold out'}</button>
+            <button class="btn-gr btn-primary-gr btn-block-gr" data-qv-add ${p.inStock ? '' : 'disabled'}>${p.inStock ? '<span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে</span>' : 'Sold out'}</button>
             <a class="btn-gr btn-outline-gr" href="${siteURL(`modules/catalog/product.html?id=${p.id}`)}">Details</a>
           </div>
         </div>

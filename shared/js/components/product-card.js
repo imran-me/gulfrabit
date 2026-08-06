@@ -142,7 +142,7 @@ export function productCardHTML(product) {
       ${originalPrice && originalPrice > price ? `<span class="price-saving">${savingsLabel(originalPrice, price)}</span>` : ''}
       <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart"
               ${inStock ? '' : 'disabled'}>
-        ${inStock ? 'Add to Cart' : 'Notify Me'}
+        ${inStock ? '<span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে</span>' : 'Notify Me'}
       </button>
     </div>
   </article>`;

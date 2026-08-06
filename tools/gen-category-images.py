@@ -26,6 +26,38 @@ with a differently-framed shot.
 The tile itself is square (see .category-card__media), so no CSS crop happens
 on top of this one — what is written here is what is seen.
 
+THE MASTERS, AND WHY THEY ALL NEED THE SAME BACKGROUND
+-----------------------------------------------------
+The first set was eight subjects each floating in its own dark vignette. Their
+border brightness ran from 35 (oil-ghee) to 129 (fashion-clothes) — measured,
+not guessed — and eight tiles in a row with backgrounds that far apart read as
+unrelated images rather than a set, whatever the CSS does. Nothing in the page
+can fix that; two attempts are recorded in modules/home/home.css.
+
+So the masters must agree with each other. Regenerate ALL EIGHT in one sitting
+with the same background and lighting clause, never one at a time. The shared
+half of the prompt:
+
+  Studio product photograph of <SUBJECT>, centred, on a seamless pure white
+  background, soft even diffused lighting, one subtle contact shadow directly
+  beneath the subject, no props, no text, no watermark, no border, square 1:1
+  composition with generous empty margin on all four sides, sharp commercial
+  e-commerce catalogue style.
+
+and the subject for each:
+
+  oil-ghee            a tall bottle of olive oil beside a glass jar of golden ghee
+  chocolates-dairy    a stack of chocolate bars beside a milk bottle and a wedge of cheese
+  home-decor          a ceramic table lamp beside a vase of dried pampas grass
+  kitchen-appliances  a stainless steel blender beside an electric kettle and an air fryer
+  dates-nuts          a wooden bowl of Medjool dates beside a bowl of pistachios and almonds
+  kids-toys           a wooden stacking-ring toy, a teddy bear and coloured building blocks
+  fashion-clothes     a neatly folded stack of pastel clothing beside a pair of shoes
+  flash-sale          red and gold gift boxes and shopping bags
+
+Square masters are used as-is; portrait ones get the upward crop below. Save at
+1024px or larger — anything smaller is upscaled into the 560w tier and shows.
+
 INPUTS
 ------
 Masters live in assets/images/categories/_src/<slug>.png (or .jpg) when you
