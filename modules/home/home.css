@@ -52,6 +52,12 @@
 
 .hero__media { position: absolute; inset: 0; overflow: hidden; background: var(--surface-band); }
 
+/* <picture> exists only to offer the WebP source; it must not become a layout
+   box. Without display:contents it sits between .hero__fit and .hero__art as
+   an inline, shrink-wrapped element, and the artwork's height:100% then
+   resolves against IT instead of the frame — the banner collapses. */
+.hero picture { display: contents; }
+
 /* Blurred fill for the letterbox. Over-scaled because a blur samples past its
    own edges and would otherwise leave a pale rim around the slide. Dimmed so
    the crisp artwork in front of it clearly reads as the foreground. */
@@ -141,25 +147,43 @@
   left: 0; right: 0;
   display: flex; justify-content: center; gap: 4px;
 }
+/* THE BAR IS NOT THE BUTTON.
+   26×3 is a target nobody can hit — under even WCAG 2.5.8's 24×24 floor. So
+   the <button> is 26×24 and transparent, and the visible bar is a ::after
+   inside it. The obvious fix — a pseudo-element stretching the old 3px
+   button — could not work: the button carries overflow:hidden to clip the
+   progress fill, so anything reaching past 3px was clipped away with it.
+   The row grows to 24px and sits a little clear of the artwork's edge, which
+   it wanted anyway. */
 .hero__dot {
   position: relative;
-  width: 26px; height: var(--hero-progress);
-  border: 0; border-radius: var(--radius-pill);
-  /* Dark, not hairline-grey. The strip these used to sit in is gone — they
-     now lie on the artwork, which is near-white on the acacia honey banner
-     and near-black on the makhana one. An opaque dark track with a light
-     outline reads on both; the grey it used to have vanished on honey. */
+  width: 26px; height: 24px;
+  border: 0; background: none; padding: 0;
+  cursor: pointer;
+}
+/* The track. Dark, not hairline-grey: these lie on the artwork, which is
+   near-white on the acacia honey banner and near-black on the makhana one.
+   An opaque dark bar with a light outline reads on both. */
+.hero__dot::after {
+  content: ""; position: absolute; z-index: 0;
+  left: 0; right: 0; top: 50%;
+  height: var(--hero-progress); margin-top: calc(var(--hero-progress) / -2);
+  border-radius: var(--radius-pill);
   background: rgba(16,19,20,.42);
   box-shadow: 0 0 0 1px rgba(255,255,255,.45);
-  cursor: pointer; padding: 0; overflow: hidden;
 }
 /* The fill starts the moment a dot gains .is-active — a CSS animation restarts
    when its element begins matching the selector, so the bar re-arms on every
    slide change without a line of JS. Same 6s as INTERVAL in home.js; if one
-   moves, move the other. */
+   moves, move the other.
+
+   Centred with margin-top, NOT translateY: the animation owns `transform`,
+   and a centring transform here would be overwritten the instant it ran. */
 .hero__dot.is-active::before {
-  content: ""; position: absolute; inset: 0;
-  border-radius: inherit;
+  content: ""; position: absolute; z-index: 1;
+  left: 0; right: 0; top: 50%;
+  height: var(--hero-progress); margin-top: calc(var(--hero-progress) / -2);
+  border-radius: var(--radius-pill);
   background: var(--gr-gradient);
   transform-origin: left center;
   animation: hero-progress 6s linear forwards;

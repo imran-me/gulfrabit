@@ -471,6 +471,18 @@ PAGES = [
      "modules/content/_fragments/shipping.main.html",
      ["/modules/content/content.css"], None, "shipping"),
 
+    ("modules/content/privacy.html",
+     "Privacy Policy — GulfRabit",
+     "What GulfRabit collects, why, and who else sees it — including advertising measurement.",
+     "modules/content/_fragments/privacy.main.html",
+     ["/modules/content/content.css"], None, "privacy"),
+
+    ("modules/content/terms.html",
+     "Terms & Conditions — GulfRabit",
+     "The terms you buy under: orders, prices, delivery, returns and refunds.",
+     "modules/content/_fragments/terms.main.html",
+     ["/modules/content/content.css"], None, "terms"),
+
     ("modules/content/404.html",
      "Page Not Found — GulfRabit",
      "The page you were looking for has hopped away.",

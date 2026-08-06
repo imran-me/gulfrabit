@@ -46,6 +46,12 @@
         <div data-active-chips style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:var(--space-4)"></div>
 
         <!-- Product grid (skeleton → data) -->
+        <!-- The results are a section, and product titles are h3, so without
+             this the outline jumped h1 -> h3: a screen-reader user tabbing by
+             heading heard the page title and then a product, with nothing
+             saying the list had begun. Hidden because the visible design
+             already makes it obvious where the grid starts. -->
+        <h2 class="visually-hidden">Products in this category</h2>
         <div class="product-grid" data-product-grid aria-live="polite">
           <noscript><p class="noscript-note">Product listings require JavaScript. Use the <a href="/index.html">home page</a> category tiles to browse without it.</p></noscript>
         </div>

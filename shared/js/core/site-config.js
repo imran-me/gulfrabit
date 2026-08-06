@@ -34,6 +34,22 @@ export const CONFIG = {
    */
   capiEndpoint: '/api/track',
 
+  /**
+   * Social profiles. An empty string hides that icon in the footer entirely.
+   *
+   * They used to be href="#" — three links on every page of the site that
+   * said "we are on Instagram" and went nowhere. A missing icon is honest; a
+   * dead one is not. Fill one in and it appears, no deploy needed beyond the
+   * push.
+   *
+   * // TODO(merchant): paste the profile URLs once the accounts exist.
+   */
+  social: {
+    instagram: '',
+    facebook: '',
+    linkedin: '',
+  },
+
   /** ISO currency for ad platform value reporting. */
   currency: 'BDT',
 };

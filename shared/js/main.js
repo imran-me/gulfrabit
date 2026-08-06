@@ -22,6 +22,7 @@ import { initWishlistButtons } from './components/wishlist.js';
 import { initQuantitySteppers } from './components/quantity-stepper.js';
 import { enhanceProductCards } from './components/product-card.js';
 import { initCompareTray } from './components/compare-tray.js';
+import { initFooterSocial } from './components/footer-social.js';
 import { initAnalytics } from './core/analytics.js';
 
 function boot() {
@@ -44,6 +45,7 @@ function boot() {
   initWishlistButtons();
   initQuantitySteppers();
   initCompareTray();
+  initFooterSocial();
   enhanceProductCards();          // wire any HTML-authored product cards
   document.documentElement.classList.add('js-ready');
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="no-js">
+<html lang="en" class="no-js" data-cms-page="privacy">
 <head>
   <meta charset="UTF-8">
   <script>
@@ -14,8 +14,8 @@
     document.documentElement.classList.remove('no-js');
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Compare — GulfRabit</title>
-  <meta name="description" content="Compare GulfRabit products side by side.">
+  <title>Privacy Policy — GulfRabit</title>
+  <meta name="description" content="What GulfRabit collects, why, and who else sees it — including advertising measurement.">
   <meta name="theme-color" content="#0A0A0A">
   <meta name="author" content="GulfRabit">
   <meta name="robots" content="index, follow">
@@ -23,12 +23,12 @@
   <!-- Social / Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GulfRabit">
-  <meta property="og:title" content="Compare — GulfRabit">
-  <meta property="og:description" content="Compare GulfRabit products side by side.">
+  <meta property="og:title" content="Privacy Policy — GulfRabit">
+  <meta property="og:description" content="What GulfRabit collects, why, and who else sees it — including advertising measurement.">
   <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Compare — GulfRabit">
-  <meta name="twitter:description" content="Compare GulfRabit products side by side.">
+  <meta name="twitter:title" content="Privacy Policy — GulfRabit">
+  <meta name="twitter:description" content="What GulfRabit collects, why, and who else sees it — including advertising measurement.">
   <link rel="icon" href="../../favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
   <link rel="apple-touch-icon" href="../../assets/logo/apple-touch-icon.png">
@@ -44,7 +44,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=ca4019a1">
-  <link rel="stylesheet" href="../../modules/catalog/catalog.css?v=b6145831">
+  <link rel="stylesheet" href="../../modules/content/content.css?v=2415fbb0">
+  <link rel="stylesheet" href="../../modules/cms/cms.css?v=625bc655">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -217,21 +218,91 @@
 
 
 <main id="main" class="gr-container" style="padding-block:var(--space-6) var(--space-9)">
-    <nav class="breadcrumb-gr" aria-label="Breadcrumb" style="margin-bottom:var(--space-5)">
-      <a href="../../index.html">Home</a><span class="breadcrumb-gr__sep">/</span><span>Compare</span>
-    </nav>
-    <header class="section-head" style="margin-bottom:var(--space-6)">
-      <div class="section-head__titles"><p class="overline">Side by side</p><h1 class="h2">Compare Products</h1></div>
-      <button class="btn-gr btn-ghost-gr" data-clear-all type="button" hidden>Clear all</button>
+    <header style="margin-bottom:var(--space-6);max-width:60ch">
+      <p class="overline">Policy</p>
+      <h1 class="h2">Privacy Policy</h1>
+      <p class="text-muted-gr">Last updated 6 August 2026.</p>
     </header>
 
-    <div class="compare-scroll" data-compare-root aria-live="polite"></div>
+    <div class="prose">
+      <p>This policy describes what GulfRabit collects, why, and who else sees it.
+         It describes what the site <em>actually does</em> — including the
+         advertising measurement below, which most shops leave unsaid.</p>
 
-    <div class="empty-state" data-compare-empty hidden>
-      <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 3v18M5 7h14M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/></svg>
-      <h2 class="empty-state__title">Nothing to compare yet</h2>
-      <p class="empty-state__text">Add products with the compare icon on any product card (up to four), then come back here.</p>
-      <a class="btn-gr btn-primary-gr" href="../../modules/catalog/category.html?slug=imported-food-grocery">Browse products</a>
+      <h2 id="what">What we collect</h2>
+      <div class="table-scroll">
+        <table class="policy-table">
+          <caption class="visually-hidden">Data collected and the reason for it</caption>
+          <thead>
+            <tr><th scope="col">What</th><th scope="col">Why</th><th scope="col">When</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Name, phone, address</th><td data-label="Why">To deliver the order and to call you if the rider cannot find you</td><td data-label="When">At checkout</td></tr>
+            <tr><th scope="row">Email</th><td data-label="Why">Order receipts. Optional — the phone number is what we actually deliver on</td><td data-label="When">At checkout, if you give it</td></tr>
+            <tr><th scope="row">Order history</th><td data-label="Why">So you can track and re-order, and so we can honour returns</td><td data-label="When">On every order</td></tr>
+            <tr><th scope="row">Cart and preferences</th><td data-label="Why">To keep your basket between visits</td><td data-label="When">Stored in your own browser, not on our server</td></tr>
+            <tr><th scope="row">Advertising identifiers</th><td data-label="Why">To know which advert led to a sale — see below</td><td data-label="When">If you arrive from an advert</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>We do not collect your card details.</strong> Cash on delivery
+         involves no card at all, and card and mobile-wallet payments are handled
+         by the payment provider on their own systems. We never see or store a
+         card number, a PIN, or a wallet password.</p>
+
+      <h2 id="advertising">Advertising measurement</h2>
+      <p>GulfRabit advertises on Meta (Facebook and Instagram). When advertising is
+         switched on, two things happen that you should know about:</p>
+      <ul>
+        <li><strong>A Meta pixel runs in your browser</strong> and reports page views,
+            products viewed, checkouts started and purchases completed.</li>
+        <li><strong>Our server reports the same events to Meta</strong> through their
+            Conversions API, together with your IP address and browser identifier,
+            so the two reports can be matched as one rather than counted twice.</li>
+      </ul>
+      <p>The purpose is narrow: to know which advert sold what, so we stop paying for
+         adverts that do not work. We send Meta the order value and the product; we do
+         not send them your name, phone number or address.</p>
+      <p>If you would rather not be measured this way, browser tracking protection or
+         an ad blocker will stop the browser half, and Meta's own
+         <em>Ad Preferences</em> settings control what they do with the rest.</p>
+
+      <h2 id="shared">Who else sees your details</h2>
+      <ul>
+        <li><strong>Courier partners</strong> — your name, phone and address, because
+            that is what a delivery is. They see nothing else about you.</li>
+        <li><strong>Payment providers</strong> (bKash, Nagad, card processors) — only if
+            you choose to pay that way, and only what the payment needs.</li>
+        <li><strong>Meta</strong> — the advertising events described above.</li>
+      </ul>
+      <p>We do not sell your data, and we do not share it for anyone else's marketing.</p>
+
+      <h2 id="cookies">Cookies and local storage</h2>
+      <p>Your cart, your wishlist and your recently-viewed products live in your own
+         browser's storage — they never reach our server unless you place an order.
+         Cookies are used to keep you signed in and to protect forms against
+         cross-site request forgery. Clearing your browser data clears all of it.</p>
+
+      <h2 id="keep">How long we keep it</h2>
+      <p>Orders are kept for as long as we may need to answer a question about them —
+         accounting and tax records require several years. An account you no longer
+         want can be closed on request; the orders behind it are anonymised rather
+         than deleted, because a delivered order is also a financial record.</p>
+
+      <h2 id="rights">Your choices</h2>
+      <ul>
+        <li>Ask what we hold about you, and we will tell you.</li>
+        <li>Ask us to correct anything wrong.</li>
+        <li>Ask us to close your account and anonymise your history.</li>
+        <li>Unsubscribe from the newsletter with the link in any of them.</li>
+      </ul>
+
+      <h2 id="contact">Contact</h2>
+      <p>Questions about this policy, or a request under it:
+         <a href="mailto:hello@gulfrabit.com">hello@gulfrabit.com</a>, or the
+         <a href="../../modules/content/contact.html">contact page</a>. We answer within two
+         working days.</p>
     </div>
   </main>
 
@@ -337,6 +408,7 @@
 </footer>
 
   <script type="module" src="../../shared/js/main.js?v=7fb0ff79"></script>
-  <script type="module" src="../../modules/catalog/compare-page.js?v=68671573"></script>
+  <script type="module" src="../../modules/cms/cms.js?v=9665d8ea"></script>
+  <script type="module" src="../../modules/cms/cms-editor.js?v=46b9f9bd"></script>
 </body>
 </html>
