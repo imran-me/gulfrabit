@@ -14,8 +14,9 @@ use Modules\Media\Controllers\MediaController;
  * remove a product photo, and inventing a separate capability would let those
  * two drift apart for no benefit.
  *
- * Loaded by MediaServiceProvider under the `api` middleware group with the
- * `api` prefix, so these sit at /api/admin/media.
+ * Loaded by MediaServiceProvider under the `web` middleware group with the
+ * `api` prefix, so these sit at /api/admin/media. `web` because the panel
+ * authenticates with a session cookie — see the provider.
  */
 Route::prefix('admin')
     ->name('admin.media.')

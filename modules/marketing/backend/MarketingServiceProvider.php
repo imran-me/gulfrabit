@@ -35,9 +35,19 @@ class MarketingServiceProvider extends ServiceProvider
             return;
         }
 
+        // Public storefront routes: stateless, as an API should be.
         $this->app['router']
             ->middleware('api')
             ->prefix('api')
             ->group(__DIR__ . '/routes.php');
+
+        // Admin routes: `web`, NOT `api`. The panel authenticates with a
+        // session cookie, and the api group has no session — every request
+        // through it arrives unauthenticated, RequireAdmin answers 401, and
+        // the panel redirects to login. Same mounting as modules/admin.
+        $this->app['router']
+            ->middleware('web')
+            ->prefix('api')
+            ->group(__DIR__ . '/routes-admin.php');
     }
 }

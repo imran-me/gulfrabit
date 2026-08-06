@@ -43,8 +43,13 @@ class MediaServiceProvider extends ServiceProvider
             return;
         }
 
+        // `web`, NOT `api`: every route in this module is an admin route, and
+        // the panel authenticates with a session cookie. The api group is
+        // stateless, so requests through it arrive unauthenticated and
+        // RequireAdmin answers 401 — which the panel shows as a login
+        // redirect. Same mounting as modules/admin.
         $this->app['router']
-            ->middleware('api')
+            ->middleware('web')
             ->prefix('api')
             ->group(__DIR__ . '/routes.php');
     }
