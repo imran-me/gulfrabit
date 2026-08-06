@@ -17,15 +17,28 @@
    wrong (128px -> 40px, the ~70% asked for), and splitting it that way gives
    a section's heading more air above it than its last row needs below —
    which is the direction the eye reads anyway. */
+/* Section rhythm. The number that matters is the one BETWEEN two sections,
+   which is this padding twice — and at --space-10 that was 256px of nothing
+   on a desktop screen, so the page read as a sequence of separate pages
+   rather than one shop. Cut by three quarters: 64px between sections at
+   desktop, 32px at tablet.
+
+   Phones keep theirs. They were already at 16+24 = 40px between sections
+   (tuned when the category grid was rebuilt for 390px), and taking three
+   quarters off THAT leaves 10px, which is not a gap — it is a mistake. */
 .section-gr { padding-block: var(--space-5) var(--space-4); }
-@media (min-width: 768px)  { .section-gr { padding-block: var(--space-8); } }
-@media (min-width: 1024px) { .section-gr { padding-block: var(--space-10); } }
+@media (min-width: 768px)  { .section-gr { padding-block: var(--space-4); } }
+@media (min-width: 1024px) { .section-gr { padding-block: var(--space-6); } }
 
 /* A section that carries less weight than its neighbours — a logo wall, a
    newsletter strip — and says so with less room. Only at desktop sizes: the
    phone rhythm above is already tight, and taking more off it would make the
    section read as attached to the one before it. */
-@media (min-width: 768px) { .section-gr--tight { padding-block: var(--space-7); } }
+/* --tight only means anything relative to the base, and the base moved. At
+   --space-7 it was 48px against a 128px section — tighter. Against the 32px
+   section it became LOOSER than the thing it modifies, which is the modifier
+   doing the opposite of its name. Cut with the base. */
+@media (min-width: 768px) { .section-gr--tight { padding-block: var(--space-5); } }
 
 /* ---- Spacing that has to respond, and therefore cannot be inline ------
    These three replaced `style="padding-block:…"` / `style="margin-top:…"`

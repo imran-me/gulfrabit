@@ -12,6 +12,26 @@
        Inline and first on purpose: a deferred file would let the page paint
        blank before it ran. */
     document.documentElement.classList.remove('no-js');
+
+    /* THEME, BEFORE THE FIRST PAINT.
+       The storefront theme is a runtime setting (the merchant flips it in the
+       admin panel), but this HTML is static — so the page has to find out
+       which theme it is in before it paints, or a Luxe shop shows a frame of
+       Classic on every single navigation.
+
+       modules/theme/theme.js caches the published theme in localStorage and
+       corrects it from the API on every load. This reads that cache and
+       nothing else: no network, no module graph, one localStorage hit. It is
+       inline and above the stylesheet on purpose — a deferred script runs
+       after the first paint, which is the flash it exists to prevent.
+
+       Absence of the attribute IS Classic. Only the exact string 'luxe' sets
+       anything, so a corrupt or half-written cache degrades to the default
+       rather than to a broken third state. */
+    try {
+      var t = localStorage.getItem('gr:theme');
+      if (t && JSON.parse(t) === 'luxe') document.documentElement.setAttribute('data-theme', 'luxe');
+    } catch (e) { /* private mode, or nothing stored — Classic stands. */ }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Orders — GulfRabit Admin</title>
@@ -43,7 +63,7 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=fcec5e54">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=67fcfff1">
   <link rel="stylesheet" href="../../modules/admin/admin.css?v=ff327c79">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
@@ -161,6 +181,7 @@
   <script type="module" src="../../modules/marketing/marketing-nav.js?v=d884c4ac"></script>
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=ebff64a4"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=87de770c"></script>
+  <script type="module" src="../../modules/theme/theme-nav.js?v=db43fd3d"></script>
   <script type="module" src="../../modules/admin/orders-page.js?v=7994bddd"></script>
 </body>
 </html>

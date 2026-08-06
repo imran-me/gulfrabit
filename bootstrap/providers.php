@@ -34,6 +34,7 @@ return [
     Modules\Media\MediaServiceProvider::class,
     Modules\Marketing\MarketingServiceProvider::class,
     Modules\Delivery\DeliveryServiceProvider::class,
+    Modules\Theme\ThemeServiceProvider::class,
 
     // Added as each module grows a Laravel layer. The frontend for these already
     // runs on the mock seam in modules/<feature>/backend/api.js:

@@ -59,8 +59,19 @@ def asset(path):
     return f"{path}?v={digest}"
 
 
-def head(title, desc, css_links, theme="#0A0A0A", cms_page=None):
+def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True):
+    """`luxe=False` for the admin panel — see scripts() for why the panel does
+    not follow the storefront's theme. With no theme.js there to set the
+    attribute, the Luxe sheet could only ever be dead weight on those pages."""
     extra = "\n  ".join(f'<link rel="stylesheet" href="{asset(c)}">' for c in css_links)
+    luxe_link = (
+        '<!-- The Luxe layer. Linked on every storefront page and completely\n'
+        '       inert without [data-theme="luxe"] on <html>, so the default theme\n'
+        '       renders exactly as it did before this file existed. Linking it\n'
+        '       conditionally would mean knowing the theme before the <head> is\n'
+        '       written, and this HTML is built once and served to everyone. -->\n'
+        f'  <link rel="stylesheet" href="{asset("/modules/theme/theme-luxe.css")}">\n  '
+    ) if luxe else ""
     # data-cms-page is what modules/cms keys its overrides on. Absent means the
     # page is not editable, which is the correct default for anything rendered
     # entirely from data — an override there would be overwritten on the next
@@ -96,10 +107,10 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None):
        Absence of the attribute IS Classic. Only the exact string 'luxe' sets
        anything, so a corrupt or half-written cache degrades to the default
        rather than to a broken third state. */
-    try {
+    try {{
       var t = localStorage.getItem('gr:theme');
       if (t && JSON.parse(t) === 'luxe') document.documentElement.setAttribute('data-theme', 'luxe');
-    } catch (e) { /* private mode, or nothing stored — Classic stands. */ }
+    }} catch (e) {{ /* private mode, or nothing stored — Classic stands. */ }}
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
@@ -132,13 +143,7 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None):
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{asset('/shared/css/gulfrabit.css')}">
-  <!-- The Luxe layer. Linked on every page and completely inert without
-       [data-theme="luxe"] on <html>, so the default theme renders exactly as
-       it did before this file existed. Linking it conditionally would mean
-       knowing the theme before the <head> is written, and this HTML is built
-       once and served to everyone. -->
-  <link rel="stylesheet" href="{asset('/modules/theme/theme-luxe.css')}">
-  {extra}
+  {luxe_link}{extra}
   <script type="application/ld+json">
   {{"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"{SITE}","logo":"{SITE}/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}}
   </script>
@@ -256,7 +261,7 @@ ADMIN_SHELL_END = read("modules/admin/_fragments/_shell-end.html")
 def assemble_admin(out, title, main_html, css_links, module_js, chrome=True):
     """`chrome=False` for the login page, which must render without the shell —
     it is the one admin page a signed-out person is supposed to reach."""
-    page = head(title, "GulfRabit staff panel.", css_links, theme="#0A0A0A") + "\n"
+    page = head(title, "GulfRabit staff panel.", css_links, theme="#0A0A0A", luxe=False) + "\n"
     # noindex on every admin page, belt and braces with robots.txt: these pages
     # carry no data, but they should never turn up in a search result either.
     page = page.replace('<meta name="robots" content="index, follow">',

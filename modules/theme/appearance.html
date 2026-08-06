@@ -34,7 +34,7 @@
     } catch (e) { /* private mode, or nothing stored — Classic stands. */ }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quote requests — GulfRabit Admin</title>
+  <title>Appearance — GulfRabit Admin</title>
   <meta name="description" content="GulfRabit staff panel.">
   <meta name="theme-color" content="#0A0A0A">
   <meta name="author" content="GulfRabit">
@@ -43,11 +43,11 @@
   <!-- Social / Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GulfRabit">
-  <meta property="og:title" content="Quote requests — GulfRabit Admin">
+  <meta property="og:title" content="Appearance — GulfRabit Admin">
   <meta property="og:description" content="GulfRabit staff panel.">
   <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Quote requests — GulfRabit Admin">
+  <meta name="twitter:title" content="Appearance — GulfRabit Admin">
   <meta name="twitter:description" content="GulfRabit staff panel.">
   <link rel="icon" href="../../favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
@@ -65,6 +65,7 @@
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=67fcfff1">
   <link rel="stylesheet" href="../../modules/admin/admin.css?v=ff327c79">
+  <link rel="stylesheet" href="../../modules/theme/theme-admin.css?v=a3ed09aa">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -93,57 +94,69 @@
 
 <div class="admin__head">
         <div>
-          <h1 class="admin__title">Quote requests</h1>
-          <p class="admin__sub" data-q-count>Loading…</p>
+          <h1 class="admin__title">Appearance</h1>
+          <p class="admin__sub">How the storefront looks. Publishing takes effect for every visitor straight away — nothing is redeployed.</p>
         </div>
       </div>
 
-      <!-- Said plainly rather than left to be discovered. Somebody wondering
-           why they never got an email should find the answer here, not conclude
-           the feature is broken. -->
-      <div class="acard" style="margin-bottom:var(--space-5)">
-        <p class="admin__sub" style="margin:0">
-          There is no email or SMS gateway connected, so nothing is sent when a request arrives.
-          The count on your dashboard is the alert — it stays up until each request is moved on,
-          and this list puts the one that has been waiting longest at the top.
-        </p>
-      </div>
+      <!-- The two options are radio inputs inside labels, not buttons: a theme
+           is one choice from a fixed set, which is what a radio group IS. The
+           keyboard behaviour — arrow between options, space to choose — then
+           arrives correct rather than being rebuilt badly. -->
+      <form data-theme-form>
+        <fieldset class="theme-set">
+          <legend class="visually-hidden">Storefront theme</legend>
 
-      <form class="afilters" data-q-filters>
-        <div class="afilters__field">
-          <label for="qf-status">Show</label>
-          <select class="select-gr" id="qf-status" name="status">
-            <option value="open">Waiting on us</option>
-            <option value="quoted">Quoted</option>
-            <option value="won">Won</option>
-            <option value="lost">Lost</option>
-          </select>
+          <label class="theme-option">
+            <input type="radio" name="theme" value="classic" class="theme-option__input" checked>
+            <span class="theme-option__frame">
+              <!-- A drawn miniature, not a screenshot. A screenshot goes stale
+                   the first time anyone touches the storefront, and a stale
+                   preview of a theme is worse than none. These are painted
+                   from each theme's own colours, so they cannot drift. -->
+              <span class="theme-swatch theme-swatch--classic" aria-hidden="true">
+                <span class="theme-swatch__bar"></span>
+                <span class="theme-swatch__row"><i></i><i></i><i></i></span>
+                <span class="theme-swatch__cta"></span>
+              </span>
+              <span class="theme-option__body">
+                <span class="theme-option__name">Classic<span class="theme-option__flag" data-live-for="classic" hidden>Live</span></span>
+                <span class="theme-option__desc">The shop as it is today. White canvas, cyan and lime, quick and quiet.</span>
+              </span>
+            </span>
+          </label>
+
+          <label class="theme-option">
+            <input type="radio" name="theme" value="luxe" class="theme-option__input">
+            <span class="theme-option__frame">
+              <span class="theme-swatch theme-swatch--luxe" aria-hidden="true">
+                <span class="theme-swatch__bar"></span>
+                <span class="theme-swatch__row"><i></i><i></i><i></i></span>
+                <span class="theme-swatch__cta"></span>
+              </span>
+              <span class="theme-option__body">
+                <span class="theme-option__name">Luxe<span class="theme-option__flag" data-live-for="luxe" hidden>Live</span></span>
+                <span class="theme-option__desc">Ivory canvas, gold trim, slower motion. The brand colours still carry every button.</span>
+              </span>
+            </span>
+          </label>
+        </fieldset>
+
+        <div class="acard" style="margin-top:var(--space-5)">
+          <p class="admin__sub" style="margin:0">
+            Luxe adds movement — a drifting background, a sheen across cards and buttons, rules that draw in as sections arrive.
+            A visitor who has asked their device to <strong>reduce motion</strong> gets the colours and none of the movement, automatically.
+            <br>
+            Neither theme changes a price, a product or a page. Switching back is the same two clicks.
+          </p>
         </div>
-        <div class="afilters__actions">
-          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Apply</button>
+
+        <div class="theme-actions">
+          <button class="btn-gr btn-primary-gr" type="submit" data-theme-save>Publish theme</button>
+          <a class="btn-gr btn-outline-gr" href="../../index.html" target="_blank" rel="noopener">Open the shop</a>
+          <span class="admin__sub" role="status" data-theme-status></span>
         </div>
       </form>
-
-      <div class="atable-wrap">
-        <table class="atable">
-          <thead>
-            <tr>
-              <th scope="col">Ref</th>
-              <th scope="col">Company</th>
-              <th scope="col">Contact</th>
-              <th scope="col">Lines</th>
-              <th scope="col">Indicative</th>
-              <th scope="col">Waiting</th>
-              <th scope="col">Move to</th>
-            </tr>
-          </thead>
-          <tbody data-q-body>
-            <tr><td colspan="7" class="atable__empty">Loading requests…</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p class="aerror" data-q-error hidden role="alert"></p>
     </main>
   </div>
 
@@ -158,6 +171,6 @@
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=ebff64a4"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=87de770c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=db43fd3d"></script>
-  <script type="module" src="../../modules/b2b/quotes-page.js?v=d5d944de"></script>
+  <script type="module" src="../../modules/theme/theme-page.js?v=9b728d34"></script>
 </body>
 </html>
