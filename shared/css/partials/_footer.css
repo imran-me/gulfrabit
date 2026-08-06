@@ -1,0 +1,91 @@
+/* =========================================================================
+   GulfRabit · Footer
+
+   The footer used to be styled entirely by inline attributes plus one stray
+   <style> block in the partial itself, which meant it had exactly two
+   layouts: a single stacked column, and a four-column desktop row. On a phone
+   that produced a ~1,100px ribbon of link text — three headings and fourteen
+   links, one per line, below every page on the site.
+
+   Phones get two columns instead. Not because two is a magic number, but
+   because these lists are short words: "About", "FAQ", "Home Decor" all fit a
+   half-width column at 14px, so a second column costs nothing in wrapping and
+   halves the scrolling.
+   ========================================================================= */
+
+.footer-grid {
+  display: grid;
+  gap: var(--space-6) var(--space-5);
+  /* Two columns from the smallest phone up. The brand block spans both. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* The logo, the promise and the newsletter are one unit and never share a
+   row with a link column — the email input needs the full width to stay a
+   comfortable target. */
+.footer-grid__brand { grid-column: 1 / -1; }
+
+/* Shop is the longest list and the one people actually use, so on a phone it
+   takes the full width and runs in two columns of its own, keeping Company
+   and Customer Care side by side underneath rather than pushing them a
+   screen further down. */
+.footer-grid > nav[aria-label="Shop"] { grid-column: 1 / -1; }
+.footer-grid > nav[aria-label="Shop"] .footer-links {
+  columns: 2;
+  column-gap: var(--space-5);
+}
+/* A list item must not be split across the column break. */
+.footer-grid > nav[aria-label="Shop"] .footer-links > li {
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+/* .stack-2's `* + *` margin lands on the first item of the second column too,
+   which knocks the two columns half a line out of alignment. */
+.footer-grid > nav[aria-label="Shop"] .footer-links > li + li { margin-top: 0; }
+.footer-grid > nav[aria-label="Shop"] .footer-links > li { padding-block: 5px; }
+
+.footer-links { font-size: var(--fs-14); }
+/* Generous rows: at 14px the text is ~19px tall, and a footer link that is
+   only as tall as its own text is a miss waiting to happen on a phone. */
+.footer-links a { display: inline-block; padding-block: 5px; }
+
+@media (min-width: 768px) {
+  /* Desktop returns to the original arrangement: brand, then three columns. */
+  .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; gap: var(--space-7); }
+  .footer-grid__brand,
+  .footer-grid > nav[aria-label="Shop"] { grid-column: auto; }
+  .footer-grid > nav[aria-label="Shop"] .footer-links { columns: 1; }
+  .footer-grid > nav[aria-label="Shop"] .footer-links > li { padding-block: 0; }
+  .footer-grid > nav[aria-label="Shop"] .footer-links > li + li { margin-top: var(--space-2); }
+}
+
+/* ---- Bottom bar ------------------------------------------------------- */
+.footer-bottom {
+  display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.footer-pay { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.footer-social { display: flex; gap: .75rem; align-items: center; }
+.footer-legal { margin-top: var(--space-3); display: flex; flex-wrap: wrap; gap: 1rem; }
+
+@media (max-width: 639.98px) {
+  /* Centred and ordered by what a customer is actually looking for down
+     here: the payment methods they can pay with, then who to follow, then
+     the small print. The copyright goes last — it is a legal necessity, not
+     information anybody came for. */
+  .footer-bottom { justify-content: center; text-align: center; gap: var(--space-3); }
+  .footer-pay { order: 1; justify-content: center; width: 100%; }
+  .footer-social { order: 2; justify-content: center; width: 100%; }
+  .footer-bottom__copy { order: 3; width: 100%; }
+  .footer-legal { justify-content: center; }
+}
+
+/* The brand mark. Sized here rather than by attributes, because the reset
+   forces height:auto — an attribute pair can only ever declare the intrinsic
+   ratio, never the display size. 88px on a phone, 104px above it: large
+   enough to read the tagline inside the mark, small enough that the footer
+   opens with the newsletter rather than with a logo. */
+.footer-logo { display: inline-block; }
+.footer-logo img { width: 88px; height: auto; }
+@media (min-width: 768px) { .footer-logo img { width: 104px; } }

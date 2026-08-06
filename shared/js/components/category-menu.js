@@ -25,6 +25,18 @@
  * after it.
  */
 
+/**
+ * Categories whose real destination is not their category page.
+ *
+ * Flash Sale is a category so the merchant can switch it on and off with the
+ * others, but its listing would be empty — the discounted products live in
+ * every other category. The deals page is the page that actually answers what
+ * the row promises, and is where the home-page tile has always pointed.
+ */
+const PROMO_HREF = {
+  'flash-sale': '/modules/deals/deals.html',
+};
+
 /** Most columns the mega-menu can hold before it overflows the viewport. */
 const MAX_COLUMNS = 4;
 
@@ -34,8 +46,9 @@ const PACK_SIZE = 5;
 export function initCategoryMenu() {
   const grid = document.querySelector('[data-mega-grid]');
   const drawer = document.querySelector('[data-mobile-shop]');
+  const footer = document.querySelector('[data-footer-shop]');
 
-  if (!grid && !drawer) return;
+  if (!grid && !drawer && !footer) return;
 
   load().then((categories) => {
     // An empty list is not the same as a failed request. It means every
@@ -45,7 +58,34 @@ export function initCategoryMenu() {
 
     if (grid) grid.innerHTML = columns(categories).map(column).join('');
     if (drawer) drawer.innerHTML = categories.map(drawerRows).join('');
+    if (footer) footerRows(footer, categories);
   });
+}
+
+/**
+ * The footer's Shop list, from the same source as the header.
+ *
+ * It was hand-authored HTML, which meant a category switched on in the admin
+ * appeared in the drawer and the mega-menu and simply never reached the
+ * footer — three lists, two of them live, and no way to notice the third had
+ * drifted except by counting.
+ *
+ * Rows marked [data-footer-keep] survive: Flash Sale is a promo pointing at
+ * the deals page, not a category, and it must not be swept away by a rewrite
+ * of the categories around it.
+ */
+function footerRows(list, categories) {
+  const kept = [...list.querySelectorAll('[data-footer-keep]')];
+  // A kept row names the slug it already stands for, so the category it
+  // represents is not then listed a second time underneath it. Flash Sale was
+  // exactly that: an authored promo row AND a live category with the same
+  // name, one above the other.
+  const covered = new Set(kept.map((li) => li.dataset.footerKeep).filter(Boolean));
+
+  list.innerHTML = kept.map((li) => li.outerHTML).join('') + categories
+    .filter((c) => !covered.has(c.slug))
+    .map((c) => `<li><a href="${esc(url(c.slug))}">${esc(c.name)}</a></li>`)
+    .join('');
 }
 
 async function load() {
@@ -139,7 +179,8 @@ function drawerRows(c, i) {
     </li>`;
 }
 
-const url = (slug) => `/modules/catalog/category.html?slug=${encodeURIComponent(slug)}`;
+const url = (slug) => PROMO_HREF[slug]
+  ?? `/modules/catalog/category.html?slug=${encodeURIComponent(slug)}`;
 
 function esc(s) {
   return String(s ?? '')
