@@ -45,6 +45,11 @@
 /* Two columns from 560px, one below. Every field is visible at once by
    design: the whole point of this page is that nothing is behind a step. */
 .express-grid { display: grid; gap: var(--space-4); grid-template-columns: 1fr; }
+/* On a phone the grid is one column, so its row gap stacks on top of the
+   16px margin AND the reserved error line under every field — three gaps
+   between one box and the next. The row gap goes; the column gap is not in
+   play at one column, and desktop keeps both untouched. */
+@media (max-width: 1023.98px) { .express-grid { row-gap: 0; } }
 @media (min-width: 560px) {
   .express-grid { grid-template-columns: 1fr 1fr; }
   .express-grid__wide { grid-column: 1 / -1; }

@@ -345,76 +345,150 @@
      to switch itself off at any count but ten. Removed rather than left as a
      selector that can never match. */
 }
-/* ---- One row of eight, desktop only -----------------------------------
-   Requested directly, and it earns its place: eight tiles across is the whole
-   catalogue in one glance with no second row to scroll past, and it keeps the
-   sections below above the fold. It only works where there is room — under
-   1200px eight columns are too narrow to hold "Kitchen Appliances", so the
-   four-up layout stands and phones keep their own compact two-up. */
-@media (min-width: 1200px) {
-  .home-cat-grid { grid-template-columns: repeat(8, 1fr); gap: var(--space-3); }
-  .home-cat-grid .category-card {
-    min-height: 148px; /* A floor for the no-photo case; art makes them taller. */
-    padding: var(--space-3);
-    border-radius: var(--radius-md);
-  }
-  .home-cat-grid .category-card__media {
-    margin-bottom: var(--space-3);
-    border-radius: var(--radius-md);
-  }
-  /* The card bottom-aligns its contents, which is right for the text — every
-     blurb ends on the same baseline across the row — but it dragged the icons
-     down by however many lines the title took, so eight icons sat at five
-     different heights. `auto` pins them to a single line at the top and still
-     lets the text settle to the bottom.
-     Only for a tile with no photo: inside a media well the icon is the
-     fallback the well shows when the picture 404s, and it is centred there.
-     Pushing THAT one to the top would misalign the very case it exists for. */
-  .home-cat-grid .category-card > .category-card__icon {
-    width: 28px; height: 28px; margin-bottom: auto;
-  }
-  .home-cat-grid .category-card__media .category-card__icon {
-    width: 34px; height: 34px;
-  }
-  /* Fluid, because a tile is ~150px at the 1400px container cap and ~130px on
-     a 1280px laptop — one fixed size is either cramped on the small end or
-     mean on the large. */
-  .home-cat-grid .category-card__title {
-    font-size: clamp(.86rem, 1.02vw, var(--fs-16));
-    line-height: 1.25;
-    letter-spacing: -.005em;
-    /* Two lines are reserved whether or not they are used. Half these names
-       wrap at this width and half do not, so without it the titles started at
-       three different heights across one row and the eight tiles read as
-       eight separate decisions instead of a set. */
-    min-height: 2.5em;
-  }
-  .home-cat-grid .category-card__count {
-    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
-    overflow: hidden;
-    margin-top: 3px;
-    font-size: clamp(.66rem, .78vw, var(--fs-12));
-    line-height: 1.35;
-    min-height: 2.7em; /* Same reason as the title. */
-  }
-  /* The lift is proportional to the card. -4px on a 148px tile is a jump. */
-  .home-cat-grid .category-card:hover { transform: translateY(-3px); }
-}
-
-/* Clean icon-led tiles with a faint brand glow that lifts on hover. */
+/* Clean icon-led tiles with a faint brand glow that lifts on hover. Phones
+   only now — from 768px up the artwork covers the card and nothing of this
+   can show through it. */
 .home-cat-grid .category-card::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(120% 80% at 100% 0%, rgba(27,180,212,.12), transparent 58%);
   opacity: .65; transition: opacity var(--dur-base) var(--ease-out);
 }
 /* Guarded like every other hover rule: on touch it latches after a tap and
-   one tile keeps a brighter glow than its neighbours for no reason. Milder
-   than the card and checkout cases, but the same bug, and leaving one
-   unguarded is how the pattern erodes. */
+   one tile keeps a brighter glow than its neighbours for no reason. */
 @media (hover: hover) {
   .home-cat-grid .category-card:hover::before { opacity: 1; }
 }
 .home-cat-grid .category-card > * { position: relative; z-index: 1; }
+
+/* ---- Category tiles: square, and the picture IS the tile ---------------
+   These read as photographs sitting in a white box — a caption under a
+   picture, not a thing you press. The art made it worse rather than better:
+   every image carries its own baked-in background, half dark and half light,
+   so eight of them inset in white padding looked like eight unrelated images
+   pasted in a row.
+
+   So the picture stops being an ornament inside the card and becomes the card.
+   A square — the art is authored square, so nothing is cropped to get one —
+   filled edge to edge, with the name set ON the image over a gradient that
+   runs up from the bottom edge. The mismatched backgrounds stop mattering the
+   moment the photograph owns the whole tile and the type has its own ground to
+   sit on; and a full-bleed image under a legible label is the pattern every
+   expensive shop uses, because it is the product doing the selling instead of
+   a box with a caption.
+
+   Below 768px this does not apply: at four across a phone tile is 80px, and no
+   type is both readable and unobtrusive laid over a square that small. Phones
+   keep the picture-above-label layout tuned for them further down. */
+@media (min-width: 768px) {
+  .home-cat-grid .category-card {
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;              /* the radius has to clip the artwork */
+    justify-content: flex-end;
+    border-radius: var(--radius-lg);
+  }
+  /* Fills the card instead of sitting in it. z-index 0 both puts it under the
+     label and traps the scrim below, so the gradient can never ride over the
+     type it exists to make readable. */
+  .home-cat-grid .category-card__media {
+    position: absolute; inset: 0; z-index: 0;
+    width: auto; height: auto; aspect-ratio: auto;
+    margin: 0; border-radius: 0;
+  }
+  .home-cat-grid .category-card__media::after {
+    content: "";
+    position: absolute; inset: 0;
+    pointer-events: none;
+    /* Shaped by measurement, not by eye: with the type hidden, the lightest
+       5% of pixels behind every label is sampled and checked against white.
+       The first pass held the bottom line easily and failed the two-line
+       names — Chocolates & Dairy at 3.83:1 — because their upper line sits
+       where the gradient was still thin. Holding .91 out to 27% fixes those
+       and clears entirely by 46%. That last number is the one that matters
+       for looks rather than legibility: these masters are already a subject
+       in a dark vignette, so a gradient reaching two thirds up the frame did
+       not read as a scrim over a photograph, it read as a murky tile. It has
+       to be deep where the type is and gone immediately after — which only
+       works because the label is held to ONE line (see the title's sizing).
+       A wrapped name puts its first line 35% up the frame and drags the whole
+       gradient with it, and murk is what that costs. If a future category
+       name wraps here, shorten the name rather than deepening this.
+       Re-run the sampler if the type size or the tile width changes. */
+    background: linear-gradient(to top,
+      rgba(3, 18, 24, .96)  0%,
+      rgba(3, 18, 24, .94) 24%,
+      rgba(3, 18, 24, .55) 34%,
+      rgba(3, 18, 24, 0)   48%);
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+  /* The photo answers the pointer. Slow and small — 600ms and 6% reads as the
+     image settling, where a fast snap reads as a hover effect. */
+  .home-cat-grid .category-card__img {
+    transition: transform 600ms var(--ease-out);
+  }
+  .home-cat-grid .category-card__title {
+    padding: var(--space-3);
+    color: #fff;
+    font-size: var(--fs-15, 15px);
+    line-height: 1.25;
+    letter-spacing: -.005em;
+    /* Insurance for the pale photographs: the scrim already carries it, this
+       keeps the edges crisp rather than doing the contrast work. */
+    text-shadow: 0 1px 10px rgba(0, 0, 0, .5);
+    text-wrap: balance;
+  }
+  /* The blurb goes. Phones have hidden it since launch, it is the one thing
+     that made the tile look like a paragraph, and there is no room for a
+     second line of type over artwork without crowding the name. */
+  .home-cat-grid .category-card__count { display: none; }
+  /* No photograph — a category the merchant added, or a request that never
+     landed. The well's default pale grey was written for a tile that had no
+     scrim over it; under this one it split the card white on top and black
+     below, which looks like damage rather than a fallback. Brand-dark gives
+     the gradient something to sit on and the tile stays a tile. It doubles
+     as the loading colour: the art is lazy, and a pale box turning dark as
+     each photograph lands is a worse first paint than a dark one. */
+  .home-cat-grid .category-card__media {
+    background: linear-gradient(155deg, #12617A 0%, #06242E 100%);
+  }
+  .home-cat-grid .category-card__img { background: transparent; }
+  .home-cat-grid .category-card__media .category-card__icon {
+    width: 40px; height: 40px;
+    color: rgba(255, 255, 255, .92);
+    margin-bottom: 18%;            /* clear of the scrim, optically centred */
+  }
+  @media (hover: hover) {
+    .home-cat-grid .category-card:hover .category-card__img { transform: scale(1.06); }
+    .home-cat-grid .category-card:hover .category-card__media::after { opacity: .88; }
+  }
+  .home-cat-grid .category-card:focus-visible {
+    outline: 2px solid var(--link);
+    outline-offset: 3px;
+  }
+}
+
+/* ---- One row of eight, desktop only -----------------------------------
+   Requested directly, and it earns its place: eight tiles across is the whole
+   catalogue in one glance with no second row to scroll past, and it keeps the
+   sections below above the fold. It only works where there is room — under
+   1200px eight columns are too narrow for these names, so the four-up layout
+   stands and phones keep their own compact four-across. */
+@media (min-width: 1200px) {
+  .home-cat-grid { grid-template-columns: repeat(8, 1fr); gap: var(--space-3); }
+  .home-cat-grid .category-card__title {
+    /* Sized to keep the longest name — "Kitchen Appliances" — on one line at
+       the narrowest desktop tile, 142px on a 1280px laptop. That is not a
+       typographic preference, it is what lets the scrim above stay shallow;
+       see the note there. Measured, not guessed. */
+    font-size: 13px;
+    padding: 10px 8px;
+    letter-spacing: -.01em;
+  }
+  .home-cat-grid .category-card__media .category-card__icon { width: 34px; height: 34px; }
+  /* Proportional to the card: -4px on a tile this size is a jump. */
+  .home-cat-grid .category-card:hover { transform: translateY(-3px); }
+}
 
 /* ---- Category section on phones --------------------------------------
    At 390px the two-up layout spent a full screen on eight tiles, and the

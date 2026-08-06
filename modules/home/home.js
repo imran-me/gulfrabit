@@ -174,7 +174,10 @@ function categoryMedia(c, icon) {
   const art = CAT_ART.has(c.slug) ? `/assets/images/categories/${c.slug}` : null;
   const pic = art
     ? `<picture><source srcset="${art}-160.webp 160w, ${art}-280.webp 280w, ${art}-560.webp 560w"`
-      + ` sizes="(max-width: 767px) 18vw, 280px" type="image/webp">`
+      /* Measured, not guessed: the well is 66px on a 390px phone and 131px in
+         the eight-across desktop row, so these pick the 160w and 280w tiers at
+         2x with no upscaling. Re-measure if the grid's column count changes. */
+      + ` sizes="(max-width: 767px) 18vw, 140px" type="image/webp">`
       + `<img class="category-card__img" onerror="this.hidden=true" src="${art}.jpg" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>`
     : (c.image ? `<img class="category-card__img" onerror="this.hidden=true" src="${esc(c.image)}" alt="" loading="lazy" decoding="async">` : '');
   return `<span class="category-card__media">`

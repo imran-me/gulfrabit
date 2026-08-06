@@ -33,12 +33,12 @@
                removed here is friction removed from the highest-value form on
                the site. -->
           <div class="form-grid">
-            <div class="field-gr" data-field><label class="label-gr" for="fullName">Full name <span class="req">*</span></label><input id="fullName" class="input-gr" name="fullName" autocomplete="name" data-validate="required|min:3" data-label="Full name"><span class="field-error" data-error></span></div>
-            <div class="field-gr" data-field><label class="label-gr" for="phone">Phone <span class="req">*</span></label><input id="phone" class="input-gr" name="phone" type="tel" inputmode="numeric" autocomplete="tel" data-validate="required|phone" data-label="Phone" placeholder="01XXXXXXXXX"><span class="field-error" data-error></span></div>
-            <div class="field-gr col-span-2" data-field><label class="label-gr" for="address">Address <span class="req">*</span></label><input id="address" class="input-gr" name="address" autocomplete="street-address" data-validate="required|min:6" data-label="Address" placeholder="House / road / area"><span class="field-error" data-error></span></div>
+            <div class="field-gr" data-field><label class="label-gr" for="fullName">Full name <span class="label-gr__bn bn" lang="bn">পুরো নাম</span> <span class="req">*</span></label><input id="fullName" class="input-gr" name="fullName" autocomplete="name" data-validate="required|min:3" data-label="Full name"><span class="field-error" data-error></span></div>
+            <div class="field-gr" data-field><label class="label-gr" for="phone">Phone <span class="label-gr__bn bn" lang="bn">ফোন</span> <span class="req">*</span></label><input id="phone" class="input-gr" name="phone" type="tel" inputmode="numeric" autocomplete="tel" data-validate="required|phone" data-label="Phone" placeholder="01XXXXXXXXX"><span class="field-error" data-error></span></div>
+            <div class="field-gr col-span-2" data-field><label class="label-gr" for="address">Address <span class="label-gr__bn bn" lang="bn">ঠিকানা</span> <span class="req">*</span></label><input id="address" class="input-gr" name="address" autocomplete="street-address" data-validate="required|min:6" data-label="Address" placeholder="House / road / area"><span class="field-error" data-error></span></div>
 
             <div class="field-gr" data-field>
-              <label class="label-gr" for="district">District <span class="req">*</span></label>
+              <label class="label-gr" for="district">District <span class="label-gr__bn bn" lang="bn">জেলা</span> <span class="req">*</span></label>
               <!-- Options are injected from modules/delivery — this select is
                    what sets the delivery charge, so it is required. -->
               <select id="district" class="select-gr" name="district" autocomplete="address-level1" data-district data-validate="required" data-label="District">
@@ -47,11 +47,11 @@
               <span class="field-error" data-error></span>
             </div>
 
-            <div class="field-gr" data-field><label class="label-gr" for="area">Area / Thana</label><input id="area" class="input-gr" name="area" autocomplete="address-level2" data-label="Area" placeholder="Optional"><span class="field-error" data-error></span></div>
+            <div class="field-gr" data-field><label class="label-gr" for="area">Area / Thana <span class="label-gr__bn bn" lang="bn">থানা</span></label><input id="area" class="input-gr" name="area" autocomplete="address-level2" data-label="Area" placeholder="Optional"><span class="field-error" data-error></span></div>
 
-            <div class="field-gr col-span-2" data-field><label class="label-gr" for="email">Email (optional)</label><input id="email" class="input-gr" name="email" type="email" autocomplete="email" data-validate="email" data-label="Email" placeholder="For the order receipt — we'll text you either way"><span class="field-error" data-error></span></div>
+            <div class="field-gr col-span-2" data-field><label class="label-gr" for="email">Email (optional) <span class="label-gr__bn bn" lang="bn">ইমেইল</span></label><input id="email" class="input-gr" name="email" type="email" autocomplete="email" data-validate="email" data-label="Email" placeholder="For the order receipt — we'll text you either way"><span class="field-error" data-error></span></div>
 
-            <div class="field-gr col-span-2" data-field><label class="label-gr" for="notes">Delivery notes (optional)</label><textarea id="notes" class="textarea-gr" name="notes" style="min-height:80px" placeholder="Landmark, floor, or a time that suits you"></textarea></div>
+            <div class="field-gr col-span-2" data-field><label class="label-gr" for="notes">Delivery notes (optional) <span class="label-gr__bn bn" lang="bn">নোট</span></label><textarea id="notes" class="textarea-gr" name="notes" style="min-height:80px" placeholder="Landmark, floor, or a time that suits you"></textarea></div>
           </div>
           <div class="step-nav"><a class="btn-gr btn-ghost-gr" href="/modules/cart/cart.html">← Back to cart</a><button class="btn-gr btn-primary-gr" type="button" data-next>Continue to Delivery</button></div>
         </section>
@@ -96,9 +96,9 @@
           <!-- Card fields (shown only when Card selected) -->
           <div data-card-fields hidden style="margin-top:var(--space-4)">
             <div class="form-grid">
-              <div class="field-gr col-span-2" data-field><label class="label-gr" for="cardNum">Card number</label><input id="cardNum" class="input-gr" name="cardNum" inputmode="numeric" placeholder="4242 4242 4242 4242" data-validate="numeric" data-label="Card number"><span class="field-error" data-error></span></div>
-              <div class="field-gr" data-field><label class="label-gr" for="cardExp">Expiry</label><input id="cardExp" class="input-gr" name="cardExp" placeholder="MM/YY"><span class="field-error" data-error></span></div>
-              <div class="field-gr" data-field><label class="label-gr" for="cardCvc">CVC</label><input id="cardCvc" class="input-gr" name="cardCvc" inputmode="numeric" placeholder="123"><span class="field-error" data-error></span></div>
+              <div class="field-gr col-span-2" data-field><label class="label-gr" for="cardNum">Card number <span class="label-gr__bn bn" lang="bn">কার্ড নম্বর</span></label><input id="cardNum" class="input-gr" name="cardNum" inputmode="numeric" placeholder="4242 4242 4242 4242" data-validate="numeric" data-label="Card number"><span class="field-error" data-error></span></div>
+              <div class="field-gr" data-field><label class="label-gr" for="cardExp">Expiry <span class="label-gr__bn bn" lang="bn">মেয়াদ</span></label><input id="cardExp" class="input-gr" name="cardExp" placeholder="MM/YY"><span class="field-error" data-error></span></div>
+              <div class="field-gr" data-field><label class="label-gr" for="cardCvc">CVC <span class="label-gr__bn bn" lang="bn">সিভিসি</span></label><input id="cardCvc" class="input-gr" name="cardCvc" inputmode="numeric" placeholder="123"><span class="field-error" data-error></span></div>
             </div>
           </div>
           <!-- TODO: connect to payment gateway -->

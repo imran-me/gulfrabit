@@ -7,6 +7,25 @@
 .label-gr { font-size: var(--fs-14); font-weight: var(--fw-medium); color: var(--text-secondary); }
 .label-gr .req { color: var(--link); }
 
+/* ---- The Bengali gloss beside a field label ---------------------------
+   Most of this shop's customers read Bangla first, and "Thana / Upazila" in
+   Latin script is a translation of a Bangla word back into English. The
+   Bangla sits ON the label's own line as a quieter second voice — lighter
+   weight, muted, a notch smaller — so the label is still one row and still
+   scans as one thing. Anything bigger and the form reads as two forms.
+
+   Inline, not flex: the label is plain inline content, so this needs no
+   layout change and cannot disturb the ~200 other .label-gr on the site.
+   .bn (see _fonts.css) brings Noto Sans Bengali with it. */
+.label-gr__bn {
+  font-weight: var(--fw-regular);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  /* Bangla's default 1.75 leading would tug the label's line box taller than
+     its Latin neighbours and stagger the field tops. */
+  line-height: 1;
+}
+
 .input-gr,
 .select-gr,
 .textarea-gr {

@@ -1227,6 +1227,25 @@ a:hover { color: var(--link-hover); }
 .label-gr { font-size: var(--fs-14); font-weight: var(--fw-medium); color: var(--text-secondary); }
 .label-gr .req { color: var(--link); }
 
+/* ---- The Bengali gloss beside a field label ---------------------------
+   Most of this shop's customers read Bangla first, and "Thana / Upazila" in
+   Latin script is a translation of a Bangla word back into English. The
+   Bangla sits ON the label's own line as a quieter second voice — lighter
+   weight, muted, a notch smaller — so the label is still one row and still
+   scans as one thing. Anything bigger and the form reads as two forms.
+
+   Inline, not flex: the label is plain inline content, so this needs no
+   layout change and cannot disturb the ~200 other .label-gr on the site.
+   .bn (see _fonts.css) brings Noto Sans Bengali with it. */
+.label-gr__bn {
+  font-weight: var(--fw-regular);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  /* Bangla's default 1.75 leading would tug the label's line box taller than
+     its Latin neighbours and stagger the field tops. */
+  line-height: 1;
+}
+
 .input-gr,
 .select-gr,
 .textarea-gr {
@@ -1469,7 +1488,18 @@ img.settle.is-settled {
 .gr-container { max-width: var(--container-max); margin-inline: auto; padding-inline: var(--space-5); }
 @media (min-width: 1024px) { .gr-container { padding-inline: var(--space-6); } }
 
-.section-gr { padding-block: var(--space-8); }
+/* ---- Section rhythm ---------------------------------------------------
+   64px top AND 64px bottom meant 128px of nothing between every pair of
+   sections on a phone — a third of the viewport, repeated six times down the
+   home page, so a customer scrolled past more blank than shop. Desktop, where
+   there is room for that rhythm, is unchanged.
+
+   24/16 rather than a single number: the gap between two sections is what was
+   wrong (128px -> 40px, the ~70% asked for), and splitting it that way gives
+   a section's heading more air above it than its last row needs below —
+   which is the direction the eye reads anyway. */
+.section-gr { padding-block: var(--space-5) var(--space-4); }
+@media (min-width: 768px)  { .section-gr { padding-block: var(--space-8); } }
 @media (min-width: 1024px) { .section-gr { padding-block: var(--space-10); } }
 
 /* Light / dark section canvases (80/20 neutral system) */

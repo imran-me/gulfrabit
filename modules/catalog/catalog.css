@@ -10,6 +10,44 @@
 .plp-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-5); }
 .plp-count { color: var(--text-muted); font-size: var(--fs-14); }
 
+.plp-sort { display: flex; align-items: center; gap: .5rem; }
+/* width:auto, so the control is as wide as its widest option rather than the
+   full-width every other select on the site wants to be. */
+.plp-sort .select-gr { min-height: 40px; width: auto; }
+
+/* ---- The toolbar on a phone -------------------------------------------
+   Sort used to wrap onto its own line, so a 390px screen spent two rows and
+   ~90px on two controls — above a grid the row exists to serve. Both sit on
+   one row now, Sort pushed right, matched to the Filters button's height and
+   type so they read as a pair rather than a button and a form field.
+
+   Capped rather than auto-width: "Price: Low to High" is the widest option
+   and sizing to it would leave the control twice the size of the button
+   beside it. The closed select clips to the cap, which is what a phone's
+   native picker does anyway once it opens. */
+@media (max-width: 767px) {
+  /* The category name at 2.25rem was the biggest thing on the page and pushed
+     the first row of products most of a screen down. 35% off it — 1.4625rem —
+     still reads as the page's title against the 0.875rem blurb under it. */
+  .plp-head h1 { font-size: 1.4625rem; line-height: 1.15; letter-spacing: -0.018em; }
+
+  .plp-toolbar { flex-wrap: nowrap; gap: var(--space-2); }
+  .plp-sort { margin-left: auto; flex: none; }
+  .plp-sort__label { display: none; }
+  .plp-sort .select-gr {
+    min-height: 38px; height: 38px;
+    max-width: 132px;
+    padding: 0 1.9rem 0 .7rem;
+    font-size: var(--fs-14);
+    background-position: right .6rem center;
+    background-color: var(--surface-raised);
+    border-color: var(--border-hairline);
+    text-overflow: ellipsis;
+  }
+  /* The count is the one thing here that can afford to give up room. */
+  .plp-count { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
 /* ---- Filters sidebar -------------------------------------------------- */
 /* On mobile the filter controls live in a bottom-sheet (opened via the Filters
    button); the inline sidebar only shows from desktop up. */

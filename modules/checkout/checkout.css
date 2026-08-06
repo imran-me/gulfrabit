@@ -4,6 +4,27 @@
 .checkout-layout { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
 @media (min-width: 1024px) { .checkout-layout { grid-template-columns: 1fr 380px; align-items: start; } }
 
+/* ---- Summary rows -----------------------------------------------------
+   These rendered as "Subtotal৳ 4,785" — label and amount touching — because
+   the only .summary-row rule on the site lives in cart.css, and the checkout
+   page does not load it. Checkout owns its own now; borrowing a layout from a
+   sibling module's stylesheet is the coupling this codebase is arranged to
+   avoid, and it failed silently the moment the two pages diverged.
+
+   Declared BEFORE the phone block below, which overrides the padding and size
+   at equal specificity — reorder these two and the compact rows come back at
+   desktop dimensions. */
+.summary-row {
+  display: flex; justify-content: space-between; gap: var(--space-3);
+  padding: var(--space-2) 0;
+  color: var(--text-secondary);
+}
+.summary-row--total {
+  font-size: var(--fs-20); color: var(--text-primary); font-weight: var(--fw-semibold);
+  border-top: 1px solid var(--border-hairline);
+  margin-top: var(--space-2); padding-top: var(--space-4);
+}
+
 /* ---- The summary goes FIRST on a phone ---------------------------------
  *
  * In one column the aside falls below all four steps, so the total is off
@@ -16,15 +37,15 @@
  * holds no interactive element, so nothing's focus order is disturbed by
  * painting it above.
  *
- * It stays stuck under the header while the steps scroll past, so the number
- * is always on screen rather than only at the top of the page.
+ * IT USED TO BE position:sticky, AND THAT WAS THE BUG. Stuck under the header
+ * at z-index 20, it did not sit above the form — it sat ON it, and the first
+ * field of every step scrolled underneath the panel and out of sight. Keeping
+ * a total on screen is not worth hiding the input the customer is trying to
+ * reach. It scrolls with the page now: seen first, then out of the way.
  */
 @media (max-width: 1023.98px) {
   .order-summary {
     order: -1;
-    position: sticky;
-    top: calc(var(--header-h) + var(--space-2));
-    z-index: 20;
     /* Compact: this is a reference, not the main content, and a full-height
        panel above the form would push the first field off the fold. */
     padding: var(--space-4) !important;
@@ -38,7 +59,22 @@
   .order-summary [data-summary-items] { display: none; }
 
   .summary-row { padding: 3px 0; font-size: var(--fs-14); }
-  .summary-row--total { font-size: var(--fs-16); }
+  .summary-row--total { font-size: var(--fs-16); padding-top: var(--space-3); }
+
+  /* ---- Half the air between fields ------------------------------------
+     Input bottom to the next label measured 36px: an 8px flex gap, then the
+     12px .field-error reserves whether or not there is an error, then a 16px
+     margin. Three separators doing one job.
+
+     The margin is the one that goes. The reserved error line stays — it is
+     what stops the form jumping when a message appears — and now does the
+     separating as well, which is space already being paid for. 36px -> 20px,
+     just short of the half asked for, and without touching the label's own
+     breathing room or reintroducing the jump.
+
+     Scoped to the two checkout forms; no other page's spacing moves. */
+  [data-checkout-form] .field-gr,
+  .express-form .field-gr { margin-bottom: 0; }
 }
 
 /* Progress stepper */

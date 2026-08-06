@@ -6,7 +6,7 @@
     </nav>
 
     <!-- Category header -->
-    <header class="section-head" style="margin-bottom:var(--space-6)">
+    <header class="section-head plp-head" style="margin-bottom:var(--space-6)">
       <div class="section-head__titles">
         <p class="overline" data-cat-audience>Shop</p>
         <h1 data-cat-title>Category</h1>
@@ -31,8 +31,12 @@
             </button>
             <span class="plp-count" data-result-count>Loading…</span>
           </div>
-          <label style="display:flex;align-items:center;gap:.5rem" class="caption">Sort
-            <select class="select-gr btn-sm-gr" data-sort style="min-height:40px;width:auto">
+          <!-- The word "Sort" is dropped on phones, not the meaning: the select
+               keeps its aria-label, so a screen reader still announces "Sort
+               by". What it buys is the control fitting on the Filters row
+               instead of claiming a second one. -->
+          <label class="plp-sort caption"><span class="plp-sort__label">Sort</span>
+            <select class="select-gr btn-sm-gr" data-sort aria-label="Sort by">
               <option value="featured">Featured</option>
               <option value="price-asc">Price: Low to High</option>
               <option value="price-desc">Price: High to Low</option>
