@@ -25,7 +25,19 @@ document.addEventListener('admin:ready', load);
 async function load() {
   const sku = new URLSearchParams(location.search).get('sku');
   const body = document.querySelector('[data-mv-body]');
-  if (!sku || !body) return;
+  if (!body) return;
+
+  // This page is one product's ledger and needs a ?sku= to have anything to
+  // show. Reached without one — a bookmark, a shared link, a back button
+  // that dropped the query — it used to return here silently and leave
+  // "Loading movements…" on screen forever: a page that looks like it is
+  // still working, permanently. Say what happened and offer the way on.
+  if (!sku) {
+    body.innerHTML = `<tr><td colspan="6" class="atable__empty">
+      Pick a product on the <a href="/modules/inventory/stock.html">Stock</a> screen
+      to see how its balance got to where it is.</td></tr>`;
+    return;
+  }
 
   let data;
   try {
