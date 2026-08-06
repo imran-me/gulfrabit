@@ -297,31 +297,61 @@
              what search engines read, and what stands if the API is down, so
              it is kept in sync by hand. Flash Sale is the odd one out: a real
              category row so the admin can switch it, but its tile points at
-             the deals page, which already lists every discounted product. -->
+             the deals page, which already lists every discounted product.
+
+             Each tile carries BOTH the photograph and the line icon that
+             preceded it. The icon sits in the same well, underneath, and shows
+             through if the picture never arrives — see .category-card__media.
+             The pictures are decorative (alt=""): the <h3> beside them already
+             names the category, and a screen reader should hear it once. -->
         <div class="home-cat-grid" data-reveal-stagger="60">
           <a class="category-card" href="modules/catalog/category.html?slug=oil-ghee" data-reveal>
-            <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2h4v3l3.2 3.6A4 4 0 0 1 18 11v8.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19.5V11a4 4 0 0 1 .8-2.4L10 5z"/><path d="M6 13h12"/></svg>
+            <span class="category-card__media">
+              <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 2h4v3l3.2 3.6A4 4 0 0 1 18 11v8.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19.5V11a4 4 0 0 1 .8-2.4L10 5z"/><path d="M6 13h12"/></svg>
+              <picture><source srcset="assets/images/categories/oil-ghee-160.webp 160w, assets/images/categories/oil-ghee-280.webp 280w, assets/images/categories/oil-ghee-560.webp 560w" sizes="(max-width: 767px) 18vw, 280px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/oil-ghee.jpg" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
+            </span>
             <h3 class="category-card__title">Oil &amp; Ghee</h3><span class="category-card__count">Olive · Cold-pressed · Ghee</span></a>
           <a class="category-card" href="modules/catalog/category.html?slug=chocolates-dairy" data-reveal>
-            <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="M4 12h16M10 6v12M16 6v12"/></svg>
+            <span class="category-card__media">
+              <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 6h16v12H4z"/><path d="M4 12h16M10 6v12M16 6v12"/></svg>
+              <picture><source srcset="assets/images/categories/chocolates-dairy-160.webp 160w, assets/images/categories/chocolates-dairy-280.webp 280w, assets/images/categories/chocolates-dairy-560.webp 560w" sizes="(max-width: 767px) 18vw, 280px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/chocolates-dairy.jpg" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
+            </span>
             <h3 class="category-card__title">Chocolates &amp; Dairy</h3><span class="category-card__count">Cocoa · Cheese · Milk powder</span></a>
           <a class="category-card" href="modules/catalog/category.html?slug=home-decor" data-reveal>
-            <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-5.5h5V20"/></svg>
+            <span class="category-card__media">
+              <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-5.5h5V20"/></svg>
+              <picture><source srcset="assets/images/categories/home-decor-160.webp 160w, assets/images/categories/home-decor-280.webp 280w, assets/images/categories/home-decor-560.webp 560w" sizes="(max-width: 767px) 18vw, 280px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/home-decor.jpg" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
+            </span>
             <h3 class="category-card__title">Home Decor</h3><span class="category-card__count">Lighting · Textiles · Art</span></a>
           <a class="category-card" href="modules/catalog/category.html?slug=kitchen-appliances" data-reveal>
-            <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3h14v18H5z"/><path d="M5 9h14"/><circle cx="12" cy="15" r="3.2"/><path d="M8 6h3"/></svg>
+            <span class="category-card__media">
+              <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3h14v18H5z"/><path d="M5 9h14"/><circle cx="12" cy="15" r="3.2"/><path d="M8 6h3"/></svg>
+              <picture><source srcset="assets/images/categories/kitchen-appliances-160.webp 160w, assets/images/categories/kitchen-appliances-280.webp 280w, assets/images/categories/kitchen-appliances-560.webp 560w" sizes="(max-width: 767px) 18vw, 280px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/kitchen-appliances.jpg" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
+            </span>
             <h3 class="category-card__title">Kitchen Appliances</h3><span class="category-card__count">Blenders · Fryers · Kettles</span></a>
           <a class="category-card" href="modules/catalog/category.html?slug=dates-nuts" data-reveal>
-            <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="14.5" rx="4.5" ry="6.5"/><path d="M12 8V4.5"/><path d="M12 6c1.6-2.2 4.4-2.4 4.4-2.4s.2 2.8-1.9 4"/></svg>
+            <span class="category-card__media">
+              <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><ellipse cx="12" cy="14.5" rx="4.5" ry="6.5"/><path d="M12 8V4.5"/><path d="M12 6c1.6-2.2 4.4-2.4 4.4-2.4s.2 2.8-1.9 4"/></svg>
+              <picture><source srcset="assets/images/categories/dates-nuts-160.webp 160w, assets/images/categories/dates-nuts-280.webp 280w, assets/images/categories/dates-nuts-560.webp 560w" sizes="(max-width: 767px) 18vw, 280px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/dates-nuts.jpg" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
+            </span>
             <h3 class="category-card__title">Dates &amp; Nuts</h3><span class="category-card__count">Ajwa · Medjool · Pistachio</span></a>
           <a class="category-card" href="modules/catalog/category.html?slug=kids-toys" data-reveal>
-            <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="12" width="9" height="9" rx="1.2"/><circle cx="17" cy="16.5" r="4.5"/><path d="M7.5 3 4 9.5h7z"/></svg>
+            <span class="category-card__media">
+              <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="12" width="9" height="9" rx="1.2"/><circle cx="17" cy="16.5" r="4.5"/><path d="M7.5 3 4 9.5h7z"/></svg>
+              <picture><source srcset="assets/images/categories/kids-toys-160.webp 160w, assets/images/categories/kids-toys-280.webp 280w, assets/images/categories/kids-toys-560.webp 560w" sizes="(max-width: 767px) 18vw, 280px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/kids-toys.jpg" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
+            </span>
             <h3 class="category-card__title">Kids &amp; Toys</h3><span class="category-card__count">Play · Books · Outdoor</span></a>
           <a class="category-card" href="modules/catalog/category.html?slug=fashion-clothes" data-reveal>
-            <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 3 4.5 5.5 6 10l2-1v12h8V9l2 1 1.5-4.5L15 3a3 3 0 0 1-6 0z"/></svg>
+            <span class="category-card__media">
+              <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 3 4.5 5.5 6 10l2-1v12h8V9l2 1 1.5-4.5L15 3a3 3 0 0 1-6 0z"/></svg>
+              <picture><source srcset="assets/images/categories/fashion-clothes-160.webp 160w, assets/images/categories/fashion-clothes-280.webp 280w, assets/images/categories/fashion-clothes-560.webp 560w" sizes="(max-width: 767px) 18vw, 280px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/fashion-clothes.jpg" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
+            </span>
             <h3 class="category-card__title">Fashion &amp; Clothes</h3><span class="category-card__count">Men · Women · Children</span></a>
           <a class="category-card" href="modules/deals/deals.html" data-reveal>
-            <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg>
+            <span class="category-card__media">
+              <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg>
+              <picture><source srcset="assets/images/categories/flash-sale-160.webp 160w, assets/images/categories/flash-sale-280.webp 280w, assets/images/categories/flash-sale-560.webp 560w" sizes="(max-width: 767px) 18vw, 280px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/flash-sale.jpg" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
+            </span>
             <h3 class="category-card__title">Flash Sale</h3><span class="category-card__count">Limited-time prices</span></a>
         </div>
       </div>

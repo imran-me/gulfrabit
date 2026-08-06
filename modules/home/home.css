@@ -354,17 +354,27 @@
 @media (min-width: 1200px) {
   .home-cat-grid { grid-template-columns: repeat(8, 1fr); gap: var(--space-3); }
   .home-cat-grid .category-card {
-    min-height: 148px;
-    padding: var(--space-4) var(--space-3) var(--space-3);
+    min-height: 148px; /* A floor for the no-photo case; art makes them taller. */
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+  }
+  .home-cat-grid .category-card__media {
+    margin-bottom: var(--space-3);
     border-radius: var(--radius-md);
   }
   /* The card bottom-aligns its contents, which is right for the text — every
      blurb ends on the same baseline across the row — but it dragged the icons
      down by however many lines the title took, so eight icons sat at five
      different heights. `auto` pins them to a single line at the top and still
-     lets the text settle to the bottom. */
-  .home-cat-grid .category-card__icon {
+     lets the text settle to the bottom.
+     Only for a tile with no photo: inside a media well the icon is the
+     fallback the well shows when the picture 404s, and it is centred there.
+     Pushing THAT one to the top would misalign the very case it exists for. */
+  .home-cat-grid .category-card > .category-card__icon {
     width: 28px; height: 28px; margin-bottom: auto;
+  }
+  .home-cat-grid .category-card__media .category-card__icon {
+    width: 34px; height: 34px;
   }
   /* Fluid, because a tile is ~150px at the 1400px container cap and ~130px on
      a 1280px laptop — one fixed size is either cramped on the small end or

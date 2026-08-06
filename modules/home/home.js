@@ -149,15 +149,45 @@ const CAT_ICONS = {
    deals page, which already lists every discounted product. */
 const CAT_HREF = { 'flash-sale': '/modules/deals/deals.html' };
 
+/* The photographic tile art, by slug. Deliberately keyed here rather than read
+   from `c.image`: CatalogSeeder only writes that column when it CREATES a row,
+   so a shop seeded before the photographs existed still reports the old SVG
+   path, and the home page would show one thing while the files say another.
+   Art we ship wins; `c.image` is the fallback for a category the merchant
+   added themselves, and the icon is the fallback for that. */
+const CAT_ART = new Set([
+  'oil-ghee', 'chocolates-dairy', 'home-decor', 'kitchen-appliances',
+  'dates-nuts', 'kids-toys', 'fashion-clothes', 'flash-sale',
+]);
+
 const esc = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => (
   { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* The picture, the icon behind it, and the well that holds both — the same
+   structure index.html authors by hand. The icon is not a spare: it is what
+   the well shows when the photograph 404s or the request never lands.
+   DOM order and CSS put the icon underneath, but they cannot uncover it: a
+   broken <img> is still painted — an opaque background plus the browser's own
+   torn-page glyph — so blocking the photos gave eight broken-image marks and
+   no icons at all. The one-line onerror is what actually removes it. */
+function categoryMedia(c, icon) {
+  const art = CAT_ART.has(c.slug) ? `/assets/images/categories/${c.slug}` : null;
+  const pic = art
+    ? `<picture><source srcset="${art}-160.webp 160w, ${art}-280.webp 280w, ${art}-560.webp 560w"`
+      + ` sizes="(max-width: 767px) 18vw, 280px" type="image/webp">`
+      + `<img class="category-card__img" onerror="this.hidden=true" src="${art}.jpg" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>`
+    : (c.image ? `<img class="category-card__img" onerror="this.hidden=true" src="${esc(c.image)}" alt="" loading="lazy" decoding="async">` : '');
+  return `<span class="category-card__media">`
+    + `<svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${icon}</svg>`
+    + `${pic}</span>`;
+}
 
 function categoryTile(c) {
   const href = CAT_HREF[c.slug] ?? `/modules/catalog/category.html?slug=${encodeURIComponent(c.slug)}`;
   const icon = CAT_ICONS[c.slug] ?? CAT_ICONS._fallback;
   const blurb = c.blurb ? `<span class="category-card__count">${esc(c.blurb)}</span>` : '';
   return `<a class="category-card" href="${esc(href)}" data-reveal>`
-    + `<svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${icon}</svg>`
+    + categoryMedia(c, icon)
     + `<h3 class="category-card__title">${esc(c.name)}</h3>${blurb}</a>`;
 }
 

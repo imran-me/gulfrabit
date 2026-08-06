@@ -701,8 +701,10 @@ a:hover { color: var(--link-hover); }
    The photograph is the tile. The line icon that used to be the tile is
    still in the markup, centred in the same well, and the picture is laid
    over it — so an image that 404s, or a phone that gave up on the request,
-   leaves the icon standing rather than an empty box. That fallback is CSS
-   and DOM order only; it holds with JavaScript off.
+   leaves the icon standing rather than an empty box. CSS and DOM order put
+   the icon underneath; uncovering it needs the img's onerror, because a
+   broken image is still painted and would sit on top of the thing it is
+   supposed to fall back to.
 
    The well is square because the art is cropped square (see
    tools/gen-category-images.py) — no second crop happens here. */
