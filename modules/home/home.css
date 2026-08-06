@@ -345,6 +345,52 @@
      to switch itself off at any count but ten. Removed rather than left as a
      selector that can never match. */
 }
+/* ---- One row of eight, desktop only -----------------------------------
+   Requested directly, and it earns its place: eight tiles across is the whole
+   catalogue in one glance with no second row to scroll past, and it keeps the
+   sections below above the fold. It only works where there is room — under
+   1200px eight columns are too narrow to hold "Kitchen Appliances", so the
+   four-up layout stands and phones keep their own compact two-up. */
+@media (min-width: 1200px) {
+  .home-cat-grid { grid-template-columns: repeat(8, 1fr); gap: var(--space-3); }
+  .home-cat-grid .category-card {
+    min-height: 148px;
+    padding: var(--space-4) var(--space-3) var(--space-3);
+    border-radius: var(--radius-md);
+  }
+  /* The card bottom-aligns its contents, which is right for the text — every
+     blurb ends on the same baseline across the row — but it dragged the icons
+     down by however many lines the title took, so eight icons sat at five
+     different heights. `auto` pins them to a single line at the top and still
+     lets the text settle to the bottom. */
+  .home-cat-grid .category-card__icon {
+    width: 28px; height: 28px; margin-bottom: auto;
+  }
+  /* Fluid, because a tile is ~150px at the 1400px container cap and ~130px on
+     a 1280px laptop — one fixed size is either cramped on the small end or
+     mean on the large. */
+  .home-cat-grid .category-card__title {
+    font-size: clamp(.86rem, 1.02vw, var(--fs-16));
+    line-height: 1.25;
+    letter-spacing: -.005em;
+    /* Two lines are reserved whether or not they are used. Half these names
+       wrap at this width and half do not, so without it the titles started at
+       three different heights across one row and the eight tiles read as
+       eight separate decisions instead of a set. */
+    min-height: 2.5em;
+  }
+  .home-cat-grid .category-card__count {
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin-top: 3px;
+    font-size: clamp(.66rem, .78vw, var(--fs-12));
+    line-height: 1.35;
+    min-height: 2.7em; /* Same reason as the title. */
+  }
+  /* The lift is proportional to the card. -4px on a 148px tile is a jump. */
+  .home-cat-grid .category-card:hover { transform: translateY(-3px); }
+}
+
 /* Clean icon-led tiles with a faint brand glow that lifts on hover. */
 .home-cat-grid .category-card::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;

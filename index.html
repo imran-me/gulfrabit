@@ -291,11 +291,17 @@
           </div>
           <a href="modules/catalog/category.html?slug=dates-nuts" class="btn-gr btn-ghost-gr">View all →</a>
         </div>
-        <!-- The seven live categories, in categories.json order. Flash Sale is the
-             odd one out: it is a real category row so the admin can switch it,
-             but its tile points at the deals page, which already lists every
-             discounted product. -->
+        <!-- The live categories, as authored. home.js re-renders this grid from
+             /api/catalog/categories so switching a category on in the admin
+             changes the home page too — this markup is what shows without JS,
+             what search engines read, and what stands if the API is down, so
+             it is kept in sync by hand. Flash Sale is the odd one out: a real
+             category row so the admin can switch it, but its tile points at
+             the deals page, which already lists every discounted product. -->
         <div class="home-cat-grid" data-reveal-stagger="60">
+          <a class="category-card" href="modules/catalog/category.html?slug=oil-ghee" data-reveal>
+            <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2h4v3l3.2 3.6A4 4 0 0 1 18 11v8.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19.5V11a4 4 0 0 1 .8-2.4L10 5z"/><path d="M6 13h12"/></svg>
+            <h3 class="category-card__title">Oil &amp; Ghee</h3><span class="category-card__count">Olive · Cold-pressed · Ghee</span></a>
           <a class="category-card" href="modules/catalog/category.html?slug=chocolates-dairy" data-reveal>
             <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="M4 12h16M10 6v12M16 6v12"/></svg>
             <h3 class="category-card__title">Chocolates &amp; Dairy</h3><span class="category-card__count">Cocoa · Cheese · Milk powder</span></a>

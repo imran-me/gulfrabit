@@ -15,8 +15,10 @@
 import { getFeatured } from '../catalog/backend/api.js';
 import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { renderProductSkeletons } from '../../shared/js/components/skeleton-loader.js';
+import { initScrollReveal } from '../../shared/js/components/scroll-reveal.js';
 
 initHeroCarousel();
+initCategoryGrid();
 initProductSections();
 initRailArrows();
 initTestimonials();
@@ -114,6 +116,78 @@ async function curatedShelf(rail, limit) {
     // Offline, or no API — the authored HTML stands.
   }
   return null;
+}
+
+/* ---- Category grid (authored HTML → live categories) ------------------
+ *
+ * The header and footer build their category lists from the API, so switching
+ * a category on in the admin changed them immediately — while this grid, being
+ * authored markup, stayed at whatever was last hand-edited. Eight categories
+ * live, seven tiles on the home page. Whichever number was right, two numbers
+ * on one page is a bug, and it recurs every time the merchant touches the
+ * admin, so the grid reads the same source the menus do.
+ *
+ * The authored markup is NOT redundant: it is the no-JS content, the SEO
+ * content, and the fallback when the API is down. It is only replaced when the
+ * API answers with a list that actually differs.
+ */
+const CAT_ICONS = {
+  'oil-ghee': '<path d="M10 2h4v3l3.2 3.6A4 4 0 0 1 18 11v8.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19.5V11a4 4 0 0 1 .8-2.4L10 5z"/><path d="M6 13h12"/>',
+  'chocolates-dairy': '<path d="M4 6h16v12H4z"/><path d="M4 12h16M10 6v12M16 6v12"/>',
+  'home-decor': '<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-5.5h5V20"/>',
+  'kitchen-appliances': '<path d="M5 3h14v18H5z"/><path d="M5 9h14"/><circle cx="12" cy="15" r="3.2"/><path d="M8 6h3"/>',
+  'dates-nuts': '<ellipse cx="12" cy="14.5" rx="4.5" ry="6.5"/><path d="M12 8V4.5"/><path d="M12 6c1.6-2.2 4.4-2.4 4.4-2.4s.2 2.8-1.9 4"/>',
+  'kids-toys': '<rect x="3" y="12" width="9" height="9" rx="1.2"/><circle cx="17" cy="16.5" r="4.5"/><path d="M7.5 3 4 9.5h7z"/>',
+  'fashion-clothes': '<path d="M9 3 4.5 5.5 6 10l2-1v12h8V9l2 1 1.5-4.5L15 3a3 3 0 0 1-6 0z"/>',
+  'flash-sale': '<path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13z"/>',
+  /* A category the merchant adds later gets a plain tag rather than no icon —
+     an empty box next to seven drawn ones reads as a broken tile. */
+  _fallback: '<path d="M3.5 11.2V4.5a1 1 0 0 1 1-1h6.7a1 1 0 0 1 .7.3l8 8a1 1 0 0 1 0 1.4l-6.7 6.7a1 1 0 0 1-1.4 0l-8-8a1 1 0 0 1-.3-.7z"/><circle cx="8" cy="8" r="1.4"/>',
+};
+
+/* Flash Sale is a real category the admin can switch, but its tile goes to the
+   deals page, which already lists every discounted product. */
+const CAT_HREF = { 'flash-sale': '/modules/deals/deals.html' };
+
+const esc = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => (
+  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function categoryTile(c) {
+  const href = CAT_HREF[c.slug] ?? `/modules/catalog/category.html?slug=${encodeURIComponent(c.slug)}`;
+  const icon = CAT_ICONS[c.slug] ?? CAT_ICONS._fallback;
+  const blurb = c.blurb ? `<span class="category-card__count">${esc(c.blurb)}</span>` : '';
+  return `<a class="category-card" href="${esc(href)}" data-reveal>`
+    + `<svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${icon}</svg>`
+    + `<h3 class="category-card__title">${esc(c.name)}</h3>${blurb}</a>`;
+}
+
+async function initCategoryGrid() {
+  const grid = document.querySelector('.home-cat-grid');
+  if (!grid) return;
+
+  let cats;
+  try {
+    const res = await fetch('/api/catalog/categories', { headers: { Accept: 'application/json' } });
+    if (!res.ok) return;
+    const body = await res.json();
+    cats = Array.isArray(body?.data) ? body.data : body;
+  } catch {
+    return; // Offline, or no API — the authored tiles stand.
+  }
+  if (!Array.isArray(cats) || !cats.length) return;
+
+  // Repainting eight identical tiles would restart their reveal for nothing,
+  // so the common case — admin and markup agree — costs one comparison.
+  const authored = [...grid.querySelectorAll('.category-card')]
+    .map((a) => new URL(a.href, location.href).searchParams.get('slug') || a.getAttribute('href'));
+  const live = cats.map((c) => CAT_HREF[c.slug] ?? c.slug);
+  if (authored.join('|') === live.join('|')) return;
+
+  grid.innerHTML = cats.map(categoryTile).join('');
+  // These tiles were built after scroll-reveal ran, so nothing is watching
+  // them — and [data-reveal] starts at opacity 0. Without this the grid would
+  // paint itself invisible, which is exactly the failure it is replacing.
+  initScrollReveal(grid.closest('.home-cat') || grid.parentElement);
 }
 
 /* ---- Product sections (skeleton → data) ------------------------------- */
