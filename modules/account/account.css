@@ -58,3 +58,15 @@
 @media (min-width: 640px) { .address-grid { grid-template-columns: 1fr 1fr; } }
 .address-card { padding: var(--space-5); position: relative; }
 .address-card.is-default { border-color: var(--gr-cyan-dark); }
+
+/* Sign out is a <button>, because it performs an action rather than going
+   somewhere — it used to be <a href="#">, which looked clickable and did
+   nothing at all with JavaScript off. A button in a list of links has to be
+   told to stop behaving like a button: full width, left-aligned, no chrome. */
+button.account-nav__link {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  background: none;
+  cursor: pointer;
+}

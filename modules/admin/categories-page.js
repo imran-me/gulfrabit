@@ -106,7 +106,32 @@ function paint() {
   document.querySelector('[data-cat-list]').innerHTML =
     html + orphans.map((c) => card(c)).join('');
 
+  hideBrokenThumbs();
   wire();
+}
+
+/**
+ * A thumbnail whose file is not there should look like no thumbnail, not like
+ * a broken page.
+ *
+ * The image path is a plain column: it can name a file that was deleted from
+ * disk, or one that a seed named and nobody ever created — eight categories
+ * shipped pointing at SVGs that do not exist, and the screen showed eight
+ * broken-image glyphs. There is already a designed empty state ("+ image"), so
+ * falling back to it costs nothing and says the true thing.
+ *
+ * Listener rather than an inline onerror: the CSP allows inline handlers, but
+ * a page that never needs one is a page that cannot be surprised by them.
+ */
+function hideBrokenThumbs() {
+  for (const img of document.querySelectorAll('.acat__thumb img')) {
+    img.addEventListener('error', () => {
+      const host = img.closest('.acat__thumb');
+      if (!host) return;
+      host.innerHTML = '<span class="acat__thumb-empty">+<br>image</span>';
+      if (host.tagName === 'BUTTON') host.title = 'Add an image';
+    }, { once: true });
+  }
 }
 
 function card(c, parent = null) {
