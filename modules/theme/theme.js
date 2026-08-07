@@ -62,7 +62,59 @@ export function applyTheme(name) {
   const root = document.documentElement;
   if (theme === 'luxe') root.setAttribute('data-theme', 'luxe');
   else root.removeAttribute('data-theme');
+  if (theme === 'luxe') armGilding();
   return theme;
+}
+
+/* ---- Heading gilding ---------------------------------------------------
+ * Luxe sets display headings half in the logo's teal, half in metallic gold
+ * (see theme-luxe.css) — and CSS cannot colour half a heading. The tail is
+ * wrapped here: the LAST half of the words, the way saraalsalam.com gilds
+ * "A BULK INQUIRY?", because the end of a phrase is where the eye lands. A
+ * one-word heading goes entirely gold — teal alone would read as a link.
+ *
+ * Only the heading's first text node is touched, so the Bangla gloss spans
+ * inside checkout's headings pass through untouched. The wrap is idempotent
+ * (a heading that already carries its .lux-gilt is left alone), and each
+ * heading is watched: pages write titles in after load — "Shop All", a
+ * category's name — and replacing textContent destroys the span, so the
+ * watcher simply gilds again. Switching back to classic strips nothing:
+ * the span only means anything under [data-theme="luxe"].
+ */
+const GILD = '.section-head__titles > h1, .section-head__titles > h2, '
+  + '.plp-head h1, h1.page-head, .express__head';
+let gildArmed = false;
+
+function gildOne(h) {
+  if (h.querySelector(':scope > .lux-gilt')) return;
+  const tn = Array.from(h.childNodes).find((n) => n.nodeType === 3 && n.textContent.trim());
+  if (!tn) return;
+  const words = tn.textContent.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return;
+  const keep = words.length === 1 ? 0 : Math.ceil(words.length / 2);
+  const span = document.createElement('span');
+  span.className = 'lux-gilt';
+  span.textContent = words.slice(keep).join(' ');
+  const frag = document.createDocumentFragment();
+  if (keep) frag.append(document.createTextNode(words.slice(0, keep).join(' ') + ' '));
+  frag.append(span);
+  // The heading may carry more after this text node — checkout's Bangla
+  // gloss does — and the wrap must not eat the space that separated them.
+  if (tn.nextSibling) frag.append(document.createTextNode(' '));
+  tn.replaceWith(frag);
+}
+
+function armGilding() {
+  if (gildArmed) return;
+  gildArmed = true;
+  const run = () => {
+    document.querySelectorAll(GILD).forEach((h) => {
+      gildOne(h);
+      new MutationObserver(() => gildOne(h)).observe(h, { childList: true });
+    });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
 }
 
 /** The ?theme= preview, if one is in play for this tab. */
