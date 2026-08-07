@@ -62,7 +62,7 @@ export function applyTheme(name) {
   const root = document.documentElement;
   if (theme === 'luxe') root.setAttribute('data-theme', 'luxe');
   else root.removeAttribute('data-theme');
-  if (theme === 'luxe') { armGilding(); armBurst(); }
+  if (theme === 'luxe') { armGilding(); armBurst(); armGlance(); }
   return theme;
 }
 
@@ -204,4 +204,56 @@ export async function syncTheme() {
   }
 }
 
+
+/* ---- The glance --------------------------------------------------------
+ * Touch screens have no hover, so the scroll is the pointer: as a card
+ * crosses the middle of the screen it is marked, the mark runs one pass of
+ * the ring light (see .lux-glance in theme-luxe.css), and animationend
+ * lifts the mark so the next arrival can run it again. Cards are observed
+ * as they appear — the shelves hydrate after load, so a body-level watcher
+ * adopts new cards, each exactly once. Idle on desktop, absent under
+ * reduced motion, and inert outside Luxe because nothing else adds the
+ * class.
+ */
+let glanceArmed = false;
+
+function armGlance() {
+  if (glanceArmed) return;
+  glanceArmed = true;
+  if (!('IntersectionObserver' in window)) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!window.matchMedia('(hover: none)').matches) return;
+
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) {
+      if (!en.isIntersecting) continue;
+      const el = en.target;
+      if (el.classList.contains('lux-glance')) continue;
+      el.classList.add('lux-glance');
+      el.addEventListener('animationend', () => el.classList.remove('lux-glance'), { once: true });
+    }
+  }, { threshold: 0.6, rootMargin: '-12% 0px -12% 0px' });
+
+  const adopt = (root) => {
+    root.querySelectorAll?.('.product-card:not([data-lux-glance]), .category-card:not([data-lux-glance])')
+      .forEach((el) => { el.dataset.luxGlance = '1'; io.observe(el); });
+  };
+
+  const run = () => {
+    adopt(document);
+    new MutationObserver((muts) => {
+      for (const m of muts) {
+        for (const n of m.addedNodes) {
+          if (n.nodeType === 1) adopt(n);
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+}
+
+/* Boot LAST: applyTheme reaches every arm-function above, and a `let`
+   declared after this line would still be uninitialized when it does —
+   exactly the bug that once made the glance observer die silently. */
 syncTheme();
