@@ -29,6 +29,7 @@
  */
 
 import { getProductById, getRelated } from '../catalog/backend/api.js';
+import { validatePromo } from '../cart/backend/api.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { siteURL } from '../../shared/js/core/paths.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';
@@ -131,9 +132,31 @@ async function fillDistricts() {
   }
 }
 
-function repaintTotals() {
+/* The coupon that rode in on the ad link (coupon-link.js), or was applied in
+   the cart. Express is the ad landing page, so this is where "use code
+   GULF10" in the ad copy has to become a number on screen — re-validated
+   against the live subtotal on every repaint, exactly as the cart does, and
+   sent with the order only while it holds. The server stays the authority. */
+const storedPromo = storage.get('cart-promo', null);
+const promoCode = typeof storedPromo === 'string' ? storedPromo : (storedPromo?.code ?? null);
+let promoDiscount = 0;
+
+async function repaintTotals() {
   const sub = (product?.price ?? 0) * qty;
-  const total = sub + quote.cost;
+
+  promoDiscount = 0;
+  if (promoCode) {
+    const r = await validatePromo(promoCode, sub);
+    if (r.valid) promoDiscount = r.discount;
+  }
+  const row = document.querySelector('[data-sum-discount-row]');
+  if (row) {
+    row.hidden = promoDiscount === 0;
+    setText('[data-sum-promo]', `· ${promoCode}`);
+    setText('[data-sum-discount]', `−${formatBDT(promoDiscount)}`);
+  }
+
+  const total = Math.max(0, sub - promoDiscount) + quote.cost;
   setText('[data-sum-subtotal]', formatBDT(sub));
   setText('[data-sum-delivery]', formatBDT(quote.cost));
   setText('[data-sum-zone]', quote.label ? `· ${quote.label}` : '');
@@ -247,7 +270,7 @@ async function confirmOrder() {
     notes: null,
     delivery: quote.id,
     payment: form.querySelector('[data-payment]:checked')?.value || 'cod',
-    promoCode: null,
+    promoCode: promoDiscount > 0 ? promoCode : null,
     website: g('website') || null,
     source: adSource(),
     eventId,
