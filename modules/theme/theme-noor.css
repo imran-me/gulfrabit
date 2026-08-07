@@ -41,12 +41,12 @@
   --surface-inverse: #F2EAD8;   /* the rare bright block                   */
 
   --border-hairline: rgba(232, 207, 142, .16);  /* hairlines are gold thread */
-  --border-input:    #3E5E66;
+  --border-input:    #4F7A85;   /* 3.6:1 on the sunken input — the audit caught 2.4 */
 
   /* ---- Text: warm ivory, never white --------------------------------- */
   /* Pure white on deep teal glares like a torch; lamplight is warm.
-     Every value is AA on --surface-page: primary 13.9:1, secondary 9.1:1,
-     muted 5.6:1. */
+     Every value is AA on --surface-page: primary 15.1:1, secondary 10.5:1,
+     muted 6.6:1 (worst case is --surface-raised: 12.9 / 9.0 / 5.6). */
   --text-primary:    #F2EAD8;
   --text-secondary:  #CFC5AB;
   --text-muted:      #A29C86;
@@ -59,6 +59,18 @@
   --accent-ink:      #4FC9E4;
   --gold-ink:        #E4CE92;   /* gold may finally be BRIGHT: 10.3:1      */
   --lime-ink:        #B9E36B;
+
+  /* ---- Status & shadows ------------------------------------------------
+     The audit's root-cause find: every --shadow-* token is documented as
+     'tuned for a white canvas' and disappears on the night page — so the
+     toast, the modal, the mega menu, the button lift all sat flat. Re-cut
+     once here, every var() consumer lifts again. The error red brightens
+     the way the cyan did. */
+  --gr-error:  #F0666B;
+  --scrollbar-thumb: #8A6D22;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.5);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.4);
+  --shadow-lg: 0 18px 48px rgba(0,0,0,.6), 0 6px 16px rgba(0,0,0,.45);
 
   /* ---- Washes & glass ------------------------------------------------- */
   --wash-hover:      rgba(242, 234, 216, .06);
@@ -321,13 +333,18 @@ html[data-theme="noor"] .category-card.lux-glance {
   border-bottom: 1px solid var(--lux-gold, #C9A24B);
   border-radius: 0;
 }
-[data-theme="noor"] .newsletter-band .overline { color: #8A6D22 !important; }
+[data-theme="noor"] .newsletter-band .overline { color: #6E5713 !important; } /* 5.4:1 on the band's darker stop */
 [data-theme="noor"] .newsletter-band h2 {
   font-family: 'Cinzel', Georgia, serif;
   font-weight: 700;
   color: #2F2A1C !important;
 }
 [data-theme="noor"] .newsletter-band p:not(.overline) { color: #5C5334 !important; }
+/* Subscribe sits on the ink pill whose label is --text-inverse — which this
+   theme flips DARK. Dark-on-dark on the bright panel: the audit's catch. */
+[data-theme="noor"] .newsletter-band .btn-gr { color: #F2EAD8; }
+/* And the night's gold selection would vanish in the bright room. */
+[data-theme="noor"] .newsletter-band ::selection { background: rgba(58,44,12,.9); color: #FFF8E6; }
 
 /* ---- Small rooms ---------------------------------------------------------
    The seal and the stepper read correctly on dark already (they are gold);
@@ -394,7 +411,14 @@ html[data-theme="noor"] .category-card.lux-glance {
    falls apart: what selecting text looks like, where keyboard focus lands,
    what the scrollbar wears. */
 [data-theme="noor"] ::selection { background: rgba(201, 162, 75, .45); color: #FFF8E6; }
-[data-theme="noor"] :focus-visible { outline: 2px solid #E4CE92; outline-offset: 2px; }
+/* Two rings, because focus can land on the night OR inside a white vitrine:
+   the dark inner ring reads on the photo wells (18:1), the gold outer ring
+   reads on the water (11.6:1). One ring alone fails one of the two. */
+[data-theme="noor"] :focus-visible {
+  outline: 2px solid #04191F;
+  outline-offset: 0;
+  box-shadow: 0 0 0 4px #E4CE92;
+}
 [data-theme="noor"] { scrollbar-color: #8A6D22 #071F26; }
 [data-theme="noor"]::-webkit-scrollbar { width: 10px; }
 [data-theme="noor"]::-webkit-scrollbar-track { background: #071F26; }
@@ -403,6 +427,110 @@ html[data-theme="noor"] .category-card.lux-glance {
   border-radius: 5px;
   border: 2px solid #071F26;
 }
+
+/* =========================================================================
+   THE NIGHT AUDIT — 50 findings from a six-agent sweep of every stylesheet,
+   each one a place the dark would have forgotten. Grouped by room.
+   ========================================================================= */
+
+/* -- Chrome ------------------------------------------------------------- */
+[data-theme="noor"] .site-header.is-scrolled { box-shadow: 0 8px 28px rgba(0, 0, 0, .45); }
+[data-theme="noor"] .mega-menu,
+[data-theme="noor"] .search-suggest { box-shadow: 0 0 26px rgba(201,162,75,.08), 0 18px 48px rgba(0,0,0,.55); }
+[data-theme="noor"] .search-suggest__item img { background: #FFFFFF; }
+[data-theme="noor"] .header-search__field:focus-within {
+  border-color: var(--link);
+  box-shadow: 0 0 0 3px rgba(79, 201, 228, .28);
+}
+[data-theme="noor"] .gr-offcanvas { box-shadow: 24px 0 60px -20px rgba(0, 0, 0, .75); }
+[data-theme="noor"] .gr-offcanvas::before {
+  background: linear-gradient(180deg, rgba(232,207,142,.07), rgba(201,162,75,.03) 42%, transparent);
+}
+[data-theme="noor"] .tabbar__badge { color: var(--text-on-accent); }
+[data-theme="noor"] .tabbar__item:active { color: var(--link); }
+
+/* -- Overlays & feedback ------------------------------------------------- */
+[data-theme="noor"] .toast-gr { box-shadow: 0 14px 40px rgba(0,0,0,.55), 0 0 22px rgba(201,162,75,.10); }
+[data-theme="noor"] .gr-modal .modal-content { box-shadow: 0 18px 48px rgba(0,0,0,.6), 0 0 26px rgba(201,162,75,.08); }
+/* The skeleton swept a near-opaque WHITE bar across the night every 1.4s —
+   the one strobe light in the theatre. It sweeps in lamplight now. */
+[data-theme="noor"] .skeleton::after {
+  background: linear-gradient(90deg, transparent, var(--wash-shimmer), transparent);
+}
+[data-theme="noor"] .input-gr:focus,
+[data-theme="noor"] .select-gr:focus,
+[data-theme="noor"] .textarea-gr:focus {
+  border-color: var(--link);
+  box-shadow: 0 0 0 3px rgba(79, 201, 228, .28);
+}
+[data-theme="noor"] .field-gr.is-invalid .input-gr,
+[data-theme="noor"] .field-gr.is-invalid .select-gr,
+[data-theme="noor"] .field-gr.is-invalid .textarea-gr { box-shadow: 0 0 0 3px rgba(229, 72, 77, .3); }
+/* The select's caret is a data-URI frozen with the LIGHT theme's grey. */
+[data-theme="noor"] .select-gr {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A29C86' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* -- Cards & merchandise ------------------------------------------------- */
+/* Ivory icons over a white photo well were 1.1:1 — the wishlist and quick
+   view buttons float ON the vitrine glass, so they keep daylight ink. */
+[data-theme="noor"] .product-card__actions .btn-icon-gr { color: #101314; background: rgba(255,255,255,.8); }
+@media (hover: hover) {
+  [data-theme="noor"] .product-card__actions .btn-icon-gr:hover { color: #0E7C99; background: rgba(255,255,255,.95); }
+}
+[data-theme="noor"] .badge-new { background: rgba(4,25,31,.85); color: #7FDCF0; border-color: rgba(79,201,228,.45); }
+[data-theme="noor"] .badge-origin { background: rgba(4,25,31,.8); color: #CFC5AB; border-color: rgba(207,197,171,.3); }
+html[data-theme="noor"] .home-cat-grid .category-card__media { background: #FFFFFF; }
+[data-theme="noor"] .category-card__media .category-card__icon { color: #0E7C99; }
+/* The near-vertical chip gradient ends at #B8860B, where the old umber sank
+   to 4.18:1 — darkened to hold 4.5 on the gradient's WORST band, not its
+   average. */
+[data-theme="noor"] .badge-premium,
+[data-theme="noor"] .size-chip.is-on,
+[data-theme="noor"] .variant-opt.is-selected { color: #241A05; }
+html[data-theme="noor"] .variant-opt.is-selected .variant-opt__price { color: inherit; }
+[data-theme="noor"] .text-gradient { background-image: linear-gradient(135deg, #4FC9E4 0%, #B9E36B 100%); }
+
+/* -- The money pages ------------------------------------------------------ */
+[data-theme="noor"] .express-sheet__scrim { background: var(--scrim); }
+[data-theme="noor"] .express-sheet__panel {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  box-shadow: 0 -18px 60px rgba(0, 0, 0, .6);
+}
+[data-theme="noor"] .express-bar { box-shadow: 0 -6px 24px rgba(0, 0, 0, .6); }
+[data-theme="noor"] .buybar,
+[data-theme="noor"] .pdp-buybar { box-shadow: 0 -2px 16px rgba(0, 0, 0, .55); }
+[data-theme="noor"] .option-card.is-selected { background: rgba(79, 201, 228, .10); border-color: var(--link); }
+@media (hover: hover) {
+  [data-theme="noor"] .option-card:hover { border-color: var(--link); }
+}
+[data-theme="noor"] .delivery-resolved { border-left-color: var(--accent-ink); }
+[data-theme="noor"] .bundle,
+[data-theme="noor"] .bundle__item { border-color: var(--border-hairline); }
+[data-theme="noor"] .bundle__tag { color: var(--accent-ink); }
+
+/* -- Bands & stories ------------------------------------------------------ */
+/* Both hero-image bands wash their art with near-white — noon glued onto
+   the night. The same art under a deep-water wash instead. */
+[data-theme="noor"] .industry-band {
+  background: linear-gradient(90deg, rgba(4,25,31,.96), rgba(4,25,31,.84)),
+              url("../../assets/images/hero/hero-industrial.svg") center/cover;
+}
+[data-theme="noor"] .about-hero {
+  background: linear-gradient(90deg, rgba(4,25,31,.96), rgba(4,25,31,.84)),
+              url("../../assets/images/hero/hero-food.svg") center/cover;
+}
+[data-theme="noor"] .industry-band .surface-gr { border-color: rgba(232,207,142,.35); }
+[data-theme="noor"] .fact { border-color: var(--border-hairline); }
+[data-theme="noor"] .hero__dot::after { box-shadow: 0 0 0 1px rgba(232,207,142,.5); }
+
+/* -- Account -------------------------------------------------------------- */
+html[data-theme="noor"] a.stat-card:hover {
+  border-color: transparent;
+  box-shadow: 0 0 44px rgba(201,162,75,.22), 0 18px 48px rgba(0,0,0,.55);
+}
+[data-theme="noor"] .address-card.is-default { border-color: var(--accent-ink); }
 
 /* ---- Stillness, on request ---------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
