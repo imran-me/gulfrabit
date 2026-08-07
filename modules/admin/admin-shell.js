@@ -20,8 +20,15 @@
 
 import { adminFetch, getSession, signOut } from './backend/api.js';
 
+/* Shared across module instances for the same reason the boot flag lives on
+   the document (see boot): the build's versioned <script src> and the nav
+   files' unversioned imports evaluate this file twice, as two instances with
+   two copies of every module variable. The instance that boots first is the
+   versioned one, and the screens are registered into the unversioned one — a
+   module-scoped array here means the sidebar paints from the empty copy and
+   an owner is told their role has no screens. */
 /** @type {Array<{id:string,label:string,href:string,area:string,group:string,icon:string,order:number}>} */
-const screens = [];
+const screens = (globalThis.grAdminScreens ??= []);
 
 /**
  * Add a screen to the admin sidebar.
