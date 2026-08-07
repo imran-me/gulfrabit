@@ -40,7 +40,7 @@
 import { storage, session, KEYS } from '../../shared/js/core/storage.js';
 
 /** The only values that may ever reach the DOM. */
-const THEMES = ['classic', 'luxe'];
+const THEMES = ['classic', 'luxe', 'trio'];
 
 /** Preview lives in sessionStorage: it dies with the tab, so it cannot be
  *  mistaken later for the published theme, and it cannot leak to a visitor. */
@@ -60,9 +60,14 @@ export function currentTheme() {
 export function applyTheme(name) {
   const theme = THEMES.includes(name) ? name : 'classic';
   const root = document.documentElement;
-  if (theme === 'luxe') root.setAttribute('data-theme', 'luxe');
-  else root.removeAttribute('data-theme');
+  // Classic is the ABSENCE of the attribute, not a value of it — that is
+  // what keeps every theme sheet inert on the default.
+  if (theme === 'classic') root.removeAttribute('data-theme');
+  else root.setAttribute('data-theme', theme);
   if (theme === 'luxe') { armGilding(); armBurst(); armGlance(); }
+  // Trio splits headings too — its tail runs cyan-to-lime instead of gold.
+  // The burst and the glance stay Luxe's: they are made of its dust.
+  if (theme === 'trio') armGilding();
   return theme;
 }
 

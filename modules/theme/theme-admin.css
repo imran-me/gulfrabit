@@ -135,3 +135,16 @@
   gap: var(--space-3);
   margin-top: var(--space-5);
 }
+
+/* Trio's miniature: white canvas, the tricolour stripe as its bar, cards
+   ringed in the three, a flat cyan CTA. Painted from the theme's own
+   colours, like its siblings, so it cannot drift. */
+.theme-swatch--trio { background: #FFFFFF; border-color: #CFE8EF; }
+.theme-swatch--trio .theme-swatch__bar {
+  background: linear-gradient(90deg, #1BB4D4, #0E7C99 50%, #9ACD3C);
+}
+.theme-swatch--trio .theme-swatch__row i {
+  background: #FFFFFF;
+  border: 1.5px solid #0E7C99;
+}
+.theme-swatch--trio .theme-swatch__cta { background: #1BB4D4; }

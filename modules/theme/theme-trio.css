@@ -1,0 +1,137 @@
+/* =========================================================================
+   GulfRabit · Trio theme
+   =========================================================================
+
+   THREE COLOURS, ALL FROM THE LOGO, AND NOTHING ELSE. The mark is cyan,
+   deep teal and lime; this theme wears exactly those, at full voice, on the
+   classic white canvas. No gold anywhere — that is Luxe's metal, and the
+   merchant asked for a theme that is NOT it. Where Luxe is jewellery, Trio
+   is a flag.
+
+   Same contract as Luxe: every rule is scoped under [data-theme="trio"],
+   the sheet is linked everywhere and inert until the attribute is set, and
+   Classic remains the absence of the attribute. Nothing here is
+   load-bearing; nothing starts hidden.
+
+   The three, and their jobs:
+     #1BB4D4 cyan   — action: buttons, the gilt tail, the selected chip
+     #0E7C99 teal   — ink: headings, prices, borders (#083D4D at depth)
+     #9ACD3C lime   — spark: badges, stars, the band's accents
+   ========================================================================= */
+
+/* ---- The signature stripe ---------------------------------------------
+   One fixed hairline across the very top of the page, running the logo
+   left to right. It is the whole brand in three centimetres, and it is the
+   first thing the theme says. */
+html[data-theme="trio"]::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: calc(var(--z-header) + 1);
+  pointer-events: none;
+  background: linear-gradient(90deg, #1BB4D4 0%, #0E7C99 50%, #9ACD3C 100%);
+}
+
+/* ---- Type --------------------------------------------------------------
+   The site-wide serif belongs to the warm themes; Trio is geometric and
+   quick, so the display face everywhere is Clash again. Headings wear the
+   teal ink, and the tail half (wrapped by theme.js, same span Luxe gilds)
+   runs cyan into lime — the logo\'s own sweep, as type. */
+[data-theme="trio"] .section-head h2,
+[data-theme="trio"] .section-head .h2,
+[data-theme="trio"] h1:not([data-pdp-title]),
+[data-theme="trio"] .h1,
+[data-theme="trio"] .page-head {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.022em;
+  color: #0B4A5C;
+}
+[data-theme="trio"] .lux-gilt { color: var(--link); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  [data-theme="trio"] .lux-gilt {
+    background: linear-gradient(96deg, #1BB4D4 0%, #0E7C99 45%, #6BA82F 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+[data-theme="trio"] .overline { color: var(--link); letter-spacing: .14em; }
+
+/* ---- The ring -----------------------------------------------------------
+   The card border runs the three colours the way Luxe\'s ran the metal —
+   same painted-border technique, same 2px reading weight, entirely
+   different voice. */
+html[data-theme="trio"] .product-card,
+html[data-theme="trio"] .category-card,
+html[data-theme="trio"] .surface-gr {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--surface-raised), var(--surface-raised)) padding-box,
+    linear-gradient(135deg, #1BB4D4 0%, #0E7C99 38%, #0E7C99 55%, #9ACD3C 100%) border-box;
+}
+@media (hover: hover) {
+  html[data-theme="trio"] .product-card:hover,
+  html[data-theme="trio"] .category-card:hover {
+    box-shadow: 0 14px 38px rgba(14,124,153,.18);
+  }
+}
+
+/* ---- Actions ------------------------------------------------------------
+   Flat logo cyan, exactly as the merchant standardised on Luxe: no
+   gradient fills on buttons, hover to the deep teal. */
+[data-theme="trio"] .btn-primary-gr,
+[data-theme="trio"] .btn-gradient-gr {
+  background: var(--gr-cyan);
+  border-color: transparent;
+  color: #04222b;
+}
+@media (hover: hover) {
+  [data-theme="trio"] .btn-primary-gr:hover,
+  [data-theme="trio"] .btn-gradient-gr:hover {
+    background: var(--gr-cyan-dark);
+    color: var(--text-inverse);
+    box-shadow: 0 10px 26px rgba(27,180,212,.35);
+  }
+}
+[data-theme="trio"] .btn-outline-gr { border-color: var(--gr-cyan-dark); color: var(--gr-cyan-dark); }
+
+/* ---- Merchandise --------------------------------------------------------
+   Lime is the spark: it marks what is NEW, what is saved, what is a deal.
+   The premium badge goes teal — premium is ink here, not metal. */
+[data-theme="trio"] .badge-premium {
+  background: #0B4A5C;
+  border: 1px solid #0E7C99;
+  color: #FFFFFF;
+}
+[data-theme="trio"] .product-card__price,
+[data-theme="trio"] .bundle__total { color: #0B4A5C; }
+[data-theme="trio"] .size-chip.is-on,
+[data-theme="trio"] .variant-opt.is-selected {
+  background: var(--gr-cyan);
+  border-color: var(--gr-cyan-dark);
+  color: #04222b;
+  box-shadow: none;
+}
+[data-theme="trio"] .trust-band svg { color: var(--gr-cyan-dark); }
+
+/* ---- The band -----------------------------------------------------------
+   The newsletter close goes full teal — the logo\'s ink as a room — with
+   the lime doing what lime does. The !importants aim at the inline colours
+   baked into the band\'s markup, same as Luxe\'s night panel. */
+[data-theme="trio"] .newsletter-band {
+  background: linear-gradient(180deg, #0E7C99 0%, #0B4A5C 70%, #083D4D 100%);
+  border-radius: 0;
+  border-top: 3px solid;
+  border-image: linear-gradient(90deg, #1BB4D4, #9ACD3C) 1;
+}
+[data-theme="trio"] .newsletter-band .overline { color: #9ACD3C !important; }
+[data-theme="trio"] .newsletter-band h2 { color: #FFFFFF !important; }
+[data-theme="trio"] .newsletter-band p:not(.overline) { color: rgba(255,255,255,.82) !important; }
+[data-theme="trio"] .newsletter-band .btn-gr[type="submit"],
+[data-theme="trio"] .newsletter-band button[type="submit"] {
+  background: var(--gr-lime);
+  color: #04222b;
+  border-color: transparent;
+}

@@ -27,7 +27,7 @@
 
 import { adminFetch, isBackendAbsent } from '/modules/admin/backend/api.js';
 
-const THEMES = ['classic', 'luxe'];
+const THEMES = ['classic', 'luxe', 'trio'];
 
 /**
  * What the shop is serving, and whether anyone can change it from here.
@@ -117,7 +117,7 @@ async function init() {
 }
 
 function label(theme) {
-  return theme === 'luxe' ? 'Luxe' : 'Classic';
+  return { luxe: 'Luxe', trio: 'Trio' }[theme] ?? 'Classic';
 }
 
 /** The "Live" flag next to whichever option the shop is actually serving. */
