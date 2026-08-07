@@ -1,0 +1,416 @@
+/* =========================================================================
+   GulfRabit · Noor theme
+   =========================================================================
+
+   নূর — LIGHT. The theme is named for what it is made of.
+
+   THE METAPHOR THAT DOES THE DESIGN WORK
+   --------------------------------------
+   The merchant's reference, saraalsalam.com, is not beautiful because it is
+   green and gold. It is beautiful because it is NIGHT: darkness is the only
+   canvas on which light becomes a material. A jeweller's window is black
+   velvet for the same reason. Luxe gilded the day; Noor is the shop after
+   dark, lanterns lit — the Gulf at night, deep water with gold riding on it.
+
+   And the one thing that fought every light theme becomes the star: the
+   product photography is shot on pure white. On ivory it glared; on deep
+   water each card becomes a LIT VITRINE — a shop window glowing in a dark
+   street. The photos are the light source. Nothing had to be reshot.
+
+   HOW IT IS BUILT
+   ---------------
+   The site paints with surface/text ROLE tokens, never raw hex — so most of
+   this theme is one token block, and every partial and module re-dresses
+   itself. What follows the tokens is only what the tokens cannot reach:
+   glass chrome that hardcodes white, the vitrine wells, the type, the
+   fireflies, the dawn panel.
+
+   Same contract as every theme: scoped under [data-theme="noor"], inert
+   until the attribute is set, nothing load-bearing, nothing starts hidden,
+   every movement dies under prefers-reduced-motion. Keyframes are reused
+   from theme-luxe.css where they exist — keyframe names are global, and a
+   second copy would be a second thing to keep in sync.
+   ========================================================================= */
+
+[data-theme="noor"] {
+  /* ---- Surfaces: the water ------------------------------------------- */
+  --surface-page:    #04191F;   /* the gulf at night                       */
+  --surface-raised:  #0A2830;   /* cards, menus, drawers — one fathom up   */
+  --surface-sunken:  #071F26;   /* inputs, wells — one fathom down         */
+  --surface-band:    #051D24;   /* alternating bands, footer               */
+  --surface-inverse: #F2EAD8;   /* the rare bright block                   */
+
+  --border-hairline: rgba(232, 207, 142, .16);  /* hairlines are gold thread */
+  --border-input:    #3E5E66;
+
+  /* ---- Text: warm ivory, never white --------------------------------- */
+  /* Pure white on deep teal glares like a torch; lamplight is warm.
+     Every value is AA on --surface-page: primary 13.9:1, secondary 9.1:1,
+     muted 5.6:1. */
+  --text-primary:    #F2EAD8;
+  --text-secondary:  #CFC5AB;
+  --text-muted:      #A29C86;
+  --text-on-accent:  #04222b;
+  --text-inverse:    #0B2830;
+
+  /* ---- Brand hues, re-cut for the dark ------------------------------- */
+  --link:            #4FC9E4;   /* cyan brightened: 8.2:1 on the water     */
+  --link-hover:      #7FDCF0;
+  --accent-ink:      #4FC9E4;
+  --gold-ink:        #E4CE92;   /* gold may finally be BRIGHT: 10.3:1      */
+  --lime-ink:        #B9E36B;
+
+  /* ---- Washes & glass ------------------------------------------------- */
+  --wash-hover:      rgba(242, 234, 216, .06);
+  --wash-shimmer:    rgba(242, 234, 216, .06);
+  --scrim:           rgba(0, 0, 0, .62);
+  --glass-header:    rgba(5, 26, 33, .78);
+  --glass-overlay:   rgba(5, 26, 33, .93);
+}
+
+/* ---- The water itself ---------------------------------------------------
+   The page colour moves up to <html> (the Luxe precedent) so the fixed
+   layers between html and content — the lagoon glow and the fireflies —
+   have somewhere to live. Two vast, slow radial glows: moonlight in the
+   brand's cyan high on the water, an ember of gold low on it. They drift
+   on Luxe's own keyframe. */
+html[data-theme="noor"] { background: var(--surface-page); }
+[data-theme="noor"] body { position: relative; background: transparent; }
+[data-theme="noor"] body::before {
+  content: "";
+  position: fixed; inset: -20%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(52% 40% at 78% 8%,  rgba(27, 180, 212, .10), transparent 60%),
+    radial-gradient(44% 38% at 15% 90%, rgba(201, 162, 75, .10), transparent 62%),
+    radial-gradient(60% 50% at 40% 45%, rgba(14, 124, 153, .05), transparent 65%);
+  animation: lux-drift 40s var(--ease-inout) infinite alternate;
+}
+
+/* ---- Fireflies ----------------------------------------------------------
+   Luxe's dust, come alive. On parchment a mote can only be a fleck; on
+   night water it is a LAMP — each one carries a soft halo (the blur radius
+   of its shadow), they rise more slowly, and they breathe deeper. Same
+   duplicated-column loop, same two composited elements, same absolute
+   removal under reduced motion: a stopped firefly is a dead one. */
+html[data-theme="noor"]::before,
+html[data-theme="noor"]::after {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+html[data-theme="noor"]::before {
+  box-shadow:
+    7vw 12vh 4px 1px rgba(232,207,142,.5),   7vw 112vh 4px 1px rgba(232,207,142,.5),
+    23vw 78vh 3px 0 rgba(244,229,180,.42),   23vw 178vh 3px 0 rgba(244,229,180,.42),
+    31vw 34vh 5px 1px rgba(201,162,75,.38),  31vw 134vh 5px 1px rgba(201,162,75,.38),
+    44vw 91vh 3px 0 rgba(232,207,142,.45),   44vw 191vh 3px 0 rgba(232,207,142,.45),
+    52vw 18vh 4px 1px rgba(244,229,180,.4),  52vw 118vh 4px 1px rgba(244,229,180,.4),
+    63vw 66vh 3px 0 rgba(201,162,75,.42),    63vw 166vh 3px 0 rgba(201,162,75,.42),
+    71vw 42vh 5px 1px rgba(232,207,142,.36), 71vw 142vh 5px 1px rgba(232,207,142,.36),
+    83vw 84vh 3px 0 rgba(244,229,180,.44),   83vw 184vh 3px 0 rgba(244,229,180,.44),
+    91vw 22vh 4px 1px rgba(232,207,142,.4),  91vw 122vh 4px 1px rgba(232,207,142,.4),
+    12vw 55vh 3px 0 rgba(201,162,75,.35),    12vw 155vh 3px 0 rgba(201,162,75,.35),
+    38vw 8vh 3px 0 rgba(232,207,142,.38),    38vw 108vh 3px 0 rgba(232,207,142,.38),
+    57vw 97vh 4px 1px rgba(244,229,180,.36), 57vw 197vh 4px 1px rgba(244,229,180,.36),
+    76vw 71vh 3px 0 rgba(232,207,142,.4),    76vw 171vh 3px 0 rgba(232,207,142,.4),
+    96vw 58vh 3px 0 rgba(201,162,75,.33),    96vw 158vh 3px 0 rgba(201,162,75,.33),
+    18vw 28vh 4px 1px rgba(244,229,180,.34), 18vw 128vh 4px 1px rgba(244,229,180,.34),
+    67vw 15vh 3px 0 rgba(232,207,142,.36),   67vw 115vh 3px 0 rgba(232,207,142,.36);
+  animation: lux-rise 190s linear infinite, lux-breathe 11s ease-in-out infinite alternate;
+}
+html[data-theme="noor"]::after {
+  width: 4px; height: 4px;
+  box-shadow:
+    15vw 88vh 6px 2px rgba(244,229,180,.5),  15vw 188vh 6px 2px rgba(244,229,180,.5),
+    29vw 45vh 7px 2px rgba(232,207,142,.42), 29vw 145vh 7px 2px rgba(232,207,142,.42),
+    48vw 74vh 6px 2px rgba(201,162,75,.44),  48vw 174vh 6px 2px rgba(201,162,75,.44),
+    61vw 29vh 8px 2px rgba(244,229,180,.38), 61vw 129vh 8px 2px rgba(244,229,180,.38),
+    79vw 55vh 6px 2px rgba(232,207,142,.45), 79vw 155vh 6px 2px rgba(232,207,142,.45),
+    88vw 92vh 7px 2px rgba(244,229,180,.4),  88vw 192vh 7px 2px rgba(244,229,180,.4),
+    9vw 70vh 6px 2px rgba(232,207,142,.38),  9vw 170vh 6px 2px rgba(232,207,142,.38),
+    36vw 12vh 7px 2px rgba(201,162,75,.36),  36vw 112vh 7px 2px rgba(201,162,75,.36);
+  animation: lux-rise 120s linear infinite, lux-breathe 7s ease-in-out infinite alternate-reverse;
+}
+
+/* ---- The lantern strip ---------------------------------------------------
+   The announce bar ships a bright cyan-to-lime day gradient — at night it
+   was a strip of noon glued to the top of the page. It becomes the lantern
+   strip: deep water, gold thread beneath, the helpline and delivery line in
+   lamplight. */
+[data-theme="noor"] .announce-bar {
+  background: linear-gradient(90deg, #062028 0%, #0A3641 55%, #062028 100%);
+  color: #E4CE92;
+  border-bottom: 1px solid rgba(232, 207, 142, .3);
+}
+[data-theme="noor"] .announce-bar a,
+[data-theme="noor"] .announce-bar__phone { color: #FFF3C4; }
+[data-theme="noor"] .announce-bar__close { color: #E4CE92; }
+
+/* ---- The chrome: dark glass ---------------------------------------------
+   Everything the tokens cannot reach because it hardcodes white. */
+[data-theme="noor"] .site-header { background: rgba(5, 26, 33, .92); }
+[data-theme="noor"] .site-header.is-scrolled {
+  background: var(--glass-header);
+  border-bottom-color: var(--border-hairline);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-theme="noor"] .site-header.is-scrolled { background: rgba(5, 26, 33, .98); }
+}
+[data-theme="noor"] .tabbar { background: rgba(5, 26, 33, .93); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-theme="noor"] .tabbar { background: rgba(5, 26, 33, .99); }
+}
+[data-theme="noor"] .pdp-buybar { background: rgba(5, 26, 33, .93); border-top-color: var(--border-hairline); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-theme="noor"] .pdp-buybar { background: rgba(5, 26, 33, .99); }
+}
+[data-theme="noor"] .cart-mobile-cta { background: rgba(5, 26, 33, .94); border-top-color: var(--border-hairline); }
+
+/* ---- Type: the lantern script -------------------------------------------
+   Cinzel, as Luxe — it is the house's ceremonial voice — but where Luxe had
+   to guard its gold against parchment, night sets it free: the tail may be
+   truly bright, and it may GLOW. The glow is a text-shadow behind the
+   clipped fill, so it halos the letters without fogging them. */
+[data-theme="noor"] .section-head__titles > h1,
+[data-theme="noor"] .section-head__titles > h2,
+[data-theme="noor"] .plp-head h1,
+[data-theme="noor"] h1.page-head,
+[data-theme="noor"] .express__head {
+  font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  letter-spacing: .015em;
+  color: var(--text-primary);
+}
+[data-theme="noor"] .lux-gilt { color: var(--gold-ink); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  [data-theme="noor"] .lux-gilt {
+    background: linear-gradient(100deg,
+      #B8860B 0%, #E8CF8E 22%, #FFF3C4 40%, #C9A24B 56%,
+      #FFEDB0 72%, #D9B45C 88%, #B8860B 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 18px rgba(201, 162, 75, .45), 0 0 3px rgba(232, 207, 142, .3);
+  }
+}
+[data-theme="noor"] .overline { color: var(--gold-ink); letter-spacing: .16em; }
+
+/* ---- The vitrines --------------------------------------------------------
+   The heart of the theme. The card is a dark case; the image well inside
+   stays PURE WHITE, because the photography is lit on white — so each
+   product sits in its own illuminated window, and the row of cards reads as
+   a shopping street at night. The gold ring frames the glass; a soft halo
+   sits under the whole case, breathing brighter under attention. */
+html[data-theme="noor"] .product-card,
+html[data-theme="noor"] .category-card,
+html[data-theme="noor"] .surface-gr {
+  --lux-border: linear-gradient(135deg,
+      #F9E9A8 0%, #B8860B 22%, #6E5313 40%, #FFF3C4 56%, #B8860B 74%, #E7CE8F 100%);
+  border: 2.5px solid transparent;
+  background:
+    linear-gradient(var(--surface-raised), var(--surface-raised)) padding-box,
+    var(--lux-border) border-box;
+  background-size: auto, 240% 100%;
+  background-position: 0 0, 0% 50%;
+  box-shadow: 0 0 26px rgba(201, 162, 75, .10), 0 14px 40px rgba(0, 0, 0, .5);
+}
+/* The lit interior. Product photography is white-ground; the well honours
+   it instead of tinting it, and becomes the light source of the card. */
+[data-theme="noor"] .product-card__media,
+[data-theme="noor"] .category-card__media,
+[data-theme="noor"] .product-card__media picture,
+[data-theme="noor"] .product-card__img,
+[data-theme="noor"] .category-card__img { background: #FFFFFF; }
+[data-theme="noor"] .category-card__media { background: #FFFFFF; }
+
+@media (hover: hover) {
+  html[data-theme="noor"] .product-card:hover,
+  html[data-theme="noor"] .category-card:hover {
+    --lux-border: linear-gradient(135deg,
+        #FFF3C4 0%, #D9B45C 26%, #B8860B 46%, #FFF8DC 60%, #D9B45C 80%, #F4E5B4 100%);
+    animation: lux-ring-flow 2400ms ease-in-out infinite alternate;
+    box-shadow: 0 0 44px rgba(201, 162, 75, .22), 0 18px 48px rgba(0, 0, 0, .55);
+  }
+}
+/* The glance — the thumb's hover — reuses Luxe's machinery wholesale. */
+html[data-theme="noor"] .product-card.lux-glance,
+html[data-theme="noor"] .category-card.lux-glance {
+  --lux-border: linear-gradient(135deg,
+      #FFF3C4 0%, #D9B45C 26%, #B8860B 46%, #FFF8DC 60%, #D9B45C 80%, #F4E5B4 100%);
+  animation: lux-ring-glint 1150ms var(--ease-out);
+  box-shadow: 0 0 44px rgba(201, 162, 75, .22), 0 18px 48px rgba(0, 0, 0, .55);
+}
+
+/* ---- Actions -------------------------------------------------------------
+   Flat logo cyan, the standing rule of the house — and nowhere does it burn
+   brighter than on night water. The hover glow is cyan, not gold: an action
+   speaks in the brand's voice, the theme keeps its jewellery to itself. */
+[data-theme="noor"] .btn-primary-gr,
+[data-theme="noor"] .btn-gradient-gr {
+  background: var(--gr-cyan);
+  border-color: transparent;
+  color: #04222b;
+}
+@media (hover: hover) {
+  [data-theme="noor"] .btn-primary-gr:hover,
+  [data-theme="noor"] .btn-gradient-gr:hover {
+    background: #3FC3E0;
+    color: #04222b;
+    box-shadow: 0 0 30px rgba(27, 180, 212, .45);
+  }
+}
+[data-theme="noor"] .btn-outline-gr,
+[data-theme="noor"] .btn-ghost-gr { color: var(--text-primary); }
+[data-theme="noor"] .btn-outline-gr { border-color: rgba(232, 207, 142, .5); }
+
+/* ---- Merchandise ---------------------------------------------------------
+   Prices are the brightest gold on the page: on this canvas the number IS
+   the lamp. Stars burn gold; the sale badge keeps Luxe's claret under
+   brighter type; the premium badge is struck metal on the dark. */
+[data-theme="noor"] .product-card__price,
+[data-theme="noor"] .bundle__total,
+[data-theme="noor"] .summary-row--total,
+[data-theme="noor"] .pdp-price__now { color: var(--gold-ink); }
+[data-theme="noor"] .product-card__stars svg,
+[data-theme="noor"] .rating-stars svg,
+[data-theme="noor"] .testi-stars { color: #E4CE92; }
+[data-theme="noor"] .badge-sale {
+  background: linear-gradient(160deg, #8E2A38, #641B26);
+  color: #FFE9B8;
+  border: 1px solid rgba(232, 207, 142, .6);
+}
+[data-theme="noor"] .price-saving { color: var(--gold-ink); }
+[data-theme="noor"] .badge-premium {
+  background: linear-gradient(170deg, #FFF3C4 0%, #E4CE92 34%, #C9A24B 72%, #B8860B 100%);
+  border: 1px solid #8A6D22;
+  color: #3A2C0C;
+}
+[data-theme="noor"] .size-chip,
+[data-theme="noor"] .variant-opt {
+  background: var(--surface-sunken);
+  border-color: rgba(232, 207, 142, .35);
+  color: var(--text-secondary);
+}
+[data-theme="noor"] .size-chip.is-on,
+[data-theme="noor"] .variant-opt.is-selected {
+  background: linear-gradient(170deg, #FFF3C4 0%, #E4CE92 30%, #C9A24B 68%, #B8860B 100%);
+  border-color: #8A6D22;
+  color: #3A2C0C;
+  box-shadow: 0 0 16px rgba(201, 162, 75, .3);
+}
+[data-theme="noor"] .variant-opt .variant-opt__price { color: inherit; opacity: .85; }
+[data-theme="noor"] .trust-band svg { color: var(--gold-ink); }
+
+/* ---- The dawn panel ------------------------------------------------------
+   Luxe's page closes at night; Noor's closes at DAWN. The newsletter band
+   inverts into the one bright room on the page — ivory, dark script, gold
+   thresholds — because on a dark page, brightness is now the emphasis.
+   Symmetry is the argument: each theme keeps exactly one room of the
+   opposite hour. The !importants answer the inline colours in the markup,
+   as both siblings do. */
+[data-theme="noor"] .newsletter-band {
+  background:
+    radial-gradient(90% 130% at 50% -20%, rgba(201, 162, 75, .18), transparent 55%),
+    linear-gradient(180deg, #F7F0DC 0%, #EFE3C4 100%);
+  border-top: 1px solid var(--lux-gold, #C9A24B);
+  border-bottom: 1px solid var(--lux-gold, #C9A24B);
+  border-radius: 0;
+}
+[data-theme="noor"] .newsletter-band .overline { color: #8A6D22 !important; }
+[data-theme="noor"] .newsletter-band h2 {
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 700;
+  color: #2F2A1C !important;
+}
+[data-theme="noor"] .newsletter-band p:not(.overline) { color: #5C5334 !important; }
+
+/* ---- Small rooms ---------------------------------------------------------
+   The seal and the stepper read correctly on dark already (they are gold);
+   the stepper's idle medallion just needs its ivory swapped for the case
+   colour. The testimonial quote mark brightens to be seen. */
+[data-theme="noor"] .step__num {
+  font-family: 'Cinzel', Georgia, serif;
+  background: var(--surface-raised);
+  border: 1px solid rgba(232, 207, 142, .5);
+  color: var(--gold-ink);
+}
+[data-theme="noor"] .step.is-active .step__num {
+  background: linear-gradient(170deg, #FFF3C4, #C9A24B 70%);
+  border-color: transparent;
+  color: #2F2A1C;
+}
+[data-theme="noor"] .step.is-done .step__num {
+  background: var(--surface-sunken);
+  border-color: rgba(232, 207, 142, .4);
+  color: var(--gold-ink);
+}
+[data-theme="noor"] .testi-card__inner::before {
+  content: "\201C";
+  position: absolute;
+  top: -0.18em; left: -0.05em;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 5.5rem;
+  line-height: 1;
+  color: rgba(232, 207, 142, .35);
+  pointer-events: none;
+}
+[data-theme="noor"] .testi-card__inner { position: relative; }
+
+/* ---- The cinema screen ---------------------------------------------------
+   The hero banners are bright, saturated artwork. On the day themes they
+   compete with a bright page; at night they become the cinema screen — the
+   brightest thing in the room, framed in a gold hairline, throwing light. */
+[data-theme="noor"] .hero {
+  border-bottom: 1px solid rgba(232, 207, 142, .35);
+  box-shadow: 0 18px 70px rgba(201, 162, 75, .12), 0 30px 90px rgba(0, 0, 0, .6);
+}
+
+/* ---- The night's thread --------------------------------------------------
+   Luxe draws a scroll-progress hairline; night earns a brighter one. Pure
+   CSS scroll-driven animation; where unsupported it simply never appears —
+   it is decoration and carries nothing. */
+@supports (animation-timeline: scroll()) {
+  [data-theme="noor"] body::after {
+    content: "";
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 2px;
+    z-index: calc(var(--z-header) + 1);
+    pointer-events: none;
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, #B8860B, #FFF3C4 55%, #C9A24B);
+    box-shadow: 0 0 12px rgba(232, 207, 142, .5);
+    animation: lux-progress linear;
+    animation-timeline: scroll();
+  }
+}
+
+/* ---- The hand of the house ------------------------------------------------
+   Small places most sites forget, where a dark theme either finishes or
+   falls apart: what selecting text looks like, where keyboard focus lands,
+   what the scrollbar wears. */
+[data-theme="noor"] ::selection { background: rgba(201, 162, 75, .45); color: #FFF8E6; }
+[data-theme="noor"] :focus-visible { outline: 2px solid #E4CE92; outline-offset: 2px; }
+[data-theme="noor"] { scrollbar-color: #8A6D22 #071F26; }
+[data-theme="noor"]::-webkit-scrollbar { width: 10px; }
+[data-theme="noor"]::-webkit-scrollbar-track { background: #071F26; }
+[data-theme="noor"]::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #C9A24B, #8A6D22);
+  border-radius: 5px;
+  border: 2px solid #071F26;
+}
+
+/* ---- Stillness, on request ---------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="noor"]::before,
+  html[data-theme="noor"]::after { display: none; }
+  [data-theme="noor"] body::before { animation: none; }
+  html[data-theme="noor"] .product-card:hover,
+  html[data-theme="noor"] .category-card:hover,
+  html[data-theme="noor"] .product-card.lux-glance,
+  html[data-theme="noor"] .category-card.lux-glance { animation: none; }
+}

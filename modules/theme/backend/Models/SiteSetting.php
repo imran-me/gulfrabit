@@ -28,7 +28,7 @@ class SiteSetting extends Model
      * controller refuses it rather than storing a string that would reach an
      * HTML attribute unvalidated.
      */
-    public const THEMES = ['classic', 'luxe', 'trio'];
+    public const THEMES = ['classic', 'luxe', 'trio', 'noor'];
 
     public const DEFAULT_THEME = 'classic';
 }

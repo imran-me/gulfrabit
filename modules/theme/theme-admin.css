@@ -148,3 +148,15 @@
   border: 1.5px solid #0E7C99;
 }
 .theme-swatch--trio .theme-swatch__cta { background: #1BB4D4; }
+
+/* Noor's miniature: night water, gold hairline, lit-window cards, cyan CTA. */
+.theme-swatch--noor { background: #04191F; border-color: #2B4A52; }
+.theme-swatch--noor .theme-swatch__bar {
+  background: #071F26;
+  box-shadow: 0 1px 0 #C9A24B;
+}
+.theme-swatch--noor .theme-swatch__row i {
+  background: #FFFFFF;
+  border: 1.5px solid #C9A24B;
+}
+.theme-swatch--noor .theme-swatch__cta { background: #1BB4D4; }

@@ -40,7 +40,7 @@
 import { storage, session, KEYS } from '../../shared/js/core/storage.js';
 
 /** The only values that may ever reach the DOM. */
-const THEMES = ['classic', 'luxe', 'trio'];
+const THEMES = ['classic', 'luxe', 'trio', 'noor'];
 
 /** Preview lives in sessionStorage: it dies with the tab, so it cannot be
  *  mistaken later for the published theme, and it cannot leak to a visitor. */
@@ -66,8 +66,11 @@ export function applyTheme(name) {
   else root.setAttribute('data-theme', theme);
   if (theme === 'luxe') { armGilding(); armBurst(); armGlance(); }
   // Trio splits headings too — its tail runs cyan-to-lime instead of gold.
-  // The burst and the glance stay Luxe's: they are made of its dust.
+  // The burst and the glance stay with the gold themes: they are made of dust.
   if (theme === 'trio') armGilding();
+  // Noor is the gold themes' night: everything that moves in Luxe moves
+  // here, and shows better — fireflies against dark water.
+  if (theme === 'noor') { armGilding(); armBurst(); armGlance(); }
   return theme;
 }
 
