@@ -249,7 +249,7 @@ final class OrderService
 
         if ($today >= 5) {
             throw new RuntimeException(
-                'This phone number has reached today's order limit. '
+                "This phone number has reached today's order limit. "
                 . 'Call us if you need a larger order — bulk is what our B2B desk is for.'
             );
         }
