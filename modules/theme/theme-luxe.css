@@ -120,7 +120,14 @@
 
    ::before on <body> rather than a background-image on <html> so the site's
    own backgrounds (bands, cards, the footer) still paint normally on top. */
-[data-theme="luxe"] body { position: relative; background: var(--surface-page); }
+/* The page colour moves UP to <html> so the fixed layers between the two —
+   the drifting wash below and the gold dust added with it — have somewhere
+   to exist: with an opaque body they would render behind the paint and
+   never be seen. Sections and bands with their own backgrounds still cover
+   the dust locally, which is right — it belongs to the open canvas, not to
+   a card. */
+html[data-theme="luxe"] { background: var(--surface-page); }
+[data-theme="luxe"] body { position: relative; background: transparent; }
 [data-theme="luxe"] body::before {
   content: "";
   position: fixed; inset: -20%;
@@ -136,6 +143,110 @@
   from { transform: translate3d(-1.5%, -1%, 0) scale(1);    }
   to   { transform: translate3d( 1.5%,  1%, 0) scale(1.06); }
 }
+
+/* ---- Gold dust ---------------------------------------------------------
+   Asked for by name: fine gold motes drifting up the page, the way dust
+   hangs in a shaft of light. Two fixed layers, all CSS — every mote is a
+   box-shadow on a 1px pseudo-element, each laid down twice, at its place
+   and again one viewport lower, so when the layer has risen a full viewport
+   the loop restarts on an identical frame and the seam is invisible.
+
+   The layers rise at different speeds (slow parallax: near dust and far
+   dust), and each breathes through a second opacity animation so motes
+   seem to catch the light rather than merely travel. transform and opacity
+   only — nothing here can cause layout, and the whole sky costs two
+   composited elements. Dead under reduced motion, and hidden rather than
+   frozen: stationary dust on a screen reads as dirt. */
+/* The pseudo IS one mote — a couple of pixels, top-left — and every shadow
+   is a copy of it placed somewhere in the two-viewport column. (The first
+   cut sized the element to the viewport instead, which made each "mote" a
+   hundred-metre golden ellipse: a bug promoted briefly to a sunrise.) */
+html[data-theme="luxe"]::before,
+html[data-theme="luxe"]::after {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 2px; height: 2px;
+  pointer-events: none;
+  border-radius: 50%;
+}
+html[data-theme="luxe"]::after { width: 3px; height: 3px; }
+html[data-theme="luxe"]::before {
+  box-shadow:
+    38.3vw 22.8vh 1px 1px rgba(232,207,142,0.32),
+    38.3vw 122.8vh 1px 1px rgba(232,207,142,0.32),
+    28.8vw 27.4vh 0px 0px rgba(201,162,75,0.34),
+    28.8vw 127.4vh 0px 0px rgba(201,162,75,0.34),
+    44.1vw 15.3vh 1px 1px rgba(232,207,142,0.22),
+    44.1vw 115.3vh 1px 1px rgba(232,207,142,0.22),
+    68.7vw 57.8vh 0px 0px rgba(228,206,146,0.28),
+    68.7vw 157.8vh 0px 0px rgba(228,206,146,0.28),
+    83.4vw 21.4vh 1px 1px rgba(232,207,142,0.21),
+    83.4vw 121.4vh 1px 1px rgba(232,207,142,0.21),
+    2.8vw 9.8vh 1px 0px rgba(228,206,146,0.19),
+    2.8vw 109.8vh 1px 0px rgba(228,206,146,0.19),
+    23.1vw 2.6vh 1px 1px rgba(201,162,75,0.39),
+    23.1vw 102.6vh 1px 1px rgba(201,162,75,0.39),
+    30.5vw 14.4vh 0px 1px rgba(232,207,142,0.19),
+    30.5vw 114.4vh 0px 1px rgba(232,207,142,0.19),
+    49.3vw 39.1vh 0px 0px rgba(228,206,146,0.21),
+    49.3vw 139.1vh 0px 0px rgba(228,206,146,0.21),
+    93.7vw 39.8vh 1px 0px rgba(232,207,142,0.39),
+    93.7vw 139.8vh 1px 0px rgba(232,207,142,0.39),
+    46.4vw 17.5vh 0px 0px rgba(232,207,142,0.35),
+    46.4vw 117.5vh 0px 0px rgba(232,207,142,0.35),
+    86.7vw 74.4vh 0px 0px rgba(228,206,146,0.39),
+    86.7vw 174.4vh 0px 0px rgba(228,206,146,0.39),
+    65.2vw 74.2vh 2px 0px rgba(201,162,75,0.41),
+    65.2vw 174.2vh 2px 0px rgba(201,162,75,0.41),
+    22.6vw 36.0vh 2px 1px rgba(201,162,75,0.37),
+    22.6vw 136.0vh 2px 1px rgba(201,162,75,0.37),
+    95.8vw 27.3vh 1px 0px rgba(232,207,142,0.25),
+    95.8vw 127.3vh 1px 0px rgba(232,207,142,0.25),
+    32.9vw 91.5vh 2px 1px rgba(232,207,142,0.36),
+    32.9vw 191.5vh 2px 1px rgba(232,207,142,0.36),
+    8.9vw 54.7vh 1px 0px rgba(228,206,146,0.23),
+    8.9vw 154.7vh 1px 0px rgba(228,206,146,0.23),
+    66.3vw 6.4vh 1px 0px rgba(201,162,75,0.3),
+    66.3vw 106.4vh 1px 0px rgba(201,162,75,0.3),
+    23.4vw 66.9vh 0px 1px rgba(232,207,142,0.32),
+    23.4vw 166.9vh 0px 1px rgba(232,207,142,0.32),
+    19.9vw 76.6vh 2px 1px rgba(228,206,146,0.39),
+    19.9vw 176.6vh 2px 1px rgba(228,206,146,0.39),
+    3.9vw 58.4vh 1px 0px rgba(232,207,142,0.3),
+    3.9vw 158.4vh 1px 0px rgba(232,207,142,0.3),
+    91.1vw 40.7vh 0px 0px rgba(232,207,142,0.3),
+    91.1vw 140.7vh 0px 0px rgba(232,207,142,0.3);
+  animation: lux-rise 150s linear infinite, lux-breathe 9s ease-in-out infinite alternate;
+}
+html[data-theme="luxe"]::after {
+  box-shadow:
+    69.0vw 21.2vh 2px 1px rgba(228,206,146,0.36),
+    69.0vw 121.2vh 2px 1px rgba(228,206,146,0.36),
+    84.7vw 60.6vh 0px 1px rgba(228,206,146,0.45),
+    84.7vw 160.6vh 0px 1px rgba(228,206,146,0.45),
+    30.7vw 79.0vh 1px 0px rgba(232,207,142,0.42),
+    30.7vw 179.0vh 1px 0px rgba(232,207,142,0.42),
+    44.2vw 47.9vh 2px 1px rgba(228,206,146,0.3),
+    44.2vw 147.9vh 2px 1px rgba(228,206,146,0.3),
+    47.2vw 56.4vh 2px 0px rgba(232,207,142,0.44),
+    47.2vw 156.4vh 2px 0px rgba(232,207,142,0.44),
+    81.1vw 53.0vh 1px 2px rgba(228,206,146,0.5),
+    81.1vw 153.0vh 1px 2px rgba(228,206,146,0.5),
+    91.0vw 57.4vh 2px 0px rgba(232,207,142,0.34),
+    91.0vw 157.4vh 2px 0px rgba(232,207,142,0.34),
+    51.4vw 14.7vh 2px 0px rgba(228,206,146,0.34),
+    51.4vw 114.7vh 2px 0px rgba(228,206,146,0.34),
+    62.0vw 55.1vh 1px 2px rgba(201,162,75,0.48),
+    62.0vw 155.1vh 1px 2px rgba(201,162,75,0.48),
+    52.6vw 58.1vh 1px 2px rgba(232,207,142,0.3),
+    52.6vw 158.1vh 1px 2px rgba(232,207,142,0.3),
+    71.6vw 18.8vh 1px 1px rgba(232,207,142,0.41),
+    71.6vw 118.8vh 1px 1px rgba(232,207,142,0.41);
+  animation: lux-rise 95s linear infinite, lux-breathe 6s ease-in-out infinite alternate-reverse;
+}
+@keyframes lux-rise    { to { transform: translateY(-100vh); } }
+@keyframes lux-breathe { from { opacity: .45; } to { opacity: 1; } }
 
 /* A single gold hairline pinned under the header, filling left-to-right with
    how far down the page you are. Pure CSS: scroll-driven animations need no
@@ -320,6 +431,90 @@ html[data-theme="luxe"] .surface-gr {
   color: var(--lux-gold-deep);
 }
 
+/* ---- The night panel ---------------------------------------------------
+   saraalsalam.com's strongest moment is its closing call — pale serif on
+   deep green with a gilded tail. Luxe gives its newsletter band the same
+   treatment in this shop's own hue: deep sea-teal, gold hairlines above and
+   below, the invitation set in Cinzel and struck gold. ONE dark panel on
+   the page, which is exactly why it lands; a second would make it wallpaper.
+
+   The !importants are aimed at inline style="" colours baked into the
+   band's markup — a theme cannot reach inline styles any other way. The
+   Subscribe button stays flat logo cyan by instruction, and nowhere does it
+   pop harder than on this ground. */
+[data-theme="luxe"] .newsletter-band {
+  background:
+    radial-gradient(90% 130% at 50% -20%, rgba(27,180,212,.16), transparent 55%),
+    linear-gradient(180deg, #07242E 0%, #0A3641 58%, #072028 100%);
+  border-top: 1px solid var(--lux-gold);
+  border-bottom: 1px solid var(--lux-gold);
+  border-radius: 0;
+  box-shadow: inset 0 1px 0 rgba(232,207,142,.25), inset 0 -1px 0 rgba(232,207,142,.25);
+}
+[data-theme="luxe"] .newsletter-band .overline {
+  color: var(--lux-gold-light) !important;
+}
+[data-theme="luxe"] .newsletter-band h2 {
+  font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--lux-gold-light) !important;
+}
+[data-theme="luxe"] .newsletter-band p:not(.overline) {
+  color: rgba(239,227,196,.85) !important;
+}
+
+/* ---- The glint ---------------------------------------------------------
+   Metal is convincing when light MOVES on it. The ring's border-box layer
+   is widened to two and a half times the card and parked off to one side;
+   on hover its position sweeps across once, so a highlight travels around
+   the frame — the card equivalent of tilting a ring under a lamp. Gradients
+   cannot transition but background-position can, which is the whole trick. */
+html[data-theme="luxe"] .product-card,
+html[data-theme="luxe"] .category-card {
+  background-size: auto, auto, 240% 100%;
+  background-position: 0 0, 0 0, 12% 50%;
+}
+@media (hover: hover) {
+  html[data-theme="luxe"] .product-card:hover,
+  html[data-theme="luxe"] .category-card:hover {
+    animation: lux-ring-glint 1100ms var(--ease-out);
+  }
+}
+@keyframes lux-ring-glint {
+  from { background-position: 0 0, 0 0, 12% 50%; }
+  to   { background-position: 0 0, 0 0, 112% 50%; }
+}
+
+/* ---- The engraved frame ------------------------------------------------
+   Summary panels — the order summary, account cards — get a second, finer
+   hairline drawn just inside the metal ring: the double rule of an engraved
+   plate. One inset shadow, no second element. */
+html[data-theme="luxe"] .surface-gr {
+  box-shadow: inset 0 0 0 4px rgba(201,162,75,0), inset 0 0 0 5px rgba(201,162,75,.28);
+}
+
+/* ---- The spoken word ---------------------------------------------------
+   A testimonial is the one place the shop speaks in a customer's voice, so
+   it earns the classical mark: an oversized gilded quotation mark floating
+   behind the words, set in the display face. */
+[data-theme="luxe"] .testi-card__inner { position: relative; }
+[data-theme="luxe"] .testi-card__inner::before {
+  content: "\201C";
+  position: absolute;
+  top: -0.18em; left: -0.05em;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 5.5rem;
+  line-height: 1;
+  color: var(--lux-gold);
+  opacity: .28;
+  pointer-events: none;
+}
+[data-theme="luxe"] .testi-stars { color: var(--lux-gold); }
+
+/* Trust icons join the metalwork. */
+[data-theme="luxe"] .trust-band svg { color: var(--gold-ink); }
+
 /* ---- Buttons -----------------------------------------------------------
    FLAT LOGO CYAN, EVERY ONE OF THEM — the merchant's direct instruction,
    pointing at the admin's own flat publish button as the reference. The
@@ -454,6 +649,12 @@ html[data-theme="luxe"] .surface-gr {
    and hairlines stay — they are colour, not movement — but nothing drifts,
    sweeps or draws. */
 @media (prefers-reduced-motion: reduce) {
+  /* Stationary dust reads as dirt on the glass — gone entirely, not paused. */
+  html[data-theme="luxe"]::before,
+  html[data-theme="luxe"]::after { display: none; }
+  html[data-theme="luxe"] .product-card:hover,
+  html[data-theme="luxe"] .category-card:hover { animation: none; }
+
   [data-theme="luxe"] body::before { animation: none; }
   [data-theme="luxe"] body::after  { animation: none; transform: scaleX(1); opacity: .5; }
   [data-theme="luxe"] .product-card::after,
