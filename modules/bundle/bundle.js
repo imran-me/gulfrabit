@@ -135,7 +135,7 @@ function render(b) {
         <p class="bundle__count" data-bundle-count></p>
         <p class="bundle__total price" data-bundle-total></p>
         <p class="bundle__save" data-bundle-save hidden></p>
-        <button class="btn-gr btn-primary-gr btn-block-gr" type="button" data-bundle-add><span class="btn-gr__en">Add selected to cart</span><span class="btn-bn bn" lang="bn">। কার্টে যোগ করুন</span></button>
+        <button class="btn-gr btn-primary-gr btn-block-gr" type="button" data-bundle-add><span class="btn-gr__en">Add selected to cart</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span></button>
         <p class="caption bundle__note">Ticking items only changes what goes in your cart — each is charged at its own listed price.</p>
       </div>
     </div>
@@ -212,7 +212,7 @@ function paintTotals() {
   // strip the span on the first tick. `chosen.length` is a number we counted,
   // so there is nothing here to escape.
   const en = chosen.length === 1 ? 'Add 1 item to cart' : `Add ${chosen.length} items to cart`;
-  btn.innerHTML = `<span class="btn-gr__en">${en}</span><span class="btn-bn bn" lang="bn">। কার্টে যোগ করুন</span>`;
+  btn.innerHTML = `<span class="btn-gr__en">${en}</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span>`;
 }
 
 function addPicked() {

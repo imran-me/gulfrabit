@@ -17,7 +17,6 @@ import { formatBDT, discountLabel, savingsLabel } from '../utils/format-currency
 import * as store from '../core/state.js';
 import { siteURL } from '../core/paths.js';
 import { toast } from './toast-notifications.js';
-import { openCartDrawer } from './cart-drawer.js';
 
 const HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
 const EYE   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>';
@@ -96,6 +95,44 @@ function cardSources(image) {
           <source srcset="${base}-card.webp" type="image/webp">`;
 }
 
+/**
+ * The pack sizes, as choosable chips.
+ *
+ * EVERY product in this catalogue is sold in two or three sizes, and the card
+ * used to display the default one and add THAT to the cart on a tap. The size
+ * was printed, so it was not a lie — but a customer scanning a grid reads the
+ * price, taps, and finds out at the door that 500g is not the 1kg they meant.
+ * On cash-on-delivery that is a refused parcel, not a return.
+ *
+ * So the choice moves onto the card. The chips carry their own price in
+ * data-* rather than the card carrying a JSON blob of every variant: the
+ * handler needs three numbers per chip, and inlining a serialised array into
+ * every card in a twenty-card grid is a lot of bytes for data the DOM can
+ * hold as attributes.
+ *
+ * Nothing is rendered for a product with one size or none — there is no
+ * choice to offer, and an empty row of one chip is just noise.
+ */
+function sizeChips(product) {
+  const variants = Array.isArray(product.variants) ? product.variants.filter((v) => v?.label) : [];
+  if (variants.length < 2) return '';
+
+  const current = product.defaultVariant ?? variants[0].label;
+  const chips = variants.map((v) => {
+    const on = v.label === current;
+    const out = v.inStock === false;
+    return `<button type="button" class="size-chip${on ? ' is-on' : ''}" data-size-chip
+            ${out ? 'disabled' : ''} aria-pressed="${on}"
+            data-v-label="${escapeAttr(v.label)}" data-v-price="${v.price}"
+            data-v-original="${v.originalPrice ?? ''}"
+            >${escapeHtml(v.label)}</button>`;
+  }).join('');
+
+  // A group, so a screen reader announces these as one control rather than as
+  // three unrelated buttons between a price and an Add to Cart.
+  return `<div class="size-chips" role="group" aria-label="Pack size">${chips}</div>`;
+}
+
 export function productCardHTML(product) {
   const {
     id, title, brand, origin, price, originalPrice, image, rating = 0,
@@ -104,6 +141,8 @@ export function productCardHTML(product) {
 
   const badges = productBadges(product);
   const wished = store.isWishlisted(id);
+  const hasChoice = Array.isArray(product.variants)
+    && product.variants.filter((v) => v?.label).length > 1;
 
   return `
   <article class="product-card" data-product-card
@@ -134,13 +173,16 @@ export function productCardHTML(product) {
         ${originalPrice && originalPrice > price ? `<span class="price price--strike">${formatBDT(originalPrice)}</span>` : ''}
         ${/* Which size that price buys. Without it a card reading ৳ 875 beside
               one reading ৳ 1,380 looks like a price difference when it is a
-              pack-size difference. */
-          defaultVariant ? `<span class="product-card__size">${escapeHtml(defaultVariant)}</span>` : ''}
+              pack-size difference.
+              Only when there is nothing to choose — otherwise the chips below
+              say the size, and saying it twice on a 163px card is clutter. */
+          defaultVariant && !hasChoice ? `<span class="product-card__size">${escapeHtml(defaultVariant)}</span>` : ''}
       </div>
       ${originalPrice && originalPrice > price ? `<span class="price-saving">${savingsLabel(originalPrice, price)}</span>` : ''}
+      ${sizeChips(product)}
       <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart"
               ${inStock ? '' : 'disabled'}>
-        ${inStock ? '<span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">। কার্টে যোগ করুন</span>' : 'Notify Me'}
+        ${inStock ? '<span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span>' : 'Notify Me'}
       </button>
     </div>
   </article>`;
@@ -214,18 +256,81 @@ export function enhanceProductCards(root = document) {
   root.querySelectorAll('[data-product-card]').forEach((card) => {
     if (card.dataset.enhanced) return;
     card.dataset.enhanced = 'true';
-    const product = cardPayload(card);
+
+    /* Pack size, chosen on the card.
+     *
+     * The chips rewrite the card's data-* rather than holding state in a
+     * closure, because cardPayload() reads those attributes at click time —
+     * so Add to Cart picks up the chosen size without knowing chips exist,
+     * and a card whose chips were never touched behaves exactly as before.
+     * Cart lines are keyed on id + variant, so this also keeps a 200g add and
+     * a 1kg add as two lines rather than silently merging. */
+    const chips = [...card.querySelectorAll('[data-size-chip]')];
+    if (chips.length) {
+      const priceEl = card.querySelector('.product-card__price');
+      const strikeEl = card.querySelector('.price--strike');
+      const savingEl = card.querySelector('.price-saving');
+
+      chips.forEach((chip) => chip.addEventListener('click', () => {
+        const price = Number(chip.dataset.vPrice);
+        const original = Number(chip.dataset.vOriginal) || 0;
+        if (!Number.isFinite(price)) return;
+
+        card.dataset.price = String(price);
+        card.dataset.variant = chip.dataset.vLabel;
+
+        chips.forEach((c) => {
+          const on = c === chip;
+          c.classList.toggle('is-on', on);
+          c.setAttribute('aria-pressed', String(on));
+        });
+
+        if (priceEl) priceEl.textContent = formatBDT(price);
+        // Both the strike and the saving are conditional on THIS size actually
+        // being discounted — a rung that is not on offer must not inherit the
+        // previous rung's saving, which would be an invented discount.
+        const cut = original > price;
+        if (strikeEl) {
+          strikeEl.textContent = cut ? formatBDT(original) : '';
+          strikeEl.hidden = !cut;
+        }
+        if (savingEl) {
+          savingEl.textContent = cut ? savingsLabel(original, price) : '';
+          savingEl.hidden = !cut;
+        }
+      }));
+    }
+
+    /* Read at CLICK time, not once at enhance time.
+     *
+     * The size chips above rewrite the card's data-price and data-variant, so
+     * a payload snapshotted here would still be the default size — the chips
+     * would repaint the price and then add the wrong pack to the cart, which
+     * is worse than not offering the choice at all. */
+    const product = () => cardPayload(card);
 
     card.querySelector('[data-action="add-to-cart"]')?.addEventListener('click', (e) => {
       if (e.currentTarget.disabled) return;
-      store.addToCart(product, 1);
-      toast.success(`Added to cart · ${product.title}`);
-      openCartDrawer();
+      const chosen = product();
+      store.addToCart(chosen, 1);
+      /* A toast OR the drawer, never both.
+       *
+       * Both fired before, and on a phone the drawer is a full-screen
+       * takeover — so the toast announced something the customer was already
+       * staring at, and the grid they were half-way down was gone. Adding a
+       * second item then meant closing the drawer, finding your place, and
+       * scrolling back.
+       *
+       * From a grid the toast wins: it confirms without moving anyone, which
+       * is the whole point of adding from a grid. The drawer still opens from
+       * the product page, where the customer has finished choosing and going
+       * to the cart is the natural next step. */
+      toast.success(`Added to cart · ${chosen.title}`);
     });
 
     const wishBtn = card.querySelector('[data-action="wishlist"]');
     wishBtn?.addEventListener('click', () => {
-      const active = store.toggleWishlist(product);
+      const active = store.toggleWishlist(product());
       toast.info(active ? 'Saved to wishlist' : 'Removed from wishlist');
       // The button is NOT painted here. syncWishlistHearts() below repaints
       // every card for this product, including this one — see why there.

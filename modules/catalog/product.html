@@ -71,14 +71,14 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=7c7c862e">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=adfb843c">
   <!-- The Luxe layer. Linked on every storefront page and completely
        inert without [data-theme="luxe"] on <html>, so the default theme
        renders exactly as it did before this file existed. Linking it
        conditionally would mean knowing the theme before the <head> is
        written, and this HTML is built once and served to everyone. -->
   <link rel="stylesheet" href="../../modules/theme/theme-luxe.css?v=5541a4e3">
-  <link rel="stylesheet" href="../../modules/catalog/catalog.css?v=121cacc3">
+  <link rel="stylesheet" href="../../modules/catalog/catalog.css?v=63b3dcc9">
   <link rel="stylesheet" href="../../modules/bundle/bundle.css?v=83af96a7">
   <link rel="stylesheet" href="../../modules/cart/pdp-offers.css?v=5ad534d4">
   <script type="application/ld+json">
@@ -301,7 +301,7 @@
             <input class="qty-stepper__input" data-qty-input value="1" inputmode="numeric" aria-label="Quantity">
             <button class="qty-stepper__btn" type="button" data-qty-inc aria-label="Increase quantity">+</button>
           </div>
-          <button class="btn-gr btn-primary-gr" data-add-to-cart style="flex:1"><span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">। কার্টে যোগ করুন</span></button>
+          <button class="btn-gr btn-primary-gr" data-add-to-cart style="flex:1"><span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span></button>
         </div>
 
         <button class="btn-gr btn-outline-gr btn-block-gr" data-wishlist-toggle
@@ -387,6 +387,21 @@
       <div class="section-head"><div class="section-head__titles"><p class="overline">Your history</p><h2 id="recent-head" class="h3">Recently Viewed</h2></div></div>
       <div class="snap-rail" data-recent-rail role="list"></div>
     </section>
+
+    <!-- The phone buy bar. On mobile the real Add to Cart scrolls away with
+         the gallery; this pins price + the same action to the thumb. Fixed,
+         phone-only (see catalog.css), filled and shown by product-page.js
+         once the product exists — and the tab bar stays off this page
+         because of it (mobile-tabbar.js checks for [data-pdp-buybar]). -->
+    <div class="pdp-buybar" data-pdp-buybar hidden>
+      <div class="pdp-buybar__price">
+        <span class="price" data-buybar-price></span>
+        <span class="caption" data-buybar-variant></span>
+      </div>
+      <button class="btn-gr btn-primary-gr" type="button" data-buybar-add>
+        <span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">। কার্টে যোগ করুন</span>
+      </button>
+    </div>
   </main>
 
   <!-- FOOTER (inlined from shared/components/footer.html) -->
@@ -490,10 +505,10 @@
   </div>
 </footer>
 
-  <script type="module" src="../../shared/js/main.js?v=79e4bfd4"></script>
+  <script type="module" src="../../shared/js/main.js?v=41e6e81a"></script>
   <script type="module" src="../../modules/theme/theme.js?v=2a6ced09"></script>
-  <script type="module" src="../../modules/catalog/product-page.js?v=ff026a0f"></script>
-  <script type="module" src="../../modules/bundle/bundle.js?v=54eb211d"></script>
+  <script type="module" src="../../modules/catalog/product-page.js?v=2dd9b50b"></script>
+  <script type="module" src="../../modules/bundle/bundle.js?v=3d6ab913"></script>
   <script type="module" src="../../modules/cart/pdp-offers.js?v=cb7ad248"></script>
 </body>
 </html>

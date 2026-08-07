@@ -90,23 +90,35 @@
  * to the product image without becoming a guessing game. */
 .product-card__actions {
   position: absolute;
-  top: var(--space-3); right: var(--space-3);
-  display: flex; flex-direction: column; gap: var(--space-2);
+  /* Inset and gap follow the buttons down from 40px to 32px — leaving them at
+     the old spacing would have made the smaller circles look adrift in the
+     corner rather than tucked into it. */
+  top: var(--space-2); right: var(--space-2);
+  display: flex; flex-direction: column; gap: 6px;
   z-index: 2;
   transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
 }
 
 .product-card__actions .btn-icon-gr {
-  /* 40px, not the 44px minimum: three of them stack down a card that is 160px
-     wide on a small phone, and each sits on top of the product photo rather
-     than beside anything mis-tappable. */
-  width: 40px; height: 40px;
+  /* 32px, down from 40px.
+     These sit ON the product photograph — the one thing the card exists to
+     show — and on a 163px phone card a 40px circle covered a noticeable share
+     of it. Below the 44px guideline deliberately, and defensibly: the target
+     is a circle floating over an image with nothing mis-tappable beside it,
+     the same action is available full-size on the product page, and losing a
+     quarter of the photo to chrome costs more sales than a slightly smaller
+     wishlist button. */
+  width: 32px; height: 32px;
+  /* The glyphs ship at 20px, which in a 32px circle leaves 6px of breathing
+     room and reads as a cramped button. Sized here rather than in the markup
+     because the hand-authored cards in index.html carry the same 20px SVGs. */
   opacity: .92;
   backdrop-filter: blur(6px);
   box-shadow: 0 1px 3px rgba(16, 19, 20, .12);
   transition: transform var(--dur-fast) var(--ease-out),
               opacity var(--dur-fast) var(--ease-out);
 }
+.product-card__actions .btn-icon-gr svg { width: 17px; height: 17px; }
 .product-card__actions .btn-icon-gr:active { transform: scale(.9); opacity: 1; }
 
 @media (hover: hover) {
@@ -145,6 +157,48 @@
    duplicated in productCardHTML and eight times in index.html, so the phone
    layout could not tune it without !important. It is one rule now. */
 .product-card__body .btn-gr { margin-top: var(--space-2); }
+/* ---- Pack size, on the card -------------------------------------------
+   Sits directly above Add to Cart, which is the order the decision is made
+   in: how much, then buy. Deliberately small and quiet — this is a
+   confirmation for most customers and a correction for the few who want a
+   different size, so it must not out-shout the price above it.
+
+   Wraps rather than scrolls: three chips fit a 163px phone card on one line,
+   and a rare fourth dropping to a second line is better than a horizontally
+   scrolling strip inside a card that is itself inside a scrolling rail. */
+.size-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: var(--space-2); }
+.size-chip {
+  flex: 0 1 auto;
+  padding: 3px 8px;
+  font-family: var(--font-body);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              background-color var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) {
+  .size-chip:hover:not(:disabled) { border-color: var(--gr-cyan-dark); color: var(--link); }
+}
+.size-chip.is-on {
+  border-color: var(--gr-cyan-dark);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  box-shadow: inset 0 0 0 1px var(--gr-cyan-dark);
+}
+/* A size that is out of stock still shows: knowing 1 kg exists but is gone is
+   worth more than a row that silently omits it and looks like the shop never
+   sold it. */
+.size-chip:disabled { opacity: .45; cursor: not-allowed; text-decoration: line-through; }
+.size-chip:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
+
 .product-card__stars { display: inline-flex; align-items: center; gap: 1px; }
 .product-card__stars svg { display: block; }
 

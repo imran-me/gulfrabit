@@ -58,7 +58,7 @@ export async function openQuickView(id) {
           </div>
           <p class="text-muted-gr" style="margin-bottom:1.5rem">${escapeHtml(p.shortDescription || p.description || '')}</p>
           <div style="display:flex;gap:.75rem">
-            <button class="btn-gr btn-primary-gr btn-block-gr" data-qv-add ${p.inStock ? '' : 'disabled'}>${p.inStock ? '<span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">। কার্টে যোগ করুন</span>' : 'Sold out'}</button>
+            <button class="btn-gr btn-primary-gr btn-block-gr" data-qv-add ${p.inStock ? '' : 'disabled'}>${p.inStock ? '<span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span>' : 'Sold out'}</button>
             <a class="btn-gr btn-outline-gr" href="${siteURL(`modules/catalog/product.html?id=${p.id}`)}">Details</a>
           </div>
         </div>
@@ -73,7 +73,9 @@ export async function openQuickView(id) {
   dialog.querySelector('[data-qv-add]')?.addEventListener('click', () => {
     if (!p.inStock) return;
     store.addToCart(p, 1);
-    toast.success(`Added to cart · ${p.title}`);
+    // The modal closing IS the confirmation of the tap, and the drawer that
+    // replaces it says what is in the cart. A toast on top of both is a third
+    // announcement of one action — see the note in product-card.js.
     close();
     openCartDrawer();
   });
