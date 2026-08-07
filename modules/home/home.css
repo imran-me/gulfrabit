@@ -12,11 +12,11 @@
 
    1. Nothing may cover the image. The old hero laid a 96%-white gradient over
       a decorative photo so authored copy could sit on top; do that to a
-      finished banner and you have washed out the design. There is no scrim
-      and no overlaid text now, and the Buy Now button sits *below* the
-      artwork rather than on it — every banner already paints its own SHOP NOW
-      at the bottom-left, and one of the four (figs) carries a full-width
-      feature bar along the bottom that a centred overlay would sit on top of.
+      finished banner and you have washed out the design. There is no scrim,
+      no overlaid text and no overlaid button — every banner already paints
+      its own SHOP NOW at the bottom-left, the whole slide is the link, and
+      one of the four (figs) carries a full-width feature bar along the
+      bottom that a centred overlay would sit on top of.
 
    2. Nothing may crop it either. `cover` is the usual carousel answer and it
       is wrong here: these four are 2.00, 1.50, 1.88 and 2.11 wide, so any
@@ -25,21 +25,13 @@
       filled with a blurred, over-scaled copy of the same slide, so the bars
       read as ambient colour from the artwork instead of dead space.
 
-   The band under the artwork carries the button and the dots. It is sized
-   in one token so the viewport height can account for it. */
+   The band under the artwork carries the dots. It is sized in one token so
+   the viewport height can account for it. */
 .hero {
   position: relative; overflow: hidden;
   --hero-h: clamp(170px, 50vw, 640px);
-  /* Phones get the smaller pill deliberately. It does NOT have to be a 44px
-     tap target: .hero__link covers the entire slide, so the finger target is
-     the whole banner and this is a label on top of it. At 40px it covered a
-     fifth of a 195px-tall banner and sat over the feature icons. */
-  --hero-cta-h: 30px;
-  --hero-cta-min: 96px;
   --hero-progress: 3px;
 }
-@media (min-width: 768px)  { .hero { --hero-cta-h: 38px; --hero-cta-min: 124px; } }
-@media (min-width: 1024px) { .hero { --hero-cta-h: 44px; --hero-cta-min: 132px; } }
 
 .hero__viewport { position: relative; height: var(--hero-h); }
 
@@ -69,21 +61,18 @@
   transform: scale(1.18);
 }
 
-/* The whole slide is still the tap target — tapping anywhere on the banner
-   buys. The visible pill now sits on the artwork as well (see .hero__cta). */
+/* The whole slide is the tap target — tapping anywhere on the banner buys,
+   the SHOP NOW pill painted into the artwork included. There is no overlaid
+   button: the painted pill is the only call to action. */
 .hero__link { position: absolute; inset: 0; display: grid; place-items: center; }
 
-/* THE ARTWORK FRAME — the piece that makes an on-image button possible.
+/* THE ARTWORK FRAME.
  *
  * A `contain`-fitted <img> is letterboxed, and how much depends on the slide:
- * these four are 2.00, 1.50, 1.88 and 2.11 wide. So a button positioned in
- * percentages of the *viewport* drifts off its mark as the bars change size —
- * fine on one banner, halfway up the next.
- *
- * This frame is exactly the rendered artwork and nothing else: its width is
- * whichever of the two limits binds first, and --ar then fixes its height.
- * Percentages inside it are percentages of the picture, so --cta-x / --cta-cb
- * mean the same thing on every slide and at every width. */
+ * these four are 2.00, 1.50, 1.88 and 2.11 wide. This frame is exactly the
+ * rendered artwork and nothing else: its width is whichever of the two limits
+ * binds first, and --ar then fixes its height — so the blurred backdrop shows
+ * only in the true letterbox, never behind the picture itself. */
 .hero__fit {
   position: relative;
   display: block;
@@ -91,40 +80,6 @@
   aspect-ratio: var(--ar);
 }
 .hero__art { display: block; width: 100%; height: 100%; object-fit: contain; }
-
-/* BUY NOW, ON THE ARTWORK.
- *
- * Every banner paints its own SHOP NOW pill at the lower left. Rather than
- * put a second button somewhere else and have the slide read as two calls to
- * action, the real one is anchored onto the painted one: --cta-x is that
- * pill's left edge and --cta-cb its centre line, both measured off the source
- * files and carried per slide in the markup. They differ more than they look
- * — the figs banner has a feature bar across its bottom, so its pill sits at
- * 31% from the bottom where the others are at 8–13%.
- *
- * Sized by max(), not by the painted pill alone. Matching it exactly would be
- * 47×9 CSS px on a 390px phone: legible in the artwork, useless as a tap
- * target. So the 132px floor wins on small screens and --cta-w — the painted
- * pill's own width plus a hair — wins on desktop.
- *
- * --cta-w has to be per slide. A single 12% was tried first and left the paint
- * sticking out from behind the button on three of the four at 1440px: these
- * pills are 11.9%, 16.1%, 12.7% and 13.6% of their banner, and the widest is
- * half again the narrowest. One number cannot cover all four. */
-.hero__cta {
-  position: absolute; z-index: 3;
-  left: var(--cta-x);
-  bottom: calc(var(--cta-cb) - var(--hero-cta-h) / 2);
-  width: max(var(--hero-cta-min), var(--cta-w));
-  min-height: var(--hero-cta-h); height: var(--hero-cta-h);
-  padding: 0 .75rem;
-  font-size: 0.6875rem;
-  border-radius: var(--radius-pill);
-  justify-content: center;
-  box-shadow: 0 2px 12px rgba(16,19,20,.28);
-}
-@media (min-width: 768px)  { .hero__cta { font-size: var(--fs-12); } }
-@media (min-width: 1024px) { .hero__cta { font-size: var(--fs-14); padding: 0 1.25rem; } }
 
 .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
 
