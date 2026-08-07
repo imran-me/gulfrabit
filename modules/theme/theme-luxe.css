@@ -313,7 +313,15 @@ html[data-theme="luxe"]::after {
 }
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
   [data-theme="luxe"] .lux-gilt {
-    background: linear-gradient(96deg, #7A5F1C 0%, #A8842B 34%, #E8CF8E 52%, #8C6D1F 70%, #B78F2E 100%);
+    /* Recut after the first ramp was judged pale on a real phone: shine is
+       ALTERNATION, and the old ramp had one glint in a field of bronze, so
+       at arm's length it averaged to khaki. Seven stops now, deep–bright–
+       deep–bright, with the darks pushed darker so the brights can afford
+       to be brighter — contrast against the parchment comes from the deep
+       stops, the metal comes from the swing between them. */
+    background: linear-gradient(100deg,
+      #6E5313 0%, #B8860B 18%, #F9E9A8 36%, #C9A24B 50%,
+      #FFF3C4 64%, #A8842B 82%, #6E5313 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -364,9 +372,13 @@ html[data-theme="luxe"]::after {
 html[data-theme="luxe"] .product-card,
 html[data-theme="luxe"] .category-card,
 html[data-theme="luxe"] .surface-gr {
+  /* 2.5x on the merchant's instruction: at 1px the alternating stops blur
+     into one average colour and the metal reads as beige thread. At 2.5px
+     each band is wide enough to be seen as itself, which is where the shine
+     actually comes from. The ramp is recut brighter to match the type. */
   --lux-border: linear-gradient(135deg,
-      #E7CE8F 0%, #A8842B 24%, #8C6D1F 42%, #EEDFAC 58%, #A8842B 76%, #D9BC6F 100%);
-  border: 1px solid transparent;
+      #F9E9A8 0%, #B8860B 22%, #6E5313 40%, #FFF3C4 56%, #B8860B 74%, #E7CE8F 100%);
+  border: 2.5px solid transparent;
   background:
     linear-gradient(180deg, rgba(201,162,75,.12), rgba(201,162,75,0) 38%) padding-box,
     linear-gradient(var(--surface-raised), var(--surface-raised)) padding-box,
@@ -403,7 +415,7 @@ html[data-theme="luxe"] .surface-gr {
 @media (hover: hover) {
   html[data-theme="luxe"] .product-card:hover {
     --lux-border: linear-gradient(135deg,
-        #F4E5B4 0%, #C9A24B 26%, #A8842B 46%, #F7ECC7 60%, #C9A24B 80%, #E4CE92 100%);
+        #FFF3C4 0%, #D9B45C 26%, #B8860B 46%, #FFF8DC 60%, #D9B45C 80%, #F4E5B4 100%);
     box-shadow: 0 20px 52px rgba(138,109,34,.16), 0 6px 18px rgba(58,44,12,.08);
   }
   [data-theme="luxe"] .product-card:hover::after {
@@ -412,7 +424,7 @@ html[data-theme="luxe"] .surface-gr {
   }
   html[data-theme="luxe"] .category-card:hover {
     --lux-border: linear-gradient(135deg,
-        #F4E5B4 0%, #C9A24B 26%, #A8842B 46%, #F7ECC7 60%, #C9A24B 80%, #E4CE92 100%);
+        #FFF3C4 0%, #D9B45C 26%, #B8860B 46%, #FFF8DC 60%, #D9B45C 80%, #F4E5B4 100%);
     box-shadow: 0 20px 52px rgba(138,109,34,.16);
   }
 }
@@ -425,10 +437,48 @@ html[data-theme="luxe"] .surface-gr {
    needs its own border — the badge below is what still singles it out.
    (Setting background-image here would also knock out the ring's painted
    layers, which is the concrete reason this block shrank.) */
+/* ---- The labels, struck in metal ---------------------------------------
+   The merchant pointed at saraalsalam.com's gold pill buttons and asked for
+   that finish on the LABELS — the PREMIUM tag and the pack-size chips —
+   same size, different material. The fill is the SAS button's own move:
+   bright crown, deep base, a hairline of white light along the top edge
+   (that inset highlight is most of what makes a surface read as struck
+   metal rather than painted yellow). Text stays dark bronze at 7:1.
+
+   The selected chip is where the full metal goes; its unselected siblings
+   wear pale gold with a gold ring, so the row still has one obvious answer.
+   The cyan selection ring is replaced wholesale — teal on gold read as an
+   error state. Sizes, padding and radii are untouched throughout. */
 [data-theme="luxe"] .badge-premium {
-  background: linear-gradient(135deg, var(--lux-gold-pale), #FFF8E6);
-  border: 1px solid var(--lux-gold);
-  color: var(--lux-gold-deep);
+  background: linear-gradient(170deg, #FFF3C4 0%, #E4CE92 34%, #C9A24B 72%, #B8860B 100%);
+  border: 1px solid #8A6D22;
+  color: #3A2C0C;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.65), 0 1px 3px rgba(138,109,34,.3);
+  text-shadow: 0 1px 0 rgba(255,248,230,.5);
+}
+[data-theme="luxe"] .size-chip,
+[data-theme="luxe"] .variant-opt {
+  background: linear-gradient(180deg, #FBF3D8, #F1E3B6);
+  border-color: rgba(184,134,11,.55);
+  color: #6E5313;
+}
+@media (hover: hover) {
+  [data-theme="luxe"] .size-chip:hover:not(:disabled),
+  [data-theme="luxe"] .variant-opt:hover {
+    border-color: #8A6D22;
+    color: #3A2C0C;
+  }
+}
+/* The chip's price line was still speaking teal on the gold — bronze, like
+   everything else struck in the metal. */
+[data-theme="luxe"] .variant-opt .variant-opt__price { color: #6E5313; }
+[data-theme="luxe"] .variant-opt.is-selected .variant-opt__price { color: #3A2C0C; }
+[data-theme="luxe"] .size-chip.is-on,
+[data-theme="luxe"] .variant-opt.is-selected {
+  background: linear-gradient(170deg, #FFF3C4 0%, #E4CE92 30%, #C9A24B 68%, #B8860B 100%);
+  border-color: #8A6D22;
+  color: #3A2C0C;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.65), 0 1px 4px rgba(138,109,34,.35);
 }
 
 /* ---- The night panel ---------------------------------------------------
