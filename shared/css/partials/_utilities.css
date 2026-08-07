@@ -69,6 +69,23 @@
 
 /* ---- Section heading block ------------------------------------------- */
 .section-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); }
+/* The serif lands HERE and nowhere else — on the line that names a section,
+   on every page. Not on product names, not on prices, not on buttons: those
+   are read, and Playfair's thin strokes cost legibility at the sizes and
+   weights they use. Clash Display's tight tracking was cut for a geometric
+   sans; a serif at -0.022em collides, so the letter-spacing is relaxed and
+   the optical size stepped up a little to match Clash's x-height. */
+.section-head h2,
+.section-head .h2 {
+  font-family: var(--font-luxe);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  font-size: clamp(2rem, 4.2vw, 2.7rem);
+  line-height: 1.12;
+}
+/* The eyebrow above it: brand colour, and spaced out so it reads as a label
+   for the serif rather than a small line of the same voice. */
+.section-head .overline { letter-spacing: .16em; }
 .section-head__titles { display: flex; flex-direction: column; gap: var(--space-2); }
 
 /* ---- The section header on a phone ------------------------------------

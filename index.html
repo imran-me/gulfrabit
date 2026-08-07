@@ -51,7 +51,7 @@
        most expensive moment to find a new origin. -->
   <link rel="preconnect" href="https://api.fontshare.com">
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
 
   <!-- Bootstrap 5 (grid + component behaviours available per stack spec) -->
@@ -385,10 +385,10 @@
             <button class="btn-icon-gr" data-rail-next="premium" aria-label="Scroll right" style="border:1px solid var(--border-hairline)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M9 6l6 6-6 6"/></svg></button>
           </div>
         </div>
-        <!-- data-rail-autoplay: home.js walks this shelf leftward one product
-             at a time on phones (400ms per step). The attribute is also what
-             tells initRailArrows to leave the arrows to the autoplay
-             controller, so a tap and a tick are the same movement. -->
+        <!-- data-rail-autoplay: home.js marches this shelf leftward, at every
+             width, at the same unhurried rate as the trust band under the hero.
+             The attribute is also what tells initRailArrows to leave the arrows
+             to the autoplay controller, so a tap and the drift do not fight. -->
         <div class="snap-rail" data-rail="premium" data-rail-autoplay role="list" aria-label="Premium picks"></div>
       </div>
     </section>
@@ -586,7 +586,10 @@
             <button class="btn-icon-gr" data-rail-next="new" aria-label="Scroll right" style="border:1px solid var(--border-hairline)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M9 6l6 6-6 6"/></svg></button>
           </div>
         </div>
-        <div class="snap-rail" data-rail="new" role="list" aria-label="New arrivals"></div>
+        <!-- Marches like Premium Picks above it. Same attribute, same reason:
+             it hands the arrows to the autoplay controller so a tap and the
+             drift are not two things writing scrollLeft at once. -->
+        <div class="snap-rail" data-rail="new" data-rail-autoplay role="list" aria-label="New arrivals"></div>
       </div>
     </section>
 

@@ -11,12 +11,20 @@
    page, the About values and much of the home page from anyone without JS. */
 html:not(.no-js) [data-reveal] {
   opacity: 0;
-  transform: translateY(18px);
-  transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out);
+  /* A shade of scale with the rise. On its own, translateY reads as content
+     sliding into place; with the scale it reads as content arriving — the
+     difference is small enough that nobody names it and large enough that the
+     page feels made rather than assembled. .98, not .9: anything more and a
+     grid of eight tiles pulses, which is a distraction, not a flourish. */
+  transform: translateY(18px) scale(.98);
+  /* Longer than --dur-slow and on its own curve: a reveal that finishes in
+     300ms is a flicker at the moment a section comes into view. This one
+     decelerates hard and settles, which is what makes it feel expensive. */
+  transition: opacity 620ms var(--ease-reveal), transform 620ms var(--ease-reveal);
   will-change: opacity, transform;
   transition-delay: var(--reveal-delay, 0ms);   /* optional stagger, set inline */
 }
-html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0); }
+html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0) scale(1); }
 
 /* ---- Skeleton shimmer ------------------------------------------------ */
 .skeleton {

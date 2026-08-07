@@ -40,6 +40,27 @@ h1, h2, h3, h4, h5, h6 {
  * The values step with the size rather than being one -0.01em for everything,
  * which is what the file did before.
  */
+/* ---- The serif, and exactly where it is allowed ----------------------
+   Every line that NAMES something — a page, a section, a category — is set in
+   Playfair. That is the whole brief: a high-contrast serif beside a geometric
+   sans is what reads expensive, and it costs nothing as long as it stays off
+   the text people actually read.
+
+   So it is scoped by role, not by tag. A product's name is an h1 on the
+   product page and it is excluded by name: a customer scans it against a
+   price and a pack size, and Playfair's thin strokes are worse at that job
+   than the sans. Same for prices, buttons and card titles, which never had
+   it. If a heading is information rather than an announcement, it keeps the
+   sans — add it to the :not() list rather than weakening this rule. */
+h1:not([data-pdp-title]):not(.product-card__title),
+.h1:not([data-pdp-title]),
+.page-head,
+h2.section-title {
+  font-family: var(--font-luxe);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
 h1, .h1 { font-size: clamp(2.25rem, 5vw, var(--fs-49)); font-weight: var(--fw-bold); letter-spacing: -0.028em; }
 h2, .h2 { font-size: clamp(1.9rem, 4vw, var(--fs-39)); letter-spacing: -0.022em; }
 h3, .h3 { font-size: clamp(1.5rem, 3vw, var(--fs-31)); letter-spacing: -0.016em; }

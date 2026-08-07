@@ -75,6 +75,12 @@
 
   /* ---- Typography ------------------------------------------------------ */
   --font-display: 'Clash Display', 'General Sans', 'Inter', system-ui, sans-serif;
+  /* The section headings only — "Shop by Category", "Premium Picks". A high
+     contrast serif is what reads expensive next to a geometric sans, and the
+     pairing is the point: the serif says what KIND of shop this is, the sans
+     stays on the work of selling. Product names keep --font-display, because
+     a product name is information a customer scans, not an atmosphere. */
+  --font-luxe: 'Playfair Display', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   /* Bengali sits in the stack so Bangla renders correctly ANYWHERE, not only
      inside a [lang="bn"] wrapper — unicode-range means it only downloads when
      Bengali codepoints are actually present. */
@@ -128,6 +134,9 @@
 
   /* ---- Motion · subtle, crafted (no bounce, no gimmick easing) --------- */
   --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  /* For scroll reveals only. Leaves fast and lands slowly with a long tail,
+     so an element settles into place instead of stopping at it. */
+  --ease-reveal: cubic-bezier(0.22, 0.85, 0.24, 1);
   --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
   --dur-fast:   150ms;
   --dur-base:   200ms;

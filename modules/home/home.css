@@ -403,21 +403,41 @@
   .home-cat-grid .category-card__title {
     padding: 11px var(--space-2) 13px;
     text-align: center;
-    color: var(--text-primary);
+    /* The wordmark's colour, at the cut that clears 4.8:1 on white — raw
+       --gr-cyan is 2.5:1 and would fail as body-sized type. */
+    color: var(--link);
     font-size: 13px;
     line-height: 1.3;
     letter-spacing: -.01em;
     transition: color var(--dur-base) var(--ease-out);
+  }
+  /* The tile carries the brand on its edge too, but quietly: eight
+     full-strength cyan rectangles in a row would shout over the artwork they
+     are framing. A third of the way there at rest, all the way on hover. */
+  .home-cat-grid .category-card {
+    border-color: rgba(27, 180, 212, .34);
   }
   /* The photo answers the pointer. Slow and small — 600ms and 5% reads as the
      image settling, where a fast snap reads as a hover effect. */
   .home-cat-grid .category-card__img {
     transition: transform 600ms var(--ease-out);
   }
+  /* The hover, in four parts that fire together: the tile lifts, its edge
+     goes to full brand colour, the shadow it casts is tinted with that
+     colour rather than grey, and the photograph pushes in slightly. The
+     shadow is what does most of the work — a grey drop shadow reads as a box
+     moving, a coloured one reads as the tile lighting up. */
   @media (hover: hover) {
-    .home-cat-grid .category-card:hover .category-card__img { transform: scale(1.05); }
-    .home-cat-grid .category-card:hover .category-card__title { color: var(--link); }
+    .home-cat-grid .category-card:hover {
+      border-color: var(--gr-cyan);
+      box-shadow: 0 10px 28px -6px rgba(27, 180, 212, .34),
+                  0 2px 8px rgba(16, 32, 44, .06);
+    }
+    .home-cat-grid .category-card:hover .category-card__img { transform: scale(1.06); }
+    .home-cat-grid .category-card:hover .category-card__title { color: var(--gr-cyan-dark); }
   }
+  /* Touch has no hover to preview with, so the press is the whole feedback. */
+  .home-cat-grid .category-card:active { border-color: var(--gr-cyan); }
   .home-cat-grid .category-card:focus-visible {
     outline: 2px solid var(--link);
     outline-offset: 3px;
@@ -468,9 +488,12 @@
   .home-cat .overline { display: none; }
   /* 75% of the 1.9rem phone h2 — still the loudest thing on the row. */
   .home-cat .section-head h2 {
-    font-size: 1.425rem;
-    line-height: 1.2;
-    letter-spacing: -0.018em;
+    /* A touch larger than the sans it replaced: Playfair's x-height is smaller
+       at the same px, so matching the old 1.425rem would have read as a step
+       DOWN in the heading rather than a change of voice. */
+    font-size: 1.55rem;
+    line-height: 1.15;
+    letter-spacing: -0.008em;
   }
   /* The button chrome reads as clutter next to a smaller title; a text
      link with a padded tap area carries it. */

@@ -272,9 +272,12 @@ async function initProductSections() {
     ]);
     if (premiumRail) renderProductGrid(premiumRail, premium);
     if (newRail) renderProductGrid(newRail, fresh);
-    // Autoplay can only be wired once there are cards to measure — the step is
-    // one card's width, and an empty rail has none.
+    // Only once there are cards to measure: the recycler works in card widths
+    // and an empty rail has none. Both shelves march — they are the same kind
+    // of thing, and one moving beside one standing still looks like the still
+    // one is broken.
     if (premiumRail) initRailAutoplay(premiumRail);
+    if (newRail) initRailAutoplay(newRail);
   } catch (err) {
     console.error('[home] failed to load products', err);
     [premiumRail, newRail].forEach((el) => {
@@ -331,7 +334,9 @@ function initRailArrows() {
  * slowly, which is what makes a moving shelf feel weighted rather than swept.
  */
 const RAIL_STEP_MS = 400;    // one product's travel — the specified figure
-const RAIL_HOLD_MS = 2600;   // dwell between steps; 3s door-to-door per card
+/* No RAIL_HOLD_MS any more: the shelves drift continuously rather than
+   stepping and dwelling, so there is nothing to dwell for. The arrows still
+   step, and still take RAIL_STEP_MS. */
 const RAIL_RESUME_MS = 4500; // quiet time before it takes over from a finger
 
 /* Mirrors --ease-out (cubic-bezier(.16,1,.3,1)) closely enough that the CSS
@@ -423,28 +428,100 @@ function initRailAutoplay(rail) {
     await tweenTo(Math.max(0, rail.scrollLeft - w));
   });
 
-  /* ---- Scheduling ---- */
-  let timer = null;
+  /* ---- The drift ---------------------------------------------------------
+   *
+   * This used to step one card, wait 2.6s, step again. It read as a slideshow:
+   * the shelf was either still or jumping, and on a wide screen where six
+   * cards are already visible a jump every three seconds is just a flinch.
+   *
+   * It marches now, continuously, the same way the trust band under the hero
+   * does — because that band is the reference the brief actually named. Same
+   * direction, same unhurried rate, so the two read as one idea rather than
+   * two different animations on one page.
+   *
+   * AND ON EVERY WIDTH. The step version was deliberately phone-only, on the
+   * grounds that a desktop shows most of the shelf anyway. That was the wrong
+   * call for a marquee: the point is not to reveal hidden cards, it is that a
+   * shelf in motion looks like a shop with stock moving through it.
+   *
+   * The treadmill underneath is unchanged and is why this is affordable. The
+   * trust band clones its four items; cloning THESE would put two Add to Cart
+   * buttons, two wishlist toggles and two copies of every product URL in the
+   * DOM. recycle() moves the node instead, so listeners and wishlist state
+   * travel with it and nothing is duplicated.
+   */
+  const DRIFT_PX_PER_SEC = 26;   // ~ the trust band's rate; readable at a glance
+  const MAX_FRAME_MS = 64;       // clamp after a tab switch, or it lurches
+
   let busy = false;
   let hovered = false;
   let touched = false;
   let inView = true;
   let resumeTimer = null;
+  let frame = null;
+  let lastTs = null;
 
-  const active = () => phone.matches && !still.matches;
+  /* THE POSITION IS KEPT HERE, IN A FLOAT, AND scrollLeft IS ONLY EVER
+     WRITTEN — never read back and added to.
+     At 26px/s a 60Hz frame advances 0.43px, and `rail.scrollLeft += 0.43`
+     moves nothing at all: the getter returns a rounded integer, so every
+     frame adds 0.43 to the same 0 and writes a value that rounds straight
+     back. Measured — sixty increments produced exactly zero travel, which is
+     why the first version of this looked like it simply did not run.
+     Owning the sub-pixel position is the whole fix. */
+  let pos = 0;
+
+  const active = () => !still.matches;
   const canPlay = () => active() && inView && !hovered && !touched && !document.hidden && canLoop();
 
-  const stop = () => { clearTimeout(timer); timer = null; };
-  const schedule = () => {
-    stop();
-    if (canPlay()) timer = setTimeout(step, RAIL_HOLD_MS);
+  /* .is-stepping switches scroll-snap off. Mandatory snapping drags every
+     programmatic write back to the nearest snap point, so with it on the rail
+     would sit perfectly still while this loop spent its whole budget being
+     undone — the same trap the old tween documented. */
+  const stop = () => {
+    if (frame) cancelAnimationFrame(frame);
+    frame = null;
+    lastTs = null;
+    rail.classList.remove('is-stepping');
   };
-  const step = async () => {
-    if (busy || !canPlay()) return schedule();
-    busy = true;
-    await forward();
-    busy = false;
-    schedule();
+
+  /* recycle() works off rail.scrollLeft, which is the rounded value — so the
+     drift needs its own, driven by `pos`. Sends every card fully behind the
+     left edge to the back and pays its width back, so `pos` only ever ranges
+     over the width of the leading card and maxScroll is never reached. The
+     guard bounds it by the child count: a zero-width card (an image that
+     failed to lay out) would otherwise spin this forever. */
+  const recycleDrift = () => {
+    for (let guard = rail.children.length; guard > 0; guard--) {
+      const first = rail.firstElementChild;
+      const w = stepOf(first);
+      if (!first || w < 1 || pos < w) break;
+      rail.appendChild(first);
+      pos -= w;
+    }
+  };
+
+  const tick = (now) => {
+    if (!canPlay()) { stop(); return; }
+    if (lastTs !== null) {
+      pos += DRIFT_PX_PER_SEC * Math.min(MAX_FRAME_MS, now - lastTs) / 1000;
+      recycleDrift();
+      rail.scrollLeft = pos;
+    }
+    lastTs = now;
+    frame = requestAnimationFrame(tick);
+  };
+
+  const schedule = () => {
+    if (!canPlay()) return stop();
+    if (frame) return;                       // already marching
+    rail.classList.add('is-stepping');
+    lastTs = null;
+    // Resync from the DOM: a finger, an arrow tap or a resize may have moved
+    // the rail while this was parked, and resuming from a stale float would
+    // jump it back to wherever the drift last left off.
+    pos = rail.scrollLeft;
+    frame = requestAnimationFrame(tick);
   };
 
   /* A finger takes precedence and keeps it for a few seconds after letting go —

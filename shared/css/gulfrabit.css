@@ -80,6 +80,12 @@
 
   /* ---- Typography ------------------------------------------------------ */
   --font-display: 'Clash Display', 'General Sans', 'Inter', system-ui, sans-serif;
+  /* The section headings only — "Shop by Category", "Premium Picks". A high
+     contrast serif is what reads expensive next to a geometric sans, and the
+     pairing is the point: the serif says what KIND of shop this is, the sans
+     stays on the work of selling. Product names keep --font-display, because
+     a product name is information a customer scans, not an atmosphere. */
+  --font-luxe: 'Playfair Display', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   /* Bengali sits in the stack so Bangla renders correctly ANYWHERE, not only
      inside a [lang="bn"] wrapper — unicode-range means it only downloads when
      Bengali codepoints are actually present. */
@@ -133,6 +139,9 @@
 
   /* ---- Motion · subtle, crafted (no bounce, no gimmick easing) --------- */
   --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  /* For scroll reveals only. Leaves fast and lands slowly with a long tail,
+     so an element settles into place instead of stopping at it. */
+  --ease-reveal: cubic-bezier(0.22, 0.85, 0.24, 1);
   --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
   --dur-fast:   150ms;
   --dur-base:   200ms;
@@ -239,6 +248,27 @@ h1, h2, h3, h4, h5, h6 {
  * The values step with the size rather than being one -0.01em for everything,
  * which is what the file did before.
  */
+/* ---- The serif, and exactly where it is allowed ----------------------
+   Every line that NAMES something — a page, a section, a category — is set in
+   Playfair. That is the whole brief: a high-contrast serif beside a geometric
+   sans is what reads expensive, and it costs nothing as long as it stays off
+   the text people actually read.
+
+   So it is scoped by role, not by tag. A product's name is an h1 on the
+   product page and it is excluded by name: a customer scans it against a
+   price and a pack size, and Playfair's thin strokes are worse at that job
+   than the sans. Same for prices, buttons and card titles, which never had
+   it. If a heading is information rather than an announcement, it keeps the
+   sans — add it to the :not() list rather than weakening this rule. */
+h1:not([data-pdp-title]):not(.product-card__title),
+.h1:not([data-pdp-title]),
+.page-head,
+h2.section-title {
+  font-family: var(--font-luxe);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
 h1, .h1 { font-size: clamp(2.25rem, 5vw, var(--fs-49)); font-weight: var(--fw-bold); letter-spacing: -0.028em; }
 h2, .h2 { font-size: clamp(1.9rem, 4vw, var(--fs-39)); letter-spacing: -0.022em; }
 h3, .h3 { font-size: clamp(1.5rem, 3vw, var(--fs-31)); letter-spacing: -0.016em; }
@@ -1500,12 +1530,20 @@ a:hover { color: var(--link-hover); }
    page, the About values and much of the home page from anyone without JS. */
 html:not(.no-js) [data-reveal] {
   opacity: 0;
-  transform: translateY(18px);
-  transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out);
+  /* A shade of scale with the rise. On its own, translateY reads as content
+     sliding into place; with the scale it reads as content arriving — the
+     difference is small enough that nobody names it and large enough that the
+     page feels made rather than assembled. .98, not .9: anything more and a
+     grid of eight tiles pulses, which is a distraction, not a flourish. */
+  transform: translateY(18px) scale(.98);
+  /* Longer than --dur-slow and on its own curve: a reveal that finishes in
+     300ms is a flicker at the moment a section comes into view. This one
+     decelerates hard and settles, which is what makes it feel expensive. */
+  transition: opacity 620ms var(--ease-reveal), transform 620ms var(--ease-reveal);
   will-change: opacity, transform;
   transition-delay: var(--reveal-delay, 0ms);   /* optional stagger, set inline */
 }
-html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0); }
+html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0) scale(1); }
 
 /* ---- Skeleton shimmer ------------------------------------------------ */
 .skeleton {
@@ -1670,6 +1708,23 @@ img.settle.is-settled {
 
 /* ---- Section heading block ------------------------------------------- */
 .section-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); }
+/* The serif lands HERE and nowhere else — on the line that names a section,
+   on every page. Not on product names, not on prices, not on buttons: those
+   are read, and Playfair's thin strokes cost legibility at the sizes and
+   weights they use. Clash Display's tight tracking was cut for a geometric
+   sans; a serif at -0.022em collides, so the letter-spacing is relaxed and
+   the optical size stepped up a little to match Clash's x-height. */
+.section-head h2,
+.section-head .h2 {
+  font-family: var(--font-luxe);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  font-size: clamp(2rem, 4.2vw, 2.7rem);
+  line-height: 1.12;
+}
+/* The eyebrow above it: brand colour, and spaced out so it reads as a label
+   for the serif rather than a small line of the same voice. */
+.section-head .overline { letter-spacing: .16em; }
 .section-head__titles { display: flex; flex-direction: column; gap: var(--space-2); }
 
 /* ---- The section header on a phone ------------------------------------
