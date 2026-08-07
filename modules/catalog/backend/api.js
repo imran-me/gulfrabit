@@ -91,8 +91,11 @@ export async function getProductById(id) {
   return products.find((p) => String(p.id) === String(id)) ?? null;
 }
 
+/** A falsy slug means the whole shop, not "no category" — that is what the
+ *  Shop All view asks for and what "View all" on the home page links to. */
 export async function getProductsByCategory(slug, { sort, filters, limit } = {}) {
-  let products = (await getAllProducts()).filter((p) => p.categorySlug === slug);
+  const every = await getAllProducts();
+  let products = slug ? every.filter((p) => p.categorySlug === slug) : every;
   products = applyFilters(products, filters);
   products = applySort(products, sort);
   return typeof limit === 'number' ? products.slice(0, limit) : products;

@@ -28,14 +28,20 @@ let filtersApi = null;
 init();
 
 async function init() {
-  const slug = getParam('slug', 'imported-food-grocery');
+  /* No ?slug= is Shop All, not a default category. It used to fall back to
+     'imported-food-grocery' — one of the categories the merchant has since
+     switched OFF — so the bare URL rendered a dead category's name over an
+     empty grid, and the home page's "View all" had nowhere correct to point.
+     Empty string, not undefined: getParam returns the fallback for a missing
+     param and '' is the value that means "every category". */
+  const slug = getParam('slug', '');
   const params = getParams();
   if (params.sort && sortSel) sortSel.value = params.sort;
 
   renderProductSkeletons(grid, PAGE_SIZE);
 
   const [category, products] = await Promise.all([
-    getCategoryBySlug(slug),
+    slug ? getCategoryBySlug(slug) : Promise.resolve(null),
     getProductsByCategory(slug),
   ]);
 
@@ -59,10 +65,11 @@ async function init() {
 }
 
 function paintHeader(category, slug) {
-  const title = category?.name || slug.replace(/-/g, ' ');
+  const title = category?.name || (slug ? slug.replace(/-/g, ' ') : 'Shop All');
   document.querySelector('[data-cat-title]').textContent = title;
   document.querySelector('[data-crumb-category]').textContent = title;
-  document.querySelector('[data-cat-blurb]').textContent = category?.blurb || '';
+  document.querySelector('[data-cat-blurb]').textContent = category?.blurb
+    || (slug ? '' : 'Every product we import, in one place.');
   document.querySelector('[data-cat-audience]').textContent = category?.audience === 'b2b' ? 'For Industry' : 'Shop';
   document.title = `${title} — GulfRabit`;
 }
