@@ -276,8 +276,8 @@ async function initProductSections() {
     // and an empty rail has none. Both shelves march — they are the same kind
     // of thing, and one moving beside one standing still looks like the still
     // one is broken.
-    if (premiumRail) initRailAutoplay(premiumRail);
-    if (newRail) initRailAutoplay(newRail);
+    if (premiumRail) { padRailForMarch(premiumRail, premium); initRailAutoplay(premiumRail); }
+    if (newRail) { padRailForMarch(newRail, fresh); initRailAutoplay(newRail); }
   } catch (err) {
     console.error('[home] failed to load products', err);
     [premiumRail, newRail].forEach((el) => {
@@ -342,6 +342,44 @@ const RAIL_RESUME_MS = 4500; // quiet time before it takes over from a finger
 /* Mirrors --ease-out (cubic-bezier(.16,1,.3,1)) closely enough that the CSS
    fades and the JS travel read as the same gesture, without a bezier solver. */
 const easeOut = (t) => 1 - Math.pow(1 - t, 4);
+
+/**
+ * Give a shelf enough cards to march.
+ *
+ * A marquee needs more content than the viewport, and on a 1440px screen four
+ * premium products fill the track exactly — measured maxScroll of 0. There is
+ * nothing to scroll, so the rail stood still on desktop while the phone
+ * marched, which reads as the desktop one being broken.
+ *
+ * So the set repeats until it overflows. The repeats are REAL cards from the
+ * same renderer, not aria-hidden decorations: the trust band can clone its
+ * headings because they do nothing, but a dead Add to Cart button that looks
+ * live is worse than no marquee. Every copy is fully wired, and wishlist state
+ * stays consistent across them because the hearts are driven from the store
+ * (see syncWishlistHearts in product-card.js) rather than by whichever button
+ * was clicked.
+ *
+ * Bounded at 4 passes. If a shelf still cannot overflow after four — a single
+ * product, or a container that has not laid out — it is left alone and simply
+ * does not march, which is the honest outcome for a shelf with nothing to
+ * show past its own edge.
+ */
+function padRailForMarch(rail, products) {
+  if (!rail || !products?.length) return;
+
+  const gap = () => parseFloat(getComputedStyle(rail).columnGap) || 0;
+  const cardW = () => (rail.firstElementChild?.getBoundingClientRect().width || 0) + gap();
+
+  // Two cards of runway past the edge — the same threshold canLoop() uses, so
+  // this either satisfies it or gives up rather than half-filling the rail.
+  const enough = () => rail.scrollWidth - rail.clientWidth >= cardW() * 2;
+
+  for (let pass = 0; pass < 4 && !enough(); pass++) {
+    if (cardW() < 1) return;                 // not laid out; nothing to measure
+    renderProductGrid(rail, [...products, ...Array.from(
+      { length: (pass + 2) * products.length }, (_, i) => products[i % products.length])]);
+  }
+}
 
 function initRailAutoplay(rail) {
   if (!rail || rail.dataset.autoplayReady) return;

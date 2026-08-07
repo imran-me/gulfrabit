@@ -151,6 +151,10 @@ export function renderProductGrid(container, products) {
   if (!container) return;
   container.innerHTML = products.map(productCardHTML).join('');
   enhanceProductCards(container);
+  // Fresh markup starts with whatever `wished` was true at render time; this
+  // makes it true at PAINT time, which is not the same thing after a toggle
+  // in another tab or on another card for the same product.
+  syncWishlistHearts(container);
 }
 
 /** Read the product payload back off a card element. */
@@ -173,6 +177,39 @@ function cardPayload(card) {
  * Wire behaviour onto every [data-product-card] under `root`.
  * Idempotent — guards with a data flag so re-enhancing is safe.
  */
+/**
+ * Repaint every wishlist heart on the page from the store.
+ *
+ * WHY THE BUTTON DOES NOT PAINT ITSELF ANY MORE
+ * ---------------------------------------------
+ * A product can legitimately appear on the page more than once — the home
+ * rails repeat their set so a shelf has enough runway to march, and a product
+ * can sit in a rail and in Recently Viewed at the same time. When the click
+ * handler painted only the button that was clicked, the other copies kept the
+ * old heart, so one card said saved and its twin said not.
+ *
+ * Driving every heart off the one place that actually knows — the store —
+ * makes duplicates correct by construction, and fixes the same staleness for
+ * a wishlist changed in another tab (state.js mirrors the `storage` event) or
+ * from the wishlist page itself.
+ */
+function syncWishlistHearts(root = document) {
+  const saved = new Set(store.getWishlist().map((w) => w.id));
+  root.querySelectorAll('[data-product-card]').forEach((card) => {
+    const btn = card.querySelector('[data-action="wishlist"]');
+    if (!btn) return;
+    const active = saved.has(card.dataset.id);
+    btn.setAttribute('aria-pressed', String(active));
+    btn.style.color = active ? 'var(--lime-ink)' : '';
+    btn.setAttribute('aria-label', active ? 'Remove from wishlist' : 'Add to wishlist');
+  });
+}
+
+/* One subscription for the whole page, not one per card: cards are rendered
+   and re-rendered constantly, and a listener per card would accumulate
+   thousands of them over a browsing session with nothing ever unsubscribing. */
+store.subscribe(store.EVENTS.WISHLIST, () => syncWishlistHearts());
+
 export function enhanceProductCards(root = document) {
   root.querySelectorAll('[data-product-card]').forEach((card) => {
     if (card.dataset.enhanced) return;
@@ -189,10 +226,9 @@ export function enhanceProductCards(root = document) {
     const wishBtn = card.querySelector('[data-action="wishlist"]');
     wishBtn?.addEventListener('click', () => {
       const active = store.toggleWishlist(product);
-      wishBtn.setAttribute('aria-pressed', String(active));
-      wishBtn.style.color = active ? 'var(--lime-ink)' : '';
-      wishBtn.setAttribute('aria-label', active ? 'Remove from wishlist' : 'Add to wishlist');
       toast.info(active ? 'Saved to wishlist' : 'Removed from wishlist');
+      // The button is NOT painted here. syncWishlistHearts() below repaints
+      // every card for this product, including this one — see why there.
     });
 
     card.querySelector('[data-action="quickview"]')?.addEventListener('click', () => {
