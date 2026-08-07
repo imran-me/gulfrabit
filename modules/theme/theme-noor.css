@@ -726,6 +726,144 @@ html[data-theme="noor"] .category-card.lux-glance .category-card__media {
   to   { background-position: 100% 50%; opacity: 1; }
 }
 
+/* =========================================================================
+   THE DREAM EDIT
+   =========================================================================
+   The merchant judged the first night five percent of a dream, and the
+   missing ninety-five was never more particles. Set beside the reference,
+   the difference is COMPOSITION: enormous space, colossal type, slowness,
+   texture, an opening. A dense dark page is a basement; a generous dark
+   page is a theatre. Everything below spends space and time — the two
+   currencies that read as expensive — and none of it touches a word of
+   content or any theme but this one.
+   ========================================================================= */
+
+/* ---- Space ----------------------------------------------------------------
+   The day themes tightened the shop's rhythm to 64px between sections —
+   right for daylight commerce, fatal for a dream. At night the rooms are
+   vast: the gap between sections triples back, and the grids loosen their
+   shoulders. */
+@media (min-width: 768px)  { html[data-theme="noor"] .section-gr { padding-block: 5.5rem; } }
+@media (min-width: 1024px) { html[data-theme="noor"] .section-gr { padding-block: 7.5rem; } }
+html[data-theme="noor"] .home-cat-grid { gap: 18px; }
+html[data-theme="noor"] .snap-rail { gap: 1.5rem; }
+
+/* ---- Scale ----------------------------------------------------------------
+   Section titles rise toward poster size and shed weight as they grow —
+   Cinzel at 600 spreads like an inscription where 700 shouts. The overline
+   above whispers wider than ever. */
+html[data-theme="noor"] .section-head__titles > h2,
+html[data-theme="noor"] .section-head__titles > h1 {
+  font-size: clamp(2.2rem, 4.4vw, 3.8rem);
+  font-weight: 600;
+  letter-spacing: .035em;
+  line-height: 1.08;
+}
+html[data-theme="noor"] .section-head .overline {
+  font-size: .78rem;
+  letter-spacing: .34em;
+}
+
+/* ---- Slowness -------------------------------------------------------------
+   A dream is slow. Reveals take nearly twice the day's duration, rise from
+   deeper, and the stagger between siblings stretches — a tide arriving,
+   not a list loading. The delay is the authored one, scaled, so the JS
+   that writes it never has to know. */
+html[data-theme="noor"] [data-reveal] {
+  transform: translateY(26px) scale(.985);
+  transition-duration: 1150ms;
+  transition-delay: calc(var(--reveal-delay, 0ms) * 1.8);
+}
+
+/* ---- Velvet ---------------------------------------------------------------
+   Flat digital black is a screen; black with grain is fabric. A warm
+   turbulence noise rides the lagoon element as its topmost layer, three
+   percent strong — felt, not seen. */
+[data-theme="noor"] body::before {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.93 0 0 0 0 0.75 0 0 0 0.03 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E") repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='520' viewBox='0 0 900 520'%3E%3Cg fill='none' stroke='%23E8CF8E' stroke-opacity='.16'%3E%3Cpath d='M120 90 L235 60 L330 130 L470 95'/%3E%3Cpath d='M620 70 L710 150 L830 120'/%3E%3C/g%3E%3Cg fill='%23E8CF8E'%3E%3Ccircle cx='120' cy='90' r='2.1' fill-opacity='.5'/%3E%3Ccircle cx='235' cy='60' r='1.5' fill-opacity='.42'/%3E%3Ccircle cx='330' cy='130' r='2.4' fill-opacity='.55'/%3E%3Ccircle cx='470' cy='95' r='1.6' fill-opacity='.4'/%3E%3Ccircle cx='620' cy='70' r='2' fill-opacity='.5'/%3E%3Ccircle cx='710' cy='150' r='1.4' fill-opacity='.38'/%3E%3Ccircle cx='830' cy='120' r='2.2' fill-opacity='.5'/%3E%3C/g%3E%3C/svg%3E")
+      top center / 900px 520px no-repeat,
+    radial-gradient(52% 40% at 78% 8%,  rgba(27, 180, 212, .10), transparent 60%),
+    radial-gradient(44% 38% at 15% 90%, rgba(201, 162, 75, .10), transparent 62%),
+    radial-gradient(60% 50% at 40% 45%, rgba(14, 124, 153, .05), transparent 65%);
+}
+
+/* ---- The cinema vignette --------------------------------------------------
+   The viewport's edges fall softly into dark, the way a lens and a
+   projection room both do — every screenful becomes a framed frame.
+   Injected by theme.js ([data-noor-fx]); above the page, below the chrome,
+   deaf to the pointer. */
+[data-theme="noor"] .noor-vignette {
+  position: fixed;
+  inset: -2px;
+  z-index: 6;
+  pointer-events: none;
+  background: radial-gradient(115% 88% at 50% 44%, transparent 58%, rgba(2, 10, 14, .40) 100%);
+}
+
+/* ---- The painting ---------------------------------------------------------
+   The hero was a strip glued edge to edge — an ad. At night it hangs: a
+   framed painting floating in the dark, gold hairline, deep glow, space
+   around it. Desktop only; a phone IS the frame. */
+@media (min-width: 992px) {
+  html[data-theme="noor"] .hero {
+    max-width: min(1380px, 94vw);
+    margin: 2.4rem auto 0;
+    border-radius: 26px;
+    overflow: hidden;
+    border: 1px solid rgba(232, 207, 142, .38);
+    box-shadow:
+      0 0 0 1px rgba(4, 25, 31, .8),
+      0 30px 90px rgba(0, 0, 0, .65),
+      0 10px 50px rgba(201, 162, 75, .14);
+  }
+}
+
+/* ---- The ornament ----------------------------------------------------------
+   A single small diamond closes every overline — the engraver's mark that
+   says a hand was here. */
+html[data-theme="noor"] .section-head .overline::after {
+  content: "\25C6";
+  display: inline-block;
+  margin-left: .9em;
+  font-size: .55em;
+  color: rgba(232, 207, 142, .75);
+  transform: translateY(-.15em);
+}
+
+/* ---- The overture ----------------------------------------------------------
+   Once per visit the shop opens from black: নূর appears in gold and
+   dissolves — light, appearing. Pure CSS once placed: even if every script
+   dies mid-curtain, the animation completes and pointer-events:none means
+   it could never catch a tap. theme.js places it only on the first page of
+   a session, never under reduced motion. */
+[data-theme="noor"] .noor-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  display: grid;
+  place-items: center;
+  background: #04191F;
+  pointer-events: none;
+  animation: noor-curtain 1500ms ease forwards;
+}
+[data-theme="noor"] .noor-curtain span {
+  font-family: 'Noto Sans Bengali', 'Cinzel', serif;
+  font-size: clamp(3rem, 9vw, 5.5rem);
+  font-weight: 700;
+  color: #E4CE92;
+  text-shadow: 0 0 40px rgba(201, 162, 75, .55), 0 0 90px rgba(201, 162, 75, .3);
+  animation: noor-curtain-glyph 1500ms ease forwards;
+}
+@keyframes noor-curtain { 0% { opacity: 1; } 45% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes noor-curtain-glyph {
+  0%   { opacity: 0; transform: scale(.94); }
+  30%  { opacity: 1; transform: scale(1); }
+  55%  { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.03); }
+}
+
 /* ---- Stillness, on request ---------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   html[data-theme="noor"]::before,
@@ -736,7 +874,8 @@ html[data-theme="noor"] .category-card.lux-glance .category-card__media {
   html[data-theme="noor"] .product-card.lux-glance,
   html[data-theme="noor"] .category-card.lux-glance { animation: none; }
   [data-theme="noor"] .noor-ember,
-  [data-theme="noor"] .noor-lantern { display: none; }
+  [data-theme="noor"] .noor-lantern,
+  [data-theme="noor"] .noor-curtain { display: none; }
   html[data-theme="noor"] .product-card.lux-glance .product-card__media,
   html[data-theme="noor"] .category-card.lux-glance .category-card__media,
   [data-theme="noor"] [data-reveal].is-visible .lux-gilt,

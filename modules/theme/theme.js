@@ -320,7 +320,34 @@ function armNight() {
   document.head.appendChild(vt);
 
   const ready = () => {
+    // The vignette is composition, not motion — it stays under reduced
+    // motion. Everything after it moves, and doesn't.
+    const vig = document.createElement('div');
+    vig.className = 'noor-vignette';
+    vig.setAttribute('data-noor-fx', '');
+    vig.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(vig);
+
     if (reduce) return;
+
+    // The overture: once per session, the night opens. The curtain is
+    // animation-driven CSS with pointer-events:none — nothing can strand it
+    // over the shop — and the session flag means back-and-forward browsing
+    // never replays it. A ritual repeated on every page is a nag.
+    try {
+      if (!sessionStorage.getItem('noor-overture')) {
+        sessionStorage.setItem('noor-overture', '1');
+        const veil = document.createElement('div');
+        veil.className = 'noor-curtain';
+        veil.setAttribute('data-noor-fx', '');
+        veil.setAttribute('aria-hidden', 'true');
+        const glyph = document.createElement('span');
+        glyph.textContent = '\u09A8\u09C2\u09B0';
+        veil.appendChild(glyph);
+        veil.addEventListener('animationend', (e) => { if (e.target === veil) veil.remove(); });
+        document.body.appendChild(veil);
+      }
+    } catch { /* private mode: no overture, no harm */ }
 
     const ember = document.createElement('div');
     ember.className = 'noor-ember';
