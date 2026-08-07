@@ -46,7 +46,7 @@ export const CONFIG = {
    */
   social: {
     instagram: '',
-    facebook: '',
+    facebook: 'https://www.facebook.com/profile.php?id=61582429974835',
     linkedin: '',
   },
 
@@ -56,9 +56,10 @@ export const CONFIG = {
    * and the worst thing it can show is one nobody does. Empty renders
    * nothing, same contract as everything else here.
    *
-   * // TODO(merchant): paste the support number and its hours.
+   * Hours are still unset — the strip shows the number alone until the
+   * merchant decides what to promise.
    */
-  phone: '',
+  phone: '01894 715151',
   supportHours: '',   // e.g. '10:00–22:00' — shown beside the number
 
   /**
@@ -66,9 +67,8 @@ export const CONFIG = {
    * non-digits are stripped (e.g. '8801XXXXXXXXX'). Empty hides the floating
    * chat bubble on every page, exactly like the socials above.
    *
-   * // TODO(merchant): paste the business WhatsApp number.
    */
-  whatsapp: '',
+  whatsapp: '8801894715151',
 
   /** ISO currency for ad platform value reporting. */
   currency: 'BDT',
