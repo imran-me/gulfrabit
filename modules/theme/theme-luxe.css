@@ -464,6 +464,56 @@ html[data-theme="luxe"] .surface-gr {
   color: rgba(239,227,196,.85) !important;
 }
 
+/* Dust where it shows best: gold motes on the deep teal, inside the panel.
+   The page's own dust dies behind the band's background, so the band grows
+   a local layer — same duplicated-column loop, shorter travel (the band is
+   short, so the copies sit half a viewport apart and the loop runs -50vh).
+   Brighter than the page motes: on the dark ground they can afford to be. */
+[data-theme="luxe"] .newsletter-band { position: relative; overflow: hidden; }
+[data-theme="luxe"] .newsletter-band > * { position: relative; z-index: 1; }
+[data-theme="luxe"] .newsletter-band::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  box-shadow:
+    33.1vw 6.9vh 0px 0 rgba(232,207,142,0.48),
+    33.1vw 56.9vh 0px 0 rgba(232,207,142,0.48),
+    37.1vw 2.7vh 1px 0 rgba(201,162,75,0.46),
+    37.1vw 52.7vh 1px 0 rgba(201,162,75,0.46),
+    42.1vw 11.1vh 2px 0 rgba(232,207,142,0.47),
+    42.1vw 61.1vh 2px 0 rgba(232,207,142,0.47),
+    93.0vw 29.0vh 0px 0 rgba(201,162,75,0.65),
+    93.0vw 79.0vh 0px 0 rgba(201,162,75,0.65),
+    6.8vw 10.2vh 1px 0 rgba(228,206,146,0.55),
+    6.8vw 60.2vh 1px 0 rgba(228,206,146,0.55),
+    53.9vw 26.3vh 1px 0 rgba(228,206,146,0.49),
+    53.9vw 76.3vh 1px 0 rgba(228,206,146,0.49),
+    37.8vw 25.2vh 0px 0 rgba(228,206,146,0.65),
+    37.8vw 75.2vh 0px 0 rgba(228,206,146,0.65),
+    49.7vw 24.5vh 1px 0 rgba(201,162,75,0.61),
+    49.7vw 74.5vh 1px 0 rgba(201,162,75,0.61),
+    36.7vw 11.4vh 1px 0 rgba(228,206,146,0.69),
+    36.7vw 61.4vh 1px 0 rgba(228,206,146,0.69),
+    9.9vw 13.8vh 2px 0 rgba(201,162,75,0.76),
+    9.9vw 63.8vh 2px 0 rgba(201,162,75,0.76),
+    29.6vw 45.1vh 0px 0 rgba(228,206,146,0.63),
+    29.6vw 95.1vh 0px 0 rgba(228,206,146,0.63),
+    74.7vw 7.0vh 2px 0 rgba(232,207,142,0.6),
+    74.7vw 57.0vh 2px 0 rgba(232,207,142,0.6),
+    75.4vw 26.4vh 1px 0 rgba(244,229,180,0.57),
+    75.4vw 76.4vh 1px 0 rgba(244,229,180,0.57),
+    59.1vw 26.7vh 2px 0 rgba(232,207,142,0.47),
+    59.1vw 76.7vh 2px 0 rgba(232,207,142,0.47),
+    92.7vw 21.8vh 0px 0 rgba(244,229,180,0.47),
+    92.7vw 71.8vh 0px 0 rgba(244,229,180,0.47);
+  animation: lux-rise-band 60s linear infinite, lux-breathe 5s ease-in-out infinite alternate;
+}
+@keyframes lux-rise-band { to { transform: translateY(-50vh); } }
+
 /* ---- The glint ---------------------------------------------------------
    Metal is convincing when light MOVES on it. The ring's border-box layer
    is widened to two and a half times the card and parked off to one side;
@@ -514,6 +564,99 @@ html[data-theme="luxe"] .surface-gr {
 
 /* Trust icons join the metalwork. */
 [data-theme="luxe"] .trust-band svg { color: var(--gold-ink); }
+
+/* ---- The sale badge, recut --------------------------------------------
+   Lime on gold was the last survivor of the old palette still shouting on
+   the cards. Under Luxe a discount dresses like everything else here:
+   deep claret under gold type, ringed in the metal. The saving line joins
+   the metalwork with it. */
+[data-theme="luxe"] .badge-sale {
+  background: linear-gradient(160deg, #7E2430, #5C1822);
+  color: #F3DFA8;
+  border: 1px solid rgba(201,162,75,.65);
+}
+[data-theme="luxe"] .price-saving { color: var(--gold-ink); }
+
+/* ---- The checkout stepper, as jewellery -------------------------------
+   The three step numbers become medallions: Cinzel digits in a gold ring on
+   ivory. The active step fills deep sea-teal — the night panel's ground —
+   with a pale gold digit; a finished step fills solid gold and keeps its
+   dark digit. States and markup are checkout-page.js's own; this repaints. */
+[data-theme="luxe"] .step__num {
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 700;
+  background: var(--surface-raised);
+  border: 1px solid var(--lux-gold);
+  color: var(--gold-ink);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.75), 0 1px 4px rgba(138,109,34,.18);
+}
+[data-theme="luxe"] .step.is-active .step__num {
+  background: linear-gradient(180deg, #0A3641, #07242E);
+  border-color: var(--lux-gold);
+  color: var(--lux-gold-light);
+}
+[data-theme="luxe"] .step.is-done .step__num {
+  background: linear-gradient(135deg, #E4CE92, #C9A24B 55%, #A8842B);
+  border-color: transparent;
+  color: #2F2A1C;
+}
+[data-theme="luxe"] .step.is-active { color: var(--gold-ink); }
+
+/* ---- The seal -----------------------------------------------------------
+   The confirmation is the moment a customer screenshots and sends to a
+   friend, so under Luxe it is stamped rather than ticked: the check circle
+   becomes a double-ringed gold seal that presses onto the page — one scale-
+   and-settle, then still. Both confirmation marks are aria-hidden in the
+   markup, which is what lets the caption ride in CSS without reaching a
+   screen reader; the heading beside it says everything that matters. */
+[data-theme="luxe"] .confirm-check,
+[data-theme="luxe"] .express-done__mark {
+  position: relative;
+  background: radial-gradient(circle at 34% 30%, #EFDFAF, #C9A24B 58%, #A8842B);
+  color: #2F2A1C;
+  border: 1px solid #8A6D22;
+  box-shadow:
+    inset 0 0 0 3px rgba(255,248,230,.55),
+    inset 0 0 0 4px rgba(138,109,34,.6),
+    0 10px 26px rgba(138,109,34,.28);
+  animation: lux-stamp 640ms var(--ease-out) both;
+}
+[data-theme="luxe"] .confirm-check::after,
+[data-theme="luxe"] .express-done__mark::after {
+  content: "GULFRABIT";
+  position: absolute;
+  left: 50%; bottom: -1.55rem;
+  transform: translateX(-50%);
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: .58rem;
+  letter-spacing: .34em;
+  text-indent: .34em;      /* recentres tracked type */
+  color: var(--gold-ink);
+  white-space: nowrap;
+}
+@keyframes lux-stamp {
+  0%   { transform: scale(1.9) rotate(-7deg); opacity: 0; }
+  55%  { transform: scale(.92) rotate(1deg);  opacity: 1; }
+  100% { transform: scale(1) rotate(0);       opacity: 1; }
+}
+
+/* ---- The burst ----------------------------------------------------------
+   Spawned by theme.js when Add to Cart is pressed: a pinch of the page's
+   own dust thrown from the button. Fixed, above every layer, gone on
+   animationend. */
+.lux-burst {
+  position: fixed;
+  z-index: 1200;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle at 35% 30%, #F4E5B4, #C9A24B 70%);
+  box-shadow: 0 0 6px rgba(201,162,75,.8);
+  animation: lux-burst-fly 700ms cubic-bezier(.17,.67,.4,1) forwards;
+}
+@keyframes lux-burst-fly {
+  from { transform: translate(0, 0) scale(1); opacity: .95; }
+  to   { transform: translate(var(--dx), var(--dy)) scale(.25); opacity: 0; }
+}
 
 /* ---- Buttons -----------------------------------------------------------
    FLAT LOGO CYAN, EVERY ONE OF THEM — the merchant's direct instruction,
@@ -649,6 +792,11 @@ html[data-theme="luxe"] .surface-gr {
    and hairlines stay — they are colour, not movement — but nothing drifts,
    sweeps or draws. */
 @media (prefers-reduced-motion: reduce) {
+  [data-theme="luxe"] .newsletter-band::before { display: none; }
+  [data-theme="luxe"] .confirm-check,
+  [data-theme="luxe"] .express-done__mark { animation: none; }
+  .lux-burst { display: none; }
+
   /* Stationary dust reads as dirt on the glass — gone entirely, not paused. */
   html[data-theme="luxe"]::before,
   html[data-theme="luxe"]::after { display: none; }

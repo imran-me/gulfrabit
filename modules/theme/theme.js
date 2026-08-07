@@ -62,8 +62,47 @@ export function applyTheme(name) {
   const root = document.documentElement;
   if (theme === 'luxe') root.setAttribute('data-theme', 'luxe');
   else root.removeAttribute('data-theme');
-  if (theme === 'luxe') armGilding();
+  if (theme === 'luxe') { armGilding(); armBurst(); }
   return theme;
+}
+
+/* ---- The gold burst ----------------------------------------------------
+ * A pinch of the theme's dust thrown from any Add to Cart as it is pressed
+ * — the one action that matters, marked in the theme's own material. Bound
+ * once, on capture, so it survives buttons that pages re-render; skipped
+ * entirely for anyone who asked their device for reduced motion, and inert
+ * outside Luxe because the check is at click time, not bind time.
+ */
+const BURST_FROM = '[data-action="add-to-cart"], [data-add-to-cart], [data-buybar-add], [data-bundle-add]';
+let burstArmed = false;
+
+function armBurst() {
+  if (burstArmed) return;
+  burstArmed = true;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  document.addEventListener('click', (e) => {
+    if (currentTheme() !== 'luxe') return;
+    const btn = e.target.closest ? e.target.closest(BURST_FROM) : null;
+    if (!btn || btn.disabled) return;
+
+    const r = btn.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + 4;
+    for (let i = 0; i < 7; i++) {
+      const m = document.createElement('span');
+      m.className = 'lux-burst';
+      const size = 2.5 + Math.random() * 3;
+      const dx = (Math.random() - 0.5) * 130;
+      const dy = -(46 + Math.random() * 80);
+      m.style.cssText = `left:${cx}px;top:${cy}px;width:${size}px;height:${size}px;`
+        + `--dx:${dx.toFixed(0)}px;--dy:${dy.toFixed(0)}px;`
+        + `animation-duration:${(480 + Math.random() * 360).toFixed(0)}ms;`
+        + `animation-delay:${(Math.random() * 90).toFixed(0)}ms`;
+      m.addEventListener('animationend', () => m.remove());
+      document.body.appendChild(m);
+    }
+  }, true);
 }
 
 /* ---- Heading gilding ---------------------------------------------------
