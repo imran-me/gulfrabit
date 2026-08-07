@@ -71,7 +71,7 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=e7dc975e">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=4e4c3062">
   <!-- The Luxe layer. Linked on every storefront page and completely
        inert without [data-theme="luxe"] on <html>, so the default theme
        renders exactly as it did before this file existed. Linking it
@@ -161,11 +161,16 @@
            in categories.json belong here: a nav item pointing at a category the
            storefront no longer lists is a dead end with a promoted position.
            Dates & Nuts leads because it is the only one carrying stock today. -->
-      <div class="nav-item"><a class="nav-link" href="../../modules/catalog/category.html?slug=dates-nuts" data-nav-match="dates-nuts">Dates &amp; Nuts</a></div>
-      <div class="nav-item"><a class="nav-link" href="../../modules/catalog/category.html?slug=chocolates-dairy" data-nav-match="chocolates-dairy">Chocolates &amp; Dairy</a></div>
-      <div class="nav-item"><a class="nav-link" href="../../modules/catalog/category.html?slug=fashion-clothes" data-nav-match="fashion-clothes">Fashion</a></div>
+      <div class="nav-item nav-item-optional"><a class="nav-link" href="../../modules/catalog/category.html?slug=dates-nuts" data-nav-match="dates-nuts">Dates &amp; Nuts</a></div>
+      <div class="nav-item nav-item-optional"><a class="nav-link" href="../../modules/catalog/category.html?slug=chocolates-dairy" data-nav-match="chocolates-dairy">Chocolates &amp; Dairy</a></div>
+      <div class="nav-item nav-item-optional"><a class="nav-link" href="../../modules/catalog/category.html?slug=fashion-clothes" data-nav-match="fashion-clothes">Fashion</a></div>
       <div class="nav-item"><a class="nav-link" href="../../modules/deals/deals.html" data-nav-match="modules/deals" style="color:var(--lime-ink)">Flash Sale</a></div>
       <div class="nav-item"><a class="nav-link" href="../../modules/content/about.html" data-nav-match="about">About</a></div>
+      <!-- "Where is my order" is the most-asked question in a cash-on-delivery
+           market, and it was answered only by a footer link. Every comparable
+           BD shop puts tracking in the top nav; burying it turns a
+           self-service answer into a phone call. -->
+      <div class="nav-item"><a class="nav-link" href="../../modules/account/track.html" data-nav-match="account/track">Track Order</a></div>
     </nav>
 
     <!-- Header search (desktop) -->
@@ -221,8 +226,12 @@
       <li style="--i:7"><a class="mobile-nav__link" href="../../modules/deals/deals.html">Flash Sale</a></li>
     </ul>
     <ul class="mobile-nav__list mobile-nav__list--minor" role="list">
-      <li style="--i:8"><a class="mobile-nav__link" href="../../modules/account/dashboard.html">My Account</a></li>
-      <li style="--i:9"><a class="mobile-nav__link" href="../../modules/content/about.html">About</a></li>
+      <!-- First in the minor list, above My Account: tracking is the one thing
+           here a signed-out customer can actually use — it takes an order
+           number, not a login. -->
+      <li style="--i:8"><a class="mobile-nav__link" href="../../modules/account/track.html">Track Order <span class="mobile-nav__bn bn" lang="bn">অর্ডার ট্র্যাক</span></a></li>
+      <li style="--i:9"><a class="mobile-nav__link" href="../../modules/account/dashboard.html">My Account</a></li>
+      <li style="--i:10"><a class="mobile-nav__link" href="../../modules/content/about.html">About</a></li>
     </ul>
   </nav>
 </aside>

@@ -121,11 +121,15 @@
              to sit here; both are switched off in categories.json for now, and a
              nav item pointing at a category the storefront no longer lists is a
              dead end with a promoted position. -->
-        <div class="nav-item"><a class="nav-link" href="modules/catalog/category.html?slug=dates-nuts" data-nav-match="dates-nuts">Dates &amp; Nuts</a></div>
-        <div class="nav-item"><a class="nav-link" href="modules/catalog/category.html?slug=chocolates-dairy" data-nav-match="chocolates-dairy">Chocolates &amp; Dairy</a></div>
-        <div class="nav-item"><a class="nav-link" href="modules/catalog/category.html?slug=fashion-clothes" data-nav-match="fashion-clothes">Fashion</a></div>
+        <div class="nav-item nav-item-optional"><a class="nav-link" href="modules/catalog/category.html?slug=dates-nuts" data-nav-match="dates-nuts">Dates &amp; Nuts</a></div>
+        <div class="nav-item nav-item-optional"><a class="nav-link" href="modules/catalog/category.html?slug=chocolates-dairy" data-nav-match="chocolates-dairy">Chocolates &amp; Dairy</a></div>
+        <div class="nav-item nav-item-optional"><a class="nav-link" href="modules/catalog/category.html?slug=fashion-clothes" data-nav-match="fashion-clothes">Fashion</a></div>
         <div class="nav-item"><a class="nav-link" href="modules/deals/deals.html" data-nav-match="modules/deals" style="color:var(--lime-ink)">Flash Sale</a></div>
         <div class="nav-item"><a class="nav-link" href="modules/content/about.html" data-nav-match="about">About</a></div>
+        <!-- "Where is my order" is the most-asked question in a cash-on-delivery
+             market, and it was answered only by a footer link. Kept in step with
+             shared/components/header.html by hand — this page is not assembled. -->
+        <div class="nav-item"><a class="nav-link" href="modules/account/track.html" data-nav-match="account/track">Track Order</a></div>
       </nav>
       <div class="header-search">
         <form data-search role="search" method="get" action="modules/catalog/search-results.html">
@@ -174,8 +178,9 @@
         <li style="--i:7"><a class="mobile-nav__link" href="modules/deals/deals.html">Flash Sale</a></li>
       </ul>
       <ul class="mobile-nav__list mobile-nav__list--minor" role="list">
-        <li style="--i:8"><a class="mobile-nav__link" href="modules/account/dashboard.html">My Account</a></li>
-        <li style="--i:9"><a class="mobile-nav__link" href="modules/content/about.html">About</a></li>
+        <li style="--i:8"><a class="mobile-nav__link" href="modules/account/track.html">Track Order <span class="mobile-nav__bn bn" lang="bn">অর্ডার ট্র্যাক</span></a></li>
+        <li style="--i:9"><a class="mobile-nav__link" href="modules/account/dashboard.html">My Account</a></li>
+        <li style="--i:10"><a class="mobile-nav__link" href="modules/content/about.html">About</a></li>
       </ul>
     </nav>
   </aside>

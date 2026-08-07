@@ -1049,6 +1049,24 @@ a:hover { color: var(--link-hover); }
   .site-header__wordmark { display: none; }
   .header-action-optional { display: none !important; }
 }
+
+/* ---- The category shortcuts give way before anything else ---------------
+   The nav row was measured to be exactly full at six items. Adding Track
+   Order made it seven and the whole PAGE scrolled sideways again — 3px at
+   1440, 24px at 1280, 82px at 1024 — the same overflow the block above was
+   written to kill.
+
+   These three go first because they are the only items in the row that are
+   duplicated: every one of them is inside the Shop mega-menu two pixels
+   away. Track Order, Flash Sale and About are each reachable from nowhere
+   else in the header, so losing one of those would cost a destination while
+   losing these costs a shortcut.
+
+   1500px, not 1400: the container caps at 1400 and the seven-item row
+   measured 1423, so it overflowed its own container even on a 1440 laptop. */
+@media (max-width: 1499.98px) {
+  .nav-item-optional { display: none; }
+}
 .site-header__actions { display: flex; align-items: center; gap: var(--space-1); margin-left: auto; }
 
 /* ---- Primary nav + mega-menu ----------------------------------------- */
@@ -1230,6 +1248,19 @@ a:hover { color: var(--link-hover); }
   color: var(--text-secondary);
 }
 .mobile-nav__list--minor > li + li > .mobile-nav__link::before { display: none; }
+
+/* The Bangla beside a drawer link. Same treatment as the buttons (.btn-bn):
+   quieter, smaller, and on the same line — a second voice, not a second row.
+   `em` so it tracks whatever size the link is. */
+.mobile-nav__bn {
+  font-size: 0.82em;
+  font-weight: var(--fw-regular);
+  color: var(--text-muted);
+  margin-inline-start: .35em;
+  /* Bangla's 1.75 default leading would make this row taller than its
+     neighbours and break the drawer's even rhythm. */
+  line-height: 1;
+}
 
 /* Rows arrive just behind the panel, ~26ms apart, so the drawer resolves into
    a list instead of appearing whole. --i is set per row in the markup and by
