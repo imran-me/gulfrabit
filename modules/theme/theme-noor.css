@@ -532,6 +532,200 @@ html[data-theme="noor"] a.stat-card:hover {
 }
 [data-theme="noor"] .address-card.is-default { border-color: var(--accent-ink); }
 
+/* =========================================================================
+   NOOR ²⁰ — the night, deepened. Every addition still obeys the three
+   words: night, water, light. And every one of them dies under reduced
+   motion, because a dream you cannot switch off is a nuisance.
+   ========================================================================= */
+
+/* ---- The constellation --------------------------------------------------
+   Faint stars joined by hairlines, high in the water — the fourth layer of
+   the lagoon wash, so it costs no new element. Visible only if looked for,
+   which is the correct brightness for a constellation. */
+[data-theme="noor"] body::before {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='520' viewBox='0 0 900 520'%3E%3Cg fill='none' stroke='%23E8CF8E' stroke-opacity='.16'%3E%3Cpath d='M120 90 L235 60 L330 130 L470 95'/%3E%3Cpath d='M620 70 L710 150 L830 120'/%3E%3C/g%3E%3Cg fill='%23E8CF8E'%3E%3Ccircle cx='120' cy='90' r='2.1' fill-opacity='.5'/%3E%3Ccircle cx='235' cy='60' r='1.5' fill-opacity='.42'/%3E%3Ccircle cx='330' cy='130' r='2.4' fill-opacity='.55'/%3E%3Ccircle cx='470' cy='95' r='1.6' fill-opacity='.4'/%3E%3Ccircle cx='620' cy='70' r='2' fill-opacity='.5'/%3E%3Ccircle cx='710' cy='150' r='1.4' fill-opacity='.38'/%3E%3Ccircle cx='830' cy='120' r='2.2' fill-opacity='.5'/%3E%3C/g%3E%3C/svg%3E")
+      top center / 900px 520px no-repeat,
+    radial-gradient(52% 40% at 78% 8%,  rgba(27, 180, 212, .10), transparent 60%),
+    radial-gradient(44% 38% at 15% 90%, rgba(201, 162, 75, .10), transparent 62%),
+    radial-gradient(60% 50% at 40% 45%, rgba(14, 124, 153, .05), transparent 65%);
+}
+
+/* ---- The shooting ember --------------------------------------------------
+   Every half minute or so, one gold streak falls across the upper sky and
+   is gone in under a second. Rare is what makes it precious — a constant
+   meteor shower is weather, a single ember is luck. The element is placed
+   by theme.js ([data-noor-fx]); each pass lands at a different height via
+   --ember-y, re-rolled on every animation iteration. */
+[data-theme="noor"] .noor-ember {
+  position: fixed;
+  top: var(--ember-y, 12vh);
+  left: -12vw;
+  width: 120px; height: 2px;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgba(232,207,142,.05) 30%, #FFF3C4 85%, #FFF8DC 100%);
+  box-shadow: 0 0 12px rgba(232, 207, 142, .5);
+  transform: rotate(9deg);
+  opacity: 0;
+  animation: noor-ember 27s linear infinite;
+}
+@keyframes noor-ember {
+  0%    { transform: translate3d(0, 0, 0) rotate(9deg); opacity: 0; }
+  1%    { opacity: .9; }
+  3.2%  { transform: translate3d(120vw, 14vw, 0) rotate(9deg); opacity: 0; }
+  100%  { transform: translate3d(120vw, 14vw, 0) rotate(9deg); opacity: 0; }
+}
+
+/* ---- The hand-carried lantern --------------------------------------------
+   Desktop only: a soft pool of gold light follows the pointer, lagging the
+   way lamplight lags a hand. mix-blend screen, transform only, and the
+   JavaScript behind it sleeps whenever the light has caught up — the night
+   answers the visitor, it does not chase them. */
+[data-theme="noor"] .noor-lantern {
+  position: fixed;
+  top: -170px; left: -170px;
+  width: 340px; height: 340px;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(232, 207, 142, .085) 0%, rgba(201, 162, 75, .05) 38%, transparent 70%);
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+/* ---- Windows light as you pass -------------------------------------------
+   The glance (theme.js) now marks arriving cards on EVERY pointer under
+   Noor — on a dark street the windows light when you walk by, whether you
+   walk with a thumb or a mouse. The mark already sweeps the ring; here it
+   also blooms the vitrine glass from dim to lit, once, on arrival. */
+html[data-theme="noor"] .product-card.lux-glance .product-card__media,
+html[data-theme="noor"] .category-card.lux-glance .category-card__media {
+  animation: noor-lightup 950ms var(--ease-out);
+}
+@keyframes noor-lightup {
+  from { filter: brightness(.5) saturate(.8); }
+  55%  { filter: brightness(1.07) saturate(1.02); }
+  to   { filter: brightness(1); }
+}
+
+/* ---- The ignition ---------------------------------------------------------
+   When a section arrives, its gilded tail catches light once — a flare that
+   travels the word and settles — instead of merely existing. Rides the
+   reveal system's own .is-visible, which is guaranteed to land. */
+[data-theme="noor"] .lux-gilt { background-size: 220% 100%; }
+[data-theme="noor"] [data-reveal].is-visible .lux-gilt {
+  animation: noor-ignite 1200ms var(--ease-out);
+}
+@keyframes noor-ignite {
+  from { background-position: 120% 50%; }
+  to   { background-position: 0% 50%; }
+}
+
+/* ---- Small lanterns -------------------------------------------------------
+   The carousel's active dot and the tab bar's active tab burn instead of
+   merely differing. */
+[data-theme="noor"] .hero__dot.is-active {
+  animation: noor-dot-burn 4s ease-in-out infinite alternate;
+}
+@keyframes noor-dot-burn {
+  from { box-shadow: 0 0 6px 1px rgba(232, 207, 142, .35); }
+  to   { box-shadow: 0 0 14px 3px rgba(232, 207, 142, .6); }
+}
+[data-theme="noor"] .tabbar__item { position: relative; }
+[data-theme="noor"] .tabbar__item.is-active { color: var(--gold-ink); }
+[data-theme="noor"] .tabbar__item.is-active::after {
+  content: "";
+  position: absolute;
+  bottom: 3px; left: 50%;
+  width: 4px; height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: #FFF3C4;
+  animation: noor-dot-burn 3s ease-in-out infinite alternate;
+}
+
+/* ---- The price, catching light --------------------------------------------
+   On the product page only — one price, one slow glint crossing it forever,
+   the way a shop light plays on an engraved tag. The grid prices stay
+   still: forty glints is a fairground. Ends of the ramp match, so the loop
+   has no seam. */
+[data-theme="noor"] .pdp-price__now {
+  background: linear-gradient(100deg,
+    #E4CE92 0%, #C9A24B 30%, #FFF3C4 50%, #C9A24B 70%, #E4CE92 100%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: noor-price-glint 8s linear infinite;
+}
+@keyframes noor-price-glint {
+  from { background-position: 0% 50%; }
+  to   { background-position: -300% 50%; }
+}
+
+/* ---- Fireflies from the button --------------------------------------------
+   The add-to-cart burst was gold dust; at night each spark carries a halo. */
+[data-theme="noor"] .lux-burst {
+  background: radial-gradient(circle at 35% 30%, #FFF8DC, #E4CE92 55%, rgba(201,162,75,0) 100%);
+  box-shadow: 0 0 10px 3px rgba(232, 207, 142, .7);
+}
+
+/* ---- The stars over the spoken word --------------------------------------- */
+[data-theme="noor"] .testi-stars {
+  color: #E4CE92;
+  text-shadow: 0 0 10px rgba(232, 207, 142, .4);
+  animation: noor-twinkle 5.5s ease-in-out infinite alternate;
+}
+@keyframes noor-twinkle {
+  from { opacity: .72; }
+  to   { opacity: 1; }
+}
+
+/* ---- The sunbeam in the dawn room ------------------------------------------
+   The one bright chamber gets the one daylight move: a slow shaft of light
+   crossing the ivory, the way sun crosses a floor. */
+[data-theme="noor"] .newsletter-band { position: relative; overflow: hidden; }
+[data-theme="noor"] .newsletter-band > * { position: relative; z-index: 1; }
+[data-theme="noor"] .newsletter-band::after {
+  content: "";
+  position: absolute;
+  top: -40%; bottom: -40%;
+  left: 0;
+  width: 26%;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255, 248, 220, .5) 50%, transparent);
+  transform: translateX(-140%) rotate(6deg);
+  animation: noor-sunbeam 16s ease-in-out infinite;
+}
+@keyframes noor-sunbeam {
+  0%   { transform: translateX(-160%) rotate(6deg); }
+  55%  { transform: translateX(560%) rotate(6deg); }
+  100% { transform: translateX(560%) rotate(6deg); }
+}
+
+/* ---- The shore -------------------------------------------------------------
+   The page ends at the waterline: a thin gold shimmer running along the top
+   of the footer, light lapping the shore. */
+[data-theme="noor"] footer { position: relative; }
+[data-theme="noor"] footer::before {
+  content: "";
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    rgba(201,162,75,.05), #C9A24B 25%, rgba(232,207,142,.9) 50%, #C9A24B 75%, rgba(201,162,75,.05));
+  background-size: 200% 100%;
+  animation: noor-waterline 9s ease-in-out infinite alternate;
+}
+@keyframes noor-waterline {
+  from { background-position: 0% 50%; opacity: .55; }
+  to   { background-position: 100% 50%; opacity: 1; }
+}
+
 /* ---- Stillness, on request ---------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   html[data-theme="noor"]::before,
@@ -541,4 +735,15 @@ html[data-theme="noor"] a.stat-card:hover {
   html[data-theme="noor"] .category-card:hover,
   html[data-theme="noor"] .product-card.lux-glance,
   html[data-theme="noor"] .category-card.lux-glance { animation: none; }
+  [data-theme="noor"] .noor-ember,
+  [data-theme="noor"] .noor-lantern { display: none; }
+  html[data-theme="noor"] .product-card.lux-glance .product-card__media,
+  html[data-theme="noor"] .category-card.lux-glance .category-card__media,
+  [data-theme="noor"] [data-reveal].is-visible .lux-gilt,
+  [data-theme="noor"] .hero__dot.is-active,
+  [data-theme="noor"] .tabbar__item.is-active::after,
+  [data-theme="noor"] .pdp-price__now,
+  [data-theme="noor"] .testi-stars,
+  [data-theme="noor"] .newsletter-band::after,
+  [data-theme="noor"] footer::before { animation: none; }
 }

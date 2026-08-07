@@ -47,7 +47,13 @@ const THEMES = ['classic', 'luxe', 'trio', 'noor'];
 const PREVIEW_KEY = 'theme-preview';
 
 export function currentTheme() {
-  return document.documentElement.getAttribute('data-theme') === 'luxe' ? 'luxe' : 'classic';
+  // Reads the attribute against the registry, NOT a hardcoded pair — this
+  // helper predated Trio and Noor as a luxe/classic binary, and every
+  // fire-time gate that trusted it (the glance, the burst) silently treated
+  // the new themes as Classic. Found by tapping the glance observer and
+  // watching it report th:classic on a page visibly wearing Noor.
+  const t = document.documentElement.getAttribute('data-theme');
+  return THEMES.includes(t) ? t : 'classic';
 }
 
 /**
@@ -70,7 +76,8 @@ export function applyTheme(name) {
   if (theme === 'trio') armGilding();
   // Noor is the gold themes' night: everything that moves in Luxe moves
   // here, and shows better — fireflies against dark water.
-  if (theme === 'noor') { armGilding(); armBurst(); armGlance(); }
+  if (theme === 'noor') { armGilding(); armBurst(); armGlance(); armNight(); }
+  else document.querySelectorAll('[data-noor-fx]').forEach((n) => n.remove());
   return theme;
 }
 
@@ -90,7 +97,7 @@ function armBurst() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   document.addEventListener('click', (e) => {
-    if (currentTheme() !== 'luxe') return;
+    if (currentTheme() !== 'luxe' && currentTheme() !== 'noor') return;
     const btn = e.target.closest ? e.target.closest(BURST_FROM) : null;
     if (!btn || btn.disabled) return;
 
@@ -230,11 +237,16 @@ function armGlance() {
   glanceArmed = true;
   if (!('IntersectionObserver' in window)) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if (!window.matchMedia('(hover: none)').matches) return;
+  // Touch screens always glance — the scroll is their only pointer. Under
+  // Noor, EVERY pointer glances: on a dark street the windows light when
+  // you walk past, however you walk. Checked at fire time, not arm time,
+  // so a tab that switches themes behaves like the theme it is wearing.
+  const touchOnly = window.matchMedia('(hover: none)');
 
   const io = new IntersectionObserver((entries) => {
     for (const en of entries) {
       if (!en.isIntersecting) continue;
+      if (!touchOnly.matches && currentTheme() !== 'noor') continue;
       const el = en.target;
       if (el.classList.contains('lux-glance')) continue;
       el.classList.add('lux-glance');
@@ -264,4 +276,87 @@ function armGlance() {
 /* Boot LAST: applyTheme reaches every arm-function above, and a `let`
    declared after this line would still be uninitialized when it does —
    exactly the bug that once made the glance observer die silently. */
+
+
+/* ---- The night instruments ---------------------------------------------
+ * Three things CSS cannot conjure alone, armed only under Noor and removed
+ * by applyTheme the moment the tab wears anything else ([data-noor-fx]).
+ *
+ * THE CROSSFADE — cross-document view transitions. The opt-in at-rule
+ * cannot be scoped by theme in a stylesheet that is always linked, so the
+ * rule itself is injected only while Noor is worn: every navigation melts
+ * through black instead of cutting. Browsers without the API simply cut,
+ * and reduced-motion keeps the cut on purpose.
+ *
+ * THE EMBER — one streak of gold across the sky every ~27s; each pass
+ * lands at a different height, re-rolled when the animation loops.
+ *
+ * THE LANTERN — desktop only: a pool of gold light that follows the
+ * pointer with a lag, and whose loop SLEEPS once the light has caught up.
+ * The night answers the hand; it does not chase it.
+ */
+let nightArmed = false;
+
+function armNight() {
+  if (nightArmed) {
+    // Re-entering Noor in the same tab: re-place what applyTheme removed.
+    if (!document.getElementById('noor-vt')) nightArmed = false;
+  }
+  if (nightArmed) return;
+  nightArmed = true;
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const vt = document.createElement('style');
+  vt.id = 'noor-vt';
+  vt.setAttribute('data-noor-fx', '');
+  vt.textContent = reduce ? '' : `
+    @view-transition { navigation: auto; }
+    ::view-transition-old(root) { animation: noor-vt-out 360ms ease both; }
+    ::view-transition-new(root) { animation: noor-vt-in 480ms ease both; }
+    @keyframes noor-vt-out { to { opacity: 0; } }
+    @keyframes noor-vt-in { from { opacity: 0; } }
+  `;
+  document.head.appendChild(vt);
+
+  const ready = () => {
+    if (reduce) return;
+
+    const ember = document.createElement('div');
+    ember.className = 'noor-ember';
+    ember.setAttribute('data-noor-fx', '');
+    ember.setAttribute('aria-hidden', 'true');
+    const roll = () => ember.style.setProperty('--ember-y', (4 + Math.random() * 26).toFixed(1) + 'vh');
+    roll();
+    ember.addEventListener('animationiteration', roll);
+    document.body.appendChild(ember);
+
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      const lamp = document.createElement('div');
+      lamp.className = 'noor-lantern';
+      lamp.setAttribute('data-noor-fx', '');
+      lamp.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(lamp);
+
+      let tx = -400, ty = -400, x = tx, y = ty, raf = 0;
+      const step = () => {
+        x += (tx - x) * 0.09;
+        y += (ty - y) * 0.09;
+        lamp.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+        if (Math.abs(tx - x) + Math.abs(ty - y) > 0.6) raf = requestAnimationFrame(step);
+        else raf = 0;                      // caught up — the loop sleeps
+      };
+      window.addEventListener('pointermove', (e) => {
+        tx = e.clientX; ty = e.clientY;
+        if (!raf && document.documentElement.getAttribute('data-theme') === 'noor') {
+          raf = requestAnimationFrame(step);
+        }
+      }, { passive: true });
+    }
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
+  else ready();
+}
+
+/* Boot LAST — see the note above. */
 syncTheme();
