@@ -594,23 +594,35 @@ a:hover { color: var(--link-hover); }
  * to the product image without becoming a guessing game. */
 .product-card__actions {
   position: absolute;
-  top: var(--space-3); right: var(--space-3);
-  display: flex; flex-direction: column; gap: var(--space-2);
+  /* Inset and gap follow the buttons down from 40px to 32px — leaving them at
+     the old spacing would have made the smaller circles look adrift in the
+     corner rather than tucked into it. */
+  top: var(--space-2); right: var(--space-2);
+  display: flex; flex-direction: column; gap: 6px;
   z-index: 2;
   transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
 }
 
 .product-card__actions .btn-icon-gr {
-  /* 40px, not the 44px minimum: three of them stack down a card that is 160px
-     wide on a small phone, and each sits on top of the product photo rather
-     than beside anything mis-tappable. */
-  width: 40px; height: 40px;
+  /* 32px, down from 40px.
+     These sit ON the product photograph — the one thing the card exists to
+     show — and on a 163px phone card a 40px circle covered a noticeable share
+     of it. Below the 44px guideline deliberately, and defensibly: the target
+     is a circle floating over an image with nothing mis-tappable beside it,
+     the same action is available full-size on the product page, and losing a
+     quarter of the photo to chrome costs more sales than a slightly smaller
+     wishlist button. */
+  width: 32px; height: 32px;
+  /* The glyphs ship at 20px, which in a 32px circle leaves 6px of breathing
+     room and reads as a cramped button. Sized here rather than in the markup
+     because the hand-authored cards in index.html carry the same 20px SVGs. */
   opacity: .92;
   backdrop-filter: blur(6px);
   box-shadow: 0 1px 3px rgba(16, 19, 20, .12);
   transition: transform var(--dur-fast) var(--ease-out),
               opacity var(--dur-fast) var(--ease-out);
 }
+.product-card__actions .btn-icon-gr svg { width: 17px; height: 17px; }
 .product-card__actions .btn-icon-gr:active { transform: scale(.9); opacity: 1; }
 
 @media (hover: hover) {
@@ -649,6 +661,48 @@ a:hover { color: var(--link-hover); }
    duplicated in productCardHTML and eight times in index.html, so the phone
    layout could not tune it without !important. It is one rule now. */
 .product-card__body .btn-gr { margin-top: var(--space-2); }
+/* ---- Pack size, on the card -------------------------------------------
+   Sits directly above Add to Cart, which is the order the decision is made
+   in: how much, then buy. Deliberately small and quiet — this is a
+   confirmation for most customers and a correction for the few who want a
+   different size, so it must not out-shout the price above it.
+
+   Wraps rather than scrolls: three chips fit a 163px phone card on one line,
+   and a rare fourth dropping to a second line is better than a horizontally
+   scrolling strip inside a card that is itself inside a scrolling rail. */
+.size-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: var(--space-2); }
+.size-chip {
+  flex: 0 1 auto;
+  padding: 3px 8px;
+  font-family: var(--font-body);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              background-color var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) {
+  .size-chip:hover:not(:disabled) { border-color: var(--gr-cyan-dark); color: var(--link); }
+}
+.size-chip.is-on {
+  border-color: var(--gr-cyan-dark);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  box-shadow: inset 0 0 0 1px var(--gr-cyan-dark);
+}
+/* A size that is out of stock still shows: knowing 1 kg exists but is gone is
+   worth more than a row that silently omits it and looks like the shop never
+   sold it. */
+.size-chip:disabled { opacity: .45; cursor: not-allowed; text-decoration: line-through; }
+.size-chip:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
+
 .product-card__stars { display: inline-flex; align-items: center; gap: 1px; }
 .product-card__stars svg { display: block; }
 
@@ -1848,6 +1902,119 @@ img.settle.is-settled {
 .stack-4 > * + * { margin-top: var(--space-4); }
 .stack-5 > * + * { margin-top: var(--space-5); }
 .stack-6 > * + * { margin-top: var(--space-6); }
+
+/* ===== partials/_tabbar.css ===== */
+/* =========================================================================
+   GulfRabit · Bottom tab bar (phones)
+   Injected by shared/js/components/mobile-tabbar.js on browse pages only —
+   pages that pin their own bottom bar (cart, express, product) never get it.
+   ========================================================================= */
+
+.tabbar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  /* Under the header's dropdowns and every overlay: drawer 1050, modal 1090,
+     toast 1100. Above page content, including the sticky compare-style rails. */
+  z-index: 990;
+  display: none;
+  grid-template-columns: repeat(4, 1fr);
+  background: rgba(255, 255, 255, .96);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border-top: 1px solid var(--border-hairline);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+/* The glass needs the same honesty as the header: without backdrop-filter,
+   96% white is a page showing through the nav. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .tabbar { background: rgba(255, 255, 255, .99); }
+}
+
+.tabbar__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 6px 2px 7px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 11px;
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tabbar__item svg { width: 22px; height: 22px; }
+.tabbar__item.is-active { color: var(--link); }
+.tabbar__item:active { color: var(--gr-cyan-dark); }
+
+/* The Bangla under the English, both tiny — same pairing as the buttons. */
+.tabbar__bn { font-size: 9px; line-height: 1; opacity: .8; }
+
+.tabbar__iconwrap { position: relative; display: inline-flex; }
+.tabbar__badge {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--radius-pill);
+  background: var(--gr-cyan);
+  color: #fff;
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  line-height: 16px;
+  text-align: center;
+}
+
+/* Phones and small tablets — exactly the range where the header collapses to
+   a hamburger (991px, see _navigation.css). Where the full nav exists the
+   bar would be a second navigation saying the same thing. */
+@media (max-width: 991.98px) {
+  .tabbar { display: grid; }
+  body.has-tabbar { padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ===== partials/_chat-bubble.css ===== */
+/* =========================================================================
+   GulfRabit · WhatsApp bubble
+   Rendered by shared/js/components/whatsapp-bubble.js, and only when
+   site-config.js carries a number.
+   ========================================================================= */
+
+.wa-bubble {
+  position: fixed;
+  right: 16px;
+  bottom: 20px;
+  z-index: 985;                      /* under the tab bar, drawers and toasts */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-pill);
+  background: #25d366;               /* WhatsApp's own green — recognition IS the affordance */
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(4, 34, 43, .25);
+  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.wa-bubble svg { width: 28px; height: 28px; }
+@media (hover: hover) {
+  .wa-bubble:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 10px 26px rgba(4, 34, 43, .3); }
+}
+.wa-bubble:active { transform: scale(.95); }
+
+/* Clear whichever bar owns the bottom edge on phones — the tab bar on browse
+   pages, the buy bar on the product page, the checkout bars elsewhere. */
+@media (max-width: 991.98px) {
+  .wa-bubble { bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+}
 
 /* ===== style.css (own rules) ===== */
 /* =========================================================================

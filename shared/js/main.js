@@ -23,6 +23,9 @@ import { initQuantitySteppers } from './components/quantity-stepper.js';
 import { enhanceProductCards } from './components/product-card.js';
 import { initFooterSocial } from './components/footer-social.js';
 import { initAnalytics } from './core/analytics.js';
+import { initCouponLink } from './core/coupon-link.js';
+import { initMobileTabbar } from './components/mobile-tabbar.js';
+import { initWhatsAppBubble } from './components/whatsapp-bubble.js';
 
 /**
  * Each init is isolated.
@@ -38,6 +41,8 @@ function boot() {
     // First, before anything can navigate: it reads the UTMs off the landing
     // URL and they are only there on the first page of a visit.
     ['analytics', initAnalytics],
+    // Also first-thing: the coupon rides the landing URL, same as the UTMs.
+    ['coupon-link', initCouponLink],
     ['header', initHeader],
     // After initHeader: it wires the mega-menu and drawer behaviour to the
     // container elements, which this only refills.
@@ -52,6 +57,8 @@ function boot() {
     ['quantity-steppers', initQuantitySteppers],
     ['footer-social', initFooterSocial],
     ['product-cards', enhanceProductCards],
+    ['tabbar', initMobileTabbar],
+    ['whatsapp', initWhatsAppBubble],
   ];
 
   for (const [name, fn] of steps) {

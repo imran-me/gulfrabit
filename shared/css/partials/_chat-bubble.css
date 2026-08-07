@@ -1,0 +1,33 @@
+/* =========================================================================
+   GulfRabit · WhatsApp bubble
+   Rendered by shared/js/components/whatsapp-bubble.js, and only when
+   site-config.js carries a number.
+   ========================================================================= */
+
+.wa-bubble {
+  position: fixed;
+  right: 16px;
+  bottom: 20px;
+  z-index: 985;                      /* under the tab bar, drawers and toasts */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-pill);
+  background: #25d366;               /* WhatsApp's own green — recognition IS the affordance */
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(4, 34, 43, .25);
+  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.wa-bubble svg { width: 28px; height: 28px; }
+@media (hover: hover) {
+  .wa-bubble:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 10px 26px rgba(4, 34, 43, .3); }
+}
+.wa-bubble:active { transform: scale(.95); }
+
+/* Clear whichever bar owns the bottom edge on phones — the tab bar on browse
+   pages, the buy bar on the product page, the checkout bars elsewhere. */
+@media (max-width: 991.98px) {
+  .wa-bubble { bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+}

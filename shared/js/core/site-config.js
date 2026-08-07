@@ -50,6 +50,15 @@ export const CONFIG = {
     linkedin: '',
   },
 
+  /**
+   * WhatsApp number in international format, digits only or formatted —
+   * non-digits are stripped (e.g. '8801XXXXXXXXX'). Empty hides the floating
+   * chat bubble on every page, exactly like the socials above.
+   *
+   * // TODO(merchant): paste the business WhatsApp number.
+   */
+  whatsapp: '',
+
   /** ISO currency for ad platform value reporting. */
   currency: 'BDT',
 };

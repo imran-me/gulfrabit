@@ -1,0 +1,76 @@
+/* =========================================================================
+   GulfRabit · Bottom tab bar (phones)
+   Injected by shared/js/components/mobile-tabbar.js on browse pages only —
+   pages that pin their own bottom bar (cart, express, product) never get it.
+   ========================================================================= */
+
+.tabbar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  /* Under the header's dropdowns and every overlay: drawer 1050, modal 1090,
+     toast 1100. Above page content, including the sticky compare-style rails. */
+  z-index: 990;
+  display: none;
+  grid-template-columns: repeat(4, 1fr);
+  background: rgba(255, 255, 255, .96);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border-top: 1px solid var(--border-hairline);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+/* The glass needs the same honesty as the header: without backdrop-filter,
+   96% white is a page showing through the nav. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .tabbar { background: rgba(255, 255, 255, .99); }
+}
+
+.tabbar__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 6px 2px 7px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 11px;
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tabbar__item svg { width: 22px; height: 22px; }
+.tabbar__item.is-active { color: var(--link); }
+.tabbar__item:active { color: var(--gr-cyan-dark); }
+
+/* The Bangla under the English, both tiny — same pairing as the buttons. */
+.tabbar__bn { font-size: 9px; line-height: 1; opacity: .8; }
+
+.tabbar__iconwrap { position: relative; display: inline-flex; }
+.tabbar__badge {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--radius-pill);
+  background: var(--gr-cyan);
+  color: #fff;
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  line-height: 16px;
+  text-align: center;
+}
+
+/* Phones and small tablets — exactly the range where the header collapses to
+   a hamburger (991px, see _navigation.css). Where the full nav exists the
+   bar would be a second navigation saying the same thing. */
+@media (max-width: 991.98px) {
+  .tabbar { display: grid; }
+  body.has-tabbar { padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px)); }
+}

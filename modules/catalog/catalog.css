@@ -298,3 +298,31 @@
   color: var(--text-secondary);
   line-height: var(--lh-normal);
 }
+
+
+/* ---- The phone buy bar (see the fragment for why) --------------------- */
+.pdp-buybar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 990;                             /* same layer as the tab bar it replaces */
+  display: none;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px var(--space-4) calc(10px + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, .96);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border-top: 1px solid var(--border-hairline);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pdp-buybar { background: rgba(255, 255, 255, .99); }
+}
+.pdp-buybar__price { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+.pdp-buybar__price .price { font-size: var(--fs-20); }
+.pdp-buybar__price .caption { color: var(--text-muted); }
+.pdp-buybar .btn-gr { flex: 1 1 auto; min-width: 0; justify-content: center; }
+@media (max-width: 991.98px) {
+  .pdp-buybar:not([hidden]) { display: flex; }
+  body.has-pdp-buybar { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+}

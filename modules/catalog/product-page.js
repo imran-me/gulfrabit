@@ -271,6 +271,13 @@ function unitRate(p, v) {
 function paintPrice(p) {
   const v = currentVariant;
   document.querySelector('[data-pdp-price]').textContent = formatBDT(v.price);
+  // The buy bar mirrors whatever size is selected — price AND label, so the
+  // bar never promises a different number than the pane above it.
+  const bbPrice = document.querySelector('[data-buybar-price]');
+  if (bbPrice) {
+    bbPrice.textContent = formatBDT(v.price);
+    document.querySelector('[data-buybar-variant]').textContent = v.label || '';
+  }
   document.querySelector('[data-pdp-original]').textContent = v.originalPrice > v.price ? formatBDT(v.originalPrice) : '';
   document.querySelector('[data-pdp-discount]').innerHTML = v.originalPrice > v.price
     ? `<span class="badge-gr badge-sale">${discountLabel(v.originalPrice, v.price)}</span>`
@@ -511,6 +518,19 @@ function wireActions(p) {
 
   const addBtn = document.querySelector('[data-add-to-cart]');
   if (!p.inStock) { addBtn.disabled = true; addBtn.textContent = 'Sold out'; }
+
+  // The buy bar forwards to the real button rather than re-implementing the
+  // add: one code path decides variant, qty, toast and drawer, and the bar
+  // can never drift from it. Shown only once the product is real — an empty
+  // bar over a skeleton would advertise adding nothing.
+  const buybar = document.querySelector('[data-pdp-buybar]');
+  if (buybar) {
+    const bbBtn = buybar.querySelector('[data-buybar-add]');
+    if (!p.inStock) { bbBtn.disabled = true; bbBtn.textContent = 'Sold out'; }
+    bbBtn.addEventListener('click', () => addBtn.click());
+    buybar.hidden = false;
+    document.body.classList.add('has-pdp-buybar');
+  }
   addBtn.addEventListener('click', () => {
     if (!p.inStock) return;
     // The chosen size, at the chosen size's price — not the product's default.

@@ -18,6 +18,8 @@
 @import url("partials/_modals-offcanvas.css");
 @import url("partials/_animations.css");
 @import url("partials/_utilities.css");
+@import url("partials/_tabbar.css");
+@import url("partials/_chat-bubble.css");
 
 /* ---- Base reset -------------------------------------------------------
  *
