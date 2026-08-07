@@ -15,6 +15,10 @@
 /* Block-centered (not flex) so long text wraps within the bar instead of
    forcing the document wider than the viewport on mobile. */
 .announce-bar__inner { position: relative; text-align: center; padding: 8px 3rem; line-height: 1.35; max-width: var(--container-max); margin-inline: auto; }
+/* The helpline, when site-config carries one (support-line.js). Bold and
+   first: it is what a nervous COD customer scans for. Inherits the strip's
+   colours; the underline alone marks it as tappable. */
+.announce-bar__phone { font-weight: var(--fw-semibold); text-decoration: underline; text-underline-offset: 2px; margin-inline-end: 10px; white-space: nowrap; }
 /* The ✕ glyph is 11×14. Sized as a button rather than left to shrink-wrap it,
    because a bare glyph is what it was: an 11×14 target on every page of the
    site, under even WCAG 2.5.8's 24×24 minimum, sitting in the corner a thumb

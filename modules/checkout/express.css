@@ -150,3 +150,20 @@
 .express-more h2 { margin-bottom: var(--space-4); }
 .express-more__grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(2, 1fr); }
 @media (min-width: 720px) { .express-more__grid { grid-template-columns: repeat(4, 1fr); } }
+
+
+/* ---- The folded email field (see the fragment for why) ---------------- */
+.express-addemail {
+  justify-self: start;
+  border: 0;
+  background: none;
+  padding: 2px 0;
+  font: inherit;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+  color: var(--link);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.express-addemail .bn { font-size: .85em; opacity: .85; }

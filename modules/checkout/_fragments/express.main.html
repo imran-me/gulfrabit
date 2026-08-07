@@ -82,7 +82,14 @@
                 <input id="ex-address" class="input-gr" name="address" autocomplete="street-address" data-validate="required|min:6" data-label="Street address" placeholder="House, road, block">
                 <span class="field-error" data-error></span>
               </div>
-              <div class="field-gr express-grid__wide" data-field>
+              <!-- Folded away by default. Dazzline's three-field form converts
+                   because it LOOKS like ten seconds of work; email was our one
+                   box that isn't needed to deliver a parcel. The toggle is a
+                   button, not a details element, so the input keeps its
+                   validation wiring and autofocus when revealed. Without JS
+                   the field simply shows — the button is what starts hidden. -->
+              <button class="express-addemail" type="button" data-email-toggle hidden>+ Add email for a receipt <span class="bn" lang="bn">। ইমেইল যোগ করুন</span></button>
+              <div class="field-gr express-grid__wide" data-field data-email-wrap>
                 <label class="label-gr" for="ex-email">Email <span class="label-gr__bn bn" lang="bn">ইমেইল</span> <span class="text-muted-gr">(optional)</span></label>
                 <input id="ex-email" class="input-gr" name="email" type="email" autocomplete="email" data-validate="email" data-label="Email" placeholder="For the receipt — we’ll text you either way">
                 <span class="field-error" data-error></span>

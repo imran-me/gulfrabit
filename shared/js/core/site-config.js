@@ -51,6 +51,17 @@ export const CONFIG = {
   },
 
   /**
+   * The helpline shown in the announce strip on every page, with its hours.
+   * The strongest trust signal a COD shop has is a number a human answers —
+   * and the worst thing it can show is one nobody does. Empty renders
+   * nothing, same contract as everything else here.
+   *
+   * // TODO(merchant): paste the support number and its hours.
+   */
+  phone: '',
+  supportHours: '',   // e.g. '10:00–22:00' — shown beside the number
+
+  /**
    * WhatsApp number in international format, digits only or formatted —
    * non-digits are stripped (e.g. '8801XXXXXXXXX'). Empty hides the floating
    * chat bubble on every page, exactly like the socials above.

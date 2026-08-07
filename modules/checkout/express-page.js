@@ -164,8 +164,29 @@ async function repaintTotals() {
   setText('[data-bar-total]', formatBDT(total));
 }
 
+/* The email field starts folded: it is the one box a parcel does not need,
+   and every visible box makes the form look slower than it is. JS does the
+   folding, so no-JS visitors simply see the field. A visitor whose browser
+   autofills email keeps it visible — hiding a filled field would silently
+   carry data they can no longer see. */
+function foldEmail() {
+  const wrap = document.querySelector('[data-email-wrap]');
+  const btn = document.querySelector('[data-email-toggle]');
+  if (!wrap || !btn) return;
+  const input = wrap.querySelector('input');
+  if (input.value) return;            // autofilled before we got here
+  wrap.hidden = true;
+  btn.hidden = false;
+  btn.addEventListener('click', () => {
+    btn.hidden = true;
+    wrap.hidden = false;
+    input.focus();
+  }, { once: true });
+}
+
 /* ---- Wiring ----------------------------------------------------------- */
 function wire() {
+  foldEmail();
   // quoteForDistrict is async — it may still be fetching districts.json on the
   // first change. Awaiting it matters: assigning the promise would put
   // "[object Promise]" through formatBDT and charge the wrong delivery fee.
