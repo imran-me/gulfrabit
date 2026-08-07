@@ -24,6 +24,18 @@ let current = 1;
 // Default to the metro rate; the radios (and later the district) refine it.
 let deliveryCost = DEFAULT_OPTION.cost;
 
+/* Declared ABOVE init(), which runs on the next line — `const` is in its
+   temporal dead zone until the statement executes, so leaving these down with
+   the stage logic threw "Cannot access 'wide' before initialization" and took
+   the whole checkout with it. */
+const wide = window.matchMedia('(min-width: 768px)');
+const STAGE_OF = { 1: 1, 2: 1, 3: 2, 4: 2 };   // desktop grouping
+
+const stageOf = (step) => (wide.matches ? STAGE_OF[step] : 1);
+const stageCount = () => (wide.matches ? 2 : 1);
+const visibleSteps = () => steps.filter((s) => stageOf(Number(s.dataset.step)) === current);
+
+
 init();
 
 async function init() {
@@ -44,47 +56,112 @@ async function init() {
   paintSummary();
   form.addEventListener('submit', placeOrder);
 
+  // Paints the first stage and, crucially, the nav — the markup ships with
+  // both end buttons hidden, so without this a phone would render the whole
+  // form and no way to place the order.
+  showStep(1);
+
   // After the empty-cart guard has returned, so an abandoned cart page does
   // not report a checkout that never started.
   track('InitiateCheckout', cartPayload(store.getCart(), subtotal()));
 }
 
-/* ---- Step navigation -------------------------------------------------- */
+/* ---- Stages ------------------------------------------------------------
+ *
+ * The four sections are unchanged and every field is still asked for. What
+ * changed is how many screens they are spread over:
+ *
+ *   phone   — ONE page. Everything visible, one scroll, one Place Order.
+ *   desktop — TWO stages. Address + Delivery, then Payment + Review.
+ *
+ * Four steps was four chances to leave. On cash on delivery, where the
+ * customer is not even entering a card, three of those screens were a name,
+ * an address, and a radio button they never changed.
+ *
+ * The grouping lives here rather than in the markup so the sections stay
+ * independent and reorderable, and so a phone rotated to landscape past
+ * 768px re-groups instead of being stuck in whatever it loaded as.
+ */
 function wireNav() {
-  form.querySelectorAll('[data-next]').forEach((b) => b.addEventListener('click', next));
-  form.querySelectorAll('[data-prev]').forEach((b) => b.addEventListener('click', prev));
+  form.querySelector('[data-nav-next]')?.addEventListener('click', next);
+  // Back is a link to the cart on the first stage and a button to the stage
+  // before it on any other, so it is wired once and re-pointed in paintNav().
+  form.querySelector('[data-nav-back]')?.addEventListener('click', (e) => {
+    if (current > 1) { e.preventDefault(); showStep(current - 1); }
+  });
+  // Re-group live. Without this a resize across 768px leaves sections hidden
+  // that the new layout should show — the classic "half my form vanished".
+  wide.addEventListener('change', () => showStep(1));
 }
+
 function showStep(n) {
-  current = n;
-  steps.forEach((s) => { s.hidden = Number(s.dataset.step) !== n; });
+  current = Math.min(Math.max(1, n), stageCount());
+  steps.forEach((s) => { s.hidden = stageOf(Number(s.dataset.step)) !== current; });
+
   indicators.forEach((ind) => {
     const i = Number(ind.dataset.stepIndicator);
-    ind.classList.toggle('is-active', i === n);
-    ind.classList.toggle('is-done', i < n);
+    ind.classList.toggle('is-active', i === current);
+    ind.classList.toggle('is-done', i < current);
   });
+
+  paintNav();
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (n === 4) paintReview();
+  // The review list is built from the answers above it, so it is painted when
+  // it becomes visible — which on a phone is immediately.
+  if (visibleSteps().some((s) => s.dataset.step === '4')) paintReview();
 }
+
+/** Which of the two end buttons is showing, and what Back means right now. */
+function paintNav() {
+  const last = current >= stageCount();
+  const next$ = form.querySelector('[data-nav-next]');
+  const place = form.querySelector('[data-place-order]');
+  const back = form.querySelector('[data-nav-back]');
+
+  if (next$) next$.hidden = last;
+  if (place) place.hidden = !last;
+
+  if (back) {
+    const first = current === 1;
+    back.href = first ? siteURL('modules/cart/cart.html') : '#';
+    back.querySelector('.btn-gr__en').textContent = first ? '← Back to cart' : '← Back';
+    back.querySelector('.btn-bn').textContent = first ? 'কার্টে ফিরে যান' : 'ফিরে যান';
+  }
+}
+
 function next() {
-  // Validate step 1 (address) before advancing.
-  if (current === 1) {
-    const { valid } = validateForm(form);
-    // Only address fields are in step 1; validateForm checks all [data-validate].
-    // Card fields are hidden unless card is chosen — hidden inputs still validate
-    // only if visible, so guard here:
-    if (!valid && anyVisibleInvalid()) { toast.error('Please complete the required fields.'); return; }
-  }
-  // Validate card details while the payment step (and its fields) are visible.
-  if (current === 3 && form.querySelector('[data-payment]:checked')?.value === 'card') {
-    const ok = ['cardNum', 'cardExp', 'cardCvc'].every((n) => validateField(form.querySelector(`[name="${n}"]`), form));
-    if (!ok) { toast.error('Please complete your card details.'); return; }
-  }
-  if (current < 4) showStep(current + 1);
+  // Whatever is on screen has to be right before anything else is asked for.
+  // On a phone that is the whole form, which is exactly what submit checks
+  // anyway — so this only ever runs on the desktop hand-off.
+  const { valid } = validateForm(form);
+  if (!valid && anyVisibleInvalid()) { revealFirstError(); return; }
+  if (current < stageCount()) showStep(current + 1);
 }
-function prev() { if (current > 1) showStep(current - 1); }
 
 function anyVisibleInvalid() {
   return [...form.querySelectorAll('.field-gr.is-invalid')].some((f) => f.offsetParent !== null);
+}
+
+/**
+ * Show the stage the first bad field is on, then put the cursor in it.
+ *
+ * Submit used to jump to stage 1 unconditionally and say "please complete
+ * your address". With payment and review now sharing a stage, a bad card
+ * number would have sent the customer to a perfectly valid address form with
+ * a message about it — hiding the actual problem behind a wrong explanation.
+ */
+function revealFirstError() {
+  const bad = form.querySelector('.field-gr.is-invalid');
+  if (!bad) return;
+
+  const section = bad.closest('.checkout-step');
+  const stage = section ? stageOf(Number(section.dataset.step)) : 1;
+  if (stage !== current) showStep(stage);
+
+  const input = bad.querySelector('input, select, textarea');
+  input?.focus();
+  bad.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  toast.error('Please complete the highlighted field.');
 }
 
 /* ---- Prefill from mock user ------------------------------------------ */
@@ -247,7 +324,17 @@ function paintReview() {
 async function placeOrder(e) {
   e.preventDefault();
   const { valid } = validateForm(form);
-  if (!valid && anyVisibleInvalid()) { showStep(1); toast.error('Please complete your address.'); return; }
+  if (!valid && anyVisibleInvalid()) { revealFirstError(); return; }
+
+  // Card details, only when card is the chosen method — they are hidden for
+  // cash on delivery, and a hidden field must never block an order. This used
+  // to run when leaving the payment STEP; payment now shares a stage with
+  // review, so submit is the last moment it can run.
+  if (form.querySelector('[data-payment]:checked')?.value === 'card') {
+    const ok = ['cardNum', 'cardExp', 'cardCvc']
+      .every((n) => validateField(form.querySelector(`[name="${n}"]`), form));
+    if (!ok) { revealFirstError(); return; }
+  }
 
   // A slow server plus an anxious double-click must not become two orders.
   const btn = form.querySelector('[data-place-order]');

@@ -77,8 +77,19 @@
   .express-form .field-gr { margin-bottom: 0; }
 }
 
+/* ---- The stepper is a desktop thing ------------------------------------
+   The phone shows the whole form on one page, so a progress indicator there
+   could only ever read "1 of 1" — furniture above the first field, on the
+   screen with least room for it. Two stages, and the bar, start at 768px,
+   which is the same breakpoint checkout-page.js groups on. Keep the two in
+   step or the bar will count screens that do not exist. */
 /* Progress stepper */
 .stepper { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-7); flex-wrap: wrap; }
+/* ...but only from 768px. Declared AFTER the base rule, not before it: equal
+   specificity means source order decides, and the first attempt at this sat
+   above and was simply overridden by the `display: flex` on the line before. */
+.stepper { display: none; }
+@media (min-width: 768px) { .stepper { display: flex; } }
 .step { display: flex; align-items: center; gap: var(--space-2); color: var(--text-muted); font-size: var(--fs-14); }
 .step__num { width: 30px; height: 30px; border-radius: var(--radius-pill); display: grid; place-items: center; border: 1px solid var(--border-hairline); font-weight: var(--fw-semibold); font-size: var(--fs-14); }
 .step.is-active { color: var(--text-primary); }

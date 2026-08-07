@@ -71,15 +71,15 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=adfb843c">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=e7dc975e">
   <!-- The Luxe layer. Linked on every storefront page and completely
        inert without [data-theme="luxe"] on <html>, so the default theme
        renders exactly as it did before this file existed. Linking it
        conditionally would mean knowing the theme before the <head> is
        written, and this HTML is built once and served to everyone. -->
   <link rel="stylesheet" href="../../modules/theme/theme-luxe.css?v=5541a4e3">
-  <link rel="stylesheet" href="../../modules/checkout/checkout.css?v=73f16cd3">
-  <link rel="stylesheet" href="../../modules/checkout/express.css?v=fbe1cb86">
+  <link rel="stylesheet" href="../../modules/checkout/checkout.css?v=ca2a0dde">
+  <link rel="stylesheet" href="../../modules/checkout/express.css?v=2711ea91">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -335,7 +335,14 @@
                 <input id="ex-address" class="input-gr" name="address" autocomplete="street-address" data-validate="required|min:6" data-label="Street address" placeholder="House, road, block">
                 <span class="field-error" data-error></span>
               </div>
-              <div class="field-gr express-grid__wide" data-field>
+              <!-- Folded away by default. Dazzline's three-field form converts
+                   because it LOOKS like ten seconds of work; email was our one
+                   box that isn't needed to deliver a parcel. The toggle is a
+                   button, not a details element, so the input keeps its
+                   validation wiring and autofocus when revealed. Without JS
+                   the field simply shows — the button is what starts hidden. -->
+              <button class="express-addemail" type="button" data-email-toggle hidden>+ Add email for a receipt <span class="bn" lang="bn">। ইমেইল যোগ করুন</span></button>
+              <div class="field-gr express-grid__wide" data-field data-email-wrap>
                 <label class="label-gr" for="ex-email">Email <span class="label-gr__bn bn" lang="bn">ইমেইল</span> <span class="text-muted-gr">(optional)</span></label>
                 <input id="ex-email" class="input-gr" name="email" type="email" autocomplete="email" data-validate="email" data-label="Email" placeholder="For the receipt — we’ll text you either way">
                 <span class="field-error" data-error></span>
@@ -542,8 +549,8 @@
   </div>
 </footer>
 
-  <script type="module" src="../../shared/js/main.js?v=41e6e81a"></script>
+  <script type="module" src="../../shared/js/main.js?v=ff3c17a8"></script>
   <script type="module" src="../../modules/theme/theme.js?v=2a6ced09"></script>
-  <script type="module" src="../../modules/checkout/express-page.js?v=14cdd832"></script>
+  <script type="module" src="../../modules/checkout/express-page.js?v=fbd3e2db"></script>
 </body>
 </html>
