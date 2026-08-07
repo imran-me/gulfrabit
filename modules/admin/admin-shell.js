@@ -56,6 +56,25 @@ async function boot() {
   const root = document.querySelector('[data-admin-shell]');
   if (!root) return;
 
+  /* TWO MODULE INSTANCES, ONE BOOT.
+     The build stamps <script src> with ?v=<hash>, and every screen imports
+     './admin-shell.js' with no query. ES modules are keyed by resolved URL,
+     query included, so those are two different modules and BOTH evaluate this
+     file's top level — both register DOMContentLoaded, both reach here, and
+     admin:ready is dispatched twice. Each screen's init() then runs twice and
+     binds every listener twice, which is silent for anything idempotent and
+     fatal for anything that toggles: "+ New product" opened the create form
+     and closed it again inside one click, so no product could be added to the
+     catalogue at all, with no error to explain it. Submit handlers were bound
+     twice too, so a save that did get through would have POSTed twice.
+
+     The flag lives on the document, not in a module variable: a module-scoped
+     flag is per-instance, and the whole problem is that there are two
+     instances. Both handlers run in the same task and this is set before the
+     first await, so the second sees it. */
+  if (document.documentElement.dataset.adminBooted) return;
+  document.documentElement.dataset.adminBooted = '1';
+
   let session = null;
   try {
     session = await getSession();
