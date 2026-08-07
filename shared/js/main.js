@@ -25,8 +25,6 @@ import { initFooterSocial } from './components/footer-social.js';
 import { initAnalytics } from './core/analytics.js';
 import { initCouponLink } from './core/coupon-link.js';
 import { initMobileTabbar } from './components/mobile-tabbar.js';
-import { initWhatsAppBubble } from './components/whatsapp-bubble.js';
-import { initSupportLine } from './components/support-line.js';
 
 /**
  * Each init is isolated.
@@ -59,8 +57,6 @@ function boot() {
     ['footer-social', initFooterSocial],
     ['product-cards', enhanceProductCards],
     ['tabbar', initMobileTabbar],
-    ['whatsapp', initWhatsAppBubble],
-    ['support-line', initSupportLine],
   ];
 
   for (const [name, fn] of steps) {

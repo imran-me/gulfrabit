@@ -955,10 +955,6 @@ a:hover { color: var(--link-hover); }
 /* Block-centered (not flex) so long text wraps within the bar instead of
    forcing the document wider than the viewport on mobile. */
 .announce-bar__inner { position: relative; text-align: center; padding: 8px 3rem; line-height: 1.35; max-width: var(--container-max); margin-inline: auto; }
-/* The helpline, when site-config carries one (support-line.js). Bold and
-   first: it is what a nervous COD customer scans for. Inherits the strip's
-   colours; the underline alone marks it as tappable. */
-.announce-bar__phone { font-weight: var(--fw-semibold); text-decoration: underline; text-underline-offset: 2px; margin-inline-end: 10px; white-space: nowrap; }
 /* The ✕ glyph is 11×14. Sized as a button rather than left to shrink-wrap it,
    because a bare glyph is what it was: an 11×14 target on every page of the
    site, under even WCAG 2.5.8's 24×24 minimum, sitting in the corner a thumb
@@ -1376,6 +1372,10 @@ a:hover { color: var(--link-hover); }
 .footer-grid > nav[aria-label="Shop"] .footer-links > li { padding-block: 5px; }
 
 .footer-links { font-size: var(--fs-14); }
+/* The helpline and WhatsApp rows in Customer Care — icon and label on one
+   line, revealed by footer-social.js only when site-config carries a value. */
+.footer-contact { display: inline-flex; align-items: center; gap: .5rem; }
+.footer-contact svg { flex: none; opacity: .8; }
 /* Generous rows: at 14px the text is ~19px tall, and a footer link that is
    only as tall as its own text is a miss waiting to happen on a phone. */
 .footer-links a { display: inline-block; padding-block: 5px; }
@@ -2014,41 +2014,6 @@ img.settle.is-settled {
 @media (max-width: 991.98px) {
   .tabbar { display: grid; }
   body.has-tabbar { padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px)); }
-}
-
-/* ===== partials/_chat-bubble.css ===== */
-/* =========================================================================
-   GulfRabit · WhatsApp bubble
-   Rendered by shared/js/components/whatsapp-bubble.js, and only when
-   site-config.js carries a number.
-   ========================================================================= */
-
-.wa-bubble {
-  position: fixed;
-  right: 16px;
-  bottom: 20px;
-  z-index: 985;                      /* under the tab bar, drawers and toasts */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: var(--radius-pill);
-  background: #25d366;               /* WhatsApp's own green — recognition IS the affordance */
-  color: #fff;
-  box-shadow: 0 6px 20px rgba(4, 34, 43, .25);
-  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
-}
-.wa-bubble svg { width: 28px; height: 28px; }
-@media (hover: hover) {
-  .wa-bubble:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 10px 26px rgba(4, 34, 43, .3); }
-}
-.wa-bubble:active { transform: scale(.95); }
-
-/* Clear whichever bar owns the bottom edge on phones — the tab bar on browse
-   pages, the buy bar on the product page, the checkout bars elsewhere. */
-@media (max-width: 991.98px) {
-  .wa-bubble { bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ===== style.css (own rules) ===== */

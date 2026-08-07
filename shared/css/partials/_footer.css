@@ -45,6 +45,10 @@
 .footer-grid > nav[aria-label="Shop"] .footer-links > li { padding-block: 5px; }
 
 .footer-links { font-size: var(--fs-14); }
+/* The helpline and WhatsApp rows in Customer Care — icon and label on one
+   line, revealed by footer-social.js only when site-config carries a value. */
+.footer-contact { display: inline-flex; align-items: center; gap: .5rem; }
+.footer-contact svg { flex: none; opacity: .8; }
 /* Generous rows: at 14px the text is ~19px tall, and a footer link that is
    only as tall as its own text is a miss waiting to happen on a phone. */
 .footer-links a { display: inline-block; padding-block: 5px; }

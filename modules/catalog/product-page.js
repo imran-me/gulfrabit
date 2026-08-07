@@ -26,8 +26,8 @@ let currentQty = 1;
 /**
  * The size the customer has chosen, or a stand-in for products sold in one size
  * only. Everything downstream — the price block, the cart line, the wishlist
- * button, the WhatsApp message — reads from here rather than from the product,
- * so there is one answer to "which size is this page currently about".
+ * button — reads from here rather than from the product, so there is one
+ * answer to "which size is this page currently about".
  */
 let currentVariant = null;
 
@@ -253,11 +253,10 @@ function paintVariants(p) {
       });
       paintPrice(p);
       // Everything that quotes a price has to move with the picker, or the page
-      // contradicts itself: the buy bar on a phone, the Save button's stored
-      // price, and the message that gets sent to WhatsApp.
+      // contradicts itself: the buy bar on a phone and the Save button's
+      // stored price.
       const wb = document.querySelector('[data-wishlist-toggle]');
       if (wb) wb.dataset.price = String(currentVariant.price);
-      paintOrderChannels(p);
     });
   });
 }
@@ -295,32 +294,10 @@ function paintPrice(p) {
 
 /**
  * Carry the product into the chat so the agent never has to ask "which one?".
- * The number is read back out of the markup so the fragment stays the only
- * place it is written. Messenger has no prefilled-text parameter — m.me only
- * forwards `ref` to the page's webhook — so it gets the id and nothing more.
+ * Messenger has no prefilled-text parameter — m.me only forwards `ref` to the
+ * page's webhook — so it gets the id and nothing more.
  */
 function paintOrderChannels(p) {
-  const link = siteURL(`modules/catalog/product.html?id=${encodeURIComponent(p.id)}`);
-  const v = currentVariant ?? { label: null, price: p.price };
-  const message = [
-    'Hello GulfRabit, I would like to order:',
-    `Product: ${p.title}`,
-    // The size goes in the message, or an order placed from this button starts
-    // with the agent asking which pack — which is the one question this button
-    // exists to prevent.
-    ...(v.label ? [`Size: ${v.label}`] : []),
-    `Price: ${formatBDT(v.price)}`,
-    `SKU: ${p.id}`,
-    `Link: ${link}`,
-  ].join('\n');
-
-  const wa = document.querySelector('[data-order-whatsapp]');
-  if (wa) {
-    const phone = (wa.getAttribute('href').match(/wa\.me\/(\d+)/) || [])[1];
-    if (phone) wa.href = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-    wa.setAttribute('aria-label', `Order ${p.title} on WhatsApp`);
-  }
-
   const fb = document.querySelector('[data-order-messenger]');
   if (fb) {
     fb.href = `${fb.getAttribute('href').split('?')[0]}?ref=${encodeURIComponent(`product-${p.id}`)}`;
