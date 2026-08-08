@@ -22,7 +22,13 @@
 .admin__side {
   display: flex;
   flex-direction: column;
-  background: var(--gr-ink);
+  /* Not black. The house's deep sea-teal, falling darker toward the floor,
+     with a gold hairline where the panel meets the daylight of the work
+     area — the storefront's night, cut for a tool you stare at daily. */
+  background:
+    radial-gradient(120% 30% at 50% 0%, rgba(27, 180, 212, .08), transparent 70%),
+    linear-gradient(180deg, #073042 0%, #052430 55%, #04191F 100%);
+  border-right: 1px solid rgba(201, 162, 75, .28);
   color: var(--text-inverse);
   padding: var(--space-5) var(--space-4);
   gap: var(--space-5);
@@ -45,6 +51,10 @@
   text-decoration: none;
 }
 .admin__brand img { width: 32px; height: 32px; }
+.admin__brand {
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid rgba(232, 207, 142, .22);
+}
 .admin__brand small {
   display: block;
   font-family: var(--font-body);
@@ -55,7 +65,22 @@
   opacity: .6;
 }
 
-.admin__main { min-width: 0; padding: var(--space-6); }
+.admin__main { min-width: 0; padding: var(--space-6); background: #FBFAF7; }
+/* The page head is a masthead now: title on a drawn rule that carries one
+   short gold segment — the same engraver's habit as the storefront, at a
+   tool's volume. */
+.admin__head {
+  border-bottom: 1px solid var(--border-hairline);
+  padding-bottom: var(--space-4);
+  position: relative;
+}
+.admin__head::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: -1px;
+  width: 64px; height: 2px;
+  background: linear-gradient(90deg, #C9A24B, rgba(201, 162, 75, .2));
+}
 
 .admin__head {
   display: flex;
@@ -72,11 +97,13 @@
 .anav { flex: 1; }
 .anav__group + .anav__group { margin-top: var(--space-5); }
 .anav__title {
-  margin: 0 0 var(--space-2);
   font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  letter-spacing: .22em;
   text-transform: uppercase;
-  letter-spacing: .08em;
-  opacity: .5;
+  color: rgba(232, 207, 142, .65);
+  margin: 0 0 var(--space-2);
+  padding-left: var(--space-3);
 }
 .anav ul { list-style: none; margin: 0; padding: 0; }
 
@@ -91,8 +118,16 @@
   font-size: var(--fs-14);
   transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
-.anav__link:hover { background: rgba(255, 255, 255, .08); color: #fff; }
-.anav__link.is-current { background: var(--gr-gradient); color: var(--text-on-accent); font-weight: var(--fw-semibold); }
+.anav__link:hover { background: rgba(79, 201, 228, .10); color: #fff; }
+/* The current page is MARKED, not painted: a gold bar at the spine, a calm
+   teal wash behind, white text. The old cyan-lime gradient pill was the
+   loudest thing on the screen and it was navigation, not action. */
+.anav__link.is-current {
+  background: linear-gradient(90deg, rgba(79, 201, 228, .16), rgba(79, 201, 228, .05));
+  color: #fff;
+  font-weight: var(--fw-semibold);
+  box-shadow: inset 3px 0 0 #C9A24B;
+}
 .anav__icon { display: inline-flex; width: 18px; height: 18px; }
 .anav__icon svg { width: 100%; height: 100%; }
 .anav__empty { font-size: var(--fs-14); opacity: .7; }
@@ -135,10 +170,12 @@
   gap: var(--space-4);
 }
 .acard {
+  background: #FFFFFF;
+  border: 1px solid var(--border-hairline);
+  border-top: 2px solid rgba(201, 162, 75, .35);
+  border-radius: var(--radius-md);
   padding: var(--space-5);
-  background: var(--surface-raised);
-  border: 1px solid var(--gr-border);
-  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 3px rgba(16, 32, 44, .05);
 }
 .acard__n {
   display: block;
@@ -582,3 +619,35 @@
 .apane { border: 1px solid var(--gr-border); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4) var(--space-4); }
 .apane__row { display: flex; align-items: flex-start; gap: var(--space-2); padding: 6px 0; cursor: pointer; }
 .apane__row input { margin-top: 3px; accent-color: var(--gr-cyan); width: 18px; height: 18px; flex-shrink: 0; }
+
+
+/* ---- Tables, ruled like the books they are ---------------------------- */
+.atable thead th {
+  font-size: var(--fs-12);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 2px solid rgba(201, 162, 75, .4);
+}
+.atable tbody tr:hover { background: rgba(27, 180, 212, .045); }
+
+/* ---- The sidebar's own scrollbar, slender ----------------------------- */
+.admin__side::-webkit-scrollbar { width: 8px; }
+.admin__side::-webkit-scrollbar-track { background: transparent; }
+.admin__side::-webkit-scrollbar-thumb {
+  background: rgba(232, 207, 142, .28);
+  border-radius: 4px;
+}
+
+/* ---- The who block: a quiet card at the panel's foot ------------------ */
+.admin__who {
+  background: rgba(4, 25, 31, .5);
+  border: 1px solid rgba(232, 207, 142, .18);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+.admin__signout {
+  color: rgba(232, 207, 142, .8);
+  text-decoration-color: rgba(232, 207, 142, .4);
+}
+.admin__signout:hover { color: #FFF3C4; }
