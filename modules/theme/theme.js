@@ -349,6 +349,103 @@ function armNight() {
       }
     } catch { /* private mode: no overture, no harm */ }
 
+    // -- 2 · Phases: the sky knows the hour. dawn 4-8, day 8-17 (deep teal
+    // still, but the constellation hides), dusk 17-20, night otherwise.
+    const h = new Date().getHours();
+    const phase = h < 4 ? 'night' : h < 8 ? 'dawn' : h < 17 ? 'day' : h < 20 ? 'dusk' : 'night';
+    document.documentElement.setAttribute('data-noor-phase', phase);
+
+    // -- 6 · The clock greets beneath the monogram, by hour, in Bangla.
+    const veilEl = document.querySelector('.noor-curtain');
+    if (veilEl) {
+      const word = phase === 'dawn' ? '\u09B6\u09C1\u09AD \u09B8\u0995\u09BE\u09B2'
+        : phase === 'dusk' ? '\u09B6\u09C1\u09AD \u09B8\u09A8\u09CD\u09A7\u09CD\u09AF\u09BE'
+        : phase === 'day' ? '\u09B8\u09CD\u09AC\u09BE\u0997\u09A4\u09AE'
+        : '\u09B6\u09C1\u09AD \u09B0\u09BE\u09A4\u09CD\u09B0\u09BF';
+      const g = document.createElement('small');
+      g.textContent = word;
+      veilEl.appendChild(g);
+    }
+
+    // -- 11 · The ornate ampersand, wherever a title joins two worlds.
+    document.querySelectorAll('.section-head__titles > h2, .category-card__title').forEach((el) => {
+      if (el.querySelector('.noor-amp')) return;
+      for (const tn of [...el.childNodes]) {
+        if (tn.nodeType !== 3 || !tn.textContent.includes('&')) continue;
+        const frag = document.createDocumentFragment();
+        const parts = tn.textContent.split('&');
+        parts.forEach((part, i) => {
+          frag.append(document.createTextNode(part));
+          if (i < parts.length - 1) {
+            const amp = document.createElement('span');
+            amp.className = 'noor-amp';
+            amp.textContent = '&';
+            frag.append(amp);
+          }
+        });
+        tn.replaceWith(frag);
+      }
+    });
+
+    // -- 29 · The coin: the cart badge flips when its number changes.
+    document.querySelectorAll('[data-cart-count], [data-tabbar-count]').forEach((badge) => {
+      new MutationObserver(() => {
+        badge.classList.remove('noor-coin');
+        void badge.offsetWidth;               // restart the animation
+        badge.classList.add('noor-coin');
+      }).observe(badge, { childList: true, characterData: true, subtree: true });
+    });
+
+    // -- 4 · The petal: rarer than the ember, a saffron fleck drifts down.
+    const petal = document.createElement('div');
+    petal.className = 'noor-petal';
+    petal.setAttribute('data-noor-fx', '');
+    petal.setAttribute('aria-hidden', 'true');
+    const rollP = () => petal.style.setProperty('--petal-x', (10 + Math.random() * 80).toFixed(1) + 'vw');
+    rollP();
+    petal.addEventListener('animationiteration', rollP);
+    document.body.appendChild(petal);
+
+    // -- 39 · The dhow: a sail crosses the shore, far below, now and then.
+    const footer = document.querySelector('footer');
+    if (footer) {
+      const dhow = document.createElement('div');
+      dhow.className = 'noor-dhow';
+      dhow.setAttribute('data-noor-fx', '');
+      dhow.setAttribute('aria-hidden', 'true');
+      footer.style.position = 'relative';
+      footer.style.overflow = 'hidden';
+      footer.appendChild(dhow);
+
+      // -- 49 · The gathering: reaching the shore, the waterline flares.
+      new IntersectionObserver((es) => {
+        for (const en of es) {
+          if (!en.isIntersecting) continue;
+          footer.classList.add('noor-shore-lit');
+          setTimeout(() => footer.classList.remove('noor-shore-lit'), 2600);
+        }
+      }, { threshold: 0.25 }).observe(footer);
+    }
+
+    // -- 23 · The origin seal on the product page's brand line.
+    const brand = document.querySelector('[data-pdp-brand]');
+    if (brand && !brand.querySelector('.noor-seal')) {
+      const seal = () => {
+        const txt = brand.textContent;
+        const dot = txt.lastIndexOf('\u00b7');
+        if (dot === -1) return;
+        brand.textContent = txt.slice(0, dot).trim();
+        const chip = document.createElement('span');
+        chip.className = 'noor-seal';
+        chip.textContent = txt.slice(dot + 1).trim();
+        brand.appendChild(chip);
+      };
+      if (brand.textContent.includes('\u00b7')) seal();
+      else new MutationObserver((m, o) => {
+        if (brand.textContent.includes('\u00b7') && !brand.querySelector('.noor-seal')) { seal(); o.disconnect(); }
+      }).observe(brand, { childList: true, characterData: true, subtree: true });
+    }
+
     const ember = document.createElement('div');
     ember.className = 'noor-ember';
     ember.setAttribute('data-noor-fx', '');

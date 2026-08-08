@@ -864,6 +864,467 @@ html[data-theme="noor"] .section-head .overline::after {
   100% { opacity: 0; transform: scale(1.03); }
 }
 
+/* =========================================================================
+   THE FIFTY — the whole menu, built. Numbers refer to the concept list the
+   merchant approved with one word: "all". Ideas a theme must not do were
+   excluded or adapted, and say so where they stand.
+   ========================================================================= */
+
+/* -- 1 · Moonpath: a soft shaft of moonlight down the page's spine. ------- */
+[data-theme="noor"] .noor-vignette::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 44%, rgba(207, 231, 238, .028) 50%, transparent 56%);
+}
+
+/* -- 3 · Aurora breath: once a minute a slow wave crosses the high water. - */
+[data-theme="noor"] .noor-vignette::before {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 34vh;
+  background: linear-gradient(100deg,
+    transparent 20%, rgba(27, 180, 212, .05) 40%, rgba(201, 162, 75, .05) 60%, transparent 80%);
+  background-size: 300% 100%;
+  opacity: 0;
+  animation: noor-aurora 58s ease-in-out infinite;
+}
+@keyframes noor-aurora {
+  0%, 76%, 100% { opacity: 0; background-position: 120% 0; }
+  82%           { opacity: 1; }
+  94%           { opacity: 0; background-position: -60% 0; }
+}
+
+/* -- 5 · The plumb: the scroll thread's tip burns hottest. ---------------- */
+@supports (animation-timeline: scroll()) {
+  [data-theme="noor"] body::after {
+    background: linear-gradient(90deg, #6E5313, #C9A24B 82%, #FFF3C4 97%, #FFFFFF 100%);
+  }
+}
+
+/* -- 7 · The illuminated initial: each section title opens like a folio. -- */
+html[data-theme="noor"] .section-head__titles > h2::first-letter,
+html[data-theme="noor"] .section-head__titles > h1::first-letter {
+  font-size: 1.32em;
+  color: #E4CE92;
+  text-shadow: 0 0 22px rgba(201, 162, 75, .5);
+}
+
+/* -- 9 (adapted) · Letterpress arrival: headings settle from soft focus. -- */
+html[data-theme="noor"] .section-head__titles > h2,
+html[data-theme="noor"] .section-head__titles > h1 {
+  transition: filter 900ms var(--ease-out), letter-spacing 900ms var(--ease-out);
+}
+html[data-theme="noor"] [data-reveal]:not(.is-visible) .section-head__titles > h2,
+html[data-theme="noor"] .section-head[data-reveal]:not(.is-visible) h2 {
+  filter: blur(3px);
+  letter-spacing: .09em;
+}
+
+/* -- 10 · Gold-leaf rim: a hair of light along the letters' crowns. ------- */
+[data-theme="noor"] .lux-gilt {
+  text-shadow:
+    0 -1px 0 rgba(255, 248, 220, .25),
+    0 0 18px rgba(201, 162, 75, .45),
+    0 0 3px rgba(232, 207, 142, .3);
+}
+
+/* -- 12 · Numerals as engravings: prices set in the display face. --------- */
+[data-theme="noor"] .product-card__price,
+[data-theme="noor"] .pdp-price__now,
+[data-theme="noor"] .summary-row--total .tabular,
+[data-theme="noor"] .express-total__grand dd {
+  font-family: 'Cinzel', Georgia, serif;
+  letter-spacing: .02em;
+}
+
+/* -- 13 · Passe-partout: an ivory mat between photograph and gold ring. --- */
+html[data-theme="noor"] .product-card__media,
+html[data-theme="noor"] .home-cat-grid .category-card__media {
+  border: 6px solid #F3ECD7;
+  border-radius: 6px;
+}
+
+/* -- 14 · The museum plaque: name and price on brushed brass-dark. -------- */
+html[data-theme="noor"] .product-card__body {
+  background: linear-gradient(180deg, rgba(232, 207, 142, .05), rgba(4, 25, 31, 0) 45%);
+  border-top: 1px solid rgba(232, 207, 142, .22);
+}
+[data-theme="noor"] .product-card__title { letter-spacing: .01em; }
+
+/* -- 15 · Window glare: a diagonal breath of glass on each vitrine. ------- */
+[data-theme="noor"] .product-card__media::after,
+[data-theme="noor"] .category-card__media::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.20) 50%, transparent 58%);
+  background-size: 260% 100%;
+  background-position: 88% 0;
+}
+@supports (animation-timeline: view()) {
+  [data-theme="noor"] .product-card__media::after,
+  [data-theme="noor"] .category-card__media::after {
+    animation: noor-glare linear both;
+    animation-timeline: view();
+  }
+  @keyframes noor-glare { from { background-position: 110% 0; } to { background-position: -10% 0; } }
+}
+
+/* -- 16 · The velvet plinth: each product stands on unseen cloth. --------- */
+[data-theme="noor"] .product-card__media::before {
+  content: "";
+  position: absolute; left: 12%; right: 12%; bottom: 4%;
+  height: 10%;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(50% 100% at 50% 100%, rgba(58, 44, 12, .18), transparent 70%);
+}
+
+/* -- 17 · Shutter arrival for the tiles (cards keep their bloom). --------- */
+html[data-theme="noor"] .category-card.lux-glance .category-card__media {
+  animation: noor-shutter 800ms var(--ease-out);
+}
+@keyframes noor-shutter {
+  from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+/* -- 18 · The centerpiece: the first Premium Pick under its own light. ---- */
+@media (min-width: 992px) {
+  html[data-theme="noor"] [data-rail="premium"] .product-card:first-child {
+    transform: rotate(-.5deg) scale(1.02);
+    box-shadow: 0 0 60px rgba(201, 162, 75, .22), 0 22px 60px rgba(0, 0, 0, .6);
+  }
+}
+
+/* -- 19 · Roman numbering on the Best Sellers: Ⅰ, Ⅱ, Ⅲ … ------------------ */
+html[data-theme="noor"] [data-grid="bestseller"] { counter-reset: bestseller; }
+html[data-theme="noor"] [data-grid="bestseller"] .product-card { counter-increment: bestseller; }
+html[data-theme="noor"] [data-grid="bestseller"] .product-card::before {
+  content: counter(bestseller, upper-roman);
+  position: absolute; top: 10px; right: 12px;
+  z-index: 3;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: .8rem;
+  color: #8A6D22;
+  background: rgba(246, 240, 220, .85);
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid rgba(138, 109, 34, .4);
+  pointer-events: none;
+}
+
+/* -- 20 (adapted) · Sold-out veil: smoked glass, no invented words. ------- */
+html[data-theme="noor"] .product-card:has([data-action="add-to-cart"]:disabled) .product-card__media {
+  filter: grayscale(.7) brightness(.72);
+}
+
+/* -- 21 · The atelier: gallery framed like a lightbox table. -------------- */
+[data-theme="noor"] .gallery {
+  border: 1px solid rgba(232, 207, 142, .3);
+  border-radius: 18px;
+  padding: 10px;
+  background: rgba(246, 240, 220, .04);
+}
+[data-theme="noor"] .gallery img { border-radius: 12px; }
+
+/* -- 24 · Apothecary weights: the chips gain turned-brass depth. ---------- */
+[data-theme="noor"] .size-chip.is-on,
+[data-theme="noor"] .variant-opt.is-selected {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .7),
+    inset 0 -2px 3px rgba(110, 83, 19, .45),
+    0 2px 6px rgba(0, 0, 0, .5);
+}
+
+/* -- 25 (generic) · The provenance thread under the product's name. ------- */
+[data-theme="noor"] [data-pdp-title]::after {
+  content: "";
+  display: block;
+  width: 90px; height: 1px;
+  margin-top: .55rem;
+  background: linear-gradient(90deg, #C9A24B, rgba(201, 162, 75, .1));
+  box-shadow: 90px 0 0 -0.5px rgba(232, 207, 142, .9);
+}
+
+/* -- 26 · The candle: a flame breathes inside the buy buttons on hover. --- */
+@media (hover: hover) {
+  [data-theme="noor"] .btn-primary-gr:hover,
+  [data-theme="noor"] .btn-gradient-gr:hover {
+    background-image: radial-gradient(60% 130% at 50% 115%, rgba(255, 243, 196, .35), transparent 60%);
+    background-color: #3FC3E0;
+  }
+}
+
+/* -- 27 · The telegram: confirmation typeset like a wire of good news. ---- */
+[data-theme="noor"] .confirm-panel {
+  border: 1px dashed rgba(201, 162, 75, .55);
+  background:
+    linear-gradient(180deg, rgba(232, 207, 142, .05), transparent 30%),
+    var(--surface-raised);
+}
+[data-theme="noor"] .confirm-hero .overline { letter-spacing: .4em; }
+
+/* -- 28 · The ledger: cart arithmetic ruled like a merchant's book. ------- */
+[data-theme="noor"] .summary-row { border-bottom: 1px solid rgba(232, 207, 142, .12); }
+[data-theme="noor"] .summary-row--total {
+  border-top: 2px solid rgba(201, 162, 75, .6);
+  font-family: 'Cinzel', Georgia, serif;
+}
+
+/* -- 30 · The running stitch: checkout's thread is embroidery now. -------- */
+[data-theme="noor"] .step__line {
+  background: none;
+  border-top: 2px dashed rgba(201, 162, 75, .55);
+  height: 0;
+}
+
+/* -- 31 · The signature: a flourish under the sworn total. ---------------- */
+[data-theme="noor"] .express-sheet__panel::after {
+  content: "";
+  display: block;
+  width: 120px; height: 14px;
+  margin: 2px auto 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='14' viewBox='0 0 120 14'%3E%3Cpath d='M4 9 C 30 2, 44 13, 62 7 S 100 2, 116 8' fill='none' stroke='%23C9A24B' stroke-width='1.4' stroke-linecap='round' opacity='.8'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* -- 32 · Parcel lanterns: the tracking timeline lights stop by stop. ----- */
+[data-theme="noor"] .timeline__dot {
+  background: var(--surface-sunken);
+  border: 1px solid rgba(232, 207, 142, .45);
+  color: var(--gold-ink);
+}
+[data-theme="noor"] .timeline__step.is-done .timeline__dot {
+  background: linear-gradient(170deg, #FFF3C4, #C9A24B 70%);
+  color: #2F2A1C;
+  box-shadow: 0 0 14px rgba(201, 162, 75, .5);
+}
+[data-theme="noor"] .timeline__step.is-current .timeline__dot {
+  background: linear-gradient(180deg, #0A3641, #07242E);
+  color: #FFF3C4;
+  box-shadow: 0 0 18px rgba(232, 207, 142, .65);
+  animation: noor-dot-burn 2.6s ease-in-out infinite alternate;
+}
+
+/* -- 33 · Marquee lanterns: the header's icons in fine gold rings. -------- */
+@media (hover: hover) {
+  [data-theme="noor"] .site-header .btn-icon-gr:hover {
+    box-shadow: 0 0 0 1px rgba(232, 207, 142, .7), 0 0 16px rgba(201, 162, 75, .35);
+  }
+}
+
+/* -- 34 · The antechamber: the drawer's contents arrive as guests do. ----- */
+[data-theme="noor"] .cart-drawer { border-left: 1px solid rgba(232, 207, 142, .4); }
+[data-theme="noor"] .cart-drawer-backdrop:not([hidden]) + .cart-drawer .cart-drawer__body > * {
+  animation: noor-guest 640ms var(--ease-out) both;
+}
+[data-theme="noor"] .cart-drawer-backdrop:not([hidden]) + .cart-drawer .cart-drawer__body > :nth-child(2) { animation-delay: 90ms; }
+[data-theme="noor"] .cart-drawer-backdrop:not([hidden]) + .cart-drawer .cart-drawer__body > :nth-child(3) { animation-delay: 180ms; }
+[data-theme="noor"] .cart-drawer-backdrop:not([hidden]) + .cart-drawer .cart-drawer__body > :nth-child(4) { animation-delay: 270ms; }
+@keyframes noor-guest {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* -- 35 · The iris: search opens like a lens. ----------------------------- */
+[data-theme="noor"] .search-overlay__box {
+  animation: noor-iris 420ms var(--ease-out);
+}
+@keyframes noor-iris {
+  from { clip-path: circle(6% at 85% 8%); opacity: .4; }
+  to   { clip-path: circle(140% at 85% 8%); opacity: 1; }
+}
+
+/* -- 37 · The routes: faint trade lines behind the footer's ports. -------- */
+[data-theme="noor"] footer {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='300' viewBox='0 0 1200 300'%3E%3Cg fill='none' stroke='%23C9A24B' stroke-opacity='.07'%3E%3Cpath d='M60 220 Q 300 80 600 160 T 1140 120'/%3E%3Cpath d='M100 260 Q 420 200 720 240 T 1160 200'/%3E%3C/g%3E%3Cg fill='%23E8CF8E' fill-opacity='.18'%3E%3Ccircle cx='60' cy='220' r='2.5'/%3E%3Ccircle cx='600' cy='160' r='2.5'/%3E%3Ccircle cx='1140' cy='120' r='2.5'/%3E%3Ccircle cx='720' cy='240' r='2'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+}
+
+/* -- 38 (adapted) · The bell: a soft sheen crosses the strip on the clock. - */
+[data-theme="noor"] .announce-bar { position: relative; overflow: hidden; }
+[data-theme="noor"] .announce-bar::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 40%, rgba(255, 243, 196, .12) 50%, transparent 60%);
+  background-size: 280% 100%;
+  animation: noor-bell 12s linear infinite;
+}
+@keyframes noor-bell {
+  0%, 78% { background-position: 120% 0; }
+  100%    { background-position: -60% 0; }
+}
+
+/* -- 40 · The letter: a testimonial pinned like correspondence. ----------- */
+[data-theme="noor"] .testi-card__inner {
+  background: rgba(246, 240, 220, .035);
+  border: 1px solid rgba(232, 207, 142, .22);
+  border-radius: 14px;
+}
+[data-theme="noor"] .testi-card__inner::after {
+  content: "";
+  position: absolute; top: -9px; left: 50%;
+  width: 34px; height: 18px;
+  margin-left: -17px;
+  border: 2px solid rgba(201, 162, 75, .8);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+}
+
+/* -- 41 · The counting house: figures in brass frames. -------------------- */
+[data-theme="noor"] .industry-stat__num {
+  font-family: 'Cinzel', Georgia, serif;
+  color: #E4CE92;
+  text-shadow: 0 0 16px rgba(201, 162, 75, .4);
+}
+
+/* -- 42 · The dawn grows: the beam strengthens as you approach. ----------- */
+@supports (animation-timeline: view()) {
+  [data-theme="noor"] .newsletter-band::after {
+    animation: noor-sunbeam 16s ease-in-out infinite, noor-dawn-grow linear both;
+    animation-timeline: auto, view();
+  }
+  @keyframes noor-dawn-grow { from { opacity: .25; } to { opacity: 1; } }
+}
+
+/* -- 44 · Girih corners: the engraver's frame on standing panels. --------- */
+[data-theme="noor"] .surface-gr { position: relative; }
+[data-theme="noor"] .surface-gr::before,
+[data-theme="noor"] .surface-gr::after {
+  content: "";
+  position: absolute;
+  width: 14px; height: 14px;
+  border: 1px solid rgba(232, 207, 142, .6);
+  pointer-events: none;
+}
+[data-theme="noor"] .surface-gr::before { top: 6px; left: 6px; border-right: none; border-bottom: none; }
+[data-theme="noor"] .surface-gr::after  { bottom: 6px; right: 6px; border-left: none; border-top: none; }
+
+/* -- 45 · Mother-of-pearl: focused fields shimmer faintly iridescent. ----- */
+[data-theme="noor"] .input-gr:focus,
+[data-theme="noor"] .select-gr:focus,
+[data-theme="noor"] .textarea-gr:focus {
+  background-image: linear-gradient(120deg,
+    rgba(79, 201, 228, .05), rgba(232, 207, 142, .05) 40%, rgba(185, 227, 107, .04) 70%, rgba(79, 201, 228, .05));
+}
+
+/* -- 46 (adapted) · The tassel: 'View all' hangs a bead on its thread. ---- */
+[data-theme="noor"] .section-head .btn-ghost-gr {
+  border-bottom: 1px solid rgba(201, 162, 75, .5);
+  border-radius: 0;
+}
+@media (hover: hover) {
+  [data-theme="noor"] .section-head .btn-ghost-gr:hover {
+    border-bottom-color: #FFF3C4;
+    box-shadow: 0 8px 0 -6px rgba(232, 207, 142, .9);
+  }
+}
+
+/* -- 47 · The minaret: the scrollbar thumb turned on a lathe. ------------- */
+[data-theme="noor"]::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #E4CE92, #C9A24B 30%, #8A6D22 85%, #E4CE92);
+  border-radius: 6px 6px 10px 10px;
+  border: 2px solid #071F26;
+}
+
+/* -- 48 · Zellige: the trust band's tiles, lit only by the passing lamp. -- */
+[data-theme="noor"] .trust-band {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23C9A24B' stroke-opacity='.05'%3E%3Cpath d='M28 4 L52 28 L28 52 L4 28 Z'/%3E%3Ccircle cx='28' cy='28' r='10'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* -- Instruments of The Fifty (elements placed by theme.js) --------------- */
+/* 2 · The day phase quiets the sky: constellation and fireflies belong to
+   the dark hours. */
+html[data-theme="noor"][data-noor-phase="day"]::before,
+html[data-theme="noor"][data-noor-phase="day"]::after { opacity: .35; }
+
+/* 6 · The greeting under the monogram. */
+[data-theme="noor"] .noor-curtain small {
+  display: block;
+  margin-top: 1rem;
+  text-align: center;
+  font-family: 'Noto Sans Bengali', serif;
+  font-size: 1rem;
+  letter-spacing: .3em;
+  color: rgba(232, 207, 142, .75);
+  animation: noor-curtain-glyph 1500ms ease forwards;
+}
+
+/* 11 · The ampersand, in the calligrapher's hand. */
+[data-theme="noor"] .noor-amp {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.1em;
+  color: #E4CE92;
+  padding: 0 .04em;
+}
+
+/* 29 · The coin flip. */
+[data-theme="noor"] .noor-coin { animation: noor-coin 500ms var(--ease-out); }
+@keyframes noor-coin {
+  0%   { transform: rotateY(0); }
+  50%  { transform: rotateY(180deg) scale(1.25); background: #E4CE92; }
+  100% { transform: rotateY(360deg); }
+}
+
+/* 4 · The petal — saffron, falling the way paper falls. */
+[data-theme="noor"] .noor-petal {
+  position: fixed;
+  top: -3vh; left: var(--petal-x, 30vw);
+  width: 7px; height: 11px;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: 60% 40% 55% 45% / 70% 60% 40% 30%;
+  background: linear-gradient(160deg, #E8B84B, #B03A2E 80%);
+  opacity: 0;
+  animation: noor-petal 53s linear infinite;
+}
+@keyframes noor-petal {
+  0%, 86%      { opacity: 0; transform: translateY(0) rotate(0) translateX(0); }
+  87%          { opacity: .85; }
+  90%          { transform: translateY(30vh) rotate(160deg) translateX(3vw); }
+  93%          { transform: translateY(60vh) rotate(280deg) translateX(-2vw); opacity: .85; }
+  96%, 100%    { transform: translateY(105vh) rotate(420deg) translateX(2vw); opacity: 0; }
+}
+
+/* 39 · The dhow on the horizon of the shore. */
+[data-theme="noor"] .noor-dhow {
+  position: absolute;
+  top: -13px; left: -80px;
+  width: 46px; height: 30px;
+  pointer-events: none;
+  opacity: .5;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='30' viewBox='0 0 46 30'%3E%3Cpath d='M6 24 Q 23 30 40 24 L 36 28 Q 23 32 10 28 Z' fill='%23C9A24B' fill-opacity='.8'/%3E%3Cpath d='M22 2 Q 34 8 30 22 L 22 22 Z' fill='%23E8CF8E' fill-opacity='.7'/%3E%3Cpath d='M20 4 Q 12 12 16 22 L 20 22 Z' fill='%23C9A24B' fill-opacity='.6'/%3E%3C/svg%3E") center/contain no-repeat;
+  animation: noor-dhow 96s linear infinite;
+}
+@keyframes noor-dhow {
+  0%, 70%  { transform: translateX(0); }
+  99%, 100% { transform: translateX(calc(100vw + 160px)); }
+}
+
+/* 49 · The shore, gathering light when you arrive. */
+[data-theme="noor"] footer.noor-shore-lit::before {
+  animation: noor-waterline 1.2s ease-in-out infinite alternate;
+  box-shadow: 0 0 24px rgba(232, 207, 142, .55);
+}
+
+/* 23 · The origin, sealed. */
+[data-theme="noor"] .noor-seal {
+  display: inline-block;
+  margin-left: .6em;
+  padding: .15em .7em;
+  font-size: .72em;
+  letter-spacing: .18em;
+  color: #2F2A1C;
+  background: radial-gradient(circle at 35% 30%, #EFDFAF, #C9A24B 62%, #A8842B);
+  border: 1px solid #8A6D22;
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255, 248, 230, .6), 0 1px 4px rgba(0, 0, 0, .45);
+  transform: rotate(-1.2deg);
+}
+
 /* ---- Stillness, on request ---------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   html[data-theme="noor"]::before,
@@ -875,7 +1336,10 @@ html[data-theme="noor"] .section-head .overline::after {
   html[data-theme="noor"] .category-card.lux-glance { animation: none; }
   [data-theme="noor"] .noor-ember,
   [data-theme="noor"] .noor-lantern,
+  [data-theme="noor"] .noor-petal,
+  [data-theme="noor"] .noor-dhow,
   [data-theme="noor"] .noor-curtain { display: none; }
+  [data-theme="noor"] .noor-coin { animation: none; }
   html[data-theme="noor"] .product-card.lux-glance .product-card__media,
   html[data-theme="noor"] .category-card.lux-glance .category-card__media,
   [data-theme="noor"] [data-reveal].is-visible .lux-gilt,
@@ -884,5 +1348,14 @@ html[data-theme="noor"] .section-head .overline::after {
   [data-theme="noor"] .pdp-price__now,
   [data-theme="noor"] .testi-stars,
   [data-theme="noor"] .newsletter-band::after,
-  [data-theme="noor"] footer::before { animation: none; }
+  [data-theme="noor"] footer::before,
+  [data-theme="noor"] .noor-vignette::before,
+  [data-theme="noor"] .announce-bar::after,
+  [data-theme="noor"] .search-overlay__box,
+  [data-theme="noor"] .cart-drawer-backdrop:not([hidden]) + .cart-drawer .cart-drawer__body > *,
+  [data-theme="noor"] .product-card__media::after,
+  [data-theme="noor"] .category-card__media::after,
+  [data-theme="noor"] .timeline__step.is-current .timeline__dot,
+  html[data-theme="noor"] .category-card.lux-glance .category-card__media { animation: none; }
+  html[data-theme="noor"] [data-reveal]:not(.is-visible) .section-head__titles > h2 { filter: none; letter-spacing: inherit; }
 }
