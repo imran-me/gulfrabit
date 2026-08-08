@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Checkout\Services;
 
 use Illuminate\Support\Facades\DB;
+use Modules\Checkout\Events\OrderStatusChanged;
 use Modules\Checkout\Models\Order;
 use Modules\Checkout\Models\OrderRefund;
 use Modules\Checkout\Models\OrderStatusEvent;
@@ -98,7 +99,7 @@ final class OrderFulfilmentService
             );
         }
 
-        return DB::transaction(function () use ($order, $to, $actorId, $actorName, $note, $actorType) {
+        $result = DB::transaction(function () use ($order, $to, $actorId, $actorName, $note, $actorType) {
             $from = $order->status;
 
             // Lock the row before re-reading the status. Two people clicking
@@ -127,6 +128,13 @@ final class OrderFulfilmentService
 
             return $fresh;
         });
+
+        // After the commit, never inside it: a listener talking to an SMS
+        // gateway must not hold the order row locked for an HTTP call, and
+        // must never announce a status a rollback then takes back.
+        event(new OrderStatusChanged($result, $order->status, $to));
+
+        return $result;
     }
 
     /** Total already refunded against an order, in poisha. */

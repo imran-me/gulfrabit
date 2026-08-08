@@ -1,10 +1,10 @@
 /**
  * checkout-page.js — multi-step checkout (Address → Delivery → Payment → Review).
- * Client-side only: real validation (utils/validate-form.js), live summary, and
- * a mock "place order" that writes an order to localStorage and routes to the
- * confirmation page. NO real payment is processed.
- *
- * // TODO: connect to payment gateway  (see modules/checkout/backend/endpoints.md)
+ * Real validation (utils/validate-form.js), live summary, server-side order
+ * placement with a localStorage fallback. Online payment (bKash/Nagad) is a
+ * redirect that happens AFTER the order exists — see modules/checkout/payment-ui.js
+ * and modules/payments/backend/endpoints.md; a failed payment never fails the
+ * order, it just pays on delivery instead.
  */
 
 import * as store from '../../shared/js/core/state.js';
@@ -16,6 +16,7 @@ import { validateForm, validateField, attachLiveValidation } from '../../shared/
 import { toast } from '../../shared/js/components/toast-notifications.js';
 import { track, cartPayload, getAttribution } from '../../shared/js/core/analytics.js';
 import { createOrder, persistOrderLocally } from './backend/api.js';
+import { adaptPaymentOptions, maybeRedirectToGateway } from './payment-ui.js';
 
 const form = document.querySelector('[data-checkout-form]');
 const steps = [...document.querySelectorAll('.checkout-step')];
@@ -53,6 +54,9 @@ async function init() {
   wireDelivery();
   wireDistricts();
   wirePayment();
+  // Async and unawaited on purpose: the page must not wait on a network call
+  // to render, and until it answers the markup's own options stand.
+  adaptPaymentOptions(form);
   paintSummary();
   form.addEventListener('submit', placeOrder);
 
@@ -402,6 +406,13 @@ async function placeOrder(e) {
 
   store.clearCart();
   storage.remove('cart-promo');
+
+  // bKash/Nagad orders detour through the gateway — but only when the order
+  // really reached the server (a local mock order has nothing to pay) and the
+  // server can arrange it. Every "no" lands on the confirmation page with the
+  // order intact and payable on delivery.
+  if (result?.ok && await maybeRedirectToGateway(order, g('phone'))) return;
+
   window.location.href = siteURL(`modules/checkout/order-confirmation.html?id=${encodeURIComponent(order.id)}`);
 }
 

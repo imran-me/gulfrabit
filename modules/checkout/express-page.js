@@ -40,6 +40,7 @@ import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 import { track, productPayload, getAttribution } from '../../shared/js/core/analytics.js';
 import { createOrder, persistOrderLocally } from './backend/api.js';
+import { adaptPaymentOptions, maybeRedirectToGateway } from './payment-ui.js';
 
 const root = document.querySelector('[data-express]');
 const form = document.querySelector('[data-express-form]');
@@ -77,6 +78,9 @@ async function init() {
   attachLiveValidation(form);
   prefill();
   wire();
+  // Unawaited: the ad-landing page must paint instantly, and until the server
+  // answers, the markup's own payment options stand.
+  adaptPaymentOptions(form);
   form.hidden = false;
   bar.hidden = false;
   repaintTotals();
@@ -308,6 +312,12 @@ async function confirmOrder() {
 
   const order = result?.ok ? { ...result.order, eventId } : local;
   persistOrderLocally(order);
+
+  // A bKash/Nagad order leaves for the gateway here; it lands on the
+  // confirmation page afterwards with the verdict. Only for a server order —
+  // a local mock has nothing to pay — and every "no" falls through to the
+  // done-sheet with the order intact, payable on delivery.
+  if (result?.ok && await maybeRedirectToGateway(order, g('phone'))) return;
 
   restore();
   sheet.hidden = true;

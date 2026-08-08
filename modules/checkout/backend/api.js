@@ -136,6 +136,45 @@ export async function createOrder(p) {
 }
 
 /**
+ * Which online payment gateways the server offers right now.
+ *
+ * `{ bkash: bool, nagad: bool }` when a backend answers; `null` on a static
+ * host or network failure — and null means "change nothing", exactly like
+ * createOrder's null. The checkout pages use this to draw only the payment
+ * options that can really be paid. See modules/payments/backend/endpoints.md.
+ */
+export async function paymentMethods() {
+  try {
+    const res = await api('/payments/methods');
+    if (!res.ok) return null;
+    const { data } = await res.json();
+    return data || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Begin online payment for a just-placed order. Answers the gateway URL to
+ * send the browser to, or null for every flavour of "that didn't work" —
+ * and null is never fatal: the order already exists and pays on delivery.
+ * The phone is the tracking-page credential, same rule as reading an order.
+ */
+export async function startPayment(orderNumber, phone) {
+  try {
+    const res = await api('/payments/intent', {
+      method: 'POST',
+      body: JSON.stringify({ order: orderNumber, phone }),
+    });
+    if (!res.ok) return null;
+    const { data } = await res.json();
+    return data?.redirect || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * The localStorage order record, shared by both checkouts. One writer, one
  * shape — the confirmation page, the track page and the account history all
  * read this, whether the order also reached the server or not.

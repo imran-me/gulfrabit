@@ -6,6 +6,11 @@
       <p class="overline">Thank you</p>
       <h1 class="h2" style="margin:.5rem 0">Your order is confirmed</h1>
       <p class="text-muted-gr">Order <strong data-order-id>—</strong> · A confirmation has been saved to your account.</p>
+      <!-- The gateway's verdict, when the customer arrives back from bKash or
+           Nagad. confirmation-page.js fills it from ?payment=; every other
+           arrival leaves it hidden. -->
+      <p data-payment-verdict hidden
+         style="margin-top:var(--space-3);padding:.6rem 1rem;border-radius:var(--radius-md);display:inline-block"></p>
     </div>
 
     <div class="confirm-panel surface-gr" style="padding:var(--space-6)">

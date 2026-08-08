@@ -111,9 +111,9 @@ In order of how much each unblocks:
 
 | What | Why it matters | Without it |
 |---|---|---|
-| **Payment gateway** (bKash / Nagad / SSLCommerz) | The shop cannot take money | Checkout is a form that goes nowhere |
+| **Payment gateway** (bKash / Nagad — the code is ready, see §6d) | Online payment | COD works today; checkout offers COD only |
 | **Product photography** | Every image is a placeholder SVG | The whole "premium" positioning, undone in one screen |
-| **SMS gateway** | Customer OTP login | Login is mocked |
+| **SMS gateway** (code ready, see §6c) | Order confirmed/shipped SMS + customer OTP login | No SMS; login is mocked |
 | **Email** (SMTP or API) | Order confirmations, staff invites | Customers get no confirmation |
 | **Courier API keys** (Pathao / Steadfast / RedX) | Automatic tracking | Manual tracking works today |
 | **Real GS1 barcodes** | The Sourcing page tells customers to check them | The 44 present are valid-format but unregistered |
@@ -147,6 +147,70 @@ click, checkout and purchase reports to Meta twice (browser + server) and
 deduplicates — which is what lets Meta optimise for buyers instead of
 clickers. Each order also records which campaign sold it, visible on the
 order screen in the panel.
+
+---
+
+## 6c. SMS to customers — one account, three .env keys
+
+The code is built and dormant (modules/sms). When an order is marked
+**confirmed** or **shipped** in the panel, the customer gets a short English
+SMS with the order number and the amount to keep ready. Nothing sends until:
+
+1. Open an account at **bulksmsbd.net** (prepaid — a few hundred taka of
+   credit is plenty to start). Apply for a **masked sender id** ("GulfRabit")
+   on their form; use the default non-masked number while that approves.
+2. In hPanel, add to `.env`:
+
+   ```
+   SMS_GATEWAY=bulksmsbd
+   SMS_API_KEY=<from their panel>
+   SMS_SENDER_ID=<approved sender id, or the number they gave>
+   ```
+
+   Then `php artisan config:cache` (or wait for the next deploy).
+
+To rehearse without spending credit: `SMS_GATEWAY=log` writes every would-be
+message to `storage/logs/laravel.log` instead of sending. Every real attempt
+— sent or failed — is recorded in the `sms_logs` table, so "the customer got
+no SMS" is a checkable fact, not an argument.
+
+---
+
+## 6d. bKash / Nagad online payment — merchant onboarding, then .env
+
+The full redirect flow is built and dormant (modules/payments): order first,
+then the gateway, then back with a server-verified verdict. Until credentials
+exist, the checkout shows COD only — nothing half-works.
+
+**bKash** — apply for a **bKash Merchant account + Payment Gateway (Tokenized
+Checkout)** at merchant.bkash.com / through their sales desk. Onboarding takes
+days-to-weeks and needs the trade licence. They issue sandbox credentials
+first — put those in `.env` and test end-to-end, THEN swap to production:
+
+```
+BKASH_BASE_URL=https://tokenized.sandbox.bka.sh/v1.2.0-beta
+BKASH_APP_KEY=...  BKASH_APP_SECRET=...  BKASH_USERNAME=...  BKASH_PASSWORD=...
+```
+
+**Nagad** — merchant onboarding via nagad.com.bd's merchant desk. You generate
+an RSA key pair (they explain how); they give you their public key and a
+merchant id:
+
+```
+NAGAD_BASE_URL=http://sandbox.mynagad.com:10080/remote-payment-gateway-1.0
+NAGAD_MERCHANT_ID=...   NAGAD_MERCHANT_NUMBER=<wallet number>
+NAGAD_PUBLIC_KEY=<their key, one base64 line>
+NAGAD_PRIVATE_KEY=<your key, one base64 line>
+```
+
+Both need `APP_URL=https://gulfrabit.com` in `.env` — the return-from-gateway
+URLs are built from it. After any `.env` edit: `php artisan config:cache`.
+
+**Important:** this module has been authored against both gateways' documented
+APIs but never yet run against their sandboxes (no credentials exist). Budget
+an hour with sandbox credentials in hand for the first real run — same honest
+deal as the first deploy of the backend itself. Money cannot move until you
+deliberately point `BASE_URL` at production.
 
 ---
 

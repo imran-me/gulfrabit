@@ -341,7 +341,10 @@
         <!-- STEP 3 · Payment -->
         <section class="checkout-step" data-step="3" hidden>
           <h2 class="h4 checkout-step__title">Payment <span class="head-gr__bn bn" lang="bn">পেমেন্ট</span></h2>
-          <p class="caption" style="margin-bottom:var(--space-4)">This is a demo checkout — no real payment is processed.</p>
+          <!-- True on a static host only. The moment a real backend answers,
+               payment-ui.js removes this line — orders are real even while
+               every gateway is still dormant. -->
+          <p class="caption" data-payment-demo-note style="margin-bottom:var(--space-4)">This is a demo checkout — no real payment is processed.</p>
           <label class="option-card is-selected"><input type="radio" name="payment" value="bkash" data-payment checked><span><span class="option-card__title">bKash</span><span class="option-card__sub">Mobile financial service</span></span></label>
           <label class="option-card"><input type="radio" name="payment" value="nagad" data-payment><span><span class="option-card__title">Nagad</span><span class="option-card__sub">Mobile financial service</span></span></label>
           <label class="option-card"><input type="radio" name="payment" value="card" data-payment><span><span class="option-card__title">Card</span><span class="option-card__sub">Visa / Mastercard</span></span></label>
@@ -522,6 +525,6 @@
 
   <script type="module" src="../../shared/js/main.js?v=65e9eef8"></script>
   <script type="module" src="../../modules/theme/theme.js?v=cecf08f3"></script>
-  <script type="module" src="../../modules/checkout/checkout-page.js?v=00e8f713"></script>
+  <script type="module" src="../../modules/checkout/checkout-page.js?v=ff3ca455"></script>
 </body>
 </html>

@@ -33,6 +33,8 @@ return [
     Modules\Inventory\InventoryServiceProvider::class,
     Modules\Media\MediaServiceProvider::class,
     Modules\Marketing\MarketingServiceProvider::class,
+    Modules\Payments\PaymentsServiceProvider::class,
+    Modules\Sms\SmsServiceProvider::class,
     Modules\Delivery\DeliveryServiceProvider::class,
     Modules\Theme\ThemeServiceProvider::class,
 

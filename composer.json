@@ -44,6 +44,8 @@
       "Modules\\Deals\\": "modules/deals/backend/",
       "Modules\\Content\\": "modules/content/backend/",
       "Modules\\Marketing\\": "modules/marketing/backend/",
+      "Modules\\Payments\\": "modules/payments/backend/",
+      "Modules\\Sms\\": "modules/sms/backend/",
       "Modules\\Theme\\": "modules/theme/backend/"
     }
   },
