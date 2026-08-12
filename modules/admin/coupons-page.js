@@ -200,13 +200,23 @@ async function onScopeChange() {
     return;
   }
 
+  // `sku`, not `id`: the ADMIN product list is its own shape (see
+  // AdminProductController::index) and has no `id` field — the storefront one
+  // does, which is where the wrong name came from. Reading the missing key
+  // gave every checkbox value="", the empty strings arrived as nulls (Laravel
+  // converts them), and the server refused the save with "The targets.0 field
+  // must be a string" — so a product-scoped coupon could not be created at all.
   const rows = scope === 'categories'
     ? categories.map((c) => ({ key: c.slug, name: c.name, note: c.isActive ? '' : 'switched off' }))
-    : products.map((p) => ({ key: p.id, name: p.title, note: p.isActive ? '' : 'unlisted' }));
+    : products.map((p) => ({ key: p.sku, name: p.title, note: p.isActive ? '' : 'unlisted' }));
 
-  hint.textContent = `— pick from ${rows.length}`;
+  // A row with no key cannot be targeted, and rendering it as a tickable box
+  // offers a choice that silently does nothing. Drop it instead.
+  const usable = rows.filter((r) => typeof r.key === 'string' && r.key !== '');
 
-  host.innerHTML = rows.map((r) => `
+  hint.textContent = `— pick from ${usable.length}`;
+
+  host.innerHTML = usable.map((r) => `
     <label class="cptarget">
       <input type="checkbox" value="${escapeHtml(r.key)}">
       <span>${escapeHtml(r.name)}${r.note ? ` <em>(${r.note})</em>` : ''}</span>
