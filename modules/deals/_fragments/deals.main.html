@@ -3,16 +3,17 @@
       <a href="/index.html">Home</a><span class="breadcrumb-gr__sep">/</span><span>Deals</span>
     </nav>
 
+    <!-- The offer card, at a third of the height it used to take. On a 360px
+         phone it stood 321px tall — 40% of the viewport spent on a banner
+         before a single deal was visible. The long paragraph went with the
+         padding: it promised what the grid below it already proves. -->
     <section class="deals-hero" data-reveal>
-      <div>
+      <div class="deals-hero__copy">
         <p class="overline" style="color:#04222b">Limited-time</p>
-        <h1 class="h1" style="color:#04222b;margin:.25rem 0">Deals &amp; Offers</h1>
-        <p style="color:#04333f;max-width:46ch">Verified imports at a lower price. New markdowns land every week — no inflated “was” prices, just real savings.</p>
+        <h1 class="h1 deals-hero__title">Deals &amp; Offers <span class="head-gr__bn head-gr__bn--full" lang="bn">ছাড় ও অফার</span></h1>
+        <p class="deals-hero__sub">Verified imports at a lower price.</p>
       </div>
-      <div class="deals-hero__stat">
-        <div class="deals-hero__num" data-deal-count>—</div>
-        <div class="deals-hero__label">Products on offer</div>
-      </div>
+      <p class="deals-hero__stat"><span class="deals-hero__num" data-deal-count>—</span> <span class="deals-hero__label">products on offer</span></p>
     </section>
 
     <!-- Biggest discounts -->

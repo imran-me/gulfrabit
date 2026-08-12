@@ -71,7 +71,7 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=47157088">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=158fecc8">
   <!-- The Luxe layer. Linked on every storefront page and completely
        inert without [data-theme="luxe"] on <html>, so the default theme
        renders exactly as it did before this file existed. Linking it
@@ -81,7 +81,7 @@
   <link rel="stylesheet" href="../../modules/theme/theme-trio.css?v=dd326453">
   <link rel="stylesheet" href="../../modules/theme/theme-noor.css?v=c96f91db">
   <link rel="stylesheet" href="../../modules/theme/theme-noor-sky.css?v=356a4c72">
-  <link rel="stylesheet" href="../../modules/deals/deals.css?v=5c7f8900">
+  <link rel="stylesheet" href="../../modules/deals/deals.css?v=3551a4d8">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -291,16 +291,17 @@
       <a href="../../index.html">Home</a><span class="breadcrumb-gr__sep">/</span><span>Deals</span>
     </nav>
 
+    <!-- The offer card, at a third of the height it used to take. On a 360px
+         phone it stood 321px tall — 40% of the viewport spent on a banner
+         before a single deal was visible. The long paragraph went with the
+         padding: it promised what the grid below it already proves. -->
     <section class="deals-hero" data-reveal>
-      <div>
+      <div class="deals-hero__copy">
         <p class="overline" style="color:#04222b">Limited-time</p>
-        <h1 class="h1" style="color:#04222b;margin:.25rem 0">Deals &amp; Offers</h1>
-        <p style="color:#04333f;max-width:46ch">Verified imports at a lower price. New markdowns land every week — no inflated “was” prices, just real savings.</p>
+        <h1 class="h1 deals-hero__title">Deals &amp; Offers <span class="head-gr__bn head-gr__bn--full" lang="bn">ছাড় ও অফার</span></h1>
+        <p class="deals-hero__sub">Verified imports at a lower price.</p>
       </div>
-      <div class="deals-hero__stat">
-        <div class="deals-hero__num" data-deal-count>—</div>
-        <div class="deals-hero__label">Products on offer</div>
-      </div>
+      <p class="deals-hero__stat"><span class="deals-hero__num" data-deal-count>—</span> <span class="deals-hero__label">products on offer</span></p>
     </section>
 
     <!-- Biggest discounts -->

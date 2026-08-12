@@ -341,6 +341,17 @@ a:hover { color: var(--link-hover); }
   letter-spacing: 0;
 }
 
+/* The same Bangla, at the English's own size and colour — a second headline
+   rather than a gloss on the first. For the places where the Bangla is not a
+   translation offered to the side but half of the title itself; the deals
+   card is the first. Weight stays regular: Noto Sans Bengali at 700 beside a
+   Latin display face reads heavier than it, not equal to it.
+
+   Inherits colour rather than naming one, because these headlines sit on
+   coloured cards as often as on the page, and --text-muted is mixed for the
+   page surface only. */
+.head-gr__bn--full { font-size: 1em; color: inherit; }
+
 /* ===== partials/_buttons.css ===== */
 /* =========================================================================
    GulfRabit · Buttons
