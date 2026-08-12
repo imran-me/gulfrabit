@@ -161,11 +161,32 @@
 }
 .theme-swatch--noor .theme-swatch__cta { background: #1BB4D4; }
 
-/* Nakshi's miniature: undyed cloth, an alta border thread along the top, and
-   card edges that are STITCHED rather than drawn. The dashed edge is the one
-   detail worth spending the swatch on — it is the theme's single organising
-   rule, and it is legible even at 40px, where a folk motif would not be. */
-.theme-swatch--nakshi { background: #FBF6EC; border-color: #E0D4BE; }
+/* Nakshi's miniature.
+ *
+ * The first version showed only the stitched card edges, on the reasoning that
+ * a folk motif would be a smudge at 40px. That reasoning was simply wrong
+ * about the size: .theme-swatch is 16/9 at the full width of its option card,
+ * which is several hundred pixels, and at that size the swatch was a blank
+ * cream rectangle. A merchant looking at the picker could not tell that the
+ * Bengali theme was the Bengali one — the single job the swatch has.
+ *
+ * So it now carries the actual scene, drawn with the same marks the theme
+ * really uses: Dhaka on the skyline, the Sundarbans with its field of
+ * breathing roots, the stitched river, and the tiger crossing in front of it.
+ * The tiger path is the one from theme-nakshi-scene.css, transformed rather
+ * than redrawn, so the preview cannot drift away from the thing it previews.
+ *
+ * It sits in `background` rather than a pseudo-element on purpose: the bar,
+ * the cards and the CTA are real child elements, and a background can never
+ * paint over them. The scene stays behind the shop, which is exactly the rule
+ * the theme itself follows. */
+.theme-swatch--nakshi {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='62' viewBox='0 0 160 62'%3E%3Cg fill='%233A342B' fill-opacity='.15'%3E%3Cpath d='M6 31 V21 h4 V31 Z M12 31 V17 h5 V31 Z M19 31 V20 h4 V31 Z M11 15 h7 v-2 h-7 Z'/%3E%3Cpath d='M58 31 V23 h19 V31 Z'/%3E%3Cpath d='M62 23 q9 -9 11 0 Z'/%3E%3Cpath d='M118 31 V24 h26 V31 Z'/%3E%3Cpath d='M118 24 h26 l-3 -4 h-20 Z'/%3E%3C/g%3E%3Cg fill='%234A753B' fill-opacity='.32'%3E%3Cpath d='M10 45 C4 40 6 32 13 30 C12 24 19 21 25 24 C30 18 40 21 41 28 C48 29 50 37 45 44 L45 45 Z'/%3E%3Cpath d='M62 45 C56 41 58 34 64 32 C64 27 71 24 76 27 C81 22 89 25 89 31 C95 33 96 41 91 45 Z'/%3E%3Cpath d='M116 45 C110 39 112 32 119 30 C118 24 125 20 131 23 C136 17 146 20 147 27 C154 29 156 37 151 44 L151 45 Z'/%3E%3C/g%3E%3Cg stroke='%233A342B' stroke-width='.9' stroke-opacity='.45' stroke-linecap='round'%3E%3Cpath d='M4 52 V46'/%3E%3Cpath d='M11 53 V45'/%3E%3Cpath d='M18 52 V47'/%3E%3Cpath d='M25 53 V45'/%3E%3Cpath d='M32 52 V46'/%3E%3Cpath d='M39 53 V47'/%3E%3Cpath d='M46 52 V45'/%3E%3Cpath d='M53 53 V46'/%3E%3Cpath d='M60 52 V47'/%3E%3Cpath d='M67 53 V45'/%3E%3Cpath d='M74 52 V46'/%3E%3Cpath d='M81 53 V47'/%3E%3Cpath d='M88 52 V45'/%3E%3Cpath d='M95 53 V46'/%3E%3Cpath d='M102 52 V47'/%3E%3Cpath d='M109 53 V45'/%3E%3Cpath d='M116 52 V46'/%3E%3Cpath d='M123 53 V47'/%3E%3Cpath d='M130 52 V45'/%3E%3Cpath d='M137 53 V46'/%3E%3Cpath d='M144 52 V47'/%3E%3Cpath d='M151 53 V45'/%3E%3Cpath d='M158 52 V46'/%3E%3C/g%3E%3Cg transform='translate(70,33) scale(.26)'%3E%3Cpath d='M22 30 C 22 20 30 16 44 16 L 64 16 C 74 16 78 20 79 25 L 86 20 L 88 26 L 82 30 C 80 34 74 35 66 35 L 30 35 C 25 35 22 33 22 30 Z' fill='%23D9A02B' fill-opacity='.85'/%3E%3Cpath d='M20 32 C 12 30 8 26 4 27 C 8 22 14 24 20 27 Z' fill='%23D9A02B' fill-opacity='.7'/%3E%3Cg fill='none' stroke='%233A342B' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M38 17 V32'/%3E%3Cpath d='M46 16 V33'/%3E%3Cpath d='M54 16 V33'/%3E%3Cpath d='M62 17 V32'/%3E%3Cpath d='M70 18 V31'/%3E%3C/g%3E%3Cg fill='none' stroke='%233A342B' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M30 35 V45'/%3E%3Cpath d='M44 35 V45'/%3E%3Cpath d='M60 35 V45'/%3E%3Cpath d='M72 35 V45'/%3E%3C/g%3E%3C/g%3E%3Cg fill='none' stroke='%232A4A7C' stroke-width='1.1' stroke-opacity='.42' stroke-linecap='round' stroke-dasharray='4 3'%3E%3Cpath d='M0 50 Q 20 46 40 50 T 80 50 T 120 50 T 160 50'/%3E%3Cpath d='M0 56 Q 20 52 40 56 T 80 56 T 120 56 T 160 56'/%3E%3Cpath d='M0 61 Q 20 57 40 61 T 80 61 T 120 61 T 160 61'/%3E%3C/g%3E%3C/svg%3E")
+      bottom center / 100% auto no-repeat,
+    #FBF6EC;
+  border-color: #E0D4BE;
+}
 .theme-swatch--nakshi .theme-swatch__bar {
   background: #F6EFE1;
   box-shadow: 0 1.5px 0 #C4352A;
@@ -174,6 +195,13 @@
   background: #FFFDF8;
   border: 1.5px dashed #3A342B;
 }
+/* The cards stop short so the bottom third stays clear, because that is the
+   theme's actual layout: the shop sits on the cloth and the landscape runs
+   along the foot of the viewport underneath it. Letting the cards fill the
+   frame the way every other swatch does would hide the entire scene behind
+   three opaque rectangles — which is exactly what the first version did. */
+.theme-swatch--nakshi .theme-swatch__row { flex: 0 1 52%; }
+.theme-swatch--nakshi .theme-swatch__cta { margin-bottom: 2px; }
 .theme-swatch--nakshi .theme-swatch__cta {
   background: linear-gradient(135deg, #0E6E88, #4A753B);
 }
