@@ -76,10 +76,53 @@
 
     RewriteRule ^login/?$ modules/auth/login.html [L,QSA]
     RewriteRule ^register/?$ modules/auth/register.html [L,QSA]
+    RewriteRule ^forgot-password/?$ modules/auth/forgot-password.html [L,QSA]
     RewriteRule ^account/?$ modules/account/dashboard.html [L,QSA]
     RewriteRule ^account/orders/?$ modules/account/orders.html [L,QSA]
     RewriteRule ^account/addresses/?$ modules/account/addresses.html [L,QSA]
     RewriteRule ^wishlist/?$ modules/account/wishlist.html [L,QSA]
+
+    # --- The staff panel ------------------------------------------------
+    # One /admin/ space instead of eight module folders. The panel spans
+    # modules/admin, inventory, courier, marketing, media, theme, accounting,
+    # highlights and b2b — an implementation detail that has no business being
+    # in the address bar of a tool someone uses all day.
+    #
+    # LONGEST PATH FIRST. /admin/products/edit must be tested before
+    # /admin/products, or the shorter rule matches first and swallows it.
+    #
+    # These are NOT public URLs made pretty: every one of these pages is
+    # noindexed and every figure on them comes from an endpoint behind the
+    # admin middleware. The routes are for the people who work here.
+    RewriteRule ^admin/products/edit/?$ modules/admin/product-edit.html [L,QSA]
+    RewriteRule ^admin/stock/movements/?$ modules/inventory/movements.html [L,QSA]
+
+    RewriteRule ^admin/?$ modules/admin/index.html [L,QSA]
+    RewriteRule ^admin/login/?$ modules/admin/login.html [L,QSA]
+    RewriteRule ^admin/orders/?$ modules/admin/orders.html [L,QSA]
+    RewriteRule ^admin/order/?$ modules/admin/order.html [L,QSA]
+    RewriteRule ^admin/customers/?$ modules/admin/customers.html [L,QSA]
+    RewriteRule ^admin/customer/?$ modules/admin/customer.html [L,QSA]
+    RewriteRule ^admin/products/?$ modules/admin/products.html [L,QSA]
+    RewriteRule ^admin/categories/?$ modules/admin/categories.html [L,QSA]
+    RewriteRule ^admin/coupons/?$ modules/admin/coupons.html [L,QSA]
+    RewriteRule ^admin/stock/?$ modules/inventory/stock.html [L,QSA]
+    RewriteRule ^admin/couriers/?$ modules/courier/couriers.html [L,QSA]
+    RewriteRule ^admin/campaigns/?$ modules/marketing/campaigns.html [L,QSA]
+    RewriteRule ^admin/media/?$ modules/media/library.html [L,QSA]
+    RewriteRule ^admin/appearance/?$ modules/theme/appearance.html [L,QSA]
+    RewriteRule ^admin/home/?$ modules/highlights/highlights.html [L,QSA]
+    RewriteRule ^admin/quotes/?$ modules/b2b/quotes.html [L,QSA]
+    RewriteRule ^admin/pnl/?$ modules/accounting/pnl.html [L,QSA]
+    RewriteRule ^admin/journal/?$ modules/accounting/journal.html [L,QSA]
+
+    # --- /index.html is not a URL, it is a filename ---------------------
+    # Matched on THE_REQUEST (the original request line) rather than on the
+    # rewritten path, because DirectoryIndex serves index.html for "/"
+    # internally — testing the rewritten path would match that too and loop
+    # the redirect forever.
+    RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
+    RewriteRule ^index\.html$ / [R=301,L]
 
     # --- Everything else is the static storefront ----------------------
     # Real files and directories are served as-is. Anything else falls
