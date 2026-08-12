@@ -78,6 +78,7 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True):
         f'  <link rel="stylesheet" href="{asset("/modules/theme/theme-luxe.css")}">\n  '
         f'<link rel="stylesheet" href="{asset("/modules/theme/theme-trio.css")}">\n  '
         f'<link rel="stylesheet" href="{asset("/modules/theme/theme-noor.css")}">\n  '
+        f'<link rel="stylesheet" href="{asset("/modules/theme/theme-noor-sky.css")}">\n  '
     ) if luxe else ""
     # data-cms-page is what modules/cms keys its overrides on. Absent means the
     # page is not editable, which is the correct default for anything rendered

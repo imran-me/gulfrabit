@@ -38,6 +38,7 @@
  */
 
 import { storage, session, KEYS } from '../../shared/js/core/storage.js';
+import { startNoorSky, stopNoorSky } from './noor-sky.js';
 
 /** The only values that may ever reach the DOM. */
 const THEMES = ['classic', 'luxe', 'trio', 'noor'];
@@ -77,7 +78,12 @@ export function applyTheme(name) {
   // Noor is the gold themes' night: everything that moves in Luxe moves
   // here, and shows better — fireflies against dark water.
   if (theme === 'noor') { armGilding(); armBurst(); armGlance(); armNight(); }
-  else document.querySelectorAll('[data-noor-fx]').forEach((n) => n.remove());
+  else {
+    // Stop the conductor BEFORE the sweep, or a roll already in flight
+    // re-populates the sky a moment after it was cleared.
+    stopNoorSky();
+    document.querySelectorAll('[data-noor-fx]').forEach((n) => n.remove());
+  }
   return theme;
 }
 
@@ -329,6 +335,11 @@ function armNight() {
     document.body.appendChild(vig);
 
     if (reduce) return;
+
+    // The sky: moon, stars, and a random loop of meteors, fireflies and the
+    // occasional phoenix. Everything it makes carries [data-noor-fx], so the
+    // sweep above takes the whole sky down when the theme changes.
+    startNoorSky();
 
     // The overture: once per session, the night opens. The curtain is
     // animation-driven CSS with pointer-events:none — nothing can strand it
