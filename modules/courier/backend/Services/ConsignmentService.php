@@ -81,7 +81,13 @@ final class ConsignmentService
         // order that is finished should not gain a new consignment.
         // `ready_for_courier` is the stage this whole screen exists to drain,
         // so it is the expected one here rather than an afterthought.
-        if (! in_array($order->status, ['confirmed', 'packed', 'ready_for_courier'], true)) {
+        //
+        // `confirmed` used to be permitted and no longer is, which makes the
+        // code match the sentence above it: a confirmed order has not been
+        // packed, so there is no parcel to hand over. It also keeps the
+        // handover -> shipped move below legal from every state that reaches
+        // here, instead of silently doing nothing from one of them.
+        if (! in_array($order->status, ['packed', 'ready_for_courier'], true)) {
             throw new RuntimeException(
                 "An order that is {$order->status} cannot be handed to a courier."
             );
@@ -98,7 +104,7 @@ final class ConsignmentService
             throw new RuntimeException('This order already has a consignment in progress.');
         }
 
-        return DB::transaction(function () use ($order, $courier, $driver, $adminId, $adminName, $trackingNumber, $costPoisha, $note) {
+        $consignment = DB::transaction(function () use ($order, $courier, $driver, $adminId, $adminName, $trackingNumber, $costPoisha, $note) {
             $consignment = Consignment::create([
                 'order_id'             => $order->id,
                 'courier_id'           => $courier->id,
@@ -137,6 +143,40 @@ final class ConsignmentService
 
             return $consignment->fresh(['courier', 'events']);
         });
+
+        // THE HANDOVER MOVES THE ORDER. The parcel has left the building, so an
+        // order still reading "Ready for courier" is a screen lying about where
+        // its parcel is — and the two screens then disagree, which is how staff
+        // stop trusting either. This is the moment "with courier" becomes true.
+        //
+        // After the commit, never inside it: transition() fires
+        // OrderStatusChanged, and the "your order is on the way" SMS must not
+        // go out ahead of a consignment row that a rollback could still take
+        // back. Same rule the service states about its own event.
+        //
+        // Caveat for the first real API adapter: with a carrier that BOOKS in
+        // advance and collects later, booking is not handover, and the honest
+        // moment becomes its pick-up scan. Every driver today is manual, where
+        // assign() happens with the parcel physically in someone's hands.
+        try {
+            $this->fulfilment->transition(
+                order:     $order,
+                to:        'shipped',
+                // 'owner' so a warehouse account handing over a parcel is not
+                // stopped by a restriction meant for cancellations.
+                role:      'owner',
+                actorId:   $adminId,
+                actorName: $adminName,
+                note:      "Handed to {$courier->name}",
+            );
+        } catch (RuntimeException) {
+            // The order could not legally move — it was changed by someone else
+            // between the guard above and here. The handover itself is real and
+            // recorded; refusing it now would throw away a parcel that has
+            // already gone.
+        }
+
+        return $consignment;
     }
 
     /**

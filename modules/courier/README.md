@@ -45,9 +45,33 @@ creating the row and the driver answering; a parcel genuinely stuck there is a
 bug, and giving it a tab would dress it up as a normal place to be.
 
 The last tab is the old courier-company list — settings, kept, and pushed to the
-end where settings belong. **Assigning still happens on the order screen**,
-where the address and the money are; a second assign form here would be a second
-place to keep correct.
+end where settings belong.
+
+### Every row can be acted on
+
+The queue hands a parcel over from the row — pick the courier, type the tracking
+number if you have it, done. Every other stage carries the one button that moves
+that parcel forward (`booked → picked up → in transit → delivered`).
+
+Both post to the same endpoints the order screen uses, so there is one set of
+rules and one audit trail; what is duplicated is the button, not the logic.
+
+**Handing over moves the order to `shipped`.** The parcel has left the building,
+so an order still reading *Ready for courier* would be a screen lying about
+where its parcel is — and once two screens disagree, staff stop trusting both.
+That also means `assign()` now requires the order to be `packed` or
+`ready_for_courier`; `confirmed` is no longer accepted, which makes the code
+match the sentence that was always above it — a confirmed order has not been
+packed, so there is no parcel to hand anyone.
+
+> For the first real API adapter: with a carrier that **books in advance** and
+> collects later, booking is not handover, and the honest moment becomes its
+> pick-up scan. Every driver today is manual, where `assign()` happens with the
+> parcel physically in someone's hands.
+
+The order screen keeps the fuller form — courier cost, notes, and the statuses
+that need explaining (`failed`, `returned`). The board carries the moves you
+make twenty times a morning.
 
 `is_active` ("we are not using RedX this month") and `is_configured` ("no
 credentials, so the driver cannot call anything") are **separate columns**.
