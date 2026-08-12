@@ -35,12 +35,71 @@
 
 .hero__viewport { position: relative; height: var(--hero-h); }
 
+/* The two numbers the admin panel sets, with the authored defaults as
+   fallbacks so the carousel behaves identically before the request answers,
+   after it fails, and with modules/hero deleted entirely. */
+.hero { --hero-interval: 6000ms; --hero-transition: 700ms; --hero-easing: var(--ease-out); }
+
 .hero__slide {
   position: absolute; inset: 0;
   opacity: 0; visibility: hidden;
-  transition: opacity 700ms var(--ease-out), visibility 700ms;
+  transition: opacity var(--hero-transition) var(--hero-easing),
+              visibility var(--hero-transition),
+              transform var(--hero-transition) var(--hero-easing);
 }
 .hero__slide.is-active { opacity: 1; visibility: visible; }
+
+/* ---- How one banner becomes the next ----------------------------------
+   Chosen in the panel; written onto .hero as a data attribute. Each variant
+   only adds a transform — opacity carries every one of them, so a slide is
+   never left half-visible if a transform is unsupported. */
+
+/* Sliding across: the outgoing banner leaves left, the incoming arrives from
+   the right. Both offsets are on the same axis on purpose — a carousel whose
+   slides pass through each other reads as a glitch, not a movement. */
+.hero[data-hero-transition="slide"] .hero__slide { transform: translateX(6%); }
+.hero[data-hero-transition="slide"] .hero__slide.is-active { transform: translateX(0); }
+
+/* Zoom: the incoming banner settles from very slightly larger. 1.06 and not
+   1.2 — this is a photograph of a product, and a big zoom makes it look like
+   a stock-photo advert. */
+.hero[data-hero-transition="zoom"] .hero__slide { transform: scale(1.06); }
+.hero[data-hero-transition="zoom"] .hero__slide.is-active { transform: scale(1); }
+
+/* Cutting straight. visibility is switched with no duration too, or the old
+   slide lingers invisibly over the new one and swallows the click. */
+.hero[data-hero-transition="none"] .hero__slide { transition: none; }
+
+/* The slow drift, off unless the panel asks for it. Runs for the length of one
+   slide and holds, so it is finished — not interrupted mid-glide — at the
+   moment the next banner takes over. */
+.hero.is-ken-burns .hero__slide.is-active .hero__art {
+  animation: hero-drift var(--hero-interval) var(--hero-easing) forwards;
+}
+@keyframes hero-drift { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+/* Optional words over a banner, for artwork that does not already carry them.
+   Most of these images have the headline baked in, so this is the exception —
+   which is why it is opt-in per slide rather than a box every banner must fill.
+
+   The scrim is not decoration. Merchant-supplied artwork can be any colour
+   under this text, and white on a pale saffron photograph is unreadable; a
+   gradient behind the words is the only way to keep the contrast honest
+   without dictating what the picture may look like. */
+.hero__words {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  display: grid; gap: var(--space-2);
+  padding: var(--space-7) var(--space-5) var(--space-5);
+  background: linear-gradient(to top, rgba(4, 25, 31, .78), rgba(4, 25, 31, .45) 45%, transparent);
+  color: #fff;
+  text-align: left;
+}
+.hero__words strong {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 3.2vw, 2.25rem);
+  line-height: var(--lh-tight);
+}
+.hero__words span { font-size: clamp(.875rem, 1.6vw, 1.0625rem); opacity: .92; }
 
 .hero__media { position: absolute; inset: 0; overflow: hidden; background: var(--surface-band); }
 
@@ -141,7 +200,11 @@
   border-radius: var(--radius-pill);
   background: var(--gr-gradient);
   transform-origin: left center;
-  animation: hero-progress 6s linear forwards;
+  /* The SAME number the carousel's timer uses, read from the variable the page
+     sets from the panel. These were a hardcoded 6s here and a hardcoded 6000
+     in home.js — a pair with no reason to stay equal, and the bar finished
+     early the moment anyone changed one of them. */
+  animation: hero-progress var(--hero-interval) linear forwards;
 }
 /* Autoplay stops on hover, focus and a hidden tab. A bar that keeps filling
    while the slide it measures is parked is worse than no bar. */

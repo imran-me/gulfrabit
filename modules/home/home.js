@@ -24,19 +24,27 @@ initRailArrows();
 initTestimonials();
 initTrustMarquee();
 
-/* ---- Hero carousel ---------------------------------------------------- */
+/* ---- Hero carousel ----------------------------------------------------
+   The banners and their timing come from the admin panel (modules/hero). The
+   slides written into index.html are the fallback, and they are a real one:
+   they render instantly, before any JavaScript, which is why the home page's
+   largest image is never waiting on a request. If the panel holds banners, they
+   replace the authored set — all of them, as a group, so a merchant is never
+   looking at a mix of what they chose and what shipped with the site. */
 function initHeroCarousel() {
   const viewport = document.querySelector('[data-hero]');
   if (!viewport) return;
-  const slides = [...viewport.querySelectorAll('[data-hero-slide]')];
-  const dots = [...document.querySelectorAll('[data-hero-dot]')];
   const hero = viewport.closest('.hero');
+  let slides = [...viewport.querySelectorAll('[data-hero-slide]')];
+  let dots = [...document.querySelectorAll('[data-hero-dot]')];
   let index = 0;
   let timer = null;
-  // The dot fill is a 6s CSS animation (.hero__dot.is-active::before). Keep
-  // the two in step or the bar will finish early or still be running when the
-  // slide changes under it.
-  const INTERVAL = 6000;
+  let settings = {
+    // Matches the CSS the authored markup ships with, so the carousel behaves
+    // identically before the request answers and after it fails.
+    intervalMs: 6000, transition: 'fade', transitionMs: 600,
+    easing: 'ease-in-out', kenBurns: false, autoplay: true,
+  };
 
   const show = (i) => {
     index = (i + slides.length) % slides.length;
@@ -46,10 +54,25 @@ function initHeroCarousel() {
   const advance = () => show(index + 1);
   // .is-paused freezes the progress fill along with the timer — a bar that
   // keeps filling while the slide it measures is parked is worse than none.
-  const start = () => { stop(); hero.classList.remove('is-paused'); timer = setInterval(advance, INTERVAL); };
+  const start = () => {
+    stop();
+    hero.classList.remove('is-paused');
+    // One banner is a picture, not a carousel, and a timer that fires to show
+    // the slide already showing is a wasted wake-up every few seconds.
+    if (!settings.autoplay || slides.length < 2) return;
+    timer = setInterval(advance, settings.intervalMs);
+  };
   const stop = () => { if (timer) clearInterval(timer); timer = null; hero.classList.add('is-paused'); };
 
-  dots.forEach((d, n) => d.addEventListener('click', () => { show(n); start(); }));
+  // Delegated, because the dots are rebuilt when the panel's banners arrive and
+  // handlers bound to the old buttons would point at slides that no longer
+  // exist.
+  document.querySelector('.hero__dots')?.addEventListener('click', (e) => {
+    const dot = e.target.closest('[data-hero-dot]');
+    if (!dot) return;
+    show(dots.indexOf(dot));
+    start();
+  });
 
   // Pause on hover / focus (a considered detail).
   hero.addEventListener('mouseenter', stop);
@@ -61,7 +84,105 @@ function initHeroCarousel() {
 
   show(0);
   start();
+
+  /**
+   * Swap in whatever the merchant has set, and apply how it should move.
+   *
+   * Deliberately after the authored carousel is already running: the built-in
+   * banner is on screen and turning within its first frame, and this either
+   * replaces it or changes nothing. A failed request, a deleted module or a
+   * database without the migration all land in the same place — the site as it
+   * was authored — which is what makes this safe to leave switched on.
+   */
+  (async () => {
+    let payload;
+    try {
+      const res = await fetch('/api/hero');
+      if (!res.ok) return;
+      payload = await res.json();
+    } catch {
+      return;                       // no backend; the authored banners stand
+    }
+
+    applySettings(payload.meta?.settings);
+    if (payload.meta?.ready && payload.data?.length) replaceSlides(payload.data);
+
+    start();                        // pick up the new interval and slide count
+  })();
+
+  /**
+   * Timing and movement as CSS custom properties on .hero.
+   *
+   * Set as variables rather than inline styles on each slide so the stylesheet
+   * still owns HOW each transition looks — this only says which one and how
+   * fast. --hero-interval also drives the dot's fill animation, which is why
+   * the two can no longer drift: there is one number and both read it.
+   */
+  function applySettings(next) {
+    if (!next) return;
+    settings = { ...settings, ...next };
+
+    hero.style.setProperty('--hero-interval', `${settings.intervalMs}ms`);
+    hero.style.setProperty('--hero-transition', `${settings.transitionMs}ms`);
+    hero.style.setProperty('--hero-easing',
+      // "Springy" is not a CSS keyword; it is a curve that overshoots slightly.
+      settings.easing === 'spring' ? 'cubic-bezier(.34,1.56,.64,1)' : settings.easing);
+
+    hero.dataset.heroTransition = settings.transition;
+    hero.classList.toggle('is-ken-burns', Boolean(settings.kenBurns));
+  }
+
+  function replaceSlides(list) {
+    viewport.innerHTML = list.map((s, i) => {
+      const picture = `
+        <picture>
+          <img class="hero__art" src="${escapeAttr(s.image)}" alt="${escapeAttr(s.alt || '')}"
+               width="1600" height="800"
+               loading="${i === 0 ? 'eager' : 'lazy'}"
+               fetchpriority="${i === 0 ? 'high' : 'low'}" decoding="async">
+        </picture>`;
+
+      // A slide with nowhere to go is not wrapped in an anchor. An <a> without
+      // an href is not a link, and one with href="#" is a link that lies.
+      const body = `
+        <picture aria-hidden="true"><img class="hero__backdrop" src="${escapeAttr(s.image)}" alt="" aria-hidden="true"></picture>
+        <span class="hero__fit">${picture}</span>
+        ${s.headline ? `<span class="hero__words"><strong>${escapeHtml(s.headline)}</strong>${
+          s.subheadline ? `<span>${escapeHtml(s.subheadline)}</span>` : ''
+        }</span>` : ''}`;
+
+      return `
+        <article class="hero__slide${i === 0 ? ' is-active' : ''}" data-hero-slide
+                 aria-roledescription="slide" aria-label="${i + 1} of ${list.length}"
+                 style="--arn:2; --ar:1600/800">
+          ${s.href ? `<a class="hero__link" href="${escapeAttr(s.href)}">${body}</a>` : body}
+        </article>`;
+    }).join('');
+
+    const dotHost = document.querySelector('.hero__dots');
+    if (dotHost) {
+      dotHost.innerHTML = list.map((_, i) =>
+        `<button class="hero__dot${i === 0 ? ' is-active' : ''}" data-hero-dot aria-label="Slide ${i + 1}"></button>`
+      ).join('');
+      dots = [...dotHost.querySelectorAll('[data-hero-dot]')];
+      dotHost.hidden = list.length < 2;
+    }
+
+    slides = [...viewport.querySelectorAll('[data-hero-slide]')];
+    index = 0;
+    show(0);
+  }
 }
+
+/* The hero writes attribute values and text from merchant-entered content, so
+   both go through an escape. textContent is not an option here — the markup is
+   built as a string because it replaces the viewport wholesale. */
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+const escapeAttr = escapeHtml;
 
 /**
  * One home-page shelf: what the merchant curated, or the old tag behaviour.
