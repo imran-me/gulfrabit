@@ -58,6 +58,8 @@
  * different, busier design. Fewer stars, wider gaps, no phoenix.
  */
 
+import { addBody, setWind, stopPhysics } from './noor-physics.js';
+
 /** Every node this module creates carries the class its animation needs and
  *  this attribute, which is theme.js's kill switch for the whole night. */
 const FX = 'data-noor-fx';
@@ -110,11 +112,15 @@ export function startNoorSky() {
   });
 }
 
-/** Stop rolling. The elements already in flight finish and remove themselves. */
+/** Stop rolling. The CSS-animated elements already in flight finish and remove
+ *  themselves; the simulated ones have no animation to finish, so the engine
+ *  is told outright — otherwise a rAF loop would keep integrating bodies for a
+ *  theme the page is no longer wearing. */
 export function stopNoorSky() {
   running = false;
   clearTimeout(timer);
   timer = 0;
+  stopPhysics();
 }
 
 const isNight = () => document.documentElement.getAttribute('data-theme') === 'noor';
@@ -569,10 +575,35 @@ function dragonfly() {
  *  SHRINKS — see section 9. Nothing else in this sky recedes. */
 function fanous(small) {
   const f = el('div', 'noor-fanous');
-  f.style.setProperty('--fa-x', rand(6, 92).toFixed(1) + 'vw');
-  f.style.setProperty('--fa-sway', (rand(2.5, 7) * pick([1, -1])).toFixed(2) + 'vw');
-  f.style.setProperty('--fa-dur', rand(22, 34).toFixed(1) + 's');
-  once(f, small ? 1 : 2);
+  if (!place(f, small ? 1 : 2)) return;
+
+  /* The lightest thing in this sky, which makes it the one that shows the
+     wind best: it has almost no momentum, so it does not so much resist a
+     gust as agree with it, and it keeps whatever sideways drift the gust left
+     it with long after the gust has gone. That persistence is the tell of a
+     real integrator — an authored sway always returns to its own centre line.
+
+     It shrinks because it is receding, and the shrinking is coupled to the
+     climb rather than timed alongside it. `heat` doubles as the flame burning
+     down: as it decays the lantern stops climbing, exactly as a real one does
+     when its fuel is spent. */
+  addBody(f, {
+    x: (rand(6, 92) / 100) * window.innerWidth,
+    y: window.innerHeight + 30,
+    vx: rand(-16, 16),
+    vy: -rand(26, 46),
+    g: 190,
+    lift: rand(1.25, 1.5),
+    heat: 1,
+    cool: 0.03,
+    drag: 0.03,
+    life: rand(26, 40),
+    fade: 7,
+    onStep: (b) => {
+      // Distance, expressed the only way a flat screen can express it.
+      b.scale = Math.max(0.3, 1 - (window.innerHeight - b.y) / (window.innerHeight * 1.5));
+    },
+  });
 }
 
 /* ---- weather ------------------------------------------------------------ */
@@ -605,8 +636,10 @@ function flash() {
   once(f, 1);
 }
 
-/** Everything light enough to be moved by it. */
-const GUST_MOVES = '.noor-fly, .noor-smoke, .noor-spark, .noor-bubble';
+/** The CSS-animated bodies light enough to be leaned by a gust. The simulated
+ *  ones are absent on purpose: they feel the wind as a force, not as a lean,
+ *  and applying both would push them twice. */
+const GUST_MOVES = '.noor-fly, .noor-smoke';
 
 /**
  * The gust — the only event here that touches the others. A faint shear
@@ -624,6 +657,20 @@ function gust() {
   g.style.setProperty('--g-dur', rand(2.8, 4.4).toFixed(1) + 's');
   once(g, 1);
 
+  /* For the simulated bodies this is not a lean, it is AIR THAT IS MOVING.
+     The engine measures every body's drag against it, so what each one does
+     is decided by its own mass and cross-section rather than by anything
+     written here: a spark drifts a couple of hundred pixels, a lantern leans
+     and KEEPS the drift after the gust has gone, a fish on its short fast arc
+     barely registers it, and a bubble underwater does not feel it at all.
+     That spread is the point — one cause, four different answers, none of
+     them authored. An authored lean gives every body the same answer and
+     always returns it to its own centre line. */
+  setWind(dir * rand(80, 170), rand(1400, 2600));
+
+  // The CSS-animated bodies cannot be pushed, only leaned — see the
+  // `translate` note in section 4 of the stylesheet. Both halves of the sky
+  // answer the same gust; only one of them answers it with forces.
   document.querySelectorAll(GUST_MOVES).forEach((n) => {
     // Each body gets its own displacement. A swarm that all leans by the same
     // amount is a sheet of paper, not a swarm.
@@ -644,18 +691,40 @@ function gust() {
  * (section 11), which is done entirely with opacity.
  */
 function spark(small) {
-  const x = rand(3, 95);
-  const b = rand(-1, 7);
+  // The fire sits somewhere along the shore, not on the bottom edge of the
+  // screen, and every spark in this handful leaves from the same one.
+  const x = (rand(3, 95) / 100) * window.innerWidth;
+  const y = window.innerHeight - (rand(-1, 7) / 100) * window.innerHeight;
+
   for (let i = 0, n = 2 + Math.floor(Math.random() * (small ? 2 : 4)); i < n; i++) {
     const s = el('div', 'noor-spark');
-    s.style.setProperty('--sp-x', (x + rand(-1.6, 1.6)).toFixed(1) + 'vw');
-    // The fire sits somewhere along the shore, not on the bottom edge of the
-    // screen — and every spark in this handful leaves from the same one.
-    s.style.setProperty('--sp-b', b.toFixed(1) + 'vh');
     s.style.setProperty('--sp-size', rand(1.8, 3.6).toFixed(1) + 'px');
-    s.style.setProperty('--sp-sway', (rand(0.8, 4) * pick([1, -1])).toFixed(2) + 'vw');
-    s.style.setProperty('--sp-dur', rand(3.4, 6.5).toFixed(1) + 's');
-    once(s, small ? 6 : 12, rand(0, 1.1));
+    if (!place(s, small ? 6 : 12)) return;
+
+    /* A spark rises for exactly as long as it is hot, and then it falls.
+       Nothing here says so: `lift` is buoyancy expressed as a fraction of
+       gravity and it is multiplied by `heat`, so as the ember cools the same
+       gravity that was being cancelled starts to win. The turnover is not a
+       keyframe, it is the moment heat crosses 1/lift — which is why no two
+       sparks in a handful turn at the same height. */
+    addBody(s, {
+      x: x + rand(-14, 14),
+      y,
+      vx: rand(-40, 40),
+      vy: -rand(120, 240),
+      g: 620,
+      lift: rand(1.15, 1.55),
+      heat: 1,
+      cool: rand(0.16, 0.3),
+      // Tiny and light: it barely holds any momentum, so the gust throws it.
+      drag: rand(0.010, 0.020),
+      life: rand(4.5, 8),
+      fade: 1.2,
+      // The colour is the same number as the flight. --sp-heat crossfades the
+      // white core off the red glow, so the ember goes red at exactly the
+      // moment buoyancy stops beating gravity — because that is one moment.
+      onStep: (b) => b.node.style.setProperty('--sp-heat', b.heat.toFixed(3)),
+    });
   }
 }
 
@@ -707,34 +776,55 @@ function ripple(small, at) {
 function fish(small) {
   const f = el('div', 'noor-fish');
   const dir = pick([1, -1]);
-  const x0 = rand(8, 88);
-  const dx = rand(6, 14) * dir;               // vw
-  const h = rand(5, 12);                      // vh
-  const b = rand(2, 9);                       // vh — where the surface is
-  const dur = rand(1.1, 1.8);
+  const surface = window.innerHeight - (rand(2, 9) / 100) * window.innerHeight;
+  const x = (rand(8, 88) / 100) * window.innerWidth;
 
-  const a = (Math.atan2((h / 100) * window.innerHeight * 4,
-                        Math.abs((dx / 100) * window.innerWidth)) * 180) / Math.PI;
-
-  // A fish swimming left is DRAWN facing left — the flip lives on the sprite,
-  // not on the element, so it cannot collide with the arc's own transform.
-  if (dir < 0) f.classList.add('is-left');
-
-  f.style.setProperty('--fi-x', x0.toFixed(1) + 'vw');
-  f.style.setProperty('--fi-b', b.toFixed(1) + 'vh');
   f.style.setProperty('--fi-w', (small ? rand(18, 26) : rand(24, 40)).toFixed(0) + 'px');
-  f.style.setProperty('--fi-dx', dx.toFixed(1) + 'vw');
-  f.style.setProperty('--fi-h', h.toFixed(1) + 'vh');
-  // Mirroring the sprite mirrors which way "nose up" is, so the tilt has to
-  // turn over with it.
-  f.style.setProperty('--fi-a', (a * dir).toFixed(1) + 'deg');
-  f.style.setProperty('--fi-dur', dur.toFixed(2) + 's');
-  once(f, 2);
+  // A fish swimming left is DRAWN facing left. The flip lives on the sprite so
+  // it cannot collide with the transform the engine owns.
+  if (dir < 0) f.classList.add('is-left');
+  if (!place(f, 2)) return;
 
-  ripple(small, { x: x0, b });                                   // the launch
-  setTimeout(() => {                                             // the entry
-    if (isNight()) ripple(small, { x: x0 + dx, b });
-  }, dur * 960);
+  /* Thrown once and then left alone. The arc is not described anywhere — it
+     is what gravity does to a body that left the water at this speed, and
+     three things follow from that which the hand-sampled parabola could not
+     give: the apex and the flight time are consequences of one throw instead
+     of three independent rolls that could contradict each other; `aim` reads
+     the nose angle off the live velocity every step rather than approximating
+     it at eight instants; and the entry splash is spawned wherever the fish
+     ACTUALLY came down instead of where a keyframe assumed it would.
+
+     What it does NOT do is get blown off course — a gust moves the landing
+     point by about four pixels, because this is a dense body on a fast
+     0.8-second arc and wind has almost no time to work on it. That is the
+     correct answer and it is worth having: the spark beside it drifts a
+     couple of hundred pixels in the same gust, and the contrast between them
+     is what makes the wind legible at all. */
+  const up = rand(560, 900);
+  addBody(f, {
+    x, y: surface,
+    vx: dir * rand(90, 210),
+    vy: -up,
+    g: 1750,
+    // Water-slick and heavy for its size: it holds its momentum.
+    drag: 0.0006,
+    aim: true,
+    life: (2 * up) / 1750 + 0.5,
+    fade: 0.18,
+    // The entry splash goes where it ACTUALLY came down, not where a keyframe
+    // assumed it would.
+    onDeath: (b) => splash(small, b.x, surface),
+  });
+
+  splash(small, x, surface);                                     // the launch
+}
+
+/** Rings where something broke the surface, in viewport pixels. */
+function splash(small, px, surfaceY) {
+  ripple(small, {
+    x: (px / window.innerWidth) * 100,
+    b: ((window.innerHeight - surfaceY) / window.innerHeight) * 100,
+  });
 }
 
 /**
@@ -743,19 +833,55 @@ function fish(small) {
  * up, which are the same fact told twice (section 12).
  */
 function bubbles(small) {
-  const x = rand(8, 92);
-  const b = rand(0, 6);
-  const h = rand(12, 24);
+  const x = (rand(8, 92) / 100) * window.innerWidth;
+  const floor = window.innerHeight - (rand(0, 6) / 100) * window.innerHeight;
+  const surface = window.innerHeight - (rand(14, 26) / 100) * window.innerHeight;
 
   for (let i = 0, n = 3 + Math.floor(Math.random() * (small ? 3 : 4)); i < n; i++) {
     const u = el('div', 'noor-bubble');
-    u.style.setProperty('--bu-x', (x + rand(-1.2, 1.2)).toFixed(1) + 'vw');
-    u.style.setProperty('--bu-b', b.toFixed(1) + 'vh');
     u.style.setProperty('--bu-size', rand(3, 7).toFixed(1) + 'px');
-    u.style.setProperty('--bu-h', (h + rand(-2, 2)).toFixed(1) + 'vh');
-    u.style.setProperty('--bu-sway', (rand(0.4, 1.8) * pick([1, -1])).toFixed(2) + 'vw');
-    u.style.setProperty('--bu-dur', rand(3.2, 5.4).toFixed(1) + 's');
-    once(u, 14, i * rand(0.18, 0.42));
+
+    /* A bubble accelerates as it rises and grows as it rises, and those are
+       not two behaviours — they are one. The pressure above it falls, so it
+       expands; expanding displaces more water, so buoyancy increases; more
+       buoyancy against the same drag means it goes faster. Here `grow` is the
+       only input and the acceleration is a CONSEQUENCE, because negative
+       gravity is scaled by the volume the growth produces.
+       Delayed by index, because one breath leaves as a string. */
+    /* Appended inside the timeout, not before it. place() puts the node in
+       the document immediately and the engine only starts positioning it when
+       addBody runs — so appending up front would park every bubble in the
+       string at the origin, visible, for as much as a second and a half. The
+       cap belongs here for the same reason: it should count what is in the
+       water now, not what was there when the breath was drawn. */
+    setTimeout(() => {
+      if (!isNight() || !place(u, 14)) return;
+      addBody(u, {
+        x: x + rand(-9, 9), y: floor,
+        vx: rand(-8, 8), vy: -rand(30, 55),
+        g: -170,                              // negative: buoyancy, not weight
+        alpha: 0.8,
+        air: false,                           // it is under the water
+        grow: rand(0.16, 0.28),
+        // Water is three orders of magnitude more viscous than air, and a
+        // bubble is slow — this is the one body here near the linear regime,
+        // so its coefficient is large and it never really accelerates away.
+        drag: 0.05,
+        life: 9,
+        fade: 0.05,
+        onStep: (b) => {
+          // Buoyancy tracks the volume it just gained.
+          b.g = -170 * b.scale;
+          // The surface. A bubble does not fade out on reaching it, it POPS —
+          // a hard expansion and gone inside two frames.
+          if (b.y <= surface && b.life > b.age + 0.05) {
+            b.life = b.age + 0.05;
+            b.fade = 0.05;
+            b.grow = 22;
+          }
+        },
+      });
+    }, i * rand(180, 420));
   }
 }
 
@@ -893,6 +1019,24 @@ function el(tag, className) {
  * @param {number} cap   how many of this kind may exist at once
  * @param {number} delay seconds to hold the element back before it is added
  */
+/**
+ * once()'s sibling, for bodies the integrator owns.
+ *
+ * Same cap, but no `animationend` and no fallback timer, because a simulated
+ * body has no animation to end and the engine already guarantees it leaves —
+ * it dies of old age or of being off-screen, and either way the loop removes
+ * it. Wiring the timeout as well would mean two owners for one node.
+ *
+ * @returns {boolean} false if the cap is already reached, in which case the
+ *   caller must not simulate the node it just built.
+ */
+function place(node, cap) {
+  const kind = (node.getAttribute('class') || '').split(' ')[0];
+  if (document.querySelectorAll('.' + kind).length >= cap) return false;
+  document.body.appendChild(node);
+  return true;
+}
+
 function once(node, cap = 4, delay = 0) {
   // getAttribute, not .className: on an SVG element className is an
   // SVGAnimatedString, which has no .split — and the constellation is SVG.

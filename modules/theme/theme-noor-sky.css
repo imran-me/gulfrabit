@@ -316,20 +316,63 @@
   will-change: transform;
 }
 
-/* The gust (section 12) leans everything light that is currently airborne.
-   It rides the standalone `translate` property, NOT `transform`, and that is
-   the entire trick: `translate` composes with whatever `transform` animation
-   the element is already running instead of overwriting it, so a firefly can
-   be blown sideways in the middle of its own climb. Declared on the base
-   class so that REMOVING .is-gusted eases the element back rather than
-   snapping it. */
+/* The gust (section 12) leans the ANIMATED bodies that are light enough. It
+   rides the standalone `translate` property, NOT `transform`, and that is the
+   entire trick: `translate` composes with whatever `transform` animation the
+   element is already running instead of overwriting it, so a firefly can be
+   blown sideways in the middle of its own climb. Declared on the base class
+   so that REMOVING .is-gusted eases the element back rather than snapping it.
+
+   The SIMULATED bodies are deliberately absent. They do not need leaning —
+   noor-physics.js measures their drag against a moving air mass, so the same
+   gust reaches them as an actual force and each one answers it according to
+   its own mass. Leaning them as well would push them twice. */
 [data-theme="noor"] .noor-fly,
-[data-theme="noor"] .noor-smoke,
-[data-theme="noor"] .noor-spark,
-[data-theme="noor"] .noor-bubble {
+[data-theme="noor"] .noor-smoke {
   transition: translate 1.5s var(--ease-inout, ease-in-out);
 }
 [data-theme="noor"] .is-gusted { translate: var(--gust, 0) 0; }
+
+/* =========================================================================
+   4b · THE BODIES THE INTEGRATOR OWNS
+   =========================================================================
+   Four of the effects in this file are not animated at all. noor-physics.js
+   steps them through gravity, buoyancy, quadratic drag and a shared wind
+   field, and writes their transform every frame. See that file for why those
+   four and not the other twenty-four.
+
+   THE CONTRACT, WHICH IS THE ONLY THING CSS MUST HONOUR HERE
+   ----------------------------------------------------------
+   A simulated body is anchored at the ORIGIN and positioned entirely by its
+   transform, because the engine writes absolute viewport pixels into that
+   transform. Anchoring it with `left`/`bottom` as well would mean two systems
+   each believing they decide where the element is, and the bug that produces
+   only shows up once the viewport is resized.
+
+   `translate: -50% -50%` is how the body's position comes to mean its CENTRE
+   rather than its top-left corner — and it has to be the standalone property
+   rather than a transform function, for the same composition reason the gust
+   uses it: the engine owns `transform` outright and would overwrite it.
+
+   No `animation` may be declared on these four. A running keyframe writing
+   the same property every frame would fight the engine and win, silently,
+   because animations beat inline styles in the cascade. Sub-element flourishes
+   (the lantern's flame, the spark's two layers) are fine — they animate
+   opacity on a ::before, which the engine never touches.
+   ========================================================================= */
+[data-theme="noor"] .noor-spark,
+[data-theme="noor"] .noor-bubble,
+[data-theme="noor"] .noor-fish,
+[data-theme="noor"] .noor-fanous {
+  translate: -50% -50%;
+  /* Invisible until the engine has placed it. The engine writes an inline
+     opacity on its very first step, so this only ever applies to a node that
+     is in the document but not yet simulated — and it makes the failure mode
+     "nothing appears" rather than "a bright dot is parked in the top-left
+     corner of the shop", which is the difference between a bug nobody
+     notices and a bug on the home page. */
+  opacity: 0;
+}
 [data-theme="noor"] .noor-fly::before {
   content: "";
   position: absolute;
@@ -788,14 +831,12 @@
    ========================================================================= */
 [data-theme="noor"] .noor-fanous {
   position: fixed;
-  bottom: -6vh;
-  left: var(--fa-x, 50vw);
+  top: 0;
+  left: 0;
   width: clamp(13px, 1.7vw, 22px);
   aspect-ratio: 24 / 34;
   z-index: 3;
   pointer-events: none;
-  opacity: 0;
-  animation: noor-fanous-rise var(--fa-dur, 26s) linear forwards;
   will-change: transform, opacity;
 }
 [data-theme="noor"] .noor-fanous::before {
@@ -814,16 +855,6 @@
 }
 /* Uneven vertical steps: a lantern climbs into calmer air and slows. The
    scale carries the distance, and the opacity falls with it. */
-@keyframes noor-fanous-rise {
-  0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0; }
-  8%   { opacity: .95; }
-  26%  { transform: translate3d(var(--fa-sway, 4vw), -32vh, 0) scale(.86); opacity: .92; }
-  48%  { transform: translate3d(calc(var(--fa-sway, 4vw) * -.5), -58vh, 0) scale(.7); opacity: .82; }
-  70%  { transform: translate3d(calc(var(--fa-sway, 4vw) * 1.3), -78vh, 0) scale(.55); opacity: .6; }
-  88%  { transform: translate3d(calc(var(--fa-sway, 4vw) * .4), -94vh, 0) scale(.42); opacity: .3; }
-  100% { transform: translate3d(calc(var(--fa-sway, 4vw) * .9), -108vh, 0) scale(.34); opacity: 0; }
-}
-
 /* =========================================================================
    10 · WEATHER
    =========================================================================
@@ -973,33 +1004,33 @@
    ========================================================================= */
 
 /* -- the spark: a cooling ember ------------------------------------------- */
-/* It leaves the fire white-hot, and it dies red. That colour change is real
-   physics — a black body radiates bluer the hotter it is — and it is done
-   here WITHOUT animating a colour: two stacked layers, a white-hot core over
-   a red glow, and only the core's OPACITY animates. As the core fades the
-   red beneath it takes over. Composited, and honest.
-   The path is buoyancy losing to drag: fast up, decelerating, a moment of
-   hanging, then it gives up and sinks a little as it goes out. */
+/* SIMULATED — see the placement note in section 15. It leaves the fire
+   white-hot and it dies red, and that colour change is real physics: a black
+   body radiates bluer the hotter it is. It is still done WITHOUT animating a
+   colour — two stacked layers, a white-hot core over a red glow — but the
+   crossfade is no longer two keyframe curves I drew to agree. `--sp-heat` is
+   the integrator's own heat variable, written every step, so the colour and
+   the flight path are two readings of ONE number. When the ember cools past
+   the point where buoyancy stops beating gravity it starts to fall, and it
+   goes red at the same instant, because that instant is the same instant. */
 [data-theme="noor"] .noor-spark {
   position: fixed;
-  bottom: var(--sp-b, -1vh);
-  left: var(--sp-x, 50vw);
+  top: 0;
+  left: 0;
   width: var(--sp-size, 3px);
   aspect-ratio: 1;
   z-index: 1;
   pointer-events: none;
   border-radius: 50%;
-  animation: noor-spark-lift var(--sp-dur, 5s) var(--ease-out, cubic-bezier(.16, .84, .44, 1)) forwards;
 }
-/* the red glow — always there, revealed as the core dies */
+/* the red glow — always there, revealed as the core cools off it */
 [data-theme="noor"] .noor-spark::after {
   content: "";
   position: absolute;
   inset: -40%;
   border-radius: 50%;
   background: radial-gradient(circle, #E8622B 0%, rgba(192, 57, 43, .55) 45%, transparent 72%);
-  opacity: 0;
-  animation: noor-spark-cool var(--sp-dur, 5s) linear forwards;
+  opacity: calc(.95 - var(--sp-heat, 1) * .6);
 }
 /* the white-hot core */
 [data-theme="noor"] .noor-spark::before {
@@ -1009,17 +1040,7 @@
   border-radius: 50%;
   background: #FFFDF2;
   box-shadow: 0 0 6px rgba(255, 243, 196, .95), 0 0 14px rgba(240, 169, 60, .6);
-  opacity: 0;
-  animation: noor-spark-burn var(--sp-dur, 5s) linear forwards;
-}
-@keyframes noor-spark-burn { 0% { opacity: 1; } 34% { opacity: .7; } 62% { opacity: .1; } 100% { opacity: 0; } }
-@keyframes noor-spark-cool { 0% { opacity: 0; } 30% { opacity: .85; } 78% { opacity: .5; } 100% { opacity: 0; } }
-@keyframes noor-spark-lift {
-  0%   { transform: translate3d(0, 0, 0) scale(1); }
-  45%  { transform: translate3d(calc(var(--sp-sway, 2vw) * .7), -22vh, 0) scale(.9); }
-  76%  { transform: translate3d(var(--sp-sway, 2vw), -31vh, 0) scale(.72); }
-  /* it stops rising before it stops existing — the hang, then the sink */
-  100% { transform: translate3d(calc(var(--sp-sway, 2vw) * 1.5), -29vh, 0) scale(.5); }
+  opacity: var(--sp-heat, 1);
 }
 
 /* -- bakhoor: laminar, then turbulent ------------------------------------- */
@@ -1093,25 +1114,24 @@
 }
 
 /* -- the fish: a parabola, and a nose that follows it --------------------- */
-/* Once it leaves the water nothing pushes it but gravity, so the arc is a
-   parabola — not a sine, which is what almost every jumping-fish animation
-   uses and why they look like they are on a wire. The keyframes below are
-   sampled from 4h*t*(1-t) at even intervals and driven LINEAR, so the shape
-   comes from the numbers rather than from an easing curve.
-   And the fish rotates through the arc: nose steeply up at launch, level at
-   the apex, nose down on entry, because a body in free flight keeps pointing
-   along its velocity. The conductor computes that launch angle from the
-   actual height and span, so the tilt is never a guess. */
+/* SIMULATED. Once it leaves the water nothing pushes it but gravity, so the
+   arc is a parabola — not a sine, which is what almost every jumping-fish
+   animation uses and why they look like they are on a wire.
+   This used to be ten keyframes sampled from 4h.t.(1-t), which was the right
+   curve and still a recording: the landing point was decided the moment the
+   element was created, so a gust could lean the fish but never actually
+   change where it came down. Now it is thrown once and gravity does the rest,
+   the splash is spawned at the position it really reached, and the nose
+   angle is read from the live velocity vector rather than approximated at
+   eight sampled instants. */
 [data-theme="noor"] .noor-fish {
   position: fixed;
-  bottom: var(--fi-b, 3vh);
-  left: var(--fi-x, 40vw);
+  top: 0;
+  left: 0;
   width: var(--fi-w, 30px);
   aspect-ratio: 48 / 16;
   z-index: 1;
   pointer-events: none;
-  opacity: 0;
-  animation: noor-fish-arc var(--fi-dur, 1.5s) linear forwards;
 }
 [data-theme="noor"] .noor-fish::before {
   content: "";
@@ -1124,30 +1144,20 @@
    the arc — putting a scaleX there would have to be repeated in all ten
    keyframes and would silently mirror the rotation with it. */
 [data-theme="noor"] .noor-fish.is-left::before { transform: scaleX(-1); }
-@keyframes noor-fish-arc {
-  0%    { transform: translate3d(0, 0, 0) rotate(calc(var(--fi-a, 52deg) * -1)); opacity: 0; }
-  6%    { opacity: .9; }
-  12.5% { transform: translate3d(calc(var(--fi-dx, 9vw) * .125), calc(var(--fi-h, 9vh) * -.4375), 0) rotate(calc(var(--fi-a, 52deg) * -.83)); }
-  25%   { transform: translate3d(calc(var(--fi-dx, 9vw) * .25),  calc(var(--fi-h, 9vh) * -.75), 0)   rotate(calc(var(--fi-a, 52deg) * -.61)); }
-  37.5% { transform: translate3d(calc(var(--fi-dx, 9vw) * .375), calc(var(--fi-h, 9vh) * -.9375), 0) rotate(calc(var(--fi-a, 52deg) * -.33)); }
-  50%   { transform: translate3d(calc(var(--fi-dx, 9vw) * .5),   calc(var(--fi-h, 9vh) * -1), 0)     rotate(0deg); }
-  62.5% { transform: translate3d(calc(var(--fi-dx, 9vw) * .625), calc(var(--fi-h, 9vh) * -.9375), 0) rotate(calc(var(--fi-a, 52deg) * .33)); }
-  75%   { transform: translate3d(calc(var(--fi-dx, 9vw) * .75),  calc(var(--fi-h, 9vh) * -.75), 0)   rotate(calc(var(--fi-a, 52deg) * .61)); }
-  87.5% { transform: translate3d(calc(var(--fi-dx, 9vw) * .875), calc(var(--fi-h, 9vh) * -.4375), 0) rotate(calc(var(--fi-a, 52deg) * .83)); }
-  94%   { opacity: .9; }
-  100%  { transform: translate3d(var(--fi-dx, 9vw), 0, 0) rotate(var(--fi-a, 52deg)); opacity: 0; }
-}
-
 /* -- the pearl diver's bubbles -------------------------------------------- */
-/* A bubble ACCELERATES as it rises and GROWS while it does it, and the two
-   are the same fact: the water pressure above it falls, so it expands, so it
-   displaces more, so it is pushed harder. This is why the animation eases IN
-   rather than out — the opposite of every other rising thing in this file.
-   Then it reaches the surface and stops existing in about 40 milliseconds. */
+/* SIMULATED, and it is the clearest case for the engine in the whole file.
+   A bubble ACCELERATES as it rises and GROWS while it does it, and those are
+   not two behaviours — they are one: the water pressure above it falls, so it
+   expands, so it displaces more, so it is pushed harder.
+   As a keyframe that was an ease-in curve sitting next to a scale curve, two
+   drawings I had made agree with each other. In the integrator `grow` is the
+   only input and the buoyancy is recomputed from the volume every step, so
+   the acceleration is a consequence rather than a coincidence. Then it
+   reaches the surface and POPS — a hard expansion, gone in two frames. */
 [data-theme="noor"] .noor-bubble {
   position: fixed;
-  bottom: var(--bu-b, -2vh);
-  left: var(--bu-x, 50vw);
+  top: 0;
+  left: 0;
   width: var(--bu-size, 5px);
   aspect-ratio: 1;
   z-index: 1;
@@ -1155,18 +1165,7 @@
   border-radius: 50%;
   border: 1px solid rgba(214, 240, 248, .55);
   background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, .45), rgba(180, 225, 240, .12) 55%, transparent 72%);
-  opacity: 0;
-  animation: noor-bubble-rise var(--bu-dur, 4s) cubic-bezier(.55, .06, .68, .19) forwards;
 }
-@keyframes noor-bubble-rise {
-  0%   { transform: translate3d(0, 0, 0) scale(.45); opacity: 0; }
-  10%  { opacity: .75; }
-  /* the surface */
-  92%  { transform: translate3d(var(--bu-sway, 1vw), calc(var(--bu-h, 16vh) * -1), 0) scale(1.15); opacity: .8; }
-  /* the pop: a flat expansion, gone before you can look at it */
-  100% { transform: translate3d(var(--bu-sway, 1vw), calc(var(--bu-h, 16vh) * -1.03), 0) scale(1.9); opacity: 0; }
-}
-
 /* -- the glitter path ----------------------------------------------------- */
 /* The moon's reflection on moving water. Two details make it read:
    it is directly BELOW the moon and nowhere else, because a glitter path
