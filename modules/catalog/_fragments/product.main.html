@@ -29,6 +29,11 @@
 
         <p class="text-muted-gr" data-pdp-short style="max-width:56ch"></p>
         <p data-pdp-stock style="margin-top:.75rem"></p>
+        <!-- "Only 3 left" — the merchant's own public figure, filled by
+             product-page.js and hidden unless one is set and small enough to
+             mean something. Ships hidden so it never flashes on a product
+             that has no such claim to make. -->
+        <p class="pdp-scarcity" data-pdp-scarcity hidden></p>
 
         <!-- Size ladder. Rendered by product-page.js from product.variants and
              hidden when a product has only one size, so a single-size product

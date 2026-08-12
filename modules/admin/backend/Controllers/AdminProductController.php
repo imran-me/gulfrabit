@@ -303,6 +303,12 @@ class AdminProductController extends Controller
                 ? $this->poisha($r['originalPriceTaka'])
                 : null,
             'in_stock'              => (bool) ($r['inStock'] ?? true),
+            // What we hold of this pack. Staff-only — Product::variantsTaka()
+            // strips it on the way to the storefront. Null is "not counted",
+            // which is a different fact from "none left".
+            'stock_qty'             => isset($r['stockQty']) && $r['stockQty'] !== '' && $r['stockQty'] !== null
+                ? (int) $r['stockQty']
+                : null,
         ], $rows));
     }
 
@@ -370,6 +376,15 @@ class AdminProductController extends Controller
         }
         if ($request->has('isActive')) {
             $product->is_active = $request->boolean('isActive');
+        }
+
+        // The public "Only N left" figure. An explicit null clears it, which
+        // means "show no such line" — deliberately not the same as 0, which
+        // tells customers the shelf is empty. Laravel turns the form's empty
+        // string into null before this runs, which is exactly the intent.
+        if ($request->has('stockDisplay')) {
+            $value = $request->input('stockDisplay');
+            $product->stock_display = $value === null || $value === '' ? null : (int) $value;
         }
 
         // Moving a product between categories. Needed the day the catalogue

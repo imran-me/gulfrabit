@@ -71,8 +71,8 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=dfdb913f">
-  <link rel="stylesheet" href="../../modules/admin/admin.css?v=d6d65ee5">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=47157088">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=4cdad39f">
   <link rel="stylesheet" href="../../modules/media/media.css?v=200563ea">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
@@ -108,7 +108,7 @@
         </div>
       </div>
 
-      <div class="aorder">
+      <div class="apedit">
         <section class="acard" aria-labelledby="pe-head">
           <h2 class="h5" id="pe-head">Details</h2>
           <form data-pe-form>
@@ -255,6 +255,34 @@
               <input class="input-gr" id="pe-search" name="searchTerms" type="text" placeholder="khejur, dates, khurma">
             </div>
 
+            <!-- TWO STOCK NUMBERS, AND THEY ARE NOT THE SAME NUMBER.
+
+                 `stockQty` (above, per pack) is what we own. It is never sent
+                 to the storefront — see Product::toStorefrontArray().
+
+                 `stockDisplay` (below) is what we TELL people. It is a
+                 marketing figure the merchant sets and lowers by hand, and it
+                 is deliberately not wired to the real count: a shop that
+                 publishes its true stock hands a competitor its sales rate,
+                 and a scarcity line that swings back up when a delivery lands
+                 stops being believed. Empty means the line is simply not shown,
+                 which is the honest default. -->
+            <div class="afilters__field" style="margin-bottom:var(--space-4)">
+              <label for="pe-stockdisplay">
+                “Only N left” shown to customers
+                <span class="atable__sub">(optional — public; leave empty to show nothing)</span>
+              </label>
+              <input class="input-gr" id="pe-stockdisplay" name="stockDisplay" type="number"
+                     min="0" max="9999" step="1" placeholder="—" style="max-width:200px">
+              <p class="admin__sub" style="margin:var(--space-2) 0 0">
+                Appears on the product page as <strong>Only N left</strong>. It is yours to
+                set and lower — nothing decrements it automatically, so it never contradicts
+                itself when stock is replenished. Set it to 0 and the product page says
+                <em>Out of stock</em>. This is not the real count; that lives per pack above
+                and stays between us.
+              </p>
+            </div>
+
             <div class="arefund-form" style="border-top:0">
               <label class="afilters__field" style="flex-direction:row;align-items:center;gap:var(--space-2)">
                 <input type="checkbox" name="inStock"> <span>In stock</span>
@@ -274,28 +302,33 @@
           </form>
         </section>
 
-        <section class="acard" aria-labelledby="ph-head">
-          <h2 class="h5" id="ph-head">Price history</h2>
-          <p class="admin__sub" style="margin-top:0">
-            Orders always charge the price at the time, so this is about being able to explain
-            the shelf price — not about what anyone was billed.
-          </p>
-          <ul class="arefunds" data-pe-history role="list"></ul>
-        </section>
+        <!-- Reference material, under the form rather than beside it: both are
+             read once, if ever, and neither deserved a third of a wide screen
+             while the form it belongs to was squeezed into the other third. -->
+        <div class="apedit__aside">
+          <section class="acard" aria-labelledby="ph-head">
+            <h2 class="h5" id="ph-head">Price history</h2>
+            <p class="admin__sub" style="margin-top:0">
+              Orders always charge the price at the time, so this is about being able to explain
+              the shelf price — not about what anyone was billed.
+            </p>
+            <ul class="arefunds" data-pe-history role="list"></ul>
+          </section>
 
-        <!-- Last, and visually separate, because it is the one control here
-             that removes something from the shop. -->
-        <section class="acard acard--danger" aria-labelledby="pd-head">
-          <h2 class="h5" id="pd-head">Remove from the shop</h2>
-          <p class="admin__sub" style="margin-top:0">
-            The product leaves the shop, search and this list. <strong>Orders that already
-            contain it are untouched</strong> — they keep the name and the price they were
-            charged. Nothing is erased, and you can put it back.
-          </p>
-          <button class="btn-gr btn-ghost-gr btn-danger-gr" type="button" data-pe-delete>
-            Remove this product
-          </button>
-        </section>
+          <!-- Last, and visually separate, because it is the one control here
+               that removes something from the shop. -->
+          <section class="acard acard--danger" aria-labelledby="pd-head">
+            <h2 class="h5" id="pd-head">Remove from the shop</h2>
+            <p class="admin__sub" style="margin-top:0">
+              The product leaves the shop, search and this list. <strong>Orders that already
+              contain it are untouched</strong> — they keep the name and the price they were
+              charged. Nothing is erased, and you can put it back.
+            </p>
+            <button class="btn-gr btn-ghost-gr btn-danger-gr" type="button" data-pe-delete>
+              Remove this product
+            </button>
+          </section>
+        </div>
       </div>
 
       <p class="aerror" data-pe-error hidden role="alert"></p>
@@ -313,6 +346,6 @@
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=ebff64a4"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=87de770c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=db43fd3d"></script>
-  <script type="module" src="../../modules/admin/product-edit-page.js?v=d6071394"></script>
+  <script type="module" src="../../modules/admin/product-edit-page.js?v=4095ac2f"></script>
 </body>
 </html>

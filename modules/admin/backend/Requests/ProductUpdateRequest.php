@@ -68,6 +68,10 @@ class ProductUpdateRequest extends FormRequest
             'variants.*.priceTaka'          => ['required', 'numeric', 'gt:0', 'max:10000000'],
             'variants.*.originalPriceTaka'  => ['sometimes', 'nullable', 'numeric', 'max:10000000'],
             'variants.*.inStock'            => ['sometimes', 'boolean'],
+            // What we actually hold of this pack. Staff-only, and nullable
+            // because "nobody has counted this" is a real state that must not
+            // be recorded as zero — the same distinction cost makes.
+            'variants.*.stockQty'           => ['sometimes', 'nullable', 'integer', 'min:0', 'max:999999'],
             'defaultVariant'                => ['sometimes', 'nullable', 'string', 'max:96'],
 
             // `nullable` on cost is load-bearing: clearing it means "we no
@@ -91,6 +95,12 @@ class ProductUpdateRequest extends FormRequest
 
             'inStock'  => ['sometimes', 'boolean'],
             'isActive' => ['sometimes', 'boolean'],
+
+            // The PUBLIC "Only N left" figure. Nullable is the whole point:
+            // clearing it means "say nothing about how many are left", which
+            // is a different statement from 0 ("we are out"). Capped low
+            // because scarcity that reads "Only 4,000 left" is not scarcity.
+            'stockDisplay' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:9999'],
 
             // Where it sits in the catalogue. The controller checks that the
             // sub-category is actually inside the category — a rule the

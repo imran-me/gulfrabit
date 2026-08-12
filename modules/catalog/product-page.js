@@ -183,9 +183,9 @@ function paintInfo(p) {
   paintPrice(p);
 
   document.querySelector('[data-pdp-short]').textContent = p.shortDescription || '';
-  document.querySelector('[data-pdp-stock]').innerHTML = p.inStock
-    ? '<span style="color:var(--lime-ink)">● In stock</span>'
-    : '<span style="color:var(--gr-error)">● Currently unavailable</span>';
+  document.querySelector('[data-pdp-stock]').innerHTML = availabilityLine(p);
+
+  paintScarcity(p);
 
   // B2B MOQ / tier hint
   if (p.moq) {
@@ -207,6 +207,57 @@ function paintInfo(p) {
   initWishlistButtons(document);
 
   paintOrderChannels(p);
+}
+
+/**
+ * The availability line under the short description.
+ *
+ * `stockDisplay` is the merchant's PUBLIC figure, set by hand in the panel —
+ * never the real count, which stays in the admin serialisation (see
+ * Product::variantsTaka). Three states, and the middle one is the point:
+ *
+ *   null → nothing to say beyond in stock / unavailable
+ *   0    → out of stock, said plainly, whatever the in-stock flag claims
+ *   N    → "Only N left", which is a promise the shop has to be able to keep
+ *
+ * Zero overrides the flag deliberately: if the merchant has typed 0 into the
+ * public counter, that is the more specific and more recent statement, and a
+ * page that says "In stock" underneath it is arguing with itself.
+ */
+function availabilityLine(p) {
+  const shown = Number.isFinite(p.stockDisplay) ? p.stockDisplay : null;
+
+  if (shown === 0 || !p.inStock) {
+    return '<span style="color:var(--gr-error)">● Currently unavailable</span>';
+  }
+  return '<span style="color:var(--lime-ink)">● In stock</span>';
+}
+
+/** Above this, a remaining-count is information rather than urgency. */
+const SCARCITY_MAX = 20;
+
+/**
+ * "Only 3 left" — shown only when the merchant has set a number AND it is
+ * small enough to mean anything. Above the threshold the line is simply not
+ * drawn: "Only 40 left" is not scarcity, it is inventory reporting, and a
+ * shop that says it about everything teaches customers to ignore the line
+ * they most want believed.
+ *
+ * Declared above its reader, not below: this file has already been bitten
+ * once by a `const` sitting under the code that reads it.
+ */
+function paintScarcity(p) {
+  const host = document.querySelector('[data-pdp-scarcity]');
+  if (!host) return;
+
+  const left = Number.isFinite(p.stockDisplay) ? p.stockDisplay : null;
+  if (left === null || left <= 0 || left > SCARCITY_MAX || !p.inStock) {
+    host.hidden = true;
+    return;
+  }
+
+  host.textContent = left === 1 ? 'Only 1 left' : `Only ${left} left`;
+  host.hidden = false;
 }
 
 /* ---- Size ladder -------------------------------------------------------

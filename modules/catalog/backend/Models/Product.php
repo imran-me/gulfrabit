@@ -30,7 +30,7 @@ class Product extends Model
         'category_id', 'sub_category_id',
         'price_poisha', 'original_price_poisha', 'cost_poisha',
         'image', 'images', 'variants', 'default_variant', 'rating', 'review_count',
-        'in_stock', 'stock_qty', 'tags', 'dietary', 'search_terms',
+        'in_stock', 'stock_qty', 'stock_display', 'tags', 'dietary', 'search_terms',
         'short_description', 'description', 'faq',
         'moq', 'price_tiers', 'specs', 'datasheet',
         'is_active',
@@ -140,6 +140,13 @@ class Product extends Model
      * existed — a variant with no price of its own sells at the product price
      * rather than at zero.
      *
+     * NOTE WHAT IS NOT HERE: `stock_qty`. The per-pack count of what we
+     * actually own is stored in the same JSON rows and is stripped on the way
+     * out, exactly like `cost_poisha` is stripped from the product itself.
+     * Real stock tells a competitor how fast a SKU moves; the number customers
+     * see is `stock_display`, which the merchant sets by hand. Two numbers,
+     * two audiences — and this method is the boundary between them.
+     *
      * @return array<int, array<string, mixed>>
      */
     public function variantsTaka(): array
@@ -153,6 +160,29 @@ class Product extends Model
                 : null,
             'inStock'       => (bool) ($v['in_stock'] ?? true),
         ], $this->variants ?? []);
+    }
+
+    /**
+     * The same rows for staff, with the count of what we hold per pack.
+     *
+     * Null is "not counted", not zero — the same distinction cost makes. A
+     * pack nobody has counted must not read as a pack we have none of, or the
+     * first person to look at the screen goes hunting for stock that is
+     * sitting on the shelf.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function variantsAdmin(): array
+    {
+        $public = $this->variantsTaka();
+
+        return array_map(
+            fn (array $row, array $stored): array => $row + [
+                'stockQty' => ($stored['stock_qty'] ?? null) === null ? null : (int) $stored['stock_qty'],
+            ],
+            $public,
+            array_values($this->variants ?? []),
+        );
     }
 
     public function originalPriceTaka(): ?int
@@ -216,6 +246,10 @@ class Product extends Model
             'rating'           => $this->rating,
             'reviewCount'      => $this->review_count,
             'inStock'          => $this->in_stock,
+            // The PUBLIC scarcity figure — what we tell people, set by hand in
+            // the panel. Null means the PDP shows no such line. The real count
+            // (per pack, in the variants JSON) never appears in this array.
+            'stockDisplay'     => $this->stock_display === null ? null : (int) $this->stock_display,
             'tags'             => $this->tags ?? [],
             'dietary'          => $this->dietary ?? [],
             'searchTerms'      => $this->search_terms ?? [],
@@ -241,7 +275,13 @@ class Product extends Model
      */
     public function toAdminArray(): array
     {
-        return $this->toStorefrontArray() + [
+        // array_merge, NOT `+`: the union operator keeps the LEFT side's value
+        // for a duplicated key, so `variants` below would have been silently
+        // discarded in favour of the storefront's copy and the per-pack counts
+        // would never have reached the panel. Everything else here is a new
+        // key, where the two behave identically — which is exactly why the
+        // mistake would have been invisible.
+        return array_merge($this->toStorefrontArray(), [
             // null means unknown, never zero — a zero cost makes every sale
             // look like pure profit.
             'costTaka'   => $this->cost_poisha === null ? null : intdiv($this->cost_poisha, 100),
@@ -250,6 +290,8 @@ class Product extends Model
                 : intdiv($this->price_poisha - $this->cost_poisha, 100),
             'isActive'   => $this->is_active,
             'stockQty'   => $this->stock_qty,
-        ];
+            // The same rows the storefront gets, plus what we actually hold.
+            'variants'   => $this->variantsAdmin(),
+        ]);
     }
 }

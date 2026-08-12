@@ -116,6 +116,33 @@
 .pdp-price__now { font-family: var(--font-display); font-size: var(--fs-31); }
 .pdp-actions { display: flex; gap: var(--space-3); margin: var(--space-5) 0; }
 
+/* ---- "Only 3 left" -----------------------------------------------------
+   Amber, not red. Red on a product page means something is wrong — sold out,
+   a failed action — and this is the opposite: the thing is available, just
+   not for long. Small, weighted, and set close under the stock line so the
+   two read as one statement about availability rather than as a warning
+   stacked on top of good news.
+
+   No pulse, no countdown, no animation. The urgency has to come from the
+   fact being true; a blinking one only tells people it was manufactured. */
+.pdp-scarcity {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: .35rem;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: #9A6B08;
+}
+.pdp-scarcity::before {
+  content: "";
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+[data-theme="noor"] .pdp-scarcity,
+[data-theme="luxe"] .pdp-scarcity { color: #E8B84B; }
+
 /* ---- Size ladder -------------------------------------------------------
    Sits between the stock line and Add to Cart, which is the order the decision
    is made in: is it here, which size, buy. Each option carries its own price,

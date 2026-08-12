@@ -90,6 +90,9 @@ function fill() {
   // Empty means unknown. Not zero — see the note next to the field.
   f.costTaka.value = product.costTaka ?? '';
   f.unit.value = product.unit ?? '';
+  // Empty is a real state here too: no number means the product page shows no
+  // scarcity line at all, which is different from showing "Only 0 left".
+  f.stockDisplay.value = product.stockDisplay ?? '';
   f.inStock.checked = !!product.inStock;
   f.isActive.checked = !!product.isActive;
 
@@ -137,6 +140,8 @@ function paintVariants() {
         <input class="input-gr" type="number" step="0.01" min="0.01" placeholder="0.00" data-vf="price" value="${v.price ?? ''}"></label>
       <label class="avariant__f"><span>“Was” ৳</span>
         <input class="input-gr" type="number" step="0.01" min="0" placeholder="—" data-vf="originalPrice" value="${v.originalPrice ?? ''}"></label>
+      <label class="avariant__f avariant__f--own"><span>We have</span>
+        <input class="input-gr" type="number" step="1" min="0" max="999999" placeholder="—" data-vf="stockQty" value="${v.stockQty ?? ''}"></label>
       <div class="avariant__foot">
         <label class="avariant__stock"><input type="checkbox" data-vf="inStock"${v.inStock === false ? '' : ' checked'}> in stock</label>
         <button class="avariant__del" type="button">✕ Remove</button>
@@ -168,7 +173,7 @@ function paintVariants() {
 }
 
 function addVariant() {
-  variantRows.push({ label: '', amount: null, price: null, originalPrice: null, inStock: true });
+  variantRows.push({ label: '', amount: null, price: null, originalPrice: null, inStock: true, stockQty: null });
   paintVariants();
   // Straight into the new row's label — the reason the button was pressed.
   const labels = document.querySelectorAll('[data-pe-variants] [data-vf="label"]');
@@ -363,6 +368,16 @@ async function save(e) {
   if (f.inStock.checked !== !!product.inStock) body.inStock = f.inStock.checked;
   if (f.isActive.checked !== !!product.isActive) body.isActive = f.isActive.checked;
 
+  // The public "Only N left" figure. Same empty-is-null rule as the money
+  // fields above, and for the same reason: clearing the box means "say nothing
+  // about how many are left", which is not the claim "there are zero".
+  {
+    const raw = f.stockDisplay.value.trim();
+    const now = raw === '' ? null : Number(raw);
+    const before = product.stockDisplay == null ? null : Number(product.stockDisplay);
+    if (now !== before) body.stockDisplay = now;
+  }
+
   // Guarded on the select actually having options: when the /categories fetch
   // fails, the select is empty and its value is "" — which is not the product
   // moving anywhere, it is the form not knowing. Without the guard, every
@@ -401,12 +416,19 @@ async function save(e) {
       if (!(v.price > 0)) { btn.disabled = false; return fail(`Pack "${v.label}" needs a price above zero.`); }
     }
 
-    const before = (product.variants ?? []).map((v) => ({
-      label: v.label, amount: v.amount ?? null, price: v.price, originalPrice: v.originalPrice ?? null, inStock: v.inStock !== false,
-    }));
-    const now = rows.map((v) => ({
-      label: v.label, amount: v.amount ?? null, price: v.price, originalPrice: v.originalPrice ?? null, inStock: v.inStock !== false,
-    }));
+    // stockQty rides along in the comparison as well as the payload: editing
+    // only a count is a real edit, and a diff that ignored it would drop the
+    // change on the floor while the form claimed it saved.
+    const shape = (v) => ({
+      label: v.label,
+      amount: v.amount ?? null,
+      price: v.price,
+      originalPrice: v.originalPrice ?? null,
+      inStock: v.inStock !== false,
+      stockQty: v.stockQty ?? null,
+    });
+    const before = (product.variants ?? []).map(shape);
+    const now = rows.map(shape);
 
     if (JSON.stringify(now) !== JSON.stringify(before)) {
       // The server's field names: taka amounts are explicit about being taka.
@@ -416,6 +438,7 @@ async function save(e) {
         priceTaka: v.price,
         originalPriceTaka: v.originalPrice,
         inStock: v.inStock,
+        stockQty: v.stockQty,
       }));
 
       // A renamed label orphans the claim past order lines have on it. Warn,
