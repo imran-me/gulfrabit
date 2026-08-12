@@ -20,8 +20,9 @@ use Modules\Sms\Services\SmsService;
  * One-way, as always: checkout does not know this module exists, and deleting
  * this folder simply leaves that event with no audience.
  *
- * No routes. The storefront never sends SMS from the browser — a gateway key
- * that reaches page JS is a gateway key someone else is now using.
+ * Routes are ADMIN ONLY. The storefront never sends SMS from the browser — a
+ * gateway key that reaches page JS is a gateway key someone else is now using.
+ * See routes.php.
  */
 class SmsServiceProvider extends ServiceProvider
 {
@@ -35,5 +36,19 @@ class SmsServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/Migrations');
 
         Event::listen(OrderStatusChanged::class, SendOrderStatusSms::class);
+
+        $this->app->booted(function (): void {
+            if ($this->app->routesAreCached()) {
+                return;
+            }
+
+            // `web`, matching the admin and courier modules: the panel
+            // authenticates with a session cookie, and these routes sit behind
+            // the same guard.
+            $this->app['router']
+                ->middleware('web')
+                ->prefix('api')
+                ->group(__DIR__ . '/routes.php');
+        });
     }
 }

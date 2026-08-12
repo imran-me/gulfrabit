@@ -234,6 +234,12 @@ export async function adminFetch(path, options = {}) {
     const body = await res.json().catch(() => ({}));
     throw Object.assign(new Error(body.message || `Request failed (${res.status})`), {
       status: res.status,
+      // The parsed body rides along, because a refusal is sometimes DATA. The
+      // SMS panel is the case that forced it: a gateway rejection comes back
+      // 502 with the logged attempt attached, and the thread has to show that
+      // failed message rather than pretend nothing was ever tried. Callers that
+      // only want the sentence keep using err.message and never touch this.
+      body,
     });
   }
 

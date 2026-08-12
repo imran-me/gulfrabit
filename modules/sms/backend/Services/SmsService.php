@@ -59,9 +59,19 @@ final class SmsService
     /**
      * Fire one SMS at one Bangladeshi number. Returns whether the gateway
      * accepted it — and never throws, whatever goes wrong.
+     *
+     * `sentByName` and `kind` describe authorship: null and 'automatic' for the
+     * status listener, a staff member's name and 'manual' for a message someone
+     * typed on the order screen. See the 2026_08_13 migration for why the two
+     * are recorded separately.
      */
-    public function send(string $phone, string $body, ?int $orderId = null): bool
-    {
+    public function send(
+        string $phone,
+        string $body,
+        ?int $orderId = null,
+        ?string $sentByName = null,
+        string $kind = 'automatic',
+    ): bool {
         if (! $this->configured()) {
             return false;
         }
@@ -87,12 +97,14 @@ final class SmsService
 
         try {
             SmsLog::create([
-                'order_id' => $orderId,
-                'phone'    => $number,
-                'body'     => $body,
-                'gateway'  => $gateway,
-                'status'   => $ok ? 'sent' : 'failed',
-                'response' => mb_substr((string) $response, 0, 1000),
+                'order_id'     => $orderId,
+                'phone'        => $number,
+                'body'         => $body,
+                'gateway'      => $gateway,
+                'sent_by_name' => $sentByName,
+                'kind'         => $kind,
+                'status'       => $ok ? 'sent' : 'failed',
+                'response'     => mb_substr((string) $response, 0, 1000),
             ]);
         } catch (Throwable $e) {
             // The sms_logs table missing (migration not yet run) must not

@@ -312,11 +312,12 @@ ADMIN_PAGES = [
     ("modules/admin/order.html", "Order — GulfRabit Admin",
      "modules/admin/_fragments/order.main.html",
      ["/modules/admin/admin.css"],
-     # The courier module mounts its own section onto this screen. Delete
-     # modules/courier/ and its entries here and the section is gone, with no
-     # orphan markup left in admin's fragment.
+     # The courier and SMS modules mount their own sections onto this screen.
+     # Delete either module folder and its entry here and the section is gone,
+     # with no orphan markup left in admin's fragment.
      ["/modules/admin/admin-shell.js", "/modules/admin/order-detail-page.js",
-      "/modules/courier/courier-order-panel.js"], True),
+      "/modules/courier/courier-order-panel.js",
+      "/modules/sms/sms-order-panel.js"], True),
 
     ("modules/admin/customers.html", "Customers — GulfRabit Admin",
      "modules/admin/_fragments/customers.main.html",
