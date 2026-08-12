@@ -160,3 +160,20 @@
   border: 1.5px solid #C9A24B;
 }
 .theme-swatch--noor .theme-swatch__cta { background: #1BB4D4; }
+
+/* Nakshi's miniature: undyed cloth, an alta border thread along the top, and
+   card edges that are STITCHED rather than drawn. The dashed edge is the one
+   detail worth spending the swatch on — it is the theme's single organising
+   rule, and it is legible even at 40px, where a folk motif would not be. */
+.theme-swatch--nakshi { background: #FBF6EC; border-color: #E0D4BE; }
+.theme-swatch--nakshi .theme-swatch__bar {
+  background: #F6EFE1;
+  box-shadow: 0 1.5px 0 #C4352A;
+}
+.theme-swatch--nakshi .theme-swatch__row i {
+  background: #FFFDF8;
+  border: 1.5px dashed #3A342B;
+}
+.theme-swatch--nakshi .theme-swatch__cta {
+  background: linear-gradient(135deg, #0E6E88, #4A753B);
+}

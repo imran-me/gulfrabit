@@ -1,0 +1,487 @@
+/* =========================================================================
+   GulfRabit · Nakshi — THE FIELD
+   =========================================================================
+
+   theme-nakshi.css made the page a piece of cloth. This sews the scenes onto
+   it: the Sundarbans along the bottom, the river through it, Dhaka on the
+   skyline, and the animals that a nakshi kantha actually carries — the tiger,
+   the deer, the boat, the egret, the hilsa.
+
+   THE ONE RULE, INHERITED
+   -----------------------
+   Everything here is SEWN. Every stroke carries a dash array, every fill is a
+   flat dye, and nothing is shaded or gradient-lit. That is not a stylistic
+   preference — it is what makes fifteen unrelated folk motifs read as one
+   piece of cloth instead of as a sticker album. A single realistically shaded
+   tiger would destroy the whole field.
+
+   WHY THE MOTIFS SIT LOW AND PALE
+   -------------------------------
+   Noor could let meteors cross the content because a thin translucent streak
+   on a dark page reads as weather. A cream page has no such licence: anything
+   with a fill that crosses a product photograph reads as damage. So the
+   permanent motifs live at z-index -1 and the moving ones stay in the bottom
+   band and the margins, at opacities that keep them beneath the text they
+   pass. A customer reading a price must never be competing with a tiger.
+
+   PERFORMANCE
+   -----------
+   transform and opacity only, same as Noor. The permanent bands are single
+   repeating background images and never animate at all; the transient motifs
+   are composited layers the conductor deletes on animationend.
+   ========================================================================= */
+
+/* =========================================================================
+   1 · THE BORDER, AND THE TREE OF LIFE
+   =========================================================================
+   Every kantha has two fixed elements: a repeating border around the whole
+   field, and one large motif at the centre — almost always the জীবনবৃক্ষ,
+   the tree of life. They are the frame the scenes are read inside.
+
+   The tree goes in a page corner rather than the centre, because the centre
+   of this cloth is a product grid. Placed and left alone: it is the fixed
+   point, exactly as Noor's moon is.
+   ========================================================================= */
+[data-theme="nakshi"] .nakshi-tree {
+  position: fixed;
+  right: clamp(-30px, -2vw, 0px);
+  bottom: 14vh;
+  width: clamp(120px, 17vw, 260px);
+  aspect-ratio: 3 / 4;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .16;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 120'%3E%3Cg fill='none' stroke='%233A342B' stroke-width='2' stroke-linecap='round' stroke-dasharray='5 3'%3E%3Cpath d='M45 118 V52'/%3E%3Cpath d='M45 92 C 30 86 22 74 20 60'/%3E%3Cpath d='M45 92 C 60 86 68 74 70 60'/%3E%3Cpath d='M45 72 C 33 66 28 56 27 44'/%3E%3Cpath d='M45 72 C 57 66 62 56 63 44'/%3E%3Cpath d='M45 56 C 38 48 36 38 37 28'/%3E%3Cpath d='M45 56 C 52 48 54 38 53 28'/%3E%3C/g%3E%3Cg fill='%23C4352A' fill-opacity='.5'%3E%3Ccircle cx='20' cy='58' r='4.5'/%3E%3Ccircle cx='70' cy='58' r='4.5'/%3E%3Ccircle cx='27' cy='42' r='4'/%3E%3Ccircle cx='63' cy='42' r='4'/%3E%3Ccircle cx='37' cy='26' r='4'/%3E%3Ccircle cx='53' cy='26' r='4'/%3E%3Ccircle cx='45' cy='16' r='5'/%3E%3C/g%3E%3Cg fill='none' stroke='%232A4A7C' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M30 108 Q 45 100 60 108'/%3E%3Cpath d='M24 114 Q 45 104 66 114'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* =========================================================================
+   2 · THE SUNDARBANS
+   =========================================================================
+   A mangrove band across the bottom of the viewport — and the detail that
+   makes it the Sundarbans rather than generic trees is the ROOTS. Mangroves
+   grow in salt mud that holds no oxygen, so they push breathing roots
+   (শ্বাসমূল) straight UP out of the water in a dense field of spikes. It is
+   the most recognisable thing about the forest at eye level and it is what
+   the row of small vertical strokes along the waterline is.
+
+   Two layers at different scales and opacities, which is the cheapest honest
+   way to get depth: the far bank is smaller, paler and higher up.
+   ========================================================================= */
+[data-theme="nakshi"] .nakshi-forest {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 15vh;
+  min-height: 92px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='120' viewBox='0 0 340 120'%3E%3Cg fill='%234A753B' fill-opacity='.30'%3E%3Cpath d='M14 96 C 4 84 8 66 22 62 C 20 48 34 40 46 46 C 56 34 76 40 78 54 C 92 56 96 74 86 88 L 86 96 Z'/%3E%3Cpath d='M120 96 C 110 86 114 70 126 66 C 126 54 140 48 150 54 C 160 44 178 50 178 62 C 190 66 192 82 182 94 L 182 96 Z'/%3E%3Cpath d='M232 96 C 222 84 226 68 240 64 C 238 50 252 42 264 48 C 274 36 294 42 296 56 C 310 58 314 76 304 90 L 304 96 Z'/%3E%3C/g%3E%3Cg fill='none' stroke='%233A342B' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='M46 96 V70'/%3E%3Cpath d='M150 96 V72'/%3E%3Cpath d='M264 96 V68'/%3E%3C/g%3E%3Cg fill='none' stroke='%233A342B' stroke-width='1.4' stroke-linecap='round' stroke-opacity='.55'%3E%3Cpath d='M8 112 V102'/%3E%3Cpath d='M20 114 V100'/%3E%3Cpath d='M32 112 V104'/%3E%3Cpath d='M44 115 V101'/%3E%3Cpath d='M56 112 V103'/%3E%3Cpath d='M68 114 V100'/%3E%3Cpath d='M80 112 V104'/%3E%3Cpath d='M92 115 V102'/%3E%3Cpath d='M104 112 V101'/%3E%3Cpath d='M116 114 V103'/%3E%3Cpath d='M128 112 V100'/%3E%3Cpath d='M140 115 V104'/%3E%3Cpath d='M152 112 V101'/%3E%3Cpath d='M164 114 V102'/%3E%3Cpath d='M176 112 V103'/%3E%3Cpath d='M188 115 V100'/%3E%3Cpath d='M200 112 V104'/%3E%3Cpath d='M212 114 V101'/%3E%3Cpath d='M224 112 V102'/%3E%3Cpath d='M236 115 V103'/%3E%3Cpath d='M248 112 V100'/%3E%3Cpath d='M260 114 V104'/%3E%3Cpath d='M272 112 V101'/%3E%3Cpath d='M284 115 V102'/%3E%3Cpath d='M296 112 V103'/%3E%3Cpath d='M308 114 V100'/%3E%3Cpath d='M320 112 V104'/%3E%3Cpath d='M332 115 V101'/%3E%3C/g%3E%3C/svg%3E") repeat-x bottom left / 340px 120px,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='90' viewBox='0 0 260 90'%3E%3Cg fill='%234A753B' fill-opacity='.15'%3E%3Cpath d='M10 78 C 2 68 6 54 18 51 C 16 40 28 34 38 39 C 46 29 62 34 64 45 C 76 47 79 62 70 72 L 70 78 Z'/%3E%3Cpath d='M138 78 C 130 70 133 57 143 54 C 143 44 155 39 163 44 C 171 36 186 41 186 51 C 196 54 198 67 190 77 L 190 78 Z'/%3E%3C/g%3E%3C/svg%3E") repeat-x bottom left / 260px 90px;
+}
+
+/* =========================================================================
+   3 · THE RIVER
+   =========================================================================
+   A stitched band of water in front of the forest. On a kantha, water is
+   never a fill — it is rows of wavy running stitch, and the rows are what
+   make it water. Two rows drifting at different speeds is parallax, which is
+   the whole illusion of a current.
+   ========================================================================= */
+[data-theme="nakshi"] .nakshi-river {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 7vh;
+  min-height: 44px;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+[data-theme="nakshi"] .nakshi-river::before,
+[data-theme="nakshi"] .nakshi-river::after {
+  content: "";
+  position: absolute;
+  inset: 0 -220px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='44' viewBox='0 0 220 44'%3E%3Cg fill='none' stroke='%232A4A7C' stroke-width='1.6' stroke-linecap='round' stroke-dasharray='7 5'%3E%3Cpath d='M0 12 Q 27 4 55 12 T 110 12 T 165 12 T 220 12'/%3E%3Cpath d='M0 26 Q 27 18 55 26 T 110 26 T 165 26 T 220 26'/%3E%3Cpath d='M0 39 Q 27 31 55 39 T 110 39 T 165 39 T 220 39'/%3E%3C/g%3E%3C/svg%3E") repeat-x center / 220px 44px;
+  opacity: .34;
+  animation: nakshi-current 26s linear infinite;
+}
+/* The far row runs slower and paler. Rivers do not, but a receding surface
+   appears to, and that apparent difference is the only depth cue available
+   to two flat rows of stitch. */
+[data-theme="nakshi"] .nakshi-river::after {
+  opacity: .18;
+  transform: scaleY(.7);
+  animation-duration: 44s;
+  animation-direction: reverse;
+}
+@keyframes nakshi-current {
+  from { background-position-x: 0; }
+  to   { background-position-x: 220px; }
+}
+
+/* =========================================================================
+   4 · DHAKA
+   =========================================================================
+   The skyline, and it is deliberately not a generic city. Three buildings
+   that are unmistakably this one: the Shaheed Minar's three arches, Ahsan
+   Manzil's dome, and Lalbagh Fort's Mughal roofline. A row of anonymous
+   towers would say "a city"; these say Dhaka, and they cost the same.
+   ========================================================================= */
+[data-theme="nakshi"] .nakshi-dhaka {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 14vh;
+  height: clamp(48px, 8vh, 92px);
+  z-index: -1;
+  pointer-events: none;
+  opacity: .13;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='92' viewBox='0 0 420 92'%3E%3Cg fill='%233A342B'%3E%3Cpath d='M16 90 V44 h10 V90 Z M32 90 V32 h12 V90 Z M50 90 V40 h10 V90 Z'/%3E%3Cpath d='M30 30 h16 v-6 h-16 Z'/%3E%3Cpath d='M150 90 V56 h56 V90 Z'/%3E%3Cpath d='M162 56 q 16 -22 32 0 Z'/%3E%3Cpath d='M176 30 h4 v6 h-4 Z'/%3E%3Cpath d='M300 90 V60 h84 V90 Z'/%3E%3Cpath d='M300 60 h84 l-8 -9 h-68 Z'/%3E%3Cpath d='M312 51 q 10 -13 20 0 Z M352 51 q 10 -13 20 0 Z'/%3E%3C/g%3E%3Cg fill='none' stroke='%233A342B' stroke-width='1.3' stroke-dasharray='4 3'%3E%3Cpath d='M0 90 H420'/%3E%3C/g%3E%3C/svg%3E") repeat-x bottom left / 420px 92px;
+}
+
+/* =========================================================================
+   5 · THE ANIMALS
+   =========================================================================
+   Everything below crosses the bottom band and leaves. They share a base
+   because they share a job: a flat dyed shape with a stitched outline,
+   travelling in front of the forest and behind the shop.
+   ========================================================================= */
+[data-theme="nakshi"] .nakshi-tiger,
+[data-theme="nakshi"] .nakshi-deer,
+[data-theme="nakshi"] .nakshi-boat,
+[data-theme="nakshi"] .nakshi-egret,
+[data-theme="nakshi"] .nakshi-rickshaw,
+[data-theme="nakshi"] .nakshi-kite {
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+[data-theme="nakshi"] .nakshi-tiger::before,
+[data-theme="nakshi"] .nakshi-deer::before,
+[data-theme="nakshi"] .nakshi-boat::before,
+[data-theme="nakshi"] .nakshi-egret::before,
+[data-theme="nakshi"] .nakshi-rickshaw::before,
+[data-theme="nakshi"] .nakshi-kite::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: center / contain no-repeat;
+}
+/* One flip for everything that can travel either way. */
+[data-theme="nakshi"] .is-left::before { transform: scaleX(-1); }
+
+/* -- the Royal Bengal tiger ----------------------------------------------- */
+/* It PROWLS, and prowling is a gait, not a speed: a cat stalking puts each
+   foot down deliberately and its shoulders roll, so the body rises and falls
+   twice per stride. That vertical roll is the entire difference between a
+   tiger and a cardboard cutout on a rail, and it is one scaleY on a second
+   element. It also pauses — twice — because nothing that hunts moves
+   continuously across open ground. */
+[data-theme="nakshi"] .nakshi-tiger {
+  bottom: var(--n-b, 3vh);
+  left: var(--n-x, -18vw);
+  width: clamp(78px, 11vw, 168px);
+  aspect-ratio: 100 / 46;
+  animation: nakshi-prowl var(--n-dur, 34s) linear forwards;
+}
+[data-theme="nakshi"] .nakshi-tiger::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 46'%3E%3Cpath d='M22 30 C 22 20 30 16 44 16 L 64 16 C 74 16 78 20 79 25 L 86 20 L 88 26 L 82 30 C 80 34 74 35 66 35 L 30 35 C 25 35 22 33 22 30 Z' fill='%23D9A02B' fill-opacity='.62'/%3E%3Cpath d='M20 32 C 12 30 8 26 4 27 C 8 22 14 24 20 27 Z' fill='%23D9A02B' fill-opacity='.5'/%3E%3Cg fill='none' stroke='%233A342B' stroke-width='1.7' stroke-linecap='round'%3E%3Cpath d='M38 17 V32'/%3E%3Cpath d='M46 16 V33'/%3E%3Cpath d='M54 16 V33'/%3E%3Cpath d='M62 17 V32'/%3E%3Cpath d='M70 18 V31'/%3E%3C/g%3E%3Cg fill='%233A342B'%3E%3Ccircle cx='83' cy='24' r='1.2'/%3E%3C/g%3E%3Cg fill='none' stroke='%233A342B' stroke-width='2' stroke-linecap='round' stroke-dasharray='4 3'%3E%3Cpath d='M30 35 V44'/%3E%3Cpath d='M42 35 V44'/%3E%3Cpath d='M58 35 V44'/%3E%3Cpath d='M70 35 V44'/%3E%3C/g%3E%3C/svg%3E");
+  transform-origin: 50% 100%;
+  animation: nakshi-stalk 1.9s var(--ease-inout, ease-in-out) infinite;
+}
+@keyframes nakshi-stalk {
+  0%, 100% { transform: scaleY(1) translateY(0); }
+  25%      { transform: scaleY(.97) translateY(1px); }
+  50%      { transform: scaleY(1.02) translateY(-1px); }
+  75%      { transform: scaleY(.98) translateY(1px); }
+}
+@keyframes nakshi-prowl {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  6%   { opacity: .78; }
+  /* it stops and looks */
+  26%  { transform: translate3d(34vw, 0, 0); }
+  33%  { transform: translate3d(34vw, 0, 0); }
+  62%  { transform: translate3d(72vw, 0, 0); }
+  67%  { transform: translate3d(72vw, 0, 0); }
+  94%  { opacity: .72; }
+  100% { transform: translate3d(128vw, 0, 0); opacity: 0; }
+}
+
+/* -- the chital deer ------------------------------------------------------ */
+/* A deer's whole behaviour is grazing punctuated by ALARM. It stands with its
+   head down for a long time, then the head snaps up and holds — that hold is
+   the tell, because a startled deer freezes before it runs — and then it goes
+   in three bounds. Grazing and bounding are one animation only because the
+   pause between them is what makes the bound read as fear. */
+[data-theme="nakshi"] .nakshi-deer {
+  bottom: var(--n-b, 4vh);
+  left: var(--n-x, 20vw);
+  width: clamp(44px, 6vw, 92px);
+  aspect-ratio: 70 / 60;
+  animation: nakshi-graze var(--n-dur, 17s) var(--ease-inout, ease-in-out) forwards;
+}
+[data-theme="nakshi"] .nakshi-deer::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 60'%3E%3Cpath d='M18 34 C 18 27 23 24 33 24 L 47 24 C 54 24 57 27 57 33 C 57 38 54 40 47 40 L 26 40 C 21 40 18 38 18 34 Z' fill='%23A85B3A' fill-opacity='.55'/%3E%3Cpath d='M55 26 L 62 14 L 66 15 L 60 27 Z' fill='%23A85B3A' fill-opacity='.55'/%3E%3Cg fill='none' stroke='%233A342B' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M62 14 L 60 6 M62 14 L 67 7 M60 9 L 55 5'/%3E%3C/g%3E%3Cg fill='%23FBF6EC'%3E%3Ccircle cx='27' cy='30' r='1.4'/%3E%3Ccircle cx='35' cy='28' r='1.4'/%3E%3Ccircle cx='43' cy='31' r='1.4'/%3E%3Ccircle cx='31' cy='35' r='1.3'/%3E%3Ccircle cx='40' cy='36' r='1.3'/%3E%3Ccircle cx='49' cy='30' r='1.2'/%3E%3C/g%3E%3Cg fill='none' stroke='%233A342B' stroke-width='1.8' stroke-linecap='round' stroke-dasharray='4 3'%3E%3Cpath d='M25 40 V57'/%3E%3Cpath d='M34 40 V57'/%3E%3Cpath d='M45 40 V57'/%3E%3Cpath d='M52 40 V57'/%3E%3C/g%3E%3C/svg%3E");
+  transform-origin: 72% 55%;
+  animation: nakshi-browse var(--n-dur, 17s) var(--ease-inout, ease-in-out) forwards;
+}
+/* The head goes down to feed, snaps up on the alarm, and stays up. */
+@keyframes nakshi-browse {
+  0%, 8%   { transform: rotate(0deg); }
+  16%, 40% { transform: rotate(13deg); }
+  46%, 56% { transform: rotate(-2deg); }
+  /* the freeze */
+  58%      { transform: rotate(-4deg); }
+  100%     { transform: rotate(-4deg); }
+}
+@keyframes nakshi-graze {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  7%   { opacity: .8; }
+  30%  { transform: translate3d(4vw, 0, 0); }
+  56%  { transform: translate3d(7vw, 0, 0); }
+  /* three bounds, and it is gone */
+  70%  { transform: translate3d(22vw, -3vh, 0); }
+  78%  { transform: translate3d(34vw, 0, 0); }
+  86%  { transform: translate3d(48vw, -3vh, 0); opacity: .75; }
+  100% { transform: translate3d(72vw, 0, 0); opacity: 0; }
+}
+
+/* -- the nouka ------------------------------------------------------------ */
+/* A country boat under sail, and the two things that make it one: the sail is
+   a single triangle raked well forward, and the hull ROCKS on the swell about
+   its own waterline while it crosses. The rock is on a second element for the
+   same reason the dhow's is in Noor — one transform cannot carry a crossing
+   and a roll without the two re-timing each other. */
+[data-theme="nakshi"] .nakshi-boat {
+  bottom: var(--n-b, 2vh);
+  left: var(--n-x, -14vw);
+  width: clamp(52px, 7vw, 116px);
+  aspect-ratio: 80 / 70;
+  animation: nakshi-sail var(--n-dur, 46s) linear forwards;
+}
+[data-theme="nakshi"] .nakshi-boat::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 70'%3E%3Cpath d='M8 58 Q 40 68 72 58 L 66 65 Q 40 72 14 65 Z' fill='%23A85B3A' fill-opacity='.62'/%3E%3Cpath d='M38 10 L 62 54 L 38 54 Z' fill='%23C4352A' fill-opacity='.5'/%3E%3Cpath d='M34 16 Q 22 36 26 54 L 34 54 Z' fill='%23D9A02B' fill-opacity='.45'/%3E%3Cg fill='none' stroke='%233A342B' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M36 8 V56'/%3E%3C/g%3E%3Cg fill='none' stroke='%233A342B' stroke-width='1.3' stroke-linecap='round' stroke-dasharray='4 3'%3E%3Cpath d='M8 58 Q 40 68 72 58'/%3E%3C/g%3E%3C/svg%3E");
+  transform-origin: 50% 84%;
+  animation: nakshi-swell 6.2s var(--ease-inout, ease-in-out) infinite;
+}
+@keyframes nakshi-swell {
+  0%   { transform: translateY(0) rotate(-2deg); }
+  25%  { transform: translateY(-2px) rotate(0deg); }
+  50%  { transform: translateY(0) rotate(2.2deg); }
+  75%  { transform: translateY(2px) rotate(0deg); }
+  100% { transform: translateY(0) rotate(-2deg); }
+}
+@keyframes nakshi-sail {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  5%   { opacity: .75; }
+  93%  { opacity: .7; }
+  100% { transform: translate3d(132vw, 0, 0); opacity: 0; }
+}
+
+/* -- the egret ------------------------------------------------------------ */
+/* বক. It flies with its neck FOLDED — the single field mark that separates a
+   heron from a stork in flight, and the reason the silhouette is short-necked
+   despite the bird being mostly neck. Slow, deep, unhurried beats. */
+[data-theme="nakshi"] .nakshi-egret {
+  bottom: var(--n-b, 26vh);
+  left: var(--n-x, -12vw);
+  width: clamp(30px, 4vw, 62px);
+  aspect-ratio: 64 / 30;
+  animation: nakshi-flap var(--n-dur, 15s) var(--ease-inout, ease-in-out) forwards;
+}
+[data-theme="nakshi"] .nakshi-egret::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 30'%3E%3Cpath d='M20 18 C 26 12 40 12 48 17 L 58 18 L 62 20 L 48 21 C 40 25 26 24 20 18 Z' fill='%23FFFDF8'/%3E%3Cpath d='M28 17 L 16 4 L 22 4 L 34 15 Z' fill='%23FFFDF8'/%3E%3Cg fill='none' stroke='%233A342B' stroke-width='1.2' stroke-linecap='round'%3E%3Cpath d='M20 18 C 26 12 40 12 48 17 L 58 18'/%3E%3Cpath d='M28 17 L 16 4 L 22 4'/%3E%3C/g%3E%3Cg fill='none' stroke='%233A342B' stroke-width='1.6' stroke-linecap='round' stroke-dasharray='3 3'%3E%3Cpath d='M34 22 L 30 29 M40 22 L 37 29'/%3E%3C/g%3E%3C/svg%3E");
+  transform-origin: 42% 60%;
+  animation: nakshi-beat 1.15s var(--ease-inout, ease-in-out) infinite;
+}
+/* Fast down, slow recovery — the asymmetry that separates a wingbeat from a
+   pulse, the same shape Noor's owl uses. */
+@keyframes nakshi-beat {
+  0%   { transform: scaleY(1); }
+  24%  { transform: scaleY(.36); }
+  100% { transform: scaleY(1); }
+}
+@keyframes nakshi-flap {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  8%   { opacity: .9; }
+  40%  { transform: translate3d(44vw, -4vw, 0); }
+  75%  { transform: translate3d(82vw, -2vw, 0); }
+  92%  { opacity: .85; }
+  100% { transform: translate3d(124vw, -6vw, 0); opacity: 0; }
+}
+
+/* -- the rickshaw --------------------------------------------------------- */
+/* Dhaka's, and the reason it is here rather than a car: the painted back
+   panel is a whole folk-art tradition of its own, so the rickshaw is the one
+   motif in this file allowed to be LOUD — a small block of saturated dye in
+   an otherwise pale field. It is also the only wheeled thing, so it is the
+   only one that moves at a steady speed without a gait. */
+[data-theme="nakshi"] .nakshi-rickshaw {
+  bottom: var(--n-b, 2vh);
+  left: var(--n-x, -16vw);
+  width: clamp(46px, 6.5vw, 104px);
+  aspect-ratio: 70 / 60;
+  animation: nakshi-pedal var(--n-dur, 30s) linear forwards;
+}
+[data-theme="nakshi"] .nakshi-rickshaw::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 60'%3E%3Cpath d='M26 20 h30 a4 4 0 0 1 4 4 v20 h-38 v-20 a4 4 0 0 1 4 -4 Z' fill='%23C4352A' fill-opacity='.6'/%3E%3Cpath d='M30 26 h22 v14 h-22 Z' fill='%23D9A02B' fill-opacity='.62'/%3E%3Ccircle cx='41' cy='33' r='4.4' fill='%232A4A7C' fill-opacity='.55'/%3E%3Cpath d='M26 18 q 15 -8 30 0 Z' fill='%232A4A7C' fill-opacity='.45'/%3E%3Cg fill='none' stroke='%233A342B' stroke-width='1.6'%3E%3Ccircle cx='24' cy='48' r='8'/%3E%3Ccircle cx='54' cy='48' r='8'/%3E%3Cpath d='M24 48 L 14 40 L 20 34'/%3E%3C/g%3E%3Cg fill='none' stroke='%233A342B' stroke-width='1.1' stroke-dasharray='3 3'%3E%3Ccircle cx='24' cy='48' r='4'/%3E%3Ccircle cx='54' cy='48' r='4'/%3E%3C/g%3E%3C/svg%3E");
+}
+@keyframes nakshi-pedal {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  6%   { opacity: .7; }
+  93%  { opacity: .66; }
+  100% { transform: translate3d(130vw, 0, 0); opacity: 0; }
+}
+
+/* -- the ghuri ------------------------------------------------------------ */
+/* সাকরাইন, the kite festival. A kite is the one thing in this field that is
+   TETHERED, and everything odd about how it moves follows from that: it does
+   not travel across, it swings on an arc about a point off the bottom of the
+   screen, and it climbs by tacking — up one side, stall, fall away, up the
+   other. The tail lags the body because a tail always lags. */
+[data-theme="nakshi"] .nakshi-kite {
+  top: var(--n-y, 14vh);
+  left: var(--n-x, 40vw);
+  width: clamp(26px, 3.4vw, 52px);
+  aspect-ratio: 40 / 74;
+  transform-origin: 50% 0;
+  animation: nakshi-fly var(--n-dur, 24s) var(--ease-inout, ease-in-out) forwards;
+}
+[data-theme="nakshi"] .nakshi-kite::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 74'%3E%3Cpath d='M20 2 L 36 22 L 20 44 L 4 22 Z' fill='%23C4352A' fill-opacity='.55'/%3E%3Cpath d='M20 2 L 36 22 L 20 22 Z' fill='%23D9A02B' fill-opacity='.6'/%3E%3Cpath d='M4 22 L 20 22 L 20 44 Z' fill='%232A4A7C' fill-opacity='.4'/%3E%3Cg fill='none' stroke='%233A342B' stroke-width='1.3'%3E%3Cpath d='M20 2 L 36 22 L 20 44 L 4 22 Z'/%3E%3Cpath d='M20 2 V44 M4 22 H36'/%3E%3C/g%3E%3Cg fill='none' stroke='%23C4352A' stroke-width='1.6' stroke-linecap='round' stroke-dasharray='5 4'%3E%3Cpath d='M20 44 Q 26 56 18 64 T 22 74'/%3E%3C/g%3E%3C/svg%3E");
+  animation: nakshi-kite-tug 2.6s var(--ease-inout, ease-in-out) infinite alternate;
+}
+@keyframes nakshi-kite-tug { from { transform: rotate(-5deg); } to { transform: rotate(6deg); } }
+/* The swing is a rotation about a point ABOVE the kite, which is what a line
+   to a hand below would actually produce — a pendulum hung the other way up.
+   Translating it side to side instead would read as a balloon. */
+@keyframes nakshi-fly {
+  0%   { transform: rotate(0deg) translateY(0); opacity: 0; }
+  9%   { opacity: .82; }
+  24%  { transform: rotate(15deg) translateY(-4vh); }
+  38%  { transform: rotate(6deg) translateY(2vh); }
+  54%  { transform: rotate(-14deg) translateY(-5vh); }
+  70%  { transform: rotate(-4deg) translateY(1vh); }
+  86%  { transform: rotate(9deg) translateY(-3vh); opacity: .78; }
+  100% { transform: rotate(2deg) translateY(-14vh); opacity: 0; }
+}
+
+/* =========================================================================
+   6 · THE SMALL THINGS
+   =========================================================================
+   Three motifs with no silhouette to draw: they are shapes, so they are
+   cheaper and they can be many.
+   ========================================================================= */
+
+/* -- the shapla ----------------------------------------------------------- */
+/* শাপলা, the national flower — a white water lily. It OPENS: the petals are
+   one element scaled from nothing, which is exactly what a flower opening
+   looks like from directly above, and directly above is how a kantha draws
+   every flower it has ever carried. */
+[data-theme="nakshi"] .nakshi-shapla {
+  position: fixed;
+  bottom: var(--n-b, 3vh);
+  left: var(--n-x, 50vw);
+  width: var(--n-size, 34px);
+  aspect-ratio: 1;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='%23FFFDF8' stroke='%233A342B' stroke-width='1' stroke-opacity='.5'%3E%3Cellipse cx='20' cy='9' rx='4' ry='9'/%3E%3Cellipse cx='20' cy='31' rx='4' ry='9'/%3E%3Cellipse cx='9' cy='20' rx='9' ry='4'/%3E%3Cellipse cx='31' cy='20' rx='9' ry='4'/%3E%3Cellipse cx='12' cy='12' rx='8' ry='3.4' transform='rotate(45 12 12)'/%3E%3Cellipse cx='28' cy='28' rx='8' ry='3.4' transform='rotate(45 28 28)'/%3E%3Cellipse cx='28' cy='12' rx='8' ry='3.4' transform='rotate(-45 28 12)'/%3E%3Cellipse cx='12' cy='28' rx='8' ry='3.4' transform='rotate(-45 12 28)'/%3E%3C/g%3E%3Ccircle cx='20' cy='20' r='4' fill='%23D9A02B' fill-opacity='.8'/%3E%3C/svg%3E") center / contain no-repeat;
+  animation: nakshi-bloom var(--n-dur, 14s) var(--ease-out, cubic-bezier(.16, .84, .44, 1)) forwards;
+}
+@keyframes nakshi-bloom {
+  0%   { transform: scale(.05) rotate(-40deg); opacity: 0; }
+  22%  { transform: scale(1.06) rotate(4deg); opacity: .9; }
+  30%  { transform: scale(1) rotate(0deg); }
+  /* it stays open, and then the light goes */
+  76%  { transform: scale(1) rotate(0deg); opacity: .85; }
+  100% { transform: scale(.9) rotate(-6deg); opacity: 0; }
+}
+
+/* -- the jonaki ----------------------------------------------------------- */
+/* জোনাকি. Bangladesh's fireflies gather in the same tree and flash in
+   UNISON — one of the few places on earth where that happens. So these do not
+   pulse independently the way Noor's do: the conductor gives every one in a
+   group the same animation-delay, and the whole cluster blinks together. It
+   is the same element as Noor's firefly and a completely different animal,
+   which is the entire point. */
+[data-theme="nakshi"] .nakshi-jonaki {
+  position: fixed;
+  bottom: var(--n-b, 8vh);
+  left: var(--n-x, 50vw);
+  width: 4px;
+  aspect-ratio: 1;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  background: #D9A02B;
+  box-shadow: 0 0 7px rgba(217, 160, 43, .9), 0 0 16px rgba(217, 160, 43, .45);
+  opacity: 0;
+  animation:
+    nakshi-jonaki-drift var(--n-dur, 12s) var(--ease-inout, ease-in-out) forwards,
+    nakshi-jonaki-blink 1.4s steps(1, end) var(--n-sync, 0s) infinite;
+}
+/* steps(1) rather than a curve: a firefly's flash is a switch, not a swell. */
+@keyframes nakshi-jonaki-blink {
+  0%, 22%  { opacity: 1; }
+  23%, 100% { opacity: .06; }
+}
+@keyframes nakshi-jonaki-drift {
+  0%   { transform: translate3d(0, 0, 0); }
+  50%  { transform: translate3d(var(--n-sway, 3vw), -5vh, 0); }
+  100% { transform: translate3d(calc(var(--n-sway, 3vw) * -.4), -11vh, 0); }
+}
+
+/* -- the monsoon ---------------------------------------------------------- */
+/* বর্ষা. Rain on a kantha is a row of slanted stitches and nothing else, so
+   that is what this is: one repeating stitched band travelling down and
+   across on a single transform. It is the only motif here that covers the
+   whole field, and it is the palest thing in the file for that reason. */
+[data-theme="nakshi"] .nakshi-rain {
+  position: fixed;
+  inset: -30vh -20vw;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background: repeating-linear-gradient(74deg,
+    rgba(42, 74, 124, .16) 0 1px,
+    transparent 1px 3px,
+    rgba(42, 74, 124, .10) 3px 4px,
+    transparent 4px 26px);
+  animation: nakshi-monsoon var(--n-dur, 12s) linear forwards;
+}
+@keyframes nakshi-monsoon {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  14%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translate3d(-18vw, 62vh, 0); opacity: 0; }
+}
+
+/* =========================================================================
+   7 · STILLNESS, ON REQUEST
+   =========================================================================
+   One selector, for the reason Noor's file learned the hard way: a
+   hand-maintained list is a door that gets left open by forgetting, and the
+   failure is silent and lands only on the people it hurts. The conductor
+   stamps [data-nakshi-scene] on everything it makes.
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  /* The forest, the river bed, the skyline and the tree are COMPOSITION —
+     they do not move, and taking them away would remove the theme from the
+     people who asked only that it hold still. Only the travelling motifs go,
+     and the river's current stops. */
+  [data-theme="nakshi"] [data-nakshi-scene]:not(.nakshi-forest):not(.nakshi-dhaka):not(.nakshi-tree):not(.nakshi-river) { display: none; }
+  [data-theme="nakshi"] .nakshi-river::before,
+  [data-theme="nakshi"] .nakshi-river::after { animation: none; }
+}
+
+@media print {
+  [data-theme="nakshi"] [data-nakshi-scene] { display: none; }
+}

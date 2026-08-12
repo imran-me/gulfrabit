@@ -39,9 +39,10 @@
 
 import { storage, session, KEYS } from '../../shared/js/core/storage.js';
 import { startNoorSky, stopNoorSky } from './noor-sky.js';
+import { startNakshiScene, stopNakshiScene } from './nakshi-scene.js';
 
 /** The only values that may ever reach the DOM. */
-const THEMES = ['classic', 'luxe', 'trio', 'noor'];
+const THEMES = ['classic', 'luxe', 'trio', 'noor', 'nakshi'];
 
 /** Preview lives in sessionStorage: it dies with the tab, so it cannot be
  *  mistaken later for the published theme, and it cannot leak to a visitor. */
@@ -84,7 +85,63 @@ export function applyTheme(name) {
     stopNoorSky();
     document.querySelectorAll('[data-noor-fx]').forEach((n) => n.remove());
   }
+
+  // Nakshi reuses the gilding — its .lux-gilt tail is dyed alta instead of
+  // gold, which is one CSS rule against a mechanism that already runs on
+  // every page. It does NOT take the burst or the glance: both are made of
+  // dust and light, and neither belongs on a piece of cloth.
+  if (theme === 'nakshi') { armGilding(); armField(); }
+  else {
+    // Same ordering rule as above, and it matters more here: a tiger crossing
+    // is a 46-second animation, so a roll that lands after the sweep would
+    // leave one walking across whatever theme the visitor switched to.
+    stopNakshiScene();
+    document.querySelectorAll('[data-nakshi-fx]').forEach((n) => n.remove());
+  }
   return theme;
+}
+
+/* ---- The field ---------------------------------------------------------
+ * Nakshi's counterpart to armNight(). Deliberately far smaller: the whole
+ * theme is composition rather than instrumentation, so there is nothing here
+ * to inject beyond the conductor itself — no view transition, no lantern, no
+ * curtain. The one thing it shares with Noor is that the scene may not exist
+ * before the body does.
+ */
+let fieldArmed = false;
+
+function armField() {
+  if (fieldArmed && !document.querySelector('.nakshi-forest')) fieldArmed = false;
+  if (fieldArmed) return;
+  fieldArmed = true;
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // The permanent cloth is composition and stays; only the conductor is
+    // withheld. Laid directly rather than through startNakshiScene(), which
+    // refuses to run at all under reduced motion — and refusing to run is
+    // the correct behaviour for a conductor and the wrong one for a
+    // background.
+    const lay = () => {
+      if (document.querySelector('.nakshi-forest')) return;
+      for (const cls of ['nakshi-forest', 'nakshi-river', 'nakshi-tree', 'nakshi-dhaka']) {
+        const n = document.createElement('div');
+        n.className = cls;
+        n.setAttribute('data-nakshi-fx', '');
+        n.setAttribute('data-nakshi-scene', '');
+        n.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(n);
+      }
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', lay);
+    else lay();
+    return;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startNakshiScene);
+  } else {
+    startNakshiScene();
+  }
 }
 
 /* ---- The gold burst ----------------------------------------------------
