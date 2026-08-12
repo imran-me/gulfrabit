@@ -1,0 +1,342 @@
+/* =========================================================================
+   GulfRabit · Nakshi theme
+   =========================================================================
+
+   নকশি — PATTERNED. Named for the nakshi kantha: a quilt made by layering
+   worn saris and covering the whole white field in running stitch, until the
+   cloth carries tigers, deer, boats, lotuses and a tree of life at its centre.
+
+   THE METAPHOR THAT DOES THE DESIGN WORK
+   --------------------------------------
+   Noor works because it is NIGHT, and night is the only canvas on which light
+   is a material. Nakshi needed its own answer to "why is the background that
+   colour", and the kantha gives it: the ground is UNDYED COTTON, and it is
+   pale not as an absence but as a material — the one thing every stitch is
+   read against. That is why this theme is warm off-white and never #FFFFFF.
+   Pure white is a screen; cream is cloth.
+
+   It also settles what the ornament is allowed to be. A kantha is not
+   printed, it is SEWN, so every line in this theme is a running stitch: a
+   dashed stroke, never a solid rule. Every ornament is drawn with the same
+   needle. That single constraint is what keeps twenty-five folk motifs from
+   reading as clip art — they are not a collection of pictures, they are one
+   piece of cloth.
+
+   AND IT SOLVES THE PROBLEM LUXE HAD
+   ----------------------------------
+   The product photography is shot on pure white. On Luxe's ivory it glared;
+   Noor turned that into an advantage by going dark. Nakshi takes the third
+   road — the cream ground is close enough to the photos that they sit on the
+   cloth like appliqué, and a stitched border around each well is exactly how
+   a kantha frames a motif. The photos need no reshoot here either.
+
+   THE DYES ARE REAL
+   -----------------
+   Every colour below is a dye a Bengali village could actually make, which is
+   a constraint rather than trivia: it is why the palette agrees with itself.
+   Alta red from lac, indigo from নীল, turmeric yellow, madder terracotta,
+   paddy green. Nothing here is a screen colour.
+
+   Same contract as every theme: scoped under [data-theme="nakshi"], inert
+   until the attribute is set, nothing load-bearing, nothing starts hidden,
+   every movement dies under prefers-reduced-motion.
+   ========================================================================= */
+
+[data-theme="nakshi"] {
+  /* ---- Surfaces: the cloth -------------------------------------------- */
+  /* Warm, and deliberately not white. A kantha is old cotton; the warmth is
+     the age. The three levels are the three depths of a quilted field —
+     raised is where the stitch has pulled the cloth up. */
+  --surface-page:    #FBF6EC;
+  --surface-raised:  #FFFDF8;
+  --surface-sunken:  #F3EADB;
+  --surface-band:    #F6EFE1;
+  --surface-inverse: #2E2A24;
+
+  /* Hairlines are thread, so they are warm and they are never black. */
+  --border-hairline: rgba(46, 42, 36, .14);
+  --border-input:    #7C7161;   /* 4.0:1 on the sunken input, well over the 3.0 a control edge needs */
+
+  /* ---- Text: iron-gall ink on cotton ----------------------------------- */
+  /* Not black. A dark warm brown, the colour of the darkest kantha thread.
+     Every ratio below is the WORST of the three surfaces, which is always
+     --surface-sunken: primary 11.9:1, secondary 6.7:1, muted 4.5:1. All AA,
+     primary AAA. Measuring against --surface-page alone would have shipped a
+     muted grey that passed on the page and failed inside every input on the
+     site, which is the exact trap Noor's own token block calls out. */
+  --text-primary:    #2E2A24;
+  --text-secondary:  #57503F;
+  --text-muted:      #726959;
+  --text-on-accent:  #FFFDF8;
+  --text-inverse:    #FBF6EC;
+
+  /* ---- Brand hues, re-dyed --------------------------------------------- */
+  /* The brand stays recognisable — this is still a cyan-and-lime shop — but
+     each hue is taken to the nearest colour a dyer could reach. The cyan
+     deepens toward indigo because indigo IS Bengal's cyan; the lime settles
+     into paddy green; the gold becomes turmeric. */
+  --link:            #0E6E88;   /* deep indigo-teal: 4.9:1 worst case        */
+  --link-hover:      #0A5568;
+  --accent-ink:      #0E6E88;
+  --gold-ink:        #8D620E;   /* turmeric, darkened until it cleared 4.5   */
+  --lime-ink:        #4A753B;   /* paddy, same                               */
+
+  /* ---- The dyes, available to the scene layer --------------------------
+     These are the ornament's palette rather than the text's, so the scene
+     may use them at any weight. --alta doubles as a text colour on headings
+     (see §3), which is why it alone is tuned to clear 4.5:1 rather than the
+     3:1 a purely decorative mark would need. */
+  --alta:            #C4352A;   /* lac red — alta, sindoor, the border thread */
+  --indigo:          #2A4A7C;   /* 7.4:1 — the darkest dye here               */
+  --turmeric:        #D9A02B;   /* ornament only: too light for text          */
+  --madder:          #A85B3A;
+  --paddy:           #4A753B;
+  --thread:          #3A342B;   /* the stitch itself                          */
+
+  /* ---- Status & shadows ------------------------------------------------
+     Shadows on cloth are not the crisp drops a white screen wants — they are
+     the soft shade under a quilted edge. Warm, low-contrast, short. */
+  --gr-error:  #B32820;
+  --scrollbar-thumb: #C9BCA3;
+  --shadow-sm: 0 1px 2px rgba(70, 58, 40, .10);
+  --shadow-md: 0 4px 14px rgba(70, 58, 40, .12), 0 1px 4px rgba(70, 58, 40, .08);
+  --shadow-lg: 0 16px 40px rgba(70, 58, 40, .16), 0 4px 12px rgba(70, 58, 40, .10);
+
+  /* ---- Washes & glass -------------------------------------------------- */
+  --wash-hover:      rgba(198, 54, 43, .05);
+  --wash-shimmer:    rgba(46, 42, 36, .05);
+  --scrim:           rgba(46, 34, 20, .42);
+  --glass-header:    rgba(251, 246, 236, .88);
+  --glass-overlay:   rgba(251, 246, 236, .96);
+}
+
+/* =========================================================================
+   1 · THE CLOTH
+   =========================================================================
+   The page colour moves to <html> so the fixed scene layers have somewhere
+   to live between the background and the content — the Luxe precedent, and
+   the same reason Noor does it.
+
+   Three things make the ground read as cloth rather than as a beige
+   rectangle, and all three are cheap because they are one gradient stack on
+   a pseudo-element that never moves:
+
+     the weave    a two-axis hairline grid at 3px, far too fine to see and
+                  exactly coarse enough to stop the surface looking flat.
+                  This is the whole trick — woven cloth has a grain, and the
+                  eye reads its absence long before it notices its presence.
+     the wash     two enormous soft blooms of madder and indigo, the way an
+                  old quilt is unevenly faded by sun and washing.
+     the quilting a wide diagonal lattice at very low opacity — the lines
+                  that hold the sari layers together.
+   ========================================================================= */
+html[data-theme="nakshi"] { background: var(--surface-page); }
+[data-theme="nakshi"] body { position: relative; background: transparent; }
+
+[data-theme="nakshi"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    /* the quilting lattice */
+    repeating-linear-gradient(48deg,
+      rgba(58, 52, 43, .035) 0 1px, transparent 1px 88px),
+    repeating-linear-gradient(-48deg,
+      rgba(58, 52, 43, .028) 0 1px, transparent 1px 88px),
+    /* the weave */
+    repeating-linear-gradient(90deg,
+      rgba(120, 104, 78, .05) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg,
+      rgba(120, 104, 78, .04) 0 1px, transparent 1px 3px),
+    /* the fading */
+    radial-gradient(58% 44% at 82% 8%,  rgba(168, 91, 58, .07), transparent 64%),
+    radial-gradient(52% 46% at 12% 88%, rgba(42, 74, 124, .06), transparent 66%);
+}
+
+/* =========================================================================
+   2 · THE RUNNING STITCH
+   =========================================================================
+   The one rule the whole theme is built on: NO SOLID RULES. A kantha has no
+   drawn lines at all, only rows of small stitches, and the gaps between them
+   are what make the row read as handwork rather than as print.
+
+   Everywhere the site draws a 1px border, this theme draws a dashed one at
+   the kantha's own rhythm — a long stitch and a short gap, roughly 3:2, which
+   is what a running stitch actually looks like when the needle takes an even
+   bite. Solid borders survive only where a shape must READ as a solid shape:
+   inside form controls, where a dashed input looks disabled.
+   ========================================================================= */
+[data-theme="nakshi"] .card,
+[data-theme="nakshi"] .acard,
+[data-theme="nakshi"] .product-card,
+[data-theme="nakshi"] .category-card,
+[data-theme="nakshi"] .section-head,
+[data-theme="nakshi"] .testi-card {
+  border-style: dashed;
+  border-width: 1.5px;
+  border-color: rgba(58, 52, 43, .28);
+  /* The stitch rhythm. `border-style: dashed` cannot be given a dash length,
+     so the WIDTH sets it: a browser draws dashes proportional to the border
+     width, and 1.5px lands on a stitch that reads as hand-sewn at both 1x and
+     2x device pixel ratios. At 1px it reads as a dotted line; at 2px it
+     reads as a stencil. */
+  border-radius: 3px;
+}
+
+/* The product well: a motif is framed by a stitched box on a kantha, and the
+   photograph is the motif. Two rows of stitching, as a real border has. */
+[data-theme="nakshi"] .product-card__media,
+[data-theme="nakshi"] .category-card__media {
+  position: relative;
+  background: #FFFFFF;
+  border-radius: 2px;
+}
+[data-theme="nakshi"] .product-card__media::before,
+[data-theme="nakshi"] .category-card__media::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: 2;
+  pointer-events: none;
+  border: 1.5px dashed rgba(198, 54, 43, .34);
+  border-radius: 2px;
+}
+
+/* =========================================================================
+   3 · THE TYPE
+   =========================================================================
+   Headings take the alta red and a wide, deliberate letter-spacing, because
+   the lettering on a kantha border is embroidered one character at a time and
+   is never tight. The gilding span theme.js already writes for the gold
+   themes is reused rather than duplicated: here its second half is dyed alta
+   instead of gold, which is a one-rule change to a mechanism that already
+   works on every page.
+   ========================================================================= */
+[data-theme="nakshi"] .section-head__titles > h1,
+[data-theme="nakshi"] .section-head__titles > h2,
+[data-theme="nakshi"] .plp-head h1,
+[data-theme="nakshi"] h1.page-head {
+  letter-spacing: .012em;
+}
+[data-theme="nakshi"] .lux-gilt {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: var(--alta);
+}
+
+/* The section rule under a heading is a stitched row, not a line. */
+[data-theme="nakshi"] .section-head::after {
+  content: "";
+  display: block;
+  height: 0;
+  margin-top: .55rem;
+  border-top: 1.5px dashed rgba(198, 54, 43, .4);
+}
+
+/* =========================================================================
+   4 · THE BUTTONS
+   =========================================================================
+   The primary action keeps the brand's gradient — a theme does not get to
+   change what the buy button is. What it gets to change is the EDGE: a
+   stitched outline just inside the fill, which is how a kantha appliqué is
+   attached to the ground cloth. It is the same detail as the product well,
+   applied at a smaller scale, and repeating one idea at two scales is most of
+   what makes a decorative system feel designed rather than assembled.
+   ========================================================================= */
+[data-theme="nakshi"] .btn--primary { position: relative; }
+[data-theme="nakshi"] .btn--primary::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  pointer-events: none;
+  border: 1px dashed rgba(255, 253, 248, .5);
+  border-radius: inherit;
+}
+[data-theme="nakshi"] .btn--ghost,
+[data-theme="nakshi"] .btn--outline {
+  border-style: dashed;
+  border-width: 1.5px;
+}
+
+/* =========================================================================
+   5 · THE HEADER AND THE FOOTER BORDERS
+   =========================================================================
+   A kantha's outermost element is always a border — a repeating band that
+   runs the full width and frames everything inside it. The page has exactly
+   two such edges, and giving them the real motif is worth more than
+   scattering ornament through the middle.
+
+   The band is one inline SVG data URI repeated on the x axis: no network
+   request, no sprite to 404, and it tiles seamlessly because the motif is
+   drawn to meet itself at both ends of its 64px box.
+   ========================================================================= */
+[data-theme="nakshi"] .site-header,
+[data-theme="nakshi"] footer {
+  position: relative;
+}
+[data-theme="nakshi"] .site-header::after,
+[data-theme="nakshi"] footer::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 9px;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='9' viewBox='0 0 64 9'%3E%3Cg fill='none' stroke='%23C6362B' stroke-width='1.4' stroke-linecap='round' stroke-dasharray='4 3'%3E%3Cpath d='M0 4.5 H64'/%3E%3C/g%3E%3Cg fill='none' stroke='%232A4A7C' stroke-width='1.2' stroke-linecap='round'%3E%3Cpath d='M4 8 L10 1 L16 8'/%3E%3Cpath d='M20 8 L26 1 L32 8'/%3E%3Cpath d='M36 8 L42 1 L48 8'/%3E%3Cpath d='M52 8 L58 1 L64 8'/%3E%3C/g%3E%3C/svg%3E") repeat-x center / 64px 9px;
+  opacity: .55;
+}
+[data-theme="nakshi"] .site-header::after { bottom: -9px; }
+[data-theme="nakshi"] footer::after { top: -9px; transform: scaleY(-1); }
+
+/* =========================================================================
+   6 · THE ARRIVAL
+   =========================================================================
+   A section arriving does not fade in here — its stitch is SEWN. The dashed
+   border's offset is animated so the dashes travel once, briefly, in the
+   direction a needle moves, and then stop. It is the one place in this theme
+   where the ornament admits it was made by hand.
+
+   This animates `background-position` on a stitched strip rather than
+   `stroke-dashoffset`, so it stays on the compositor like everything else.
+   ========================================================================= */
+[data-theme="nakshi"] [data-reveal].is-visible .section-head::after {
+  animation: nakshi-sew 900ms var(--ease-out, cubic-bezier(.16, .84, .44, 1)) both;
+}
+@keyframes nakshi-sew {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+/* A card arriving lifts the way a quilted panel does when the thread pulls:
+   a small settle, not a slide. */
+[data-theme="nakshi"] [data-reveal].is-visible .product-card,
+[data-theme="nakshi"] [data-reveal].is-visible .category-card {
+  animation: nakshi-settle 620ms var(--ease-out, cubic-bezier(.16, .84, .44, 1)) both;
+}
+@keyframes nakshi-settle {
+  from { transform: scale(.988); opacity: .4; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* =========================================================================
+   7 · STILLNESS, ON REQUEST
+   =========================================================================
+   Everything above that moves, stops. The ornament is unaffected: a stitched
+   border is composition, not motion, and removing it would take the theme
+   away from the very people who asked only for the movement to stop.
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="nakshi"] [data-reveal].is-visible .section-head::after,
+  [data-theme="nakshi"] [data-reveal].is-visible .product-card,
+  [data-theme="nakshi"] [data-reveal].is-visible .category-card { animation: none; }
+}
+
+/* Print: the cloth is not ink, but the stitching carries meaning at the
+   edges of a card, so it stays. Only the ground drops out. */
+@media print {
+  [data-theme="nakshi"] body::before,
+  [data-theme="nakshi"] .site-header::after,
+  [data-theme="nakshi"] footer::after { display: none; }
+}
