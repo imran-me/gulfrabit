@@ -29,6 +29,55 @@
     # Laravel's health check.
     RewriteRule ^up$ public/index.php [L,QSA]
 
+    # --- Readable URLs -------------------------------------------------
+    # /product/ajwa-dates-madinah-select  ->  modules/catalog/product.html?id=…
+    #
+    # The pages are unchanged: each still reads its parameter from the query
+    # string, so this is a rename of the ADDRESS and nothing else. The page
+    # resolves ?id= against a slug or a SKU, which is why the old
+    # /modules/catalog/product.html?id=gr-1101 keeps working — it is a real
+    # file and the pass-through rule below serves it exactly as it always has.
+    #
+    # ADDITIVE ON PURPOSE. Nothing here redirects, rewrites away, or breaks a
+    # single existing URL: it only makes new ones start working. Every link,
+    # ad, bookmark, QR code and indexed page in the world keeps resolving. The
+    # redirects that eventually retire the old form are a later, separate step
+    # taken only once these are proven on the server.
+    #
+    # QSA so /product/x?utm_source=fb keeps its UTMs — attribution rides the
+    # landing URL and dropping it would blind the ad reporting.
+    # The character classes are deliberately narrow: a slug is lowercase
+    # letters, digits and hyphens, and anything else should fall through to the
+    # 404 rather than be handed to a page as a parameter.
+    RewriteRule ^product/([A-Za-z0-9._-]+)/?$ modules/catalog/product.html?id=$1 [L,QSA]
+    RewriteRule ^category/([a-z0-9-]+)/?$ modules/catalog/category.html?slug=$1 [L,QSA]
+    RewriteRule ^search/?$ modules/catalog/search-results.html [L,QSA]
+
+    # The flat pages. One line each, and each one is a name a person could say
+    # over a phone — which is the entire point of the exercise.
+    RewriteRule ^cart/?$ modules/cart/cart.html [L,QSA]
+    RewriteRule ^checkout/?$ modules/checkout/checkout.html [L,QSA]
+    RewriteRule ^buy/?$ modules/checkout/express.html [L,QSA]
+    RewriteRule ^order-confirmed/?$ modules/checkout/order-confirmation.html [L,QSA]
+    RewriteRule ^track/?$ modules/account/track.html [L,QSA]
+    RewriteRule ^deals/?$ modules/deals/deals.html [L,QSA]
+    RewriteRule ^wholesale/?$ modules/b2b/b2b-industrial.html [L,QSA]
+
+    RewriteRule ^about/?$ modules/content/about.html [L,QSA]
+    RewriteRule ^contact/?$ modules/content/contact.html [L,QSA]
+    RewriteRule ^sourcing/?$ modules/content/sourcing.html [L,QSA]
+    RewriteRule ^faq/?$ modules/content/faq.html [L,QSA]
+    RewriteRule ^shipping-returns/?$ modules/content/shipping-returns.html [L,QSA]
+    RewriteRule ^privacy/?$ modules/content/privacy.html [L,QSA]
+    RewriteRule ^terms/?$ modules/content/terms.html [L,QSA]
+
+    RewriteRule ^login/?$ modules/auth/login.html [L,QSA]
+    RewriteRule ^register/?$ modules/auth/register.html [L,QSA]
+    RewriteRule ^account/?$ modules/account/dashboard.html [L,QSA]
+    RewriteRule ^account/orders/?$ modules/account/orders.html [L,QSA]
+    RewriteRule ^account/addresses/?$ modules/account/addresses.html [L,QSA]
+    RewriteRule ^wishlist/?$ modules/account/wishlist.html [L,QSA]
+
     # --- Everything else is the static storefront ----------------------
     # Real files and directories are served as-is. Anything else falls
     # through to the 404 page below rather than to Laravel, which has no
