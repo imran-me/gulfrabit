@@ -458,6 +458,80 @@
 
 .atemplates { display: flex; flex-wrap: wrap; gap: var(--space-2); flex: 1 1 100%; }
 
+/* ---- Hero preview -----------------------------------------------------
+   A working copy of the storefront carousel, small enough to sit above the
+   controls that drive it.
+
+   The transitions below are written a second time rather than shared with
+   modules/home/home.css, and that is deliberate: the panel does not load the
+   storefront stylesheet, and linking it here to save thirty lines would drag a
+   whole theme — its fonts, its hero sizing, its variables — into a screen that
+   wants none of it. The pair is kept honest by both reading the same
+   --hero-* variables the API sends. */
+.apreview {
+  --hero-interval: 6000ms;
+  --hero-transition: 600ms;
+  --hero-easing: ease-in-out;
+}
+.apreview__stage {
+  position: relative;
+  aspect-ratio: 2 / 1;
+  max-height: 340px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+}
+.apreview__slide {
+  position: absolute; inset: 0; margin: 0;
+  opacity: 0; visibility: hidden;
+  transition: opacity var(--hero-transition) var(--hero-easing),
+              visibility var(--hero-transition),
+              transform var(--hero-transition) var(--hero-easing);
+}
+.apreview__slide.is-active { opacity: 1; visibility: visible; }
+.apreview__slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.apreview__slide figcaption {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: var(--space-6) var(--space-4) var(--space-3);
+  background: linear-gradient(to top, rgba(4, 25, 31, .8), transparent);
+  color: #fff; font-weight: var(--fw-semibold);
+}
+
+.apreview[data-transition="slide"] .apreview__slide { transform: translateX(6%); }
+.apreview[data-transition="slide"] .apreview__slide.is-active { transform: translateX(0); }
+.apreview[data-transition="zoom"] .apreview__slide { transform: scale(1.06); }
+.apreview[data-transition="zoom"] .apreview__slide.is-active { transform: scale(1); }
+.apreview[data-transition="none"] .apreview__slide { transition: none; }
+
+.apreview.is-ken-burns .apreview__slide.is-active img {
+  animation: apreview-drift var(--hero-interval) var(--hero-easing) forwards;
+}
+@keyframes apreview-drift { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+.apreview__dots { display: flex; justify-content: center; gap: var(--space-2); margin-top: var(--space-3); }
+.apreview__dot {
+  width: 28px; height: 4px; border-radius: var(--radius-pill);
+  background: var(--border-hairline);
+  transition: background var(--hero-transition) var(--hero-easing);
+}
+.apreview__dot.is-active { background: var(--gr-gold-accent); }
+
+.apreview__empty {
+  display: grid; place-items: center; text-align: center;
+  aspect-ratio: 2 / 1; max-height: 340px;
+  padding: var(--space-5);
+  border: 1px dashed var(--gr-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted); font-size: var(--fs-14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The preview still advances — it has to, or it stops answering the question
+     it exists for — but it stops sliding, zooming and drifting to get there. */
+  .apreview__slide { transition: opacity 1ms linear; transform: none !important; }
+  .apreview.is-ken-burns .apreview__slide.is-active img { animation: none; }
+}
+
 /* ---- Hero slide rows --------------------------------------------------
    One card per banner: the picture on the left at the shape it will actually
    be seen in, its words on the right, and everything that decides WHEN it

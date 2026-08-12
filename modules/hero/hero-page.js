@@ -57,7 +57,7 @@ async function load() {
   host.innerHTML = '<p class="admin__sub">Loading…</p>';
 
   try {
-    const payload = await adminFetch('/admin/hero');
+    const payload = await adminFetch('/hero');
     slides = payload.data;
     settings = payload.meta.settings;
   } catch (err) {
@@ -73,8 +73,8 @@ async function load() {
   // The pickers need names, not ids. Fetched once and reused by every row;
   // both are small and both are already cached by the panel's other screens.
   await Promise.all([
-    adminFetch('/admin/products?perPage=100').then((r) => { products = r.data; }).catch(() => {}),
-    adminFetch('/admin/categories').then((r) => { categories = r.data; }).catch(() => {}),
+    adminFetch('/products?perPage=100').then((r) => { products = r.data; }).catch(() => {}),
+    adminFetch('/categories').then((r) => { categories = r.data; }).catch(() => {}),
   ]);
 
   paintSettings();
@@ -106,10 +106,88 @@ function paint() {
           Add your first banner. Nothing changes on the site until one is switched on.
         </p>
       </div>`;
+    paintPreview();
     return;
   }
 
   host.innerHTML = slides.map((s, i) => row(s, i)).join('');
+  paintPreview();
+}
+
+/* ---- Preview -----------------------------------------------------------
+   The same carousel a customer gets, at a sixth of the size.
+
+   Rebuilt from scratch on every change rather than patched. A carousel is a
+   timer plus an index, and reconciling those against an edited slide list is
+   how a preview ends up showing the third banner when there are two — the
+   whole point of this box is that it cannot disagree with the site. */
+let previewTimer = null;
+
+function paintPreview() {
+  const host = document.querySelector('[data-hero-preview]');
+  if (!host) return;
+
+  clearInterval(previewTimer);
+  previewTimer = null;
+
+  // What the STOREFRONT would show, not what this screen holds: switched-off
+  // banners and ones outside their dates are exactly what a merchant is trying
+  // to confirm are absent.
+  const live = slides.filter((s) => s.isActive && inSchedule(s));
+
+  if (!live.length) {
+    host.innerHTML = `
+      <div class="apreview__empty">
+        No live banners — the home page is showing the artwork built into the site.
+      </div>`;
+    return;
+  }
+
+  const easing = settings.easing === 'spring'
+    ? 'cubic-bezier(.34,1.56,.64,1)'
+    : (settings.easing || 'ease-in-out');
+
+  host.style.setProperty('--hero-interval', `${settings.intervalMs ?? 6000}ms`);
+  host.style.setProperty('--hero-transition', `${settings.transitionMs ?? 600}ms`);
+  host.style.setProperty('--hero-easing', easing);
+  host.dataset.transition = settings.transition || 'fade';
+  host.classList.toggle('is-ken-burns', Boolean(settings.kenBurns));
+
+  host.innerHTML = `
+    <div class="apreview__stage">
+      ${live.map((s, i) => `
+        <figure class="apreview__slide${i === 0 ? ' is-active' : ''}">
+          <img src="${escapeHtml(s.image)}" alt="${escapeHtml(s.alt || '')}">
+          ${s.headline ? `<figcaption>${escapeHtml(s.headline)}</figcaption>` : ''}
+        </figure>`).join('')}
+    </div>
+    <div class="apreview__dots">
+      ${live.map((s, i) => `
+        <span class="apreview__dot${i === 0 ? ' is-active' : ''}"
+              title="${escapeHtml(s.alt || '')}"></span>`).join('')}
+    </div>`;
+
+  const figures = [...host.querySelectorAll('.apreview__slide')];
+  const dots = [...host.querySelectorAll('.apreview__dot')];
+  let i = 0;
+
+  // A single banner is a still picture. Running a timer to re-show the slide
+  // already showing is the same waste here as on the storefront.
+  if (!settings.autoplay || live.length < 2) return;
+
+  previewTimer = setInterval(() => {
+    i = (i + 1) % figures.length;
+    figures.forEach((f, n) => f.classList.toggle('is-active', n === i));
+    dots.forEach((d, n) => d.classList.toggle('is-active', n === i));
+  }, settings.intervalMs ?? 6000);
+}
+
+/** Today against a slide's optional start/end, matching the server's scope. */
+function inSchedule(s) {
+  const now = Date.now();
+  if (s.startsAt && new Date(s.startsAt).getTime() > now) return false;
+  if (s.endsAt && new Date(s.endsAt).getTime() < now) return false;
+  return true;
 }
 
 function row(s, i) {
@@ -280,7 +358,7 @@ async function save(s, changes) {
 
   let saved;
   try {
-    ({ data: saved } = await adminFetch(`/admin/hero/${s.id}`, {
+    ({ data: saved } = await adminFetch(`/hero/${s.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -300,7 +378,7 @@ async function addSlide() {
   btn.disabled = true;
 
   try {
-    const { data } = await adminFetch('/admin/hero', {
+    const { data } = await adminFetch('/hero', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -326,7 +404,7 @@ async function remove(s) {
   if (!confirm(`Delete this banner? Switching it off keeps it for later; deleting does not.`)) return;
 
   try {
-    await adminFetch(`/admin/hero/${s.id}`, { method: 'DELETE' });
+    await adminFetch(`/hero/${s.id}`, { method: 'DELETE' });
   } catch (err) {
     return fail(err.message);
   }
@@ -352,7 +430,7 @@ async function move(s, delta) {
   paint();                                    // instant; the write follows
 
   try {
-    await adminFetch('/admin/hero/order', {
+    await adminFetch('/hero/order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ids: slides.map((x) => x.id) }),
@@ -375,12 +453,15 @@ async function saveSettings(e) {
   };
 
   try {
-    ({ data: settings } = await adminFetch('/admin/hero/settings', {
+    ({ data: settings } = await adminFetch('/hero/settings', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     }));
     clearError();
+    // Immediately, from the SAVED values rather than the form's — so what is
+    // being watched is what the site will do, not what was just typed at it.
+    paintPreview();
   } catch (err) {
     fail(err.message);
   }
