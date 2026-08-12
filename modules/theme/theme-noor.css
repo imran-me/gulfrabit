@@ -571,11 +571,18 @@ html[data-theme="noor"] a.stat-card:hover {
   opacity: 0;
   animation: noor-ember 27s linear infinite;
 }
+/* The drop is 19vw, not 14vw, because the streak is drawn at 9deg and
+   tan(9deg) x 120vw = 19vw. At 14vw it fell at 6.65deg while pointing at
+   9deg — a 2.35deg disagreement between where the ember aims and where it
+   goes. Small, but it is the same fault the sky's meteors had, and a streak
+   that does not point along its own velocity is the one thing the eye
+   reliably reads as fake. Both legs stay in vw so the angle survives any
+   window shape. */
 @keyframes noor-ember {
   0%    { transform: translate3d(0, 0, 0) rotate(9deg); opacity: 0; }
   1%    { opacity: .9; }
-  3.2%  { transform: translate3d(120vw, 14vw, 0) rotate(9deg); opacity: 0; }
-  100%  { transform: translate3d(120vw, 14vw, 0) rotate(9deg); opacity: 0; }
+  3.2%  { transform: translate3d(120vw, 19vw, 0) rotate(9deg); opacity: 0; }
+  100%  { transform: translate3d(120vw, 19vw, 0) rotate(9deg); opacity: 0; }
 }
 
 /* ---- The hand-carried lantern --------------------------------------------
@@ -1288,12 +1295,31 @@ html[data-theme="noor"][data-noor-phase="day"]::after { opacity: .35; }
   opacity: 0;
   animation: noor-petal 53s linear infinite;
 }
+/* HOW A PETAL ACTUALLY FALLS, AND WHAT WAS WRONG WITH THIS
+ * -------------------------------------------------------
+ * 1. TRANSFORM ORDER. It was `translateY() rotate() translateX()` — and a
+ *    translate written AFTER a rotate happens in the ROTATED frame. By the
+ *    420deg keyframe the "2vw sideways" was being applied 60deg off from
+ *    sideways, so the petal's drift swung around wherever its spin happened
+ *    to be pointing. Both translates now come before the rotate, in one
+ *    translate3d, so drift is drift.
+ * 2. IT WAS DRILLING, NOT FLUTTERING. 0 -> 420deg in one direction is a
+ *    maple seed autorotating. A petal does not autorotate: it stalls, tips,
+ *    slides down the other way, stalls again — so the tilt OSCILLATES, and
+ *    its sign agrees with the direction the petal is currently sliding,
+ *    because the tilt is what generates the slide.
+ * 3. The tumble is a separate rotateY, which turns the petal edge-on twice
+ *    per fall and is why it briefly narrows to a line.
+ * The vertical steps stay even: a petal reaches terminal velocity almost at
+ * once, and constant speed downward is correct. */
 @keyframes noor-petal {
-  0%, 86%      { opacity: 0; transform: translateY(0) rotate(0) translateX(0); }
-  87%          { opacity: .85; }
-  90%          { transform: translateY(30vh) rotate(160deg) translateX(3vw); }
-  93%          { transform: translateY(60vh) rotate(280deg) translateX(-2vw); opacity: .85; }
-  96%, 100%    { transform: translateY(105vh) rotate(420deg) translateX(2vw); opacity: 0; }
+  0%, 86%   { opacity: 0; transform: translate3d(0, 0, 0) rotate(0deg) rotateY(0deg); }
+  87%       { opacity: .85; }
+  89.5%     { transform: translate3d(3.2vw, 26vh, 0) rotate(17deg) rotateY(190deg); }
+  92%       { transform: translate3d(-1.4vw, 52vh, 0) rotate(-15deg) rotateY(370deg); opacity: .85; }
+  94.5%     { transform: translate3d(3vw, 78vh, 0) rotate(13deg) rotateY(545deg); opacity: .8; }
+  96.5%     { transform: translate3d(.4vw, 98vh, 0) rotate(-8deg) rotateY(680deg); opacity: 0; }
+  100%      { transform: translate3d(.4vw, 106vh, 0) rotate(-8deg) rotateY(700deg); opacity: 0; }
 }
 
 /* 39 · The dhow on the horizon of the shore. */
@@ -1303,12 +1329,31 @@ html[data-theme="noor"][data-noor-phase="day"]::after { opacity: .35; }
   width: 46px; height: 30px;
   pointer-events: none;
   opacity: .5;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='30' viewBox='0 0 46 30'%3E%3Cpath d='M6 24 Q 23 30 40 24 L 36 28 Q 23 32 10 28 Z' fill='%23C9A24B' fill-opacity='.8'/%3E%3Cpath d='M22 2 Q 34 8 30 22 L 22 22 Z' fill='%23E8CF8E' fill-opacity='.7'/%3E%3Cpath d='M20 4 Q 12 12 16 22 L 20 22 Z' fill='%23C9A24B' fill-opacity='.6'/%3E%3C/svg%3E") center/contain no-repeat;
   animation: noor-dhow 96s linear infinite;
+}
+/* The hull rides on the element that crosses, so the two motions do not have
+   to share one transform. A boat on open water is never still: it rises and
+   falls on the swell and rocks about its own centre, and the roll leads the
+   heave by a quarter period the way a hull actually answers a passing wave.
+   Without this the dhow slides across the horizon like a decal on glass. */
+[data-theme="noor"] .noor-dhow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='30' viewBox='0 0 46 30'%3E%3Cpath d='M6 24 Q 23 30 40 24 L 36 28 Q 23 32 10 28 Z' fill='%23C9A24B' fill-opacity='.8'/%3E%3Cpath d='M22 2 Q 34 8 30 22 L 22 22 Z' fill='%23E8CF8E' fill-opacity='.7'/%3E%3Cpath d='M20 4 Q 12 12 16 22 L 20 22 Z' fill='%23C9A24B' fill-opacity='.6'/%3E%3C/svg%3E") center/contain no-repeat;
+  transform-origin: 50% 80%;                /* the waterline, not the sail */
+  animation: noor-dhow-swell 5.4s var(--ease-inout, ease-in-out) infinite;
 }
 @keyframes noor-dhow {
   0%, 70%  { transform: translateX(0); }
   99%, 100% { transform: translateX(calc(100vw + 160px)); }
+}
+@keyframes noor-dhow-swell {
+  0%   { transform: translateY(0)     rotate(-1.7deg); }
+  25%  { transform: translateY(-2.4px) rotate(0deg); }
+  50%  { transform: translateY(0)     rotate(1.9deg); }
+  75%  { transform: translateY(2.2px) rotate(0deg); }
+  100% { transform: translateY(0)     rotate(-1.7deg); }
 }
 
 /* 49 · The shore, gathering light when you arrive. */

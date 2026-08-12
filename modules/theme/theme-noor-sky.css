@@ -136,9 +136,21 @@
   opacity: 0;
   animation: noor-star-twinkle var(--star-dur, 6s) ease-in-out var(--star-delay, 0s) infinite;
 }
+/* Scintillation is not a sine wave. A star twinkles because pockets of air of
+   different density drift across the line of sight, so the brightness jitters
+   on no schedule at all — it lifts, half-drops, surges, settles. The old
+   two-stop keyframe was a metronome, and nine metronomes at nine tempos still
+   read as machinery. These stops are deliberately uneven; each star gets its
+   own duration and offset from the conductor on top. */
 @keyframes noor-star-twinkle {
-  0%, 100% { opacity: .12; transform: scale(.85); }
-  50%      { opacity: .85; transform: scale(1.15); }
+  0%   { opacity: .16; transform: scale(.86); }
+  17%  { opacity: .62; transform: scale(1.05); }
+  28%  { opacity: .31; transform: scale(.93); }
+  47%  { opacity: .92; transform: scale(1.18); }
+  59%  { opacity: .44; transform: scale(1.00); }
+  76%  { opacity: .74; transform: scale(1.11); }
+  88%  { opacity: .27; transform: scale(.91); }
+  100% { opacity: .16; transform: scale(.86); }
 }
 
 /* =========================================================================
@@ -151,6 +163,37 @@
    Two sizes, weighted heavily toward the small: a sky where every meteor is
    a fireball is a video game. The rare bright one is what makes the small
    ones feel like a sky at all.
+
+   THE THREE THINGS THAT MAKE A STREAK READ AS A FALLING BODY
+   ----------------------------------------------------------
+   All three were wrong here, and all three are the same class of mistake:
+   the streak was DRAWN by one number and MOVED by another, and nothing
+   forced the two to agree.
+
+   1. IT MUST POINT WHERE IT IS GOING. The meteor travels down and to the
+      LEFT, so its long axis must too — `rotate(180deg - angle)`, not
+      `rotate(angle)`. Rotating by the raw angle points the streak down-RIGHT
+      while it slides down-left: a mirror image of its own velocity. That is
+      the single detail that makes a meteor read as a decal being dragged
+      across the page, and the file previously claimed to have fixed it while
+      doing exactly the opposite. Because the axis flipped, the gradient
+      flipped with it — the bright head now sits at the 100% (leading) end.
+
+   2. ITS ANGLE MUST SURVIVE THE VIEWPORT. `--m-dy` is now in **vw**, the
+      same unit as `--m-dx`. It used to be vh, which sounds harmless and is
+      not: 1vh and 1vw are different lengths, so a streak declared at 30deg
+      actually fell at 18deg on a 16:9 desktop and at something else again on
+      a phone. One unit for both legs of the triangle is what makes the drawn
+      angle and the travelled angle the same angle on every screen.
+
+   3. ITS SPEED MUST FOLLOW FROM ITS DISTANCE. The conductor now rolls a
+      VELOCITY and divides, instead of rolling a duration and hoping. Rolling
+      both independently put a 4.2x speed spread in one sky — two meteors of
+      the same size, one strolling and one snapping past.
+
+   And the taper: `transform-origin` is the head, so the tail retracts INTO
+   the head as the rock burns out rather than shrinking from both ends. Real
+   meteors are longest at peak burn and collapse to a point at the end.
    ========================================================================= */
 [data-theme="noor"] .noor-meteor {
   position: fixed;
@@ -161,16 +204,22 @@
   z-index: 3;
   pointer-events: none;
   border-radius: 999px;
-  /* Bright head on the LEADING (left) edge, tail dissolving behind it. */
-  background: linear-gradient(270deg,
+  /* Bright head on the LEADING end, tail dissolving behind it. With the axis
+     now pointing along the velocity, the leading end is 100%, not 0%. */
+  background: linear-gradient(90deg,
     transparent 0%,
     rgba(232, 207, 142, .06) 22%,
     rgba(255, 243, 196, .55) 72%,
     #FFF8DC 100%);
   box-shadow: 0 0 12px rgba(255, 243, 196, .55);
   opacity: 0;
-  transform: rotate(var(--m-angle, 22deg));
-  animation: noor-meteor-fall var(--m-dur, 1.5s) cubic-bezier(.25, .5, .5, 1) forwards;
+  /* The head is the pivot AND the anchor the tail retracts toward. */
+  transform-origin: 100% 50%;
+  transform: rotate(var(--m-angle, 158deg));
+  /* Linear. A meteor crosses in about a second; over that span its apparent
+     motion is constant, and the ease-out that used to be here made every one
+     of them look like it was landing in treacle. */
+  animation: noor-meteor-fall var(--m-dur, 1.5s) linear forwards;
   will-change: transform, opacity;
 }
 
@@ -188,12 +237,25 @@
     0 0 42px rgba(27, 180, 212, .35);
 }
 
+/* Every keyframe carries the same three functions in the same order, or the
+   browser cannot interpolate them componentwise and falls back to a matrix
+   blend that wobbles the angle mid-flight. */
 @keyframes noor-meteor-fall {
-  0%   { transform: translate3d(0, 0, 0) rotate(var(--m-angle, 22deg)); opacity: 0; }
-  8%   { opacity: 1; }
-  70%  { opacity: 1; }
+  0% {
+    transform: translate3d(0, 0, 0) rotate(var(--m-angle, 158deg)) scaleX(.3);
+    opacity: 0;
+  }
+  10% { opacity: .6; }
+  /* Peak burn: densest air, longest tail, brightest head. */
+  55% {
+    transform: translate3d(calc(var(--m-dx, -110vw) * .55), calc(var(--m-dy, 38vw) * .55), 0)
+               rotate(var(--m-angle, 158deg)) scaleX(1);
+    opacity: 1;
+  }
+  78% { opacity: .8; }
   100% {
-    transform: translate3d(var(--m-dx, -110vw), var(--m-dy, 42vh), 0) rotate(var(--m-angle, 22deg));
+    transform: translate3d(var(--m-dx, -110vw), var(--m-dy, 38vw), 0)
+               rotate(var(--m-angle, 158deg)) scaleX(.18);
     opacity: 0;
   }
 }
@@ -222,6 +284,21 @@
   animation: noor-fly-rise var(--f-dur, 18s) linear forwards;
   will-change: transform;
 }
+
+/* The gust (section 12) leans everything light that is currently airborne.
+   It rides the standalone `translate` property, NOT `transform`, and that is
+   the entire trick: `translate` composes with whatever `transform` animation
+   the element is already running instead of overwriting it, so a firefly can
+   be blown sideways in the middle of its own climb. Declared on the base
+   class so that REMOVING .is-gusted eases the element back rather than
+   snapping it. */
+[data-theme="noor"] .noor-fly,
+[data-theme="noor"] .noor-smoke,
+[data-theme="noor"] .noor-spark,
+[data-theme="noor"] .noor-bubble {
+  transition: translate 1.5s var(--ease-inout, ease-in-out);
+}
+[data-theme="noor"] .is-gusted { translate: var(--gust, 0) 0; }
 [data-theme="noor"] .noor-fly::before {
   content: "";
   position: absolute;
@@ -236,14 +313,29 @@
 
 /* The wander is written into the path itself rather than a second animation:
    percentage keyframes with alternating sideways drift read as an insect
-   making decisions, where a sine-wave transform reads as a machine. */
+   making decisions, where a sine-wave transform reads as a machine.
+ *
+ * TWO PHYSICAL CORRECTIONS TO THAT PATH
+ * -------------------------------------
+ * 1. NO CORNERS. The old keyframes ran on `linear`, which meant the insect
+ *    reversed direction at full speed — an instantaneous velocity flip, which
+ *    is an infinite acceleration, which is a visible kink. A body with mass
+ *    decelerates into a turn and accelerates out of it, so every stop carries
+ *    its own ease-in-out and the sideways velocity passes through zero at
+ *    each reversal.
+ * 2. NO CRUISE CONTROL. The climb used to be five identical 22vh steps in
+ *    five identical slices of time — a constant vertical velocity, which is
+ *    an elevator, not an insect. The steps below are uneven (18, 21, 18, 23,
+ *    28) so the firefly labours, coasts and labours again, and the eased
+ *    horizontal turns never line up into a beat.
+ */
 @keyframes noor-fly-rise {
-  0%   { transform: translate3d(0, 0, 0); }
-  20%  { transform: translate3d(calc(var(--f-sway, 3vw) * 1), -22vh, 0); }
-  40%  { transform: translate3d(calc(var(--f-sway, 3vw) * -0.6), -44vh, 0); }
-  60%  { transform: translate3d(calc(var(--f-sway, 3vw) * 1.3), -66vh, 0); }
-  80%  { transform: translate3d(calc(var(--f-sway, 3vw) * -0.3), -88vh, 0); }
-  100% { transform: translate3d(calc(var(--f-sway, 3vw) * 0.7), -112vh, 0); }
+  0%   { transform: translate3d(0, 0, 0); animation-timing-function: var(--ease-inout, ease-in-out); }
+  20%  { transform: translate3d(calc(var(--f-sway, 3vw) *  1),    -18vh, 0); animation-timing-function: var(--ease-inout, ease-in-out); }
+  40%  { transform: translate3d(calc(var(--f-sway, 3vw) * -0.6),  -39vh, 0); animation-timing-function: var(--ease-inout, ease-in-out); }
+  60%  { transform: translate3d(calc(var(--f-sway, 3vw) *  1.3),  -57vh, 0); animation-timing-function: var(--ease-inout, ease-in-out); }
+  80%  { transform: translate3d(calc(var(--f-sway, 3vw) * -0.3),  -80vh, 0); animation-timing-function: var(--ease-inout, ease-in-out); }
+  100% { transform: translate3d(calc(var(--f-sway, 3vw) *  0.7), -108vh, 0); }
 }
 @keyframes noor-fly-pulse {
   0%, 100% { opacity: .15; transform: scale(.7); }
@@ -285,11 +377,16 @@
 }
 
 /* The ember trail: a tapering streak behind the bird, faded at both ends so
-   it has no visible start. Sits BEHIND the bird (negative z within the
-   element's own stacking context). */
+   it has no visible start. It is supposed to sit BEHIND the bird, and it
+   never did: the rule said so in a comment and then declared no z-index at
+   all, so the default paint order (::after over ::before) laid the trail
+   across the phoenix's own body — a bar of fire through its chest. The bird
+   carries z-index:3 and position:fixed, so it is its own stacking context and
+   a negative z here goes behind the wings without falling behind the page. */
 [data-theme="noor"] .noor-phoenix::after {
   content: "";
   position: absolute;
+  z-index: -1;
   top: 50%; right: 82%;
   width: 170px; height: 3px;
   transform: translateY(-50%);
@@ -303,14 +400,21 @@
 }
 
 /* A long shallow arc: up through the middle of the crossing, down at the
-   end — a bird gliding, not a projectile. */
+   end — a bird gliding, not a projectile. The bank angle is the physics: the
+   nose is up while it climbs and down while it falls away, never level except
+   at the top of the arc.
+ *
+ * The vertical legs are in vw, not vh. Mixed units make the drawn bank angle
+ * a lie about the actual path the moment the window stops being 16:9 — the
+ * same fault the meteor had, and the reason a phoenix on an ultrawide used to
+ * look like it was gliding nose-up down a flat line. */
 @keyframes noor-phoenix-cross {
   0%   { transform: translate3d(0, 0, 0) rotate(-4deg); opacity: 0; }
   8%   { opacity: .9; }
-  35%  { transform: translate3d(38vw, -7vh, 0) rotate(-7deg); }
-  65%  { transform: translate3d(72vw, -4vh, 0) rotate(2deg); }
+  35%  { transform: translate3d(38vw, -4vw, 0) rotate(-7deg); }
+  65%  { transform: translate3d(72vw, -2.2vw, 0) rotate(2deg); }
   92%  { opacity: .85; }
-  100% { transform: translate3d(calc(100vw + 200px), 6vh, 0) rotate(7deg); opacity: 0; }
+  100% { transform: translate3d(calc(100vw + 200px), 3.4vw, 0) rotate(7deg); opacity: 0; }
 }
 @keyframes noor-phoenix-beat {
   from { transform: scaleY(1); }

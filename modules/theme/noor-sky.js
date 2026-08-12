@@ -144,31 +144,62 @@ function hangTheMoon(small) {
 }
 
 /**
- * One meteor. Enters from the upper right, falls left and down — the
- * direction is fixed because a sky whose meteors come from everywhere reads
- * as random noise rather than weather. Everything else about it is rolled.
+ * One streak of burning rock. Enters from the upper right, falls left and
+ * down — the direction is fixed because a sky whose meteors come from
+ * everywhere reads as random noise rather than weather.
+ *
+ * THE GEOMETRY, WHICH IS THE WHOLE JOB
+ * ------------------------------------
+ * A streak has to point where it is going. It travels down-LEFT, so its long
+ * axis has to be rotated to 180 - angle; rotating by the raw angle points it
+ * down-RIGHT, a mirror image of its own velocity, and that is what made the
+ * old meteors read as decals dragged across the page rather than objects
+ * moving through air.
+ *
+ * Both legs of the fall are in **vw**. The drop used to be in vh, and since
+ * 1vh and 1vw are different lengths, a meteor declared at 30deg actually fell
+ * at 18deg on a 16:9 desktop — the drawn angle and the travelled angle were
+ * never the same number on any screen. One unit for both legs fixes that
+ * everywhere at once.
+ *
+ * And the duration is DERIVED. Rolling a distance and a duration
+ * independently, as this used to, put a 4.2x speed spread in a single sky:
+ * two identical rocks, one snapping past and one strolling. Roll the velocity
+ * instead — a real, narrow band — and divide.
+ *
+ * @param {object} o overrides; every field is optional and rolled if absent.
  */
+function streak(o = {}) {
+  const cls = o.cls ?? 'noor-meteor';
+  const angle = o.angle ?? rand(16, 32);             // degrees below horizontal
+  const travel = o.travel ?? rand(70, 125);          // vw crossed before it dies
+  const drop = travel * Math.tan(angle * Math.PI / 180);   // vw, deliberately
+  const speed = o.speed ?? rand(58, 96);             // vw per second
+
+  const m = el('div', cls);
+  m.style.setProperty('--m-x', (o.x ?? rand(60, 108)).toFixed(1) + 'vw');
+  m.style.setProperty('--m-y', (o.y ?? rand(-2, 30)).toFixed(1) + 'vh');
+  // A faster rock burns a longer trail; length is a consequence of speed,
+  // not a second independent roll that can contradict it.
+  m.style.setProperty('--m-len', ((o.bulk ?? 1) * speed * rand(1.5, 2.3)).toFixed(0) + 'px');
+  m.style.setProperty('--m-thick', o.thick ?? '2px');
+  m.style.setProperty('--m-angle', (180 - angle).toFixed(1) + 'deg');
+  m.style.setProperty('--m-dx', (-travel).toFixed(1) + 'vw');
+  m.style.setProperty('--m-dy', drop.toFixed(1) + 'vw');
+  m.style.setProperty('--m-dur', (Math.hypot(travel, drop) / speed).toFixed(2) + 's');
+
+  once(m, o.cap ?? 5, o.delay ?? 0);
+  return { angle, travel, drop, speed };
+}
+
+/** The common event: one small rock, occasionally a bright one. */
 function meteor(small) {
   const bright = Math.random() < 0.18;
-  const angle = rand(16, 30);                        // degrees below horizontal
-  const m = el('div', bright ? 'noor-meteor is-bright' : 'noor-meteor');
-
-  const len = bright ? rand(150, 230) : rand(80, 160);
-  const travel = rand(70, 125);                      // vw covered before it dies
-
-  m.style.setProperty('--m-x', rand(60, 108).toFixed(1) + 'vw');
-  m.style.setProperty('--m-y', rand(-2, 30).toFixed(1) + 'vh');
-  m.style.setProperty('--m-len', (small ? len * 0.7 : len).toFixed(0) + 'px');
-  m.style.setProperty('--m-thick', bright ? '3px' : '2px');
-  m.style.setProperty('--m-angle', angle.toFixed(1) + 'deg');
-  m.style.setProperty('--m-dx', (-travel).toFixed(1) + 'vw');
-  // Fall consistent with the angle it is drawn at, or the streak points one
-  // way and travels another — the single detail that makes a meteor read as
-  // a sticker sliding across the page.
-  m.style.setProperty('--m-dy', (travel * Math.tan(angle * Math.PI / 180)).toFixed(1) + 'vh');
-  m.style.setProperty('--m-dur', rand(0.9, 2.1).toFixed(2) + 's');
-
-  once(m);
+  streak({
+    cls: bright ? 'noor-meteor is-bright' : 'noor-meteor',
+    bulk: (bright ? 1.7 : 1) * (small ? 0.7 : 1),
+    thick: bright ? '3px' : '2px',
+  });
 }
 
 /** One firefly, rising off the water at the bottom of the page. */
@@ -221,15 +252,27 @@ function el(tag, className) {
  * causes is invisible until a long session has thousands of dead nodes in
  * the DOM.
  *
- * @param {number} cap how many of this kind may exist at once
+ * THE PSEUDO-ELEMENT TRAP. An animation running on ::before or ::after fires
+ * its `animationend` ON THE HOST ELEMENT — there is no separate event target
+ * for a pseudo-element. So a short flourish on a child (the satellite's
+ * flare, the spark's cooling core) would delete the whole node the instant it
+ * finished, cutting the parent's own flight off partway. `e.pseudoElement` is
+ * the empty string only for the element's own animations, which is the one
+ * signal that distinguishes them.
+ *
+ * @param {number} cap   how many of this kind may exist at once
+ * @param {number} delay seconds to hold the element back before it is added
  */
-function once(node, cap = 4) {
+function once(node, cap = 4, delay = 0) {
   const kind = node.className.split(' ')[0];
   if (document.querySelectorAll('.' + kind).length >= cap) return;
 
   const done = () => node.remove();
-  node.addEventListener('animationend', done, { once: true });
-  setTimeout(done, 30000);
+  node.addEventListener('animationend', (e) => {
+    if (e.target === node && !e.pseudoElement) done();
+  });
+  setTimeout(done, 40000);
 
-  document.body.appendChild(node);
+  if (delay > 0) setTimeout(() => { if (isNight()) document.body.appendChild(node); }, delay * 1000);
+  else document.body.appendChild(node);
 }
