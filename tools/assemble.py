@@ -63,6 +63,20 @@ THEME_SHEETS = [
     "/modules/theme/theme-utsab.css",
 ]
 
+# Every theme a visitor may be shown, EXCLUDING classic — classic is the
+# absence of the attribute, not a value of it.
+#
+# This must stay in step with THEMES in modules/theme/theme.js and with
+# SiteSetting::THEMES on the server. It exists because the pre-paint bootstrap
+# below has to decide, before any JavaScript module has loaded, whether the
+# mirrored value is a theme it should paint or junk it should ignore.
+STOREFRONT_THEMES = ["luxe", "trio", "noor", "nakshi", "utsab"]
+
+
+def _theme_js_list():
+    """STOREFRONT_THEMES as a JS array literal for the inline bootstrap."""
+    return "[" + ",".join(f"'{t}'" for t in STOREFRONT_THEMES) + "]"
+
 
 def asset(path):
     """Append a content hash to a local asset URL, so browsers refetch it when
@@ -154,7 +168,8 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, cano
     # IS the universal theme: every visitor gets it, identically, and changing
     # it means `python tools/assemble.py --theme luxe` and a deploy. Never set
     # on admin pages (luxe=False), which do not follow the storefront.
-    theme_attr = ' data-theme="luxe"' if (luxe and BUILD_THEME == "luxe") else ""
+    theme_attr = (f' data-theme="{BUILD_THEME}"'
+                  if (luxe and BUILD_THEME in STOREFRONT_THEMES) else "")
     return f"""<!DOCTYPE html>
 <html lang="en" class="no-js"{cms_attr}{theme_attr}>
 <head>
@@ -187,13 +202,23 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, cano
        must REMOVE the attribute, not ignore the mirror — otherwise switching
        the shop back would never reach anyone who had already visited.
 
+       THE LIST IS GENERATED, NOT TYPED. This used to read `=== 'luxe'` and
+       remove the attribute for everything else, which was correct while Luxe
+       was the only non-Classic theme and silently wrong the moment it was not:
+       a shop published as Noor, Nakshi or Utsab painted Classic white on every
+       single navigation and then flipped once /api/theme resolved. The theme
+       still arrived — it just arrived after the flash this block exists to
+       prevent, on every page, forever. Interpolating STOREFRONT_THEMES means a
+       theme cannot be added without this knowing about it.
+
        Inline and above the stylesheet on purpose: a deferred script runs after
        the first paint, which is the flash it exists to prevent. */
     try {{
       var t = localStorage.getItem('gr:theme');
       if (t) {{
         var el = document.documentElement;
-        if (JSON.parse(t) === 'luxe') el.setAttribute('data-theme', 'luxe');
+        var v = JSON.parse(t);
+        if ({_theme_js_list()}.indexOf(v) > -1) el.setAttribute('data-theme', v);
         else el.removeAttribute('data-theme');
       }}
     }} catch (e) {{ /* private mode, or nothing stored — the built-in theme stands. */ }}
@@ -780,7 +805,7 @@ def sync_index_theme():
     with open(path, encoding="utf-8") as f:
         html = f.read()
 
-    want = ' data-theme="luxe"' if BUILD_THEME == "luxe" else ""
+    want = f' data-theme="{BUILD_THEME}"' if BUILD_THEME in STOREFRONT_THEMES else ""
     new = re.sub(r'(<html\b[^>]*?)(?:\s+data-theme="[^"]*")?(\s*>)',
                  lambda m: m.group(1) + want + m.group(2), html, count=1)
 
@@ -816,7 +841,12 @@ if __name__ == "__main__":
     import argparse
 
     _ap = argparse.ArgumentParser(description="Assemble GulfRabit's static pages.")
-    _ap.add_argument("--theme", choices=["classic", "luxe"], default="classic",
+    # Derived from STOREFRONT_THEMES rather than typed, for the reason the
+    # pre-paint bootstrap was wrong for three themes: a hand-kept copy of a
+    # list is a list that goes stale silently. Without this, --theme nakshi was
+    # rejected outright and a static deployment could not ship the new themes
+    # at all.
+    _ap.add_argument("--theme", choices=["classic", *STOREFRONT_THEMES], default="classic",
                      help="storefront theme to build in (default: classic)")
     BUILD_THEME = _ap.parse_args().theme          # noqa: F811 — overrides the module default
     if BUILD_THEME != "classic":

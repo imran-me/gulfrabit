@@ -30,13 +30,23 @@
        must REMOVE the attribute, not ignore the mirror — otherwise switching
        the shop back would never reach anyone who had already visited.
 
+       THE LIST IS GENERATED, NOT TYPED. This used to read `=== 'luxe'` and
+       remove the attribute for everything else, which was correct while Luxe
+       was the only non-Classic theme and silently wrong the moment it was not:
+       a shop published as Noor, Nakshi or Utsab painted Classic white on every
+       single navigation and then flipped once /api/theme resolved. The theme
+       still arrived — it just arrived after the flash this block exists to
+       prevent, on every page, forever. Interpolating STOREFRONT_THEMES means a
+       theme cannot be added without this knowing about it.
+
        Inline and above the stylesheet on purpose: a deferred script runs after
        the first paint, which is the flash it exists to prevent. */
     try {
       var t = localStorage.getItem('gr:theme');
       if (t) {
         var el = document.documentElement;
-        if (JSON.parse(t) === 'luxe') el.setAttribute('data-theme', 'luxe');
+        var v = JSON.parse(t);
+        if (['luxe','trio','noor','nakshi','utsab'].indexOf(v) > -1) el.setAttribute('data-theme', v);
         else el.removeAttribute('data-theme');
       }
     } catch (e) { /* private mode, or nothing stored — the built-in theme stands. */ }
