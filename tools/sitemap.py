@@ -67,6 +67,15 @@ NOINDEX = {
     "modules/catalog/product.html":         "template — indexed per ?id=",
     "modules/catalog/category.html":        "template — indexed per ?slug=",
     "modules/catalog/search-results.html":  "template — results depend on ?q=",
+
+    # Steps in a transaction, not destinations. Nobody arrives at a shop from
+    # a search for its cart, and asking Google to spend its crawl budget on
+    # four pages that are empty until a session exists takes that budget from
+    # the product pages, which are the only pages here that can win a search.
+    "modules/cart/cart.html":               "a step in buying — empty without a session",
+    "modules/checkout/checkout.html":       "a step in buying — empty without a cart",
+    "modules/auth/login.html":              "sign-in form — no indexable content",
+    "modules/auth/register.html":           "sign-up form — no indexable content",
 }
 
 # index.html is hand-authored, so it is not in assemble.py's PAGES.

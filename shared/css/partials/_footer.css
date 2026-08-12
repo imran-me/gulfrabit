@@ -70,6 +70,32 @@
   gap: var(--space-4);
 }
 .footer-pay { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+
+/* ---- Payment marks -----------------------------------------------------
+   A white tile under every one of them, and not for decoration: these logos
+   are drawn to sit on white, and the footer band is grey in the day themes
+   and near-black in Noor. Visa's #222357 on Noor's lagoon would be a dark
+   shape on a dark ground. The tile makes the row theme-proof and matches how
+   every checkout page in the market presents the same five. */
+.pay-mark {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 34px; min-width: 56px; padding: 0 10px;
+  background: #fff;
+  border: 1px solid var(--border-hairline);
+  border-radius: 7px;
+}
+.pay-mark img { height: 15px; width: auto; display: block; }
+/* A symbol carries more optical weight per pixel than a wordmark. Set to the
+   same 15px as the wordmarks, Mastercard's circles read as a smaller logo
+   sitting in a bigger box — the eye measures the ink, not the line. */
+.pay-mark--symbol img { height: 21px; }
+/* Cash on delivery is a method, not a brand, so it is set rather than drawn.
+   The colour is literal because the tile is white in every theme, and a
+   --text-* token is mixed for the page surface, which here it is not on. */
+.pay-mark--cod {
+  font-size: var(--fs-12); font-weight: var(--fw-semibold);
+  letter-spacing: .01em; white-space: nowrap; color: #04222b;
+}
 .footer-social { display: flex; gap: .75rem; align-items: center; }
 .footer-legal { margin-top: var(--space-3); display: flex; flex-wrap: wrap; gap: 1rem; }
 
