@@ -142,8 +142,105 @@ class AdminProductController extends Controller
             'data' => $product->toAdminArray() + [
                 'marginPct'    => $this->marginPercent($product),
                 'priceHistory' => $history,
+                'performance'  => $this->performance($product),
             ],
         ]);
+    }
+
+    /**
+     * How this product has actually sold — totals, and the same figures split
+     * by pack size.
+     *
+     * WHY IT READS ORDER LINES AND NOT THE PRODUCT
+     * --------------------------------------------
+     * Order lines are snapshots: they keep the title, the pack label and the
+     * price that were charged, and they survive the product being renamed,
+     * repriced or delisted. That is exactly what a sales history needs. The
+     * join is on `sku`, not `product_id`, for the same reason — product_id is
+     * nullable-on-delete, and a removed product's past sales must still count.
+     *
+     * THE BUCKETS, AND WHY THESE ONES
+     * -------------------------------
+     *   delivered — units that reached a customer and were paid for. This is
+     *               the only bucket whose revenue is real money.
+     *   open      — placed through shipped: demand that exists but could still
+     *               evaporate. Kept apart from delivered because counting the
+     *               two together is how a shop talks itself into a reorder it
+     *               cannot afford.
+     *   cancelled — including spam, which is a cancellation with a reason.
+     *   returned  — the expensive bucket in a COD market: the courier was
+     *               paid twice and the goods came back. Shown on its own so a
+     *               product with a quiet return problem cannot hide inside a
+     *               healthy-looking sold figure.
+     *
+     * One query, grouped in SQL and folded in PHP: a product with a thousand
+     * order lines must not become a thousand rows on the wire.
+     *
+     * @return array<string, mixed>
+     */
+    private function performance(Product $product): array
+    {
+        $rows = DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->where('order_items.sku', $product->sku)
+            ->groupBy('order_items.variant', 'orders.status')
+            ->selectRaw('order_items.variant as variant, orders.status as status,'
+                . ' SUM(order_items.qty) as units,'
+                . ' SUM(order_items.line_total_poisha) as revenue')
+            ->get();
+
+        $blank = ['delivered' => 0, 'open' => 0, 'cancelled' => 0, 'returned' => 0];
+        $totals = $blank + ['revenue' => 0];
+        $perVariant = [];
+
+        foreach ($rows as $row) {
+            $bucket = match ($row->status) {
+                'delivered'             => 'delivered',
+                'returned'              => 'returned',
+                'cancelled', 'spam'     => 'cancelled',
+                default                 => 'open',
+            };
+
+            $units = (int) $row->units;
+            // A null variant is a one-size product; it groups under '' so the
+            // panel has one row to draw rather than a special case.
+            $key = (string) ($row->variant ?? '');
+            $perVariant[$key] ??= $blank;
+            $perVariant[$key][$bucket] += $units;
+
+            $totals[$bucket] += $units;
+
+            if ($bucket === 'delivered') {
+                $totals['revenue'] += (int) $row->revenue;
+            }
+        }
+
+        // Counted on its own, NOT by summing the grouped counts: an order that
+        // contains two pack sizes of this product appears in two groups, and
+        // adding those together would report it as two orders.
+        $orderCount = DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->where('order_items.sku', $product->sku)
+            ->distinct()
+            ->count('orders.id');
+
+        $lastOrdered = DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->where('order_items.sku', $product->sku)
+            ->max('orders.created_at');
+
+        return [
+            'unitsDelivered' => $totals['delivered'],
+            'unitsOpen'      => $totals['open'],
+            'unitsCancelled' => $totals['cancelled'],
+            'unitsReturned'  => $totals['returned'],
+            'orders'         => $orderCount,
+            'revenueTaka'    => intdiv($totals['revenue'], 100),
+            'lastOrderedAt'  => $lastOrdered,
+            // Keyed by pack label so the panel can line these up against the
+            // variants it is already drawing.
+            'byVariant'      => $perVariant,
+        ];
     }
 
     /**
@@ -308,6 +405,11 @@ class AdminProductController extends Controller
             // which is a different fact from "none left".
             'stock_qty'             => isset($r['stockQty']) && $r['stockQty'] !== '' && $r['stockQty'] !== null
                 ? (int) $r['stockQty']
+                : null,
+            // The public per-pack "Only N left". Null means this pack makes no
+            // claim and the product-level figure stands.
+            'stock_display'         => isset($r['stockDisplay']) && $r['stockDisplay'] !== '' && $r['stockDisplay'] !== null
+                ? (int) $r['stockDisplay']
                 : null,
         ], $rows));
     }
