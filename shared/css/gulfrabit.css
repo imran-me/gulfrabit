@@ -1077,8 +1077,15 @@ a:hover { color: var(--link-hover); }
    the same way, by measuring every width from 992 to 1920. The threshold
    moves up with the row it guards. 1540 rather than the measured 1503, so a
    Bengali fallback face or a notch of browser zoom cannot walk it back over
-   the edge. */
-@media (max-width: 1539.98px) {
+   the edge.
+
+   1580 now, not 1540: the 1540 figure was measured while the Home glyph was
+   silently being crushed to 0px, so the row it was sized against was 21px
+   narrower than the real one. With the glyph holding its width the row needs
+   1544, and the threshold it sat exactly on gave back 4px of sideways
+   scroll. Re-measured at every width from 992 to 2560 with the icon
+   incompressible. */
+@media (max-width: 1579.98px) {
   .nav-item-optional { display: none; }
 }
 .site-header__actions { display: flex; align-items: center; gap: var(--space-1); margin-left: auto; }
@@ -1114,6 +1121,16 @@ a:hover { color: var(--link-hover); }
    icon. */
 .nav-link--icon { padding: 0.6rem 0.7rem; }
 .nav-link--icon[aria-current="page"]::after { left: 0.55rem; right: 0.55rem; }
+/* A glyph is not a flexible thing, and this one was the softest item in the
+   row. The header inner wants ~1453px inside a container that caps at 1400,
+   so the nav is over-constrained at EVERY width where the category shortcuts
+   show — widening the window never helps, because the container stops
+   growing. Every label carries white-space:nowrap and every icon button has
+   a width, which left an inline <svg> as the one child with no min-content
+   floor: it absorbed the entire deficit and rendered 0px wide from 1540
+   upward, leaving the active underline sitting under nothing at all. Seen on
+   the live site, reproduced at 1540, 1600, 1800, 1920 and 2560. */
+.nav-link--icon > svg { flex: none; }
 
 /* Anchored to the left edge of the Shop item, not centred on it.
    Centred, an 880px panel hung ~180px off the left of a 1280px window and the
@@ -1151,7 +1168,14 @@ a:hover { color: var(--link-hover); }
   transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
 .header-search__field:focus-within { border-color: var(--gr-cyan-dark); box-shadow: 0 0 0 3px rgba(27,180,212,.15); }
-.header-search__input { flex: 1; background: none; border: 0; color: var(--text-primary); font-size: var(--fs-14); outline: none; }
+/* min-width:0 at EVERY width, not only on the small-desktop slice below,
+   because that is where the row's give has to come from. A flex child cannot
+   shrink past its own content without an explicit floor, and the input's
+   default min-width:auto made the search box the one rigid thing in a row
+   that does not fit — so the deficit went looking for something else to
+   crush and found the Home glyph. A search field that is 12px narrower than
+   it wants is invisible to a shopper; a missing icon is not. */
+.header-search__input { flex: 1; min-width: 0; background: none; border: 0; color: var(--text-primary); font-size: var(--fs-14); outline: none; }
 .header-search__input::placeholder { color: var(--text-muted); }
 
 /* ---- Count badge on cart / wishlist icons ---------------------------- */
