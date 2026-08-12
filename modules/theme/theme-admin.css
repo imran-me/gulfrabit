@@ -177,3 +177,27 @@
 .theme-swatch--nakshi .theme-swatch__cta {
   background: linear-gradient(135deg, #0E6E88, #4A753B);
 }
+
+/* Utsab's miniature. The swatch cannot show a generative field — it changes,
+   and a still frame of one state would misrepresent the other three thousand
+   — so it shows the CONTRACT instead: a lit background, and solid opaque
+   cards sitting on top of it. That is the honest preview, because it is the
+   thing that stays true whatever the shader is doing. */
+.theme-swatch--utsab {
+  background:
+    radial-gradient(70% 60% at 78% 12%, rgba(86, 216, 240, .5), transparent 68%),
+    radial-gradient(60% 55% at 16% 86%, rgba(242, 206, 114, .42), transparent 68%),
+    radial-gradient(80% 70% at 45% 50%, rgba(120, 70, 190, .45), transparent 72%),
+    #0B0A12;
+  border-color: #3A3358;
+}
+.theme-swatch--utsab .theme-swatch__bar {
+  background: rgba(11, 10, 18, .94);
+  box-shadow: 0 1px 0 rgba(242, 206, 114, .5);
+}
+.theme-swatch--utsab .theme-swatch__row i {
+  background: #16141F;
+  border: 1px solid rgba(246, 242, 234, .2);
+  box-shadow: inset 0 1px 0 rgba(242, 206, 114, .35);
+}
+.theme-swatch--utsab .theme-swatch__cta { background: #56D8F0; }

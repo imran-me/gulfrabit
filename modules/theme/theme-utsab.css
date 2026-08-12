@@ -1,0 +1,184 @@
+/* =========================================================================
+   GulfRabit · Utsab theme
+   =========================================================================
+
+   উৎসব — FESTIVAL. The theme for the days a shop dresses up: Eid, Boishakh,
+   an anniversary sale. Not the daily clothes, and it is built on that
+   assumption rather than in spite of it.
+
+   THE ONE PROBLEM THIS THEME HAS TO SOLVE
+   ---------------------------------------
+   A generative WebGL field is the most attention-hungry thing that can go on
+   a page, and it is going behind a shop where people read prices. Every
+   decision below is about that conflict, and the resolution is a rule:
+
+     THE BACKGROUND MAY BE SPECTACULAR. THE READING SURFACE MAY NOT BE.
+
+   So the canvas is glorious and the content sits on solid, opaque cards over
+   a scrim heavy enough that no field can ever reach the type. Nothing is
+   translucent over the shader — not a card, not the header, not a drawer.
+   The festival happens BEHIND the shop, the way lights are strung above a
+   market rather than across the goods.
+
+   THE CANVAS IS NOT IN THIS FILE, AND MOSTLY DOES NOT EXIST
+   ---------------------------------------------------------
+   utsab-gl.js is reached through a dynamic import() and only after theme.js
+   has decided the theme is Utsab. On every other day it is not fetched, not
+   parsed and not compiled. What IS always here is the gradient below, which
+   is a complete, presentable background on its own — so a browser without
+   WebGL2, a visitor who asked for reduced motion, and the moment before the
+   module arrives all get the same finished theme rather than a blank page
+   waiting for a canvas.
+   ========================================================================= */
+
+[data-theme="utsab"] {
+  /* ---- Surfaces: near-black, so the field is the only light ------------ */
+  --surface-page:    #0B0A12;
+  --surface-raised:  #16141F;   /* cards — OPAQUE, see the rule above       */
+  --surface-sunken:  #100E18;
+  --surface-band:    #0E0C15;
+  --surface-inverse: #F6F2EA;
+
+  --border-hairline: rgba(246, 242, 234, .14);
+  --border-input:    #6A6484;
+
+  /* ---- Text: warm white, never pure ------------------------------------ */
+  /* Measured against the worst of all four surfaces, which for light text on
+     dark is always the LIGHTEST one (--surface-raised): primary 16.3:1,
+     secondary 10.3:1, muted 5.8:1, link 10.8:1, input border 3.3:1. */
+  --text-primary:    #F6F2EA;
+  --text-secondary:  #C6C0D4;
+  --text-muted:      #948DA8;
+  --text-on-accent:  #0B0A12;
+  --text-inverse:    #16141F;
+
+  /* ---- Brand hues, lit for a festival ---------------------------------- */
+  --link:            #56D8F0;
+  --link-hover:      #8BE7F7;
+  --accent-ink:      #56D8F0;
+  --gold-ink:        #F2CE72;
+  --lime-ink:        #B6E96A;
+
+  --gr-error:  #FF7A80;
+  --scrollbar-thumb: #4A4470;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.6);
+  --shadow-md: 0 6px 20px rgba(0,0,0,.66), 0 2px 6px rgba(0,0,0,.5);
+  --shadow-lg: 0 22px 56px rgba(0,0,0,.72), 0 8px 20px rgba(0,0,0,.55);
+
+  --wash-hover:      rgba(246, 242, 234, .07);
+  --wash-shimmer:    rgba(246, 242, 234, .07);
+  --scrim:           rgba(4, 3, 10, .74);
+  /* Deliberately near-solid. Everywhere else in this codebase the header
+     glass is translucent; over a moving shader it would strobe the logo. */
+  --glass-header:    rgba(11, 10, 18, .94);
+  --glass-overlay:   rgba(11, 10, 18, .97);
+}
+
+/* =========================================================================
+   1 · THE GROUND, WITHOUT THE CANVAS
+   =========================================================================
+   A complete background in its own right. This is what a browser with no
+   WebGL2 gets, what a reduced-motion visitor gets, and what everyone sees for
+   the few hundred milliseconds before the module lands — which is why it is a
+   designed gradient and not a placeholder colour. A theme whose fallback is
+   visibly a fallback has two designs, and one of them is bad.
+   ========================================================================= */
+html[data-theme="utsab"] { background: var(--surface-page); }
+[data-theme="utsab"] body { position: relative; background: transparent; }
+[data-theme="utsab"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 44% at 78% 10%, rgba(86, 216, 240, .16), transparent 66%),
+    radial-gradient(52% 46% at 14% 88%, rgba(242, 206, 114, .13), transparent 66%),
+    radial-gradient(70% 60% at 46% 50%, rgba(120, 70, 190, .12), transparent 70%);
+}
+
+/* =========================================================================
+   2 · THE CANVAS
+   =========================================================================
+   Behind everything, in front of the fallback gradient, and it never captures
+   a pointer. It is stretched from a buffer roughly half the viewport's size
+   (see RES_SCALE in utsab-gl.js) — which is invisible on a smooth field and
+   is most of why this runs at all on a mid-range phone.
+   ========================================================================= */
+[data-theme="utsab"] .utsab-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  opacity: .85;
+  /* The renderer swaps state on a timer; this is the crossfade it fades
+     through. Doing the transition here rather than in the shader means the
+     swap costs nothing on the GPU and cannot tear. */
+  transition: opacity 900ms var(--ease-inout, ease-in-out);
+}
+[data-theme="utsab"] .utsab-canvas.is-turning { opacity: 0; }
+
+/* THE SCRIM, and it is the single most important rule in the theme.
+   A generative field goes light and dark and light again on its own schedule,
+   which means at some point it WILL run bright directly under body copy. A
+   fixed veil over the canvas costs one composited layer and makes that
+   impossible by construction, rather than by hoping the palettes behave. */
+[data-theme="utsab"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(11, 10, 18, .82) 0%, rgba(11, 10, 18, .58) 30%,
+                            rgba(11, 10, 18, .58) 70%, rgba(11, 10, 18, .86) 100%);
+}
+
+/* =========================================================================
+   3 · THE READING SURFACE
+   =========================================================================
+   Opaque, all of it. This is the half of the bargain that lets the other half
+   be spectacular.
+   ========================================================================= */
+[data-theme="utsab"] .card,
+[data-theme="utsab"] .acard,
+[data-theme="utsab"] .product-card,
+[data-theme="utsab"] .category-card,
+[data-theme="utsab"] .testi-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  /* A festival light catches an edge. One hairline of gold along the top of
+     each card, and nothing else — the ornament budget for this theme is spent
+     almost entirely on the background. */
+  box-shadow: inset 0 1px 0 rgba(242, 206, 114, .22), var(--shadow-md);
+}
+
+/* The product photograph is shot on white and this page is nearly black, so
+   the well stays white and becomes the brightest thing on the card — the same
+   lit-vitrine idea Noor uses, and it works here for the same reason. */
+[data-theme="utsab"] .product-card__media,
+[data-theme="utsab"] .category-card__media {
+  background: #FFFFFF;
+}
+
+/* =========================================================================
+   4 · STILLNESS, ON REQUEST
+   =========================================================================
+   utsab-gl.js refuses to start under reduced motion, so there is usually no
+   canvas at all to quiet. This is the second lock: if one exists — a visitor
+   who changed the setting mid-session — it stops being animated by being
+   removed, and the fallback gradient underneath is already a finished
+   background. Nobody gets a frozen shader.
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="utsab"] .utsab-canvas { display: none; }
+}
+
+@media print {
+  [data-theme="utsab"] .utsab-canvas,
+  [data-theme="utsab"] body::before,
+  [data-theme="utsab"] body::after { display: none; }
+}

@@ -42,7 +42,7 @@ import { startNoorSky, stopNoorSky } from './noor-sky.js';
 import { startNakshiScene, stopNakshiScene } from './nakshi-scene.js';
 
 /** The only values that may ever reach the DOM. */
-const THEMES = ['classic', 'luxe', 'trio', 'noor', 'nakshi'];
+const THEMES = ['classic', 'luxe', 'trio', 'noor', 'nakshi', 'utsab'];
 
 /** Preview lives in sessionStorage: it dies with the tab, so it cannot be
  *  mistaken later for the published theme, and it cannot leak to a visitor. */
@@ -98,7 +98,50 @@ export function applyTheme(name) {
     stopNakshiScene();
     document.querySelectorAll('[data-nakshi-fx]').forEach((n) => n.remove());
   }
+
+  if (theme === 'utsab') armFestival();
+  else stopFestival();
   return theme;
+}
+
+/* ---- The festival ------------------------------------------------------
+ * Utsab is a special-occasion theme, so its renderer is the one thing in this
+ * file that is NOT imported at the top. utsab-gl.js is a WebGL2 shader
+ * system; a static import would put every byte of it on the critical path of
+ * a Classic shop that will never show it. Reached by dynamic import(), after
+ * the theme is known, and never fetched on any other day.
+ *
+ * theme-utsab.css ships a finished gradient background on its own, which is
+ * what makes that lateness safe: there is no blank page waiting for a canvas,
+ * no WebGL2 means no missing design, and reduced motion is simply the theme
+ * without its shader.
+ */
+let festivalMod = null;
+let festivalWanted = false;
+
+function armFestival() {
+  festivalWanted = true;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const go = () => {
+    import('./utsab-gl.js')
+      .then((m) => {
+        festivalMod = m;
+        // The theme can change while a network fetch is in flight, and on a
+        // slow connection that window is seconds long. Without this check the
+        // canvas arrives over whatever theme the visitor switched to.
+        if (festivalWanted && currentTheme() === 'utsab') m.startUtsab();
+      })
+      .catch(() => { /* the gradient in theme-utsab.css is already a background */ });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go);
+  else go();
+}
+
+function stopFestival() {
+  festivalWanted = false;
+  festivalMod?.stopUtsab();
+  document.querySelectorAll('[data-utsab-fx]').forEach((n) => n.remove());
 }
 
 /* ---- The field ---------------------------------------------------------
