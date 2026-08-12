@@ -43,7 +43,7 @@ async function init() {
   // Guard: empty cart → back to cart.
   if (!store.getCart().length) {
     document.querySelector('.checkout-layout').innerHTML =
-      `<div class="empty-state" style="grid-column:1/-1"><h2 class="empty-state__title">Your cart is empty</h2><p class="empty-state__text">Add something before checking out.</p><a class="btn-gr btn-primary-gr" href="${siteURL('index.html')}">Start shopping</a></div>`;
+      `<div class="empty-state" style="grid-column:1/-1"><h2 class="empty-state__title">Your cart is empty</h2><p class="empty-state__text">Add something before checking out.</p><a class="btn-gr btn-primary-gr" href="${siteURL('')}">Start shopping</a></div>`;
     document.querySelector('[data-stepper]')?.remove();
     return;
   }
@@ -127,7 +127,7 @@ function paintNav() {
 
   if (back) {
     const first = current === 1;
-    back.href = first ? siteURL('modules/cart/cart.html') : '#';
+    back.href = first ? siteURL('cart') : '#';
     back.querySelector('.btn-gr__en').textContent = first ? '← Back to cart' : '← Back';
     back.querySelector('.btn-bn').textContent = first ? 'কার্টে ফিরে যান' : 'ফিরে যান';
   }
@@ -413,7 +413,7 @@ async function placeOrder(e) {
   // order intact and payable on delivery.
   if (result?.ok && await maybeRedirectToGateway(order, g('phone'))) return;
 
-  window.location.href = siteURL(`modules/checkout/order-confirmation.html?id=${encodeURIComponent(order.id)}`);
+  window.location.href = siteURL(`order-confirmed?id=${encodeURIComponent(order.id)}`);
 }
 
 function setText(sel, v) { const el = document.querySelector(sel); if (el) el.textContent = v; }

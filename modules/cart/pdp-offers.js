@@ -134,7 +134,7 @@ function volumeRow(p) {
     detail: `${breaks}.`,
     // The cart charges the listed unit price. Printing a tier price as though
     // checkout would apply it would be advertising a price we do not charge.
-    status: `<span class="offers__note">Quoted by the B2B desk — <a href="/modules/b2b/b2b-industrial.html">request a quote</a>. The cart charges the listed unit price.</span>`,
+    status: `<span class="offers__note">Quoted by the B2B desk — <a href="/wholesale">request a quote</a>. The cart charges the listed unit price.</span>`,
   })];
 }
 

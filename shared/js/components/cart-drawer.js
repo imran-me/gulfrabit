@@ -68,7 +68,7 @@ function render() {
         <div class="cart-empty__icon">${BAG}</div>
         <p class="h5" style="margin-bottom:.5rem">Your cart is empty</p>
         <p class="caption" style="margin-bottom:1.5rem">Sourced. Verified. Delivered — start exploring.</p>
-        <a href="${siteURL('index.html')}" class="btn-gr btn-outline-gr btn-sm-gr">Continue shopping</a>
+        <a href="${siteURL('')}" class="btn-gr btn-outline-gr btn-sm-gr">Continue shopping</a>
       </div>`;
     footEl.innerHTML = '';
     return;
@@ -105,8 +105,8 @@ function render() {
     <div class="cart-summary-row"><span>Subtotal</span><span class="tabular">${formatBDT(subtotal)}</span></div>
     <div class="cart-summary-row"><span>Delivery</span><span>Calculated at checkout</span></div>
     <div class="flex gap-3 mt-4">
-      <a href="${siteURL('modules/cart/cart.html')}" class="btn-gr btn-outline-gr btn-block-gr">View Cart</a>
-      <a href="${siteURL('modules/checkout/checkout.html')}" class="btn-gr btn-primary-gr btn-block-gr">Checkout</a>
+      <a href="${siteURL('cart')}" class="btn-gr btn-outline-gr btn-block-gr">View Cart</a>
+      <a href="${siteURL('checkout')}" class="btn-gr btn-primary-gr btn-block-gr">Checkout</a>
     </div>`;
 
   // Not awaited: the drawer must open instantly. The gift block fills in a

@@ -118,7 +118,7 @@ function injectProductSchema(p) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL('index.html') },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL('') },
       { '@type': 'ListItem', position: 2, name: p.categoryName, item: categoryURL(p.categorySlug) },
       { '@type': 'ListItem', position: 3, name: p.title },
     ],
@@ -206,7 +206,7 @@ function paintInfo(p) {
     document.querySelector('[data-pdp-short]').insertAdjacentHTML('afterend',
       // Grouped: the offers block below says "1,000-unit minimum order" and an
       // ungrouped "1000" two lines above it reads like a different number.
-      `<p class="caption" style="margin-top:.5rem">MOQ: <strong>${p.moq.toLocaleString('en-BD')}</strong> units · Bulk pricing available — <a href="${siteURL('modules/b2b/b2b-industrial.html')}">request a quote</a>.</p>`);
+      `<p class="caption" style="margin-top:.5rem">MOQ: <strong>${p.moq.toLocaleString('en-BD')}</strong> units · Bulk pricing available — <a href="${siteURL('wholesale')}">request a quote</a>.</p>`);
   }
 
   // Wishlist button: the shared initializer already ran on DOMContentLoaded and
@@ -615,7 +615,7 @@ function renderNotFound() {
     <div class="empty-state" style="grid-column:1/-1">
       <h1 class="empty-state__title">Product not found</h1>
       <p class="empty-state__text">This product may have sold out or the link is incorrect.</p>
-      <a class="btn-gr btn-primary-gr" href="${siteURL('index.html')}">Back to home</a>
+      <a class="btn-gr btn-primary-gr" href="${siteURL('')}">Back to home</a>
     </div>`;
 }
 

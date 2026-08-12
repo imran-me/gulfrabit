@@ -9,7 +9,7 @@
  *
  * Usage:  import { siteURL } from '.../core/paths.js';
  *         a.href = siteURL('modules/catalog/product.html?id=gr-1');
- *         location.href = siteURL('index.html');
+ *         location.href = siteURL('');
  */
 
 // shared/js/core/ -> shared/js/ -> shared/ -> <site root>/

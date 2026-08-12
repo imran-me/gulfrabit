@@ -12,7 +12,7 @@ import { registerScreen } from '../admin/admin-shell.js';
 registerScreen({
   id: 'campaigns',
   label: 'Campaigns',
-  href: '/modules/marketing/campaigns.html',
+  href: '/admin/campaigns',
   area: 'orders',
   group: 'Trade',
   order: 20,

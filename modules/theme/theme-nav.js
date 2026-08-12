@@ -14,7 +14,7 @@ import { registerScreen } from '../admin/admin-shell.js';
 registerScreen({
   id: 'appearance',
   label: 'Appearance',
-  href: '/modules/theme/appearance.html',
+  href: '/admin/appearance',
   area: 'content',
   group: 'Settings',
   order: 80,

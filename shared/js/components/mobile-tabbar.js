@@ -49,12 +49,12 @@ export function initMobileTabbar() {
   nav.className = 'tabbar';
   nav.setAttribute('aria-label', 'Quick navigation');
   nav.innerHTML =
-    item('home', 'Home', 'হোম', siteURL('index.html'))
+    item('home', 'Home', 'হোম', siteURL(''))
     + item('shop', 'Shop', 'শপ', siteURL('shop'))
     + `<button class="tabbar__item" type="button" data-tabbar-cart>
          <span class="tabbar__iconwrap">${icon('cart')}<span class="tabbar__badge" data-tabbar-count hidden></span></span>
          <span>Cart</span><span class="tabbar__bn bn" lang="bn">কার্ট</span></button>`
-    + item('account', 'Account', 'অ্যাকাউন্ট', siteURL('modules/account/dashboard.html'));
+    + item('account', 'Account', 'অ্যাকাউন্ট', siteURL('account'));
   document.body.appendChild(nav);
   document.body.classList.add('has-tabbar');
 

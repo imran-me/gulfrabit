@@ -128,7 +128,7 @@ function paintIdentity(session) {
 
   document.querySelector('[data-admin-signout]')?.addEventListener('click', async () => {
     await signOut();
-    location.replace('/modules/admin/login.html');
+    location.replace('/admin/login');
   });
 }
 

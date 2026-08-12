@@ -225,7 +225,7 @@ function paint({ data, meta }) {
   body.innerHTML = data.map((p, i) => `
     <tr>
       <td>
-        <a href="/modules/admin/product-edit.html?sku=${encodeURIComponent(p.sku)}">${escapeHtml(p.title)}</a>
+        <a href="/admin/products/edit?sku=${encodeURIComponent(p.sku)}">${escapeHtml(p.title)}</a>
         <div class="atable__sub">${escapeHtml(p.sku)}${p.brand ? ` · ${escapeHtml(p.brand)}` : ''}</div>
       </td>
       <td class="atable__sub">${escapeHtml(p.category || '—')}${placement(p)}</td>
@@ -240,7 +240,7 @@ function paint({ data, meta }) {
       <td class="atable__num">${p.marginPct == null ? '<span class="atable__sub">—</span>' : `${p.marginPct}%`}</td>
       <td>${status(p)}</td>
       <td class="atable__actions">
-        <a class="btn-gr btn-ghost-gr btn-sm-gr" href="/modules/admin/product-edit.html?sku=${encodeURIComponent(p.sku)}">Edit</a>
+        <a class="btn-gr btn-ghost-gr btn-sm-gr" href="/admin/products/edit?sku=${encodeURIComponent(p.sku)}">Edit</a>
         <button class="btn-gr btn-ghost-gr btn-sm-gr aact-remove" type="button"
                 data-prod-remove="${i}">Remove</button>
       </td>

@@ -62,5 +62,5 @@ function go() {
   // Only same-origin admin paths. An open redirect on a login form is how a
   // phishing page borrows your domain's credibility.
   const safe = next && next.startsWith('/modules/admin/') && !next.startsWith('//');
-  location.replace(safe ? next : '/modules/admin/index.html');
+  location.replace(safe ? next : '/admin');
 }

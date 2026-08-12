@@ -35,7 +35,7 @@ import { categoryURL } from '../core/paths.js';
  * the row promises, and is where the home-page tile has always pointed.
  */
 const PROMO_HREF = {
-  'flash-sale': '/modules/deals/deals.html',
+  'flash-sale': '/deals',
 };
 
 /** Most columns the mega-menu can hold before it overflows the viewport. */

@@ -8,7 +8,7 @@ import { registerScreen } from '../admin/admin-shell.js';
 registerScreen({
   id: 'quotes',
   label: 'Quote requests',
-  href: '/modules/b2b/quotes.html',
+  href: '/admin/quotes',
   // Whoever works orders works quote requests — the same job at a different
   // size, and the same capability guarding the routes.
   area: 'orders',

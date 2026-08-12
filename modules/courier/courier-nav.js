@@ -11,7 +11,7 @@ import { registerScreen } from '../admin/admin-shell.js';
 registerScreen({
   id: 'couriers',
   label: 'Couriers',
-  href: '/modules/courier/couriers.html',
+  href: '/admin/couriers',
   // Whoever may work an order may see who carries it. Matches the
   // `admin:orders` guard on this module's routes.
   area: 'orders',

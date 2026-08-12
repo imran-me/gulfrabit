@@ -258,7 +258,7 @@ function fillAdLink() {
   const btn = document.querySelector('[data-pe-adcopy]');
   if (!input) return;
 
-  const url = new URL('/modules/checkout/express.html', location.origin);
+  const url = new URL('/buy', location.origin);
   url.searchParams.set('sku', product.id);
   url.searchParams.set('utm_source', 'facebook');
   url.searchParams.set('utm_medium', 'paid');
@@ -581,7 +581,7 @@ async function unlist() {
   note(result.message);
   // Back to the list: this product's page no longer has anything to show, and
   // leaving it open invites an edit that would fail.
-  setTimeout(() => location.assign('/modules/admin/products.html'), 900);
+  setTimeout(() => location.assign('/admin/products'), 900);
 }
 
 function note(message) {

@@ -20,7 +20,7 @@ import { registerScreen } from './admin-shell.js';
 registerScreen({
   id: 'dashboard',
   label: 'Dashboard',
-  href: '/modules/admin/index.html',
+  href: '/admin',
   // Every role has 'dashboard' (AdminUser::CAPABILITIES). The controller still
   // decides which cards each role receives.
   area: 'dashboard',
@@ -32,9 +32,9 @@ registerScreen({
 registerScreen({
   id: 'orders',
   label: 'Orders',
-  href: '/modules/admin/orders.html',
+  href: '/admin/orders',
   // Viewing one order is still being in Orders.
-  match: ['/modules/admin/order.html'],
+  match: ['/admin/order'],
   area: 'orders',
   group: 'Trade',
   order: 10,
@@ -44,8 +44,8 @@ registerScreen({
 registerScreen({
   id: 'customers',
   label: 'Customers',
-  href: '/modules/admin/customers.html',
-  match: ['/modules/admin/customer.html'],
+  href: '/admin/customers',
+  match: ['/admin/customer'],
   // Only owner and manager hold this capability. Warehouse sees a delivery
   // address on a packing slip; accounts sees money without names.
   area: 'customers',
@@ -57,8 +57,8 @@ registerScreen({
 registerScreen({
   id: 'products',
   label: 'Products',
-  href: '/modules/admin/products.html',
-  match: ['/modules/admin/product-edit.html'],
+  href: '/admin/products',
+  match: ['/admin/products/edit'],
   area: 'products',
   group: 'Catalogue',
   order: 35,
@@ -68,7 +68,7 @@ registerScreen({
 registerScreen({
   id: 'coupons',
   label: 'Coupons & offers',
-  href: '/modules/admin/coupons.html',
+  href: '/admin/coupons',
   area: 'products',
   group: 'Catalogue',
   // After Images (36). Pricing follows the catalogue it prices.
@@ -79,7 +79,7 @@ registerScreen({
 registerScreen({
   id: 'categories',
   label: 'Categories',
-  href: '/modules/admin/categories.html',
+  href: '/admin/categories',
   area: 'products',
   group: 'Catalogue',
   order: 34,

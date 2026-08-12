@@ -53,7 +53,7 @@ const handlers = {
     const { valid } = validateForm(form);
     if (!valid) return;
     toast.success('If that email exists, a reset link is on its way.');
-    setTimeout(() => { window.location.href = siteURL('modules/auth/login.html'); }, 1600);
+    setTimeout(() => { window.location.href = siteURL('login'); }, 1600);
   },
 };
 
@@ -67,7 +67,7 @@ async function signIn(user) {
   // through must never block a sign-in that already succeeded.
   await mergeGuestState();
 
-  setTimeout(() => { window.location.href = siteURL('modules/account/dashboard.html'); }, 900);
+  setTimeout(() => { window.location.href = siteURL('account'); }, 900);
 }
 
 /**

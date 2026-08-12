@@ -25,7 +25,7 @@ export function wireLogout() {
     e.preventDefault();
     store.clearUser();
     toast.info('Signed out');
-    setTimeout(() => { window.location.href = siteURL('index.html'); }, 700);
+    setTimeout(() => { window.location.href = siteURL(''); }, 700);
   });
 }
 

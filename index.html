@@ -90,7 +90,7 @@
       <button class="btn-icon-gr d-lg-none" type="button" data-open-mobile-nav aria-controls="mobileNav" aria-expanded="false" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
-      <a class="site-header__logo" href="index.html" aria-label="GulfRabit home">
+      <a class="site-header__logo" href="/" aria-label="GulfRabit home">
         <img src="assets/logo/gulfrabit-mark.png" alt="" width="38" height="38">
         <span class="site-header__wordmark">GulfRabit</span>
       </a>
@@ -98,7 +98,7 @@
         <!-- Home. Same glyph as the phone tab bar, icon-only because the row
              was measured full at six labels. Kept byte-for-byte in step with
              shared/components/header.html — this page is hand-authored. -->
-        <div class="nav-item"><a class="nav-link nav-link--icon" href="index.html" data-nav-home title="Home">
+        <div class="nav-item"><a class="nav-link nav-link--icon" href="/" data-nav-home title="Home">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="21" height="21" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-5.5h5V20"/></svg>
           <span class="visually-hidden">Home</span>
         </a></div>
@@ -110,19 +110,19 @@
             <div class="mega-menu__grid" data-mega-grid>
               <div>
                 <p class="mega-menu__col-title">Food &amp; Pantry</p>
-                <a class="mega-menu__link" href="modules/catalog/category.html?slug=dates-nuts">Dates &amp; Nuts</a>
-                <a class="mega-menu__link" href="modules/catalog/category.html?slug=chocolates-dairy">Chocolates &amp; Dairy</a>
+                <a class="mega-menu__link" href="/shop?slug=dates-nuts">Dates &amp; Nuts</a>
+                <a class="mega-menu__link" href="/shop?slug=chocolates-dairy">Chocolates &amp; Dairy</a>
               </div>
               <div>
                 <p class="mega-menu__col-title">Home &amp; Kitchen</p>
-                <a class="mega-menu__link" href="modules/catalog/category.html?slug=kitchen-appliances">Kitchen Appliances</a>
-                <a class="mega-menu__link" href="modules/catalog/category.html?slug=home-decor">Home Decor</a>
+                <a class="mega-menu__link" href="/shop?slug=kitchen-appliances">Kitchen Appliances</a>
+                <a class="mega-menu__link" href="/shop?slug=home-decor">Home Decor</a>
               </div>
               <div>
                 <p class="mega-menu__col-title">Family &amp; Style</p>
-                <a class="mega-menu__link" href="modules/catalog/category.html?slug=fashion-clothes">Fashion &amp; Clothes</a>
-                <a class="mega-menu__link" href="modules/catalog/category.html?slug=kids-toys">Kids &amp; Toys</a>
-                <a class="mega-menu__link" href="modules/deals/deals.html">Flash Sale</a>
+                <a class="mega-menu__link" href="/shop?slug=fashion-clothes">Fashion &amp; Clothes</a>
+                <a class="mega-menu__link" href="/shop?slug=kids-toys">Kids &amp; Toys</a>
+                <a class="mega-menu__link" href="/deals">Flash Sale</a>
               </div>
             </div>
           </div>
@@ -131,15 +131,15 @@
              to sit here; both are switched off in categories.json for now, and a
              nav item pointing at a category the storefront no longer lists is a
              dead end with a promoted position. -->
-        <div class="nav-item nav-item-optional"><a class="nav-link" href="modules/catalog/category.html?slug=dates-nuts" data-nav-match="dates-nuts">Dates &amp; Nuts</a></div>
-        <div class="nav-item nav-item-optional"><a class="nav-link" href="modules/catalog/category.html?slug=chocolates-dairy" data-nav-match="chocolates-dairy">Chocolates &amp; Dairy</a></div>
-        <div class="nav-item nav-item-optional"><a class="nav-link" href="modules/catalog/category.html?slug=fashion-clothes" data-nav-match="fashion-clothes">Fashion</a></div>
-        <div class="nav-item"><a class="nav-link" href="modules/deals/deals.html" data-nav-match="modules/deals" style="color:var(--lime-ink)">Flash Sale</a></div>
-        <div class="nav-item"><a class="nav-link" href="modules/content/about.html" data-nav-match="about">About</a></div>
+        <div class="nav-item nav-item-optional"><a class="nav-link" href="/shop?slug=dates-nuts" data-nav-match="dates-nuts">Dates &amp; Nuts</a></div>
+        <div class="nav-item nav-item-optional"><a class="nav-link" href="/shop?slug=chocolates-dairy" data-nav-match="chocolates-dairy">Chocolates &amp; Dairy</a></div>
+        <div class="nav-item nav-item-optional"><a class="nav-link" href="/shop?slug=fashion-clothes" data-nav-match="fashion-clothes">Fashion</a></div>
+        <div class="nav-item"><a class="nav-link" href="/deals" data-nav-match="modules/deals" style="color:var(--lime-ink)">Flash Sale</a></div>
+        <div class="nav-item"><a class="nav-link" href="/about" data-nav-match="about">About</a></div>
         <!-- "Where is my order" is the most-asked question in a cash-on-delivery
              market, and it was answered only by a footer link. Kept in step with
              shared/components/header.html by hand — this page is not assembled. -->
-        <div class="nav-item"><a class="nav-link" href="modules/account/track.html" data-nav-match="account/track">Track Order</a></div>
+        <div class="nav-item"><a class="nav-link" href="/track" data-nav-match="account/track">Track Order</a></div>
       </nav>
       <div class="header-search">
         <form data-search role="search" method="get" action="modules/catalog/search-results.html">
@@ -154,10 +154,10 @@
         <button class="btn-icon-gr d-lg-none" type="button" data-open-search aria-label="Search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
         </button>
-        <a class="btn-icon-gr header-action-optional" href="modules/account/dashboard.html" aria-label="Account">
+        <a class="btn-icon-gr header-action-optional" href="/account" aria-label="Account">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
         </a>
-        <a class="btn-icon-gr header-action-optional" href="modules/account/wishlist.html" aria-label="Wishlist">
+        <a class="btn-icon-gr header-action-optional" href="/wishlist" aria-label="Wishlist">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
           <span class="action-badge" data-wishlist-count aria-live="polite">0</span>
         </a>
@@ -182,23 +182,23 @@
            wholesale by category-menu.js, so a row authored inside it would
            vanish the moment the API answers. -->
       <ul class="mobile-nav__list mobile-nav__list--lead" role="list">
-        <li style="--i:0"><a class="mobile-nav__link" href="index.html" data-nav-home>
+        <li style="--i:0"><a class="mobile-nav__link" href="/" data-nav-home>
           <svg class="mobile-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="19" height="19" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-5.5h5V20"/></svg>
           Home <span class="mobile-nav__bn bn" lang="bn">হোম</span></a></li>
       </ul>
       <ul class="mobile-nav__list" role="list" data-mobile-shop>
-        <li style="--i:1"><a class="mobile-nav__link" href="modules/catalog/category.html?slug=chocolates-dairy">Chocolates &amp; Dairy</a></li>
-        <li style="--i:2"><a class="mobile-nav__link" href="modules/catalog/category.html?slug=home-decor">Home Decor</a></li>
-        <li style="--i:3"><a class="mobile-nav__link" href="modules/catalog/category.html?slug=kitchen-appliances">Kitchen Appliances</a></li>
-        <li style="--i:4"><a class="mobile-nav__link" href="modules/catalog/category.html?slug=dates-nuts">Dates &amp; Nuts</a></li>
-        <li style="--i:5"><a class="mobile-nav__link" href="modules/catalog/category.html?slug=kids-toys">Kids &amp; Toys</a></li>
-        <li style="--i:6"><a class="mobile-nav__link" href="modules/catalog/category.html?slug=fashion-clothes">Fashion &amp; Clothes</a></li>
-        <li style="--i:7"><a class="mobile-nav__link" href="modules/deals/deals.html">Flash Sale</a></li>
+        <li style="--i:1"><a class="mobile-nav__link" href="/shop?slug=chocolates-dairy">Chocolates &amp; Dairy</a></li>
+        <li style="--i:2"><a class="mobile-nav__link" href="/shop?slug=home-decor">Home Decor</a></li>
+        <li style="--i:3"><a class="mobile-nav__link" href="/shop?slug=kitchen-appliances">Kitchen Appliances</a></li>
+        <li style="--i:4"><a class="mobile-nav__link" href="/shop?slug=dates-nuts">Dates &amp; Nuts</a></li>
+        <li style="--i:5"><a class="mobile-nav__link" href="/shop?slug=kids-toys">Kids &amp; Toys</a></li>
+        <li style="--i:6"><a class="mobile-nav__link" href="/shop?slug=fashion-clothes">Fashion &amp; Clothes</a></li>
+        <li style="--i:7"><a class="mobile-nav__link" href="/deals">Flash Sale</a></li>
       </ul>
       <ul class="mobile-nav__list mobile-nav__list--minor" role="list">
-        <li style="--i:8"><a class="mobile-nav__link" href="modules/account/track.html">Track Order <span class="mobile-nav__bn bn" lang="bn">অর্ডার ট্র্যাক</span></a></li>
-        <li style="--i:9"><a class="mobile-nav__link" href="modules/account/dashboard.html">My Account</a></li>
-        <li style="--i:10"><a class="mobile-nav__link" href="modules/content/about.html">About</a></li>
+        <li style="--i:8"><a class="mobile-nav__link" href="/track">Track Order <span class="mobile-nav__bn bn" lang="bn">অর্ডার ট্র্যাক</span></a></li>
+        <li style="--i:9"><a class="mobile-nav__link" href="/account">My Account</a></li>
+        <li style="--i:10"><a class="mobile-nav__link" href="/about">About</a></li>
       </ul>
     </nav>
   </aside>
@@ -250,7 +250,7 @@
       <div class="hero__viewport" data-hero>
         <article class="hero__slide is-active" data-hero-slide aria-roledescription="slide" aria-label="1 of 4"
                  style="--arn:2; --ar:1600/800">
-          <a class="hero__link" href="modules/catalog/category.html?slug=dates-nuts">
+          <a class="hero__link" href="/shop?slug=dates-nuts">
             <picture aria-hidden="true"><source srcset="assets/images/hero/hero-saffron-400.webp" type="image/webp"><img class="hero__backdrop" src="assets/images/hero/hero-saffron.jpg" alt="" aria-hidden="true" loading="eager" fetchpriority="high"></picture>
             <span class="hero__fit">
               <picture><source srcset="assets/images/hero/hero-saffron-800.webp 800w, assets/images/hero/hero-saffron-1200.webp 1200w, assets/images/hero/hero-saffron.webp 1600w" sizes="(max-width: 1280px) 100vw, 1280px" type="image/webp"><img class="hero__art" src="assets/images/hero/hero-saffron.jpg" width="1600" height="800" alt="Premium Iranian Saffron — 100% pure, handpicked, red gold of Iran." loading="eager" fetchpriority="high"></picture>
@@ -259,7 +259,7 @@
         </article>
         <article class="hero__slide" data-hero-slide aria-roledescription="slide" aria-label="2 of 4"
                  style="--arn:1.5; --ar:1536/1024">
-          <a class="hero__link" href="modules/catalog/category.html?slug=dates-nuts">
+          <a class="hero__link" href="/shop?slug=dates-nuts">
             <picture aria-hidden="true"><source srcset="assets/images/hero/hero-figs-400.webp" type="image/webp"><img class="hero__backdrop" src="assets/images/hero/hero-figs.jpg" alt="" aria-hidden="true" loading="lazy" fetchpriority="low"></picture>
             <span class="hero__fit">
               <picture><source srcset="assets/images/hero/hero-figs-800.webp 800w, assets/images/hero/hero-figs-1200.webp 1200w, assets/images/hero/hero-figs.webp 1536w" sizes="(max-width: 1280px) 100vw, 1280px" type="image/webp"><img class="hero__art" src="assets/images/hero/hero-figs.jpg" width="1536" height="1024" alt="Premium Afghanistan Twisted Figs — 100% natural, hand twisted, no additives." loading="lazy" fetchpriority="low"></picture>
@@ -268,7 +268,7 @@
         </article>
         <article class="hero__slide" data-hero-slide aria-roledescription="slide" aria-label="3 of 4"
                  style="--arn:1.876; --ar:1600/853">
-          <a class="hero__link" href="modules/catalog/category.html?slug=dates-nuts">
+          <a class="hero__link" href="/shop?slug=dates-nuts">
             <picture aria-hidden="true"><source srcset="assets/images/hero/hero-acacia-honey-400.webp" type="image/webp"><img class="hero__backdrop" src="assets/images/hero/hero-acacia-honey.jpg" alt="" aria-hidden="true" loading="lazy" fetchpriority="low"></picture>
             <span class="hero__fit">
               <picture><source srcset="assets/images/hero/hero-acacia-honey-800.webp 800w, assets/images/hero/hero-acacia-honey-1200.webp 1200w, assets/images/hero/hero-acacia-honey.webp 1600w" sizes="(max-width: 1280px) 100vw, 1280px" type="image/webp"><img class="hero__art" src="assets/images/hero/hero-acacia-honey.jpg" width="1600" height="853" alt="Yemeni Acacia Honey for kids — 100% pure and natural, from the blossoms of Yemen." loading="lazy" fetchpriority="low"></picture>
@@ -277,7 +277,7 @@
         </article>
         <article class="hero__slide" data-hero-slide aria-roledescription="slide" aria-label="4 of 4"
                  style="--arn:2.114; --ar:1600/757">
-          <a class="hero__link" href="modules/catalog/category.html?slug=dates-nuts">
+          <a class="hero__link" href="/shop?slug=dates-nuts">
             <picture aria-hidden="true"><source srcset="assets/images/hero/hero-makhana-400.webp" type="image/webp"><img class="hero__backdrop" src="assets/images/hero/hero-makhana.jpg" alt="" aria-hidden="true" loading="lazy" fetchpriority="low"></picture>
             <span class="hero__fit">
               <picture><source srcset="assets/images/hero/hero-makhana-800.webp 800w, assets/images/hero/hero-makhana-1200.webp 1200w, assets/images/hero/hero-makhana.webp 1600w" sizes="(max-width: 1280px) 100vw, 1280px" type="image/webp"><img class="hero__art" src="assets/images/hero/hero-makhana.jpg" width="1600" height="757" alt="Premium Indian Makhana — 100% natural, rich in protein, low calorie, gluten free." loading="lazy" fetchpriority="low"></picture>
@@ -341,49 +341,49 @@
              picks the 160w and 280w tiers at 2x with nothing upscaled and the
              560w tier left for larger. Re-measure if the column count moves. -->
         <div class="home-cat-grid" data-reveal-stagger="60">
-          <a class="category-card" href="modules/catalog/category.html?slug=oil-ghee" data-reveal>
+          <a class="category-card" href="/shop?slug=oil-ghee" data-reveal>
             <span class="category-card__media">
               <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 2h4v3l3.2 3.6A4 4 0 0 1 18 11v8.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19.5V11a4 4 0 0 1 .8-2.4L10 5z"/><path d="M6 13h12"/></svg>
               <picture><source srcset="assets/images/categories/oil-ghee-160.webp?v=2477f36b 160w, assets/images/categories/oil-ghee-280.webp?v=2477f36b 280w, assets/images/categories/oil-ghee-560.webp?v=2477f36b 560w" sizes="(max-width: 767px) 18vw, 140px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/oil-ghee.jpg?v=2477f36b" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
             </span>
             <h3 class="category-card__title">Oil &amp; Ghee</h3><span class="category-card__count">Olive · Cold-pressed · Ghee</span></a>
-          <a class="category-card" href="modules/catalog/category.html?slug=chocolates-dairy" data-reveal>
+          <a class="category-card" href="/shop?slug=chocolates-dairy" data-reveal>
             <span class="category-card__media">
               <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 6h16v12H4z"/><path d="M4 12h16M10 6v12M16 6v12"/></svg>
               <picture><source srcset="assets/images/categories/chocolates-dairy-160.webp?v=2477f36b 160w, assets/images/categories/chocolates-dairy-280.webp?v=2477f36b 280w, assets/images/categories/chocolates-dairy-560.webp?v=2477f36b 560w" sizes="(max-width: 767px) 18vw, 140px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/chocolates-dairy.jpg?v=2477f36b" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
             </span>
             <h3 class="category-card__title">Chocolates &amp; Dairy</h3><span class="category-card__count">Cocoa · Cheese · Milk powder</span></a>
-          <a class="category-card" href="modules/catalog/category.html?slug=home-decor" data-reveal>
+          <a class="category-card" href="/shop?slug=home-decor" data-reveal>
             <span class="category-card__media">
               <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-5.5h5V20"/></svg>
               <picture><source srcset="assets/images/categories/home-decor-160.webp?v=2477f36b 160w, assets/images/categories/home-decor-280.webp?v=2477f36b 280w, assets/images/categories/home-decor-560.webp?v=2477f36b 560w" sizes="(max-width: 767px) 18vw, 140px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/home-decor.jpg?v=2477f36b" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
             </span>
             <h3 class="category-card__title">Home Decor</h3><span class="category-card__count">Lighting · Textiles · Art</span></a>
-          <a class="category-card" href="modules/catalog/category.html?slug=kitchen-appliances" data-reveal>
+          <a class="category-card" href="/shop?slug=kitchen-appliances" data-reveal>
             <span class="category-card__media">
               <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3h14v18H5z"/><path d="M5 9h14"/><circle cx="12" cy="15" r="3.2"/><path d="M8 6h3"/></svg>
               <picture><source srcset="assets/images/categories/kitchen-appliances-160.webp?v=2477f36b 160w, assets/images/categories/kitchen-appliances-280.webp?v=2477f36b 280w, assets/images/categories/kitchen-appliances-560.webp?v=2477f36b 560w" sizes="(max-width: 767px) 18vw, 140px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/kitchen-appliances.jpg?v=2477f36b" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
             </span>
             <h3 class="category-card__title">Kitchen Appliances</h3><span class="category-card__count">Blenders · Fryers · Kettles</span></a>
-          <a class="category-card" href="modules/catalog/category.html?slug=dates-nuts" data-reveal>
+          <a class="category-card" href="/shop?slug=dates-nuts" data-reveal>
             <span class="category-card__media">
               <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><ellipse cx="12" cy="14.5" rx="4.5" ry="6.5"/><path d="M12 8V4.5"/><path d="M12 6c1.6-2.2 4.4-2.4 4.4-2.4s.2 2.8-1.9 4"/></svg>
               <picture><source srcset="assets/images/categories/dates-nuts-160.webp?v=2477f36b 160w, assets/images/categories/dates-nuts-280.webp?v=2477f36b 280w, assets/images/categories/dates-nuts-560.webp?v=2477f36b 560w" sizes="(max-width: 767px) 18vw, 140px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/dates-nuts.jpg?v=2477f36b" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
             </span>
             <h3 class="category-card__title">Dates &amp; Nuts</h3><span class="category-card__count">Ajwa · Medjool · Pistachio</span></a>
-          <a class="category-card" href="modules/catalog/category.html?slug=kids-toys" data-reveal>
+          <a class="category-card" href="/shop?slug=kids-toys" data-reveal>
             <span class="category-card__media">
               <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="12" width="9" height="9" rx="1.2"/><circle cx="17" cy="16.5" r="4.5"/><path d="M7.5 3 4 9.5h7z"/></svg>
               <picture><source srcset="assets/images/categories/kids-toys-160.webp?v=2477f36b 160w, assets/images/categories/kids-toys-280.webp?v=2477f36b 280w, assets/images/categories/kids-toys-560.webp?v=2477f36b 560w" sizes="(max-width: 767px) 18vw, 140px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/kids-toys.jpg?v=2477f36b" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
             </span>
             <h3 class="category-card__title">Kids &amp; Toys</h3><span class="category-card__count">Play · Books · Outdoor</span></a>
-          <a class="category-card" href="modules/catalog/category.html?slug=fashion-clothes" data-reveal>
+          <a class="category-card" href="/shop?slug=fashion-clothes" data-reveal>
             <span class="category-card__media">
               <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 3 4.5 5.5 6 10l2-1v12h8V9l2 1 1.5-4.5L15 3a3 3 0 0 1-6 0z"/></svg>
               <picture><source srcset="assets/images/categories/fashion-clothes-160.webp?v=2477f36b 160w, assets/images/categories/fashion-clothes-280.webp?v=2477f36b 280w, assets/images/categories/fashion-clothes-560.webp?v=2477f36b 560w" sizes="(max-width: 767px) 18vw, 140px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/fashion-clothes.jpg?v=2477f36b" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
             </span>
             <h3 class="category-card__title">Fashion &amp; Clothes</h3><span class="category-card__count">Men · Women · Children</span></a>
-          <a class="category-card" href="modules/deals/deals.html" data-reveal>
+          <a class="category-card" href="/deals" data-reveal>
             <span class="category-card__media">
               <svg class="category-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg>
               <picture><source srcset="assets/images/categories/flash-sale-160.webp?v=2477f36b 160w, assets/images/categories/flash-sale-280.webp?v=2477f36b 280w, assets/images/categories/flash-sale-560.webp?v=2477f36b 560w" sizes="(max-width: 767px) 18vw, 140px" type="image/webp"><img class="category-card__img" onerror="this.hidden=true" src="assets/images/categories/flash-sale.jpg?v=2477f36b" alt="" width="1024" height="1024" loading="lazy" decoding="async"></picture>
@@ -416,7 +416,7 @@
       <div class="gr-container">
         <div class="section-head">
           <div class="section-head__titles"><p class="overline">Loved by customers</p><h2 id="best-head">Best Sellers</h2></div>
-          <a href="modules/catalog/category.html?slug=dates-nuts" class="btn-gr btn-ghost-gr">Shop all →</a>
+          <a href="/shop?slug=dates-nuts" class="btn-gr btn-ghost-gr">Shop all →</a>
         </div>
         <div class="product-grid" data-grid="bestseller" aria-label="Best sellers" data-static>
           <article class="product-card" data-reveal data-product-card data-id="gr-1102" data-title="Medjool Dates — Jumbo Grade" data-brand="GulfRabit Select" data-price="875" data-image="assets/images/products/gr-1102.jpg" data-variant="500 g">
@@ -425,11 +425,11 @@
               <div class="product-card__actions">
                 <button class="btn-icon-gr" data-action="wishlist" aria-label="Add to wishlist" style="background:var(--surface-sunken)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
               </div>
-              <a href="modules/catalog/product.html?id=gr-1102" aria-label="Medjool Dates — Jumbo Grade"><picture><source srcset="assets/images/products/gr-1102-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1102.jpg" alt="Medjool Dates — Jumbo Grade" loading="lazy" decoding="async" width="638" height="610"></picture></a>
+              <a href="/product/gr-1102" aria-label="Medjool Dates — Jumbo Grade"><picture><source srcset="assets/images/products/gr-1102-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1102.jpg" alt="Medjool Dates — Jumbo Grade" loading="lazy" decoding="async" width="638" height="610"></picture></a>
             </div>
             <div class="product-card__body">
               <span class="product-card__brand">GulfRabit Select · Jordan</span>
-              <a href="modules/catalog/product.html?id=gr-1102"><h3 class="product-card__title">Medjool Dates — Jumbo Grade</h3></a>
+              <a href="/product/gr-1102"><h3 class="product-card__title">Medjool Dates — Jumbo Grade</h3></a>
               <div class="product-card__price-row"><span class="price product-card__price">৳ 875</span><span class="price price--strike">৳ 920</span><span class="product-card__size">500 g</span></div>
               <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart"><span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span></button>
             </div>
@@ -440,11 +440,11 @@
               <div class="product-card__actions">
                 <button class="btn-icon-gr" data-action="wishlist" aria-label="Add to wishlist" style="background:var(--surface-sunken)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
               </div>
-              <a href="modules/catalog/product.html?id=gr-1202" aria-label="Iranian Wildflower Honey"><picture><source srcset="assets/images/products/gr-1202-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1202.jpg" alt="Iranian Wildflower Honey" loading="lazy" decoding="async" width="1254" height="1254"></picture></a>
+              <a href="/product/gr-1202" aria-label="Iranian Wildflower Honey"><picture><source srcset="assets/images/products/gr-1202-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1202.jpg" alt="Iranian Wildflower Honey" loading="lazy" decoding="async" width="1254" height="1254"></picture></a>
             </div>
             <div class="product-card__body">
               <span class="product-card__brand">GulfRabit Select · Iran</span>
-              <a href="modules/catalog/product.html?id=gr-1202"><h3 class="product-card__title">Iranian Wildflower Honey</h3></a>
+              <a href="/product/gr-1202"><h3 class="product-card__title">Iranian Wildflower Honey</h3></a>
               <div class="product-card__price-row"><span class="price product-card__price">৳ 1,425</span><span class="price price--strike">৳ 1,500</span><span class="product-card__size">500 g</span></div>
               <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart"><span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span></button>
             </div>
@@ -455,11 +455,11 @@
               <div class="product-card__actions">
                 <button class="btn-icon-gr" data-action="wishlist" aria-label="Add to wishlist" style="background:var(--surface-sunken)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
               </div>
-              <a href="modules/catalog/product.html?id=gr-1401" aria-label="Afghan Dried Figs"><picture><source srcset="assets/images/products/gr-1401-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1401.jpg" alt="Afghan Dried Figs" loading="lazy" decoding="async" width="1254" height="1254"></picture></a>
+              <a href="/product/gr-1401" aria-label="Afghan Dried Figs"><picture><source srcset="assets/images/products/gr-1401-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1401.jpg" alt="Afghan Dried Figs" loading="lazy" decoding="async" width="1254" height="1254"></picture></a>
             </div>
             <div class="product-card__body">
               <span class="product-card__brand">GulfRabit Select · Afghanistan</span>
-              <a href="modules/catalog/product.html?id=gr-1401"><h3 class="product-card__title">Afghan Dried Figs</h3></a>
+              <a href="/product/gr-1401"><h3 class="product-card__title">Afghan Dried Figs</h3></a>
               <div class="product-card__price-row"><span class="price product-card__price">৳ 1,645</span><span class="price price--strike">৳ 1,730</span><span class="product-card__size">500 g</span></div>
               <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart"><span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span></button>
             </div>
@@ -470,11 +470,11 @@
               <div class="product-card__actions">
                 <button class="btn-icon-gr" data-action="wishlist" aria-label="Add to wishlist" style="background:var(--surface-sunken)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
               </div>
-              <a href="modules/catalog/product.html?id=gr-1502" aria-label="Super Negin Saffron — Grade A1"><picture><source srcset="assets/images/products/gr-1502-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1502.jpg" alt="Super Negin Saffron — Grade A1" loading="lazy" decoding="async" width="1254" height="1254"></picture></a>
+              <a href="/product/gr-1502" aria-label="Super Negin Saffron — Grade A1"><picture><source srcset="assets/images/products/gr-1502-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1502.jpg" alt="Super Negin Saffron — Grade A1" loading="lazy" decoding="async" width="1254" height="1254"></picture></a>
             </div>
             <div class="product-card__body">
               <span class="product-card__brand">GulfRabit Select · Afghanistan</span>
-              <a href="modules/catalog/product.html?id=gr-1502"><h3 class="product-card__title">Super Negin Saffron — Grade A1</h3></a>
+              <a href="/product/gr-1502"><h3 class="product-card__title">Super Negin Saffron — Grade A1</h3></a>
               <div class="product-card__price-row"><span class="price product-card__price">৳ 1,370</span><span class="price price--strike">৳ 1,440</span><span class="product-card__size">1 g</span></div>
               <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart"><span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span></button>
             </div>
@@ -485,11 +485,11 @@
               <div class="product-card__actions">
                 <button class="btn-icon-gr" data-action="wishlist" aria-label="Add to wishlist" style="background:var(--surface-sunken)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
               </div>
-              <a href="modules/catalog/product.html?id=gr-1602" aria-label="Cashew Nuts W320 — Whole"><picture><source srcset="assets/images/products/gr-1602-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1602.jpg" alt="Cashew Nuts W320 — Whole" loading="lazy" decoding="async" width="1254" height="1254"></picture></a>
+              <a href="/product/gr-1602" aria-label="Cashew Nuts W320 — Whole"><picture><source srcset="assets/images/products/gr-1602-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1602.jpg" alt="Cashew Nuts W320 — Whole" loading="lazy" decoding="async" width="1254" height="1254"></picture></a>
             </div>
             <div class="product-card__body">
               <span class="product-card__brand">GulfRabit Select · India</span>
-              <a href="modules/catalog/product.html?id=gr-1602"><h3 class="product-card__title">Cashew Nuts W320 — Whole</h3></a>
+              <a href="/product/gr-1602"><h3 class="product-card__title">Cashew Nuts W320 — Whole</h3></a>
               <div class="product-card__price-row"><span class="price product-card__price">৳ 1,150</span><span class="price price--strike">৳ 1,210</span><span class="product-card__size">500 g</span></div>
               <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart"><span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span></button>
             </div>
@@ -500,11 +500,11 @@
               <div class="product-card__actions">
                 <button class="btn-icon-gr" data-action="wishlist" aria-label="Add to wishlist" style="background:var(--surface-sunken)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
               </div>
-              <a href="modules/catalog/product.html?id=gr-1801" aria-label="Oregano — Naturally Dried"><picture><source srcset="assets/images/products/gr-1801-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1801.jpg" alt="Oregano — Naturally Dried" loading="lazy" decoding="async" width="900" height="1125"></picture></a>
+              <a href="/product/gr-1801" aria-label="Oregano — Naturally Dried"><picture><source srcset="assets/images/products/gr-1801-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1801.jpg" alt="Oregano — Naturally Dried" loading="lazy" decoding="async" width="900" height="1125"></picture></a>
             </div>
             <div class="product-card__body">
               <span class="product-card__brand">Sara Al Salam · Turkey</span>
-              <a href="modules/catalog/product.html?id=gr-1801"><h3 class="product-card__title">Oregano — Naturally Dried</h3></a>
+              <a href="/product/gr-1801"><h3 class="product-card__title">Oregano — Naturally Dried</h3></a>
               <div class="product-card__price-row"><span class="price product-card__price">৳ 420</span><span class="price price--strike">৳ 440</span><span class="product-card__size">100 g</span></div>
               <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart"><span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span></button>
             </div>
@@ -515,11 +515,11 @@
               <div class="product-card__actions">
                 <button class="btn-icon-gr" data-action="wishlist" aria-label="Add to wishlist" style="background:var(--surface-sunken)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
               </div>
-              <a href="modules/catalog/product.html?id=gr-1901" aria-label="Deshi Buffalo Ghee"><picture><source srcset="assets/images/products/gr-1901-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1901.jpg" alt="Deshi Buffalo Ghee" loading="lazy" decoding="async" width="900" height="1125"></picture></a>
+              <a href="/product/gr-1901" aria-label="Deshi Buffalo Ghee"><picture><source srcset="assets/images/products/gr-1901-card.webp" type="image/webp"><img class="product-card__img" src="assets/images/products/gr-1901.jpg" alt="Deshi Buffalo Ghee" loading="lazy" decoding="async" width="900" height="1125"></picture></a>
             </div>
             <div class="product-card__body">
               <span class="product-card__brand">GulfRabit Select · India</span>
-              <a href="modules/catalog/product.html?id=gr-1901"><h3 class="product-card__title">Deshi Buffalo Ghee</h3></a>
+              <a href="/product/gr-1901"><h3 class="product-card__title">Deshi Buffalo Ghee</h3></a>
               <div class="product-card__price-row"><span class="price product-card__price">৳ 2,080</span><span class="price price--strike">৳ 2,190</span><span class="product-card__size">1 L (905 g)</span></div>
               <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart"><span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span></button>
             </div>
@@ -575,8 +575,8 @@
                 <div class="industry-stat"><span class="industry-stat__num">RoHS</span><span class="industry-stat__label">Compliant stock</span></div>
               </div>
               <div class="hero__actions" style="margin-top:var(--space-3)">
-                <a href="modules/b2b/b2b-industrial.html" class="btn-gr btn-gradient-gr">Enter B2B Portal</a>
-                <a href="modules/catalog/category.html?slug=industrial-raw-materials" class="btn-gr btn-outline-gr">Browse Components</a>
+                <a href="/wholesale" class="btn-gr btn-gradient-gr">Enter B2B Portal</a>
+                <a href="/shop?slug=industrial-raw-materials" class="btn-gr btn-outline-gr">Browse Components</a>
               </div>
             </div>
             <div class="surface-gr" style="padding:var(--space-5);background:rgba(10,10,10,.6)">
@@ -677,7 +677,7 @@
           <!-- Mark as an image, words as words. Kept byte-for-byte in step
                with shared/components/footer.html — this page is hand-authored
                and every other page is generated from that partial. -->
-          <a class="footer-logo" href="index.html" aria-label="GulfRabit home">
+          <a class="footer-logo" href="/" aria-label="GulfRabit home">
             <img class="footer-logo__mark" src="assets/logo/gulfrabit-mark.png" alt="" width="520" height="520">
             <span class="footer-logo__type">
               <span class="footer-logo__word">GulfRabit</span>
@@ -707,28 +707,28 @@
              not a category, and its href is the deals page. -->
         <nav aria-label="Shop"><p class="mega-menu__col-title">Shop</p>
           <ul role="list" class="stack-2 footer-links" data-footer-shop>
-            <li data-footer-keep="flash-sale"><a href="modules/deals/deals.html">Flash Sale</a></li>
-            <li><a href="modules/catalog/category.html?slug=dates-nuts">Dates &amp; Nuts</a></li>
-            <li><a href="modules/catalog/category.html?slug=chocolates-dairy">Chocolates &amp; Dairy</a></li>
-            <li><a href="modules/catalog/category.html?slug=kitchen-appliances">Kitchen Appliances</a></li>
-            <li><a href="modules/catalog/category.html?slug=home-decor">Home Decor</a></li>
-            <li><a href="modules/catalog/category.html?slug=fashion-clothes">Fashion &amp; Clothes</a></li>
-            <li><a href="modules/catalog/category.html?slug=kids-toys">Kids &amp; Toys</a></li>
+            <li data-footer-keep="flash-sale"><a href="/deals">Flash Sale</a></li>
+            <li><a href="/shop?slug=dates-nuts">Dates &amp; Nuts</a></li>
+            <li><a href="/shop?slug=chocolates-dairy">Chocolates &amp; Dairy</a></li>
+            <li><a href="/shop?slug=kitchen-appliances">Kitchen Appliances</a></li>
+            <li><a href="/shop?slug=home-decor">Home Decor</a></li>
+            <li><a href="/shop?slug=fashion-clothes">Fashion &amp; Clothes</a></li>
+            <li><a href="/shop?slug=kids-toys">Kids &amp; Toys</a></li>
           </ul>
         </nav>
         <nav aria-label="Company"><p class="mega-menu__col-title">Company</p>
           <ul role="list" class="stack-2 footer-links">
-            <li><a href="modules/content/about.html">About</a></li>
-            <li><a href="modules/content/contact.html">Contact</a></li>
-            <li><a href="modules/content/sourcing.html">Sourcing &amp; Authenticity</a></li>
-            <li><a href="modules/content/about.html#values">Our Values</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/sourcing">Sourcing &amp; Authenticity</a></li>
+            <li><a href="/about#values">Our Values</a></li>
           </ul>
         </nav>
         <nav aria-label="Customer care"><p class="mega-menu__col-title">Customer Care</p>
           <ul role="list" class="stack-2 footer-links">
-            <li><a href="modules/content/faq.html">FAQ</a></li>
-            <li><a href="modules/content/shipping-returns.html">Shipping &amp; Returns</a></li>
-            <li><a href="modules/account/track.html">Track Order</a></li>
+            <li><a href="/faq">FAQ</a></li>
+            <li><a href="/shipping-returns">Shipping &amp; Returns</a></li>
+            <li><a href="/track">Track Order</a></li>
             <!-- The helpline and WhatsApp used to ride the announce bar and a
                  floating bubble; they live here now, with the rest of "how do I
                  reach a human". Hidden until site-config.js carries a value —
@@ -781,10 +781,10 @@
         </div>
       </div>
       <div class="footer-legal">
-        <a href="modules/content/shipping-returns.html" class="caption">Shipping</a>
-        <a href="modules/content/faq.html" class="caption">FAQ</a>
-        <a href="modules/content/privacy.html" class="caption">Privacy</a>
-        <a href="modules/content/terms.html" class="caption">Terms</a>
+        <a href="/shipping-returns" class="caption">Shipping</a>
+        <a href="/faq" class="caption">FAQ</a>
+        <a href="/privacy" class="caption">Privacy</a>
+        <a href="/terms" class="caption">Terms</a>
       </div>
     </div>
   </footer>

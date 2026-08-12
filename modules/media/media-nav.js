@@ -13,7 +13,7 @@ import { registerScreen } from '../admin/admin-shell.js';
 registerScreen({
   id: 'media',
   label: 'Images',
-  href: '/modules/media/library.html',
+  href: '/admin/media',
   area: 'products',
   group: 'Catalogue',
   order: 36,

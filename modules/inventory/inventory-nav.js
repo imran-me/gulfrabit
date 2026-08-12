@@ -8,8 +8,8 @@ import { registerScreen } from '../admin/admin-shell.js';
 registerScreen({
   id: 'stock',
   label: 'Stock',
-  href: '/modules/inventory/stock.html',
-  match: ['/modules/inventory/movements.html'],
+  href: '/admin/stock',
+  match: ['/admin/stock/movements'],
   // owner, manager and warehouse. Moving stock is the warehouse role's job.
   area: 'inventory',
   group: 'Warehouse',

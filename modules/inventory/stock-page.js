@@ -96,7 +96,7 @@ function paint({ data, meta }) {
   body.innerHTML = data.map((l) => `
     <tr>
       <td>
-        <a href="/modules/inventory/movements.html?sku=${encodeURIComponent(l.sku)}">${escapeHtml(l.title)}</a>
+        <a href="/admin/stock/movements?sku=${encodeURIComponent(l.sku)}">${escapeHtml(l.title)}</a>
         <div class="atable__sub">${escapeHtml(l.sku)}</div>
       </td>
       <td>${escapeHtml(l.warehouse || '—')}</td>

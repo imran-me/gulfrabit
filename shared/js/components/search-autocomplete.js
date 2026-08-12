@@ -60,7 +60,7 @@ function setup(form) {
       <p class="search-suggest__heading">Popular searches</p>
       ${popular.map((s) => `
         <a class="search-suggest__item search-suggest__item--query"
-           href="${siteURL(`modules/catalog/search-results.html?q=${encodeURIComponent(s.q)}`)}">
+           href="${siteURL(`search?q=${encodeURIComponent(s.q)}`)}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           <span>${escapeHtml(s.label)}</span>
         </a>`).join('')}`;

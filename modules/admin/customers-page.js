@@ -77,7 +77,7 @@ function paint({ data, meta }) {
   body.innerHTML = data.map((c) => `
     <tr>
       <td>
-        <a href="/modules/admin/customer.html?id=${c.id}">${escapeHtml(c.name)}</a>
+        <a href="/admin/customer?id=${c.id}">${escapeHtml(c.name)}</a>
         <div class="atable__sub">${escapeHtml(c.email || 'no email')}${c.verified ? '' : ' · unverified'}</div>
       </td>
       <td>${escapeHtml(c.phone)}</td>

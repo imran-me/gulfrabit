@@ -109,7 +109,7 @@ function showGone(msg) {
   bar.hidden = true;
   const gone = document.querySelector('[data-express-gone]');
   document.querySelector('[data-express-gone-msg]').textContent = msg;
-  document.querySelector('[data-express-gone-link]').href = siteURL('index.html');
+  document.querySelector('[data-express-gone-link]').href = siteURL('');
   gone.hidden = false;
 }
 
@@ -386,7 +386,7 @@ async function showDone(order) {
     ? `Pay ${formatBDT(order.total)} in cash when the rider arrives.`
     : `We’ll contact you on ${order.phone} to collect payment by ${paymentLabel()}.`);
   document.querySelector('[data-done-track]').href =
-    siteURL(`modules/account/track.html?id=${encodeURIComponent(order.id)}`);
+    siteURL(`track?id=${encodeURIComponent(order.id)}`);
   done.hidden = false;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 

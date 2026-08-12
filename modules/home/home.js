@@ -269,7 +269,7 @@ const CAT_ICONS = {
 
 /* Flash Sale is a real category the admin can switch, but its tile goes to the
    deals page, which already lists every discounted product. */
-const CAT_HREF = { 'flash-sale': '/modules/deals/deals.html' };
+const CAT_HREF = { 'flash-sale': '/deals' };
 
 /* The photographic tile art, by slug. Deliberately keyed here rather than read
    from `c.image`: CatalogSeeder only writes that column when it CREATES a row,

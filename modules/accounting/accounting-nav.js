@@ -8,7 +8,7 @@ import { registerScreen } from '../admin/admin-shell.js';
 registerScreen({
   id: 'pnl',
   label: 'Profit & loss',
-  href: '/modules/accounting/pnl.html',
+  href: '/admin/pnl',
   // owner, manager, accounts. Warehouse never sees the books.
   area: 'accounting',
   group: 'Books',
@@ -19,7 +19,7 @@ registerScreen({
 registerScreen({
   id: 'journal',
   label: 'Journal',
-  href: '/modules/accounting/journal.html',
+  href: '/admin/journal',
   area: 'accounting',
   group: 'Books',
   order: 51,

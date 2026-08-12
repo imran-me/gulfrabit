@@ -34,7 +34,7 @@ async function load() {
   // still working, permanently. Say what happened and offer the way on.
   if (!sku) {
     body.innerHTML = `<tr><td colspan="6" class="atable__empty">
-      Pick a product on the <a href="/modules/inventory/stock.html">Stock</a> screen
+      Pick a product on the <a href="/admin/stock">Stock</a> screen
       to see how its balance got to where it is.</td></tr>`;
     return;
   }

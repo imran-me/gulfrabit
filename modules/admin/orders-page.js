@@ -167,7 +167,7 @@ function paint({ data, meta }) {
 
   body.innerHTML = data.map((o) => `
     <tr>
-      <td><a href="/modules/admin/order.html?no=${encodeURIComponent(o.orderNumber)}">${escapeHtml(o.orderNumber)}</a></td>
+      <td><a href="/admin/order?no=${encodeURIComponent(o.orderNumber)}">${escapeHtml(o.orderNumber)}</a></td>
       <td>
         <div>${escapeHtml(o.customerName)}</div>
         <div class="atable__sub">${escapeHtml(o.customerPhone)}</div>
@@ -220,7 +220,7 @@ function rowAction(o) {
   const no = escapeHtml(o.orderNumber);
 
   if (!next && !endings.length) {
-    return `<a class="atable__sub" href="/modules/admin/order.html?no=${encodeURIComponent(o.orderNumber)}">Open</a>`;
+    return `<a class="atable__sub" href="/admin/order?no=${encodeURIComponent(o.orderNumber)}">Open</a>`;
   }
 
   const forward = next

@@ -12,7 +12,7 @@ import { registerScreen } from '../admin/admin-shell.js';
 registerScreen({
   id: 'highlights',
   label: 'Home page',
-  href: '/modules/highlights/highlights.html',
+  href: '/admin/home',
   area: 'products',
   group: 'Catalogue',
   order: 32,
