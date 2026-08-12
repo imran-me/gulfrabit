@@ -70,6 +70,62 @@ and then quietly deflates it when cash-on-delivery attempts fail.
 
 ---
 
+## Orders
+
+### `GET /api/admin/orders`
+
+Filters: `status`, `paymentStatus`, `q`, `from`, `to`, `perPage`. All optional,
+all whitelisted — `status` reaches a WHERE and is validated against the keys of
+`OrderFulfilmentService::TRANSITIONS`, so it can never drift from the pipeline
+the server actually enforces.
+
+`meta.counts` carries how many orders sit in **every** stage under the current
+search, plus `all`:
+
+```json
+"counts": { "all": 42, "placed": 4, "confirmed": 6, "packed": 3,
+            "ready_for_courier": 2, "shipped": 7, "delivered": 18,
+            "returned": 1, "cancelled": 1, "spam": 0 }
+```
+
+It deliberately ignores the `status` filter and honours the others — a stage tab
+bar has to know about the tabs you are not standing on. One `GROUP BY`, not nine
+round trips. `q` searches order number, phone and name only; a wildcard across
+every column would turn the box into a way to trawl customer records.
+
+### `POST /api/admin/orders/{order}/transition`
+
+```json
+{ "to": "ready_for_courier", "note": null }
+```
+
+The request validates *shape* only. Whether this particular move is legal for
+this particular order is `OrderFulfilmentService`'s decision — a validator that
+only knew the list of statuses would happily accept `delivered → placed`.
+
+**422** → the move is not permitted, or someone else changed the order first.
+
+### `POST /api/admin/orders/{order}/notes`
+
+```json
+{ "body": "Called at 6pm, asked us to deliver after Friday prayers." }
+```
+
+**Internal only.** Nothing here is ever sent to the customer — telling them
+something is a different act with a different record
+(`POST /orders/{order}/messages`, modules/sms). The split is deliberate: a note
+like *"customer sounded evasive, verify the address"* must be impossible to
+deliver by accident.
+
+Append-only and attributed. There is no edit route and no delete route, for the
+same reason the status trail has none: a record that can be tidied up after an
+argument settles nothing. 2000 characters, against 500 for a transition note —
+that one annotates a click, this one holds a whole phone call.
+
+**201** → the saved note.
+
+---
+
 ## Errors
 
 | Code | Meaning |

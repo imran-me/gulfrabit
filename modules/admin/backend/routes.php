@@ -68,6 +68,10 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::get('/', [AdminOrderController::class, 'index'])->name('index');
             Route::get('/{order}', [AdminOrderController::class, 'show'])->name('show');
             Route::post('/{order}/transition', [AdminOrderController::class, 'transition'])->name('transition');
+            // Internal notes. Anyone who may work an order may write on it —
+            // the warehouse noting "box crushed, repacked" is exactly the kind
+            // of thing that must not need a manager to type it.
+            Route::post('/{order}/notes', [AdminOrderController::class, 'addNote'])->name('notes.store');
             // Refunds carry a second, narrower check inside the controller:
             // `orders` gets you the screen, it does not get you the money.
             Route::post('/{order}/refund', [AdminOrderController::class, 'refund'])->name('refund');

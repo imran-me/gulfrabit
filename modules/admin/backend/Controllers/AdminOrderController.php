@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Admin\Controllers;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Modules\Admin\Models\OrderNote;
+use Modules\Admin\Requests\OrderNoteRequest;
 use Modules\Admin\Requests\OrderRefundRequest;
 use Modules\Admin\Requests\OrderTransitionRequest;
 use Modules\Checkout\Models\Order;
@@ -37,7 +42,11 @@ class AdminOrderController extends Controller
     public function index(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'status'        => ['sometimes', 'in:placed,confirmed,packed,shipped,delivered,cancelled,returned'],
+            // Whitelisted from the transition map itself, so a stage added to
+            // the pipeline is filterable the same day it exists and a stage
+            // removed stops being accepted — rather than this list quietly
+            // drifting out of step with the one the server enforces.
+            'status'        => ['sometimes', Rule::in(array_keys(OrderFulfilmentService::TRANSITIONS))],
             'paymentStatus' => ['sometimes', 'in:pending,paid,failed,refunded'],
             'q'             => ['sometimes', 'string', 'max:64'],
             'from'          => ['sometimes', 'date'],
@@ -45,11 +54,44 @@ class AdminOrderController extends Controller
             'perPage'       => ['sometimes', 'integer', 'min:10', 'max:100'],
         ]);
 
-        $query = Order::query()->with('items:id,order_id,title,qty')->latest('placed_at');
+        $query = $this->filtered($data)
+            ->with('items:id,order_id,title,qty')
+            ->latest('placed_at');
 
         if (isset($data['status'])) {
             $query->where('status', $data['status']);
         }
+
+        $page = $query->paginate($data['perPage'] ?? 25);
+
+        return response()->json([
+            'data' => array_map(
+                fn (Order $o): array => $this->rowArray($o),
+                $page->items(),
+            ),
+            'meta' => [
+                'total'       => $page->total(),
+                'perPage'     => $page->perPage(),
+                'currentPage' => $page->currentPage(),
+                'lastPage'    => $page->lastPage(),
+                'counts'      => $this->stageCounts($data),
+            ],
+        ]);
+    }
+
+    /**
+     * Every filter EXCEPT status, as a fresh query.
+     *
+     * Status is left out here and applied by the caller because the stage tab
+     * bar needs both readings of the same search: the rows for the stage you
+     * are looking at, and how many are sitting in each of the others.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function filtered(array $data): Builder
+    {
+        $query = Order::query();
+
         if (isset($data['paymentStatus'])) {
             $query->where('payment_status', $data['paymentStatus']);
         }
@@ -73,20 +115,38 @@ class AdminOrderController extends Controller
             });
         }
 
-        $page = $query->paginate($data['perPage'] ?? 25);
+        return $query;
+    }
 
-        return response()->json([
-            'data' => array_map(
-                fn (Order $o): array => $this->rowArray($o),
-                $page->items(),
-            ),
-            'meta' => [
-                'total'       => $page->total(),
-                'perPage'     => $page->perPage(),
-                'currentPage' => $page->currentPage(),
-                'lastPage'    => $page->lastPage(),
-            ],
-        ]);
+    /**
+     * How many orders sit in each stage, under the current search.
+     *
+     * One GROUP BY, not one query per tab — nine round trips to paint a nav bar
+     * is how a list screen becomes slow on the day the shop gets busy.
+     *
+     * Every known stage is present in the answer, including the empty ones: a
+     * tab that vanishes when it hits zero moves the other tabs under the
+     * cursor, and "no orders are waiting for a courier" is information worth
+     * showing rather than hiding.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, int>
+     */
+    private function stageCounts(array $data): array
+    {
+        $found = $this->filtered($data)
+            ->getQuery()
+            ->select('status', DB::raw('count(*) as aggregate'))
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
+        $counts = ['all' => (int) $found->sum()];
+
+        foreach (OrderFulfilmentService::STAGE_ORDER as $stage) {
+            $counts[$stage] = (int) ($found[$stage] ?? 0);
+        }
+
+        return $counts;
     }
 
     /** GET /api/admin/orders/{order} */
@@ -144,6 +204,17 @@ class AdminOrderController extends Controller
                 'history' => $order->statusEvents->map->toAdminArray()->all(),
                 'refunds' => $order->refunds->map->toAdminArray()->all(),
 
+                // Internal, and never sent anywhere. The panel labels them as
+                // such next to the message thread, which is the one place the
+                // distinction has to be unmistakable.
+                'notes' => OrderNote::query()
+                    ->where('order_id', $order->id)
+                    ->oldest()
+                    ->get()
+                    ->map
+                    ->toAdminArray()
+                    ->all(),
+
                 // Computed server-side from the same map the server enforces,
                 // so the panel can never draw a button the API would refuse.
                 'allowedTransitions' => $this->fulfilment->allowedTransitions($order, $role),
@@ -173,6 +244,27 @@ class AdminOrderController extends Controller
         }
 
         return response()->json(['data' => ['status' => $order->status]]);
+    }
+
+    /**
+     * POST /api/admin/orders/{order}/notes
+     *
+     * Append-only and attributed. There is no edit and no delete route, for the
+     * same reason the status trail has none: a record that can be tidied up
+     * after an argument settles nothing.
+     */
+    public function addNote(OrderNoteRequest $request, Order $order): JsonResponse
+    {
+        $admin = $request->user('admin');
+
+        $note = OrderNote::create([
+            'order_id'        => $order->id,
+            'body'            => $request->string('body')->trim()->toString(),
+            'author_admin_id' => $admin->id,
+            'author_name'     => $admin->name,
+        ]);
+
+        return response()->json(['data' => $note->toAdminArray()], 201);
     }
 
     /** POST /api/admin/orders/{order}/refund */
