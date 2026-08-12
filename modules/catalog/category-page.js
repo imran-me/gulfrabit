@@ -9,7 +9,7 @@ import { getCategoryBySlug, getProductsByCategory } from './backend/api.js';
 import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { renderProductSkeletons } from '../../shared/js/components/skeleton-loader.js';
 import { initFilters, matchesSpecFilters } from '../../shared/js/components/filters-sidebar.js';
-import { getParam, getParams, setParams } from '../../shared/js/core/router-helpers.js';
+import { getParam, getParams, setParams, setCanonical, setPageMeta } from '../../shared/js/core/router-helpers.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 
 const PAGE_SIZE = 8;
@@ -36,6 +36,11 @@ async function init() {
      param and '' is the value that means "every category". */
   const slug = getParam('slug', '');
   const params = getParams();
+
+  // ?slug= is what this page IS. Sort and filter params are not: "nuts, price
+  // low to high" is the same shelf as "nuts" and must not compete with it in
+  // a search result. utm_* goes for the same reason it does on a product.
+  setCanonical(slug ? ['slug'] : []);
   if (params.sort && sortSel) sortSel.value = params.sort;
 
   renderProductSkeletons(grid, PAGE_SIZE);
@@ -71,7 +76,16 @@ function paintHeader(category, slug) {
   document.querySelector('[data-cat-blurb]').textContent = category?.blurb
     || (slug ? '' : 'Every product we import, in one place.');
   document.querySelector('[data-cat-audience]').textContent = category?.audience === 'b2b' ? 'For Industry' : 'Shop';
-  document.title = `${title} — GulfRabit`;
+
+  // The served HTML calls every one of these pages "Category — GulfRabit".
+  // "Buy in Bangladesh" is not filler: it is how the query is actually typed,
+  // and it is the difference between competing globally for "dates" and
+  // locally for the search a customer here really runs.
+  setPageMeta({
+    title: `${title} — Buy in Bangladesh | GulfRabit`,
+    description: category?.blurb
+      || `${title} imported and delivered across Bangladesh. Cash on delivery, genuine stock, dispatched from Dhaka.`,
+  });
 }
 
 function applyAndRender(filters) {

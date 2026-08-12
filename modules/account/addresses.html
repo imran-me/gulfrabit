@@ -57,6 +57,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="My Addresses — GulfRabit">
   <meta name="twitter:description" content="Manage your saved delivery addresses.">
+  <link rel="canonical" href="https://gulfrabit.com/modules/account/addresses.html">
   <link rel="icon" href="../../favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
   <link rel="apple-touch-icon" href="../../assets/logo/apple-touch-icon.png">
@@ -71,7 +72,7 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=5d669283">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=ffd95ef0">
   <!-- The Luxe layer. Linked on every storefront page and completely
        inert without [data-theme="luxe"] on <html>, so the default theme
        renders exactly as it did before this file existed. Linking it
@@ -433,16 +434,37 @@
 
     <div class="footer-bottom">
       <p class="caption footer-bottom__copy">© 2026 GulfRabit. All rights reserved.</p>
-      <!-- Payment methods (placeholder chips) -->
-      <!-- flex-wrap: five chips measure 325px, so on a 320px phone this row was
+      <!-- Payment methods. The real marks — these were text chips from the day
+           the footer was written, and the source said so: "placeholder chips".
+           On a shop that has not taken an online payment yet, the marks in the
+           footer are most of what tells a first-time customer their money has
+           somewhere familiar to go.
+
+           The four SVGs live in /assets/payments/ and each viewBox is cropped
+           to its own artwork, measured off the rendered pixels rather than
+           trusted from the file, so a shared height lands them the same size
+           optically instead of leaving each one floating in whatever padding
+           its exporter happened to bake in. THEY ARE THIRD-PARTY TRADEMARKS:
+           fine as acceptance marks, and to be swapped for the official kits
+           the moment bKash and Nagad merchant onboarding delivers them
+           (ACTION-REQUIRED.md §6d).
+
+           COD is not a brand and gets no logo — a banknote and the word, in
+           the same tile, because it is the method most of these orders will
+           actually use.
+
+           flex-wrap: five chips measure 325px, so on a 320px phone this row was
            the one thing on the page wide enough to scroll the whole document
            sideways. -->
       <div class="footer-pay" aria-label="Accepted payment methods">
-        <span class="badge-gr badge-origin">bKash</span>
-        <span class="badge-gr badge-origin">Nagad</span>
-        <span class="badge-gr badge-origin">Visa</span>
-        <span class="badge-gr badge-origin">Mastercard</span>
-        <span class="badge-gr badge-origin">COD</span>
+        <span class="pay-mark"><img src="../../assets/payments/bkash.svg" alt="bKash" width="247" height="113" loading="lazy" decoding="async"></span>
+        <span class="pay-mark"><img src="../../assets/payments/nagad.svg" alt="Nagad" width="300" height="131" loading="lazy" decoding="async"></span>
+        <span class="pay-mark"><img src="../../assets/payments/visa.svg" alt="Visa" width="498" height="162" loading="lazy" decoding="async"></span>
+        <span class="pay-mark pay-mark--symbol"><img src="../../assets/payments/mastercard.svg" alt="Mastercard" width="641" height="397" loading="lazy" decoding="async"></span>
+        <span class="pay-mark pay-mark--cod">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="15" height="15" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.6v4.8M18 9.6v4.8"/></svg>
+          Cash on delivery
+        </span>
       </div>
       <!-- Hidden until configured. A social icon linking to "#" is a link that
            lies about existing; footer-social.js shows each one only when

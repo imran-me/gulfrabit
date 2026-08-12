@@ -64,11 +64,22 @@ def asset(path):
     return f"{path}?v={digest}"
 
 
-def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True):
+def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, canonical=None):
     """`luxe=False` for the admin panel — see scripts() for why the panel does
     not follow the storefront's theme. With no theme.js there to set the
-    attribute, the Luxe sheet could only ever be dead weight on those pages."""
+    attribute, the Luxe sheet could only ever be dead weight on those pages.
+
+    `canonical` is the page's own absolute URL. It matters here specifically
+    because this shop advertises: every ad link arrives carrying
+    ?utm_source=...&utm_campaign=..., and to a search engine each of those is a
+    separate URL showing the same page. Without this tag one campaign can split
+    a page's ranking across a dozen copies of itself, and the copy that wins
+    the search result is the one with a Facebook tracking string in it."""
     extra = "\n  ".join(f'<link rel="stylesheet" href="{asset(c)}">' for c in css_links)
+    # Absolute, because a relative canonical resolves against the URL currently
+    # being crawled — which is the very thing (?utm_source=…) it exists to
+    # point away from.
+    canonical_tag = f'  <link rel="canonical" href="{SITE}/{canonical.lstrip("/")}">\n' if canonical else ""
     luxe_link = (
         '<!-- The Luxe layer. Linked on every storefront page and completely\n'
         '       inert without [data-theme="luxe"] on <html>, so the default theme\n'
@@ -151,7 +162,7 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True):
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{title}">
   <meta name="twitter:description" content="{desc}">
-  <link rel="icon" href="/favicon.ico" sizes="any">
+{canonical_tag}  <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="/assets/logo/favicon-32.png">
   <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
@@ -213,6 +224,28 @@ def relativize(html, out):
         html = html.replace('="/', f'="{prefix}').replace("url('/", f"url('{prefix}").replace('url("/', f'url("{prefix}').replace("url(/", f"url({prefix}")
     return html
 
+# Pages whose IDENTITY lives in the query string, so a canonical written at
+# build time would be a lie — and an expensive one.
+#
+# product.html?id=gr-1101 and product.html?id=gr-1102 are one file. Stamping
+# both with `canonical: /modules/catalog/product.html` tells Google that every
+# product in the shop is the same page and that the real one is the empty
+# shell — which is not a missed opportunity but an instruction to drop the
+# entire catalogue from the index. A wrong canonical is worse than none.
+#
+# These pages set their own at runtime instead, to the clean URL with the
+# tracking parameters stripped, which is the duplicate that actually needed
+# solving. The permanent fix is a real URL per product; until then this is the
+# honest half.
+DYNAMIC_CANONICAL = {
+    "modules/catalog/product.html",       # ?id=
+    "modules/catalog/category.html",      # ?slug=
+    "modules/catalog/search-results.html",  # ?q= — never canonical to anything
+    "modules/checkout/express.html",      # ?sku=
+    "modules/account/track.html",         # ?order=
+}
+
+
 def assemble(out, title, desc, main_html, css_links=None, module_js=None, cms_page=None,
              noindex=False):
     """`cms_page` opts a page into live content editing.
@@ -233,7 +266,9 @@ def assemble(out, title, desc, main_html, css_links=None, module_js=None, cms_pa
         existing = list(module_js) if isinstance(module_js, list) else ([module_js] if module_js else [])
         module_js = existing + ["/modules/cms/cms.js", "/modules/cms/cms-editor.js"]
 
-    page = head(title, desc, css_links or [], cms_page=cms_page) + "\n"
+    page = head(title, desc, css_links or [],
+                cms_page=cms_page,
+                canonical=None if out in DYNAMIC_CANONICAL else out) + "\n"
     page += "  <!-- HEADER (inlined from shared/components/header.html) -->\n"
     page += HEADER + "\n\n"
     page += main_html.strip() + "\n\n"
@@ -284,6 +319,9 @@ ADMIN_SHELL_END = read("modules/admin/_fragments/_shell-end.html")
 def assemble_admin(out, title, main_html, css_links, module_js, chrome=True):
     """`chrome=False` for the login page, which must render without the shell —
     it is the one admin page a signed-out person is supposed to reach."""
+    # No canonical on the panel: these pages are noindex and disallowed in
+    # robots.txt, and a canonical is an instruction to an indexer that has
+    # already been told not to be here.
     page = head(title, "GulfRabit staff panel.", css_links, theme="#0A0A0A", luxe=False) + "\n"
     # noindex on every admin page, belt and braces with robots.txt: these pages
     # carry no data, but they should never turn up in a search result either.

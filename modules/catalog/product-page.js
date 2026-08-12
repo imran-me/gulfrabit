@@ -14,7 +14,7 @@ import { openCartDrawer } from '../../shared/js/components/cart-drawer.js';
 import { renderProductGrid, productBadges } from '../../shared/js/components/product-card.js';
 import { setup as setupStepper } from '../../shared/js/components/quantity-stepper.js';
 import { initWishlistButtons } from '../../shared/js/components/wishlist.js';
-import { getParam } from '../../shared/js/core/router-helpers.js';
+import { getParam, setCanonical, setPageMeta } from '../../shared/js/core/router-helpers.js';
 import { track, productPayload } from '../../shared/js/core/analytics.js';
 import { siteURL } from '../../shared/js/core/paths.js';
 import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
@@ -38,7 +38,17 @@ async function init() {
   const product = id ? await getProductById(id) : null;
   if (!product) return renderNotFound();
 
-  document.title = `${product.title} — GulfRabit`;
+  // ?id= is the whole identity of this page; a utm_campaign on the end of it
+  // is the same product arriving from an ad. Declared before anything slow, so
+  // a crawler that stops reading early still gets it.
+  setCanonical(['id']);
+  setPageMeta({
+    // Origin in the title because it is what people search — "saudi ajwa
+    // dates", not "ajwa dates madinah select" — and because it is the one
+    // word that distinguishes an import shop from a supermarket shelf.
+    title: `${product.title}${product.origin ? ` — ${product.origin}` : ''} | GulfRabit`,
+    description: product.shortDescription || product.description,
+  });
   // After the not-found guard, so a bad ?id= does not report a product view.
   track('ViewContent', productPayload(product));
   injectProductSchema(product);
