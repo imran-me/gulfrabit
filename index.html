@@ -37,6 +37,13 @@
   <meta property="og:description" content="Premium imports for Bangladesh — dates, honey, saffron, dry fruits, nuts, herbs, oil and ghee. Sourced. Verified. Delivered.">
   <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
   <meta name="twitter:card" content="summary_large_image">
+  <!-- The home page is the one page assemble.py does not build, so it is the
+       one page the canonical pass in tools/assemble.py could not reach. Written
+       by hand for the same reason every other page has one: every ad link
+       arrives as /?utm_source=facebook&utm_campaign=…, and without this each
+       campaign is a separate URL competing with the home page itself.
+       "/" and not "/index.html" — the filename 301s to the root. -->
+  <link rel="canonical" href="https://gulfrabit.com/">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="assets/logo/favicon-32.png">
   <link rel="apple-touch-icon" href="assets/logo/apple-touch-icon.png">
