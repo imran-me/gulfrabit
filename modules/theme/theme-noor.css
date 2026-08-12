@@ -739,12 +739,19 @@ html[data-theme="noor"] .category-card.lux-glance .category-card__media {
    ========================================================================= */
 
 /* ---- Space ----------------------------------------------------------------
-   The day themes tightened the shop's rhythm to 64px between sections —
-   right for daylight commerce, fatal for a dream. At night the rooms are
-   vast: the gap between sections triples back, and the grids loosen their
-   shoulders. */
-@media (min-width: 768px)  { html[data-theme="noor"] .section-gr { padding-block: 5.5rem; } }
-@media (min-width: 1024px) { html[data-theme="noor"] .section-gr { padding-block: 7.5rem; } }
+   The night once claimed vast rooms — 7.5rem top and bottom, which is 240px
+   of nothing between every pair of sections on a desktop screen. Judged
+   against the real page it was not a theatre, it was a wait: the category
+   tiles left the screen and the Premium Picks eyebrow had not arrived yet.
+   The day themes were cut to a 64px gap and Noor was never cut with them.
+
+   Cut by four fifths, as asked: 48px between sections at desktop, 32px at
+   tablet, phones on the base rhythm. Noor now sits a little TIGHTER than the
+   day themes on purpose — its headings are poster-sized, so the type itself
+   supplies the air that the padding used to buy. On the 8px grid, since
+   5.5/7.5rem never was. */
+@media (min-width: 768px)  { html[data-theme="noor"] .section-gr { padding-block: var(--space-4); } }
+@media (min-width: 1024px) { html[data-theme="noor"] .section-gr { padding-block: var(--space-5); } }
 html[data-theme="noor"] .home-cat-grid { gap: 18px; }
 html[data-theme="noor"] .snap-rail { gap: 1.5rem; }
 
