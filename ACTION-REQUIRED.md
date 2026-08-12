@@ -10,11 +10,18 @@ unblock everything else.
 
 ---
 
-## 1. Run the migrations — ✅ DONE 2026-08-13
+## 1. Run the migrations — ✅ CLEARED 2026-08-13
 
-Verified on the server: `php artisan migrate` answers *Nothing to migrate*, and
-`migrate:status` shows every migration `Ran`, including the order pipeline
-stages, order notes and SMS authorship added on 13 August.
+The backlog is gone. Checked on the server that afternoon: `php artisan
+migrate` answered *Nothing to migrate*, and `migrate:status` showed every
+migration `Ran` — including the order pipeline stages, order notes and SMS
+authorship added the same day.
+
+**This is not a standing guarantee.** New migrations arrive with new features
+(the hero banners added two tables later that evening), and `deploy.sh` applies
+them on the next pull without anyone asking. Nothing to do here unless the
+admin dashboard raises its setup panel, or a screen says a table is missing —
+then run `bash migrate.sh` and read the first error.
 
 Kept here rather than deleted, because the failure was worth remembering: three
 migrations never ran because `deploy.sh` did not check the exit code, so one
