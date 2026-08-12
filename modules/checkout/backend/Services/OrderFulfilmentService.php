@@ -34,20 +34,51 @@ final class OrderFulfilmentService
     /**
      * from => [permitted next states].
      *
-     * `cancelled` and `returned` are terminal and appear as keys with empty
-     * arrays rather than being left out, so that "is this a known status with
-     * nowhere to go" and "is this an unknown status" stay different questions.
+     * `cancelled`, `returned` and `spam` are terminal and appear as keys with
+     * empty arrays rather than being left out, so that "is this a known status
+     * with nowhere to go" and "is this an unknown status" stay different
+     * questions.
      */
     public const TRANSITIONS = [
-        'placed'    => ['confirmed', 'cancelled'],
+        // `spam` only from `placed`, and deliberately nowhere else. Junk is
+        // spotted on the confirmation call; an order somebody already spoke to
+        // a human about and confirmed was real, and if it later goes wrong that
+        // is a cancellation with a reason, not a fake order.
+        'placed'    => ['confirmed', 'cancelled', 'spam'],
         'confirmed' => ['packed', 'cancelled'],
-        'packed'    => ['shipped', 'cancelled'],
+        // Sealed and labelled is not the same as gone. This is the queue by the
+        // door — see the ready_for_courier note in the 2026_08_13 migration.
+        //
+        // `shipped` is reachable straight from `packed` on purpose. The new
+        // stage is a queue, not a toll gate: a courier's pick-up scan can arrive
+        // before anyone has clicked "Ready for courier", and a rider standing at
+        // the counter is not a reason to make staff click twice. Without this
+        // the scan would find no legal move and the order would sit at `packed`
+        // while the parcel was demonstrably gone.
+        'packed'    => ['ready_for_courier', 'shipped', 'cancelled'],
+        'ready_for_courier' => ['shipped', 'cancelled'],
         // Once it is with a courier, cancelling is no longer a thing we can do
         // unilaterally — it comes back as a return instead.
         'shipped'   => ['delivered', 'returned'],
         'delivered' => ['returned'],
         'cancelled' => [],
         'returned'  => [],
+        'spam'      => [],
+    ];
+
+    /**
+     * The pipeline in the order it is actually worked, for any caller that has
+     * to show stages side by side.
+     *
+     * Separate from TRANSITIONS because that map answers "where may this go
+     * next", which says nothing about sequence — `cancelled` is reachable from
+     * four stages but belongs at the end of a board, not after `placed`.
+     *
+     * @var array<int, string>
+     */
+    public const STAGE_ORDER = [
+        'placed', 'confirmed', 'packed', 'ready_for_courier',
+        'shipped', 'delivered', 'returned', 'cancelled', 'spam',
     ];
 
     /**
@@ -55,9 +86,11 @@ final class OrderFulfilmentService
      *
      * Warehouse moves parcels; it does not decide that an order stops being an
      * order. Cancelling a paid order implies money going back, and the role
-     * that cannot see money should not be able to start that.
+     * that cannot see money should not be able to start that. `spam` sits here
+     * too: calling an order fake removes it from every figure the business is
+     * judged on, which is a management call.
      */
-    private const RESTRICTED_TO_MANAGEMENT = ['cancelled', 'returned'];
+    private const RESTRICTED_TO_MANAGEMENT = ['cancelled', 'returned', 'spam'];
 
     /**
      * What this actor may move this order to, right now.
