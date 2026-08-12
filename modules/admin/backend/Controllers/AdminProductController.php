@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Modules\Admin\Requests\ProductStoreRequest;
 use Modules\Admin\Requests\ProductUpdateRequest;
 use Modules\Catalog\Models\Category;
@@ -275,6 +276,10 @@ class AdminProductController extends Controller
 
         $product = Product::create([
             'sku'                   => $this->nextSku(),
+            // The URL name, made once from the title and then left alone. A
+            // slug that follows later renames is a URL that 404s for everyone
+            // who bookmarked, shared or indexed the old one.
+            'slug'                  => $this->uniqueSlug((string) $request->input('title')),
             'title'                 => $request->input('title'),
             'brand'                 => $request->input('brand'),
             'origin'                => $request->input('origin'),
@@ -364,6 +369,31 @@ class AdminProductController extends Controller
             ->max();
 
         return 'gr-' . max(1001, (int) $highest + 1);
+    }
+
+    /**
+     * A URL name for a new product, guaranteed not to collide.
+     *
+     * withTrashed(), because a deleted product keeps its row and its unique
+     * slug: re-using the name of something that was removed would fail at the
+     * database and, worse, would hand a new product the address of an old one
+     * that people may still have links to.
+     *
+     * An unsluggable title (punctuation only, or a script that does not
+     * transliterate) falls back to 'product', which the counter then makes
+     * unique. A URL is required; a pretty one is not always possible.
+     */
+    private function uniqueSlug(string $title): string
+    {
+        $base = Str::slug($title) ?: 'product';
+        $slug = $base;
+        $n = 2;
+
+        while (Product::withTrashed()->where('slug', $slug)->exists()) {
+            $slug = $base . '-' . $n++;
+        }
+
+        return $slug;
     }
 
     /** Taka to integer poisha. Null stays null — it means "not known". */

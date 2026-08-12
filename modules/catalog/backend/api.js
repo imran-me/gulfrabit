@@ -86,9 +86,21 @@ export async function getAllProducts() {
   return products.filter(isActive);
 }
 
+/**
+ * A product by SKU **or** by slug.
+ *
+ * Pretty URLs (/product/ajwa-dates-madinah-select) carry the slug; every
+ * older link, ad, bookmark and indexed page carries the SKU, and both have to
+ * keep working for good — a shop does not get to invalidate the address of a
+ * page somebody shared. SKU is tried first because it is the exact key every
+ * other consumer uses, and the two vocabularies cannot collide.
+ */
 export async function getProductById(id) {
   const products = await getAllProducts();
-  return products.find((p) => String(p.id) === String(id)) ?? null;
+  const key = String(id);
+  return products.find((p) => String(p.id) === key)
+    ?? products.find((p) => p.slug && String(p.slug) === key)
+    ?? null;
 }
 
 /** A falsy slug means the whole shop, not "no category" — that is what the

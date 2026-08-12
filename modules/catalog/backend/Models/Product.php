@@ -26,7 +26,7 @@ class Product extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'sku', 'title', 'brand', 'origin', 'barcode', 'unit',
+        'sku', 'slug', 'title', 'brand', 'origin', 'barcode', 'unit',
         'category_id', 'sub_category_id',
         'price_poisha', 'original_price_poisha', 'cost_poisha',
         'image', 'images', 'variants', 'default_variant', 'rating', 'review_count',
@@ -60,6 +60,25 @@ class Product extends Model
     public function getRouteKeyName(): string
     {
         return 'sku';
+    }
+
+    /**
+     * Look a product up by EITHER its slug or its SKU.
+     *
+     * Pretty URLs carry the slug; every link, bookmark, ad and indexed page
+     * from before slugs existed carries the SKU. Both must keep working, for
+     * good — a shop does not get to invalidate the address of a page someone
+     * shared, and "the old URL still works" costs one extra WHERE clause.
+     *
+     * Slug is tried first because it is the form we now publish; the SKU
+     * branch is the compatibility path. The two vocabularies cannot collide:
+     * a SKU is `gr-1101` and a slug is made from a title, and even if one
+     * ever did, matching the published form first is the right answer.
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where('slug', $value)->first()
+            ?? $this->where('sku', $value)->first();
     }
 
     /* ---- Relations ----------------------------------------------------- */
@@ -233,6 +252,12 @@ class Product extends Model
     {
         return [
             'id'               => $this->sku,
+            // The URL name. `id` stays the SKU — every consumer keys off it,
+            // from cart lines to order snapshots to the wishlist — and this
+            // is purely the address the page is reachable at. Null on rows
+            // written before slugs existed, and every link builder falls back
+            // to the SKU when it is, so nothing can break by being early.
+            'slug'             => $this->slug,
             'title'            => $this->title,
             'brand'            => $this->brand,
             'origin'           => $this->origin,

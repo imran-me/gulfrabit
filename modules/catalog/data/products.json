@@ -8,6 +8,7 @@
   "products": [
     {
       "id": "gr-1101",
+      "slug": "ajwa-dates-madinah-select",
       "title": "Ajwa Dates — Madinah Select",
       "brand": "GulfRabit Select",
       "origin": "Saudi Arabia",
@@ -100,6 +101,7 @@
     },
     {
       "id": "gr-1102",
+      "slug": "medjool-dates-jumbo-grade",
       "title": "Medjool Dates — Jumbo Grade",
       "brand": "GulfRabit Select",
       "origin": "Jordan",
@@ -190,6 +192,7 @@
     },
     {
       "id": "gr-1103",
+      "slug": "sukkari-dates-golden",
       "title": "Sukkari Dates — Golden",
       "brand": "GulfRabit Select",
       "origin": "Saudi Arabia",
@@ -281,6 +284,7 @@
     },
     {
       "id": "gr-1201",
+      "slug": "manuka-honey-umf-25",
       "title": "Mānuka Honey UMF 25+",
       "brand": "GulfRabit Select",
       "origin": "New Zealand",
@@ -363,6 +367,7 @@
     },
     {
       "id": "gr-1202",
+      "slug": "iranian-wildflower-honey",
       "title": "Iranian Wildflower Honey",
       "brand": "GulfRabit Select",
       "origin": "Iran",
@@ -456,6 +461,7 @@
     },
     {
       "id": "gr-1203",
+      "slug": "sidr-honey-raw-unfiltered",
       "title": "Sidr Honey — Raw & Unfiltered",
       "brand": "GulfRabit Select",
       "origin": "Yemen",
@@ -548,6 +554,7 @@
     },
     {
       "id": "gr-1401",
+      "slug": "afghan-dried-figs",
       "title": "Afghan Dried Figs",
       "brand": "GulfRabit Select",
       "origin": "Afghanistan",
@@ -637,6 +644,7 @@
     },
     {
       "id": "gr-1402",
+      "slug": "royal-dry-fruit-nut-mix",
       "title": "Royal Dry Fruit & Nut Mix",
       "brand": "GulfRabit Select",
       "origin": "UAE",
@@ -723,6 +731,7 @@
     },
     {
       "id": "gr-1501",
+      "slug": "premium-keshar-saffron-boxed",
       "title": "Premium Keshar Saffron — Boxed",
       "brand": "GulfRabit Select",
       "origin": "Afghanistan",
@@ -807,6 +816,7 @@
     },
     {
       "id": "gr-1502",
+      "slug": "super-negin-saffron-grade-a1",
       "title": "Super Negin Saffron — Grade A1",
       "brand": "GulfRabit Select",
       "origin": "Afghanistan",
@@ -893,6 +903,7 @@
     },
     {
       "id": "gr-1503",
+      "slug": "saffron-heritage-jar",
       "title": "Saffron — Heritage Jar",
       "brand": "GulfRabit Select",
       "origin": "Iran",
@@ -978,6 +989,7 @@
     },
     {
       "id": "gr-1601",
+      "slug": "iranian-pistachios-roasted-salted",
       "title": "Iranian Pistachios — Roasted & Salted",
       "brand": "GulfRabit Select",
       "origin": "Iran",
@@ -1062,6 +1074,7 @@
     },
     {
       "id": "gr-1602",
+      "slug": "cashew-nuts-w320-whole",
       "title": "Cashew Nuts W320 — Whole",
       "brand": "GulfRabit Select",
       "origin": "India",
@@ -1146,6 +1159,7 @@
     },
     {
       "id": "gr-1801",
+      "slug": "oregano-naturally-dried",
       "title": "Oregano — Naturally Dried",
       "brand": "Sara Al Salam",
       "origin": "Turkey",
@@ -1235,6 +1249,7 @@
     },
     {
       "id": "gr-1901",
+      "slug": "deshi-buffalo-ghee",
       "title": "Deshi Buffalo Ghee",
       "brand": "GulfRabit Select",
       "origin": "India",
@@ -1316,6 +1331,7 @@
     },
     {
       "id": "gr-1902",
+      "slug": "gawa-ghee-bilona-hand-churned",
       "title": "Gawa Ghee — Bilona Hand-Churned",
       "brand": "Sara Al Salam",
       "origin": "India",
@@ -1395,6 +1411,7 @@
     },
     {
       "id": "gr-1903",
+      "slug": "desi-cow-ghee-clay-pot-cured",
       "title": "Desi Cow Ghee — Clay-Pot Cured",
       "brand": "GulfRabit Select",
       "origin": "India",
@@ -1480,6 +1497,7 @@
     },
     {
       "id": "gr-1904",
+      "slug": "extra-virgin-olive-oil-first-cold-press",
       "title": "Extra Virgin Olive Oil — First Cold Press",
       "brand": "GulfRabit Select",
       "origin": "Spain",
@@ -1569,6 +1587,7 @@
     },
     {
       "id": "gr-1905",
+      "slug": "cold-pressed-sesame-oil",
       "title": "Cold-Pressed Sesame Oil",
       "brand": "GulfRabit Select",
       "origin": "India",
@@ -1655,6 +1674,7 @@
     },
     {
       "id": "gr-1906",
+      "slug": "black-seed-oil-kalonji",
       "title": "Black Seed Oil — Kalonji",
       "brand": "GulfRabit Select",
       "origin": "Egypt",
