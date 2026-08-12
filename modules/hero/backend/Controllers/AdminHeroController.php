@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Modules\Hero\Models\HeroSetting;
 use Modules\Hero\Models\HeroSlide;
 use Modules\Hero\Requests\HeroSlideRequest;
@@ -24,11 +25,28 @@ class AdminHeroController extends Controller
     /** GET /api/admin/hero — every slide, live or not, in panel order. */
     public function index(): JsonResponse
     {
+        // The same guard the public read carries, and for the same window: code
+        // deployed ahead of its migration. Without it this screen answers 500
+        // with a SQL error, which tells a merchant nothing and reads as the
+        // feature being broken rather than one command away from working.
+        if (! Schema::hasTable('hero_slides')) {
+            return response()->json([
+                'data' => [],
+                'meta' => [
+                    'ready'    => false,
+                    'settings' => HeroSetting::current()->toPublicArray(),
+                ],
+            ]);
+        }
+
         return response()->json([
             'data' => HeroSlide::query()
                 ->orderBy('sort_order')->orderBy('id')
                 ->get()->map->toAdminArray()->all(),
-            'meta' => ['settings' => HeroSetting::current()->toPublicArray()],
+            'meta' => [
+                'ready'    => true,
+                'settings' => HeroSetting::current()->toPublicArray(),
+            ],
         ]);
     }
 

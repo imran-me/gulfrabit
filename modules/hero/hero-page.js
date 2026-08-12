@@ -60,6 +60,24 @@ async function load() {
     const payload = await adminFetch('/hero');
     slides = payload.data;
     settings = payload.meta.settings;
+
+    // The API answered, and answered that its tables are not there yet. Said
+    // plainly with the command that fixes it, because "no banners" and "this
+    // feature is not installed on the server" look identical otherwise — and
+    // one of them is somebody adding banners into a void.
+    if (payload.meta.ready === false && !slides.length) {
+      host.innerHTML = `
+        <div class="acard">
+          <h2 class="h5" style="margin:0 0 var(--space-2)">Almost there — one command left</h2>
+          <p class="admin__sub" style="margin:0">
+            The banner tables have not been created on the server yet. Over SSH, run:
+            <code>bash migrate.sh</code> in the site folder, then reload this page.
+          </p>
+        </div>`;
+      paintSettings();
+      paintPreview();
+      return;
+    }
   } catch (err) {
     host.innerHTML = `<p class="admin__sub">${
       err.status === 404 || !err.status
