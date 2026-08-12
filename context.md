@@ -1892,3 +1892,96 @@ the inline no-js remover, two JSON-LD blocks per page, and 77 `style=""`
 attributes on the home page dealt with first. Check in a real browser whether
 CSP `script-src` even applies to `application/ld+json` before starting — if it
 does not, the job is much smaller than it looks.
+
+---
+
+## 10. URLs ARE ROUTES (2026-08-13) — read before touching a link
+
+Every page on the site answers at a readable route. There is no `.html` and no
+`/modules/` in any URL a person or a crawler sees.
+
+```
+/                       /shop                  /product/ajwa-dates-madinah-select
+/category/dates-nuts    /cart                  /checkout      /buy      /track
+/about /faq /contact /sourcing /terms /privacy /shipping-returns /deals /wholesale
+/login /register /forgot-password /account /account/orders /wishlist
+/admin  /admin/orders  /admin/products  /admin/stock  /admin/appearance …
+```
+
+### How it works, and why it is not `routes/web.php`
+
+Apache does it, in `.htaccess`. The storefront is static HTML served straight
+off disk; Laravel is only the JSON API under `/api`. Page routes in
+`routes/web.php` would boot the framework for every page view — slower on
+shared hosting, and it would take the whole shop down whenever PHP is unwell
+instead of just the API. `routes/web.php` says this itself and must stay empty
+of page routes.
+
+The trade-off, stated plainly: `.htaccess` is Apache-only. Moving to nginx
+means porting ~45 rules. That was accepted; the host is Apache.
+
+### The four rules that keep it working
+
+1. **`.htaccess` is the single source of the route table.** `assemble.py`,
+   `sitemap.py` and the link sweeps all PARSE it. Never restate a route in
+   code — add the rule and the rest follows.
+2. **The rewrite is internal, so the query string never reaches JavaScript.**
+   Apache sees `product.html?id=x`; the browser's address bar keeps the path
+   and nothing else. Pages read their key with `pathKey()` from
+   `shared/js/core/router-helpers.js`, falling back to `getParam()`. A page
+   that reads only the query string renders "not found" on its own pretty URL —
+   this shipped once and reached production.
+3. **Links go through `productURL()` / `categoryURL()`** in
+   `shared/js/core/paths.js`. Both fall back to the SKU when a slug is missing,
+   and `/product/<sku>` resolves, so no input can produce a dead link.
+4. **Old URLs still work, permanently.** `?id=gr-1101` resolves, the SKU form
+   resolves, and `Product::resolveRouteBinding` accepts slug OR sku. This is
+   not a migration window — a shop does not get to invalidate an address
+   somebody shared.
+
+### Products have slugs
+
+`products.slug`, unique, backfilled from titles by the 2026_08_13 migration and
+generated on create. **Stored, not derived**: a slug computed from the title
+would change the moment a typo is fixed, and a URL that changes 404s for
+everyone who bookmarked it. Treat it as identity, like `sku` and `barcode` —
+the admin does not expose it for editing.
+
+### Canonicals
+
+Every page declares ONE address. `setCanonical(keep, path)` takes the true
+route explicitly, because deriving it from `location.pathname` declared both
+the route and the file canonical — telling Google the shop has two of every
+product. A missing product sets `noindex` and removes its canonical (the
+server cannot 404 a slug it has never heard of; the catalogue is in a database
+and the page is a static file).
+
+### Verifying a change to any of this
+
+`.htaccess` needs Apache, which is not available locally, so
+`python -m http.server` CANNOT test routing and will silently hide exactly the
+bugs this system is prone to. Use the rewrite-replaying test server + crawler
+pattern: parse the real `.htaccess`, replay its rules, then load every page in
+a browser and assert (a) no internal link 404s and (b) **no JavaScript console
+errors** — a missed import after a link sweep empties a product grid while the
+page still returns 200.
+
+---
+
+## 11. DEFERRED ON PURPOSE — decided 2026-08-13
+
+Built and dormant, waiting only on an account or a decision. None of these is
+unfinished work; each is switched off honestly and shows nothing rather than
+half-working. **Do not "fix" them by inventing placeholder credentials.**
+
+| Item | State | What unblocks it |
+|---|---|---|
+| **Google Search Console** | Nothing set up. `sitemap.xml` is correct and current (38 routes). | Verify the domain, submit the sitemap. ACTION-REQUIRED §7b. |
+| **Meta Pixel + Conversions API** | Both halves written, both dormant. | Pixel id + CAPI token. ACTION-REQUIRED §6b. |
+| **SMS to customers** | `modules/sms`, dormant. | bulksmsbd account, 3 `.env` keys. §6c. |
+| **bKash / Nagad** | `modules/payments`, dormant, sandbox by default. | Merchant onboarding. §6d. |
+| **301s from old `/modules/…` URLs** | Deliberately NOT added. | Old URLs work and canonicalise to the new ones, which is how Google consolidates. Redirects would mean mangling query strings for marginal gain — revisit only if Search Console shows the old URLs lingering. |
+| **Courier APIs** | Manual driver in daily use. | Pathao/Steadfast credentials. |
+
+The order that matters commercially: **payment gateway and product
+photography** first; everything else can wait until orders are flowing.

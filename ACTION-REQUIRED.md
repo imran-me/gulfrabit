@@ -278,6 +278,33 @@ not one for this list.
 
 ---
 
+## 6e. Google Search Console — 10 minutes, and it is the free one
+
+Deferred by decision on 2026-08-13, along with the Pixel — noted here so it is
+not mistaken for something half-built. **The code side is done:** every page
+now has a readable URL, one canonical each, and `sitemap.xml` lists 38 real
+routes. Nothing more can happen from this end; Google has to be told the site
+exists, and only a human with the domain can do that.
+
+1. **search.google.com/search-console → Add property → Domain** →
+   `gulfrabit.com`. It gives you a TXT record; add it in hPanel → Domains →
+   DNS Zone. Verification takes a few minutes to a few hours.
+2. **Sitemaps → add** `sitemap.xml`.
+3. **URL Inspection** on `https://gulfrabit.com/product/ajwa-dates-madinah-select`
+   → *Request indexing*. One product is enough to confirm the whole shape is
+   accepted.
+
+Why it is worth the ten minutes: it is the only place that will tell you *why*
+a page is not in Google rather than that it is not. It also reports the exact
+failure this shop is most exposed to — a "Duplicate, Google chose a different
+canonical" warning would mean the canonical work needs another look, and there
+is no other way to find that out.
+
+Until it is done nothing is broken. The shop is fully crawlable; Google simply
+has to discover it on its own, which is slower.
+
+---
+
 ## 7. Security housekeeping — 5 minutes
 
 - The **SSH password** you pasted in chat — change it if you have not
