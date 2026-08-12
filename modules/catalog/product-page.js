@@ -14,7 +14,7 @@ import { openCartDrawer } from '../../shared/js/components/cart-drawer.js';
 import { renderProductGrid, productBadges } from '../../shared/js/components/product-card.js';
 import { setup as setupStepper } from '../../shared/js/components/quantity-stepper.js';
 import { initWishlistButtons } from '../../shared/js/components/wishlist.js';
-import { getParam, setCanonical, setPageMeta } from '../../shared/js/core/router-helpers.js';
+import { getParam, pathKey, setCanonical, setPageMeta } from '../../shared/js/core/router-helpers.js';
 import { track, productPayload } from '../../shared/js/core/analytics.js';
 import { siteURL } from '../../shared/js/core/paths.js';
 import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
@@ -34,7 +34,11 @@ let currentVariant = null;
 init();
 
 async function init() {
-  const id = getParam('id');
+  // ?id= for every existing link; the path for /product/<slug>. The rewrite
+  // that serves those pretty URLs is INTERNAL, so the query string it adds is
+  // visible to Apache and not to this script — the path is the only place the
+  // browser can still see which product was asked for.
+  const id = getParam('id') || pathKey('product');
   const product = id ? await getProductById(id) : null;
   if (!product) return renderNotFound();
 

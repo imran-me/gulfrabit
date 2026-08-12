@@ -47,6 +47,7 @@ NOINDEX = {
     "modules/courier/couriers.html":        "staff panel",
     "modules/admin/categories.html":        "staff panel",
     "modules/media/library.html":           "staff panel",
+    "modules/hero/hero.html":               "staff panel",
     "modules/highlights/highlights.html":   "staff panel",
     "modules/marketing/campaigns.html":     "staff panel",
     "modules/admin/coupons.html":           "staff panel",

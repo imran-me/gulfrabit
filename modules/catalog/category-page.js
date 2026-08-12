@@ -9,7 +9,7 @@ import { getCategoryBySlug, getProductsByCategory } from './backend/api.js';
 import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { renderProductSkeletons } from '../../shared/js/components/skeleton-loader.js';
 import { initFilters, matchesSpecFilters } from '../../shared/js/components/filters-sidebar.js';
-import { getParam, getParams, setParams, setCanonical, setPageMeta } from '../../shared/js/core/router-helpers.js';
+import { getParam, getParams, pathKey, setParams, setCanonical, setPageMeta } from '../../shared/js/core/router-helpers.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 
 const PAGE_SIZE = 8;
@@ -34,7 +34,11 @@ async function init() {
      empty grid, and the home page's "View all" had nowhere correct to point.
      Empty string, not undefined: getParam returns the fallback for a missing
      param and '' is the value that means "every category". */
-  const slug = getParam('slug', '');
+  // ...or from the path, for /category/<slug>. That rewrite is internal, so
+  // the query string Apache adds never reaches this script; without the
+  // fallback the pretty URL silently rendered Shop All — every product in the
+  // shop under the wrong heading, which reads as working and is not.
+  const slug = getParam('slug', '') || pathKey('category') || '';
   const params = getParams();
 
   // ?slug= is what this page IS. Sort and filter params are not: "nuts, price

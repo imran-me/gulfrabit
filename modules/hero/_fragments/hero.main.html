@@ -1,0 +1,88 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Hero banners</h1>
+          <p class="admin__sub" data-hero-count>Loading…</p>
+        </div>
+        <div class="aactions">
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-hero-add>Add a banner</button>
+        </div>
+      </div>
+
+      <!-- Said once, at the top, because it is the thing that surprises people:
+           these banners replace the ones built into the home page as a set, not
+           one at a time. -->
+      <div class="acard" style="margin-bottom:var(--space-5)">
+        <h2 class="h5" style="margin:0 0 var(--space-2)">How this works</h2>
+        <p class="admin__sub" style="margin:0">
+          While there is <strong>no live banner here</strong>, the home page shows the artwork built
+          into the site. The moment one banner is live, this list takes over completely — so add
+          every banner you want before switching the first one on.
+        </p>
+      </div>
+
+      <section class="acard" aria-labelledby="hs-head" style="margin-bottom:var(--space-5)">
+        <h2 class="h5" id="hs-head">Movement</h2>
+        <p class="admin__sub" style="margin:-.5rem 0 var(--space-4)">
+          Applies to every banner. Changes save as you make them.
+        </p>
+        <form class="afilters" data-hero-settings style="margin:0">
+          <div class="afilters__field">
+            <label for="h-interval">Hold each banner for</label>
+            <select class="select-gr" id="h-interval" name="intervalMs">
+              <option value="3000">3 seconds</option>
+              <option value="4000">4 seconds</option>
+              <option value="5000">5 seconds</option>
+              <option value="6000">6 seconds</option>
+              <option value="8000">8 seconds</option>
+              <option value="10000">10 seconds</option>
+              <option value="15000">15 seconds</option>
+            </select>
+          </div>
+          <div class="afilters__field">
+            <label for="h-transition">Change by</label>
+            <select class="select-gr" id="h-transition" name="transition">
+              <option value="fade">Fading</option>
+              <option value="slide">Sliding across</option>
+              <option value="zoom">Zooming in</option>
+              <option value="none">Cutting straight</option>
+            </select>
+          </div>
+          <div class="afilters__field">
+            <label for="h-tms">Change takes</label>
+            <select class="select-gr" id="h-tms" name="transitionMs">
+              <option value="0">Instant</option>
+              <option value="300">0.3s — brisk</option>
+              <option value="600">0.6s — normal</option>
+              <option value="1000">1s — slow</option>
+              <option value="1600">1.6s — very slow</option>
+            </select>
+          </div>
+          <div class="afilters__field">
+            <label for="h-easing">Movement feel</label>
+            <select class="select-gr" id="h-easing" name="easing">
+              <option value="ease-in-out">Smooth both ends</option>
+              <option value="ease">Gentle</option>
+              <option value="linear">Mechanical</option>
+              <option value="spring">Springy</option>
+            </select>
+          </div>
+          <div class="afilters__field">
+            <label for="h-kb">Slow drift on the picture</label>
+            <select class="select-gr" id="h-kb" name="kenBurns">
+              <option value="0">Off</option>
+              <option value="1">On</option>
+            </select>
+          </div>
+          <div class="afilters__field">
+            <label for="h-auto">Move on its own</label>
+            <select class="select-gr" id="h-auto" name="autoplay">
+              <option value="1">Yes</option>
+              <option value="0">No — only arrows and dots</option>
+            </select>
+          </div>
+        </form>
+      </section>
+
+      <div data-hero-list></div>
+
+      <p class="aerror" data-hero-error hidden role="alert"></p>

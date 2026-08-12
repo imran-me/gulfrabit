@@ -65,8 +65,13 @@ class HeroSlide extends Model
     public function href(): ?string
     {
         return match ($this->link_type) {
-            'product'  => '/modules/catalog/product.html?id=' . rawurlencode((string) $this->link_value),
-            'category' => '/modules/catalog/category.html?slug=' . rawurlencode((string) $this->link_value),
+            // The readable form Apache rewrites — /product/gr-1101 rather than
+            // modules/catalog/product.html?id=gr-1101. Changed here, once, on
+            // the day those URLs landed; not one banner in the database needed
+            // touching, which is the entire reason the link is stored as a type
+            // and an id instead of a finished href.
+            'product'  => '/product/' . rawurlencode((string) $this->link_value),
+            'category' => '/category/' . rawurlencode((string) $this->link_value),
             // Already validated to a same-site path on the way in — see
             // HeroSlideRequest. Passed through as stored.
             'custom'   => $this->link_value,

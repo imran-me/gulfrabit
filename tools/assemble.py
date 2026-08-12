@@ -306,6 +306,7 @@ ADMIN_NAV = [
     "/modules/courier/courier-nav.js",
     "/modules/inventory/inventory-nav.js",
     "/modules/media/media-nav.js",
+    "/modules/hero/hero-nav.js",
     "/modules/highlights/highlights-nav.js",
     "/modules/marketing/marketing-nav.js",
     "/modules/accounting/accounting-nav.js",
@@ -386,6 +387,11 @@ ADMIN_PAGES = [
      "modules/theme/_fragments/theme.main.html",
      ["/modules/admin/admin.css", "/modules/theme/theme-admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/theme/theme-page.js"], True),
+
+    ("modules/hero/hero.html", "Hero banners — GulfRabit Admin",
+     "modules/hero/_fragments/hero.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/hero/hero-page.js"], True),
 
     ("modules/highlights/highlights.html", "Home page — GulfRabit Admin",
      "modules/highlights/_fragments/highlights.main.html",

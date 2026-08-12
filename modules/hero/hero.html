@@ -42,7 +42,7 @@
     } catch (e) { /* private mode, or nothing stored — the built-in theme stands. */ }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profit & loss — GulfRabit Admin</title>
+  <title>Hero banners — GulfRabit Admin</title>
   <meta name="description" content="GulfRabit staff panel.">
   <meta name="theme-color" content="#0A0A0A">
   <meta name="author" content="GulfRabit">
@@ -51,11 +51,11 @@
   <!-- Social / Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GulfRabit">
-  <meta property="og:title" content="Profit & loss — GulfRabit Admin">
+  <meta property="og:title" content="Hero banners — GulfRabit Admin">
   <meta property="og:description" content="GulfRabit staff panel.">
   <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Profit & loss — GulfRabit Admin">
+  <meta name="twitter:title" content="Hero banners — GulfRabit Admin">
   <meta name="twitter:description" content="GulfRabit staff panel.">
   <link rel="icon" href="../../favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
@@ -101,52 +101,92 @@
 
 <div class="admin__head">
         <div>
-          <h1 class="admin__title">Profit &amp; loss</h1>
-          <p class="admin__sub" data-pnl-period>Loading…</p>
+          <h1 class="admin__title">Hero banners</h1>
+          <p class="admin__sub" data-hero-count>Loading…</p>
+        </div>
+        <div class="aactions">
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-hero-add>Add a banner</button>
         </div>
       </div>
 
-      <form class="afilters" data-pnl-filters>
-        <div class="afilters__field">
-          <label for="pl-from">From</label>
-          <input class="input-gr" id="pl-from" name="from" type="date" required>
-        </div>
-        <div class="afilters__field">
-          <label for="pl-to">To</label>
-          <input class="input-gr" id="pl-to" name="to" type="date" required>
-        </div>
-        <div class="afilters__actions">
-          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Run</button>
-        </div>
-      </form>
-
-      <!-- The caveat, when it applies. Placed ABOVE the figures rather than in
-           a footnote: a number you read before the warning is a number you have
-           already believed. -->
-      <div class="acard" style="margin-bottom:var(--space-5);border-left:3px solid var(--gr-warning)"
-           data-pnl-caveat hidden>
-        <h2 class="h5" style="margin:0 0 var(--space-2)">Gross profit cannot be calculated</h2>
-        <p class="admin__sub" style="margin:0" data-pnl-caveat-text></p>
+      <!-- Said once, at the top, because it is the thing that surprises people:
+           these banners replace the ones built into the home page as a set, not
+           one at a time. -->
+      <div class="acard" style="margin-bottom:var(--space-5)">
+        <h2 class="h5" style="margin:0 0 var(--space-2)">How this works</h2>
+        <p class="admin__sub" style="margin:0">
+          While there is <strong>no live banner here</strong>, the home page shows the artwork built
+          into the site. The moment one banner is live, this list takes over completely — so add
+          every banner you want before switching the first one on.
+        </p>
       </div>
 
-      <div class="aorder">
-        <section class="acard" aria-labelledby="pi-head">
-          <h2 class="h5" id="pi-head">Income</h2>
-          <dl class="atotals" data-pnl-income></dl>
-        </section>
+      <section class="acard" aria-labelledby="hs-head" style="margin-bottom:var(--space-5)">
+        <h2 class="h5" id="hs-head">Movement</h2>
+        <p class="admin__sub" style="margin:-.5rem 0 var(--space-4)">
+          Applies to every banner. Changes save as you make them.
+        </p>
+        <form class="afilters" data-hero-settings style="margin:0">
+          <div class="afilters__field">
+            <label for="h-interval">Hold each banner for</label>
+            <select class="select-gr" id="h-interval" name="intervalMs">
+              <option value="3000">3 seconds</option>
+              <option value="4000">4 seconds</option>
+              <option value="5000">5 seconds</option>
+              <option value="6000">6 seconds</option>
+              <option value="8000">8 seconds</option>
+              <option value="10000">10 seconds</option>
+              <option value="15000">15 seconds</option>
+            </select>
+          </div>
+          <div class="afilters__field">
+            <label for="h-transition">Change by</label>
+            <select class="select-gr" id="h-transition" name="transition">
+              <option value="fade">Fading</option>
+              <option value="slide">Sliding across</option>
+              <option value="zoom">Zooming in</option>
+              <option value="none">Cutting straight</option>
+            </select>
+          </div>
+          <div class="afilters__field">
+            <label for="h-tms">Change takes</label>
+            <select class="select-gr" id="h-tms" name="transitionMs">
+              <option value="0">Instant</option>
+              <option value="300">0.3s — brisk</option>
+              <option value="600">0.6s — normal</option>
+              <option value="1000">1s — slow</option>
+              <option value="1600">1.6s — very slow</option>
+            </select>
+          </div>
+          <div class="afilters__field">
+            <label for="h-easing">Movement feel</label>
+            <select class="select-gr" id="h-easing" name="easing">
+              <option value="ease-in-out">Smooth both ends</option>
+              <option value="ease">Gentle</option>
+              <option value="linear">Mechanical</option>
+              <option value="spring">Springy</option>
+            </select>
+          </div>
+          <div class="afilters__field">
+            <label for="h-kb">Slow drift on the picture</label>
+            <select class="select-gr" id="h-kb" name="kenBurns">
+              <option value="0">Off</option>
+              <option value="1">On</option>
+            </select>
+          </div>
+          <div class="afilters__field">
+            <label for="h-auto">Move on its own</label>
+            <select class="select-gr" id="h-auto" name="autoplay">
+              <option value="1">Yes</option>
+              <option value="0">No — only arrows and dots</option>
+            </select>
+          </div>
+        </form>
+      </section>
 
-        <section class="acard" aria-labelledby="pe-head">
-          <h2 class="h5" id="pe-head">Expenses</h2>
-          <dl class="atotals" data-pnl-expenses></dl>
-        </section>
+      <div data-hero-list></div>
 
-        <section class="acard" aria-labelledby="pr-head">
-          <h2 class="h5" id="pr-head">Result</h2>
-          <div class="acards" data-pnl-result></div>
-        </section>
-      </div>
-
-      <p class="aerror" data-pnl-error hidden role="alert"></p>
+      <p class="aerror" data-hero-error hidden role="alert"></p>
     </main>
   </div>
 
@@ -162,6 +202,6 @@
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=ebff64a4"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=87de770c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=db43fd3d"></script>
-  <script type="module" src="../../modules/accounting/pnl-page.js?v=b38d9ad1"></script>
+  <script type="module" src="../../modules/hero/hero-page.js?v=71f1bb2e"></script>
 </body>
 </html>

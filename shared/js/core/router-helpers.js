@@ -11,6 +11,37 @@ export function getParam(name, fallback = null) {
   return new URLSearchParams(window.location.search).get(name) ?? fallback;
 }
 
+/**
+ * The key carried by a readable URL's PATH — `/product/ajwa-dates` → 'ajwa-dates'.
+ *
+ * WHY THIS EXISTS, AND WHY getParam ALONE WAS NOT ENOUGH
+ * -----------------------------------------------------
+ * Apache rewrites /product/<slug> onto modules/catalog/product.html?id=<slug>.
+ * That rewrite is INTERNAL: the server sees the query string, the browser
+ * never does. `window.location.search` is empty on a rewritten URL, so a page
+ * that reads only getParam() gets null and renders "not found" — which is
+ * exactly what the live site did the first time these URLs were tried.
+ *
+ * So the query string is the first source (every old link, and every filter
+ * the page itself writes with setParams, still carries one) and the path is
+ * the fallback. Both work, neither is required.
+ *
+ * @param {string} prefix the segment before the key — 'product', 'category'
+ * @returns {string|null}
+ */
+export function pathKey(prefix) {
+  const match = window.location.pathname.match(
+    new RegExp(`/${prefix}/([^/?#]+)/?$`),
+  );
+  // decode, because a slug could legitimately arrive percent-encoded and the
+  // lookup compares against the plain string.
+  try {
+    return match ? decodeURIComponent(match[1]) : null;
+  } catch {
+    return match ? match[1] : null;   // malformed escape — use it verbatim
+  }
+}
+
 /** Get all params as a plain object. */
 export function getParams() {
   return Object.fromEntries(new URLSearchParams(window.location.search).entries());

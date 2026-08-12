@@ -458,6 +458,53 @@
 
 .atemplates { display: flex; flex-wrap: wrap; gap: var(--space-2); flex: 1 1 100%; }
 
+/* ---- Hero slide rows --------------------------------------------------
+   One card per banner: the picture on the left at the shape it will actually
+   be seen in, its words on the right, and everything that decides WHEN it
+   shows along the bottom. Deliberately not a table — a banner is a picture,
+   and a 60px thumbnail in a table cell is not enough to recognise one by. */
+.aslide { margin-bottom: var(--space-4); }
+/* A banner that is switched off should look switched off at a glance down the
+   list, without having to read every pill. */
+.aslide.is-off { opacity: .62; }
+.aslide.is-off:hover, .aslide.is-off:focus-within { opacity: 1; }
+
+.aslide__grid { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: var(--space-5); }
+.aslide__media { display: grid; gap: var(--space-3); align-content: start; }
+.aslide__media img {
+  width: 100%;
+  /* The hero's own proportion, so what is chosen here is what lands there. */
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+}
+.aslide__empty {
+  display: grid; place-items: center;
+  aspect-ratio: 2 / 1;
+  border: 1px dashed var(--gr-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--fs-14);
+}
+
+.aslide__fields { display: flex; flex-wrap: wrap; gap: var(--space-3); align-content: start; }
+
+.aslide__foot {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2);
+  margin-top: var(--space-4); padding-top: var(--space-4);
+  border-top: 1px solid var(--border-hairline);
+}
+.aslide__spacer { flex: 1 1 auto; }
+.aslide__foot code { font-size: var(--fs-12); word-break: break-all; }
+
+@media (max-width: 720px) {
+  /* The picture goes full width rather than shrinking to a stamp: on a phone
+     this screen is used to check that the right artwork is in the right slot,
+     which needs the artwork legible more than it needs the form beside it. */
+  .aslide__grid { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* ---- Row actions ------------------------------------------------------
    Controls that live IN a table row — the courier picker and tracking box on
    the handover queue. Kept on one line and narrow: this column exists to be
