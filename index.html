@@ -674,8 +674,15 @@
                overrode the attribute and it painted a 160px SQUARE into a 42px
                reservation: four times too tall, and a layout shift on every page
                of the site. Honest intrinsic ratio here; CSS sets the size. -->
+          <!-- Mark as an image, words as words. Kept byte-for-byte in step
+               with shared/components/footer.html — this page is hand-authored
+               and every other page is generated from that partial. -->
           <a class="footer-logo" href="index.html" aria-label="GulfRabit home">
-            <img src="assets/logo/gulfrabit-logo.png" alt="GulfRabit" width="720" height="720">
+            <img class="footer-logo__mark" src="assets/logo/gulfrabit-mark.png" alt="" width="520" height="520">
+            <span class="footer-logo__type">
+              <span class="footer-logo__word">GulfRabit</span>
+              <span class="footer-logo__tag">Shop Smart. Hop Fast.</span>
+            </span>
           </a>
           <p class="text-muted-gr" style="max-width:34ch">Premium imports for Bangladesh. Sourced. Verified. Delivered.</p>
           <form data-newsletter class="stack-2" novalidate>

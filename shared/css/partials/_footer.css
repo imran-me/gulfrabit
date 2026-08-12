@@ -85,11 +85,43 @@
   .footer-legal { justify-content: center; }
 }
 
-/* The brand mark. Sized here rather than by attributes, because the reset
-   forces height:auto — an attribute pair can only ever declare the intrinsic
-   ratio, never the display size. 88px on a phone, 104px above it: large
-   enough to read the tagline inside the mark, small enough that the footer
-   opens with the newsletter rather than with a logo. */
-.footer-logo { display: inline-block; }
-.footer-logo img { width: 88px; height: auto; }
-@media (min-width: 768px) { .footer-logo img { width: 104px; } }
+/* ---- The footer brand lockup ------------------------------------------
+   Mark plus type, horizontal, the same construction as the header's — one
+   brand, drawn one way, in the two places it appears. It replaced the whole
+   720×720 stacked logo squeezed into 104px, where the wordmark inside the
+   raster came out around 8px tall and its Arabic line around 5px: unreadable
+   at the size, and soft at every zoom, because it was a photograph of
+   lettering rather than lettering.
+
+   Sized in CSS rather than by attributes, because the reset forces
+   height:auto — an attribute pair can only ever declare the intrinsic ratio,
+   never the display size. */
+.footer-logo {
+  display: inline-flex; align-items: center; gap: 11px;
+  /* The anchor wraps type now, so it would inherit the link colour and paint
+     the whole lockup cyan. Each part states its own. */
+  color: inherit;
+}
+/* 52px, not the header's 38: the footer column is wider and quieter, and the
+   mark is the only picture in it. flex:none because a mark that shrinks is
+   not a mark — the same lesson the nav's Home glyph taught. */
+.footer-logo__mark { width: 52px; height: 52px; flex: none; display: block; }
+.footer-logo__type { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+/* The header wordmark's face, weight and colour exactly, one step up in size
+   because it is not competing with a nav row here. */
+.footer-logo__word {
+  font-family: var(--font-display); font-weight: var(--fw-bold);
+  font-size: var(--fs-24); line-height: 1;
+  color: var(--link); letter-spacing: -0.01em;
+}
+/* The slogan the raster used to hide. Small, letterspaced and muted: it is a
+   signature under the name, not a second line of shouting. */
+.footer-logo__tag {
+  font-size: var(--fs-12); line-height: 1;
+  color: var(--text-muted); letter-spacing: .07em;
+}
+@media (min-width: 768px) {
+  .footer-logo { gap: 13px; }
+  .footer-logo__mark { width: 60px; height: 60px; }
+  .footer-logo__word { font-size: var(--fs-31); }
+}

@@ -71,7 +71,7 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=0c6c79f6">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=5d669283">
   <!-- The Luxe layer. Linked on every storefront page and completely
        inert without [data-theme="luxe"] on <html>, so the default theme
        renders exactly as it did before this file existed. Linking it
@@ -319,13 +319,26 @@
     <div class="footer-grid">
       <!-- Brand + newsletter -->
       <div class="stack-4 footer-grid__brand">
-        <!-- The asset is 720×720. It was declared 160×42 — a wide-lockup shape
-             this file has never had — so the reset's `img { height: auto }`
-             overrode the attribute and it painted a 160px SQUARE into a 42px
-             reservation: four times too tall, and a layout shift on every page
-             of the site. Honest intrinsic ratio here; CSS sets the size. -->
+        <!-- The brand lockup, built the way the header builds it: the MARK as
+             an image, the words as words.
+
+             It used to be the full 720×720 stacked logo painted at 104px —
+             which meant the wordmark baked into that raster rendered about
+             8px tall and its Arabic line about 5px, under a photograph's
+             worth of compression. From a metre away it read as a blue smudge.
+             A logo that cannot be read is not branding.
+
+             As live type the wordmark is sharp at any zoom, sits on the same
+             display face and brand cyan as the header's, and the slogan the
+             raster was hiding becomes text a search engine and a screen
+             reader can both have. alt="" on the mark because the anchor is
+             already labelled — otherwise it announces the brand twice. -->
         <a class="footer-logo" href="../../index.html" aria-label="GulfRabit home">
-          <img src="../../assets/logo/gulfrabit-logo.png" alt="GulfRabit" width="720" height="720">
+          <img class="footer-logo__mark" src="../../assets/logo/gulfrabit-mark.png" alt="" width="520" height="520">
+          <span class="footer-logo__type">
+            <span class="footer-logo__word">GulfRabit</span>
+            <span class="footer-logo__tag">Shop Smart. Hop Fast.</span>
+          </span>
         </a>
         <p class="text-muted-gr" style="max-width:34ch">Premium imports for Bangladesh. Sourced. Verified. Delivered.</p>
         <form data-newsletter class="stack-2" novalidate>
