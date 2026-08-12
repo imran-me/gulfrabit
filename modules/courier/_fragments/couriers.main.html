@@ -1,38 +1,55 @@
       <div class="admin__head">
         <div>
           <h1 class="admin__title">Couriers</h1>
-          <p class="admin__sub">Who carries your parcels, and which of them this system can talk to directly.</p>
+          <p class="admin__sub" data-board-count>Loading…</p>
         </div>
       </div>
 
-      <!-- Stated up front rather than discovered one order at a time. Until
+      <!-- Stated up front rather than discovered one parcel at a time. Until
            credentials exist, every courier is worked by hand — that is a real
            way to run a storefront, not a broken state, and saying so plainly
            keeps anyone from waiting for an integration that has not been set
-           up. -->
+           up. Every status on this board was typed by one of us. -->
       <div class="acard" style="margin-bottom:var(--space-5)">
         <h2 class="h5" style="margin:0 0 var(--space-2)">No courier API is connected yet</h2>
         <p class="admin__sub" style="margin:0">
-          Every courier below is worked manually: you hand over the parcel, type the tracking
-          number, and record each status yourself. Nothing here contacts a courier automatically.
-          When API credentials are added for one, its row changes and nothing else does — the
-          orders screen, the consignment records and the tracking history stay exactly as they are.
+          Every parcel below is tracked manually: you hand it over, type the tracking number,
+          and record each status yourself. Nothing here contacts a courier automatically.
+          When API credentials are added for one, its scans start arriving on their own and
+          nothing else changes.
         </p>
       </div>
 
+      <!-- The parcel pipeline as places. Filled by couriers-page.js from the
+           stage list the server sends counts for. The last tab is the courier
+           companies themselves — settings, kept at the end where settings go. -->
+      <nav class="atabs" data-board-tabs aria-label="Parcel stages"></nav>
+
+      <form class="afilters" data-board-search>
+        <div class="afilters__field">
+          <label for="b-q">Search</label>
+          <input class="input-gr" id="b-q" name="q" type="search"
+                 placeholder="Order no, phone, name or tracking">
+        </div>
+        <div class="afilters__actions">
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Search</button>
+        </div>
+      </form>
+
+      <!-- One table, two shapes: the handover queue lists orders, every other
+           stage lists parcels. The header row is written by the page script so
+           the columns always match what is actually in the body. -->
       <div class="atable-wrap">
         <table class="atable">
-          <thead>
-            <tr>
-              <th scope="col">Courier</th>
-              <th scope="col">Integration</th>
-              <th scope="col">Tracking link</th>
-              <th scope="col">Support</th>
-              <th scope="col">Status</th>
-            </tr>
-          </thead>
-          <tbody data-couriers-body>
-            <tr><td colspan="5" class="atable__empty">Loading couriers…</td></tr>
+          <thead data-board-head></thead>
+          <tbody data-board-body>
+            <tr><td colspan="7" class="atable__empty">Loading…</td></tr>
           </tbody>
         </table>
       </div>
+
+      <nav class="apager" data-board-pager hidden aria-label="Parcel pages">
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-board-prev>← Previous</button>
+        <span data-board-page></span>
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-board-next>Next →</button>
+      </nav>

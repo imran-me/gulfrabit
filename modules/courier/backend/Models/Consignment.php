@@ -7,6 +7,7 @@ namespace Modules\Courier\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Checkout\Models\Order;
 
 /**
  * One handover of one order to one courier.
@@ -35,6 +36,16 @@ class Consignment extends Model
     public function courier(): BelongsTo
     {
         return $this->belongsTo(Courier::class);
+    }
+
+    /**
+     * The order this parcel is. Reaching UP into checkout is the direction this
+     * dependency already runs — courier requires checkout, checkout knows
+     * nothing of couriers — so it costs nothing the module did not already owe.
+     */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     public function events(): HasMany

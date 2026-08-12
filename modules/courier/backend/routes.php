@@ -18,6 +18,10 @@ Route::prefix('admin')->name('admin.')->middleware(['admin', 'admin:orders'])->g
 
     Route::get('/couriers', [AdminCourierController::class, 'index'])->name('couriers.index');
 
+    // The parcel board — every consignment by stage, plus the queue of packed
+    // orders still waiting for a rider.
+    Route::get('/consignments', [AdminCourierController::class, 'board'])->name('consignments.board');
+
     Route::get('/orders/{order}/consignments', [AdminCourierController::class, 'forOrder'])
         ->name('consignments.forOrder');
     Route::post('/orders/{order}/consignments', [AdminCourierController::class, 'assign'])

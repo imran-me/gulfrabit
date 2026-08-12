@@ -27,6 +27,37 @@ booked, which is the only useful thing to tell the person looking at it.
 
 ---
 
+## `GET /api/admin/consignments?stage=…&q=…`
+
+The parcel board. One stage's rows, plus how many sit in every other stage so
+the tab bar is drawn without eight more requests.
+
+```json
+{ "data": [ … ],
+  "meta": { "stage":"handover", "total":4, "currentPage":1, "lastPage":1,
+            "counts": { "handover":4, "booked":7, "picked_up":0, "in_transit":3,
+                        "delivered":21, "failed":1, "returned":2, "cancelled":0 } } }
+```
+
+`stage` defaults to `handover` and is whitelisted. Every row carries `kind`, so
+the client renders it without guessing:
+
+| `stage` | `kind` | What a row is |
+|---|---|---|
+| `handover` | `order` | a packed order with no live consignment — the parcel does not exist yet |
+| everything else | `consignment` | a real parcel in that status |
+
+`counts` ignores the `stage` filter and honours `q`, because a tab bar has to
+know about the tabs you are *not* standing on. Every known stage appears even at
+zero: a tab that vanishes when empty moves the others under the cursor, and "no
+parcels are waiting" is worth saying.
+
+The handover queue sorts **oldest first** and excludes any order that already
+has a consignment in a non-final status — without that exclusion a parcel would
+appear both as waiting and as with-a-courier.
+
+---
+
 ## `GET /api/admin/orders/{order}/consignments`
 Newest first, each with its events. Multiple rows are normal: a failed delivery
 that goes out again is two handovers, and both matter.
@@ -47,7 +78,7 @@ can respond by picking another courier:
 
 - the courier is switched off
 - the courier has no credentials and its driver cannot book
-- the order is not `confirmed` or `packed` — an unpacked parcel cannot be handed to anyone
+- the order is not `confirmed`, `packed` or `ready_for_courier` — an unpacked parcel cannot be handed to anyone
 - the order already has an open consignment (two riders, one parcel)
 - the courier refused the booking
 

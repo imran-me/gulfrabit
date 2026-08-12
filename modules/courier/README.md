@@ -26,6 +26,29 @@ The panel says so in three places rather than hiding it:
 - each courier row is labelled *Manual* or *API connected*,
 - the assign form states that nothing is booked automatically.
 
+## The Couriers screen is a board, not a settings page
+
+Tabs across the top are the stages a parcel passes through, with live counts:
+
+**Ready to hand over** · With courier · Picked up · In transit · Delivered ·
+Attempt failed · Returned · Cancelled · *Courier accounts*
+
+The first tab is **not** a consignment status. It lists *orders* that are packed
+and have no live consignment — the parcel does not exist yet, which is the whole
+point of the tab. It answers the first question of the morning: what goes out
+today? It sorts **oldest first**, against the habit of every other list in this
+panel, because it is a queue and the parcel that has waited longest is the one
+most likely to be forgotten.
+
+`draft` gets no tab. It exists for a few milliseconds inside `assign()` between
+creating the row and the driver answering; a parcel genuinely stuck there is a
+bug, and giving it a tab would dress it up as a normal place to be.
+
+The last tab is the old courier-company list — settings, kept, and pushed to the
+end where settings belong. **Assigning still happens on the order screen**,
+where the address and the money are; a second assign form here would be a second
+place to keep correct.
+
 `is_active` ("we are not using RedX this month") and `is_configured` ("no
 credentials, so the driver cannot call anything") are **separate columns**.
 Collapsing them would hide *why* a courier is unavailable.
