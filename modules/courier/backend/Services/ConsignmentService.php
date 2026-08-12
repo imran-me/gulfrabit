@@ -79,7 +79,9 @@ final class ConsignmentService
 
         // A parcel that has not been packed cannot be handed to anyone, and an
         // order that is finished should not gain a new consignment.
-        if (! in_array($order->status, ['confirmed', 'packed'], true)) {
+        // `ready_for_courier` is the stage this whole screen exists to drain,
+        // so it is the expected one here rather than an afterthought.
+        if (! in_array($order->status, ['confirmed', 'packed', 'ready_for_courier'], true)) {
             throw new RuntimeException(
                 "An order that is {$order->status} cannot be handed to a courier."
             );
