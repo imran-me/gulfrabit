@@ -72,6 +72,9 @@ class ProductUpdateRequest extends FormRequest
             // because "nobody has counted this" is a real state that must not
             // be recorded as zero — the same distinction cost makes.
             'variants.*.stockQty'           => ['sometimes', 'nullable', 'integer', 'min:0', 'max:999999'],
+            // The public per-pack "Only N left". Same cap as the product-level
+            // field: scarcity that reads "Only 4,000 left" is not scarcity.
+            'variants.*.stockDisplay'       => ['sometimes', 'nullable', 'integer', 'min:0', 'max:9999'],
             'defaultVariant'                => ['sometimes', 'nullable', 'string', 'max:96'],
 
             // `nullable` on cost is load-bearing: clearing it means "we no

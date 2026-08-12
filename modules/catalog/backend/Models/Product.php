@@ -159,6 +159,14 @@ class Product extends Model
                 ? intdiv((int) $v['original_price_poisha'], 100)
                 : null,
             'inStock'       => (bool) ($v['in_stock'] ?? true),
+            // The PUBLIC per-pack counter, and the only stock figure in this
+            // array. A shop sells out of 500 g while 1 kg is stacked to the
+            // ceiling, so one number for the whole product would be wrong on
+            // both packs at once. Null falls back to the product's own figure
+            // in the PDP, which keeps single-size products unchanged.
+            'stockDisplay'  => isset($v['stock_display']) && $v['stock_display'] !== null
+                ? (int) $v['stock_display']
+                : null,
         ], $this->variants ?? []);
     }
 

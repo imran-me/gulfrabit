@@ -225,12 +225,27 @@ function paintInfo(p) {
  * page that says "In stock" underneath it is arguing with itself.
  */
 function availabilityLine(p) {
-  const shown = Number.isFinite(p.stockDisplay) ? p.stockDisplay : null;
+  const shown = remainingFor(p);
 
   if (shown === 0 || !p.inStock) {
     return '<span style="color:var(--gr-error)">● Currently unavailable</span>';
   }
   return '<span style="color:var(--lime-ink)">● In stock</span>';
+}
+
+/**
+ * The public remaining-count that applies RIGHT NOW: the selected pack's own
+ * figure if it has one, otherwise the product's.
+ *
+ * Per-pack matters because a shop sells out of 500 g while 1 kg is stacked to
+ * the ceiling — one number for the whole product would be wrong on both packs
+ * at once. The fallback keeps single-size products, and packs the merchant has
+ * not bothered to count, behaving exactly as before.
+ */
+function remainingFor(p) {
+  const v = currentVariant;
+  if (v && Number.isFinite(v.stockDisplay)) return v.stockDisplay;
+  return Number.isFinite(p.stockDisplay) ? p.stockDisplay : null;
 }
 
 /** Above this, a remaining-count is information rather than urgency. */
@@ -250,7 +265,7 @@ function paintScarcity(p) {
   const host = document.querySelector('[data-pdp-scarcity]');
   if (!host) return;
 
-  const left = Number.isFinite(p.stockDisplay) ? p.stockDisplay : null;
+  const left = remainingFor(p);
   if (left === null || left <= 0 || left > SCARCITY_MAX || !p.inStock) {
     host.hidden = true;
     return;
@@ -308,6 +323,11 @@ function paintVariants(p) {
       // stored price.
       const wb = document.querySelector('[data-wishlist-toggle]');
       if (wb) wb.dataset.price = String(currentVariant.price);
+      // And so does the remaining-count, which is now per pack: leaving "Only
+      // 2 left" on screen after the shopper switches to the size we have a
+      // hundred of is a false claim, made by us, at the moment of purchase.
+      paintScarcity(p);
+      document.querySelector('[data-pdp-stock]').innerHTML = availabilityLine(p);
     });
   });
 }
