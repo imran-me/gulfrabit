@@ -458,6 +458,72 @@
 
 .atemplates { display: flex; flex-wrap: wrap; gap: var(--space-2); flex: 1 1 100%; }
 
+/* ---- Row actions ------------------------------------------------------
+   Controls that live IN a table row — the courier picker and tracking box on
+   the handover queue. Kept on one line and narrow: this column exists to be
+   used at speed with a rider waiting, not to be read. */
+.arow-actions { display: flex; gap: var(--space-2); align-items: center; flex-wrap: nowrap; }
+
+/* The endings — cancel, spam, returned, failed — behind one extra click.
+   Built on <details>, so it opens with a click or the keyboard and closes on
+   Escape without a line of JavaScript or a library to keep up to date. */
+.amenu { position: relative; }
+.amenu > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  line-height: 1;
+  user-select: none;
+}
+.amenu > summary::-webkit-details-marker { display: none; }
+.amenu > summary:hover { background: var(--wash-hover); color: var(--text-primary); }
+.amenu > summary:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 1px; }
+
+.amenu__list {
+  position: absolute;
+  right: 0;
+  z-index: 5;
+  min-width: 12rem;
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  display: grid;
+  gap: 2px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+}
+.amenu__list button {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: var(--fs-14);
+  /* Not red. These are ordinary parts of running a shop, and painting them as
+     alarms every day makes the colour meaningless on the day it matters. */
+  color: var(--text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.amenu__list button:hover { background: var(--wash-hover); }
+
+/* Room for a menu opened on one of the last rows.
+   .atable-wrap scrolls sideways, and CSS will not let one axis clip while the
+   other stays visible — `overflow-y: visible` beside `overflow-x: auto`
+   silently computes to `auto`. So the menu of a bottom row, being out of flow,
+   would open past the box and be clipped. Rather than fight that, the box is
+   given the height while a menu is open and takes it back when it closes. */
+.atable-wrap:has(.amenu[open]) { padding-bottom: 9rem; }
+.arow-actions .select-gr { min-width: 9rem; }
+.arow-actions .input-gr { width: 8rem; }
+.arow-actions .select-gr,
+.arow-actions .input-gr { padding: var(--space-2) var(--space-3); font-size: var(--fs-14); }
+
 .aerror {
   margin-top: var(--space-5); padding: var(--space-4);
   background: rgba(200, 30, 30, .08); color: var(--gr-error);

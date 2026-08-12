@@ -214,17 +214,39 @@ function paymentTone(s) {
  * move you make once and have to justify.
  */
 function rowAction(o) {
-  const next = (o.allowedTransitions || []).find((t) => !NEEDS_REASON.includes(t));
+  const all = o.allowedTransitions || [];
+  const next = all.find((t) => !NEEDS_REASON.includes(t));
+  const endings = all.filter((t) => NEEDS_REASON.includes(t));
+  const no = escapeHtml(o.orderNumber);
 
-  if (!next) {
+  if (!next && !endings.length) {
     return `<a class="atable__sub" href="/modules/admin/order.html?no=${encodeURIComponent(o.orderNumber)}">Open</a>`;
   }
 
-  return `
-    <button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
-            data-move="${escapeHtml(next)}" data-order="${escapeHtml(o.orderNumber)}">
-      ${escapeHtml(TRANSITION_LABELS[next] || next)}
-    </button>`;
+  const forward = next
+    ? `<button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
+               data-move="${escapeHtml(next)}" data-order="${no}">
+         ${escapeHtml(TRANSITION_LABELS[next] || next)}
+       </button>`
+    : '';
+
+  // The endings sit behind a second click on purpose. "Cancel order" a few
+  // pixels from "Confirm", on every row of a list somebody works at speed, is
+  // a mis-click waiting to happen — and this one texts a customer. Opening the
+  // menu is the pause; the reason prompt after it is the confirmation.
+  const menu = endings.length
+    ? `<details class="amenu">
+         <summary aria-label="More actions for order ${no}">⋯</summary>
+         <div class="amenu__list">
+           ${endings.map((t) => `
+             <button type="button" data-move="${escapeHtml(t)}" data-order="${no}">
+               ${escapeHtml(TRANSITION_LABELS[t] || t)}
+             </button>`).join('')}
+         </div>
+       </details>`
+    : '';
+
+  return `<div class="arow-actions">${forward}${menu}</div>`;
 }
 
 /**
@@ -238,6 +260,19 @@ async function move(btn) {
   const { move: to, order: no } = btn.dataset;
   const original = btn.textContent;
 
+  // Ending an order takes a reason, here exactly as on the order screen. Six
+  // months later "cancelled" on its own answers nothing — whether the customer
+  // changed their mind, the stock was gone, or the number was fake is the
+  // whole content of the record.
+  let note = null;
+  if (NEEDS_REASON.includes(to)) {
+    note = prompt(
+      `${no} — why is this being marked ${stageLabel(to).toLowerCase()}? (recorded against your name)`
+    );
+    if (note === null) return;             // cancelled the prompt; nothing happens
+    if (!note.trim()) return alert(`A reason is required to mark an order ${stageLabel(to).toLowerCase()}.`);
+  }
+
   btn.disabled = true;
   btn.textContent = 'Working…';
 
@@ -245,7 +280,7 @@ async function move(btn) {
     await adminFetch(`/orders/${encodeURIComponent(no)}/transition`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to, note: null }),
+      body: JSON.stringify({ to, note }),
     });
   } catch (err) {
     btn.disabled = false;

@@ -102,6 +102,17 @@ class AdminCourierController extends Controller
                 'currentPage' => $page->currentPage(),
                 'lastPage'    => $page->lastPage(),
                 'counts'      => $this->boardCounts($term),
+
+                // Only on the queue tab, and only because that tab hands
+                // parcels over from the row. Sending the courier list with
+                // every stage would be payload nobody reads.
+                'couriers'    => $stage === 'handover'
+                    ? Courier::query()->usable()->get()
+                        ->map(fn (Courier $c): array => [
+                            'key'  => $c->key,
+                            'name' => $c->name,
+                        ])->all()
+                    : [],
             ],
         ]);
     }
