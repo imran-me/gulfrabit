@@ -19,7 +19,7 @@
 
 import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
-import { STAGES, stageLabel, stageTone } from './order-stages.js';
+import { STAGES, TRANSITION_LABELS, NEEDS_REASON, stageLabel, stageTone } from './order-stages.js';
 
 const FILTER_KEYS = ['q', 'status', 'paymentStatus', 'from', 'to'];
 let page = 1;
@@ -59,6 +59,13 @@ function init() {
     form.status.value = tab.dataset.stage;
     page = 1;
     load();
+  });
+
+  // Same reasoning for the rows: delegated once to the tbody, which survives
+  // every repaint, rather than re-bound to buttons that are thrown away.
+  document.querySelector('[data-orders-body]')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-move]');
+    if (btn) move(btn);
   });
 
   load();
@@ -113,13 +120,13 @@ async function load() {
   if (page > 1) qs.set('page', String(page));
   history.replaceState(null, '', qs.toString() ? `?${qs}` : location.pathname);
 
-  body.innerHTML = `<tr><td colspan="8" class="atable__empty">Loading…</td></tr>`;
+  body.innerHTML = `<tr><td colspan="9" class="atable__empty">Loading…</td></tr>`;
 
   let payload;
   try {
     payload = await adminFetch(`/orders?${new URLSearchParams({ ...filters, page: String(page) })}`);
   } catch (err) {
-    body.innerHTML = `<tr><td colspan="8" class="atable__empty">${
+    body.innerHTML = `<tr><td colspan="9" class="atable__empty">${
       err.status === 404 || !err.status
         ? 'No backend connected yet — orders appear once the API is live.'
         : escapeHtml(err.message)
@@ -149,7 +156,7 @@ function paint({ data, meta }) {
     // Named, because an empty stage is usually good news. "Nothing here" makes
     // an empty Placed tab look like a broken screen when it means every order
     // has been called.
-    body.innerHTML = `<tr><td colspan="8" class="atable__empty">${
+    body.innerHTML = `<tr><td colspan="9" class="atable__empty">${
       stage
         ? `Nothing in ${escapeHtml(stageLabel(stage).toLowerCase())} right now.`
         : 'Nothing here. Try widening the filters.'
@@ -171,6 +178,7 @@ function paint({ data, meta }) {
       <td>${pill(o.paymentStatus, paymentTone(o.paymentStatus))}</td>
       <td>${pill(stageLabel(o.status), stageTone(o.status), true)}</td>
       <td class="atable__sub">${formatWhen(o.placedAt)}</td>
+      <td>${rowAction(o)}</td>
     </tr>`).join('');
 
   const pager = document.querySelector('[data-orders-pager]');
@@ -189,6 +197,68 @@ function paymentTone(s) {
   if (s === 'refunded') return 'info';
   return 'wait';
 }
+/**
+ * The one button that moves this order forward, on its own row.
+ *
+ * WHY ONLY ONE, AND WHY NOT THE ENDINGS
+ * -------------------------------------
+ * `allowedTransitions` comes from the server in pipeline order, so the first
+ * entry that is not an ending IS the next step — Confirm for a placed order,
+ * Start packing for a confirmed one. Drawing all of them would put "Cancel
+ * order" a few pixels from "Confirm" on every row of a list somebody clicks
+ * through at speed.
+ *
+ * Cancelling, returning and marking spam need a typed reason and stay on the
+ * order screen, where there is room to read the order before ending it. The
+ * row is for the move you make twenty times a morning; the page is for the
+ * move you make once and have to justify.
+ */
+function rowAction(o) {
+  const next = (o.allowedTransitions || []).find((t) => !NEEDS_REASON.includes(t));
+
+  if (!next) {
+    return `<a class="atable__sub" href="/modules/admin/order.html?no=${encodeURIComponent(o.orderNumber)}">Open</a>`;
+  }
+
+  return `
+    <button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
+            data-move="${escapeHtml(next)}" data-order="${escapeHtml(o.orderNumber)}">
+      ${escapeHtml(TRANSITION_LABELS[next] || next)}
+    </button>`;
+}
+
+/**
+ * Move one order, from its row.
+ *
+ * Reloads the list rather than patching the row: the move changes which tab the
+ * order belongs to and every count in the bar above it, and re-deriving that in
+ * the browser is how the screen starts disagreeing with the database.
+ */
+async function move(btn) {
+  const { move: to, order: no } = btn.dataset;
+  const original = btn.textContent;
+
+  btn.disabled = true;
+  btn.textContent = 'Working…';
+
+  try {
+    await adminFetch(`/orders/${encodeURIComponent(no)}/transition`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, note: null }),
+    });
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = original;
+    // 422 is the useful one: somebody else moved this order first. Saying so on
+    // the row beats a silent no-op that leaves two people arguing about it.
+    alert(err.message);
+    return;
+  }
+
+  load();
+}
+
 /**
  * `asIs` for text that is already a written phrase — a stage label like "Ready
  * for courier". Raw one-word values (a payment status) keep the stylesheet's

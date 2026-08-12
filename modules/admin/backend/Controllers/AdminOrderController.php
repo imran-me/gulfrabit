@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Modules\Admin\Models\OrderNote;
 use Modules\Admin\Requests\OrderNoteRequest;
@@ -63,10 +64,11 @@ class AdminOrderController extends Controller
         }
 
         $page = $query->paginate($data['perPage'] ?? 25);
+        $role = $request->user('admin')->role;
 
         return response()->json([
             'data' => array_map(
-                fn (Order $o): array => $this->rowArray($o),
+                fn (Order $o): array => $this->rowArray($o, $role),
                 $page->items(),
             ),
             'meta' => [
@@ -207,13 +209,23 @@ class AdminOrderController extends Controller
                 // Internal, and never sent anywhere. The panel labels them as
                 // such next to the message thread, which is the one place the
                 // distinction has to be unmistakable.
-                'notes' => OrderNote::query()
-                    ->where('order_id', $order->id)
-                    ->oldest()
-                    ->get()
-                    ->map
-                    ->toAdminArray()
-                    ->all(),
+                //
+                // Guarded by hasTable for one window only: between deploying
+                // this code and running the migration. Without the guard a
+                // missing order_notes table turns the ENTIRE order screen into
+                // a 500 — no items, no customer, no transition buttons — and
+                // the shop cannot work an order because a notes feature is not
+                // installed. The panel says what to run; see notesReady below.
+                'notes' => $this->notesReady()
+                    ? OrderNote::query()
+                        ->where('order_id', $order->id)
+                        ->oldest()
+                        ->get()
+                        ->map
+                        ->toAdminArray()
+                        ->all()
+                    : [],
+                'notesReady' => $this->notesReady(),
 
                 // Computed server-side from the same map the server enforces,
                 // so the panel can never draw a button the API would refuse.
@@ -305,7 +317,20 @@ class AdminOrderController extends Controller
         return in_array($role, ['owner', 'manager', 'accounts'], true);
     }
 
-    private function rowArray(Order $o): array
+    /**
+     * Has the order_notes migration been run on this database?
+     *
+     * Cached per request: show() asks twice and the answer cannot change
+     * mid-request, and a schema query per call is a round trip for nothing.
+     */
+    private ?bool $notesReady = null;
+
+    private function notesReady(): bool
+    {
+        return $this->notesReady ??= Schema::hasTable('order_notes');
+    }
+
+    private function rowArray(Order $o, string $role): array
     {
         return [
             'orderNumber'   => $o->order_number,
@@ -318,6 +343,12 @@ class AdminOrderController extends Controller
             'itemCount'     => $o->items->sum('qty'),
             'totalTaka'     => intdiv($o->total_poisha, 100),
             'placedAt'      => $o->placed_at?->toIso8601String(),
+
+            // The same list the detail screen gets, from the same map the
+            // server enforces — so the row can offer "Confirm" without the
+            // browser ever deciding what is legal. Working twenty orders
+            // through a stage should not mean opening twenty pages.
+            'allowedTransitions' => $this->fulfilment->allowedTransitions($o, $role),
         ];
     }
 }

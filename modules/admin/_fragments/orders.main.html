@@ -57,10 +57,13 @@
               <th scope="col">Payment</th>
               <th scope="col">Status</th>
               <th scope="col">Placed</th>
+              <!-- The next step, on the row. Working twenty orders through a
+                   stage should not mean opening twenty pages. -->
+              <th scope="col"><span class="visually-hidden">Move to next stage</span></th>
             </tr>
           </thead>
           <tbody data-orders-body>
-            <tr><td colspan="8" class="atable__empty">Loading orders…</td></tr>
+            <tr><td colspan="9" class="atable__empty">Loading orders…</td></tr>
           </tbody>
         </table>
       </div>

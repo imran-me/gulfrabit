@@ -141,6 +141,18 @@ function paintNotes() {
   const host = document.querySelector('[data-order-notes]');
   if (!host) return;
 
+  // Deployed but not migrated. Say which command is missing rather than showing
+  // a form that would 500 on submit — this is a two-minute window on the day of
+  // a deploy, and it should read as "one step left", not as a broken screen.
+  if (order.notesReady === false) {
+    host.innerHTML = `<li class="atimeline__empty">
+      Notes need their table. Run <code>php artisan migrate</code> on the server.
+    </li>`;
+    const form = document.querySelector('[data-note-form]');
+    if (form) form.hidden = true;
+    return;
+  }
+
   host.innerHTML = order.notes.length
     ? order.notes.map((n) => `
         <li class="anote">
