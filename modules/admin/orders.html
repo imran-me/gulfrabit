@@ -71,8 +71,8 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=dfdb913f">
-  <link rel="stylesheet" href="../../modules/admin/admin.css?v=d6d65ee5">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=da10f36f">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=76ffbbe2">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -106,26 +106,21 @@
         </div>
       </div>
 
+      <!-- The pipeline, as places rather than as a dropdown. Filled by
+           orders-page.js from the stage list the server sends counts for, so a
+           stage added to the backend appears here without editing this file. -->
+      <nav class="atabs" data-orders-tabs aria-label="Order stages"></nav>
+
       <!-- Filters. Every control maps to a validated query parameter, and the
            state lives in the URL so a filtered view can be bookmarked and
-           shared with a colleague rather than described to them. -->
+           shared with a colleague rather than described to them.
+           `status` is a hidden input, not a dropdown: the tab bar above owns
+           it, and two controls for one value is how they end up disagreeing. -->
       <form class="afilters" data-orders-filters>
+        <input type="hidden" name="status" value="">
         <div class="afilters__field">
           <label for="f-q">Search</label>
           <input class="input-gr" id="f-q" name="q" type="search" placeholder="Order no, phone or name">
-        </div>
-        <div class="afilters__field">
-          <label for="f-status">Status</label>
-          <select class="select-gr" id="f-status" name="status">
-            <option value="">Any status</option>
-            <option value="placed">Placed</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="packed">Packed</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="returned">Returned</option>
-          </select>
         </div>
         <div class="afilters__field">
           <label for="f-pay">Payment</label>
@@ -190,6 +185,6 @@
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=ebff64a4"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=87de770c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=db43fd3d"></script>
-  <script type="module" src="../../modules/admin/orders-page.js?v=7994bddd"></script>
+  <script type="module" src="../../modules/admin/orders-page.js?v=540cd658"></script>
 </body>
 </html>

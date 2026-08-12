@@ -297,6 +297,65 @@
 .afilters__field label { font-size: var(--fs-12); font-weight: var(--fw-semibold); color: var(--text-secondary); }
 .afilters__actions { display: flex; gap: var(--space-2); }
 
+/* ---- Stage tabs -------------------------------------------------------
+   The working pipeline as places you stand in, on the orders list and the
+   courier board. Scrolls sideways rather than wrapping: nine stages wrap to
+   two rows on a laptop, and a bar that changes height as you click through it
+   pushes the table up and down under the cursor.
+
+   The gold underline is the house's, the same hairline that sits under the
+   page title and along the sidebar's edge. */
+.atabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-5);
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--gr-border);
+  overflow-x: auto;
+  /* Kills the sub-pixel vertical scrollbar that overflow-x alone invites. */
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+.atab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: -3px;                     /* sits ON the rule, not above it */
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color .16s ease, border-color .16s ease;
+}
+.atab:hover { color: var(--text-primary); border-bottom-color: color-mix(in srgb, var(--gr-border) 30%, transparent); }
+.atab:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: -2px; border-radius: var(--radius-sm); }
+.atab.is-on { color: var(--text-primary); border-bottom-color: var(--gr-gold-accent); }
+
+/* The count reads as a quantity, not as part of the name. Tabular figures so
+   the bar does not shuffle sideways when 9 becomes 10. */
+.atab__count {
+  min-width: 1.5em;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-size: var(--fs-12);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.atab.is-on .atab__count { background: rgba(201, 162, 75, .16); color: var(--gold-ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .atab { transition: none; }
+}
+
 /* ---- Table ------------------------------------------------------------
    Scrolls inside its own box. An admin table has more columns than a phone has
    width, and the alternative — dropping columns — hides the one somebody
@@ -325,6 +384,12 @@
   border-radius: var(--radius-pill);
   font-size: var(--fs-12); font-weight: var(--fw-semibold);
   text-transform: capitalize; white-space: nowrap;
+}
+/* Pills whose text is already a written phrase — "Ready for courier",
+   "In transit". Capitalising those gives "Ready For Courier", which reads like
+   a product name. Single-word status values keep the default above. */
+.apill--label {
+  text-transform: none;
 }
 .apill--ok   { background: rgba(46, 160, 67, .12); color: #1a7f37; }
 .apill--bad  { background: rgba(200, 30, 30, .10); color: var(--gr-error); }
@@ -367,6 +432,31 @@
 .arefund { padding: var(--space-3); background: var(--surface-sunken); border-radius: var(--radius-sm); }
 .arefund-form { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-end; border-top: 1px solid var(--gr-border); padding-top: var(--space-4); }
 .arefund-form > .admin__sub { flex: 1 1 100%; margin: 0; }
+
+/* ---- Notes and messages -----------------------------------------------
+   Two lists that must never be mistaken for each other. Internal notes are
+   flat and quiet — a pad by the phone. Messages the customer received are
+   indented and carry a rail, the shape every chat in the world uses, because
+   the one thing that must be obvious at a glance is which of these two the
+   customer has actually seen. */
+.anotes, .athread { list-style: none; margin: 0 0 var(--space-4); padding: 0; display: grid; gap: var(--space-3); font-size: var(--fs-14); }
+.anote { padding: var(--space-3); background: var(--surface-sunken); border-radius: var(--radius-sm); }
+.anote__body, .amsg__body { white-space: pre-wrap; word-break: break-word; margin-bottom: 4px; }
+
+.anote-form { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-end; border-top: 1px solid var(--gr-border); padding-top: var(--space-4); }
+.anote-form textarea { resize: vertical; min-height: 4.5rem; }
+
+.amsg {
+  padding: var(--space-3);
+  background: var(--surface-sunken);
+  border-left: 3px solid var(--gr-cyan);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+/* A refused message keeps its place in the thread rather than disappearing —
+   "we tried and it did not go" is the fact somebody needs. */
+.amsg.is-failed { border-left-color: var(--gr-error); background: rgba(200, 30, 30, .05); }
+
+.atemplates { display: flex; flex-wrap: wrap; gap: var(--space-2); flex: 1 1 100%; }
 
 .aerror {
   margin-top: var(--space-5); padding: var(--space-4);
@@ -602,6 +692,39 @@
   color: var(--text-muted); cursor: pointer;
 }
 .avariant__del:hover { color: var(--gr-error); border-color: currentColor; }
+
+/* ---- The product editor is ONE column ----------------------------------
+   It used to borrow `.aorder`, which is auto-fit/320px — right for the order
+   screen, where three short panels genuinely sit side by side, and wrong
+   here. On a wide monitor it dealt the editor a third of the width, so the
+   longest form in the panel (title, brand, two descriptions, prices, packs,
+   placement, three tag fields) got the narrowest column on the screen, while
+   Price history and the delete box — read once each, if ever — took the
+   other two thirds.
+
+   So: one column, and the two reference panels sit UNDER the form in the
+   order they are actually wanted. The measure is capped rather than left to
+   fill a 27-inch display, because a text input 1,600 pixels wide is its own
+   kind of unusable. */
+.apedit { display: grid; gap: var(--space-4); align-items: start; max-width: 1080px; }
+.apedit .acard { padding: var(--space-5); }
+.apedit .acard h2 { margin: 0 0 var(--space-4); }
+
+/* Full-width fields inside it. The old markup leaned on inline margins and
+   the parent's narrowness to keep inputs sane; with room to spread, the
+   short ones (price, cost, a count) must NOT stretch to the full measure —
+   a number box the width of a paragraph invites the eye to expect a
+   paragraph. */
+.apedit .afilters__field { margin-bottom: var(--space-4); }
+.apedit .afilters__field > .input-gr,
+.apedit .afilters__field > textarea.input-gr { width: 100%; }
+.apedit .arefund-form .afilters__field { flex: 0 1 200px; margin-bottom: 0; }
+.apedit textarea.input-gr { min-height: 140px; }
+
+/* Two panels that are reference material, not workspace: quieter and side
+   by side under the form, so the page ends with the form's Save rather than
+   with a delete button. */
+.apedit__aside { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-4); align-items: start; }
 
 /* ---- Placement chips + row actions (products list) -------------------- */
 .achips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }

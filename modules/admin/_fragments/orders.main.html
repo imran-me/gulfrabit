@@ -5,26 +5,21 @@
         </div>
       </div>
 
+      <!-- The pipeline, as places rather than as a dropdown. Filled by
+           orders-page.js from the stage list the server sends counts for, so a
+           stage added to the backend appears here without editing this file. -->
+      <nav class="atabs" data-orders-tabs aria-label="Order stages"></nav>
+
       <!-- Filters. Every control maps to a validated query parameter, and the
            state lives in the URL so a filtered view can be bookmarked and
-           shared with a colleague rather than described to them. -->
+           shared with a colleague rather than described to them.
+           `status` is a hidden input, not a dropdown: the tab bar above owns
+           it, and two controls for one value is how they end up disagreeing. -->
       <form class="afilters" data-orders-filters>
+        <input type="hidden" name="status" value="">
         <div class="afilters__field">
           <label for="f-q">Search</label>
           <input class="input-gr" id="f-q" name="q" type="search" placeholder="Order no, phone or name">
-        </div>
-        <div class="afilters__field">
-          <label for="f-status">Status</label>
-          <select class="select-gr" id="f-status" name="status">
-            <option value="">Any status</option>
-            <option value="placed">Placed</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="packed">Packed</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="returned">Returned</option>
-          </select>
         </div>
         <div class="afilters__field">
           <label for="f-pay">Payment</label>

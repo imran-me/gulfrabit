@@ -5,6 +5,7 @@
 
 import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
+import { stageLabel, stageTone } from './order-stages.js';
 
 let customer = null;
 let session = null;
@@ -65,16 +66,10 @@ function paintOrders() {
   host.innerHTML = customer.orders.map((o) => `
     <tr>
       <td><a href="/modules/admin/order.html?no=${encodeURIComponent(o.orderNumber)}">${escapeHtml(o.orderNumber)}</a></td>
-      <td><span class="apill apill--${tone(o.status)}">${escapeHtml(o.status)}</span></td>
+      <td><span class="apill apill--label apill--${stageTone(o.status)}">${escapeHtml(stageLabel(o.status))}</span></td>
       <td class="atable__num">৳ ${Number(o.totalTaka).toLocaleString('en-BD')}</td>
       <td class="atable__sub">${when(o.placedAt)}</td>
     </tr>`).join('');
-}
-
-function tone(status) {
-  if (status === 'delivered') return 'ok';
-  if (status === 'cancelled' || status === 'returned') return 'bad';
-  return 'wait';
 }
 
 function paintAddresses() {

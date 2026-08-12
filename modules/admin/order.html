@@ -71,8 +71,8 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=dfdb913f">
-  <link rel="stylesheet" href="../../modules/admin/admin.css?v=d6d65ee5">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=da10f36f">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=76ffbbe2">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -134,6 +134,27 @@
           <ol class="atimeline" data-order-history></ol>
         </section>
 
+        <!-- Internal notes. Never sent, never shown to the customer — said in
+             the card itself rather than only in a comment, because the person
+             typing here is the one who needs to know it. The customer-facing
+             message box is a separate card, mounted by modules/sms. -->
+        <section class="acard" aria-labelledby="on-head">
+          <h2 class="h5" id="on-head">Internal notes</h2>
+          <p class="admin__sub" style="margin:-.5rem 0 var(--space-4)">
+            Only staff see these. Nothing here is ever sent to the customer.
+          </p>
+          <ul class="anotes" data-order-notes role="list"></ul>
+          <form class="anote-form" data-note-form>
+            <div class="afilters__field afilters__field--wide">
+              <label for="n-body">Add a note</label>
+              <textarea class="input-gr" id="n-body" name="body" rows="3" required
+                        maxlength="2000"
+                        placeholder="What happened — a call, a promise, something odd about the address."></textarea>
+            </div>
+            <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Save note</button>
+          </form>
+        </section>
+
         <section class="acard" aria-labelledby="or-head" data-refund-section hidden>
           <h2 class="h5" id="or-head">Refunds</h2>
           <ul class="arefunds" data-order-refunds role="list"></ul>
@@ -179,7 +200,8 @@
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=ebff64a4"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=87de770c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=db43fd3d"></script>
-  <script type="module" src="../../modules/admin/order-detail-page.js?v=9a286ccf"></script>
-  <script type="module" src="../../modules/courier/courier-order-panel.js?v=c3f0b784"></script>
+  <script type="module" src="../../modules/admin/order-detail-page.js?v=5ec26ab2"></script>
+  <script type="module" src="../../modules/courier/courier-order-panel.js?v=9d1a7fec"></script>
+  <script type="module" src="../../modules/sms/sms-order-panel.js?v=527398df"></script>
 </body>
 </html>

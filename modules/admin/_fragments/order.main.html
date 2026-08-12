@@ -33,6 +33,27 @@
           <ol class="atimeline" data-order-history></ol>
         </section>
 
+        <!-- Internal notes. Never sent, never shown to the customer — said in
+             the card itself rather than only in a comment, because the person
+             typing here is the one who needs to know it. The customer-facing
+             message box is a separate card, mounted by modules/sms. -->
+        <section class="acard" aria-labelledby="on-head">
+          <h2 class="h5" id="on-head">Internal notes</h2>
+          <p class="admin__sub" style="margin:-.5rem 0 var(--space-4)">
+            Only staff see these. Nothing here is ever sent to the customer.
+          </p>
+          <ul class="anotes" data-order-notes role="list"></ul>
+          <form class="anote-form" data-note-form>
+            <div class="afilters__field afilters__field--wide">
+              <label for="n-body">Add a note</label>
+              <textarea class="input-gr" id="n-body" name="body" rows="3" required
+                        maxlength="2000"
+                        placeholder="What happened — a call, a promise, something odd about the address."></textarea>
+            </div>
+            <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Save note</button>
+          </form>
+        </section>
+
         <section class="acard" aria-labelledby="or-head" data-refund-section hidden>
           <h2 class="h5" id="or-head">Refunds</h2>
           <ul class="arefunds" data-order-refunds role="list"></ul>

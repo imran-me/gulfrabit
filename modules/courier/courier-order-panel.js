@@ -29,6 +29,22 @@ const STATUS_STEPS = [
   ['cancelled', 'Cancelled'],
 ];
 
+/**
+ * A courier status as a person would say it.
+ *
+ * The two statuses missing from STATUS_STEPS — `draft` and `booked` — are set
+ * by the system rather than chosen by staff, so they are not offered in the
+ * dropdown but still have to be readable when displayed. The fallback turns
+ * any of them into words rather than showing `in_transit` with its underscore.
+ */
+const STATUS_LABELS = Object.fromEntries(STATUS_STEPS);
+
+function statusLabel(status) {
+  if (STATUS_LABELS[status]) return STATUS_LABELS[status];
+  const words = String(status || '').replace(/_/g, ' ');
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
 let couriers = [];
 let consignments = [];
 
@@ -84,7 +100,7 @@ function openConsignment(c) {
     <dl class="akv">
       <div class="akv__row"><dt>Courier</dt><dd>${escapeHtml(c.courier || '—')}</dd></div>
       <div class="akv__row"><dt>Tracking</dt><dd>${link}</dd></div>
-      <div class="akv__row"><dt>Status</dt><dd><span class="apill apill--info">${escapeHtml(c.status)}</span></dd></div>
+      <div class="akv__row"><dt>Status</dt><dd><span class="apill apill--label apill--info">${escapeHtml(statusLabel(c.status))}</span></dd></div>
       ${c.costTaka != null ? `<div class="akv__row"><dt>Courier cost</dt><dd>৳ ${Number(c.costTaka).toLocaleString('en-BD')}</dd></div>` : ''}
       ${c.codTaka ? `<div class="akv__row"><dt>COD to collect</dt><dd>৳ ${Number(c.codTaka).toLocaleString('en-BD')}${c.codRemitted ? ' (remitted)' : ' — not yet remitted'}</dd></div>` : ''}
       <div class="akv__row"><dt>Handed over</dt><dd>${when(c.handedOverAt)} by ${escapeHtml(c.assignedBy || '—')}</dd></div>
@@ -152,7 +168,7 @@ function history() {
     <ul class="arefunds" role="list">
       ${consignments.map((c) => `
         <li class="arefund">
-          <div><strong>${escapeHtml(c.courier || '—')}</strong> · ${escapeHtml(c.status)}</div>
+          <div><strong>${escapeHtml(c.courier || '—')}</strong> · ${escapeHtml(statusLabel(c.status))}</div>
           <div class="atable__sub">${escapeHtml(c.trackingNumber || 'no tracking number')} · ${when(c.handedOverAt)}</div>
         </li>`).join('')}
     </ul>`;
@@ -164,7 +180,7 @@ function eventList(events = []) {
     <ol class="atimeline" style="margin-top:var(--space-4)">
       ${events.map((e) => `
         <li class="atimeline__item">
-          <div class="atimeline__what"><strong>${escapeHtml(e.status)}</strong>${
+          <div class="atimeline__what"><strong>${escapeHtml(statusLabel(e.status))}</strong>${
             e.location ? ` · ${escapeHtml(e.location)}` : ''
           }</div>
           <div class="atimeline__who">${

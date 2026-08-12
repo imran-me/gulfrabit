@@ -1,24 +1,29 @@
 /**
- * order-detail-page.js — one order: items, money, history, transitions, refunds.
+ * order-detail-page.js — one order: items, money, history, notes, transitions,
+ * refunds.
  *
  * The buttons drawn here come from `allowedTransitions` in the payload, which
  * the server computes from the same map it enforces. Nothing about what is
  * legal is decided in this file — a browser that disagreed with the server
  * about whether an order can go from delivered back to packed would be a bug
  * that only shows up as a confusing error.
+ *
+ * THREE RECORDS, THREE CARDS, NEVER MERGED
+ * ----------------------------------------
+ * History is what HAPPENED — written by the server, never by a person.
+ * Notes are what we THINK — internal, staff-written, and never sent anywhere.
+ * Messages are what we TOLD the customer — mounted by modules/sms, and the only
+ * one of the three that leaves the building.
+ *
+ * Collapsing them into one pretty timeline was tempting and would have been a
+ * mistake: the whole value of a note like "customer sounded evasive, verify
+ * address" is that it is impossible to confuse with something the customer was
+ * sent.
  */
 
 import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
-
-const TRANSITION_LABELS = {
-  confirmed: 'Confirm',
-  packed: 'Mark packed',
-  shipped: 'Mark shipped',
-  delivered: 'Mark delivered',
-  cancelled: 'Cancel order',
-  returned: 'Mark returned',
-};
+import { TRANSITION_LABELS, NEEDS_REASON, stageLabel } from './order-stages.js';
 
 let order = null;
 
@@ -44,8 +49,12 @@ async function load() {
   paintItems();
   paintCustomer();
   paintHistory();
+  paintNotes();
   paintRefunds();
   paintActions();
+
+  // Wired once. Everything above may repaint; this form never does.
+  document.querySelector('[data-note-form]')?.addEventListener('submit', submitNote);
 }
 
 function paintHeader() {
@@ -58,7 +67,7 @@ function paintHeader() {
     ? ` · via ${order.adSource.utm_campaign || order.adSource.utm_source || 'ad'}`
     : '';
   document.querySelector('[data-order-meta]').textContent =
-    `${order.status} · ${order.paymentStatus} via ${order.paymentMethod} · placed ${when(order.placedAt)}${ad}`;
+    `${stageLabel(order.status)} · ${order.paymentStatus} via ${order.paymentMethod} · placed ${when(order.placedAt)}${ad}`;
   document.title = `${order.orderNumber} — GulfRabit Admin`;
 }
 
@@ -113,11 +122,62 @@ function paintHistory() {
   host.innerHTML = order.history.map((e) => `
     <li class="atimeline__item">
       <div class="atimeline__what">
-        ${e.from ? `${escapeHtml(e.from)} → ` : ''}<strong>${escapeHtml(e.to)}</strong>
+        ${e.from ? `${escapeHtml(stageLabel(e.from))} → ` : ''}<strong>${escapeHtml(stageLabel(e.to))}</strong>
       </div>
       <div class="atimeline__who">${escapeHtml(e.actor)} · ${when(e.at)}</div>
       ${e.note ? `<div class="atimeline__note">${escapeHtml(e.note)}</div>` : ''}
     </li>`).join('');
+}
+
+/**
+ * Internal notes: the record of what staff know that the order itself does not
+ * say. Append-only — there is no edit and no delete, matching the server.
+ *
+ * Only the list is redrawn here. The form is wired once, in load(), because
+ * this function runs again after every save and a listener re-attached each
+ * time would post the next note twice.
+ */
+function paintNotes() {
+  const host = document.querySelector('[data-order-notes]');
+  if (!host) return;
+
+  host.innerHTML = order.notes.length
+    ? order.notes.map((n) => `
+        <li class="anote">
+          <div class="anote__body">${escapeHtml(n.body)}</div>
+          <div class="atable__sub">${escapeHtml(n.author)} · ${when(n.at)}</div>
+        </li>`).join('')
+    : '<li class="atimeline__empty">No notes on this order yet.</li>';
+}
+
+async function submitNote(e) {
+  e.preventDefault();
+  const form = e.currentTarget;
+  const btn = form.querySelector('button[type="submit"]');
+  const body = form.body.value.trim();
+  if (!body) return;
+
+  btn.disabled = true;
+
+  let saved;
+  try {
+    ({ data: saved } = await adminFetch(`/orders/${encodeURIComponent(order.orderNumber)}/notes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body }),
+    }));
+  } catch (err) {
+    btn.disabled = false;
+    return fail(err.message);
+  }
+
+  // Appended in place rather than reloading. A note changes nothing else on
+  // this screen, and throwing away a half-typed message in the box below it —
+  // or the courier form beside it — to redraw one paragraph would be rude.
+  order.notes.push(saved);
+  form.reset();
+  btn.disabled = false;
+  paintNotes();
 }
 
 function paintRefunds() {
@@ -188,8 +248,11 @@ function paintActions() {
     return;
   }
 
+  // The ending moves get the quieter button. Both are one click away, but the
+  // one that carries the order forward is the one the eye lands on — which is
+  // the right default a hundred times a day.
   host.innerHTML = order.allowedTransitions.map((to) => `
-    <button class="btn-gr ${to === 'cancelled' || to === 'returned' ? 'btn-outline-gr' : 'btn-primary-gr'} btn-sm-gr"
+    <button class="btn-gr ${NEEDS_REASON.includes(to) ? 'btn-outline-gr' : 'btn-primary-gr'} btn-sm-gr"
             type="button" data-transition="${escapeHtml(to)}">
       ${escapeHtml(TRANSITION_LABELS[to] || to)}
     </button>`).join('');
@@ -200,14 +263,17 @@ function paintActions() {
 }
 
 async function transition(to, btn) {
-  // Cancelling and returning are the two that cost money or annoy a customer,
-  // and they are the two a mis-click lands on. Ask, and take the reason while
-  // we are asking — the note is the only record of why.
+  // Cancelling, returning and marking spam are the moves that cost money,
+  // annoy a customer, or remove an order from every figure the business is
+  // judged on — and they are the ones a mis-click lands on. Ask, and take the
+  // reason while we are asking: the note is the only record of why.
   let note = null;
-  if (to === 'cancelled' || to === 'returned') {
-    note = prompt(`Why is this order being marked ${to}? (recorded against your name)`);
+  if (NEEDS_REASON.includes(to)) {
+    note = prompt(
+      `Why is this order being marked ${stageLabel(to).toLowerCase()}? (recorded against your name)`
+    );
     if (note === null) return;
-    if (!note.trim()) return fail('A reason is required to ' + to + ' an order.');
+    if (!note.trim()) return fail(`A reason is required to mark an order ${stageLabel(to).toLowerCase()}.`);
   }
 
   btn.disabled = true;
