@@ -683,6 +683,13 @@
 .avariant__f--label { flex: 1 1 100%; }
 .avariant__f > span { font-size: var(--fs-12); color: var(--text-muted); }
 .avariant .input-gr { min-height: 40px; padding-block: .4rem; width: 100%; }
+/* "We have" — the real count, and the only field in this row that customers
+   never see. Marked rather than merely present: it sits beside four numbers
+   that ARE public, and someone typing quickly needs to know which of the five
+   they are publishing. A tinted well and a dotted rule under the label, both
+   quiet enough not to shout on a screen full of inputs. */
+.avariant__f--own > span { color: var(--gr-cyan-dark); border-bottom: 1px dotted currentColor; align-self: flex-start; }
+.avariant__f--own .input-gr { background: rgba(27, 180, 212, .06); }
 .avariant__foot { flex-basis: 100%; display: flex; justify-content: space-between; align-items: center; }
 .avariant__stock { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-12); color: var(--text-muted); }
 .avariant__del {
