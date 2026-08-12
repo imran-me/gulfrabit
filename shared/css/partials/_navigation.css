@@ -119,8 +119,15 @@
    losing these costs a shortcut.
 
    1500px, not 1400: the container caps at 1400 and the seven-item row
-   measured 1423, so it overflowed its own container even on a 1440 laptop. */
-@media (max-width: 1499.98px) {
+   measured 1423, so it overflowed its own container even on a 1440 laptop.
+
+   Then Home joined the row as an eighth item and put 43px back on it: at
+   exactly 1500 the page scrolled sideways by 3px again — the same bug, found
+   the same way, by measuring every width from 992 to 1920. The threshold
+   moves up with the row it guards. 1540 rather than the measured 1503, so a
+   Bengali fallback face or a notch of browser zoom cannot walk it back over
+   the edge. */
+@media (max-width: 1539.98px) {
   .nav-item-optional { display: none; }
 }
 .site-header__actions { display: flex; align-items: center; gap: var(--space-1); margin-left: auto; }
@@ -148,6 +155,14 @@
   content: ""; position: absolute; left: 0.9rem; right: 0.9rem; bottom: 6px; height: 2px;
   background: var(--gr-gradient); border-radius: var(--radius-pill);
 }
+
+/* A nav item that is a glyph rather than a word — Home. Square-ish padding so
+   it reads as an icon button and not as a label that lost its text, and the
+   active underline pulled in to match, since the 0.9rem inset above was
+   written for a word's worth of box and would leave a 2px dash under a 21px
+   icon. */
+.nav-link--icon { padding: 0.6rem 0.7rem; }
+.nav-link--icon[aria-current="page"]::after { left: 0.55rem; right: 0.55rem; }
 
 /* Anchored to the left edge of the Shop item, not centred on it.
    Centred, an 880px panel hung ~180px off the left of a 1280px window and the
@@ -289,6 +304,18 @@
 .mobile-nav__link:active::after { transform: scaleY(1); }
 .mobile-nav__link[aria-current="page"] { color: var(--link); }
 .mobile-nav__link[aria-current="page"]::after { transform: scaleY(1); }
+
+/* The lead row — Home — above the categories, ruled off from them. Its own
+   block rather than a first row of the category list: it is the one row in
+   the drawer that carries an icon, and a lone glyph in a column of plain
+   labels reads as a stray until a hairline says it is a different thing. */
+.mobile-nav__list--lead::after {
+  content: ""; display: block; height: 1px; margin: var(--space-2) 16px;
+  background: var(--border-hairline);
+}
+/* Never let the glyph squeeze: the label beside it can wrap, the icon cannot
+   shrink. Brand cyan so the row reads as the way out to the front page. */
+.mobile-nav__icon { flex: none; color: var(--link); }
 
 /* Account / company. Pushed to the foot of the panel and set quieter, so the
    categories own the list and these stay reachable without competing. */

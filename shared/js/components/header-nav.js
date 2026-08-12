@@ -161,4 +161,15 @@ function markActiveNav() {
   document.querySelectorAll('.nav-link[data-nav-match]').forEach((link) => {
     if (path.includes(link.getAttribute('data-nav-match'))) link.setAttribute('aria-current', 'page');
   });
+
+  // Home is matched by rule, not by the substring test above, because it is
+  // the one destination whose URL can be written two ways — "/index.html" and
+  // a bare "/" — and no substring satisfies both. Same test the bottom tab
+  // bar uses, so the header and the tab bar cannot disagree about whether the
+  // visitor is on the front page. Marks the drawer row as well as the desktop
+  // icon: [data-nav-home] is on both.
+  if (location.pathname === '/' || /index\.html$/.test(location.pathname)) {
+    document.querySelectorAll('[data-nav-home]')
+      .forEach((link) => link.setAttribute('aria-current', 'page'));
+  }
 }
