@@ -109,6 +109,7 @@ function fill() {
   f.searchTerms.value = (product.searchTerms ?? []).join(', ');
 
   fillAdLink();
+  paintPerformance();
 
   variantRows = (product.variants ?? []).map((v) => ({ ...v }));
   paintVariants();
@@ -121,6 +122,56 @@ function fill() {
 /* ------------------------------------------------------------------ *
  * Pack sizes
  * ------------------------------------------------------------------ */
+
+/**
+ * The Performance panel: what this product has done, in five figures.
+ *
+ * Delivered and open are kept apart deliberately. Adding them together is how
+ * a shop talks itself into a reorder it cannot afford — open orders in a COD
+ * market are demand that can still evaporate at the door, and this one has a
+ * returned figure precisely so that evaporation is visible.
+ *
+ * The return RATE is spelled out rather than left as two numbers to divide,
+ * because it is the one figure here that changes a decision: a product
+ * selling well with a fifth of it coming back is not selling well.
+ *
+ * Hidden entirely until something has been ordered — a wall of zeroes on a
+ * product added this morning is noise pretending to be information.
+ */
+function paintPerformance() {
+  const host = document.querySelector('[data-pe-perf]');
+  const p = product?.performance;
+  if (!host || !p) return;
+
+  const settled = p.unitsDelivered + p.unitsReturned;
+  const returnRate = settled > 0 ? Math.round((p.unitsReturned / settled) * 100) : null;
+
+  if (!p.orders) {
+    host.hidden = true;
+    return;
+  }
+
+  const tiles = [
+    ['Delivered', `${p.unitsDelivered}`, 'units that reached a customer'],
+    ['Revenue', `৳ ${p.revenueTaka.toLocaleString('en-BD')}`, 'from delivered orders only'],
+    ['In flight', `${p.unitsOpen}`, 'placed but not yet delivered'],
+    ['Returned', `${p.unitsReturned}`, returnRate === null ? 'none settled yet' : `${returnRate}% of settled`],
+    ['Cancelled', `${p.unitsCancelled}`, 'incl. orders marked spam'],
+  ];
+
+  document.querySelector('[data-pe-perf-tiles]').innerHTML = tiles.map(([label, value, sub]) => `
+    <div class="apstat">
+      <span class="apstat__l">${escapeHtml(label)}</span>
+      <span class="apstat__n">${escapeHtml(value)}</span>
+      <span class="apstat__s">${escapeHtml(sub)}</span>
+    </div>`).join('');
+
+  const foot = document.querySelector('[data-pe-perf-foot]');
+  foot.textContent = `Across ${p.orders} order${p.orders === 1 ? '' : 's'}`
+    + (p.lastOrderedAt ? ` · last ordered ${when(p.lastOrderedAt)}` : '');
+
+  host.hidden = false;
+}
 
 function paintVariants() {
   const host = document.querySelector('[data-pe-variants]');
@@ -142,8 +193,11 @@ function paintVariants() {
         <input class="input-gr" type="number" step="0.01" min="0" placeholder="—" data-vf="originalPrice" value="${v.originalPrice ?? ''}"></label>
       <label class="avariant__f avariant__f--own"><span>We have</span>
         <input class="input-gr" type="number" step="1" min="0" max="999999" placeholder="—" data-vf="stockQty" value="${v.stockQty ?? ''}"></label>
+      <label class="avariant__f"><span>Show “N left”</span>
+        <input class="input-gr" type="number" step="1" min="0" max="9999" placeholder="—" data-vf="stockDisplay" value="${v.stockDisplay ?? ''}"></label>
       <div class="avariant__foot">
         <label class="avariant__stock"><input type="checkbox" data-vf="inStock"${v.inStock === false ? '' : ' checked'}> in stock</label>
+        <span class="avariant__sold" data-vsold></span>
         <button class="avariant__del" type="button">✕ Remove</button>
       </div>`;
 
@@ -161,6 +215,20 @@ function paintVariants() {
         if (k === 'label') refreshDefaultVariant();
       });
     });
+    // How this exact pack has actually sold. Sits in the row it describes,
+    // because "which size do people buy" is the question a pack list is
+    // silently asking, and answering it two panels away means nobody looks.
+    const stats = product?.performance?.byVariant?.[v.label ?? ''] ?? null;
+    const soldEl = row.querySelector('[data-vsold]');
+    if (stats && soldEl) {
+      const bits = [];
+      if (stats.delivered) bits.push(`${stats.delivered} sold`);
+      if (stats.open) bits.push(`${stats.open} in flight`);
+      if (stats.returned) bits.push(`${stats.returned} returned`);
+      if (stats.cancelled) bits.push(`${stats.cancelled} cancelled`);
+      soldEl.textContent = bits.join(' · ');
+    }
+
     row.querySelector('.avariant__del').addEventListener('click', () => {
       variantRows.splice(i, 1);
       paintVariants();
@@ -426,6 +494,7 @@ async function save(e) {
       originalPrice: v.originalPrice ?? null,
       inStock: v.inStock !== false,
       stockQty: v.stockQty ?? null,
+      stockDisplay: v.stockDisplay ?? null,
     });
     const before = (product.variants ?? []).map(shape);
     const now = rows.map(shape);
@@ -439,6 +508,7 @@ async function save(e) {
         originalPriceTaka: v.originalPrice,
         inStock: v.inStock,
         stockQty: v.stockQty,
+        stockDisplay: v.stockDisplay,
       }));
 
       // A renamed label orphans the claim past order lines have on it. Warn,

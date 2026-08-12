@@ -7,6 +7,17 @@
       </div>
 
       <div class="apedit">
+        <!-- How it has actually sold. FIRST, above the form: opening a product
+             is usually a question ("is this worth restocking, why is it not
+             moving") before it is an edit, and an answer under a screen of
+             inputs is an answer nobody scrolls to. Filled by
+             product-edit-page.js from the show endpoint's `performance`. -->
+        <section class="acard apstats" aria-labelledby="ps-head" data-pe-perf hidden>
+          <h2 class="h5" id="ps-head">Performance</h2>
+          <div class="apstats__grid" data-pe-perf-tiles></div>
+          <p class="admin__sub" data-pe-perf-foot style="margin:var(--space-3) 0 0"></p>
+        </section>
+
         <section class="acard" aria-labelledby="pe-head">
           <h2 class="h5" id="pe-head">Details</h2>
           <form data-pe-form>

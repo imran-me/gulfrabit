@@ -72,7 +72,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=47157088">
-  <link rel="stylesheet" href="../../modules/admin/admin.css?v=4cdad39f">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=82de6c1c">
   <link rel="stylesheet" href="../../modules/media/media.css?v=200563ea">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
@@ -109,6 +109,17 @@
       </div>
 
       <div class="apedit">
+        <!-- How it has actually sold. FIRST, above the form: opening a product
+             is usually a question ("is this worth restocking, why is it not
+             moving") before it is an edit, and an answer under a screen of
+             inputs is an answer nobody scrolls to. Filled by
+             product-edit-page.js from the show endpoint's `performance`. -->
+        <section class="acard apstats" aria-labelledby="ps-head" data-pe-perf hidden>
+          <h2 class="h5" id="ps-head">Performance</h2>
+          <div class="apstats__grid" data-pe-perf-tiles></div>
+          <p class="admin__sub" data-pe-perf-foot style="margin:var(--space-3) 0 0"></p>
+        </section>
+
         <section class="acard" aria-labelledby="pe-head">
           <h2 class="h5" id="pe-head">Details</h2>
           <form data-pe-form>
@@ -346,6 +357,6 @@
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=ebff64a4"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=87de770c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=db43fd3d"></script>
-  <script type="module" src="../../modules/admin/product-edit-page.js?v=4095ac2f"></script>
+  <script type="module" src="../../modules/admin/product-edit-page.js?v=e6a2e6e7"></script>
 </body>
 </html>
