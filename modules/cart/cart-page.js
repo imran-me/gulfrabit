@@ -7,7 +7,7 @@
 
 import * as store from '../../shared/js/core/state.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
-import { siteURL } from '../../shared/js/core/paths.js';
+import { productURL, siteURL } from '../../shared/js/core/paths.js';
 import { DEFAULT_OPTION } from '../delivery/backend/api.js';
 import { validatePromo } from './backend/api.js';
 import { renderGiftProgress } from './gift-progress.js';
@@ -65,9 +65,9 @@ async function render() {
 function itemHTML(l) {
   return `
     <div class="cart-item" data-item="${l.id}" data-variant="${l.variant ?? ''}">
-      <a class="cart-item__media" href="${siteURL(`modules/catalog/product.html?id=${l.id}`)}"><img src="${l.image}" alt="${escapeAttr(l.title)}" loading="lazy"></a>
+      <a class="cart-item__media" href="${productURL(l)}"><img src="${l.image}" alt="${escapeAttr(l.title)}" loading="lazy"></a>
       <div>
-        <a href="${siteURL(`modules/catalog/product.html?id=${l.id}`)}"><div class="cart-item__title">${escapeHtml(l.title)}</div></a>
+        <a href="${productURL(l)}"><div class="cart-item__title">${escapeHtml(l.title)}</div></a>
         <!-- The size leads. Two lines of the same product in different packs are
              otherwise identical on screen, and the customer cannot tell which
              one they are about to remove. -->
@@ -90,7 +90,7 @@ function itemHTML(l) {
 function savedHTML(s) {
   return `
     <div class="cart-item" data-saved="${s.id}">
-      <a class="cart-item__media" href="${siteURL(`modules/catalog/product.html?id=${s.id}`)}"><img src="${s.image}" alt="${escapeAttr(s.title)}" loading="lazy"></a>
+      <a class="cart-item__media" href="${productURL(s)}"><img src="${s.image}" alt="${escapeAttr(s.title)}" loading="lazy"></a>
       <div>
         <div class="cart-item__title">${escapeHtml(s.title)}</div>
         <div class="cart-item__meta">${escapeHtml(s.brand || '')}</div>

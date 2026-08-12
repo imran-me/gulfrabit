@@ -16,7 +16,7 @@ import { setup as setupStepper } from '../../shared/js/components/quantity-stepp
 import { initWishlistButtons } from '../../shared/js/components/wishlist.js';
 import { getParam, pathKey, setCanonical, setPageMeta } from '../../shared/js/core/router-helpers.js';
 import { track, productPayload } from '../../shared/js/core/analytics.js';
-import { siteURL } from '../../shared/js/core/paths.js';
+import { categoryURL, productURL, siteURL } from '../../shared/js/core/paths.js';
 import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 import { initBuyBar } from './pdp-buybar.js';
 
@@ -105,7 +105,7 @@ function injectProductSchema(p) {
       priceCurrency: 'BDT',
       price: p.price,
       availability: p.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      url: siteURL(`modules/catalog/product.html?id=${p.id}`),
+      url: productURL(p),
     },
   };
   if (p.rating && p.reviewCount) {
@@ -119,7 +119,7 @@ function injectProductSchema(p) {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: siteURL('index.html') },
-      { '@type': 'ListItem', position: 2, name: p.categoryName, item: siteURL(`modules/catalog/category.html?slug=${p.categorySlug}`) },
+      { '@type': 'ListItem', position: 2, name: p.categoryName, item: categoryURL(p.categorySlug) },
       { '@type': 'ListItem', position: 3, name: p.title },
     ],
   });
@@ -186,7 +186,7 @@ function paintInfo(p) {
   document.querySelector('[data-pdp-title]').textContent = p.title;
   document.querySelector('[data-crumb-title]').textContent = p.title;
   const crumbCat = document.querySelector('[data-crumb-cat]');
-  crumbCat.textContent = p.categoryName; crumbCat.href = siteURL(`modules/catalog/category.html?slug=${p.categorySlug}`);
+  crumbCat.textContent = p.categoryName; crumbCat.href = categoryURL(p.categorySlug);
 
   const full = Math.round(p.rating || 0);
   document.querySelector('[data-pdp-rating]').innerHTML =

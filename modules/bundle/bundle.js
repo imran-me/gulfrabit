@@ -32,6 +32,7 @@ import { addToCart } from '../../shared/js/core/state.js';
 import { showToast } from '../../shared/js/components/toast-notifications.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';
+import { productURL } from '../../shared/js/core/paths.js';
 
 const state = {
   bundle: null,
@@ -152,13 +153,13 @@ function itemHtml(p, isAnchor) {
                ${isAnchor ? 'aria-describedby="bundle-anchor-note"' : ''}>
         <span class="visually-hidden">Include ${escapeHtml(p.title)}</span>
       </label>
-      <a class="bundle__thumb" href="/modules/catalog/product.html?id=${encodeURIComponent(p.id)}">
+      <a class="bundle__thumb" href="${productURL(p)}">
         <picture><source srcset="${escapeHtml(cardImage(p.image))}" type="image/webp">
           <img src="${escapeHtml(p.image)}" alt="" loading="lazy" width="88" height="88"></picture>
       </a>
       <div class="bundle__meta">
         ${isAnchor ? '<span class="bundle__tag" id="bundle-anchor-note">This item</span>' : ''}
-        <a class="bundle__title" href="/modules/catalog/product.html?id=${encodeURIComponent(p.id)}">${escapeHtml(p.title)}</a>
+        <a class="bundle__title" href="${productURL(p)}">${escapeHtml(p.title)}</a>
         <span class="bundle__price price">${formatBDT(lineTotal(p))}${
           save ? ` <s class="bundle__was">${formatBDT(p.originalPrice * qty)}</s>` : ''
         }</span>

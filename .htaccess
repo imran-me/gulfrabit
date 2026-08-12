@@ -51,6 +51,9 @@
     # 404 rather than be handed to a page as a parameter.
     RewriteRule ^product/([A-Za-z0-9._-]+)/?$ modules/catalog/product.html?id=$1 [L,QSA]
     RewriteRule ^category/([a-z0-9-]+)/?$ modules/catalog/category.html?slug=$1 [L,QSA]
+    # The whole catalogue — the same page with no category chosen. Its own name
+    # rather than a bare /category/, which reads like a missing argument.
+    RewriteRule ^shop/?$ modules/catalog/category.html [L,QSA]
     RewriteRule ^search/?$ modules/catalog/search-results.html [L,QSA]
 
     # The flat pages. One line each, and each one is a name a person could say

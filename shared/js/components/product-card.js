@@ -15,7 +15,7 @@
 
 import { formatBDT, discountLabel, savingsLabel } from '../utils/format-currency.js';
 import * as store from '../core/state.js';
-import { siteURL } from '../core/paths.js';
+import { productURL, siteURL } from '../core/paths.js';
 import { toast } from './toast-notifications.js';
 
 const HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
@@ -34,10 +34,9 @@ function starsHTML(rating = 0, count = 0) {
   return s;
 }
 
-/** Product detail URL (query-param driven). */
-export function productURL(product) {
-  return siteURL(`modules/catalog/product.html?id=${encodeURIComponent(product.id)}`);
-}
+/* The local productURL() that used to live here is gone: there is one link
+   builder now, in core/paths.js, and it prefers the slug. Nothing outside this
+   file ever imported this copy. */
 
 /** Canonical card markup for a product object. */
 /**
@@ -340,7 +339,7 @@ export function enhanceProductCards(root = document) {
       // Quick-view modal is optional enhancement; fall back to the PDP link.
       import('./quick-view-modal.js')
         .then((m) => m.openQuickView(product.id))
-        .catch(() => { window.location.href = siteURL(`modules/catalog/product.html?id=${product.id}`); });
+        .catch(() => { window.location.href = productURL(product); });
     });
   });
 }

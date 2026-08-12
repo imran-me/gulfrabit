@@ -17,6 +17,7 @@ import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { renderProductSkeletons } from '../../shared/js/components/skeleton-loader.js';
 import { initScrollReveal } from '../../shared/js/components/scroll-reveal.js';
 
+import { categoryURL } from '../../shared/js/core/paths.js';
 initHeroCarousel();
 initCategoryGrid();
 initProductSections();
@@ -314,7 +315,7 @@ function categoryMedia(c, icon) {
 }
 
 function categoryTile(c) {
-  const href = CAT_HREF[c.slug] ?? `/modules/catalog/category.html?slug=${encodeURIComponent(c.slug)}`;
+  const href = CAT_HREF[c.slug] ?? categoryURL(c.slug);
   const icon = CAT_ICONS[c.slug] ?? CAT_ICONS._fallback;
   const blurb = c.blurb ? `<span class="category-card__count">${esc(c.blurb)}</span>` : '';
   return `<a class="category-card" href="${esc(href)}" data-reveal>`
@@ -349,7 +350,7 @@ async function initCategoryGrid() {
   };
   const authored = [...grid.querySelectorAll('.category-card')].map((a) => key(a.getAttribute('href')));
   const live = cats.map((c) => key(CAT_HREF[c.slug]
-    ?? `/modules/catalog/category.html?slug=${encodeURIComponent(c.slug)}`));
+    ?? categoryURL(c.slug)));
   if (authored.join('|') === live.join('|')) return;
 
   // Has the visitor already watched this grid arrive? Then the API is late and

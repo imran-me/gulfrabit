@@ -1,3 +1,4 @@
+import { categoryURL } from '../core/paths.js';
 /**
  * category-menu.js — the header menu, built from the live categories.
  *
@@ -180,7 +181,7 @@ function drawerRows(c, i) {
 }
 
 const url = (slug) => PROMO_HREF[slug]
-  ?? `/modules/catalog/category.html?slug=${encodeURIComponent(slug)}`;
+  ?? categoryURL(slug);
 
 function esc(s) {
   return String(s ?? '')
