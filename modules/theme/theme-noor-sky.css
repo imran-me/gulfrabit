@@ -237,6 +237,37 @@
     0 0 42px rgba(27, 180, 212, .35);
 }
 
+/* -- the earthgrazer ------------------------------------------------------ */
+/* A rock that hits the atmosphere at a shallow enough angle to skip along it
+   instead of diving through. It travels an enormously longer path in much
+   thinner air, so it is SLOW — seconds, not tenths — long, and dim. It is
+   the rarest thing a real meteor watcher hopes for and the most convincing
+   thing in this file, precisely because it breaks the rule the other streaks
+   establish: everything else falls fast and steeply, and then one crawls. */
+[data-theme="noor"] .noor-meteor.is-grazer {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(232, 207, 142, .04) 30%,
+    rgba(255, 243, 196, .3) 76%,
+    rgba(255, 248, 220, .85) 100%);
+  box-shadow: 0 0 9px rgba(255, 243, 196, .35);
+}
+
+/* -- the bolide, and its fragments ---------------------------------------- */
+/* A fireball big enough to survive down into dense air, where the pressure
+   in front of it finally exceeds what the rock can take and it BREAKS. The
+   pieces separate slowly, on very slightly diverging tracks, and each burns
+   out well before the parent does because each is smaller. The conductor
+   places them at the real position of the break and gives each its own
+   fractionally different angle — they must not fan out symmetrically, which
+   is what makes a firework read as a firework. */
+[data-theme="noor"] .noor-meteor.is-bolide {
+  box-shadow:
+    0 0 24px rgba(255, 248, 220, .95),
+    0 0 60px rgba(240, 169, 60, .5),
+    0 0 96px rgba(27, 180, 212, .28);
+}
+
 /* Every keyframe carries the same three functions in the same order, or the
    browser cannot interpolate them componentwise and falls back to a matrix
    blend that wobbles the angle mid-flight. */
@@ -422,27 +453,875 @@
 }
 
 /* =========================================================================
-   6 · STILLNESS, ON REQUEST
+   6 · THE SATELLITE — and the flare
+   =========================================================================
+   The counterpoint to a meteor, and the reason both read correctly: a
+   satellite is a POINT, moving in a DEAD STRAIGHT LINE, at a CONSTANT SPEED,
+   with NO TRAIL, for twenty seconds. Every one of those is wrong for a
+   falling rock and right for a thing in orbit — it is not burning, it is
+   only reflecting, and it is not falling, it is going round. Put one in the
+   same sky as the meteors and each makes the other more believable.
+
+   The flare is the rarer half. A flat antenna catches the sun square-on for
+   a few seconds and the satellite briefly outshines every star, then dies
+   back to a dim point — it does not blink, it swells and fades, because what
+   is moving is the angle of a mirror. It runs on the satellite's OWN
+   duration so the peak always lands mid-crossing.
+   ========================================================================= */
+[data-theme="noor"] .noor-sat {
+  position: fixed;
+  top: var(--s-y, 14vh);
+  left: var(--s-x, -3vw);
+  width: 2.4px;
+  aspect-ratio: 1;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: 50%;
+  background: #EAF6FF;
+  box-shadow: 0 0 5px rgba(234, 246, 255, .85);
+  opacity: 0;
+  animation: noor-sat-track var(--s-dur, 18s) linear forwards;
+}
+@keyframes noor-sat-track {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  7%   { opacity: .8; }
+  90%  { opacity: .75; }
+  100% { transform: translate3d(var(--s-dx, 118vw), var(--s-dy, 6vw), 0); opacity: 0; }
+}
+
+[data-theme="noor"] .noor-sat.is-flare::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0 0 6px rgba(255, 255, 255, .9), 0 0 20px rgba(200, 235, 255, .6);
+  opacity: 0;
+  animation: noor-sat-flare var(--s-dur, 18s) var(--ease-inout, ease-in-out) forwards;
+}
+/* Asymmetric on purpose: a real flare brightens over a couple of seconds and
+   takes twice as long to die, because the mirror rotates past. */
+@keyframes noor-sat-flare {
+  0%, 36% { opacity: 0;   transform: scale(1); }
+  50%     { opacity: .85; transform: scale(3.6); }
+  55%     { opacity: 1;   transform: scale(5); }
+  74%     { opacity: .25; transform: scale(2.2); }
+  88%,
+  100%    { opacity: 0;   transform: scale(1); }
+}
+
+/* =========================================================================
+   7 · THE COMET
+   =========================================================================
+   The slow one. A meteor is over in a second; a comet takes half a minute to
+   cross, because it is not in our air — it is far away and enormous, and
+   distance is what makes big things look slow.
+
+   AND ITS TAIL DOES NOT TRAIL IT. This is the whole reason the comet is
+   here. Every animated comet on the web drags its tail behind it like a
+   scarf, and that is not what a tail is: it is dust and ion gas pushed off
+   the nucleus by light and solar wind, so it points directly AWAY FROM THE
+   LIGHT — regardless of which way the comet is travelling. A comet moving
+   toward the sun wears its tail in FRONT of it.
+
+   Noor's sky has exactly one light source, the moon in section 1, so the
+   conductor measures the real angle from the moon to the comet and pins the
+   tail along it. Watch one cross beneath the moon and the tail swings to
+   stay pointed away. Nothing else in this file needed trigonometry.
+   ========================================================================= */
+[data-theme="noor"] .noor-comet {
+  position: fixed;
+  top: var(--c-y, 16vh);
+  left: var(--c-x, -6vw);
+  width: var(--c-size, 7px);
+  aspect-ratio: 1;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  animation: noor-comet-drift var(--c-dur, 22s) linear forwards;
+  will-change: transform, opacity;
+}
+/* The coma: the fuzzy head. Not a disc — a comet has no visible edge. */
+[data-theme="noor"] .noor-comet::before {
+  content: "";
+  position: absolute;
+  inset: -55%;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    #FFF8DC 0%,
+    rgba(255, 243, 196, .55) 26%,
+    rgba(178, 232, 245, .22) 52%,
+    transparent 74%);
+}
+/* The tail. transform-origin is the nucleus, so the rotation the conductor
+   writes here swings the tail about the head rather than about its own
+   middle. Wide at the far end, because dust spreads as it is pushed. */
+[data-theme="noor"] .noor-comet::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--c-tail, 190px);
+  height: var(--c-fan, 26px);
+  transform-origin: 0 50%;
+  transform: translateY(-50%) rotate(var(--c-angle, 200deg));
+  border-radius: 0 999px 999px 0 / 0 50% 50% 0;
+  background: linear-gradient(90deg,
+    rgba(255, 243, 196, .42) 0%,
+    rgba(178, 232, 245, .16) 44%,
+    rgba(120, 200, 225, .05) 74%,
+    transparent 94%);
+  filter: blur(3px);
+}
+@keyframes noor-comet-drift {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  12%  { opacity: .9; }
+  84%  { opacity: .85; }
+  100% { transform: translate3d(var(--c-dx, 116vw), var(--c-dy, 9vw), 0); opacity: 0; }
+}
+
+/* =========================================================================
+   8 · WINGS
+   =========================================================================
+   Five fliers, and not one of them is the same animal twice. What separates
+   them is not the silhouette — at this size nobody can see a silhouette — it
+   is HOW THEY MOVE, which is the only thing the eye actually reads at 40px:
+
+     gull       soars. No wingbeat at all for seconds at a time, and it BANKS
+                into its turns, because a bird with no engine turns by
+                rolling and letting gravity do the work.
+     owl        beats slowly and deeply and travels in dead silence and a
+                dead straight line. Big wings, low wing-loading, no hurry.
+     bat        does not fly a path, it flies a SEARCH. Direction changes
+                every few hundred milliseconds with no deceleration, because
+                each change is a new echo arriving.
+     moth       spirals INWARD. A moth holds a fixed angle to a light it
+                evolved to read as the moon; near a close light that constant
+                angle traces a logarithmic spiral, tightening until it
+                arrives. It is a navigation bug, and it is why moths circle.
+     dragonfly  hovers, then darts, then hovers. Dead stop to full speed and
+                back with nothing in between — four independently driven
+                wings and almost no mass to accelerate.
+   ========================================================================= */
+[data-theme="noor"] .noor-gull,
+[data-theme="noor"] .noor-owl,
+[data-theme="noor"] .noor-bat {
+  position: fixed;
+  top: var(--w-y, 26vh);
+  left: var(--w-x, -12vw);
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+[data-theme="noor"] .noor-gull::before,
+[data-theme="noor"] .noor-owl::before,
+[data-theme="noor"] .noor-bat::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: center / contain no-repeat;
+}
+
+/* -- the gull: soaring, banking, no beat ---------------------------------- */
+[data-theme="noor"] .noor-gull {
+  width: clamp(26px, 3.4vw, 46px);
+  aspect-ratio: 64 / 20;
+  animation: noor-gull-soar var(--w-dur, 13s) var(--ease-inout, ease-in-out) forwards;
+}
+[data-theme="noor"] .noor-gull::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 20'%3E%3Cpath d='M2 12 Q 17 1 32 10 Q 47 1 62 12 Q 47 7 32 15 Q 17 7 2 12 Z' fill='%23E8F4F8' fill-opacity='.6'/%3E%3C/svg%3E");
+  /* One slow flex of the wingtips over the whole crossing — a soaring bird
+     is not rigid, it trims. Nothing like a beat. */
+  animation: noor-gull-trim 4.6s var(--ease-inout, ease-in-out) infinite alternate;
+}
+@keyframes noor-gull-trim { from { transform: scaleY(1); } to { transform: scaleY(.86); } }
+/* The bank angle leads the turn, exactly as it does on a real wing: the bird
+   rolls FIRST and the path curves as a result. */
+@keyframes noor-gull-soar {
+  0%   { transform: translate3d(0, 0, 0) rotate(6deg); opacity: 0; }
+  9%   { opacity: .85; }
+  28%  { transform: translate3d(28vw, -5vw, 0) rotate(-9deg); }
+  52%  { transform: translate3d(56vw, -7.5vw, 0) rotate(4deg); }
+  76%  { transform: translate3d(86vw, -3vw, 0) rotate(11deg); }
+  91%  { opacity: .8; }
+  100% { transform: translate3d(125vw, 2vw, 0) rotate(5deg); opacity: 0; }
+}
+
+/* -- the owl: slow, deep, silent, straight -------------------------------- */
+[data-theme="noor"] .noor-owl {
+  width: clamp(34px, 4.6vw, 62px);
+  aspect-ratio: 64 / 28;
+  animation: noor-owl-cross var(--w-dur, 10s) linear forwards;
+}
+[data-theme="noor"] .noor-owl::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 28'%3E%3Cpath d='M32 6 Q 42 3 52 8 Q 60 12 62 19 Q 50 14 40 16 L 38 22 Q 32 26 26 22 L 24 16 Q 14 14 2 19 Q 4 12 12 8 Q 22 3 32 6 Z' fill='%23D9CDAC' fill-opacity='.46'/%3E%3Ccircle cx='29' cy='11' r='1.5' fill='%23FFF3C4' fill-opacity='.75'/%3E%3Ccircle cx='35' cy='11' r='1.5' fill='%23FFF3C4' fill-opacity='.75'/%3E%3C/svg%3E");
+  transform-origin: 50% 30%;                /* the shoulder, not the belly */
+  animation: noor-owl-beat 1.05s var(--ease-inout, ease-in-out) infinite;
+}
+/* The downstroke is fast and the recovery is slow — that asymmetry is what
+   separates a wingbeat from a pulse. */
+@keyframes noor-owl-beat {
+  0%   { transform: scaleY(1); }
+  22%  { transform: scaleY(.42); }
+  100% { transform: scaleY(1); }
+}
+@keyframes noor-owl-cross {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  10%  { opacity: .7; }
+  88%  { opacity: .65; }
+  100% { transform: translate3d(122vw, var(--w-dy, -3vw), 0); opacity: 0; }
+}
+
+/* -- the bat: a search pattern, not a flight path ------------------------- */
+[data-theme="noor"] .noor-bat {
+  width: clamp(16px, 2vw, 26px);
+  aspect-ratio: 64 / 24;
+  animation: noor-bat-hunt var(--w-dur, 3.4s) linear forwards;
+}
+[data-theme="noor"] .noor-bat::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 24'%3E%3Cpath d='M32 7 L 40 3 L 45 10 L 54 4 L 59 13 L 50 12 L 44 17 L 38 14 L 32 20 L 26 14 L 20 17 L 14 12 L 5 13 L 10 4 L 19 10 L 24 3 Z' fill='%23071A22' fill-opacity='.82'/%3E%3C/svg%3E");
+  animation: noor-bat-flutter .19s linear infinite;
+}
+@keyframes noor-bat-flutter { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.5); } }
+/* No easing anywhere. A bat corrects on an echo, and an echo arrives all at
+   once — the direction changes are supposed to be abrupt. */
+@keyframes noor-bat-hunt {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  8%   { opacity: .78; }
+  17%  { transform: translate3d(14vw, -6vh, 0); }
+  29%  { transform: translate3d(26vw, 3vh, 0); }
+  38%  { transform: translate3d(41vw, -4vh, 0); }
+  51%  { transform: translate3d(52vw, 5vh, 0); }
+  63%  { transform: translate3d(68vw, -2vh, 0); }
+  74%  { transform: translate3d(79vw, 6vh, 0); }
+  86%  { transform: translate3d(95vw, -3vh, 0); opacity: .7; }
+  100% { transform: translate3d(114vw, 2vh, 0); opacity: 0; }
+}
+
+/* -- the moth: the logarithmic spiral ------------------------------------- */
+[data-theme="noor"] .noor-moth {
+  position: fixed;
+  bottom: var(--w-b, 22vh);
+  left: var(--w-x, 50vw);
+  width: clamp(11px, 1.4vw, 17px);
+  aspect-ratio: 32 / 24;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  animation: noor-moth-spiral var(--w-dur, 11s) var(--ease-inout, ease-in-out) forwards;
+}
+[data-theme="noor"] .noor-moth::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 24'%3E%3Cpath d='M16 8 L 3 3 Q 0 12 6 18 Q 12 20 16 15 Q 20 20 26 18 Q 32 12 29 3 Z' fill='%23E6D8B4' fill-opacity='.46'/%3E%3Cellipse cx='16' cy='13' rx='1.6' ry='5' fill='%23C9A24B' fill-opacity='.66'/%3E%3C/svg%3E") center / contain no-repeat;
+  animation: noor-moth-wing .11s linear infinite;
+}
+@keyframes noor-moth-wing { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(.55); } }
+/* Each loop overshoots less than the last. The amplitude falls geometrically
+   while the period shortens — that IS a logarithmic spiral, and it is why the
+   moth ends up at the light instead of orbiting it forever. Then it breaks
+   away, because a moth that arrives is a moth that has stopped being
+   interesting. */
+@keyframes noor-moth-spiral {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  10%  { opacity: .8; }
+  22%  { transform: translate3d(-9vw, -7vh, 0); }
+  38%  { transform: translate3d(5.4vw, -12vh, 0); }
+  52%  { transform: translate3d(-4.4vw, -8.4vh, 0); }
+  64%  { transform: translate3d(2.6vw, -12.6vh, 0); }
+  74%  { transform: translate3d(-1.6vw, -10vh, 0); }
+  82%  { transform: translate3d(1vw, -12.4vh, 0); }
+  88%  { transform: translate3d(-.6vw, -11.2vh, 0); opacity: .8; }
+  100% { transform: translate3d(11vw, -19vh, 0); opacity: 0; }
+}
+
+/* -- the dragonfly: hover, dart, hover ------------------------------------ */
+[data-theme="noor"] .noor-dragonfly {
+  position: fixed;
+  bottom: var(--w-b, 12vh);
+  left: var(--w-x, 30vw);
+  width: clamp(16px, 2.2vw, 30px);
+  aspect-ratio: 40 / 20;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  animation: noor-dfly-dart var(--w-dur, 9s) linear forwards;
+}
+[data-theme="noor"] .noor-dragonfly::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 20'%3E%3Cellipse cx='19' cy='10' rx='16' ry='1.4' fill='%2350C8DC' fill-opacity='.5'/%3E%3Cellipse cx='15' cy='6' rx='9' ry='2.1' fill='%23A8E8F4' fill-opacity='.26'/%3E%3Cellipse cx='15' cy='14' rx='9' ry='2.1' fill='%23A8E8F4' fill-opacity='.26'/%3E%3Ccircle cx='34' cy='10' r='2.3' fill='%2350C8DC' fill-opacity='.55'/%3E%3C/svg%3E") center / contain no-repeat;
+  animation: noor-dfly-wing .07s linear infinite;
+}
+@keyframes noor-dfly-wing { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.66); } }
+/* The holds are flat runs of the SAME transform — a true hover, not a slow
+   drift — and the darts use a near-instant curve. That contrast is the whole
+   animal; smooth it out and it becomes a fly. */
+@keyframes noor-dfly-dart {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; animation-timing-function: ease-out; }
+  6%   { opacity: .8; }
+  14%  { transform: translate3d(0, 0, 0); animation-timing-function: cubic-bezier(.85, 0, .15, 1); }
+  22%  { transform: translate3d(17vw, -5vh, 0); animation-timing-function: linear; }
+  38%  { transform: translate3d(17vw, -5vh, 0); animation-timing-function: cubic-bezier(.85, 0, .15, 1); }
+  45%  { transform: translate3d(9vw, 4vh, 0); animation-timing-function: linear; }
+  60%  { transform: translate3d(9vw, 4vh, 0); animation-timing-function: cubic-bezier(.85, 0, .15, 1); }
+  68%  { transform: translate3d(31vw, -2vh, 0); animation-timing-function: linear; }
+  84%  { transform: translate3d(31vw, -2vh, 0); opacity: .8; animation-timing-function: cubic-bezier(.85, 0, .15, 1); }
+  100% { transform: translate3d(48vw, -14vh, 0); opacity: 0; }
+}
+
+/* =========================================================================
+   9 · THE FANOUS
+   =========================================================================
+   A paper lantern let go at the shore. It rises because the air inside it is
+   hot, and everything about how it moves follows from that one fact: it is
+   SLOW, it is light enough that the smallest breath pushes it sideways, and
+   it never travels in a straight line for more than a few seconds.
+
+   And it SHRINKS. Not because it is deflating — because it is getting
+   further away. Nothing else in this sky recedes, and one object that does
+   is what gives the whole thing depth. It dims as it shrinks, at the same
+   rate, the way a real light does through kilometres of night air.
+   ========================================================================= */
+[data-theme="noor"] .noor-fanous {
+  position: fixed;
+  bottom: -6vh;
+  left: var(--fa-x, 50vw);
+  width: clamp(13px, 1.7vw, 22px);
+  aspect-ratio: 24 / 34;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  animation: noor-fanous-rise var(--fa-dur, 26s) linear forwards;
+  will-change: transform, opacity;
+}
+[data-theme="noor"] .noor-fanous::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 34'%3E%3Cpath d='M9 2 h6 v4 h-6 z' fill='%23C9A24B' fill-opacity='.85'/%3E%3Cpath d='M5 7 h14 l-2 18 h-10 z' fill='%23F0C960' fill-opacity='.5'/%3E%3Cpath d='M6 25 h12 v3 h-12 z' fill='%23C9A24B' fill-opacity='.85'/%3E%3Cpath d='M9 10 h6 v12 h-6 z' fill='%23FFF3C4' fill-opacity='.8'/%3E%3C/svg%3E") center / contain no-repeat;
+  filter: drop-shadow(0 0 7px rgba(240, 201, 96, .75));
+  /* The flame gutters. A hot-air lantern's light is never steady, and the
+     wobble of the envelope hangs off the same beat. */
+  animation: noor-fanous-flame 2.3s var(--ease-inout, ease-in-out) infinite alternate;
+}
+@keyframes noor-fanous-flame {
+  from { opacity: .78; transform: rotate(-2.4deg) scale(.98); }
+  to   { opacity: 1;   transform: rotate(2.8deg) scale(1.02); }
+}
+/* Uneven vertical steps: a lantern climbs into calmer air and slows. The
+   scale carries the distance, and the opacity falls with it. */
+@keyframes noor-fanous-rise {
+  0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0; }
+  8%   { opacity: .95; }
+  26%  { transform: translate3d(var(--fa-sway, 4vw), -32vh, 0) scale(.86); opacity: .92; }
+  48%  { transform: translate3d(calc(var(--fa-sway, 4vw) * -.5), -58vh, 0) scale(.7); opacity: .82; }
+  70%  { transform: translate3d(calc(var(--fa-sway, 4vw) * 1.3), -78vh, 0) scale(.55); opacity: .6; }
+  88%  { transform: translate3d(calc(var(--fa-sway, 4vw) * .4), -94vh, 0) scale(.42); opacity: .3; }
+  100% { transform: translate3d(calc(var(--fa-sway, 4vw) * .9), -108vh, 0) scale(.34); opacity: 0; }
+}
+
+/* =========================================================================
+   10 · WEATHER
+   =========================================================================
+   Four events that are not objects. Nothing here has edges or a body; they
+   are things the whole sky does at once, and they are the reason the sky
+   reads as a place with air in it rather than a black rectangle with sprites
+   on top.
+   ========================================================================= */
+
+/* -- the cloud: proof the stars are behind something ---------------------- */
+/* It sits at z-index -1 with the stars, so it OCCLUDES them as it passes and
+   that occlusion is the only thing that makes it a cloud — a dark blob on a
+   dark sky is otherwise invisible. Its top-right edge is lit, because that
+   is where the moon is; a cloud lit from the wrong side is the fastest way
+   to break a night sky. */
+[data-theme="noor"] .noor-cloud {
+  position: fixed;
+  top: var(--cl-y, 10vh);
+  left: -46vw;
+  width: var(--cl-w, 52vw);
+  height: var(--cl-h, 15vh);
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  opacity: 0;
+  background:
+    radial-gradient(58% 62% at 68% 34%, rgba(244, 231, 190, .10), transparent 62%),
+    radial-gradient(62% 72% at 42% 52%, rgba(5, 24, 32, .78), rgba(5, 24, 32, .34) 56%, transparent 78%);
+  animation: noor-cloud-drift var(--cl-dur, 52s) linear forwards;
+}
+@keyframes noor-cloud-drift {
+  0%   { transform: translate3d(0, 0, 0) scaleX(1); opacity: 0; }
+  14%  { opacity: 1; }
+  50%  { transform: translate3d(70vw, 1.5vh, 0) scaleX(1.12); }
+  86%  { opacity: 1; }
+  100% { transform: translate3d(154vw, 3vh, 0) scaleX(1.2); opacity: 0; }
+}
+
+/* -- the airglow veil ----------------------------------------------------- */
+/* Not an aurora — this is the Gulf, not the Arctic. Airglow: a faint sheet
+   of light the upper atmosphere emits on its own. The rays are VERTICAL
+   because they follow magnetic field lines, and the whole sheet shears
+   slowly rather than rippling. Any horizontal banding here would be wrong. */
+[data-theme="noor"] .noor-veil {
+  position: fixed;
+  top: -8vh;
+  left: var(--v-x, 20vw);
+  width: var(--v-w, 46vw);
+  height: 46vh;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(180deg,
+    rgba(27, 180, 212, .17) 0%,
+    rgba(27, 180, 212, .08) 40%,
+    rgba(40, 200, 190, .03) 66%,
+    transparent 88%);
+  animation: noor-veil-hang var(--v-dur, 26s) var(--ease-inout, ease-in-out) forwards;
+}
+[data-theme="noor"] .noor-veil::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg,
+    rgba(150, 240, 255, .085) 0 7px,
+    transparent 7px 27px);
+  animation: noor-veil-ray 7.5s var(--ease-inout, ease-in-out) infinite alternate;
+}
+@keyframes noor-veil-hang {
+  0%   { opacity: 0; transform: scaleY(.8); }
+  24%  { opacity: 1; }
+  72%  { opacity: .9; }
+  100% { opacity: 0; transform: scaleY(1.08); }
+}
+@keyframes noor-veil-ray {
+  from { transform: skewX(-8deg) translateX(-2.5%); }
+  to   { transform: skewX(6deg) translateX(3%); }
+}
+
+/* -- heat lightning ------------------------------------------------------- */
+/* A storm below the horizon. You never see the bolt and you never hear the
+   thunder — only the cloud lighting from underneath, which is why this is a
+   glow rising from the BOTTOM edge with no shape in it at all.
+   The rhythm is the tell: real lightning is a multi-stroke discharge, three
+   or four flashes in a fifth of a second, then nothing, then one more late
+   one. Evenly spaced flashes read as a broken CSS animation. */
+[data-theme="noor"] .noor-flash {
+  position: fixed;
+  left: var(--fl-x, 20vw);
+  bottom: 0;
+  width: var(--fl-w, 44vw);
+  height: 34vh;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(62% 100% at 50% 100%,
+    rgba(196, 238, 252, .5) 0%,
+    rgba(120, 200, 232, .17) 42%,
+    transparent 74%);
+  animation: noor-flash-sheet var(--fl-dur, 5s) linear forwards;
+}
+@keyframes noor-flash-sheet {
+  0%, 3%   { opacity: 0; }
+  4%       { opacity: .9; }
+  6%       { opacity: .15; }
+  8%       { opacity: .75; }
+  10%      { opacity: .28; }
+  12%      { opacity: .62; }
+  16%      { opacity: 0; }
+  46%      { opacity: 0; }
+  48%      { opacity: .5; }
+  52%      { opacity: .06; }
+  100%     { opacity: 0; }
+}
+
+/* -- the gust ------------------------------------------------------------- */
+/* The only event in this file that touches the others. A faint shear crosses
+   the page, and everything light enough to be moved — fireflies, smoke,
+   sparks, bubbles — leans downwind for a couple of seconds and drifts back.
+   See the `translate` note in section 4 for why that lean can coexist with
+   each element's own running animation.
+   Wind is a thing that happens TO a sky, not a thing in it. */
+[data-theme="noor"] .noor-gust {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(101deg,
+    transparent 40%,
+    rgba(204, 242, 252, .055) 50%,
+    transparent 60%);
+  animation: noor-gust-pass var(--g-dur, 3.4s) var(--ease-inout, ease-in-out) forwards;
+}
+@keyframes noor-gust-pass {
+  0%   { opacity: 0; transform: translate3d(calc(var(--g-dir, 1) * -130vw), 0, 0); }
+  20%  { opacity: 1; }
+  78%  { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(calc(var(--g-dir, 1) * 130vw), 0, 0); }
+}
+
+/* =========================================================================
+   11 · FIRE
+   =========================================================================
+   Two things rising off a shore you cannot see: sparks from someone's fire,
+   and the smoke of bakhoor burning somewhere along it.
+   ========================================================================= */
+
+/* -- the spark: a cooling ember ------------------------------------------- */
+/* It leaves the fire white-hot, and it dies red. That colour change is real
+   physics — a black body radiates bluer the hotter it is — and it is done
+   here WITHOUT animating a colour: two stacked layers, a white-hot core over
+   a red glow, and only the core's OPACITY animates. As the core fades the
+   red beneath it takes over. Composited, and honest.
+   The path is buoyancy losing to drag: fast up, decelerating, a moment of
+   hanging, then it gives up and sinks a little as it goes out. */
+[data-theme="noor"] .noor-spark {
+  position: fixed;
+  bottom: var(--sp-b, -1vh);
+  left: var(--sp-x, 50vw);
+  width: var(--sp-size, 3px);
+  aspect-ratio: 1;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 50%;
+  animation: noor-spark-lift var(--sp-dur, 5s) var(--ease-out, cubic-bezier(.16, .84, .44, 1)) forwards;
+}
+/* the red glow — always there, revealed as the core dies */
+[data-theme="noor"] .noor-spark::after {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #E8622B 0%, rgba(192, 57, 43, .55) 45%, transparent 72%);
+  opacity: 0;
+  animation: noor-spark-cool var(--sp-dur, 5s) linear forwards;
+}
+/* the white-hot core */
+[data-theme="noor"] .noor-spark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #FFFDF2;
+  box-shadow: 0 0 6px rgba(255, 243, 196, .95), 0 0 14px rgba(240, 169, 60, .6);
+  opacity: 0;
+  animation: noor-spark-burn var(--sp-dur, 5s) linear forwards;
+}
+@keyframes noor-spark-burn { 0% { opacity: 1; } 34% { opacity: .7; } 62% { opacity: .1; } 100% { opacity: 0; } }
+@keyframes noor-spark-cool { 0% { opacity: 0; } 30% { opacity: .85; } 78% { opacity: .5; } 100% { opacity: 0; } }
+@keyframes noor-spark-lift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  45%  { transform: translate3d(calc(var(--sp-sway, 2vw) * .7), -22vh, 0) scale(.9); }
+  76%  { transform: translate3d(var(--sp-sway, 2vw), -31vh, 0) scale(.72); }
+  /* it stops rising before it stops existing — the hang, then the sink */
+  100% { transform: translate3d(calc(var(--sp-sway, 2vw) * 1.5), -29vh, 0) scale(.5); }
+}
+
+/* -- bakhoor: laminar, then turbulent ------------------------------------- */
+/* A smoke column leaves the coal as a straight, still ribbon and holds that
+   shape for a surprisingly long way up — then crosses a threshold and breaks
+   into turbulence all at once, widening and writhing. That TRANSITION is the
+   most recognisable thing about rising smoke and almost nobody animates it.
+   Here the first 35% of the climb is dead straight and narrow; everything
+   after it skews, widens and fades. */
+[data-theme="noor"] .noor-smoke {
+  position: fixed;
+  bottom: var(--sm-b, 0);
+  left: var(--sm-x, 50vw);
+  width: var(--sm-w, 9px);
+  height: 42vh;
+  z-index: 1;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  opacity: 0;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(214, 226, 230, .05) 22%,
+    rgba(206, 220, 226, .13) 62%,
+    rgba(198, 214, 222, .2) 100%);
+  filter: blur(3px);
+  animation: noor-smoke-rise var(--sm-dur, 16s) linear forwards;
+}
+@keyframes noor-smoke-rise {
+  0%   { opacity: 0; transform: translate3d(0, 24vh, 0) scale(.5, .3) skewX(0deg); }
+  12%  { opacity: .85; }
+  /* laminar: still narrow, still straight */
+  35%  { transform: translate3d(0, 8vh, 0) scale(.75, .72) skewX(1deg); opacity: .9; }
+  /* the break */
+  58%  { transform: translate3d(2.2vw, 0, 0) scale(1.5, .92) skewX(-11deg); opacity: .6; }
+  80%  { transform: translate3d(-1.4vw, -6vh, 0) scale(2.4, 1.05) skewX(14deg); opacity: .3; }
+  100% { transform: translate3d(3.4vw, -14vh, 0) scale(3.6, 1.15) skewX(-8deg); opacity: 0; }
+}
+
+/* =========================================================================
+   12 · THE WATER
+   =========================================================================
+   Everything below lives at the bottom edge, because that is where Noor's
+   lagoon is — the same waterline the fireflies rise off. Four events, and
+   each one is a different piece of surface physics.
+   ========================================================================= */
+
+/* -- the ripple ----------------------------------------------------------- */
+/* A ring spreading from a disturbance. It DECELERATES, because a spreading
+   gravity wave hands its energy to an ever-longer circumference, and it dims
+   as it grows for the same reason — the energy per unit of ring falls as the
+   ring gets bigger. A ring that expands at constant speed and constant
+   brightness is a radar sweep, not water. */
+[data-theme="noor"] .noor-ripple {
+  position: fixed;
+  bottom: var(--r-b, 5vh);
+  left: var(--r-x, 50vw);
+  width: var(--r-size, 90px);
+  aspect-ratio: 4 / 1;                       /* seen at a glancing angle */
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 50%;
+  border: 1px solid rgba(232, 240, 214, .75);
+  box-shadow: 0 0 8px rgba(200, 232, 240, .3);
+  opacity: 0;
+  animation: noor-ripple-out var(--r-dur, 3.4s) cubic-bezier(.12, .72, .36, 1) forwards;
+}
+@keyframes noor-ripple-out {
+  0%   { transform: translate(-50%, 0) scale(.12); opacity: 0; }
+  12%  { opacity: .8; }
+  100% { transform: translate(-50%, 0) scale(1); opacity: 0; }
+}
+
+/* -- the fish: a parabola, and a nose that follows it --------------------- */
+/* Once it leaves the water nothing pushes it but gravity, so the arc is a
+   parabola — not a sine, which is what almost every jumping-fish animation
+   uses and why they look like they are on a wire. The keyframes below are
+   sampled from 4h*t*(1-t) at even intervals and driven LINEAR, so the shape
+   comes from the numbers rather than from an easing curve.
+   And the fish rotates through the arc: nose steeply up at launch, level at
+   the apex, nose down on entry, because a body in free flight keeps pointing
+   along its velocity. The conductor computes that launch angle from the
+   actual height and span, so the tilt is never a guess. */
+[data-theme="noor"] .noor-fish {
+  position: fixed;
+  bottom: var(--fi-b, 3vh);
+  left: var(--fi-x, 40vw);
+  width: var(--fi-w, 30px);
+  aspect-ratio: 48 / 16;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  animation: noor-fish-arc var(--fi-dur, 1.5s) linear forwards;
+}
+[data-theme="noor"] .noor-fish::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 16'%3E%3Cpath d='M14 8 Q 25 1 39 8 Q 25 15 14 8 Z' fill='%23DCEEF4' fill-opacity='.8'/%3E%3Cpath d='M14 8 L 4 3 L 7 8 L 4 13 Z' fill='%23BEDDE8' fill-opacity='.6'/%3E%3Ccircle cx='33' cy='7' r='.9' fill='%230A2028' fill-opacity='.8'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+/* A fish going left is drawn facing left. The flip lives on the SPRITE and
+   not on the element, because the element's transform is fully spoken for by
+   the arc — putting a scaleX there would have to be repeated in all ten
+   keyframes and would silently mirror the rotation with it. */
+[data-theme="noor"] .noor-fish.is-left::before { transform: scaleX(-1); }
+@keyframes noor-fish-arc {
+  0%    { transform: translate3d(0, 0, 0) rotate(calc(var(--fi-a, 52deg) * -1)); opacity: 0; }
+  6%    { opacity: .9; }
+  12.5% { transform: translate3d(calc(var(--fi-dx, 9vw) * .125), calc(var(--fi-h, 9vh) * -.4375), 0) rotate(calc(var(--fi-a, 52deg) * -.83)); }
+  25%   { transform: translate3d(calc(var(--fi-dx, 9vw) * .25),  calc(var(--fi-h, 9vh) * -.75), 0)   rotate(calc(var(--fi-a, 52deg) * -.61)); }
+  37.5% { transform: translate3d(calc(var(--fi-dx, 9vw) * .375), calc(var(--fi-h, 9vh) * -.9375), 0) rotate(calc(var(--fi-a, 52deg) * -.33)); }
+  50%   { transform: translate3d(calc(var(--fi-dx, 9vw) * .5),   calc(var(--fi-h, 9vh) * -1), 0)     rotate(0deg); }
+  62.5% { transform: translate3d(calc(var(--fi-dx, 9vw) * .625), calc(var(--fi-h, 9vh) * -.9375), 0) rotate(calc(var(--fi-a, 52deg) * .33)); }
+  75%   { transform: translate3d(calc(var(--fi-dx, 9vw) * .75),  calc(var(--fi-h, 9vh) * -.75), 0)   rotate(calc(var(--fi-a, 52deg) * .61)); }
+  87.5% { transform: translate3d(calc(var(--fi-dx, 9vw) * .875), calc(var(--fi-h, 9vh) * -.4375), 0) rotate(calc(var(--fi-a, 52deg) * .83)); }
+  94%   { opacity: .9; }
+  100%  { transform: translate3d(var(--fi-dx, 9vw), 0, 0) rotate(var(--fi-a, 52deg)); opacity: 0; }
+}
+
+/* -- the pearl diver's bubbles -------------------------------------------- */
+/* A bubble ACCELERATES as it rises and GROWS while it does it, and the two
+   are the same fact: the water pressure above it falls, so it expands, so it
+   displaces more, so it is pushed harder. This is why the animation eases IN
+   rather than out — the opposite of every other rising thing in this file.
+   Then it reaches the surface and stops existing in about 40 milliseconds. */
+[data-theme="noor"] .noor-bubble {
+  position: fixed;
+  bottom: var(--bu-b, -2vh);
+  left: var(--bu-x, 50vw);
+  width: var(--bu-size, 5px);
+  aspect-ratio: 1;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 50%;
+  border: 1px solid rgba(214, 240, 248, .55);
+  background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, .45), rgba(180, 225, 240, .12) 55%, transparent 72%);
+  opacity: 0;
+  animation: noor-bubble-rise var(--bu-dur, 4s) cubic-bezier(.55, .06, .68, .19) forwards;
+}
+@keyframes noor-bubble-rise {
+  0%   { transform: translate3d(0, 0, 0) scale(.45); opacity: 0; }
+  10%  { opacity: .75; }
+  /* the surface */
+  92%  { transform: translate3d(var(--bu-sway, 1vw), calc(var(--bu-h, 16vh) * -1), 0) scale(1.15); opacity: .8; }
+  /* the pop: a flat expansion, gone before you can look at it */
+  100% { transform: translate3d(var(--bu-sway, 1vw), calc(var(--bu-h, 16vh) * -1.03), 0) scale(1.9); opacity: 0; }
+}
+
+/* -- the glitter path ----------------------------------------------------- */
+/* The moon's reflection on moving water. Two details make it read:
+   it is directly BELOW the moon and nowhere else, because a glitter path
+   always points at the observer; and it is a wedge that WIDENS toward the
+   bottom of the screen, because the near water tilts through a wider range
+   of angles than the far water does. It is not a beam of light, it is a
+   thousand separate reflections — hence the mask, which cuts it into
+   horizontal glints on the wavelets rather than leaving a solid column. */
+[data-theme="noor"] .noor-glitter {
+  position: fixed;
+  bottom: 0;
+  left: var(--gl-x, 50vw);
+  width: var(--gl-w, 200px);
+  height: 24vh;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(0deg,
+    rgba(244, 231, 190, .26) 0%,
+    rgba(244, 231, 190, .11) 44%,
+    transparent 84%);
+  clip-path: polygon(36% 0, 64% 0, 100% 100%, 0 100%);
+  -webkit-mask-image: repeating-linear-gradient(0deg, #000 0 2px, transparent 2px 8px);
+          mask-image: repeating-linear-gradient(0deg, #000 0 2px, transparent 2px 8px);
+  animation: noor-glitter-lie var(--gl-dur, 20s) var(--ease-inout, ease-in-out) forwards;
+}
+/* The glints do not travel sideways — the water moves through them, so the
+   path shimmers in place. A glitter path that slides is a searchlight. */
+[data-theme="noor"] .noor-glitter::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  animation: noor-glitter-shimmer 3.6s var(--ease-inout, ease-in-out) infinite alternate;
+}
+@keyframes noor-glitter-lie {
+  0%   { opacity: 0; }
+  18%  { opacity: 1; }
+  76%  { opacity: .9; }
+  100% { opacity: 0; }
+}
+@keyframes noor-glitter-shimmer {
+  from { transform: translateY(0) scaleX(.94); opacity: .5; }
+  to   { transform: translateY(-4px) scaleX(1.06); opacity: 1; }
+}
+
+/* =========================================================================
+   13 · THE STARS ANSWER
+   =========================================================================
+   Three events with no element of their own. They reach into the stars that
+   section 2 already hung and change what those stars are doing — which means
+   they cost nothing, and, more importantly, they make the fixed points feel
+   like objects rather than decoration. The sky's furniture is allowed to
+   participate.
+   ========================================================================= */
+
+/* -- the flare star ------------------------------------------------------- */
+/* One star brightens by several magnitudes over a second or two and settles
+   back. Real, common, and it happens to red dwarfs. It rides a ::after so
+   the star's own twinkle keeps running underneath, and the two together are
+   what a flare actually looks like: a normal star, briefly enormous. */
+[data-theme="noor"] .noor-star.is-nova::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFFFFF 0%, rgba(255, 246, 222, .8) 30%, transparent 70%);
+  box-shadow: 0 0 14px rgba(255, 246, 222, .9), 0 0 34px rgba(180, 225, 245, .5);
+  opacity: 0;
+  animation: noor-star-nova 2.6s var(--ease-out, ease-out) forwards;
+}
+/* Fast rise, slow decay — the shape of every flare in nature. */
+@keyframes noor-star-nova {
+  0%   { opacity: 0; transform: scale(1); }
+  14%  { opacity: 1; transform: scale(5.5); }
+  38%  { opacity: .6; transform: scale(3.6); }
+  100% { opacity: 0; transform: scale(1.2); }
+}
+
+/* -- the occultation ------------------------------------------------------ */
+/* A star goes out, stays out for a second, and comes back. Something passed
+   in front of it — a satellite, an asteroid, the limb of something you
+   cannot see. The edges are SHARP, because the occulting body has a hard
+   edge; fade it and it just reads as a slow twinkle. */
+/* The twinkle is restated so it keeps running underneath. No `forwards` on
+   the occultation: a filled final keyframe would pin opacity at 1 and leave
+   the star permanently un-twinkling, since the later animation in the list
+   wins any property both of them touch. */
+[data-theme="noor"] .noor-star.is-occult {
+  animation: noor-star-twinkle var(--star-dur, 6s) ease-in-out var(--star-delay, 0s) infinite,
+             noor-star-occult 2.4s linear;
+}
+@keyframes noor-star-occult {
+  0%, 14%   { opacity: 1; }
+  18%, 62%  { opacity: 0; }
+  66%, 100% { opacity: 1; }
+}
+
+/* -- the constellation resolves ------------------------------------------- */
+/* Hairlines between four stars that are genuinely near each other on THIS
+   load — the conductor walks nearest-neighbour through the real positions,
+   so the figure is different every visit and never crosses itself.
+   It fades in rather than being drawn stroke by stroke, and that is a
+   deliberate refusal: a drawn line means animating stroke-dashoffset, which
+   is geometry the compositor cannot touch. Opacity is free, and "a shape
+   resolving out of noise" is the better metaphor anyway — which is what
+   finding a constellation actually feels like. */
+[data-theme="noor"] .noor-lines {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  animation: noor-lines-resolve var(--ln-dur, 7s) var(--ease-inout, ease-in-out) forwards;
+}
+[data-theme="noor"] .noor-lines polyline {
+  fill: none;
+  stroke: #E8CF8E;
+  stroke-opacity: .5;
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@keyframes noor-lines-resolve {
+  0%   { opacity: 0; }
+  22%  { opacity: 1; }
+  74%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* =========================================================================
+   14 · STILLNESS, ON REQUEST
    =========================================================================
    Reduced motion removes the sky entirely rather than freezing it. A frozen
    meteor is a gold smear across the page with no explanation; a stopped
    firefly is a dead one. The conductor also refuses to start, so this is a
    second lock on a door already bolted — deliberately, because the cost of
    being wrong here is a page a motion-sensitive customer cannot use.
+
+   ONE SELECTOR, NOT A LIST. This used to name each class, which meant every
+   new effect had to remember to add itself to two lists at the bottom of the
+   file or it would keep moving for someone who asked it not to — an
+   accessibility failure that fails SILENTLY and only for the people it hurts.
+   `[data-noor-sky]` is stamped by the conductor on everything it creates, so
+   the door cannot be left open by forgetting.
+
+   It is a different attribute from [data-noor-fx], which is theme.js's kill
+   switch for the whole night and also carries the vignette — and the
+   vignette is composition rather than motion, so it must SURVIVE this rule.
    ========================================================================= */
 @media (prefers-reduced-motion: reduce) {
-  [data-theme="noor"] .noor-moon,
-  [data-theme="noor"] .noor-star,
-  [data-theme="noor"] .noor-meteor,
-  [data-theme="noor"] .noor-fly,
-  [data-theme="noor"] .noor-phoenix { display: none; }
+  [data-theme="noor"] [data-noor-sky] { display: none; }
 }
 
 /* Print: none of this is ink. */
 @media print {
-  [data-theme="noor"] .noor-moon,
-  [data-theme="noor"] .noor-star,
-  [data-theme="noor"] .noor-meteor,
-  [data-theme="noor"] .noor-fly,
-  [data-theme="noor"] .noor-phoenix { display: none; }
+  [data-theme="noor"] [data-noor-sky] { display: none; }
 }
