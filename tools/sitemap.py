@@ -79,8 +79,10 @@ NOINDEX = {
     "modules/auth/register.html":           "sign-up form — no indexable content",
 }
 
-# index.html is hand-authored, so it is not in assemble.py's PAGES.
-ALWAYS = ["/index.html"]
+# The home page. "/" and not "/index.html": the filename 301s to the root now,
+# and a sitemap that submits the redirect instead of the destination asks
+# Google to crawl one URL to be told about another.
+ALWAYS = ["/"]
 
 
 def assemble_pages() -> list[str]:
@@ -99,6 +101,18 @@ def assemble_pages() -> list[str]:
     # as data; importing it runs no build, so this is safe and always current.
     spec.loader.exec_module(module)
     return [entry[0] for entry in (*module.PAGES, *module.ADMIN_PAGES)]
+
+
+def assemble_routes() -> dict:
+    """built file -> readable route, borrowed from assemble.py's own table.
+
+    One reader of .htaccess, shared, so the sitemap can never publish a route
+    the rewrite rules do not actually serve.
+    """
+    spec = importlib.util.spec_from_file_location("gr_assemble_routes", ROOT / "tools" / "assemble.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return dict(module.ROUTES)
 
 
 def load(name):
@@ -121,16 +135,33 @@ def main() -> int:
         print("  NOINDEX names pages that assemble.py no longer builds: " + ", ".join(unknown))
         return 1
 
-    urls = list(ALWAYS) + [f"/{p}" for p in built if p not in NOINDEX]
+    # Routes, not file paths. Every page now answers at a readable URL and the
+    # whole site links to it; submitting the /modules/…html form as well would
+    # offer a search engine two addresses for one page and let them compete.
+    routes = assemble_routes()
+
+    def indexable(page: str) -> bool:
+        if page in NOINDEX:
+            return False
+        # Anything that answers under /admin/ is the staff panel, whichever
+        # module folder it happens to live in. The hand-kept list above missed
+        # modules/theme/appearance.html for exactly that reason — it is the
+        # Appearance SCREEN, not a storefront page, and nothing about its path
+        # said so. A rule beats a list that has to be remembered.
+        return not routes.get(page, "").startswith("/admin")
+
+    urls = list(ALWAYS) + [routes.get(p, f"/{p}") for p in built if indexable(p)]
 
     # Switched-off categories still have a page — category.html renders whatever
     # slug it is handed — but submitting a URL we have deliberately taken out of
     # the navigation is asking Google to index a dead end.
     for c in load("categories")["categories"]:
         if c.get("active", True):
-            urls.append(f"/modules/catalog/category.html?slug={c['slug']}")
+            urls.append(f"/category/{c['slug']}")
+    # The slug, falling back to the SKU: /product/ accepts either, so a product
+    # that has not been slugged yet still gets a working URL rather than none.
     for p in load("products")["products"]:
-        urls.append(f"/modules/catalog/product.html?id={p['id']}")
+        urls.append(f"/product/{p.get('slug') or p['id']}")
 
     body = "\n".join(
         f"  <url><loc>{SITE}{u}</loc><changefreq>weekly</changefreq></url>" for u in urls
