@@ -42,10 +42,12 @@ async function init() {
   const product = id ? await getProductById(id) : null;
   if (!product) return renderNotFound();
 
-  // ?id= is the whole identity of this page; a utm_campaign on the end of it
-  // is the same product arriving from an ad. Declared before anything slow, so
-  // a crawler that stops reading early still gets it.
-  setCanonical(['id']);
+  // The route is the identity now, so no parameter is kept: a utm_campaign on
+  // the end is the same product arriving from an ad, and the SKU URL, the slug
+  // URL and the old query URL are all one page that must resolve to one
+  // address. Declared before anything slow, so a crawler that stops reading
+  // early still gets it.
+  setCanonical([], productURL(product));
   setPageMeta({
     // Origin in the title because it is what people search — "saudi ajwa
     // dates", not "ajwa dates madinah select" — and because it is the one
@@ -610,7 +612,30 @@ async function loadRelated(p) {
   else rail.closest('section').hidden = true;
 }
 
+/**
+ * A product that does not exist.
+ *
+ * THE SOFT 404, AND WHY IT NEEDS ANSWERING IN JAVASCRIPT
+ * -----------------------------------------------------
+ * The server cannot know whether a slug names a real product — the catalogue
+ * is in a database and this page is a static file — so it answers 200 and
+ * this function runs. To a crawler that is a perfectly good page saying
+ * "Product not found", and it will index it as one: a shop whose search
+ * results include a dozen identical empty pages.
+ *
+ * `noindex` is the honest correction. It cannot change the status code, but
+ * it does say the one thing that matters — do not keep this.
+ *
+ * The canonical is removed rather than pointed somewhere: canonicalising a
+ * missing product onto the home page tells a search engine they are the same
+ * page, which is a different lie from the one being fixed.
+ */
 function renderNotFound() {
+  const robots = document.querySelector('meta[name="robots"]')
+    ?? document.head.appendChild(Object.assign(document.createElement('meta'), { name: 'robots' }));
+  robots.content = 'noindex, follow';
+  document.querySelector('link[rel="canonical"]')?.remove();
+
   document.querySelector('[data-pdp]').innerHTML = `
     <div class="empty-state" style="grid-column:1/-1">
       <h1 class="empty-state__title">Product not found</h1>

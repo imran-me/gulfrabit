@@ -92,7 +92,7 @@ export function setParams(updates, { replace = true } = {}) {
  *
  * @param {string[]} keep  params that genuinely change what the page IS
  */
-export function setCanonical(keep = []) {
+export function setCanonical(keep = [], path = null) {
   try {
     const current = new URLSearchParams(window.location.search);
     const kept = new URLSearchParams();
@@ -104,8 +104,20 @@ export function setCanonical(keep = []) {
       if (v) kept.set(k, v);
     });
 
+    // `path` is the page's ONE true address, and it is passed in rather than
+    // read off the location because the same page now answers at two: the
+    // route (/product/ajwa-dates) and the file it rewrites to
+    // (/modules/catalog/product.html?id=gr-1101), which every older link and
+    // every already-indexed result still uses. Deriving the canonical from
+    // wherever the visitor happened to arrive would declare BOTH of those
+    // canonical — telling a search engine the shop has two of every product.
+    // Naming the route explicitly is what consolidates them onto one.
+    const where = path
+      ? new URL(path, window.location.origin).pathname
+      : window.location.pathname;
+
     const qs = kept.toString();
-    const href = `${window.location.origin}${window.location.pathname}${qs ? `?${qs}` : ''}`;
+    const href = `${window.location.origin}${where}${qs ? `?${qs}` : ''}`;
 
     let link = document.querySelector('link[rel="canonical"]');
     if (!link) {

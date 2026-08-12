@@ -40,6 +40,29 @@ SITE = "https://gulfrabit.com"
 # tool) cannot hit a NameError inside head().
 BUILD_THEME = "classic"
 
+# Every theme layer, in cascade order. THE ONE LIST.
+#
+# This was two lists: head() built the links for the 44 generated pages, and
+# index.html — the only page this tool does not assemble — carried its own
+# hand-typed copy. Adding a theme meant remembering both, and the failure mode
+# was silent and landed on the page most visitors actually see: the home page
+# would set data-theme="nakshi" on <html>, the conductor would build its whole
+# scene, and none of it had a stylesheet, so the home page rendered as Classic
+# while every other page in the shop wore the new theme.
+#
+# So there is one list now, head() reads it, and sync_index_theme() rewrites
+# index.html's block from it on every build. A theme added here cannot be
+# missing from the home page.
+THEME_SHEETS = [
+    "/modules/theme/theme-luxe.css",
+    "/modules/theme/theme-trio.css",
+    "/modules/theme/theme-noor.css",
+    "/modules/theme/theme-noor-sky.css",
+    "/modules/theme/theme-nakshi.css",
+    "/modules/theme/theme-nakshi-scene.css",
+    "/modules/theme/theme-utsab.css",
+]
+
 
 def asset(path):
     """Append a content hash to a local asset URL, so browsers refetch it when
@@ -64,6 +87,37 @@ def asset(path):
     return f"{path}?v={digest}"
 
 
+def _routes():
+    """target file -> readable route, read out of .htaccess.
+
+    The rewrite rules are the only place a route is declared, so the canonical
+    tags are derived from them rather than restated here. A rule that is
+    removed stops being published in the same build.
+    """
+    try:
+        conf = read(".htaccess")
+    except OSError:
+        return {}
+    table = {}
+    for pat, target in re.findall(
+            r"^\s*RewriteRule\s+\^([a-z0-9/-]+)/\?\$\s+(modules/\S+?\.html)\s+\[", conf, re.M):
+        table[target] = "/" + pat
+    return table
+
+
+ROUTES = _routes()
+
+
+def canonical_for(out):
+    """The one address a page should be indexed under.
+
+    Publishing the FILE path would compete with the route the whole site now
+    links to — the same page offered to a search engine twice, which is how a
+    shop's own pages end up ranking against each other.
+    """
+    return ROUTES.get(out, "/" + out.lstrip("/"))
+
+
 def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, canonical=None):
     """`luxe=False` for the admin panel — see scripts() for why the panel does
     not follow the storefront's theme. With no theme.js there to set the
@@ -86,13 +140,8 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, cano
         '       renders exactly as it did before this file existed. Linking it\n'
         '       conditionally would mean knowing the theme before the <head> is\n'
         '       written, and this HTML is built once and served to everyone. -->\n'
-        f'  <link rel="stylesheet" href="{asset("/modules/theme/theme-luxe.css")}">\n  '
-        f'<link rel="stylesheet" href="{asset("/modules/theme/theme-trio.css")}">\n  '
-        f'<link rel="stylesheet" href="{asset("/modules/theme/theme-noor.css")}">\n  '
-        f'<link rel="stylesheet" href="{asset("/modules/theme/theme-noor-sky.css")}">\n  '
-        f'<link rel="stylesheet" href="{asset("/modules/theme/theme-nakshi.css")}">\n  '
-        f'<link rel="stylesheet" href="{asset("/modules/theme/theme-nakshi-scene.css")}">\n  '
-        f'<link rel="stylesheet" href="{asset("/modules/theme/theme-utsab.css")}">\n  '
+        + "\n  ".join(f'  <link rel="stylesheet" href="{asset(s)}">' for s in THEME_SHEETS)
+        + "\n  "
     ) if luxe else ""
     # data-cms-page is what modules/cms keys its overrides on. Absent means the
     # page is not editable, which is the correct default for anything rendered
@@ -271,7 +320,7 @@ def assemble(out, title, desc, main_html, css_links=None, module_js=None, cms_pa
 
     page = head(title, desc, css_links or [],
                 cms_page=cms_page,
-                canonical=None if out in DYNAMIC_CANONICAL else out) + "\n"
+                canonical=None if out in DYNAMIC_CANONICAL else canonical_for(out)) + "\n"
     page += "  <!-- HEADER (inlined from shared/components/header.html) -->\n"
     page += HEADER + "\n\n"
     page += main_html.strip() + "\n\n"
@@ -702,14 +751,30 @@ def bundle_css():
 
 
 def sync_index_theme():
-    """Keep the hand-authored home page's theme in step with --theme.
+    """Keep the hand-authored home page's theming in step with the build.
 
-    index.html is not built from a fragment, so it is the one page the theme
-    flag would otherwise miss — and it is the page most visitors land on. A
-    shop whose home page is Classic and whose every other page is Luxe is not
-    a theme, it is a bug, so this is not optional polish.
+    index.html is not built from a fragment, so it is the one page every
+    theme-wide change would otherwise miss — and it is the page most visitors
+    land on. A shop whose home page is Classic and whose every other page is
+    Luxe is not a theme, it is a bug, so this is not optional polish.
 
-    Rewrites only the <html> tag's data-theme attribute, and is idempotent.
+    Two things are synced, and the second was the expensive one to learn:
+
+      the ATTRIBUTE  — <html data-theme>, so --theme reaches the home page.
+
+      the STYLESHEET LINKS — rewritten wholesale from THEME_SHEETS. They used
+      to be typed by hand here, which meant a new theme could be registered in
+      all six of its normal places, ship, and still be invisible on the home
+      page: the attribute was set, the conductor built its entire scene, and
+      not one rule existed to style any of it. The page rendered as Classic
+      and looked, convincingly, like nothing had been built at all.
+      Regenerating the block removes the possibility.
+
+    The links also gain the same ?v= content hash every other page's assets
+    carry. index.html had none, so the busiest page in the shop was the one
+    page that could serve a stale cached theme after a deploy.
+
+    Idempotent: running twice changes nothing.
     """
     path = os.path.join(ROOT, "index.html")
     with open(path, encoding="utf-8") as f:
@@ -719,10 +784,27 @@ def sync_index_theme():
     new = re.sub(r'(<html\b[^>]*?)(?:\s+data-theme="[^"]*")?(\s*>)',
                  lambda m: m.group(1) + want + m.group(2), html, count=1)
 
+    # index.html sits at the root, so its hrefs are relative with no "../".
+    block = "\n  ".join(
+        f'<link rel="stylesheet" href="{asset(s).lstrip("/")}">' for s in THEME_SHEETS
+    )
+    new, hits = re.subn(
+        r'(?:[ \t]*<link rel="stylesheet" href="modules/theme/theme-[^"]*">[ \t]*\r?\n)+',
+        "  " + block + "\n",
+        new,
+        count=1,
+    )
+    if not hits:
+        # Loud, because silence here is exactly the failure this function
+        # exists to prevent: the home page would keep whatever links it has
+        # and quietly diverge from every other page in the shop.
+        print("WARNING: index.html has no theme stylesheet block to sync — "
+              "the home page will not follow new themes")
+
     if new != html:
         with open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(new)
-        print(f"index.html: theme -> {BUILD_THEME}")
+        print(f"index.html: theme -> {BUILD_THEME}, {len(THEME_SHEETS)} theme sheets linked")
 
 
 if __name__ == "__main__":

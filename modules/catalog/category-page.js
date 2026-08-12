@@ -10,6 +10,7 @@ import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { renderProductSkeletons } from '../../shared/js/components/skeleton-loader.js';
 import { initFilters, matchesSpecFilters } from '../../shared/js/components/filters-sidebar.js';
 import { getParam, getParams, pathKey, setParams, setCanonical, setPageMeta } from '../../shared/js/core/router-helpers.js';
+import { categoryURL, siteURL } from '../../shared/js/core/paths.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 
 const PAGE_SIZE = 8;
@@ -44,7 +45,10 @@ async function init() {
   // ?slug= is what this page IS. Sort and filter params are not: "nuts, price
   // low to high" is the same shelf as "nuts" and must not compete with it in
   // a search result. utm_* goes for the same reason it does on a product.
-  setCanonical(slug ? ['slug'] : []);
+  // The slug lives in the path now, so nothing is kept from the query string.
+  // No slug is the whole catalogue, which is /shop — NOT /category/, which is
+  // not a route at all and would canonicalise Shop All onto a 404.
+  setCanonical([], slug ? categoryURL(slug) : siteURL('shop'));
   if (params.sort && sortSel) sortSel.value = params.sort;
 
   renderProductSkeletons(grid, PAGE_SIZE);
