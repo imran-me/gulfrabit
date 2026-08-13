@@ -226,8 +226,17 @@ html[data-theme="nakshi"] { background: var(--surface-page); }
   color: var(--alta);
 }
 
-/* The section rule under a heading is a stitched row, not a line. */
-[data-theme="nakshi"] .section-head::after {
+/* The section rule under a heading is a stitched row, not a line.
+ *
+ * It hangs off .section-head__titles, NOT .section-head. The outer element is
+ * `display: flex; justify-content: space-between` in _utilities.css, and it
+ * already holds two children — the titles and the trailing "View all →" link.
+ * A ::after on it becomes a THIRD flex item, which both fails to draw (a
+ * zero-height flex item is not a rule under anything) and shoves the "View
+ * all" link into the middle of every section header on the site. The titles
+ * block is a plain div, so its ::after is a block box directly under the
+ * heading, which is where the rule belongs. */
+[data-theme="nakshi"] .section-head__titles::after {
   content: "";
   display: block;
   height: 0;
@@ -245,8 +254,14 @@ html[data-theme="nakshi"] { background: var(--surface-page); }
    applied at a smaller scale, and repeating one idea at two scales is most of
    what makes a decorative system feel designed rather than assembled.
    ========================================================================= */
-[data-theme="nakshi"] .btn--primary { position: relative; }
-[data-theme="nakshi"] .btn--primary::after {
+/* The class names are this codebase's — btn-primary-gr, btn-outline-gr,
+   btn-ghost-gr. An earlier draft of this section invented .btn--primary,
+   .btn--ghost and .btn--outline, which exist nowhere in the repo, so the whole
+   section was dead CSS that looked correct in review. */
+[data-theme="nakshi"] .btn-primary-gr,
+[data-theme="nakshi"] .btn-gradient-gr { position: relative; }
+[data-theme="nakshi"] .btn-primary-gr::after,
+[data-theme="nakshi"] .btn-gradient-gr::after {
   content: "";
   position: absolute;
   inset: 3px;
@@ -254,8 +269,8 @@ html[data-theme="nakshi"] { background: var(--surface-page); }
   border: 1px dashed rgba(255, 253, 248, .5);
   border-radius: inherit;
 }
-[data-theme="nakshi"] .btn--ghost,
-[data-theme="nakshi"] .btn--outline {
+[data-theme="nakshi"] .btn-ghost-gr,
+[data-theme="nakshi"] .btn-outline-gr {
   border-style: dashed;
   border-width: 1.5px;
 }
@@ -298,10 +313,11 @@ html[data-theme="nakshi"] { background: var(--surface-page); }
    direction a needle moves, and then stop. It is the one place in this theme
    where the ornament admits it was made by hand.
 
-   This animates `background-position` on a stitched strip rather than
-   `stroke-dashoffset`, so it stays on the compositor like everything else.
+   It wipes the rule in with `clip-path: inset()`, which is the honest
+   description — an earlier comment here claimed it animated
+   `background-position` on a stitched strip, which it never did.
    ========================================================================= */
-[data-theme="nakshi"] [data-reveal].is-visible .section-head::after {
+[data-theme="nakshi"] [data-reveal].is-visible .section-head__titles::after {
   animation: nakshi-sew 900ms var(--ease-out, cubic-bezier(.16, .84, .44, 1)) both;
 }
 @keyframes nakshi-sew {
@@ -310,14 +326,33 @@ html[data-theme="nakshi"] { background: var(--surface-page); }
 }
 
 /* A card arriving lifts the way a quilted panel does when the thread pulls:
-   a small settle, not a slide. */
-[data-theme="nakshi"] [data-reveal].is-visible .product-card,
-[data-theme="nakshi"] [data-reveal].is-visible .category-card {
-  animation: nakshi-settle 620ms var(--ease-out, cubic-bezier(.16, .84, .44, 1)) both;
+   a small settle, not a slide.
+ *
+ * `[data-reveal]` sits ON the card in this markup — `class="product-card"
+ * data-reveal` — so this is a compound selector, not a descendant one. Written
+ * with a space it matched nothing and the animation never ran.
+ *
+ * And no `both`. Filling forwards would pin `transform: scale(1)` on the card
+ * permanently, which outranks the base sheet's hover lift and press for the
+ * rest of the page's life — the animation would have worked and quietly
+ * disabled every card's hover in exchange. `backwards` gets the pre-start
+ * state during any delay and hands the element back afterwards. */
+[data-theme="nakshi"] [data-reveal].is-visible.product-card,
+[data-theme="nakshi"] [data-reveal].is-visible.category-card {
+  animation: nakshi-settle 620ms var(--ease-out, cubic-bezier(.16, .84, .44, 1)) backwards;
 }
 @keyframes nakshi-settle {
   from { transform: scale(.988); opacity: .4; }
   to   { transform: scale(1); opacity: 1; }
+}
+
+/* The card border above is scoped `[data-theme] .product-card`, which is the
+   same specificity as the base sheet's `.product-card:hover` and loads after
+   it — so it silently won, and cards under Nakshi had no hover response at
+   all. Restated here in the theme's own dye. */
+[data-theme="nakshi"] .product-card:hover,
+[data-theme="nakshi"] .category-card:hover {
+  border-color: var(--alta);
 }
 
 /* =========================================================================
@@ -328,9 +363,9 @@ html[data-theme="nakshi"] { background: var(--surface-page); }
    away from the very people who asked only for the movement to stop.
    ========================================================================= */
 @media (prefers-reduced-motion: reduce) {
-  [data-theme="nakshi"] [data-reveal].is-visible .section-head::after,
-  [data-theme="nakshi"] [data-reveal].is-visible .product-card,
-  [data-theme="nakshi"] [data-reveal].is-visible .category-card { animation: none; }
+  [data-theme="nakshi"] [data-reveal].is-visible .section-head__titles::after,
+  [data-theme="nakshi"] [data-reveal].is-visible.product-card,
+  [data-theme="nakshi"] [data-reveal].is-visible.category-card { animation: none; }
 }
 
 /* Print: the cloth is not ink, but the stitching carries meaning at the

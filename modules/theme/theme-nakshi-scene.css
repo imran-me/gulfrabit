@@ -5,13 +5,17 @@
    theme-nakshi.css made the page a piece of cloth. This sews the scenes onto
    it: the Sundarbans along the bottom, the river through it, Dhaka on the
    skyline, and the animals that a nakshi kantha actually carries — the tiger,
-   the deer, the boat, the egret, the hilsa.
+   the deer, the boat, the egret.
+
+   Thirteen motifs in all: four permanent (the tree of life, the forest, the
+   river, the skyline) and nine that cross and leave (tiger, deer, boat,
+   egret, rickshaw, kite, shapla, jonaki, monsoon).
 
    THE ONE RULE, INHERITED
    -----------------------
    Everything here is SEWN. Every stroke carries a dash array, every fill is a
    flat dye, and nothing is shaded or gradient-lit. That is not a stylistic
-   preference — it is what makes fifteen unrelated folk motifs read as one
+   preference — it is what makes thirteen unrelated folk motifs read as one
    piece of cloth instead of as a sticker album. A single realistically shaded
    tiger would destroy the whole field.
 
@@ -26,9 +30,16 @@
 
    PERFORMANCE
    -----------
-   transform and opacity only, same as Noor. The permanent bands are single
-   repeating background images and never animate at all; the transient motifs
-   are composited layers the conductor deletes on animationend.
+   transform and opacity, with ONE deliberate exception: the river's two rows
+   scroll on `background-position-x`, which is a paint rather than a composite.
+   It is affordable because the element is a 7vh strip of a repeating 220px
+   tile with no content behind it, and the alternative — two oversized
+   translating layers — costs more memory than the repaint saves. Stating it
+   plainly because an earlier version of this header claimed the permanent
+   bands "never animate at all" while the river had run since it was written.
+
+   The forest, the skyline and the tree genuinely never animate. The transient
+   motifs are composited layers the conductor deletes on animationend.
    ========================================================================= */
 
 /* =========================================================================
@@ -173,8 +184,21 @@
   inset: 0;
   background: center / contain no-repeat;
 }
-/* One flip for everything that can travel either way. */
-[data-theme="nakshi"] .is-left::before { transform: scaleX(-1); }
+/* One flip for everything that can travel either way.
+ *
+ * It uses the standalone `scale` property, not `transform: scaleX(-1)`, and
+ * that is not a style choice. The tiger, the deer, the boat and the egret all
+ * run a gait animation on their ::before's `transform`, and an animation
+ * declaration outranks a normal author declaration in the cascade — so the
+ * flip was simply discarded on exactly the four motifs that needed it, and
+ * every "leftward" tiger walked backwards. `scale` is a separate property the
+ * animation never touches, and it composes into the same matrix.
+ *
+ * Safe here specifically because no gait animates a TRANSLATE: they are
+ * scaleY and rotate. Mirroring around x therefore flips the sprite and the
+ * direction its roll leans, which is what a mirrored animal should do, and
+ * cannot mirror a movement that does not exist. */
+[data-theme="nakshi"] .is-left::before { scale: -1 1; }
 
 /* -- the Royal Bengal tiger ----------------------------------------------- */
 /* It PROWLS, and prowling is a gait, not a speed: a cat stalking puts each
