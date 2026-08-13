@@ -15,8 +15,9 @@
  * the next event AND for how long to wait, every time, so the rhythm never
  * resolves. The gaps are deliberately wide; a busy sky is a screensaver.
  *
- * The weights live in BILL, below, and they are the whole design. Twenty-eight
- * events now, and they are NOT twenty-eight kinds of falling star: a satellite,
+ * The weights live in BILL, below, and they are the whole design: 27 events
+ * plus an empty beat, across 28 rows. They are NOT 27 kinds of falling star —
+ * a satellite,
  * a comet whose tail points away from the moon, a gull that soars and an owl
  * that beats and a bat that hunts, a moth spiralling into a light, a paper
  * lantern shrinking as it recedes, bakhoor smoke going turbulent, a fish on a
@@ -30,13 +31,13 @@
  * fast should the satellite go, which way does the comet's tail point, does
  * the bubble speed up or slow down — with an answer instead of a preference,
  * and answers agree with each other in a way preferences do not. It is also
- * the only reason twenty-eight simultaneous ideas read as one sky rather than
+ * the only reason twenty-seven simultaneous ideas read as one sky rather than
  * as a stock animation pack.
  *
- * The distribution stays lopsided. Roughly half of all rolls are still a
- * meteor or a firefly, because a sky needs a heartbeat you have stopped
- * noticing before anything can register as rare, and the four at the bottom
- * of BILL are meant to be missed by most visits.
+ * The distribution stays lopsided. Meteor and firefly together take 36% of
+ * desktop rolls and 42% of phone ones, because a sky needs a heartbeat you
+ * have stopped noticing before anything can register as rare, and the four
+ * rarest rows in BILL are meant to be missed by most visits.
  *
  * WHAT THIS FILE REFUSES TO DO
  * ----------------------------
@@ -135,10 +136,10 @@ const isNight = () => document.documentElement.getAttribute('data-theme') === 'n
  * because it is a slow ambient wash that only pays off at desk distance.
  *
  * The shape of this table IS the design, and it is deliberately lopsided.
- * Roughly half of all rolls are still a meteor or a firefly, because a sky
- * needs a heartbeat you stop noticing before the rare things can register as
- * rare. Everything below the fold happens once in a while, and the four at
- * the bottom happen once in a long while — a visitor who sees a comet
+ * Meteor and firefly take 36% of desktop rolls between them (42% on a phone),
+ * because a sky needs a heartbeat you stop noticing before the rare things can
+ * register as rare. Everything below the fold happens once in a while, and the
+ * four at the bottom happen once in a long while — a visitor who sees a comet
  * probably will not see another one, and that is the point.
  *
  * `nothing` earns its line. A beat where the sky does nothing is what stops
@@ -329,9 +330,9 @@ function firefly(small) {
 
 /**
  * The phoenix. Desktop only, and the rarest thing here — roughly one visit in
- * several will see one at all. It is also the only element that is skipped
- * when one is already in flight: two phoenixes is a parade, and a parade is
- * not rare.
+ * several will see one at all. Like the constellation and the glitter path it
+ * refuses to start while one is already in flight: two phoenixes is a parade,
+ * and a parade is not rare.
  */
 function phoenix() {
   if (document.querySelector('.noor-phoenix')) return;
@@ -768,10 +769,10 @@ function ripple(small, at) {
  * A fish, on a real parabola, with a nose that follows it — and a splash at
  * each end, because it broke the surface twice.
  *
- * The launch angle is computed rather than chosen. For y = 4h.t.(1-t) the
- * slope at t=0 is 4h/dx, and the arctangent of that is only meaningful once
- * both are in the SAME unit — which is why the height and the span are
- * converted to pixels before they meet.
+ * There is no launch-angle arithmetic here any more. The keyframe version
+ * needed one, because ten sampled keyframes had to be told what tilt to hold
+ * at each instant; the integrator reads the angle off the live velocity every
+ * step instead (`aim: true`), which is both exact and free.
  */
 function fish(small) {
   const f = el('div', 'noor-fish');
@@ -902,9 +903,11 @@ function glitter() {
 }
 
 /* ---- the stars answer --------------------------------------------------- */
-/* Three events with no element of their own: they reach into the stars
- * hangTheMoon already placed. They cost nothing, and they make the sky's
- * fixed points feel like objects rather than wallpaper. */
+/* Three events that work on the stars hangTheMoon already placed rather than
+ * on anything of their own. Two of them — the flare and the occultation —
+ * genuinely add no element at all; the constellation is the exception and
+ * creates one SVG for the lines. All three make the sky's fixed points feel
+ * like objects rather than wallpaper. */
 
 /** One star flares by several magnitudes and settles. Red dwarfs do this. */
 function nova() {
@@ -1047,7 +1050,13 @@ function once(node, cap = 4, delay = 0) {
   node.addEventListener('animationend', (e) => {
     if (e.target === node && !e.pseudoElement) done();
   });
-  setTimeout(done, 40000);
+  /* The backstop must outlast the LONGEST animation in the file, or it stops
+     being a safety net and becomes a bug. It was 40s while a cloud drifts for
+     42-70s and a fanous climbs for up to 40s — so most clouds were deleted at
+     full opacity in the middle of the screen, and the MAX_SKY note in this
+     file cited "a cloud at 52s" as a long-lived event that could not actually
+     exist. 90s clears every roll in BILL with room to spare. */
+  setTimeout(done, 90000);
 
   if (delay > 0) setTimeout(() => { if (isNight()) document.body.appendChild(node); }, delay * 1000);
   else document.body.appendChild(node);

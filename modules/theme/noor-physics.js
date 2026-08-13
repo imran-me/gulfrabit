@@ -42,8 +42,10 @@
  * ------------------------
  * One rAF loop, at most MAX_BODIES live, roughly twenty flops and one style
  * write each per step. It writes `transform` and `opacity` only — no layout
- * property, and it never READS layout, so it cannot force a synchronous
- * reflow. The loop does not exist when nothing is simulated: the last body to
+ * property. It does read `innerWidth`/`innerHeight` in the off-screen test,
+ * which are cached viewport metrics rather than element geometry and so do
+ * not force a reflow the way `offsetTop` or `getBoundingClientRect` would.
+ * The loop does not exist when nothing is simulated: the last body to
  * die cancels it. It stops on tab-hide, on reduced motion, and on leaving
  * Noor. A storefront must not pay for weather it is not showing.
  */
