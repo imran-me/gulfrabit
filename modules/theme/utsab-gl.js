@@ -37,12 +37,17 @@
  *                voronoi at 3 cells is a stained-glass window and at 40 is a
  *                crocodile skin.
  *
- * 24 x 12 x 5 x 4 = 5760 reachable states, and the axes are orthogonal by
- * construction: every field reads `u_scale`, every field colours through
- * `pal()`, every field takes its time from `flow()`. Adding one field adds
- * 240 states; adding one palette adds 480. That is what makes this a system
- * rather than a list, and it is why a new idea costs eight lines here instead
- * of a new file.
+ * The naive product is 24 x 12 x 5 x 4 = 5760, but motions are CURATED per
+ * field rather than universal — only 73 of the 120 field-motion pairings are
+ * allowed — so the real figure is 73 x 12 x 4 = 3504, which is what the
+ * exported STATE_COUNT computes. Quoting 5760 would be counting states the
+ * conductor refuses to roll.
+ *
+ * The axes are orthogonal by construction: every field reads `u_scale`, every
+ * field colours through `pal()`, every field takes its time from the shaped
+ * clock. Adding one field adds 48 states per motion it accepts; adding one
+ * palette adds 292. That is what makes this a system rather than a list, and
+ * why a new idea costs eight lines here instead of a new file.
  *
  * The conductor does not roll uniformly across that space. Some pairings are
  * ugly — a still motion on a field that is only interesting when it moves —
@@ -63,8 +68,21 @@
 
 /* ---- the shared GLSL ---------------------------------------------------- */
 
+/**
+ * The attribute location is DECLARED, not assumed.
+ *
+ * `in vec2 a;` with no layout qualifier gets an implementation-assigned
+ * location. The setup code hardcodes 0 in enableVertexAttribArray and
+ * vertexAttribPointer, and it runs before any program exists, so the location
+ * could not have been queried even in principle. It is 0 on every driver
+ * anyone tests on, which is exactly what makes it the worst kind of bug:
+ * correct until it silently is not, on someone else's GPU, with a blank
+ * background and no error. `layout(location = 0)` makes it a fact.
+ */
+const ATTR = 0;
+
 const VERT = `#version 300 es
-in vec2 a;
+layout(location = ${ATTR}) in vec2 a;
 void main() { gl_Position = vec4(a, 0.0, 1.0); }`;
 
 /**
@@ -149,6 +167,13 @@ float vor(vec2 p, out vec2 cell) {
 /**
  * THE FIELDS.
  *
+ * A NOTE ON smoothstep. Every call here runs edge0 < edge1, and a descending
+ * ramp is written `1.0 - smoothstep(lo, hi, x)` rather than by swapping the
+ * edges. GLSL ES declares smoothstep undefined when edge0 >= edge1; every
+ * real driver evaluates the same clamp and produces the reversed ramp anyway,
+ * which is why the idiom is everywhere, but "works on every GPU I own" is not
+ * a guarantee a storefront should ship on.
+ *
  * Each is the body of `vec3 field(vec2 p)`, where p is centred and
  * aspect-corrected so that (0,0) is the middle of the screen at every window
  * shape — the same discipline as the vw/vh rule in Noor's sky, for the same
@@ -222,7 +247,7 @@ const FIELDS = [
       float lane = floor(a / 6.28318 * u_scale * 6.0 + fi * 7.0);
       float seed = hash11(lane * 13.7 + fi * 31.0);
       float d = fract(seed + u_t * (0.12 + seed * 0.2) + r * 0.5);
-      col += pal(seed) * smoothstep(0.4, 0.0, abs(d - r * 0.9)) * 0.5;
+      col += pal(seed) * (1.0 - smoothstep(0.0, 0.4, abs(d - r * 0.9))) * 0.5;
     }
     return col;` },
 
@@ -245,11 +270,20 @@ const FIELDS = [
 
   { name: 'contour', motions: [0, 1, 4], src: `
     float h = fbm(p * u_scale + u_t * 0.04);
-    /* fwidth keeps the line one pixel wide wherever the terrain is steep;
-       without it the contours vanish on flats and blob on cliffs. */
+    /* d is 0 at the middle of a level and 1 at its boundary, so the LINE is
+       where d is high. The first version tested the same quantity and then
+       inverted the mix, which filled the middle half of every level with the
+       bright colour instead of drawing a line at its edge — a banded blob
+       rather than a contour map.
+       fwidth keeps the line one pixel wide wherever the terrain is steep, and
+       the constant floor keeps the two smoothstep edges apart: fwidth is
+       exactly 0 across a flat region, and smoothstep with edge0 == edge1 is
+       undefined by the spec. */
     float band = fract(h * 12.0);
-    float line = smoothstep(0.5 - fwidth(h) * 14.0, 0.5, abs(band - 0.5) * 2.0);
-    return mix(pal(h), pal(h + 0.14) * 1.5, 1.0 - line);` },
+    float d = abs(band - 0.5) * 2.0;
+    float w = fwidth(h) * 12.0 + 0.03;
+    float line = smoothstep(1.0 - w, 1.0, d);
+    return mix(pal(h), pal(h + 0.14) * 1.6, line);` },
 
   { name: 'kaleido', motions: [0, 2, 3], src: `
     float a = atan(p.y, p.x), r = length(p);
@@ -275,7 +309,7 @@ const FIELDS = [
     vec2 f = q - vec2(i.x, i.y + mod(i.x, 2.0) * 0.5) - 0.5;
     float d = max(abs(f.x) * 0.866 + abs(f.y) * 0.5, abs(f.y));
     float beat = 0.5 + 0.5 * sin(u_t * 1.4 - hash21(i) * 6.28);
-    return pal(hash21(i) * 0.6 + beat * 0.25) * (0.3 + beat * smoothstep(0.5, 0.2, d));` },
+    return pal(hash21(i) * 0.6 + beat * 0.25) * (0.3 + beat * (1.0 - smoothstep(0.2, 0.5, d)));` },
 
   { name: 'aurora', motions: [0, 2, 3], src: `
     float acc = 0.0;
@@ -285,7 +319,7 @@ const FIELDS = [
       float band = sin(x + u_t * (0.3 + fi * 0.12) + fbm(vec2(x * 0.5, u_t * 0.1)) * 2.4);
       /* Vertical falloff only: auroral rays follow field lines, so the
          structure is columnar and never horizontal. */
-      acc += smoothstep(0.55, 0.0, abs(p.y - band * 0.22 - 0.1 * fi)) * (0.5 - fi * 0.12);
+      acc += (1.0 - smoothstep(0.0, 0.55, abs(p.y - band * 0.22 - 0.1 * fi))) * (0.5 - fi * 0.12);
     }
     return pal(acc * 1.1 + 0.15) * acc * 1.6;` },
 
@@ -301,16 +335,22 @@ const FIELDS = [
       q = abs(q) / dot(q, q) - vec2(0.72 + sin(u_t * 0.14) * 0.06, 0.55);
       d = min(d, length(q));
     }
-    return pal(d * 2.4 + u_t * 0.02) * (0.4 + smoothstep(0.6, 0.0, d) * 1.3);` },
+    return pal(d * 2.4 + u_t * 0.02) * (0.4 + (1.0 - smoothstep(0.0, 0.6, d)) * 1.3);` },
 
   { name: 'flock', motions: [0, 2, 3], src: `
+    /* The boids live in SCREEN space, not in u_scale space. Scaling the
+       sample point by the density while leaving the flock in +-1 units meant
+       that at the two higher densities the whole flock collapsed into a speck
+       at the centre and the field rendered essentially black. Density now
+       controls how tight each boid's glow is, which is what it should have
+       been doing: more density, smaller points, same spread. */
     vec3 col = vec3(0.0);
-    vec2 q = p * u_scale * 0.6;
+    float tight = 0.055 / u_scale;
     for (int i = 0; i < 14; i++) {
       float fi = float(i);
-      vec2 c = vec2(sin(u_t * 0.3 + fi * 1.7) , cos(u_t * 0.24 + fi * 2.3));
+      vec2 c = vec2(sin(u_t * 0.3 + fi * 1.7), cos(u_t * 0.24 + fi * 2.3)) * 0.85;
       c += curl(c * 0.8 + u_t * 0.05) * 0.4;
-      col += pal(hash11(fi)) * 0.016 / max(0.006, length(q - c * 1.2));
+      col += pal(hash11(fi)) * tight / max(0.004, length(p - c));
     }
     return col;` },
 
@@ -320,7 +360,7 @@ const FIELDS = [
     if (hash21(i + floor(u_t * 0.25)) > 0.5) f.x = -f.x;
     float d = abs(length(f - 0.5) - 0.5);
     d = min(d, abs(length(f + 0.5) - 0.5));
-    float line = smoothstep(0.14, 0.02, d);
+    float line = (1.0 - smoothstep(0.02, 0.14, d));
     return mix(pal(hash21(i) * 0.4), pal(0.7 + hash21(i) * 0.3) * 1.4, line);` },
 
   { name: 'galaxy', motions: [0, 2, 3], src: `
@@ -347,7 +387,7 @@ const FIELDS = [
     float a = fbm(p * u_scale + u_t * 0.05);
     float b = fbm(p * u_scale * 1.07 - u_t * 0.04 + 11.3);
     float m = smoothstep(0.46, 0.52, a - b + 0.5);
-    float edge = smoothstep(0.02, 0.0, abs(a - b));
+    float edge = (1.0 - smoothstep(0.0, 0.02, abs(a - b)));
     return mix(pal(0.1), pal(0.72), m) * (0.6 + edge * 1.2);` },
 
   { name: 'glassrain', motions: [0, 1], src: `
@@ -356,7 +396,7 @@ const FIELDS = [
     float drift = hash21(i) * 6.28;
     f.y += sin(u_raw * (0.6 + hash21(i + 5.0)) + drift) * 0.22;
     float d = length(f * vec2(1.0, 0.7));
-    float drop = smoothstep(0.34, 0.06, d);
+    float drop = (1.0 - smoothstep(0.06, 0.34, d));
     vec2 refr = p + f * drop * 0.28;
     return pal(fbm(refr * u_scale * 0.5 + u_t * 0.02)) * (0.55 + drop * 0.8);` },
 
@@ -366,7 +406,7 @@ const FIELDS = [
     float sym = cos(a * n + u_t * 0.3);
     float rings = sin(r * u_scale * 5.0 - u_t * 0.7);
     float petal = smoothstep(0.1, 0.9, sym * rings);
-    return pal(r * 0.7 + petal * 0.25 + u_t * 0.01) * (0.4 + petal * 1.1) * smoothstep(1.5, 0.1, r);` },
+    return pal(r * 0.7 + petal * 0.25 + u_t * 0.01) * (0.4 + petal * 1.1) * (1.0 - smoothstep(0.1, 1.5, r));` },
 ];
 
 /**
@@ -510,6 +550,26 @@ function link(vsrc, fsrc) {
   return p;
 }
 
+/**
+ * The one triangle every field is drawn on, and the VAO that describes it.
+ *
+ * A single oversized triangle rather than two making a quad: fewer vertices,
+ * and no diagonal seam down the middle where a quad's two triangles meet.
+ *
+ * Called at start AND on context restore, because a lost context destroys
+ * every GPU object — buffers and vertex arrays included, not just programs.
+ */
+function buildGeometry() {
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+
+  const vao = gl.createVertexArray();
+  gl.bindVertexArray(vao);
+  gl.enableVertexAttribArray(ATTR);
+  gl.vertexAttribPointer(ATTR, 2, gl.FLOAT, false, 0, 0);
+}
+
 function resize() {
   const w = Math.max(1, Math.round(window.innerWidth * RES_SCALE));
   const h = Math.max(1, Math.round(window.innerHeight * RES_SCALE));
@@ -583,21 +643,17 @@ export function startUtsab() {
     depth: false,
     stencil: false,
     powerPreference: 'low-power',
-    // Without this a lost context silently leaves a black rectangle over the
-    // shop; with it the browser is free to give us a fresh one.
+    /* Refuse a context the browser would have to rasterise in software. This
+       has nothing to do with context loss, which an earlier comment here
+       claimed: it makes getContext() return null on a blocklisted GPU or a
+       software fallback, and startUtsab() then returns false so the caller
+       leaves the CSS gradient in place. A shader background rendered on the
+       CPU would cost more than the whole rest of the page. */
     failIfMajorPerformanceCaveat: true,
   });
   if (!gl) { canvas = null; return false; }
 
-  // One triangle rather than two, covering the viewport. Fewer vertices, and
-  // no diagonal seam where the two triangles of a quad meet.
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  const vao = gl.createVertexArray();
-  gl.bindVertexArray(vao);
-  gl.enableVertexAttribArray(0);
-  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+  buildGeometry();
 
   current = rollState();
   startedAt = performance.now();
@@ -614,8 +670,17 @@ export function startUtsab() {
     raf = 0;
   });
   canvas.addEventListener('webglcontextrestored', () => {
-    programs.clear();               // every program died with the context
-    if (alive && !raf) raf = requestAnimationFrame(frame);
+    /* EVERY GPU object died with the context, not just the programs. The
+       first version cleared the program cache and nothing else, so the buffer,
+       the VAO and the attribute pointer were all gone while the code carried
+       on issuing draws against them — and drawArrays with no bound geometry
+       draws nothing. The canvas stayed an opaque full-screen black rectangle
+       over the shop for the rest of the session, and the loop kept running at
+       36fps to keep it there. Rebuilding the geometry is the whole fix, and
+       it is why that setup is a function rather than inline. */
+    programs.clear();
+    buildGeometry();
+    if (alive && !raf) { lastDraw = 0; raf = requestAnimationFrame(frame); }
   });
 
   document.addEventListener('visibilitychange', () => {
