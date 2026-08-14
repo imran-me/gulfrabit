@@ -40,6 +40,7 @@ NOINDEX = {
     "modules/checkout/express.html":        "ad landing page — reached from paid links only",
     "modules/admin/index.html":             "staff panel — noindex, and disallowed in robots.txt",
     "modules/admin/login.html":             "staff sign-in — never a search result",
+    "modules/admin/slip.html":              "staff panel — a printable order document",
     "modules/admin/orders.html":            "staff panel",
     "modules/admin/order.html":             "staff panel",
     "modules/admin/customers.html":         "staff panel — customer PII",

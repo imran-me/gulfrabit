@@ -520,6 +520,14 @@ ADMIN_PAGES = [
      ["/modules/admin/admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/accounting/journal-page.js"], True),
 
+    # chrome=False: the sidebar has no business on a page whose only job is to
+    # become a sheet of paper, and printing it would waste the left third of
+    # every slip.
+    ("modules/admin/slip.html", "Packing slip — GulfRabit Admin",
+     "modules/admin/_fragments/slip.main.html",
+     ["/modules/admin/admin.css", "/modules/admin/slip.css"],
+     ["/modules/admin/admin-shell.js", "/modules/admin/slip-page.js"], False),
+
     ("modules/admin/login.html", "Staff sign-in — GulfRabit Admin",
      "modules/admin/_fragments/login.main.html",
      ["/modules/admin/admin.css"],

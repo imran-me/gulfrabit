@@ -11,7 +11,7 @@ import { registerScreen } from '../admin/admin-shell.js';
 registerScreen({
   id: 'hero',
   label: 'Hero banners',
-  href: '/modules/hero/hero.html',
+  href: '/admin/hero',
   // `content` — arranging banners is merchandising, the same capability that
   // edits page copy. Deliberately not one that reaches money or customers.
   area: 'content',

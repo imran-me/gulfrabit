@@ -1,0 +1,126 @@
+/* ============================================================
+   modules/admin — the packing slip.
+
+   PAPER FIRST. Every other stylesheet here is designed for a
+   screen somebody sits in front of; this one is designed for a
+   sheet that gets taped to a box, read by a rider on a doorstep
+   in poor light, and thrown away. Screen styling exists only so
+   the preview looks like the paper.
+
+   Printed on a cheap laser or an inkjet running low, so: black
+   on white, no large filled areas, no colour carrying meaning.
+   The one boxed figure is bordered rather than filled for the
+   same reason — a solid black block eats toner and prints grey
+   and streaky on exactly the printers a small shop owns.
+   ============================================================ */
+
+.slip-bar {
+  display: flex; flex-wrap: wrap; gap: var(--space-4);
+  align-items: center; justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-5);
+}
+.slip-bar__hint { display: block; color: var(--text-muted); font-size: var(--fs-12); margin-top: 2px; }
+.slip-bar__actions { display: flex; gap: var(--space-2); }
+
+.slip {
+  background: #fff;
+  color: #000;
+  /* A5 is the sheet most BD shops print two-up on A4, and the whole layout is
+     sized so it stays legible when it is halved. */
+  max-width: 148mm;
+  margin: 0 auto var(--space-5);
+  padding: 12mm 10mm;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 11pt;
+  line-height: 1.4;
+}
+
+.slip__head {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 8mm;
+  padding-bottom: 3mm; border-bottom: 1.5pt solid #000;
+}
+.slip__brand strong { display: block; font-family: var(--font-display); font-size: 17pt; line-height: 1.1; }
+.slip__brand span { font-size: 8pt; letter-spacing: .04em; }
+.slip__ref { text-align: right; }
+.slip__ref strong { display: block; font-size: 12pt; font-variant-numeric: tabular-nums; }
+.slip__ref span { font-size: 8pt; }
+
+.slip__to { margin: 5mm 0; }
+.slip__to h2 {
+  font-size: 7.5pt; letter-spacing: .16em; text-transform: uppercase;
+  margin: 0 0 1.5mm; font-weight: 700;
+}
+.slip__to p { margin: 0 0 .8mm; }
+/* The two lines a rider needs from three feet away. */
+.slip__name { font-size: 13pt; font-weight: 700; }
+.slip__phone { font-size: 13pt; font-weight: 700; font-variant-numeric: tabular-nums; }
+.slip__note { margin-top: 2mm; font-size: 9pt; font-style: italic; }
+
+.slip__items { width: 100%; border-collapse: collapse; margin: 4mm 0; font-size: 10pt; }
+.slip__items th {
+  text-align: left; font-size: 7.5pt; letter-spacing: .1em; text-transform: uppercase;
+  border-bottom: 1pt solid #000; padding: 1.5mm 0;
+}
+.slip__items td { padding: 1.5mm 0; border-bottom: .5pt solid #bbb; vertical-align: top; }
+.slip__items th:last-child, .slip__items td:last-child,
+.slip__items th:nth-child(2), .slip__items td:nth-child(2) { text-align: right; }
+.slip__n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.slip__variant { font-size: 8.5pt; color: #444; }
+.slip__items tfoot td { border-bottom: 0; padding: 1mm 0; }
+.slip__items tfoot tr:first-child td { padding-top: 2.5mm; }
+.slip__total td { font-weight: 700; font-size: 11.5pt; border-top: 1pt solid #000 !important; padding-top: 2mm !important; }
+
+/* The only figure on the sheet that costs money if it is misread. Bordered,
+   never filled — see the note at the top about toner. */
+.slip__collect {
+  margin: 4mm 0 0;
+  padding: 3.5mm 4mm;
+  border: 2.5pt solid #000;
+  text-align: center;
+}
+.slip__collect strong { display: block; font-size: 16pt; line-height: 1.15; letter-spacing: .01em; }
+.slip__collect span { display: block; font-size: 8.5pt; margin-top: 1mm; }
+/* A prepaid parcel is the case where a rider collecting "the usual" is a real
+   loss, so it is stated at the same size as an amount would be. */
+.slip__collect.is-paid { border-style: double; border-width: 4pt; }
+
+.slip__foot {
+  display: flex; justify-content: space-between; gap: 4mm;
+  margin-top: 5mm; padding-top: 2mm; border-top: .5pt solid #999;
+  font-size: 7.5pt;
+}
+
+.slip--broken { border: 1pt dashed #999; }
+.slip--broken h2 { font-size: 12pt; margin: 0 0 2mm; }
+
+/* ---- Paper ------------------------------------------------------------ */
+@media print {
+  /* The panel's chrome, the toolbar and anything else that is screen-only.
+     :has() is not needed — the print view is its own page and carries only
+     what is below. */
+  .slip-bar, .aerror { display: none !important; }
+
+  html, body { background: #fff; }
+  .admin__main { padding: 0 !important; background: #fff !important; }
+
+  @page { size: A4; margin: 8mm; }
+
+  .slip {
+    max-width: none;
+    margin: 0;
+    padding: 6mm 4mm;
+    border: 0;
+    border-radius: 0;
+    /* One order per sheet. A slip split across two pages is a slip whose
+       address and whose amount are on different pieces of paper. */
+    break-inside: avoid;
+    break-after: page;
+  }
+  .slip:last-child { break-after: auto; }
+}

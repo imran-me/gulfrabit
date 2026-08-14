@@ -255,15 +255,27 @@ async function submitRefund(e) {
 
 function paintActions() {
   const host = document.querySelector('[data-order-actions]');
+
+  // The slip comes first and is drawn whatever stage the order is in —
+  // including the terminal ones, which used to return early from here. A
+  // reprint is wanted most often for an order that has already shipped, so
+  // hiding the button on exactly those orders had it backwards.
+  const slip = `
+    <a class="btn-gr btn-outline-gr btn-sm-gr"
+       href="/admin/slip?no=${encodeURIComponent(order.orderNumber)}" target="_blank" rel="noopener">
+      Print slip
+    </a>`;
+
   if (!order.allowedTransitions.length) {
-    host.innerHTML = `<span class="admin__sub">No further changes possible from ${escapeHtml(order.status)}.</span>`;
+    host.innerHTML = slip
+      + `<span class="admin__sub">No further changes possible from ${escapeHtml(stageLabel(order.status))}.</span>`;
     return;
   }
 
   // The ending moves get the quieter button. Both are one click away, but the
   // one that carries the order forward is the one the eye lands on — which is
   // the right default a hundred times a day.
-  host.innerHTML = order.allowedTransitions.map((to) => `
+  host.innerHTML = slip + order.allowedTransitions.map((to) => `
     <button class="btn-gr ${NEEDS_REASON.includes(to) ? 'btn-outline-gr' : 'btn-primary-gr'} btn-sm-gr"
             type="button" data-transition="${escapeHtml(to)}">
       ${escapeHtml(TRANSITION_LABELS[to] || to)}

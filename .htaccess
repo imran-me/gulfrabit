@@ -112,6 +112,11 @@
     RewriteRule ^admin/media/?$ modules/media/library.html [L,QSA]
     RewriteRule ^admin/appearance/?$ modules/theme/appearance.html [L,QSA]
     RewriteRule ^admin/home/?$ modules/highlights/highlights.html [L,QSA]
+    RewriteRule ^admin/hero/?$ modules/hero/hero.html [L,QSA]
+    # The printable order document. QSA matters more here than anywhere else in
+    # this block: the whole page is driven by ?no= — and by a comma-separated
+    # list of them when a batch is printed from the orders list.
+    RewriteRule ^admin/slip/?$ modules/admin/slip.html [L,QSA]
     RewriteRule ^admin/quotes/?$ modules/b2b/quotes.html [L,QSA]
     RewriteRule ^admin/pnl/?$ modules/accounting/pnl.html [L,QSA]
     RewriteRule ^admin/journal/?$ modules/accounting/journal.html [L,QSA]
