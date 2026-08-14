@@ -62,6 +62,27 @@ class AdminQuoteController extends Controller
                 'email'       => $q->contact_email,
                 'status'      => $q->status,
                 'lines'       => $q->items->count(),
+
+                // The actual request, not just how many lines it has.
+                //
+                // This screen used to send the COUNT alone, so the B2B desk
+                // could mark a request "Quote sent" without ever being able to
+                // see what had been asked for. The workflow was complete and
+                // the information needed to do the work was missing.
+                //
+                // Free: `with('items')` above already loaded them, so this adds
+                // no query — the rows were being fetched and then thrown away.
+                'items' => $q->items->map(fn ($i): array => [
+                    'sku'   => $i->sku,
+                    'title' => $i->title,
+                    'qty'   => $i->qty,
+                    // What the storefront quoted as a guide when they asked.
+                    // Named "indicative" everywhere, including on screen: the
+                    // desk's whole job is to replace it with a real price, and
+                    // a column headed "price" invites somebody to treat it as
+                    // one already agreed.
+                    'indicativeUnitTaka' => intdiv((int) $i->indicative_unit_poisha, 100),
+                ])->all(),
                 'indicativeTaka' => intdiv((int) $q->indicative_total_poisha, 100),
                 'notes'       => $q->notes,
                 'receivedAt'  => $q->created_at?->toIso8601String(),

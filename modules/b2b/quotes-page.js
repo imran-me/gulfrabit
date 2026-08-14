@@ -68,18 +68,78 @@ function paint({ data, meta }) {
         ${escapeHtml(q.contactName)}
         <div class="atable__sub">${escapeHtml(q.phone)}</div>
       </td>
-      <td class="atable__num">${q.lines}</td>
+      <td class="atable__num">
+        ${q.lines
+          ? `<button class="alink-btn" type="button" data-lines="${escapeHtml(q.reference)}"
+                     aria-expanded="false">${q.lines}</button>`
+          : '0'}
+      </td>
       <td class="atable__num">৳ ${Number(q.indicativeTaka).toLocaleString('en-BD')}</td>
       <td>${waiting(q)}</td>
       <td>${(NEXT[q.status] || []).map(([to, label]) => `
         <button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
                 data-move="${escapeHtml(q.reference)}" data-to="${to}">${escapeHtml(label)}</button>`).join(' ')
         || '<span class="atable__sub">—</span>'}</td>
-    </tr>`).join('');
+    </tr>
+    ${lineRow(q)}`).join('');
 
   body.querySelectorAll('[data-move]').forEach((btn) => {
     btn.addEventListener('click', () => move(btn.dataset.move, btn.dataset.to, btn));
   });
+
+  body.querySelectorAll('[data-lines]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const row = body.querySelector(`[data-lines-for="${CSS.escape(btn.dataset.lines)}"]`);
+      if (!row) return;
+      row.hidden = !row.hidden;
+      btn.setAttribute('aria-expanded', String(!row.hidden));
+    });
+  });
+}
+
+/**
+ * What the customer actually asked for, one row down.
+ *
+ * Inline rather than on its own page: the desk works this list top to bottom
+ * against a phone, and losing the queue to read one request means finding your
+ * place again afterwards. Collapsed by default so the inbox still reads as an
+ * inbox.
+ *
+ * The unit figure is labelled "indicative" here exactly as it is on the
+ * storefront. It is what the site quoted as a guide, not a price anybody has
+ * agreed — and replacing it with a real one is the entire job of this desk.
+ */
+function lineRow(q) {
+  if (!q.items?.length) return '';
+
+  return `
+    <tr class="aquote-lines" data-lines-for="${escapeHtml(q.reference)}" hidden>
+      <td colspan="7">
+        <table class="atable atable--tight">
+          <thead>
+            <tr>
+              <th scope="col">Product</th>
+              <th scope="col">SKU</th>
+              <th scope="col">Qty</th>
+              <th scope="col">Indicative unit</th>
+              <th scope="col">Indicative line</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${q.items.map((i) => `
+              <tr>
+                <td>${escapeHtml(i.title)}</td>
+                <td class="atable__sub">${escapeHtml(i.sku || '—')}</td>
+                <td class="atable__num">${i.qty}</td>
+                <td class="atable__num">৳ ${Number(i.indicativeUnitTaka).toLocaleString('en-BD')}</td>
+                <td class="atable__num">৳ ${Number(i.indicativeUnitTaka * i.qty).toLocaleString('en-BD')}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+        ${q.notes ? `<p class="admin__sub" style="margin:var(--space-3) 0 0"><strong>Their note:</strong> ${escapeHtml(q.notes)}</p>` : ''}
+        ${q.email ? `<p class="admin__sub" style="margin:var(--space-2) 0 0">Reply to <a href="mailto:${escapeHtml(q.email)}">${escapeHtml(q.email)}</a></p>` : ''}
+      </td>
+    </tr>`;
 }
 
 /**

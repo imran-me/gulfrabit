@@ -458,6 +458,22 @@
 
 .atemplates { display: flex; flex-wrap: wrap; gap: var(--space-2); flex: 1 1 100%; }
 
+/* A number in a table that opens something. Styled as a link rather than a
+   button because that is what it behaves like, but it stays a <button> in the
+   markup — it toggles a panel, it does not navigate, and a screen reader
+   should not be told otherwise. */
+.alink-btn {
+  background: none; border: 0; padding: 0;
+  font: inherit; font-variant-numeric: tabular-nums;
+  color: var(--gr-cyan-dark); text-decoration: underline; cursor: pointer;
+}
+.alink-btn:hover { color: var(--text-primary); }
+.alink-btn:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; border-radius: 2px; }
+
+/* An expanded detail row inside a list. Sunken so it reads as belonging to the
+   row above rather than as another entry in the list. */
+.aquote-lines > td { background: var(--surface-sunken); padding: var(--space-4) !important; }
+
 /* A dashboard card that opens the work it is counting. Only cards with
    something waiting become links — see CARD_LINKS in dashboard-page.js. */
 .acard--link {
