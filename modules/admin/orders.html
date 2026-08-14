@@ -82,7 +82,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=ffd95ef0">
-  <link rel="stylesheet" href="../../modules/admin/admin.css?v=d0e9052c">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=7b5151a8">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -156,10 +156,21 @@
         </div>
       </form>
 
+      <!-- Appears only with a selection. A permanently visible bar of actions
+           that do nothing yet is a bar people learn to ignore. -->
+      <div class="abulk" data-orders-bulk hidden>
+        <strong data-bulk-count></strong>
+        <div class="abulk__actions" data-bulk-actions></div>
+        <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-bulk-clear>Clear selection</button>
+      </div>
+
       <div class="atable-wrap">
         <table class="atable">
           <thead>
             <tr>
+              <th scope="col" class="atable__pick">
+                <input type="checkbox" data-select-all aria-label="Select every order on this page">
+              </th>
               <th scope="col">Order</th>
               <th scope="col">Customer</th>
               <th scope="col">District</th>
@@ -174,7 +185,7 @@
             </tr>
           </thead>
           <tbody data-orders-body>
-            <tr><td colspan="9" class="atable__empty">Loading orders…</td></tr>
+            <tr><td colspan="10" class="atable__empty">Loading orders…</td></tr>
           </tbody>
         </table>
       </div>
@@ -199,6 +210,6 @@
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=73f64c7d"></script>
-  <script type="module" src="../../modules/admin/orders-page.js?v=3bae0155"></script>
+  <script type="module" src="../../modules/admin/orders-page.js?v=88249ee6"></script>
 </body>
 </html>

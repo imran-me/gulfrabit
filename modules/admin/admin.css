@@ -458,6 +458,26 @@
 
 .atemplates { display: flex; flex-wrap: wrap; gap: var(--space-2); flex: 1 1 100%; }
 
+/* ---- Bulk selection ---------------------------------------------------
+   The bar is hidden until something is ticked. A permanently visible row of
+   actions that do nothing yet teaches people to look past it, which is the
+   opposite of what a bar full of destructive-ish verbs should do. */
+.abulk {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-raised);
+  border: 1px solid var(--gr-border);
+  border-left: 3px solid var(--gr-gold-accent);
+  border-radius: var(--radius-sm);
+}
+.abulk__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); flex: 1 1 auto; }
+
+/* Narrow, and the checkbox centred in it — a tick column that drifts left of
+   its header reads as a rendering fault on every row of a long list. */
+.atable__pick { width: 2.4rem; text-align: center; }
+.atable__pick input { width: 16px; height: 16px; cursor: pointer; accent-color: var(--gr-cyan-dark); }
+
 /* ---- Hero preview -----------------------------------------------------
    A working copy of the storefront carousel, small enough to sit above the
    controls that drive it.

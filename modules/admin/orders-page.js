@@ -24,6 +24,13 @@ import { STAGES, TRANSITION_LABELS, NEEDS_REASON, stageLabel, stageTone } from '
 const FILTER_KEYS = ['q', 'status', 'paymentStatus', 'from', 'to'];
 let page = 1;
 
+/* The current page's rows, and which of them are ticked. Selection is cleared
+   whenever the list reloads: after a bulk move the rows underneath are no
+   longer the rows that were chosen, and a selection that survives that is a
+   selection that acts on orders somebody did not mean to touch. */
+let rows = [];
+const selected = new Set();
+
 document.addEventListener('admin:ready', init);
 
 function init() {
@@ -66,6 +73,29 @@ function init() {
   document.querySelector('[data-orders-body]')?.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-move]');
     if (btn) move(btn);
+  });
+
+  document.querySelector('[data-orders-body]')?.addEventListener('change', (e) => {
+    const box = e.target.closest('[data-pick]');
+    if (!box) return;
+    if (box.checked) selected.add(box.dataset.pick);
+    else selected.delete(box.dataset.pick);
+    paintBulk();
+  });
+
+  document.querySelector('[data-select-all]')?.addEventListener('change', (e) => {
+    rows.forEach((o) => e.target.checked ? selected.add(o.orderNumber) : selected.delete(o.orderNumber));
+    document.querySelectorAll('[data-pick]').forEach((b) => { b.checked = e.target.checked; });
+    paintBulk();
+  });
+
+  document.querySelector('[data-bulk-clear]')?.addEventListener('click', clearSelection);
+
+  document.querySelector('[data-bulk-actions]')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-bulk]');
+    if (!btn) return;
+    if (btn.dataset.bulk === 'print') return printSlips();
+    bulkMove(btn.dataset.bulk, btn);
   });
 
   load();
@@ -114,19 +144,24 @@ async function load() {
   const body = document.querySelector('[data-orders-body]');
   const filters = currentFilters();
 
+  // Any reload — a filter, a page, a finished bulk move — replaces the rows
+  // underneath, so a selection made against the old ones is meaningless and
+  // dangerous to keep.
+  clearSelection();
+
   // Mirror to the URL before fetching, so the address bar is right even if the
   // request is slow or fails.
   const qs = new URLSearchParams(filters);
   if (page > 1) qs.set('page', String(page));
   history.replaceState(null, '', qs.toString() ? `?${qs}` : location.pathname);
 
-  body.innerHTML = `<tr><td colspan="9" class="atable__empty">Loading…</td></tr>`;
+  body.innerHTML = `<tr><td colspan="10" class="atable__empty">Loading…</td></tr>`;
 
   let payload;
   try {
     payload = await adminFetch(`/orders?${new URLSearchParams({ ...filters, page: String(page) })}`);
   } catch (err) {
-    body.innerHTML = `<tr><td colspan="9" class="atable__empty">${
+    body.innerHTML = `<tr><td colspan="10" class="atable__empty">${
       err.status === 404 || !err.status
         ? 'No backend connected yet — orders appear once the API is live.'
         : escapeHtml(err.message)
@@ -156,7 +191,7 @@ function paint({ data, meta }) {
     // Named, because an empty stage is usually good news. "Nothing here" makes
     // an empty Placed tab look like a broken screen when it means every order
     // has been called.
-    body.innerHTML = `<tr><td colspan="9" class="atable__empty">${
+    body.innerHTML = `<tr><td colspan="10" class="atable__empty">${
       stage
         ? `Nothing in ${escapeHtml(stageLabel(stage).toLowerCase())} right now.`
         : 'Nothing here. Try widening the filters.'
@@ -165,8 +200,17 @@ function paint({ data, meta }) {
     return;
   }
 
+  // Held so the bulk bar can work out which moves are legal for the whole
+  // selection without asking the server again.
+  rows = data;
+
   body.innerHTML = data.map((o) => `
     <tr>
+      <td class="atable__pick">
+        <input type="checkbox" data-pick="${escapeHtml(o.orderNumber)}"
+               ${selected.has(o.orderNumber) ? 'checked' : ''}
+               aria-label="Select ${escapeHtml(o.orderNumber)}">
+      </td>
       <td><a href="/admin/order?no=${encodeURIComponent(o.orderNumber)}">${escapeHtml(o.orderNumber)}</a></td>
       <td>
         <div>${escapeHtml(o.customerName)}</div>
@@ -180,6 +224,8 @@ function paint({ data, meta }) {
       <td class="atable__sub">${formatWhen(o.placedAt)}</td>
       <td>${rowAction(o)}</td>
     </tr>`).join('');
+
+  paintBulk();
 
   const pager = document.querySelector('[data-orders-pager]');
   pager.hidden = meta.lastPage <= 1;
@@ -197,6 +243,99 @@ function paymentTone(s) {
   if (s === 'refunded') return 'info';
   return 'wait';
 }
+/* ---- Working several orders at once ------------------------------------ */
+
+/**
+ * The bulk bar: what can be done to EVERY order currently ticked.
+ *
+ * The moves offered are the INTERSECTION of what each selected order allows,
+ * not the union. Offering "Start packing" because three of eight orders could
+ * take it would half-work — five would refuse, and a bulk action that
+ * half-works is worse than one that is not offered, because the merchant has
+ * to work out afterwards which five did not move.
+ *
+ * Printing is always available: a slip can be printed for an order in any
+ * stage, and reprints are most often wanted for orders already gone.
+ */
+function paintBulk() {
+  const bar = document.querySelector('[data-orders-bulk]');
+  if (!bar) return;
+
+  const n = selected.size;
+  bar.hidden = n === 0;
+  if (!n) return;
+
+  document.querySelector('[data-bulk-count]').textContent =
+    `${n} order${n === 1 ? '' : 's'} selected`;
+
+  const picked = rows.filter((o) => selected.has(o.orderNumber));
+
+  // Legal for all of them, and not an ending — endings need a reason each, and
+  // one reason typed once for twenty different orders is not a reason.
+  const shared = picked.reduce((acc, o) => {
+    const allowed = (o.allowedTransitions || []).filter((t) => !NEEDS_REASON.includes(t));
+    return acc === null ? allowed : acc.filter((t) => allowed.includes(t));
+  }, null) || [];
+
+  document.querySelector('[data-bulk-actions]').innerHTML = `
+    <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-bulk="print">
+      Print ${n} slip${n === 1 ? '' : 's'}
+    </button>
+    ${shared.map((t) => `
+      <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-bulk="${escapeHtml(t)}">
+        ${escapeHtml(TRANSITION_LABELS[t] || t)}
+      </button>`).join('')}
+    ${shared.length ? '' : '<span class="atable__sub">These orders are at different stages — no move applies to all of them.</span>'}`;
+}
+
+function clearSelection() {
+  selected.clear();
+  document.querySelectorAll('[data-pick]').forEach((b) => { b.checked = false; });
+  const all = document.querySelector('[data-select-all]');
+  if (all) all.checked = false;
+  paintBulk();
+}
+
+/** One tab, every selected slip, already asking to print. */
+function printSlips() {
+  const list = [...selected].map(encodeURIComponent).join(',');
+  window.open(`/admin/slip?no=${list}&auto=1`, '_blank', 'noopener');
+}
+
+/**
+ * Move every selected order, and report honestly on what happened.
+ *
+ * Each order goes through the same single-order endpoint rather than a bulk
+ * one, so each gets its own audit row and its own rule check. Settled rather
+ * than all-or-nothing on purpose: if one order was changed by somebody else a
+ * minute ago, the other nineteen should still move, and the merchant should be
+ * told which one did not.
+ */
+async function bulkMove(to, btn) {
+  const list = [...selected];
+  btn.disabled = true;
+  btn.textContent = `Moving ${list.length}…`;
+
+  const results = await Promise.all(list.map((no) =>
+    adminFetch(`/orders/${encodeURIComponent(no)}/transition`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, note: null }),
+    }).then(() => ({ no, ok: true }))
+      .catch((err) => ({ no, ok: false, message: err.message }))));
+
+  const failed = results.filter((r) => !r.ok);
+  if (failed.length) {
+    alert(
+      `${results.length - failed.length} of ${results.length} moved.\n\n`
+      + failed.map((f) => `${f.no}: ${f.message}`).join('\n'),
+    );
+  }
+
+  clearSelection();
+  load();
+}
+
 /**
  * The one button that moves this order forward, on its own row.
  *
