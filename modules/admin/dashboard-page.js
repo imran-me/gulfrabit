@@ -20,6 +20,37 @@ const CARD_LABELS = {
   quotesWaiting:    ['Quote requests waiting', true],
 };
 
+/**
+ * Where each card's work actually lives.
+ *
+ * Every number on this screen was a dead end: it told you five orders were
+ * waiting to be packed and left you to navigate and re-filter to find them.
+ * The landing screen names the work; it should also be the way in.
+ *
+ * A card without an entry here stays plain text on purpose — `todayRevenueTaka`
+ * is a figure, not a queue, and there is no list of "revenue" to open.
+ */
+const CARD_LINKS = {
+  // The server counts `placed` AND `confirmed` together, and the orders list
+  // filters one status at a time — so this goes to the unfiltered list, where
+  // the stage bar shows both counts side by side and they add up to this card.
+  // A link to one of the two stages would show a smaller number than the card
+  // that was clicked, which reads as the screen being wrong.
+  awaitingPack:    () => '/admin/orders',
+  shipped:         () => '/admin/orders?status=shipped',
+  todayCount:      () => `/admin/orders?from=${today()}`,
+  lowStock:        () => '/admin/stock?lowOnly=1',
+  outOfStock:      () => '/admin/stock?lowOnly=1',
+  unpostedEntries: () => '/admin/journal',
+  quotesWaiting:   () => '/admin/quotes',
+};
+
+function today() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 document.addEventListener('admin:ready', ({ detail }) => paint(detail.session));
 
 async function paint(session) {
@@ -51,11 +82,17 @@ async function paint(session) {
   host.innerHTML = cards.map(([key, value]) => {
     const [label, isAction] = CARD_LABELS[key] || [key, false];
     const shown = key.endsWith('Taka') ? `৳ ${Number(value).toLocaleString('en-BD')}` : value;
-    return `
-      <div class="acard${isAction && Number(value) > 0 ? ' acard--action' : ''}">
-        <span class="acard__n">${shown}</span>
-        <span class="acard__l">${label}</span>
-      </div>`;
+    const cls = `acard${isAction && Number(value) > 0 ? ' acard--action' : ''}`;
+    const body = `<span class="acard__n">${shown}</span><span class="acard__l">${escapeHtml(label)}</span>`;
+
+    // A zero is not worth a journey. Nothing is waiting, so the card states
+    // that and stops being a button — a link to an empty list is a wasted
+    // click every morning on the screen opened most.
+    const href = Number(value) > 0 ? CARD_LINKS[key]?.() : null;
+
+    return href
+      ? `<a class="${cls} acard--link" href="${href}">${body}</a>`
+      : `<div class="${cls}">${body}</div>`;
   }).join('');
 }
 

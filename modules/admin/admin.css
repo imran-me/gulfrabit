@@ -458,6 +458,27 @@
 
 .atemplates { display: flex; flex-wrap: wrap; gap: var(--space-2); flex: 1 1 100%; }
 
+/* A dashboard card that opens the work it is counting. Only cards with
+   something waiting become links — see CARD_LINKS in dashboard-page.js. */
+.acard--link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.acard--link:hover {
+  border-color: color-mix(in srgb, var(--gr-gold-accent) 55%, var(--border-hairline));
+  box-shadow: 0 2px 10px rgba(16, 32, 44, .10);
+}
+.acard--link:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
+/* The label carries the affordance, since the number is the thing being read
+   and underlining a figure makes it harder to scan. */
+.acard--link:hover .acard__l { color: var(--text-primary); text-decoration: underline; }
+
+@media (prefers-reduced-motion: reduce) {
+  .acard--link { transition: none; }
+}
+
 /* ---- Bulk selection ---------------------------------------------------
    The bar is hidden until something is ticked. A permanently visible row of
    actions that do nothing yet teaches people to look past it, which is the
