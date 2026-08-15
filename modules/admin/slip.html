@@ -83,12 +83,33 @@
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=ffd95ef0">
   <link rel="stylesheet" href="../../modules/admin/admin.css?v=17ec0583">
-  <link rel="stylesheet" href="../../modules/admin/slip.css?v=abd6bb4a">
+  <link rel="stylesheet" href="../../modules/admin/slip.css?v=c4059596">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
 </head>
 <body>
+  <!-- Hidden until the shell confirms a session, so a signed-out visitor never
+       sees a flash of the panel's structure. This is cosmetic, not a control:
+       the page contains no data to protect. -->
+  <div class="admin" data-admin-shell hidden>
+    <aside class="admin__side">
+      <a class="admin__brand" href="../../admin">
+        <img src="../../assets/logo/gulfrabit-mark.png" alt="">
+        <span>GulfRabit<small>Admin</small></span>
+      </a>
+
+      <nav class="anav" aria-label="Admin sections" data-admin-nav></nav>
+
+      <div class="admin__who">
+        <div class="admin__who-name" data-admin-name>—</div>
+        <span class="admin__who-role" data-admin-role>—</span>
+        <button type="button" class="admin__signout" data-admin-signout>Sign out</button>
+      </div>
+    </aside>
+
+    <main class="admin__main" id="main">
+
 <div class="slip-bar" data-slip-bar>
         <div>
           <strong data-slip-count>Loading…</strong>
@@ -103,9 +124,21 @@
       <div data-slips></div>
 
       <p class="aerror" data-slip-error hidden role="alert"></p>
+    </main>
+  </div>
 
   <script type="module" src="../../shared/js/main.js?v=65e9eef8"></script>
   <script type="module" src="../../modules/admin/admin-shell.js?v=e9147336"></script>
+  <script type="module" src="../../modules/admin/admin-nav.js?v=130be8cb"></script>
+  <script type="module" src="../../modules/courier/courier-nav.js?v=f4fd5181"></script>
+  <script type="module" src="../../modules/inventory/inventory-nav.js?v=1b82ef57"></script>
+  <script type="module" src="../../modules/media/media-nav.js?v=bc710b20"></script>
+  <script type="module" src="../../modules/hero/hero-nav.js?v=f09f428b"></script>
+  <script type="module" src="../../modules/highlights/highlights-nav.js?v=9c1c00e4"></script>
+  <script type="module" src="../../modules/marketing/marketing-nav.js?v=f2deaf14"></script>
+  <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
+  <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
+  <script type="module" src="../../modules/theme/theme-nav.js?v=73f64c7d"></script>
   <script type="module" src="../../modules/admin/slip-page.js?v=975b7e83"></script>
 </body>
 </html>

@@ -101,12 +101,17 @@
 
 /* ---- Paper ------------------------------------------------------------ */
 @media print {
-  /* The panel's chrome, the toolbar and anything else that is screen-only.
-     :has() is not needed — the print view is its own page and carries only
-     what is below. */
-  .slip-bar, .aerror { display: none !important; }
+  /* The panel's chrome, the toolbar, and anything else that is screen-only.
+     The sidebar is hidden HERE rather than by building this page without the
+     admin shell: that shell is what checks the session and dispatches
+     admin:ready, so a page built without it renders its toolbar and then never
+     loads anything at all. */
+  .slip-bar, .aerror, .admin__side, .admin-fixture { display: none !important; }
 
   html, body { background: #fff; }
+  /* The shell is a two-column grid. Left as a grid with one column gone, the
+     slips would print inside a column sized for the missing sidebar. */
+  .admin { display: block !important; min-height: 0 !important; }
   .admin__main { padding: 0 !important; background: #fff !important; }
 
   @page { size: A4; margin: 8mm; }

@@ -520,13 +520,20 @@ ADMIN_PAGES = [
      ["/modules/admin/admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/accounting/journal-page.js"], True),
 
-    # chrome=False: the sidebar has no business on a page whose only job is to
-    # become a sheet of paper, and printing it would waste the left third of
-    # every slip.
+    # chrome=True, even though the sidebar is useless on a sheet of paper.
+    #
+    # The shell is not decoration: boot() returns early when [data-admin-shell]
+    # is absent, so a chrome-less page never dispatches admin:ready and no
+    # screen script ever runs. It is also what checks the session and sends a
+    # signed-out visitor to the login page. Built without it, this page loaded
+    # its toolbar and then sat on "Loading…" forever.
+    #
+    # The sidebar is removed at PRINT time instead — see the @media print block
+    # in slip.css, which is where a paper-only concern belongs.
     ("modules/admin/slip.html", "Packing slip — GulfRabit Admin",
      "modules/admin/_fragments/slip.main.html",
      ["/modules/admin/admin.css", "/modules/admin/slip.css"],
-     ["/modules/admin/admin-shell.js", "/modules/admin/slip-page.js"], False),
+     ["/modules/admin/admin-shell.js", "/modules/admin/slip-page.js"], True),
 
     ("modules/admin/login.html", "Staff sign-in — GulfRabit Admin",
      "modules/admin/_fragments/login.main.html",
