@@ -317,6 +317,21 @@ class AdminProductController extends Controller
             'short_description'     => $request->input('shortDescription'),
             'description'           => $request->input('description'),
             'in_stock'              => true,
+
+            /* Arrival, straight from the create form — this is the "while
+               adding a product" half of the feature. A date in the future
+               makes the product upcoming the moment it exists, so a merchant
+               can list a shipment that has not left the supplier yet.
+
+               preorder_enabled is only honoured alongside a future date. A
+               product marked pre-orderable with no arrival date is a product
+               that is simply on sale, and storing the flag anyway would leave
+               a booby trap for the day somebody sets a date. */
+            'available_from'        => $this->arrivalDate($request->input('availableFrom')),
+            'preorder_enabled'      => $this->arrivalDate($request->input('availableFrom')) !== null
+                && $request->boolean('preorderEnabled'),
+            'preorder_limit'        => $this->limitOrNull($request->input('preorderLimit')),
+
             // Off. See the docblock: a new product must not appear on the shop
             // before anyone has looked at it.
             'is_active'             => false,
@@ -367,6 +382,37 @@ class AdminProductController extends Controller
             'data'    => $product->toAdminArray(),
             'message' => "{$product->title} is back in the catalogue, still unlisted.",
         ]);
+    }
+
+    /**
+     * An arrival date, or null.
+     *
+     * Null and the empty string both mean "it is here now" — the form sends an
+     * empty date input as '', and treating that as anything other than "clear
+     * it" would make the field impossible to un-set once used.
+     *
+     * A date in the PAST is stored as given rather than rejected. It reads as a
+     * contradiction and it is not: it is how a merchant records that a
+     * shipment landed on Tuesday, and the derived state is identical to having
+     * no date at all — Product::isUpcoming() only looks forward.
+     */
+    private function arrivalDate(mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return (string) $value;
+    }
+
+    /** A pre-order cap, or null for "no cap". Zero is not a cap, it is a typo. */
+    private function limitOrNull(mixed $value): ?int
+    {
+        if ($value === null || $value === '' || (int) $value <= 0) {
+            return null;
+        }
+
+        return (int) $value;
     }
 
     /**
@@ -525,6 +571,31 @@ class AdminProductController extends Controller
         }
         if ($request->has('isActive')) {
             $product->is_active = $request->boolean('isActive');
+        }
+
+        /* Arrival. Handled as a group rather than field by field, because
+           the three settings only make sense together: clearing the date has
+           to clear the pre-order flag with it, or a product that has landed
+           keeps a stale "Pre-order" button on the shop. */
+        if ($request->has('availableFrom') || $request->has('preorderEnabled')) {
+            if ($request->has('availableFrom')) {
+                $product->available_from = $this->arrivalDate($request->input('availableFrom'));
+            }
+
+            if ($request->has('preorderEnabled')) {
+                $product->preorder_enabled = $request->boolean('preorderEnabled');
+            }
+
+            // The rule that keeps the three honest, applied whichever of them
+            // changed: no arrival date means nothing to pre-order.
+            if ($product->available_from === null) {
+                $product->preorder_enabled = false;
+                $product->preorder_limit = null;
+            }
+        }
+
+        if ($request->has('preorderLimit')) {
+            $product->preorder_limit = $this->limitOrNull($request->input('preorderLimit'));
         }
 
         // The public "Only N left" figure. An explicit null clears it, which

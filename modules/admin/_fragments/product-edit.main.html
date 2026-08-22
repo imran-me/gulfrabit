@@ -192,6 +192,48 @@
               </p>
             </div>
 
+            <!-- ARRIVAL ------------------------------------------------------
+                 Three settings that only make sense together, so they live in
+                 one panel rather than being scattered among the stock fields.
+
+                 The date is the feature. Everything else is read from it: a
+                 date in the future makes the product upcoming, and the morning
+                 it passes the product goes on sale by itself. Nobody has to
+                 remember to flip anything, which matters because shipments
+                 land overnight and a product still saying "arriving 14
+                 September" on the 15th is a shop that looks abandoned. -->
+            <fieldset class="apane" style="margin-bottom:var(--space-4)" data-pe-arrival>
+              <legend class="admin__sub" style="padding:0 var(--space-2)">Arrival</legend>
+
+              <div class="afilters__field" style="margin-bottom:var(--space-3)">
+                <label for="pe-availablefrom">
+                  Arrives on
+                  <span class="atable__sub">(leave empty if it is already here)</span>
+                </label>
+                <input class="input-gr" id="pe-availablefrom" name="availableFrom" type="date"
+                       style="max-width:220px">
+              </div>
+
+              <label class="apane__row" data-pe-preorder-row hidden>
+                <input type="checkbox" name="preorderEnabled">
+                <span>Take pre-orders before it arrives</span>
+              </label>
+
+              <div class="afilters__field" style="margin-top:var(--space-3)" data-pe-limit-row hidden>
+                <label for="pe-preorderlimit">
+                  Stop after
+                  <span class="atable__sub">(optional — how many may be pre-ordered)</span>
+                </label>
+                <input class="input-gr" id="pe-preorderlimit" name="preorderLimit" type="number"
+                       min="1" max="9999" step="1" placeholder="no limit" style="max-width:200px">
+              </div>
+
+              <!-- Written by product-edit-page.js from the date and the two
+                   controls, so the merchant reads the consequence rather than
+                   inferring it from three inputs. -->
+              <p class="admin__sub" style="margin:var(--space-3) 0 0" data-pe-arrival-says></p>
+            </fieldset>
+
             <div class="arefund-form" style="border-top:0">
               <label class="afilters__field" style="flex-direction:row;align-items:center;gap:var(--space-2)">
                 <input type="checkbox" name="inStock"> <span>In stock</span>

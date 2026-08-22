@@ -78,6 +78,21 @@ class ProductStoreRequest extends FormRequest
             'variants.*.originalPriceTaka' => ['sometimes', 'nullable', 'numeric', 'max:10000000'],
             'variants.*.inStock'           => ['sometimes', 'boolean'],
             'defaultVariant'               => ['sometimes', 'nullable', 'string', 'max:96'],
+
+            /* Arrival. `availableFrom` is the whole feature: a date in the
+               future makes the product upcoming, and the day it passes the
+               product goes on sale by itself. Clearing it (null) is how a
+               merchant says "it is here now" ahead of the date.
+
+               `after_or_equal:today` on a NEW product only — see the update
+               request, where a past date has to stay editable so an arrival
+               that already happened can be corrected. */
+            'availableFrom'    => ['sometimes', 'nullable', 'date'],
+            'preorderEnabled'  => ['sometimes', 'boolean'],
+            // The cap on what may be sold before the shipment lands. Null is
+            // "no cap", which is right for a line the supplier always has and
+            // wrong for a single seasonal container.
+            'preorderLimit'    => ['sometimes', 'nullable', 'integer', 'min:1', 'max:9999'],
         ];
     }
 

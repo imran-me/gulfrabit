@@ -69,6 +69,13 @@ async function load() {
   fill();
   paintHistory();
   document.querySelector('[data-pe-form]').addEventListener('submit', save);
+
+  // Delegated to the form, so the arrival panel re-reads itself whichever
+  // of the three controls moved.
+  document.querySelector('[data-pe-form]')
+    ?.addEventListener('input', (e) => {
+      if (e.target.closest('[data-pe-arrival]')) paintArrival(e.currentTarget);
+    });
   const del = document.querySelector('[data-pe-delete]');
   if (del) {
     // Owner-only, and hidden rather than disabled: a control that refuses
@@ -103,6 +110,13 @@ function fill() {
   f.stockDisplay.value = product.stockDisplay ?? '';
   f.inStock.checked = !!product.inStock;
   f.isActive.checked = !!product.isActive;
+
+  // Arrival. The date is the feature; the other two are only meaningful
+  // alongside it, which is what paintArrival() enforces on screen.
+  f.availableFrom.value = product.availableFrom ?? '';
+  f.preorderEnabled.checked = !!product.preorderEnabled;
+  f.preorderLimit.value = product.preorderLimit ?? '';
+  paintArrival(f);
 
   // Placement: the four rail tags become checkboxes; anything else the
   // product carries is a merchant's own label and goes to the "other tags"
@@ -261,6 +275,60 @@ function addVariant() {
  * checkout, with UTMs so the order records which ad sold it. Origin comes from
  * the page so a staging panel hands out staging links, not production ones.
  */
+/**
+ * The arrival panel, explaining itself.
+ *
+ * Three inputs that produce four different shop behaviours is exactly the kind
+ * of form where a merchant guesses wrong and finds out from a customer. So the
+ * panel says the consequence in a sentence, and hides the controls that do not
+ * apply yet rather than leaving them enabled and inert.
+ *
+ * The date decides everything. A past date is treated as "already here",
+ * matching Product::isUpcoming() on the server — the same rule in the same
+ * words, so the screen and the shop cannot disagree.
+ */
+function paintArrival(f) {
+  const raw = f.availableFrom.value;
+  const says = document.querySelector('[data-pe-arrival-says]');
+  const preorderRow = document.querySelector('[data-pe-preorder-row]');
+  const limitRow = document.querySelector('[data-pe-limit-row]');
+
+  // Compared as dates, not timestamps: an arrival of "today" has landed, and
+  // comparing against the current clock would keep it upcoming until midnight.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const arrives = raw ? new Date(`${raw}T00:00:00`) : null;
+  const upcoming = arrives !== null && arrives > today;
+
+  preorderRow.hidden = !upcoming;
+  limitRow.hidden = !upcoming || !f.preorderEnabled.checked;
+
+  if (!upcoming) {
+    // Kept in step with the server, which clears both when the date goes: a
+    // ticked box left behind a cleared date is a booby trap for the day
+    // somebody sets a new one.
+    f.preorderEnabled.checked = false;
+    says.textContent = raw
+      ? 'This arrived already, so it behaves like any other product — its stock switch decides whether it can be bought.'
+      : 'On sale now, like the rest of the catalogue.';
+    return;
+  }
+
+  const when = arrives.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+
+  if (!f.preorderEnabled.checked) {
+    says.textContent = `Shown in its category as Coming soon, arriving ${when}. `
+      + 'Customers can ask to be told when it lands, but cannot order it. '
+      + `On the morning of ${when} it goes on sale by itself.`;
+    return;
+  }
+
+  const cap = Number(f.preorderLimit.value) || 0;
+  says.textContent = `Customers can pre-order it now and it ships on ${when}. `
+    + (cap > 0 ? `Stops after ${cap}. ` : 'No limit on how many. ')
+    + 'Pre-orders must be paid in advance — cash on delivery is not offered on them.';
+}
+
 function fillAdLink() {
   const input = document.querySelector('[data-pe-adlink]');
   const btn = document.querySelector('[data-pe-adcopy]');
@@ -443,6 +511,23 @@ async function save(e) {
 
   if (f.inStock.checked !== !!product.inStock) body.inStock = f.inStock.checked;
   if (f.isActive.checked !== !!product.isActive) body.isActive = f.isActive.checked;
+
+  /* Arrival. Sent as a group whenever any of the three moved, because the
+     server clears the pre-order flag and the limit when the date goes — and it
+     can only do that if it is told the date changed in the same request. */
+  {
+    const date = f.availableFrom.value || null;
+    const wasDate = product.availableFrom || null;
+    const limitRaw = f.preorderLimit.value.trim();
+    const limit = limitRaw === '' ? null : Number(limitRaw);
+    const wasLimit = product.preorderLimit == null ? null : Number(product.preorderLimit);
+
+    if (date !== wasDate) body.availableFrom = date;
+    if (f.preorderEnabled.checked !== !!product.preorderEnabled) {
+      body.preorderEnabled = f.preorderEnabled.checked;
+    }
+    if (limit !== wasLimit) body.preorderLimit = limit;
+  }
 
   // The public "Only N left" figure. Same empty-is-null rule as the money
   // fields above, and for the same reason: clearing the box means "say nothing

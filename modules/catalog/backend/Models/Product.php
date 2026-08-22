@@ -27,6 +27,7 @@ class Product extends Model
 
     protected $fillable = [
         'sku', 'slug', 'title', 'brand', 'origin', 'barcode', 'unit',
+        'available_from', 'preorder_enabled', 'preorder_limit',
         'category_id', 'sub_category_id',
         'price_poisha', 'original_price_poisha', 'cost_poisha',
         'image', 'images', 'variants', 'default_variant', 'rating', 'review_count',
@@ -49,6 +50,9 @@ class Product extends Model
             'faq'                   => 'array',
             'in_stock'              => 'boolean',
             'is_active'             => 'boolean',
+            'available_from'        => 'date',
+            'preorder_enabled'      => 'boolean',
+            'preorder_limit'        => 'integer',
             'rating'                => 'float',
             'price_poisha'          => 'integer',
             'original_price_poisha' => 'integer',
@@ -117,6 +121,96 @@ class Product extends Model
      * Reading the parent at query time keeps every switch independently
      * meaningful, and one extra EXISTS on an indexed key is cheap.
      */
+    /* ---- Has it landed yet? ---------------------------------------------
+
+       Three states, all read from ONE date, so a shipment that arrives
+       overnight puts the product on sale by itself. See the migration for why
+       this is not a status column somebody has to remember to change.
+
+       `in_stock` still means what the warehouse means by it — there is some on
+       the shelf — and a pre-order product is quite correctly not in stock.
+       What these methods separate is the question that used to be tangled up
+       with it: whether a customer may order the thing. */
+
+    /** Announced, but not landed. */
+    public function isUpcoming(): bool
+    {
+        return $this->available_from !== null && $this->available_from->isFuture();
+    }
+
+    /** Upcoming AND open for orders. */
+    public function isPreorder(): bool
+    {
+        return $this->isUpcoming() && $this->preorder_enabled;
+    }
+
+    /** Upcoming and NOT open for orders — listed with a date and a Notify me. */
+    public function isComingSoon(): bool
+    {
+        return $this->isUpcoming() && ! $this->preorder_enabled;
+    }
+
+    /**
+     * May a customer put this in a basket right now?
+     *
+     * THE ONE QUESTION THE CART AND CHECKOUT SHOULD ASK. Both used to test
+     * `in_stock` directly, which was correct while those two things meant the
+     * same thing and silently wrong the moment they stopped: a pre-order is
+     * out of stock by definition, and refusing it was the whole bug.
+     */
+    public function isOrderable(): bool
+    {
+        return $this->isUpcoming() ? $this->preorder_enabled : $this->in_stock;
+    }
+
+    /**
+     * Why it cannot be ordered, in the customer's words — or null if it can.
+     *
+     * Returned from here rather than composed at each call site, so the cart,
+     * the revalidation pass and the checkout capture cannot drift into giving
+     * three different explanations for one refusal.
+     */
+    public function unavailableReason(): ?string
+    {
+        if (! $this->is_active) {
+            return "{$this->title} is no longer available.";
+        }
+
+        if ($this->isComingSoon()) {
+            return "{$this->title} is not on sale yet — it arrives "
+                . $this->available_from->format('j F') . '.';
+        }
+
+        if (! $this->isUpcoming() && ! $this->in_stock) {
+            return "{$this->title} is out of stock.";
+        }
+
+        return null;
+    }
+
+    /**
+     * Products arriving, soonest first.
+     *
+     * Deliberately NOT filtered to `preorder_enabled`: the category page shows
+     * what is coming alongside what is here, whether or not it can be ordered
+     * yet, because "this shop is getting new saffron in September" is worth
+     * knowing either way.
+     */
+    public function scopeUpcoming(Builder $q): Builder
+    {
+        return $q->whereNotNull('available_from')
+            ->whereDate('available_from', '>', now())
+            ->orderBy('available_from');
+    }
+
+    /** Everything that has landed — the ordinary catalogue. */
+    public function scopeLanded(Builder $q): Builder
+    {
+        return $q->where(fn (Builder $w) => $w
+            ->whereNull('available_from')
+            ->orWhereDate('available_from', '<=', now()));
+    }
+
     public function scopeActive(Builder $q): Builder
     {
         return $q->where('products.is_active', true)
@@ -279,6 +373,19 @@ class Product extends Model
             'rating'           => $this->rating,
             'reviewCount'      => $this->review_count,
             'inStock'          => $this->in_stock,
+
+            /* Arrival, for the card and the product page. `availableFrom` is a
+               plain date string so the browser formats it in the visitor's own
+               locale; the two booleans are sent already decided rather than
+               left for the client to work out from the date, because the
+               server's clock is the one that settles whether something has
+               landed. A browser with a wrong system date would otherwise put a
+               Pre-order button on a product that is already on the shelf. */
+            'availableFrom'    => $this->available_from?->toDateString(),
+            'isPreorder'       => $this->isPreorder(),
+            'isComingSoon'     => $this->isComingSoon(),
+            'orderable'        => $this->isOrderable(),
+
             // The PUBLIC scarcity figure — what we tell people, set by hand in
             // the panel. Null means the PDP shows no such line. The real count
             // (per pack, in the variants JSON) never appears in this array.
@@ -323,6 +430,11 @@ class Product extends Model
                 : intdiv($this->price_poisha - $this->cost_poisha, 100),
             'isActive'   => $this->is_active,
             'stockQty'   => $this->stock_qty,
+            // The editable half of the arrival settings. The storefront array
+            // above already carries the DERIVED state (isPreorder, orderable);
+            // these two are the raw values the form writes back.
+            'preorderEnabled' => $this->preorder_enabled,
+            'preorderLimit'   => $this->preorder_limit,
             // The same rows the storefront gets, plus what we actually hold.
             'variants'   => $this->variantsAdmin(),
         ]);
