@@ -1172,3 +1172,17 @@
 .aslide__head > :last-child { margin-left: auto; }
 .aslide.is-deleted { opacity: .72; }
 .aslide.is-deleted:hover, .aslide.is-deleted:focus-within { opacity: 1; }
+
+/* The other two reasons the order screen raises a banner. Waiting on a
+   shipment is not a problem, so it is painted in the panel's neutral wash
+   rather than in an alert colour; due is a job, so it is warm. */
+.abanner--wait {
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-hairline);
+  color: var(--text-secondary);
+}
+.abanner--due {
+  background: rgba(232, 179, 66, .12);
+  border: 1px solid rgba(232, 179, 66, .35);
+  color: var(--text-primary);
+}

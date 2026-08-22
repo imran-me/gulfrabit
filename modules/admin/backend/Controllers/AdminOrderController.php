@@ -187,6 +187,10 @@ class AdminOrderController extends Controller
                 'paymentMethod' => $order->payment_method,
                 'placedAt'      => $order->placed_at?->toIso8601String(),
                 'deletedAt'     => $order->deleted_at?->toIso8601String(),
+                'shipsOn'       => $order->preorder_ships_on?->toDateString(),
+                'preorderDue'   => $order->isPreorder() ? $order->preorderDue() : null,
+                // Its sibling from the same checkout, when the basket split.
+                'placementRef'  => $order->placement_ref,
 
                 'customer' => [
                     'name'  => $order->customer_name,
@@ -455,6 +459,14 @@ class AdminOrderController extends Controller
             // this is set, so a screenshot of the Deleted tab can never be
             // mistaken for the live list.
             'deletedAt'     => $o->deleted_at?->toIso8601String(),
+
+            /* Waiting on a shipment rather than on us. An order sitting in
+               `confirmed` for a fortnight is normally a failure; for a
+               pre-order it is the plan, and without this the two are
+               indistinguishable on the board — so the genuinely stuck orders
+               get lost among the ones that are merely early. */
+            'shipsOn'       => $o->preorder_ships_on?->toDateString(),
+            'preorderDue'   => $o->isPreorder() ? $o->preorderDue() : null,
 
             // The same list the detail screen gets, from the same map the
             // server enforces — so the row can offer "Confirm" without the

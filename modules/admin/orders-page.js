@@ -265,7 +265,7 @@ function paint({ data, meta }) {
       <td class="atable__num">${o.itemCount}</td>
       <td class="atable__num">৳ ${Number(o.totalTaka).toLocaleString('en-BD')}</td>
       <td>${pill(o.paymentStatus, paymentTone(o.paymentStatus))}</td>
-      <td>${pill(stageLabel(o.status), stageTone(o.status), true)}</td>
+      <td>${pill(stageLabel(o.status), stageTone(o.status), true)}${preorderNote(o)}</td>
       <td class="atable__sub">${formatWhen(o.placedAt)}</td>
       <td>${rowAction(o)}</td>
     </tr>`).join('');
@@ -277,6 +277,29 @@ function paint({ data, meta }) {
   document.querySelector('[data-page-label]').textContent = `Page ${meta.currentPage} of ${meta.lastPage}`;
   document.querySelector('[data-page-prev]').disabled = meta.currentPage <= 1;
   document.querySelector('[data-page-next]').disabled = meta.currentPage >= meta.lastPage;
+}
+
+/**
+ * "Pre-order · 14 Sep", under the stage pill.
+ *
+ * Sits beside the stage rather than replacing it, because a pre-order still
+ * moves through the same pipeline — it is confirmed, it is packed, it goes out
+ * — it simply cannot start until a shipment lands. The stage says where it is;
+ * this says why it is not moving.
+ *
+ * Once the date has passed it flips to "stock due" in the alert tone, because
+ * at that point the order IS actionable and the thing that was an explanation
+ * has become a job.
+ */
+function preorderNote(o) {
+  if (!o.shipsOn) return '';
+
+  const when = new Date(`${o.shipsOn}T00:00:00`)
+    .toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+  return o.preorderDue
+    ? `<div class="atable__sub"><strong>Stock due — ${escapeHtml(when)}</strong></div>`
+    : `<div class="atable__sub">Pre-order · ${escapeHtml(when)}</div>`;
 }
 
 /* Tone carries meaning that colour alone would not: the label is always the

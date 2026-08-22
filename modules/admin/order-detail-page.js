@@ -76,11 +76,32 @@ function paintHeader() {
   // there. Only the actions differ, and a difference is not an explanation.
   const banner = document.querySelector('[data-order-deleted]');
   if (banner) {
-    banner.hidden = !order.deletedAt;
-    banner.textContent = order.deletedAt
-      ? `This order was deleted on ${when(order.deletedAt)}. It does not appear in any list, `
-        + 'count or dashboard figure. Nothing about it has been destroyed.'
-      : '';
+    /* Two reasons this screen needs a banner, and deleted outranks pre-order:
+       an order that has been removed is the more surprising fact, and stacking
+       two banners teaches people to skip both. */
+    if (order.deletedAt) {
+      banner.hidden = false;
+      banner.className = 'abanner abanner--deleted';
+      banner.textContent =
+        `This order was deleted on ${when(order.deletedAt)}. It does not appear in any list, `
+        + 'count or dashboard figure. Nothing about it has been destroyed.';
+    } else if (order.shipsOn) {
+      const day = new Date(`${order.shipsOn}T00:00:00`)
+        .toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+
+      banner.hidden = false;
+      banner.className = `abanner abanner--${order.preorderDue ? 'due' : 'wait'}`;
+      // Not blocking the stage buttons, deliberately. Stock arrives early, a
+      // supplier ships in two parts, and a merchant who has the goods in hand
+      // should not be argued with by a date typed in three weeks ago. The
+      // banner is the reminder; the decision stays theirs.
+      banner.textContent = order.preorderDue
+        ? `Pre-order — the shipment was due ${day}. If it has landed, this can be packed.`
+        : `Pre-order — cannot be packed until the shipment lands on ${day}.`;
+    } else {
+      banner.hidden = true;
+      banner.textContent = '';
+    }
   }
 }
 
