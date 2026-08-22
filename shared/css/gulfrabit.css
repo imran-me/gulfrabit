@@ -928,6 +928,26 @@ a:hover { color: var(--link-hover); }
 .badge-out      { background: var(--surface-sunken); color: var(--text-muted); border: 1px solid var(--border-hairline); }
 .badge-origin   { background: var(--wash-hover); color: var(--text-secondary); border: 1px solid var(--border-hairline); text-transform: none; letter-spacing: 0; }
 
+/* Arrival badges. Pre-order borrows the gold that this project reserves for
+   premium and imported goods, because that is exactly what a pre-order is
+   here — a container of something scarce that has not landed. Coming soon
+   stays quiet: it is an announcement, not an offer, and dressing it up as one
+   invites a tap that cannot be answered. */
+.badge-preorder { background: rgba(201,162,75,.16); color: var(--gold-ink); border: 1px solid rgba(201,162,75,.45); }
+.badge-soon     { background: var(--surface-sunken); color: var(--text-secondary); border: 1px solid var(--border-hairline); }
+
+/* "Ships 14 Sept", under the button. Small and quiet — it qualifies the
+   button rather than competing with it, and on a card that already carries a
+   price, a size and a rating it is the fourth thing to read, not the first. */
+.product-card__arrives {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 .product-card__badges { position: absolute; top: var(--space-3); left: var(--space-3); display: flex; flex-direction: column; gap: var(--space-1); z-index: 2; }
 
 /* ---- Elevation on a white canvas -------------------------------------
@@ -1724,6 +1744,41 @@ a:hover { color: var(--link-hover); }
 }
 .search-overlay.is-open { opacity: 1; visibility: visible; }
 .search-overlay__box { width: min(720px, 92vw); }
+
+
+/* ---- "Tell me when it is ready" ----------------------------------------
+   One field, asked from a product card. Native <dialog>, so the backdrop,
+   Escape and the focus trap are the browser's job. See modules/catalog/
+   notify-me.js. */
+.notify::backdrop { background: rgba(10, 10, 10, .5); }
+.notify {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  max-width: min(24rem, calc(100vw - 2rem));
+}
+.notify__panel {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-lg);
+  text-align: left;
+}
+.notify__title { margin: 0 0 var(--space-1); font-size: var(--fs-18); line-height: 1.3; }
+/* The product name, sitting under the heading as its subject. */
+.notify__sub   { margin: 0 0 var(--space-4); color: var(--text-secondary); font-size: var(--fs-14); }
+.notify__label { display: block; margin-bottom: var(--space-2); font-size: var(--fs-14); font-weight: 500; }
+.notify .input-gr { width: 100%; }
+/* The promise that makes the number safe to give. Quiet, but present — a
+   phone field with no such line is a phone field people abandon. */
+.notify__fine  { margin: var(--space-2) 0 0; font-size: var(--fs-12); color: var(--text-muted); }
+.notify__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
 
 /* ===== partials/_animations.css ===== */
 /* =========================================================================

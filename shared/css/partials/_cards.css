@@ -413,6 +413,26 @@
 .badge-out      { background: var(--surface-sunken); color: var(--text-muted); border: 1px solid var(--border-hairline); }
 .badge-origin   { background: var(--wash-hover); color: var(--text-secondary); border: 1px solid var(--border-hairline); text-transform: none; letter-spacing: 0; }
 
+/* Arrival badges. Pre-order borrows the gold that this project reserves for
+   premium and imported goods, because that is exactly what a pre-order is
+   here — a container of something scarce that has not landed. Coming soon
+   stays quiet: it is an announcement, not an offer, and dressing it up as one
+   invites a tap that cannot be answered. */
+.badge-preorder { background: rgba(201,162,75,.16); color: var(--gold-ink); border: 1px solid rgba(201,162,75,.45); }
+.badge-soon     { background: var(--surface-sunken); color: var(--text-secondary); border: 1px solid var(--border-hairline); }
+
+/* "Ships 14 Sept", under the button. Small and quiet — it qualifies the
+   button rather than competing with it, and on a card that already carries a
+   price, a size and a rating it is the fourth thing to read, not the first. */
+.product-card__arrives {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 .product-card__badges { position: absolute; top: var(--space-3); left: var(--space-3); display: flex; flex-direction: column; gap: var(--space-1); z-index: 2; }
 
 /* ---- Elevation on a white canvas -------------------------------------

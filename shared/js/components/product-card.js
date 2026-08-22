@@ -59,6 +59,13 @@ function starsHTML(rating = 0, count = 0) {
 export function productBadges(product, max = 2) {
   const { price, originalPrice, inStock = true, tags = [] } = product;
 
+  /* Arrival outranks every other badge, for the same reason sold-out already
+     did: it changes whether the card can be acted on at all, and a "20% off"
+     flash on something that will not exist for three weeks is a card that
+     answers the wrong question first. */
+  if (product.isPreorder) return ['<span class="badge-gr badge-preorder">Pre-order</span>'];
+  if (product.isComingSoon) return ['<span class="badge-gr badge-soon">Coming soon</span>'];
+
   if (!inStock) return ['<span class="badge-gr badge-out">Sold out</span>'];
 
   const candidates = [
@@ -179,12 +186,79 @@ export function productCardHTML(product) {
       </div>
       ${originalPrice && originalPrice > price ? `<span class="price-saving">${savingsLabel(originalPrice, price)}</span>` : ''}
       ${sizeChips(product)}
-      <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart"
-              ${inStock ? '' : 'disabled'}>
-        ${inStock ? '<span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span>' : 'Notify Me'}
-      </button>
+      ${cardAction(product)}
     </div>
   </article>`;
+}
+
+/**
+ * The one control at the foot of the card, in whichever of four states applies.
+ *
+ * WHY "NOTIFY ME" IS NOW A REAL BUTTON
+ * ------------------------------------
+ * It used to be rendered `disabled` with the label "Notify Me" — a control
+ * that named a thing it could not do, on every sold-out product in the shop.
+ * Now that arriving stock can be announced, the same mechanism serves both
+ * cases honestly: an out-of-stock product and a Coming soon one are the same
+ * request from the customer's side — tell me when I can buy this.
+ *
+ * A pre-order says "Pre-order", not "Add to Cart". The wording IS the
+ * disclosure: it is the only place before checkout where somebody learns they
+ * are buying something that has not arrived.
+ */
+function cardAction(product) {
+  const { inStock = true, isPreorder, isComingSoon, availableFrom } = product;
+
+  if (isPreorder) {
+    return `
+      <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart">
+        <span class="btn-gr__en">Pre-order</span>
+        <span class="btn-bn bn" lang="bn">প্রি-অর্ডার</span>
+      </button>
+      ${arrivalLine(availableFrom, 'Ships')}`;
+  }
+
+  if (isComingSoon) {
+    return `
+      <button class="btn-gr btn-outline-gr btn-block-gr btn-sm-gr" data-action="notify-me">
+        <span class="btn-gr__en">Notify me</span>
+        <span class="btn-bn bn" lang="bn">জানান</span>
+      </button>
+      ${arrivalLine(availableFrom, 'Arrives')}`;
+  }
+
+  if (!inStock) {
+    return `
+      <button class="btn-gr btn-outline-gr btn-block-gr btn-sm-gr" data-action="notify-me">
+        <span class="btn-gr__en">Notify me</span>
+        <span class="btn-bn bn" lang="bn">জানান</span>
+      </button>`;
+  }
+
+  return `
+    <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart">
+      <span class="btn-gr__en">Add to Cart</span>
+      <span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span>
+    </button>`;
+}
+
+/**
+ * "Ships 14 Sept" under the button.
+ *
+ * Formatted in the browser from a plain date string rather than sent
+ * pre-worded by the server, so it reads correctly for a visitor whose device
+ * is set to Bengali. Returns nothing at all without a date — a card that says
+ * "Ships" and then stops is worse than one that says nothing.
+ */
+function arrivalLine(availableFrom, verb) {
+  if (!availableFrom) return '';
+
+  const when = new Date(`${availableFrom}T00:00:00`);
+  if (Number.isNaN(when.getTime())) return '';
+
+  return `<span class="product-card__arrives">${verb} ${
+    when.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+  }</span>`;
 }
 
 /** Render a list of products into a container. */
@@ -325,6 +399,15 @@ export function enhanceProductCards(root = document) {
        * the product page, where the customer has finished choosing and going
        * to the cart is the natural next step. */
       toast.success(`Added to cart · ${chosen.title}`);
+    });
+
+    /* Notify me. Loaded on demand rather than imported at the top: the vast
+       majority of cards in a grid are ordinary in-stock products, and the
+       module that asks for a phone number should not be in the bundle every
+       one of them pays for. */
+    card.querySelector('[data-action="notify-me"]')?.addEventListener('click', async () => {
+      const { askToNotify } = await import('/modules/catalog/notify-me.js');
+      askToNotify(product());
     });
 
     const wishBtn = card.querySelector('[data-action="wishlist"]');
