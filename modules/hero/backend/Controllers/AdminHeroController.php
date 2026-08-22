@@ -40,7 +40,12 @@ class AdminHeroController extends Controller
         }
 
         return response()->json([
+            // Deleted banners ride along in the same payload. A shop runs a
+            // handful of banners, not a paginated list, and this screen is a
+            // running order you drag — the client keeps them out of that order
+            // and draws them in their own section underneath.
             'data' => HeroSlide::query()
+                ->withTrashed()
                 ->orderBy('sort_order')->orderBy('id')
                 ->get()->map->toAdminArray()->all(),
             'meta' => [
@@ -81,9 +86,36 @@ class AdminHeroController extends Controller
      */
     public function destroy(HeroSlide $slide): JsonResponse
     {
+        // Soft, and switched off on the way out — the same pairing the product
+        // and coupon deletes use. Restoring must not put a banner straight back
+        // onto the front page: undoing a mistake should not publish anything.
+        //
+        // sort_order is deliberately untouched, so a restored banner returns to
+        // the place it held in the rotation rather than to the end.
+        $slide->is_active = false;
+        $slide->save();
         $slide->delete();
 
-        return response()->json(null, 204);
+        return response()->json([
+            'message' => 'Banner deleted. It is under Deleted below, and can be put back.',
+        ]);
+    }
+
+    /** POST /api/admin/hero/{slide}/restore */
+    public function restore(int $slide): JsonResponse
+    {
+        $model = HeroSlide::withTrashed()->findOrFail($slide);
+
+        if (! $model->trashed()) {
+            return response()->json(['message' => 'That banner is not deleted.'], 422);
+        }
+
+        $model->restore();
+
+        return response()->json([
+            'data'    => $model->toAdminArray(),
+            'message' => 'Banner restored, still switched off. Switch it on to put it back in the rotation.',
+        ]);
     }
 
     /**

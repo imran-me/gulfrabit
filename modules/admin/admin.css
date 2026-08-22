@@ -1159,3 +1159,16 @@
    this screen is mostly used to flip. */
 .acat__delete { margin-left: auto; }
 .acat.is-deleted .acat__name { text-decoration: line-through; }
+
+/* A deleted banner in the hero bin: the picture and the headline, which is how
+   somebody recognises the one they meant to keep, and nothing else. It is not
+   editable and it holds no place in the running order above. */
+.aslide__head { display: flex; align-items: center; gap: var(--space-4); }
+.aslide__thumb {
+  width: 96px; aspect-ratio: 2 / 1; object-fit: cover;
+  border-radius: var(--radius-sm); background: var(--surface-sunken);
+  flex: 0 0 auto;
+}
+.aslide__head > :last-child { margin-left: auto; }
+.aslide.is-deleted { opacity: .72; }
+.aslide.is-deleted:hover, .aslide.is-deleted:focus-within { opacity: 1; }

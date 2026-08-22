@@ -33,5 +33,12 @@ Route::prefix('admin/hero')->name('admin.hero.')
         Route::patch('/settings', [AdminHeroController::class, 'settings'])->name('settings');
 
         Route::patch('/{slide}', [AdminHeroController::class, 'update'])->name('update');
-        Route::delete('/{slide}', [AdminHeroController::class, 'destroy'])->name('destroy');
+        // Soft, and it switches the banner off on the way out — restoring must
+        // not put one straight back onto the front page. sort_order survives,
+        // so a restored banner returns to the place it held.
+        Route::middleware('admin.owner')->group(function (): void {
+            Route::delete('/{slide}', [AdminHeroController::class, 'destroy'])
+                ->withTrashed()->name('destroy');
+            Route::post('/{slide}/restore', [AdminHeroController::class, 'restore'])->name('restore');
+        });
     });

@@ -6,6 +6,7 @@ namespace Modules\Hero\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * One banner on the home page.
@@ -16,6 +17,13 @@ use Illuminate\Database\Eloquent\Model;
  */
 class HeroSlide extends Model
 {
+    /* A banner is a headline, a sub-line, a button label, a link and an
+       image somebody chose and cropped. Deleting used to lose all of it —
+       the old dialog admitted as much. sort_order is left alone on the way
+       out, so a restored banner returns to the place it held rather than to
+       the end of the carousel. */
+    use SoftDeletes;
+
     protected $fillable = [
         'image_path', 'alt', 'headline', 'subheadline',
         'link_type', 'link_value', 'sort_order', 'is_active',
@@ -110,6 +118,9 @@ class HeroSlide extends Model
             'endsAt'    => $this->ends_at?->toIso8601String(),
             'updatedBy' => $this->updated_by_name,
             'updatedAt' => $this->updated_at?->toIso8601String(),
+            // Null for a live banner. The admin list uses it to keep deleted
+            // banners out of the running order and draw them separately.
+            'deletedAt' => $this->deleted_at?->toIso8601String(),
         ];
     }
 }

@@ -25,6 +25,7 @@
 
 import { adminFetch } from '../admin/backend/api.js';
 import { escapeHtml } from '../admin/admin-shell.js';
+import { canDelete, confirmDelete, toast } from '../admin/admin-delete.js';
 
 let slides = [];
 let settings = {};
@@ -109,27 +110,85 @@ function paintSettings() {
   form.autoplay.value = settings.autoplay ? '1' : '0';
 }
 
+/**
+ * The running order — every banner that is actually in the rotation.
+ *
+ * Deleted banners keep their sort_order, so a restore returns them to the
+ * place they held rather than to the end. That means the payload has them
+ * interleaved with the live ones, and anything that walks the rotation by
+ * index — the up/down arrows, the preview — has to walk this instead.
+ */
+const ordered = () => slides.filter((s) => !s.deletedAt);
+
 function paint() {
   const host = document.querySelector('[data-hero-list]');
-  const live = slides.filter((s) => s.isActive).length;
 
-  document.querySelector('[data-hero-count]').textContent = slides.length === 0
+  /* Deleted banners arrive in the same payload and are kept out of the running
+     order entirely — out of the count, out of the drag order, and out of the
+     preview. A deleted banner in the list you reorder would take a position in
+     a rotation it is not part of. */
+  const shown = ordered();
+  const binned = slides.filter((s) => s.deletedAt);
+  const live = shown.filter((s) => s.isActive).length;
+
+  document.querySelector('[data-hero-count]').textContent = shown.length === 0
     ? 'No banners yet — the home page is showing its built-in artwork.'
-    : `${slides.length} banner${slides.length === 1 ? '' : 's'}, ${live} live`;
+    : `${shown.length} banner${shown.length === 1 ? '' : 's'}, ${live} live`;
 
-  if (!slides.length) {
+  if (!shown.length) {
     host.innerHTML = `
       <div class="acard" style="text-align:center">
         <p class="admin__sub" style="margin:0">
           Add your first banner. Nothing changes on the site until one is switched on.
         </p>
       </div>`;
+    paintBin(binned);
     paintPreview();
     return;
   }
 
-  host.innerHTML = slides.map((s, i) => row(s, i)).join('');
+  host.innerHTML = shown.map((s, i) => row(s, i, shown.length)).join('');
+  paintBin(binned);
   paintPreview();
+}
+
+/**
+ * Deleted banners, under the running order.
+ *
+ * Their headline and image are shown, because that is how somebody recognises
+ * the one they meant to keep — a list of "Banner 4, Banner 7" would be a list
+ * nobody can use.
+ */
+function paintBin(binned) {
+  const host = document.querySelector('[data-hero-bin]');
+  if (!host) return;
+
+  host.hidden = !binned.length;
+  if (!binned.length) { host.innerHTML = ''; return; }
+
+  host.innerHTML = `
+    <h2 class="h5">Deleted</h2>
+    <p class="admin__sub" style="margin-top:0">
+      Restoring brings the banner back switched off, in the place it held in the rotation.
+    </p>
+    ${binned.map((s) => `
+      <article class="acard aslide is-deleted">
+        <div class="aslide__head">
+          ${s.image ? `<img class="aslide__thumb" src="${escapeHtml(s.image)}" alt="">` : ''}
+          <div>
+            <strong>${escapeHtml(s.headline || 'Untitled banner')}</strong>
+            ${s.subline ? `<div class="atable__sub">${escapeHtml(s.subline)}</div>` : ''}
+          </div>
+          ${canDelete()
+            ? `<button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
+                       data-hero-restore="${s.id}">Restore</button>`
+            : ''}
+        </div>
+      </article>`).join('')}`;
+
+  host.querySelectorAll('[data-hero-restore]').forEach((btn) => {
+    btn.addEventListener('click', () => putBack(btn));
+  });
 }
 
 /* ---- Preview -----------------------------------------------------------
@@ -151,7 +210,7 @@ function paintPreview() {
   // What the STOREFRONT would show, not what this screen holds: switched-off
   // banners and ones outside their dates are exactly what a merchant is trying
   // to confirm are absent.
-  const live = slides.filter((s) => s.isActive && inSchedule(s));
+  const live = ordered().filter((s) => s.isActive && inSchedule(s));
 
   if (!live.length) {
     host.innerHTML = `
@@ -208,9 +267,12 @@ function inSchedule(s) {
   return true;
 }
 
-function row(s, i) {
+function row(s, i, total) {
   const first = i === 0;
-  const last = i === slides.length - 1;
+  // Counted against the running order, not the payload — which now also
+  // carries deleted banners, and a down-arrow disabled by one of those would
+  // be disabled on the wrong row.
+  const last = i === total - 1;
 
   return `
     <section class="acard aslide${s.isActive ? '' : ' is-off'}" data-slide="${s.id}">
@@ -419,17 +481,48 @@ async function addSlide() {
 }
 
 async function remove(s) {
-  if (!confirm(`Delete this banner? Switching it off keeps it for later; deleting does not.`)) return;
+  const ok = await confirmDelete({
+    title: s.headline ? `Delete "${s.headline}"?` : 'Delete this banner?',
+    // The old wording here was "switching it off keeps it for later; deleting
+    // does not", which was honest and was also the reason nobody used this
+    // button. Now both keep it, and the difference is what they mean: off is
+    // "not now", deleted is "not part of the rotation at all".
+    body: 'Its headline, wording, link and picture are kept, and so is its place in the rotation.',
+    confirm: 'Delete banner',
+  });
+  if (!ok) return;
 
+  let message;
   try {
-    await adminFetch(`/hero/${s.id}`, { method: 'DELETE' });
+    ({ message } = await adminFetch(`/hero/${s.id}`, { method: 'DELETE' }));
   } catch (err) {
     return fail(err.message);
   }
 
-  slides = slides.filter((x) => x.id !== s.id);
   clearError();
-  paint();
+  toast(message || 'Banner deleted.');
+  // Reloaded rather than patched: the banner moves from the running order into
+  // the Deleted section, and the server is the one that knows it went off on
+  // the way out.
+  await load();
+}
+
+async function putBack(btn) {
+  btn.disabled = true;
+  btn.textContent = 'Restoring…';
+
+  let message;
+  try {
+    ({ message } = await adminFetch(`/hero/${btn.dataset.heroRestore}/restore`, { method: 'POST' }));
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Restore';
+    return toast(err.message, false);
+  }
+
+  clearError();
+  toast(message || 'Banner restored, still switched off.');
+  await load();
 }
 
 /**
@@ -440,18 +533,25 @@ async function remove(s) {
  * list briefly holding two slides that both think they are third.
  */
 async function move(s, delta) {
-  const from = slides.indexOf(s);
+  // The rotation, not the payload. Deleted banners keep their sort_order so a
+  // restore returns them to the place they held, which means they are still
+  // interleaved in what the server sends — walking that list would step over
+  // a banner nobody can see.
+  const list = ordered();
+  const from = list.indexOf(s);
   const to = from + delta;
-  if (to < 0 || to >= slides.length) return;
+  if (to < 0 || to >= list.length) return;
 
-  slides.splice(to, 0, slides.splice(from, 1)[0]);
+  list.splice(to, 0, list.splice(from, 1)[0]);
+  // Rebuilt so paint() and the next move() both see the arrangement just made.
+  slides = [...list, ...slides.filter((x) => x.deletedAt)];
   paint();                                    // instant; the write follows
 
   try {
     await adminFetch('/hero/order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids: slides.map((x) => x.id) }),
+      body: JSON.stringify({ ids: list.map((x) => x.id) }),
     });
   } catch (err) {
     await load();
