@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * A promo code and the rules that govern it.
@@ -19,6 +20,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Promotion extends Model
 {
     use HasFactory;
+
+    /* Deleting a code takes it off the panel and out of every checkout; it
+       leaves its promotion_targets rows attached, so restoring returns the
+       code AND the scope somebody chose product by product. Hard deleting
+       cascaded those away. */
+    use SoftDeletes;
 
     protected $fillable = [
         'code', 'label', 'type', 'value', 'scope',

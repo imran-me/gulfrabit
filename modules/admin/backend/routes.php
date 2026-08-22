@@ -136,8 +136,13 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::get('/', [AdminPromotionController::class, 'index'])->name('index');
             Route::post('/', [AdminPromotionController::class, 'store'])->name('store');
             Route::patch('/{promotion:code}', [AdminPromotionController::class, 'update'])->name('update');
-            // Refused once the code has been used — see the controller.
-            Route::delete('/{promotion:code}', [AdminPromotionController::class, 'destroy'])->name('destroy');
+            // Refused once the code has been used — see the controller. Soft,
+            // and it switches the code off on the way out, so restoring never
+            // hands back a live discount.
+            Route::middleware('admin.owner')->group(function (): void {
+                Route::delete('/{promotion:code}', [AdminPromotionController::class, 'destroy'])->name('destroy');
+                Route::post('/{promotion}/restore', [AdminPromotionController::class, 'restore'])->name('restore');
+            });
         });
 
         // Categories. Same capability as products — whoever curates the

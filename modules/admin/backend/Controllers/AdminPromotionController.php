@@ -41,7 +41,12 @@ class AdminPromotionController extends Controller
     /** GET /api/admin/promotions */
     public function index(): JsonResponse
     {
+        // Deleted codes come back in the same payload. A shop has a handful of
+        // promo codes, not a paginated list, and the screen is a set of cards
+        // you read down — the client draws the deleted ones in their own
+        // section underneath rather than behind a tab nobody would open.
         $promotions = Promotion::query()
+            ->withTrashed()
             ->with('targets')
             ->orderByDesc('is_active')
             ->orderByDesc('id')
@@ -73,6 +78,7 @@ class AdminPromotionController extends Controller
                 'usedCount'   => $p->used_count,
                 'isActive'    => $p->is_active,
                 'isPublic'    => $p->is_public,
+                'deletedAt'   => $p->deleted_at?->toIso8601String(),
                 // Why it is not currently redeemable, in the merchant's words.
                 // "Active" with nothing happening on the shop is the single
                 // most confusing state a coupon screen can show.
@@ -95,8 +101,20 @@ class AdminPromotionController extends Controller
 
         $code = strtoupper(trim($data['code']));
 
-        if (Promotion::where('code', $code)->exists()) {
-            return response()->json(['message' => "The code {$code} already exists."], 422);
+        // withTrashed, because `code` is unique and a soft-deleted row keeps
+        // it. Without this the insert below dies on the constraint with a
+        // database error, for what is really a simple situation: the code is
+        // already there, deleted, and the merchant almost certainly wants it
+        // back rather than a second one.
+        $existing = Promotion::withTrashed()->where('code', $code)->first();
+
+        if ($existing !== null) {
+            return response()->json([
+                'message' => $existing->trashed()
+                    ? "The code {$code} was deleted. Restore it from Deleted below rather than "
+                        . 'making a second one — restoring brings its scope back with it.'
+                    : "The code {$code} already exists.",
+            ], 422);
         }
 
         $promotion = DB::transaction(function () use ($data, $code): Promotion {
@@ -151,9 +169,42 @@ class AdminPromotionController extends Controller
             ], 422);
         }
 
-        $promotion->delete();     // targets cascade
+        // Soft, so the targets do NOT cascade away. A code scoped to eleven
+        // products was eleven decisions; restoring has to bring them back, and
+        // it can only do that if the rows are still attached to a promotion id
+        // that still exists.
+        //
+        // Switched off on the way out, the same belt-and-braces the product
+        // delete uses: otherwise restore hands back a LIVE discount, and
+        // undoing a mistake would start taking money off orders the moment it
+        // was undone. Switching it on again stays a deliberate act.
+        DB::transaction(function () use ($promotion): void {
+            $promotion->is_active = false;
+            $promotion->save();
+            $promotion->delete();
+        });
 
-        return response()->json(['message' => "{$promotion->code} deleted."]);
+        return response()->json([
+            'message' => "{$promotion->code} deleted. It is under Deleted below, with its scope.",
+        ]);
+    }
+
+    /** POST /api/admin/promotions/{promotion}/restore */
+    public function restore(string $promotion): JsonResponse
+    {
+        $model = Promotion::withTrashed()->where('code', strtoupper(trim($promotion)))->firstOrFail();
+
+        if (! $model->trashed()) {
+            return response()->json(['message' => 'That code is not deleted.'], 422);
+        }
+
+        $model->restore();
+
+        // Deliberately still switched off — destroy() turned it off on the way
+        // out precisely so this cannot hand back a live discount.
+        return response()->json([
+            'message' => "{$model->code} is back, still switched off. Switch it on when you are ready.",
+        ]);
     }
 
     /* ---- helpers ------------------------------------------------------ */

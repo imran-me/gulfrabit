@@ -10,6 +10,7 @@
 
 import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
+import { canDelete, confirmDelete } from './admin-delete.js';
 
 let coupons = [];
 let categories = [];
@@ -66,21 +67,44 @@ async function load() {
  * ------------------------------------------------------------------ */
 
 function paint() {
-  const live = coupons.filter((c) => c.state === 'live').length;
+  /* Deleted codes arrive in the same payload — a shop has a handful of promo
+     codes, not a paginated list — and are drawn in their own section below
+     rather than behind a tab nobody would open. They are kept out of the count
+     and out of "working right now", which is the number this screen exists to
+     answer. */
+  const shown = coupons.filter((c) => !c.deletedAt);
+  const binned = coupons.filter((c) => c.deletedAt);
+  const live = shown.filter((c) => c.state === 'live').length;
 
-  document.querySelector('[data-cp-count]').textContent = coupons.length
-    ? `${coupons.length} coupon${coupons.length === 1 ? '' : 's'} · ${live} working right now`
+  document.querySelector('[data-cp-count]').textContent = shown.length
+    ? `${shown.length} coupon${shown.length === 1 ? '' : 's'} · ${live} working right now`
     : 'No coupons yet';
 
-  document.querySelector('[data-cp-list]').innerHTML = coupons.length
-    ? coupons.map(card).join('')
+  document.querySelector('[data-cp-list]').innerHTML = shown.length
+    ? shown.map(card).join('')
     : '<p class="admin__sub">No coupons yet — create one to run an offer.</p>';
+
+  const bin = document.querySelector('[data-cp-bin]');
+  if (bin) {
+    bin.hidden = !binned.length;
+    bin.innerHTML = binned.length
+      ? `<h2 class="h5">Deleted</h2>
+         <p class="admin__sub" style="margin-top:0">
+           Restoring brings the code back with the products or categories it was scoped to —
+           still switched off, so nothing starts discounting by surprise.
+         </p>
+         <div class="acat-grid">${binned.map(card).join('')}</div>`
+      : '';
+  }
 
   document.querySelectorAll('[data-cp-toggle]').forEach((input) => {
     input.addEventListener('change', () => toggle(input));
   });
   document.querySelectorAll('[data-cp-del]').forEach((btn) => {
     btn.addEventListener('click', () => remove(btn.dataset.cpDel));
+  });
+  document.querySelectorAll('[data-cp-restore]').forEach((btn) => {
+    btn.addEventListener('click', () => putBack(btn));
   });
 }
 
@@ -108,7 +132,8 @@ function card(c) {
           : (c.targets.length === 1 ? 'y' : 'ies')}`;
 
   return `
-    <article class="acat${c.state === 'live' ? '' : ' is-off'}" data-cp="${escapeHtml(c.code)}">
+    <article class="acat${c.state === 'live' ? '' : ' is-off'}${c.deletedAt ? ' is-deleted' : ''}"
+             data-cp="${escapeHtml(c.code)}">
       <div class="acat__head">
         <div class="acat__ident">
           <h2 class="acat__name" style="font-family:monospace">${escapeHtml(c.code)}</h2>
@@ -137,23 +162,38 @@ function card(c) {
             ${c.endsAt ? `until ${escapeHtml(c.endsAt)}` : 'no end date'}</p>`
         : ''}
 
-      <div class="acat__switches">
-        <label class="aswitch">
-          <input type="checkbox" data-cp-toggle="isActive" ${c.isActive ? 'checked' : ''}>
-          <span class="aswitch__track"></span>
-          <span>Active</span>
-        </label>
-        <label class="aswitch">
-          <input type="checkbox" data-cp-toggle="isPublic" ${c.isPublic ? 'checked' : ''}
-                 ${c.isActive ? '' : 'disabled'}>
-          <span class="aswitch__track"></span>
-          <span>Show on site</span>
-        </label>
-        ${c.usedCount === 0
-          ? `<button type="button" class="mbtn mbtn--quiet" style="color:var(--gr-error)"
-                     data-cp-del="${escapeHtml(c.code)}">Delete</button>`
-          : ''}
-      </div>
+      <div class="acat__switches">${
+        // A deleted code has no switches. They would offer to publish a
+        // discount that is not in any checkout, and toggling one would be a
+        // change with no visible effect anywhere.
+        c.deletedAt
+          ? (canDelete()
+              ? `<button type="button" class="btn-gr btn-outline-gr btn-sm-gr"
+                         data-cp-restore="${escapeHtml(c.code)}">Restore</button>`
+              : '<span class="atable__sub">Deleted</span>')
+          : `<label class="aswitch">
+               <input type="checkbox" data-cp-toggle="isActive" ${c.isActive ? 'checked' : ''}>
+               <span class="aswitch__track"></span>
+               <span>Active</span>
+             </label>
+             <label class="aswitch">
+               <input type="checkbox" data-cp-toggle="isPublic" ${c.isPublic ? 'checked' : ''}
+                      ${c.isActive ? '' : 'disabled'}>
+               <span class="aswitch__track"></span>
+               <span>Show on site</span>
+             </label>
+             ${
+               // Drawn whatever the used count, so the server's refusal — "this
+               // has been used 40 times, it is the only record of what that
+               // campaign cost" — can be read. Hiding the button hid the reason
+               // with it, and left the merchant wondering why one card has a
+               // Delete and the next does not.
+               canDelete()
+                 ? `<button type="button" class="alink-btn alink-btn--danger acat__delete"
+                            data-cp-del="${escapeHtml(c.code)}">Delete</button>`
+                 : ''
+             }`
+      }</div>
     </article>`;
 }
 
@@ -311,16 +351,55 @@ async function toggle(input) {
 }
 
 async function remove(code) {
-  if (!confirm(`Delete ${code}? It has never been used, so nothing is lost.`)) return;
+  const c = coupons.find((x) => x.code === code);
 
+  const ok = await confirmDelete({
+    title: `Delete ${code}?`,
+    // The used count decides whether this will be allowed at all, so it leads.
+    body: c?.usedCount
+      ? `It has been used ${c.usedCount} time${c.usedCount === 1 ? '' : 's'}, so the server will `
+        + 'refuse — a used code is the only record of what that campaign cost. Switch it off instead.'
+      : 'It has never been used. The code and the products or categories it applies to are kept.',
+  });
+  if (!ok) return;
+
+  let message;
   try {
-    await adminFetch(`/promotions/${encodeURIComponent(code)}`, { method: 'DELETE' });
+    ({ message } = await adminFetch(`/promotions/${encodeURIComponent(code)}`, { method: 'DELETE' }));
   } catch (err) {
+    // The refusal sentence is the whole value of the click when a code has
+    // been used, so it is shown rather than swallowed.
     return note(err.message, false);
   }
 
   await load();
-  note(`${code} deleted.`, true);
+  note(message || `${code} deleted.`, true);
+}
+
+/**
+ * Put a deleted code back — off.
+ *
+ * destroy() switches it off on the way out precisely so this cannot hand back
+ * a live discount: undoing a mistake should not start taking money off orders
+ * the moment it is undone.
+ */
+async function putBack(btn) {
+  const code = btn.dataset.cpRestore;
+  btn.disabled = true;
+  btn.textContent = 'Restoring…';
+
+  let message;
+  try {
+    ({ message } = await adminFetch(
+      `/promotions/${encodeURIComponent(code)}/restore`, { method: 'POST' }));
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Restore';
+    return note(err.message, false);
+  }
+
+  await load();
+  note(message || `${code} is back, still switched off.`, true);
 }
 
 function note(message, ok) {
