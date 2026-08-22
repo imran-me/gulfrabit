@@ -53,15 +53,133 @@ BUILD_THEME = "classic"
 # So there is one list now, head() reads it, and sync_index_theme() rewrites
 # index.html's block from it on every build. A theme added here cannot be
 # missing from the home page.
-THEME_SHEETS = [
-    "/modules/theme/theme-luxe.css",
-    "/modules/theme/theme-trio.css",
-    "/modules/theme/theme-noor.css",
-    "/modules/theme/theme-noor-sky.css",
-    "/modules/theme/theme-nakshi.css",
-    "/modules/theme/theme-nakshi-scene.css",
-    "/modules/theme/theme-utsab.css",
-]
+THEME_SHEETS = {
+    "classic": [],                                    # classic IS the base sheet
+    "luxe":    ["/modules/theme/theme-luxe.css"],
+    "trio":    ["/modules/theme/theme-trio.css"],
+    "noor":    ["/modules/theme/theme-noor.css",
+                "/modules/theme/theme-noor-sky.css"],
+    "nakshi":  ["/modules/theme/theme-nakshi.css",
+                "/modules/theme/theme-nakshi-scene.css"],
+    "utsab":   ["/modules/theme/theme-utsab.css"],
+}
+
+# ONE THEME'S SHEETS, NOT ALL OF THEM.
+#
+# This was a flat list and every page linked the whole thing: seven
+# stylesheets, 230 KB raw and about 64 KB gzipped, render-blocking, on every
+# page of the shop. Six of the seven were inert — a theme sheet does nothing
+# without its [data-theme] on <html> — so a shop published as Trio was making
+# every visitor download 62 KB of CSS for five themes they would never see,
+# before the first pixel. On the connections most of this shop's customers are
+# on, that was the better part of a second of blank screen, on every page.
+#
+# It was linked that way for a real reason: the HTML is static and built once,
+# so the build cannot know which theme the merchant will publish next week. The
+# answer is not to guess but to LAYER the two things that do know:
+#
+#   1. The build bakes its own theme's sheets as normal blocking <link>s.
+#   2. The pre-paint bootstrap knows better whenever a returning visitor has a
+#      mirror of the server's last answer, and injects that theme's sheets
+#      before the first paint. Appending a stylesheet <link> into <head> blocks
+#      rendering exactly as an authored one does, so there is no flash.
+#   3. theme.js covers the rest — the first-ever visit, and a live switch.
+#
+# The cost is one extra blocking request, and only for visitors who arrive
+# between the merchant publishing a new theme and the next deploy re-baking it.
+# The saving is 62 KB of dead CSS for everybody, always.
+
+
+# The comment that ships in every page's <head>, above the theme link.
+# Kept here rather than inline in head() so the string is one piece of prose
+# instead of six concatenated fragments.
+THEME_LINK_NOTE = (
+    "<!-- The theme layer for this build. ONE theme, not seven: a theme sheet\n"
+    "       is inert without its [data-theme] on <html>, so linking them all\n"
+    "       meant every visitor downloading five themes they would never see,\n"
+    "       render-blocking, on every page. The bootstrap above adds a\n"
+    "       different one before the first paint when the server has already\n"
+    "       told this visitor which theme is published. -->\n"
+)
+
+
+def _theme_bootstrap_js():
+    """The pre-paint theme block, shared by head() and sync_index_theme().
+
+    It lives in one function for the same reason THEME_SHEETS is one map: this
+    code exists in two places on disk — every generated page, and the
+    hand-authored index.html — and the last time those two drifted, the home
+    page painted Classic while the rest of the shop wore the published theme.
+    A copy that has to be kept in step by hand is a copy that goes stale, and
+    the home page is the page most visitors land on.
+
+    Indented to sit inside the <script> in head().
+    """
+    return """try {
+      var t = localStorage.getItem('gr:theme');
+      if (t) {
+        var el = document.documentElement;
+        var v = JSON.parse(t);
+        if (%(list)s.indexOf(v) > -1) el.setAttribute('data-theme', v);
+        else el.removeAttribute('data-theme');
+
+        /* AND ITS STYLESHEET, if this build did not bake it.
+           The attribute alone paints nothing. A theme is an attribute plus the
+           sheet scoped to it, and the build links only the theme it was built
+           with — see THEME_SHEETS for why it stopped linking all seven.
+
+           Injecting the <link> HERE, rather than in theme.js, is the whole
+           point of doing it in this block: a stylesheet appended to <head>
+           before the body exists blocks the first paint exactly as an authored
+           one does, so the visitor sees the right theme immediately instead of
+           a frame of Classic and then a flip. theme.js runs after the paint
+           this is here to get right.
+
+           Skipped when the mirror agrees with the build, which is the normal
+           case and already has its sheet linked. */
+        var baked = '%(baked)s';
+        var sheets = %(sheets)s;
+        if (v !== baked && sheets[v]) {
+          for (var i = 0; i < sheets[v].length; i++) {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = sheets[v][i];
+            document.head.appendChild(link);
+          }
+        }
+      }
+    } catch (e) { /* private mode, or nothing stored — the built-in theme stands. */ }""" % {
+        "list": _theme_js_list(),
+        "baked": BUILD_THEME,
+        "sheets": _theme_sheet_map_js(),
+    }
+
+
+def theme_links(theme, *, relative=False):
+    """The <link> tags for one theme, in cascade order."""
+    sheets = THEME_SHEETS.get(theme, [])
+    return [
+        f'<link rel="stylesheet" href="{asset(s).lstrip("/") if relative else asset(s)}">'
+        for s in sheets
+    ]
+
+
+def _theme_sheet_map_js():
+    """THEME_SHEETS as a JS object literal, for the pre-paint bootstrap.
+
+    Hashed exactly as the authored links are, so a sheet injected by the
+    bootstrap hits the same cache entry as one the build wrote — otherwise a
+    visitor would download the same file twice under two URLs.
+    """
+    parts = []
+
+    for name, sheets in THEME_SHEETS.items():
+        if not sheets:
+            continue
+        urls = ",".join(f"'{asset(s)}'" for s in sheets)
+        parts.append(f"{name}:[{urls}]")
+
+    return "{" + ",".join(parts) + "}"
 
 # Every theme a visitor may be shown, EXCLUDING classic — classic is the
 # absence of the attribute, not a value of it.
@@ -148,15 +266,15 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, cano
     # being crawled — which is the very thing (?utm_source=…) it exists to
     # point away from.
     canonical_tag = f'  <link rel="canonical" href="{SITE}/{canonical.lstrip("/")}">\n' if canonical else ""
+    # Only the BAKED theme's sheets. The other five are not linked at all —
+    # see the note by THEME_SHEETS for why, and for what covers a visitor whose
+    # published theme is not the one this build baked.
+    baked = theme_links(BUILD_THEME) if luxe else []
     luxe_link = (
-        '<!-- The Luxe layer. Linked on every storefront page and completely\n'
-        '       inert without [data-theme="luxe"] on <html>, so the default theme\n'
-        '       renders exactly as it did before this file existed. Linking it\n'
-        '       conditionally would mean knowing the theme before the <head> is\n'
-        '       written, and this HTML is built once and served to everyone. -->\n'
-        + "\n  ".join(f'  <link rel="stylesheet" href="{asset(s)}">' for s in THEME_SHEETS)
+        THEME_LINK_NOTE
+        + "\n  ".join(f"  {tag}" for tag in baked)
         + "\n  "
-    ) if luxe else ""
+    ) if baked else ""
     # data-cms-page is what modules/cms keys its overrides on. Absent means the
     # page is not editable, which is the correct default for anything rendered
     # entirely from data — an override there would be overwritten on the next
@@ -213,15 +331,7 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, cano
 
        Inline and above the stylesheet on purpose: a deferred script runs after
        the first paint, which is the flash it exists to prevent. */
-    try {{
-      var t = localStorage.getItem('gr:theme');
-      if (t) {{
-        var el = document.documentElement;
-        var v = JSON.parse(t);
-        if ({_theme_js_list()}.indexOf(v) > -1) el.setAttribute('data-theme', v);
-        else el.removeAttribute('data-theme');
-      }}
-    }} catch (e) {{ /* private mode, or nothing stored — the built-in theme stands. */ }}
+{_theme_bootstrap_js()}
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
@@ -825,26 +935,67 @@ def sync_index_theme():
                  lambda m: m.group(1) + want + m.group(2), html, count=1)
 
     # index.html sits at the root, so its hrefs are relative with no "../".
-    block = "\n  ".join(
-        f'<link rel="stylesheet" href="{asset(s).lstrip("/")}">' for s in THEME_SHEETS
-    )
+    #
+    # ONE theme's sheets, matching what head() writes for every other page. If
+    # the build bakes Classic there is no link at all, so the block is removed
+    # rather than left holding six sheets nothing can reach.
+    tags = theme_links(BUILD_THEME, relative=True)
+    block = ("  " + "\n  ".join(tags) + "\n") if tags else ""
+
     new, hits = re.subn(
         r'(?:[ \t]*<link rel="stylesheet" href="modules/theme/theme-[^"]*">[ \t]*\r?\n)+',
-        "  " + block + "\n",
+        lambda _m: block,
         new,
         count=1,
     )
-    if not hits:
+
+    # NOTHING TO REPLACE IS THE NORMAL CASE NOW, not a failure.
+    #
+    # A Classic build writes no theme link at all, so the next build — for a
+    # theme that does need one — finds no block to swap and has to know where
+    # to put it. Anchoring on the base stylesheet works because every theme
+    # sheet must come after it in the cascade, which is the same order head()
+    # writes for every other page.
+    if not hits and tags:
+        new, hits = re.subn(
+            r'([ \t]*<link rel="stylesheet" href="shared/css/gulfrabit\.css[^"]*">[ \t]*\r?\n)',
+            lambda m: m.group(1) + block,
+            new,
+            count=1,
+        )
+
+    if not hits and tags:
         # Loud, because silence here is exactly the failure this function
         # exists to prevent: the home page would keep whatever links it has
         # and quietly diverge from every other page in the shop.
-        print("WARNING: index.html has no theme stylesheet block to sync — "
+        print("WARNING: index.html has nowhere to put the theme stylesheet — "
               "the home page will not follow new themes")
+
+    # THE PRE-PAINT BOOTSTRAP, from the same function head() uses.
+    #
+    # This is the half that used to be missed. The links could be regenerated
+    # perfectly and the home page would still be wrong, because the block that
+    # reads the mirror — and now the block that injects the sheet for a theme
+    # this build did not bake — was a hand-typed copy sitting in index.html.
+    # A copy kept in step by hand is a copy that goes stale, on the page most
+    # visitors land on.
+    new, boot_hits = re.subn(
+        r"try \{\s*\n\s*var t = localStorage\.getItem\('gr:theme'\);"
+        r".*?"
+        r"catch \(e\) \{ /\* private mode[^}]*\}",
+        lambda _m: _theme_bootstrap_js(),
+        new,
+        count=1,
+        flags=re.S,
+    )
+    if not boot_hits:
+        print("WARNING: index.html has no theme bootstrap to sync — the home "
+              "page will flash the wrong theme when one is published")
 
     if new != html:
         with open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(new)
-        print(f"index.html: theme -> {BUILD_THEME}, {len(THEME_SHEETS)} theme sheets linked")
+        print(f"index.html: theme -> {BUILD_THEME}, {len(tags)} theme sheet(s) linked")
 
 
 if __name__ == "__main__":
@@ -863,7 +1014,44 @@ if __name__ == "__main__":
     # at all.
     _ap.add_argument("--theme", choices=["classic", *STOREFRONT_THEMES], default="classic",
                      help="storefront theme to build in (default: classic)")
-    BUILD_THEME = _ap.parse_args().theme          # noqa: F811 — overrides the module default
+    # --theme-from matters more now than it would have before.
+    #
+    # A page links only the theme it was BUILT with. So a build that guesses
+    # Classic while the shop publishes Trio makes every FIRST-time visitor —
+    # the ones with no mirror for the bootstrap to read — paint Classic, wait
+    # for /api/theme, then fetch a stylesheet and flip. That is precisely the
+    # flash the whole mechanism exists to prevent, aimed at the visitors who
+    # have never seen the shop before.
+    #
+    # The server already knows the answer, so the build asks it rather than
+    # relying on someone remembering a flag. Unreachable, slow, or answering
+    # something this build has never heard of all fall back to --theme, which
+    # is the old behaviour: a deploy must not fail because a decoration
+    # endpoint is down.
+    _ap.add_argument("--theme-from", metavar="URL",
+                     help="read the published theme from a URL returning "
+                          '{"data":{"theme":"…"}}; falls back to --theme')
+
+    _args = _ap.parse_args()
+    BUILD_THEME = _args.theme                     # noqa: F811 — overrides the module default
+
+    if _args.theme_from:
+        import json as _json
+        import urllib.request as _url
+
+        try:
+            with _url.urlopen(_args.theme_from, timeout=10) as _r:
+                _published = (_json.load(_r).get("data") or {}).get("theme")
+        except Exception as _e:                    # noqa: BLE001 — any failure is the same failure
+            _published = None
+            print(f"could not read the published theme ({_e}); building {BUILD_THEME}")
+
+        if _published in ("classic", *STOREFRONT_THEMES):
+            BUILD_THEME = _published
+            print(f"published theme is {BUILD_THEME}")
+        elif _published is not None:
+            print(f"ignoring unknown published theme {_published!r}; building {BUILD_THEME}")
+
     if BUILD_THEME != "classic":
         print(f"building storefront with the {BUILD_THEME} theme")
 

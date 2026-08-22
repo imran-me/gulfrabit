@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="no-js">
+<html lang="en" class="no-js" data-theme="trio">
 <head>
   <meta charset="UTF-8">
   <script>
@@ -41,13 +41,38 @@
 
        Inline and above the stylesheet on purpose: a deferred script runs after
        the first paint, which is the flash it exists to prevent. */
-    try {
+try {
       var t = localStorage.getItem('gr:theme');
       if (t) {
         var el = document.documentElement;
         var v = JSON.parse(t);
         if (['luxe','trio','noor','nakshi','utsab'].indexOf(v) > -1) el.setAttribute('data-theme', v);
         else el.removeAttribute('data-theme');
+
+        /* AND ITS STYLESHEET, if this build did not bake it.
+           The attribute alone paints nothing. A theme is an attribute plus the
+           sheet scoped to it, and the build links only the theme it was built
+           with — see THEME_SHEETS for why it stopped linking all seven.
+
+           Injecting the <link> HERE, rather than in theme.js, is the whole
+           point of doing it in this block: a stylesheet appended to <head>
+           before the body exists blocks the first paint exactly as an authored
+           one does, so the visitor sees the right theme immediately instead of
+           a frame of Classic and then a flip. theme.js runs after the paint
+           this is here to get right.
+
+           Skipped when the mirror agrees with the build, which is the normal
+           case and already has its sheet linked. */
+        var baked = 'trio';
+        var sheets = {luxe:['/modules/theme/theme-luxe.css?v=72101cb9'],trio:['/modules/theme/theme-trio.css?v=dd326453'],noor:['/modules/theme/theme-noor.css?v=a4d38565','/modules/theme/theme-noor-sky.css?v=f8c6680b'],nakshi:['/modules/theme/theme-nakshi.css?v=0e635894','/modules/theme/theme-nakshi-scene.css?v=b4627e73'],utsab:['/modules/theme/theme-utsab.css?v=b0d10326']};
+        if (v !== baked && sheets[v]) {
+          for (var i = 0; i < sheets[v].length; i++) {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = sheets[v][i];
+            document.head.appendChild(link);
+          }
+        }
       }
     } catch (e) { /* private mode, or nothing stored — the built-in theme stands. */ }
   </script>
@@ -83,18 +108,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=672caade">
-  <!-- The Luxe layer. Linked on every storefront page and completely
-       inert without [data-theme="luxe"] on <html>, so the default theme
-       renders exactly as it did before this file existed. Linking it
-       conditionally would mean knowing the theme before the <head> is
-       written, and this HTML is built once and served to everyone. -->
-  <link rel="stylesheet" href="../../modules/theme/theme-luxe.css?v=72101cb9">
-    <link rel="stylesheet" href="../../modules/theme/theme-trio.css?v=dd326453">
-    <link rel="stylesheet" href="../../modules/theme/theme-noor.css?v=a4d38565">
-    <link rel="stylesheet" href="../../modules/theme/theme-noor-sky.css?v=f8c6680b">
-    <link rel="stylesheet" href="../../modules/theme/theme-nakshi.css?v=0e635894">
-    <link rel="stylesheet" href="../../modules/theme/theme-nakshi-scene.css?v=b4627e73">
-    <link rel="stylesheet" href="../../modules/theme/theme-utsab.css?v=b0d10326">
+  <!-- The theme layer for this build. ONE theme, not seven: a theme sheet
+       is inert without its [data-theme] on <html>, so linking them all
+       meant every visitor downloading five themes they would never see,
+       render-blocking, on every page. The bootstrap above adds a
+       different one before the first paint when the server has already
+       told this visitor which theme is published. -->
+  <link rel="stylesheet" href="../../modules/theme/theme-trio.css?v=dd326453">
   <link rel="stylesheet" href="../../modules/auth/auth.css?v=90cffd9a">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
@@ -505,7 +525,7 @@
 </footer>
 
   <script type="module" src="../../shared/js/main.js?v=65e9eef8"></script>
-  <script type="module" src="../../modules/theme/theme.js?v=3d984ffc"></script>
+  <script type="module" src="../../modules/theme/theme.js?v=d6e89794"></script>
   <script type="module" src="../../modules/auth/auth-page.js?v=df27b8cb"></script>
 </body>
 </html>

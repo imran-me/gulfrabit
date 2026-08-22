@@ -59,6 +59,64 @@ export function currentTheme() {
 }
 
 /**
+ * Which stylesheet each theme needs.
+ *
+ * Pages link only the theme they were BUILT with — see THEME_SHEETS in
+ * tools/assemble.py for why they stopped linking all seven. The pre-paint
+ * bootstrap covers a returning visitor whose published theme differs from the
+ * build. This covers everyone else: a first-ever visit, and a live switch from
+ * the admin preview or ?theme=.
+ *
+ * Classic is absent on purpose. It is the base stylesheet, not a layer.
+ */
+const THEME_SHEETS = {
+  luxe:   ['/modules/theme/theme-luxe.css'],
+  trio:   ['/modules/theme/theme-trio.css'],
+  noor:   ['/modules/theme/theme-noor.css', '/modules/theme/theme-noor-sky.css'],
+  nakshi: ['/modules/theme/theme-nakshi.css', '/modules/theme/theme-nakshi-scene.css'],
+  utsab:  ['/modules/theme/theme-utsab.css'],
+};
+
+/**
+ * Make sure a theme's stylesheet is on the page, and WAIT for it.
+ *
+ * The wait is the point. Setting data-theme before its sheet has parsed shows
+ * the visitor a frame of half-themed page — Classic's layout wearing none of
+ * the new theme's colour — which is worse than the brief delay, and it lands
+ * on the switch the merchant is watching in the admin preview.
+ *
+ * Resolves either way after 3 seconds. A theme is decoration; a shop that will
+ * not paint because a stylesheet is slow is a worse failure than a shop that
+ * paints in the wrong colour.
+ */
+function ensureSheets(theme) {
+  const hrefs = THEME_SHEETS[theme] || [];
+
+  const pending = hrefs
+    // href on a link element resolves to an absolute URL, and the build stamps
+    // a ?v= hash on the authored ones, so compare on the pathname alone.
+    .filter((href) => !document.querySelector(
+      `link[rel="stylesheet"][href*="${href.split('/').pop().split('?')[0]}"]`
+    ))
+    .map((href) => new Promise((resolve) => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      link.addEventListener('load', resolve, { once: true });
+      // A theme that 404s must not hang the switch for ever.
+      link.addEventListener('error', resolve, { once: true });
+      document.head.append(link);
+    }));
+
+  if (!pending.length) return Promise.resolve();
+
+  return Promise.race([
+    Promise.all(pending),
+    new Promise((resolve) => setTimeout(resolve, 3000)),
+  ]);
+}
+
+/**
  * Put a theme on the page.
  *
  * Classic is the ABSENCE of the attribute, not a value of it — that is what
@@ -306,6 +364,7 @@ export async function syncTheme() {
   if (preview) {
     // Deliberately does NOT touch the mirror. A preview must leave no trace
     // that could later be read as the published theme.
+    await ensureSheets(preview);
     return applyTheme(preview);
   }
 
@@ -317,8 +376,16 @@ export async function syncTheme() {
     const name = body?.data?.theme ?? body?.theme;
     if (!THEMES.includes(name)) return currentTheme();
 
-    // The ONLY write to the mirror in the codebase.
+    // The ONLY write to the mirror in the codebase. Written BEFORE the sheet
+    // is fetched, on purpose: the mirror is what lets the next navigation
+    // paint this theme before anything is requested at all, and it is correct
+    // the moment the server says so — not the moment a stylesheet finishes.
     try { storage.set(KEYS.THEME, name); } catch { /* private mode */ }
+
+    // Nothing to fetch when the page already links this theme, which is the
+    // normal case: the build baked it, or the pre-paint bootstrap added it.
+    await ensureSheets(name);
+
     return applyTheme(name);
   } catch {
     return currentTheme();   // offline, or no backend — 3 then 4 stand.

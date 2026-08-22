@@ -41,13 +41,38 @@
 
        Inline and above the stylesheet on purpose: a deferred script runs after
        the first paint, which is the flash it exists to prevent. */
-    try {
+try {
       var t = localStorage.getItem('gr:theme');
       if (t) {
         var el = document.documentElement;
         var v = JSON.parse(t);
         if (['luxe','trio','noor','nakshi','utsab'].indexOf(v) > -1) el.setAttribute('data-theme', v);
         else el.removeAttribute('data-theme');
+
+        /* AND ITS STYLESHEET, if this build did not bake it.
+           The attribute alone paints nothing. A theme is an attribute plus the
+           sheet scoped to it, and the build links only the theme it was built
+           with — see THEME_SHEETS for why it stopped linking all seven.
+
+           Injecting the <link> HERE, rather than in theme.js, is the whole
+           point of doing it in this block: a stylesheet appended to <head>
+           before the body exists blocks the first paint exactly as an authored
+           one does, so the visitor sees the right theme immediately instead of
+           a frame of Classic and then a flip. theme.js runs after the paint
+           this is here to get right.
+
+           Skipped when the mirror agrees with the build, which is the normal
+           case and already has its sheet linked. */
+        var baked = 'trio';
+        var sheets = {luxe:['/modules/theme/theme-luxe.css?v=72101cb9'],trio:['/modules/theme/theme-trio.css?v=dd326453'],noor:['/modules/theme/theme-noor.css?v=a4d38565','/modules/theme/theme-noor-sky.css?v=f8c6680b'],nakshi:['/modules/theme/theme-nakshi.css?v=0e635894','/modules/theme/theme-nakshi-scene.css?v=b4627e73'],utsab:['/modules/theme/theme-utsab.css?v=b0d10326']};
+        if (v !== baked && sheets[v]) {
+          for (var i = 0; i < sheets[v].length; i++) {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = sheets[v][i];
+            document.head.appendChild(link);
+          }
+        }
       }
     } catch (e) { /* private mode, or nothing stored — the built-in theme stands. */ }
   </script>

@@ -64,7 +64,15 @@ jobs:
 
       - name: Rebuild static pages
         run: |
-          python3 tools/assemble.py
+          # --theme-from, not a bare build. Every page now links only the theme
+          # it was BUILT with, so a build that assumes Classic while the shop
+          # publishes Trio makes first-time visitors paint Classic, wait for
+          # /api/theme, fetch a stylesheet and flip — the flash the pre-paint
+          # bootstrap exists to prevent, aimed at people who have never seen
+          # the shop. The server knows the answer, so the build asks it.
+          # Unreachable or unrecognised falls back to Classic; a deploy must
+          # not fail because a decoration endpoint is down.
+          python3 tools/assemble.py --theme-from https://gulfrabit.com/api/theme
           python3 tools/sitemap.py
 
       - name: Verify before shipping
