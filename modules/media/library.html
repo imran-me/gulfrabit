@@ -115,34 +115,78 @@
           <h1 class="admin__title">Images</h1>
           <p class="admin__sub" data-lib-count>Loading…</p>
         </div>
-        <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-lib-upload>+ Upload images</button>
+        <div class="mfm__head-acts">
+          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-lib-newfolder>+ New folder</button>
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-lib-upload>+ Upload images</button>
+        </div>
       </div>
 
-      <!-- Said once, here, because it is the one thing about this screen that
-           is not obvious: images are shared. Replacing a picture from a product
-           screen changes it for that product only, but deleting it here removes
-           it everywhere it is used. -->
+      <!-- Said once, here, because these are the two things about this screen
+           that are not obvious: images are shared, and folders are only
+           filing. Deleting an image here removes it everywhere it is used;
+           moving one between folders changes nothing on the live shop, because
+           the web address of a picture never depends on where it is filed. -->
       <div class="acard" style="margin-bottom:var(--space-5)">
         <p class="admin__sub" style="margin:0">
-          Every image uploaded anywhere in the panel lands here. The number on a
-          thumbnail is <strong>how many places use it</strong> — deleting one of those
-          leaves a blank space on the live site, so the panel asks first.
-          Uploading the same picture twice reuses the copy already here.
+          Every image uploaded anywhere in the panel lands here. Folders are
+          <strong>filing only</strong> — moving a picture never changes its web
+          address, so the shop keeps showing it. The number on a thumbnail is
+          <strong>how many places use it</strong>; deleting one of those leaves a
+          blank space on the live site, so the panel asks first.
         </p>
       </div>
 
-      <label class="afilters__field afilters__field--wide" style="margin-bottom:var(--space-4)">
-        <span class="sr-only">Search images</span>
-        <input class="input-gr" type="search" placeholder="Search by file name or description"
-               data-lib-search>
-      </label>
+      <div class="mfm">
+        <!-- The tree. A real sidebar, not a filter dropdown: the whole point of
+             folders is seeing where a thing sits relative to everything else,
+             and a dropdown shows you one row at a time. -->
+        <aside class="mfm__side">
+          <div class="mfm__side-head">
+            <span>Folders</span>
+            <button type="button" class="mfm__side-add" data-lib-newfolder-root
+                    title="New top-level folder" aria-label="New top-level folder">+</button>
+          </div>
+          <nav class="mfm__tree" data-lib-tree aria-label="Folders">
+            <p class="admin__sub" style="padding:var(--space-3)">Loading…</p>
+          </nav>
+        </aside>
 
-      <div class="mlib" data-lib-grid>
-        <p class="admin__sub">Loading images…</p>
-      </div>
+        <section class="mfm__main">
+          <div class="mfm__bar">
+            <nav class="mfm__crumbs" data-lib-crumbs aria-label="Breadcrumb"></nav>
+            <label class="mfm__deep" data-lib-deep-wrap hidden>
+              <input type="checkbox" data-lib-deep>
+              <span>Include subfolders</span>
+            </label>
+          </div>
 
-      <div style="text-align:center;padding:var(--space-5) 0">
-        <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-lib-more hidden>Load more</button>
+          <label class="mfm__search">
+            <span class="sr-only">Search images</span>
+            <input class="input-gr" type="search" placeholder="Search by file name or description"
+                   data-lib-search>
+          </label>
+
+          <!-- Appears only with a selection. Same component as the orders
+               screen's bulk bar, on purpose — one selection idiom in the
+               panel, learned once. -->
+          <div class="abulk" data-lib-bulk hidden>
+            <strong data-bulk-count></strong>
+            <div class="abulk__actions">
+              <button class="btn-gr btn-sm-gr" type="button" data-bulk-move>Move to folder…</button>
+            </div>
+            <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-bulk-clear>Clear selection</button>
+          </div>
+
+          <div class="mfm__folders" data-lib-folders hidden></div>
+
+          <div class="mlib" data-lib-grid>
+            <p class="admin__sub">Loading images…</p>
+          </div>
+
+          <div style="text-align:center;padding:var(--space-5) 0">
+            <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-lib-more hidden>Load more</button>
+          </div>
+        </section>
       </div>
 
       <p class="aerror" data-lib-note hidden role="alert"></p>
@@ -161,6 +205,6 @@
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=73f64c7d"></script>
-  <script type="module" src="../../modules/media/library-page.js?v=3a5963ef"></script>
+  <script type="module" src="../../modules/media/library-page.js?v=8e0c0c16"></script>
 </body>
 </html>

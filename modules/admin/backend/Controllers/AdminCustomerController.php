@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Admin\Controllers;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -40,23 +41,10 @@ class AdminCustomerController extends Controller
         $data = $request->validate([
             'q'       => ['sometimes', 'string', 'max:64'],
             'perPage' => ['sometimes', 'integer', 'min:10', 'max:100'],
+            'deleted' => ['sometimes', 'boolean'],
         ]);
 
-        $query = User::query()->latest('created_at');
-
-        if (! empty($data['q'])) {
-            $term = trim($data['q']);
-            // Name, phone, email. Not a wildcard across every column — a broad
-            // LIKE over an address book turns a support tool into a way to
-            // trawl for people who live in a particular area.
-            $query->where(function ($w) use ($term): void {
-                $w->where('name', 'like', "%{$term}%")
-                    ->orWhere('phone', 'like', "%{$term}%")
-                    ->orWhere('email', 'like', "%{$term}%");
-            });
-        }
-
-        $page = $query->paginate($data['perPage'] ?? 25);
+        $page = $this->filtered($data)->latest('created_at')->paginate($data['perPage'] ?? 25);
         $stats = $this->orderStatsFor(collect($page->items())->pluck('id')->all());
 
         return response()->json([
@@ -76,6 +64,7 @@ class AdminCustomerController extends Controller
                     'spentTaka'  => intdiv($s['spentPoisha'], 100),
                     'lastOrderAt' => $s['lastAt'],
                     'joinedAt'   => $u->created_at?->toIso8601String(),
+                    'deletedAt'  => $u->deleted_at?->toIso8601String(),
                 ];
             }, $page->items()),
             'meta' => [
@@ -83,8 +72,104 @@ class AdminCustomerController extends Controller
                 'perPage'     => $page->perPage(),
                 'currentPage' => $page->currentPage(),
                 'lastPage'    => $page->lastPage(),
+                // Counted under the same search but the opposite side of the
+                // drawer, so the Deleted tab answers the question actually
+                // being asked rather than a different one — and shows the same
+                // number whichever side you are standing on.
+                'deletedCount' => $this->filtered(['deleted' => true] + $data)->count(),
             ],
         ]);
+    }
+
+    /**
+     * DELETE /api/admin/customers/{user}
+     *
+     * NOT the same act as `forget`, and the difference is the whole point.
+     *
+     *   forget  — anonymise in place. Irreversible, logged as an erasure,
+     *             demands a typed reason. For the day somebody asks to be
+     *             erased.
+     *   delete  — take them off the list. Reversible, keeps everything. For a
+     *             test account, a duplicate, or a number that was nobody.
+     *
+     * Using the first to do the second is how an erasure log fills with
+     * entries that mean nothing, and how the one real erasure request becomes
+     * impossible to find among them.
+     *
+     * Their orders are deliberately untouched. An order is a historical record
+     * with its own delivery snapshot on it — deleting the customer does not
+     * unsell what they bought, and the money stays on the books.
+     */
+    public function destroy(User $user): JsonResponse
+    {
+        if ($user->trashed()) {
+            return response()->json(['message' => 'That customer is already deleted.'], 422);
+        }
+
+        $user->delete();
+
+        return response()->json([
+            'message' => "{$user->name} removed from the customer list. "
+                . 'Their orders are unchanged, and they can be put back.',
+        ]);
+    }
+
+    /**
+     * POST /api/admin/customers/{user}/restore
+     *
+     * Note that this is not the only way a deleted customer comes back: one
+     * who signs in with an OTP and proves they control their phone number is
+     * restored by that act, because deleting is a tidying of the list and not
+     * a ban. See AuthService::loginWithVerifiedPhone in modules/auth.
+     */
+    public function restore(int $user): JsonResponse
+    {
+        $model = User::withTrashed()->findOrFail($user);
+
+        if (! $model->trashed()) {
+            return response()->json(['message' => 'That customer is not deleted.'], 422);
+        }
+
+        $model->restore();
+
+        return response()->json(['message' => "{$model->name} is back on the customer list."]);
+    }
+
+    /**
+     * The customer list under the current search, on one side of the drawer.
+     *
+     * Shared by the page of rows and by the Deleted tab's count, so the two
+     * can never answer different questions — a "Deleted 12" badge that ignores
+     * the search box while the rows beside it obey it is a badge that gets
+     * mistrusted and then ignored.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function filtered(array $data): Builder
+    {
+        $query = User::query();
+
+        // Every other caller in the project — checkout, the account pages, the
+        // storefront — sees only live customers, because the global scope is
+        // doing its job. This is the one screen allowed to look in the drawer,
+        // and only when it asks.
+        if (! empty($data['deleted'])) {
+            $query->onlyTrashed();
+        }
+
+        if (! empty($data['q'])) {
+            $term = trim($data['q']);
+            // Name, phone, email. Not a wildcard across every column — a broad
+            // LIKE over an address book turns a support tool into a way to
+            // trawl for people who live in a particular area.
+            $query->where(function ($w) use ($term): void {
+                $w->where('name', 'like', "%{$term}%")
+                    ->orWhere('phone', 'like', "%{$term}%")
+                    ->orWhere('email', 'like', "%{$term}%");
+            });
+        }
+
+        return $query;
     }
 
     /** GET /api/admin/customers/{user} */
@@ -106,6 +191,9 @@ class AdminCustomerController extends Controller
                 'tier'     => $user->tier,
                 'verified' => $user->phone_verified_at !== null,
                 'joinedAt' => $user->created_at?->toIso8601String(),
+                // The route binds withTrashed, so this screen opens for a
+                // deleted customer and has to be able to say so.
+                'deletedAt' => $user->deleted_at?->toIso8601String(),
 
                 'stats' => [
                     'orders'      => $stats['orders'],

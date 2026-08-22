@@ -1,10 +1,22 @@
 /**
  * customer-detail-page.js — one customer: profile, orders, addresses, notes,
- * and the erasure control.
+ * and the two ways to remove them.
+ *
+ * TWO REMOVALS, KEPT APART ON PURPOSE
+ * -----------------------------------
+ * Delete, at the top, is the ordinary one: they leave the customer list and
+ * every count, their orders are untouched, and an owner can put them back.
+ * Erase, in the card at the bottom, overwrites their name, phone, email and
+ * addresses here AND on past orders, and cannot be undone.
+ *
+ * They are at opposite ends of the screen, worded differently, and only one of
+ * them demands a typed reason — because the day somebody reaches for the wrong
+ * one is the day this screen has failed.
  */
 
 import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
+import { canDelete, confirmDelete, toast } from './admin-delete.js';
 import { stageLabel, stageTone } from './order-stages.js';
 
 let customer = null;
@@ -34,7 +46,86 @@ async function load() {
   paintOrders();
   paintAddresses();
   paintNotes();
+  paintActions();
   paintForget();
+}
+
+/**
+ * Delete, or restore, at the top of the screen.
+ *
+ * Deliberately nowhere near the erasure card at the foot of the page. They are
+ * different acts with different consequences, and putting them side by side
+ * would be an invitation to reach for the wrong one.
+ */
+function paintActions() {
+  const host = document.querySelector('[data-cust-actions]');
+  const banner = document.querySelector('[data-cust-deleted]');
+  if (!host) return;
+
+  if (banner) {
+    banner.hidden = !customer.deletedAt;
+    banner.textContent = customer.deletedAt
+      ? `${customer.name} was deleted on ${when(customer.deletedAt)}. They do not appear in the `
+        + 'customer list or any count. Nothing has been erased, and their orders are unchanged.'
+      : '';
+  }
+
+  if (!canDelete(session)) { host.innerHTML = ''; return; }
+
+  host.innerHTML = customer.deletedAt
+    ? '<button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-cust-restore>Restore customer</button>'
+    : '<button class="btn-gr btn-danger-gr btn-sm-gr" type="button" data-cust-delete>Delete customer</button>';
+
+  host.querySelector('[data-cust-delete]')?.addEventListener('click', (e) => remove(e.currentTarget));
+  host.querySelector('[data-cust-restore]')?.addEventListener('click', (e) => putBack(e.currentTarget));
+}
+
+async function remove(btn) {
+  const n = customer.stats?.orders ?? 0;
+
+  const ok = await confirmDelete({
+    title: `Delete ${customer.name}?`,
+    // Named apart from erasure in the dialog too, not only on the page. This
+    // is the last moment before the act, and it is the moment somebody who
+    // reached for the wrong control can still notice.
+    body: (n > 0
+      ? `They have ${n} order${n === 1 ? '' : 's'}, and those stay exactly as they are. `
+      : '')
+      + 'Their name, phone and email are kept — this is not the erasure below.',
+    confirm: 'Delete customer',
+  });
+  if (!ok) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+
+  try {
+    const { message } = await adminFetch(`/customers/${encodeURIComponent(id())}`, { method: 'DELETE' });
+    toast(message || `${customer.name} deleted.`);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Delete customer';
+    return toast(err.message, false);
+  }
+
+  location.reload();
+}
+
+async function putBack(btn) {
+  btn.disabled = true;
+  btn.textContent = 'Restoring…';
+
+  try {
+    const { message } = await adminFetch(
+      `/customers/${encodeURIComponent(id())}/restore`, { method: 'POST' });
+    toast(message || `${customer.name} restored.`);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Restore customer';
+    return toast(err.message, false);
+  }
+
+  location.reload();
 }
 
 function paintProfile() {

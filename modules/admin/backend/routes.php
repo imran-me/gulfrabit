@@ -99,11 +99,20 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         // `owner` and `manager` hold the `customers` capability.
         Route::middleware('admin:customers')->prefix('customers')->name('customers.')->group(function (): void {
             Route::get('/', [AdminCustomerController::class, 'index'])->name('index');
-            Route::get('/{user}', [AdminCustomerController::class, 'show'])->name('show');
+            Route::get('/{user}', [AdminCustomerController::class, 'show'])->withTrashed()->name('show');
             Route::post('/{user}/notes', [AdminCustomerController::class, 'addNote'])->name('notes.store');
             // Irreversible, and it edits historical order records. A second,
             // narrower check inside the controller restricts it to owners.
             Route::post('/{user}/forget', [AdminCustomerController::class, 'forget'])->name('forget');
+
+            // Deleting is the reversible one — off the list, everything kept.
+            // `forget` above is the irreversible one. Two acts, two routes,
+            // and neither is a synonym for the other.
+            Route::middleware('admin.owner')->group(function (): void {
+                Route::delete('/{user}', [AdminCustomerController::class, 'destroy'])
+                    ->withTrashed()->name('destroy');
+                Route::post('/{user}/restore', [AdminCustomerController::class, 'restore'])->name('restore');
+            });
         });
 
         // Catalogue. Editing is scoped to the fields a merchant changes week to

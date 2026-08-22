@@ -14,7 +14,13 @@
         </p>
       </div>
 
+      <!-- Two places: the live list, and what has been taken off it. Painted
+           by customers-page.js so the count in the tab comes from the server
+           under the same search as the rows. -->
+      <nav class="atabs" data-cust-tabs aria-label="Customer lists"></nav>
+
       <form class="afilters" data-cust-filters>
+        <input type="hidden" name="deleted" value="">
         <div class="afilters__field afilters__field--wide">
           <label for="cf-q">Search</label>
           <input class="input-gr" id="cf-q" name="q" type="search" placeholder="Name, phone or email">
@@ -35,10 +41,11 @@
               <th scope="col">Spent</th>
               <th scope="col">Last order</th>
               <th scope="col">Joined</th>
+              <th scope="col"><span class="visually-hidden">Actions</span></th>
             </tr>
           </thead>
           <tbody data-cust-body>
-            <tr><td colspan="6" class="atable__empty">Loading customers…</td></tr>
+            <tr><td colspan="7" class="atable__empty">Loading customers…</td></tr>
           </tbody>
         </table>
       </div>

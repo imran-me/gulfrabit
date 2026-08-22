@@ -35,7 +35,19 @@ final class AuthService
     public function loginWithVerifiedPhone(string $phone, ?string $guestCartToken = null): array
     {
         return DB::transaction(function () use ($phone, $guestCartToken): array {
-            $user = User::firstOrCreate(
+            /* withTrashed, and it is not optional.
+               `phone` is unique, and a customer deleted from the admin panel
+               still occupies that number in the index. Without this the
+               ordinary firstOrCreate finds nothing (the global scope hides the
+               deleted row), inserts, and dies on the unique constraint — so a
+               customer who has just proved they own their number is shown a
+               database error and can never sign in again.
+
+               Restoring is the right answer rather than refusing. Deleting a
+               customer in the panel is a tidying act, not a ban; somebody who
+               comes back and proves they control the number is a customer
+               again. A ban would need to be a ban, stored and named as one. */
+            $user = User::withTrashed()->firstOrCreate(
                 ['phone' => $phone],
                 [
                     // A placeholder name is better than blocking the login. The
@@ -49,6 +61,10 @@ final class AuthService
                     'phone_verified_at' => now(),
                 ],
             );
+
+            if ($user->trashed()) {
+                $user->restore();
+            }
 
             if ($user->phone_verified_at === null) {
                 $user->forceFill(['phone_verified_at' => now()])->save();

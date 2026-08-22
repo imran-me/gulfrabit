@@ -29,13 +29,24 @@
  */
 
 import { adminFetch, csrfHeader } from '/modules/admin/backend/api.js';
+import { fetchTree, folderIcon, trail } from './folders.js';
 
 const MAX_BYTES = 8 * 1024 * 1024;
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/gif';
 
 let sheet = null;
 let resolveOpen = null;
-let state = { items: [], page: 1, pages: 1, loading: false, term: '' };
+
+/**
+ * `scope` is 'all', 'root' (the top level) or a folder id — the same three
+ * values the Images screen uses, so the two screens agree on what "where you
+ * are" means.
+ */
+let state = {
+  items: [], page: 1, pages: 1, loading: false, term: '',
+  scope: 'all',
+  tree: { list: [], byId: new Map(), roots: [], unfiled: 0, total: 0 },
+};
 
 /* ------------------------------------------------------------------ *
  * Public API
@@ -43,10 +54,23 @@ let state = { items: [], page: 1, pages: 1, loading: false, term: '' };
 
 /**
  * Open the library and resolve with the chosen asset, or null if dismissed.
+ *
+ * @param {{folderId?: number|null}} [opts]
+ *   Where to open, and where uploads land. A product screen passes nothing and
+ *   gets the whole library; the Images screen passes the folder the merchant
+ *   is standing in, so "Upload images" while inside "Ramadan 2026" files them
+ *   there rather than dumping them at the top level to be sorted later.
+ *
  * @returns {Promise<{id:number,url:string,alt:string|null}|null>}
  */
-export function pickImage() {
+export function pickImage(opts = {}) {
   if (!sheet) build();
+
+  state.scope = opts.folderId != null ? opts.folderId : 'all';
+  state.term = '';
+
+  const search = sheet.querySelector('[data-search]');
+  if (search) search.value = '';
 
   return new Promise((resolve) => {
     resolveOpen = resolve;
@@ -266,6 +290,14 @@ function build() {
         <input type="search" placeholder="Search images" data-search>
       </label>
 
+      <!-- Browsing, not just searching. Once a library is filed into folders,
+           a flat wall of every picture ever uploaded is the thing folders were
+           created to escape — so the picker walks the same tree the Images
+           screen does. -->
+      <nav class="msheet__crumbs" data-crumbs aria-label="Folder"></nav>
+
+      <div class="msheet__folders" data-folders hidden></div>
+
       <div class="msheet__grid" data-grid></div>
 
       <div class="msheet__more">
@@ -308,6 +340,20 @@ function build() {
     }, 250);
   });
 
+  // Walking into a folder, and back out along the crumbs.
+  [sheet.querySelector('[data-crumbs]'), sheet.querySelector('[data-folders]')].forEach((host) => {
+    host.addEventListener('click', (ev) => {
+      const go = ev.target.closest('[data-go]');
+      if (!go) return;
+
+      state.scope = go.dataset.go === 'all' || go.dataset.go === 'root'
+        ? go.dataset.go
+        : Number(go.dataset.go);
+
+      load(1);
+    });
+  });
+
   sheet.querySelector('[data-more]').addEventListener('click', () => load(state.page + 1));
 
   // Escape closes, because a modal that traps you is worse than no modal.
@@ -318,6 +364,7 @@ function build() {
 
 function open() {
   sheet.hidden = false;
+  refreshTree();
   // Two frames: one to un-hide, one so the transition has a start state to
   // move from. Adding the class in the same frame skips the animation.
   requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.add('is-open')));
@@ -343,6 +390,29 @@ function close(value) {
  * Library
  * ------------------------------------------------------------------ */
 
+/**
+ * The folder tree, refreshed each time the sheet opens.
+ *
+ * Fire and forget, and never fatal: the picker's job is to hand back an image,
+ * and it can still do that with no tree at all. A folder created on another
+ * tab two minutes ago should show up, and a failed tree request should not
+ * stop someone choosing a photo.
+ */
+async function refreshTree() {
+  try {
+    state.tree = await fetchTree();
+  } catch {
+    return;   // browsing degrades to the flat list; picking still works
+  }
+
+  if (typeof state.scope === 'number' && !state.tree.byId.has(state.scope)) {
+    state.scope = 'all';
+  }
+
+  paintCrumbs();
+  paintFolders();
+}
+
 async function load(page) {
   if (state.loading) return;
   state.loading = true;
@@ -350,10 +420,15 @@ async function load(page) {
   const grid = sheet.querySelector('[data-grid]');
   if (page === 1) grid.innerHTML = '<p class="msheet__note">Loading…</p>';
 
+  // Searching looks everywhere, for the same reason it does on the Images
+  // screen: someone typing a file name is trying to find a picture, not to
+  // filter the folder they happen to be standing in.
+  const where = state.term ? 'all' : state.scope;
+
   let res;
   try {
     const q = state.term ? `&q=${encodeURIComponent(state.term)}` : '';
-    res = await adminFetch(`/media?page=${page}${q}`);
+    res = await adminFetch(`/media?folder=${where}&page=${page}${q}`);
   } catch (err) {
     state.loading = false;
     grid.innerHTML = `<p class="msheet__note">${escape(err.message)}</p>`;
@@ -368,12 +443,74 @@ async function load(page) {
   paintGrid();
 }
 
+/** The trail, plus the two views that are not folders at all. */
+function paintCrumbs() {
+  const el = sheet.querySelector('[data-crumbs]');
+  if (!el) return;
+
+  // Nothing to browse and nothing to explain — a library with no folders looks
+  // exactly as it did before folders existed.
+  if (!state.tree.list.length) {
+    el.innerHTML = '';
+    return;
+  }
+
+  if (state.term) {
+    el.innerHTML = '<span class="msheet__crumb is-now">Every folder</span>';
+    return;
+  }
+
+  const parts = trail(state.tree, typeof state.scope === 'number' ? state.scope : null);
+
+  const head = [
+    state.scope === 'all'
+      ? '<span class="msheet__crumb is-now">All images</span>'
+      : '<button type="button" class="msheet__crumb" data-go="all">All images</button>',
+    state.scope === 'root'
+      ? '<span class="msheet__crumb is-now">Top level</span>'
+      : '<button type="button" class="msheet__crumb" data-go="root">Top level</button>',
+  ];
+
+  const rest = parts.map((c, i) => (i === parts.length - 1
+    ? `<span class="msheet__crumb is-now">${escape(c.name)}</span>`
+    : `<button type="button" class="msheet__crumb" data-go="${c.id}">${escape(c.name)}</button>`));
+
+  el.innerHTML = [...head, ...rest].join('<span class="msheet__sep" aria-hidden="true">/</span>');
+}
+
+/** Subfolders of wherever we are, as a row of chips above the thumbnails. */
+function paintFolders() {
+  const el = sheet.querySelector('[data-folders]');
+  if (!el) return;
+
+  const kids = state.term || state.scope === 'all'
+    ? []
+    : state.scope === 'root'
+      ? state.tree.roots
+      : state.tree.byId.get(state.scope)?.children ?? [];
+
+  el.hidden = !kids.length;
+  el.innerHTML = kids.map((f) => `
+    <button type="button" class="msheet__folder" data-go="${f.id}">
+      ${folderIcon()}
+      <span>${escape(f.name)}</span>
+      ${f.imagesDeep ? `<small>${f.imagesDeep}</small>` : ''}
+    </button>`).join('');
+}
+
 function paintGrid() {
   const grid = sheet.querySelector('[data-grid]');
 
+  paintCrumbs();
+  paintFolders();
+
   if (!state.items.length) {
     grid.innerHTML = `<p class="msheet__note">${
-      state.term ? 'Nothing matches that.' : 'No images yet — upload your first one above.'
+      state.term
+        ? 'Nothing matches that.'
+        : state.tree.list.length && state.scope !== 'all'
+          ? 'Nothing here yet — open another folder, or upload straight into this one.'
+          : 'No images yet — upload your first one above.'
     }</p>`;
   } else {
     grid.innerHTML = state.items.map(tile).join('');
@@ -445,6 +582,11 @@ async function send(file, row) {
   const xhr = new XMLHttpRequest();
   const body = new FormData();
   body.append('file', file);
+
+  // Into the folder being browsed. "All images" and the top level are both
+  // the top level for an upload — there is no such place as "everywhere" to
+  // put a new file.
+  if (typeof state.scope === 'number') body.append('folderId', String(state.scope));
 
   xhr.upload.addEventListener('progress', (ev) => {
     if (ev.lengthComputable) {

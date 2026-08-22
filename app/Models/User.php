@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -26,6 +27,16 @@ class User extends Authenticatable
     use HasFactory;
     use Notifiable;
 
+    /* Deleting a customer from the panel takes them off the list and out of
+       every count; it does not erase them and it does not touch their orders.
+       Erasing is a different, irreversible act with its own screen — see
+       CustomerAnonymiserService in modules/admin.
+
+       `phone` is unique and stays occupied by a soft-deleted row, so the OTP
+       login path looks withTrashed and restores rather than colliding with
+       it. See AuthService::loginWithVerifiedPhone in modules/auth. */
+    use SoftDeletes;
+
     protected $fillable = [
         'name',
         'phone',
@@ -44,6 +55,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
+            'deleted_at'        => 'datetime',
             // Laravel 10+ hashes on assignment, so a plain password assigned to
             // this attribute is never stored in the clear.
             'password'          => 'hashed',
