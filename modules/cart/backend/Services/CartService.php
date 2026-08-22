@@ -77,8 +77,16 @@ final class CartService
             throw new RuntimeException("Unknown or unavailable product: {$sku}");
         }
 
-        if (! $product->in_stock) {
-            throw new RuntimeException("{$product->title} is out of stock.");
+        /* isOrderable(), not in_stock. Those meant the same thing until
+           pre-orders existed, and a pre-order is out of stock by definition —
+           testing the column directly is what would refuse the entire feature
+           at the first click. The reason comes from the model too, so the cart,
+           the revalidation pass below and the checkout capture cannot drift
+           into three different explanations for one refusal. */
+        if (! $product->isOrderable()) {
+            throw new RuntimeException(
+                $product->unavailableReason() ?? "{$product->title} cannot be ordered right now.",
+            );
         }
 
         $line = $cart->items()
@@ -279,8 +287,9 @@ final class CartService
                 $notices[] = 'An item in your cart is no longer available.';
                 continue;
             }
-            if (! $item->product->in_stock) {
-                $notices[] = "{$item->product->title} is now out of stock.";
+            if (! $item->product->isOrderable()) {
+                $notices[] = $item->product->unavailableReason()
+                    ?? "{$item->product->title} can no longer be ordered.";
             }
             if ($item->priceChanged()) {
                 $notices[] = "The price of {$item->product->title} changed since you added it.";

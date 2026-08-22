@@ -34,11 +34,32 @@ class Order extends Model
     /** Statuses a customer can still cancel from. */
     public const CANCELLABLE = ['placed', 'confirmed'];
 
+    /**
+     * Is this order waiting on a shipment rather than on us?
+     *
+     * The distinction the warehouse needs: an order sitting in `confirmed` for
+     * a fortnight is normally a failure, and for a pre-order it is the plan.
+     * Without this the two are indistinguishable on the board and the genuinely
+     * stuck orders get lost among the ones that are merely early.
+     */
+    public function isPreorder(): bool
+    {
+        return $this->preorder_ships_on !== null;
+    }
+
+    /** Has the stock it was waiting for arrived? */
+    public function preorderDue(): bool
+    {
+        return $this->preorder_ships_on !== null
+            && ! $this->preorder_ships_on->isFuture();
+    }
+
     protected $fillable = [
-        'order_number', 'user_id',
+        'order_number', 'placement_ref', 'user_id',
         'customer_name', 'customer_phone', 'customer_email',
         'address_line', 'area', 'district_name', 'district_key', 'delivery_notes',
         'delivery_zone_key', 'delivery_eta', 'delivery_charge_poisha',
+        'preorder_ships_on',
         'subtotal_poisha', 'discount_poisha', 'total_poisha', 'promo_code',
         'payment_method', 'payment_status', 'payment_reference',
         'status', 'placed_at',
@@ -50,6 +71,7 @@ class Order extends Model
         return [
             'placed_at'              => 'datetime',
             'deleted_at'             => 'datetime',
+            'preorder_ships_on'      => 'date',
             'subtotal_poisha'        => 'integer',
             'discount_poisha'        => 'integer',
             'delivery_charge_poisha' => 'integer',
@@ -123,6 +145,24 @@ class Order extends Model
             'total'     => intdiv($this->total_poisha, 100),
             'items'     => $this->items->map(fn (OrderItem $i) => $i->toStorefrontArray())->all(),
             'cancellable' => $this->isCancellable(),
+
+            /* Pre-order. Null on an ordinary order, which is almost all of
+               them — the confirmation and tracking screens branch on it rather
+               than showing an empty "ships on" row to everybody. */
+            'shipsOn'   => $this->preorder_ships_on?->toDateString(),
+            // The sibling written in the same checkout, if the basket was
+            // split. The confirmation screen needs it to say "and a second
+            // parcel follows" rather than leaving a customer to discover a
+            // second order number in a text message.
+            'alsoOrdered' => $this->placement_ref === null ? null : self::query()
+                ->where('placement_ref', $this->placement_ref)
+                ->where('id', '!=', $this->id)
+                ->get()
+                ->map(fn (self $o): array => [
+                    'id'      => $o->order_number,
+                    'shipsOn' => $o->preorder_ships_on?->toDateString(),
+                    'total'   => intdiv($o->total_poisha, 100),
+                ])->all(),
         ];
     }
 }
