@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Modules\Media\Models\MediaAsset;
+use Modules\Media\Models\MediaFolder;
+use Modules\Media\Services\FolderTree;
 use Modules\Media\Services\ImageStore;
 use RuntimeException;
 
@@ -25,8 +27,10 @@ class MediaController extends Controller
     /** Hard ceiling in kilobytes. Also enforced by the client, for the message. */
     private const MAX_KB = 8192;
 
-    public function __construct(private readonly ImageStore $store)
-    {
+    public function __construct(
+        private readonly ImageStore $store,
+        private readonly FolderTree $tree,
+    ) {
     }
 
     /**
@@ -34,12 +38,33 @@ class MediaController extends Controller
      *
      * Newest first, paged. The picker loads a page at a time rather than the
      * whole library: on a phone, a thousand thumbnails is a stalled screen.
+     *
+     * `folder` decides what is in scope, and the default is deliberately
+     * everything — a caller written before folders existed keeps seeing the
+     * whole library rather than silently narrowing to the top level:
+     *
+     *   (absent) / all   the entire library
+     *   root             filed nowhere — the top level
+     *   <id>             that folder; add deep=1 to include its subfolders
      */
     public function index(Request $request): JsonResponse
     {
         $perPage = min(60, max(12, (int) $request->query('perPage', 24)));
 
         $query = MediaAsset::query()->latest('id');
+
+        $scope = (string) $request->query('folder', 'all');
+
+        if ($scope === 'root') {
+            $query->whereNull('folder_id');
+        } elseif ($scope !== 'all' && $scope !== '') {
+            $folder = MediaFolder::findOrFail((int) $scope);
+
+            $query->whereIn(
+                'folder_id',
+                $request->boolean('deep') ? $this->tree->subtreeIds($folder) : [$folder->id]
+            );
+        }
 
         if ($term = trim((string) $request->query('q', ''))) {
             $query->where(function ($q) use ($term): void {
@@ -72,13 +97,15 @@ class MediaController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'file' => ['required', 'file', 'max:' . self::MAX_KB],
-            'alt'  => ['nullable', 'string', 'max:255'],
+            'file'     => ['required', 'file', 'max:' . self::MAX_KB],
+            'alt'      => ['nullable', 'string', 'max:255'],
+            'folderId' => ['nullable', 'integer', 'exists:media_folders,id'],
         ], [
             'file.max' => 'That image is over 8 MB. Most product photos are well under 2 MB.',
         ]);
 
         $file = $request->file('file');
+        $folderId = $request->filled('folderId') ? (int) $request->input('folderId') : null;
 
         // Hash the ORIGINAL bytes, before re-encoding. Re-encoding is not
         // guaranteed to be byte-identical across GD versions, so hashing the
@@ -92,10 +119,20 @@ class MediaController extends Controller
         $existing = MediaAsset::where('hash', $hash)->first();
 
         if ($existing) {
+            // Deliberately NOT refiled into the folder being uploaded to. The
+            // image may already be filed somewhere on purpose, and quietly
+            // moving it would change what another folder contains as a side
+            // effect of an upload nobody thought of as a move. Say where it
+            // is instead, and let the merchant drag it if they meant to.
             return response()->json([
                 'data'      => $existing->toPanelArray(),
                 'duplicate' => true,
-                'message'   => 'That image is already in the library — reusing it.',
+                'message'   => $existing->folder_id === $folderId
+                    ? 'That image is already in the library — reusing it.'
+                    : sprintf(
+                        'That image is already in the library, filed under "%s" — reusing it there.',
+                        $existing->folder?->name ?? 'Unfiled'
+                    ),
             ]);
         }
 
@@ -111,6 +148,7 @@ class MediaController extends Controller
             $asset = MediaAsset::create([
                 'hash'          => $hash,
                 'path'          => $stored['path'],
+                'folder_id'     => $folderId,
                 'original_name' => mb_substr($file->getClientOriginalName(), 0, 255),
                 'mime'          => $stored['mime'],
                 'bytes'         => $stored['bytes'],
@@ -129,16 +167,76 @@ class MediaController extends Controller
         return response()->json(['data' => $asset->toPanelArray()], 201);
     }
 
-    /** PATCH /api/admin/media/{asset} — alt text is the only editable field. */
+    /**
+     * PATCH /api/admin/media/{asset}
+     *
+     * Alt text and filing. Both keys are optional and both are read with
+     * array_key_exists rather than a truthiness test, because null is a
+     * meaningful value for each of them — "no description" and "top level" —
+     * and `?:` cannot tell those apart from "not sent".
+     */
     public function update(Request $request, MediaAsset $asset): JsonResponse
     {
         $data = $request->validate([
-            'alt' => ['present', 'nullable', 'string', 'max:255'],
+            'alt'      => ['sometimes', 'nullable', 'string', 'max:255'],
+            'folderId' => ['sometimes', 'nullable', 'integer', 'exists:media_folders,id'],
         ]);
 
-        $asset->update(['alt' => $data['alt'] ?: null]);
+        $changes = [];
+
+        if (array_key_exists('alt', $data)) {
+            $changes['alt'] = $data['alt'] ?: null;
+        }
+
+        if (array_key_exists('folderId', $data)) {
+            $changes['folder_id'] = $data['folderId'] ?: null;
+        }
+
+        if ($changes) {
+            $asset->update($changes);
+        }
 
         return response()->json(['data' => $asset->fresh()->toPanelArray()]);
+    }
+
+    /**
+     * POST /api/admin/media/move — file several images at once.
+     *
+     * One request for the whole selection, not one per image. Dragging forty
+     * photos into a folder over a phone connection must not be forty chances
+     * to half-finish: this either files all of them or none.
+     *
+     * Nothing on disk moves. See the migration — a folder is metadata, and the
+     * URL of every image here is the same after this call as before it, which
+     * is what makes reorganising the library safe to do on a live shop.
+     */
+    public function move(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'ids'      => ['required', 'array', 'min:1', 'max:200'],
+            'ids.*'    => ['integer'],
+            'folderId' => ['present', 'nullable', 'integer', 'exists:media_folders,id'],
+        ]);
+
+        $folderId = $data['folderId'] ?: null;
+
+        $moved = MediaAsset::query()
+            ->whereIn('id', $data['ids'])
+            ->update(['folder_id' => $folderId]);
+
+        $where = $folderId
+            ? MediaFolder::find($folderId)?->name ?? 'that folder'
+            : 'the top level';
+
+        return response()->json([
+            'moved'   => $moved,
+            'message' => sprintf(
+                '%d image%s moved to %s.',
+                $moved,
+                $moved === 1 ? '' : 's',
+                $where
+            ),
+        ]);
     }
 
     /**

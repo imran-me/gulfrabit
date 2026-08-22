@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Media;
 
 use Illuminate\Support\ServiceProvider;
+use Modules\Media\Services\FolderTree;
 use Modules\Media\Services\ImageStore;
 
 /**
@@ -26,6 +27,7 @@ class MediaServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(ImageStore::class);
+        $this->app->singleton(FolderTree::class);
     }
 
     public function boot(): void

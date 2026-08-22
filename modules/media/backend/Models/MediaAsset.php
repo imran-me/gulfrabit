@@ -25,7 +25,7 @@ use Modules\Admin\Models\AdminUser;
 class MediaAsset extends Model
 {
     protected $fillable = [
-        'hash', 'path', 'original_name', 'mime',
+        'hash', 'path', 'folder_id', 'original_name', 'mime',
         'bytes', 'width', 'height', 'alt', 'uploaded_by',
     ];
 
@@ -36,12 +36,26 @@ class MediaAsset extends Model
             'width'       => 'integer',
             'height'      => 'integer',
             'usage_count' => 'integer',
+            'folder_id'   => 'integer',
         ];
     }
 
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(AdminUser::class, 'uploaded_by');
+    }
+
+    /**
+     * The folder this image is filed under, or none for the top level.
+     *
+     * Filing only. `path` — the URL the shop serves — does not contain the
+     * folder and never will: moving an image between folders must not change
+     * where the browser fetches it from, or reorganising the library would
+     * blank out pictures on the live site.
+     */
+    public function folder(): BelongsTo
+    {
+        return $this->belongsTo(MediaFolder::class, 'folder_id');
     }
 
     /**
@@ -72,6 +86,7 @@ class MediaAsset extends Model
         return [
             'id'        => $this->id,
             'url'       => $this->path,
+            'folderId'  => $this->folder_id,
             'name'      => $this->original_name,
             'alt'       => $this->alt,
             'width'     => $this->width,
