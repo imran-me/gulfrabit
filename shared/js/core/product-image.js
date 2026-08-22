@@ -21,17 +21,42 @@
  * load-bearing; it makes an existing picture smaller or it does nothing.
  */
 
-/** Only these become variants. Anything else is passed through untouched. */
+/**
+ * Seeded photographs: tools/gen-product-tiers.py cuts the copies.
+ *
+ * The FOLDER is part of the rule, not just the extension. Category art also
+ * lives under /assets/images/ as .jpg, and it is cut to a completely different
+ * ladder (160/280/560, by gen-category-images.py) — so matching on ".jpg"
+ * alone would happily derive `dates-nuts-thumb.webp` for a file that has never
+ * existed. Nothing calls this with a category image today; the guard is here
+ * so that the day something does, it gets a null rather than a broken image.
+ */
+const PRODUCTS = '/assets/images/products/';
 const MASTERS = ['.jpg', '.jpeg', '.png'];
+
+/**
+ * Uploaded photographs: ImageStore cuts the copies at upload time, and
+ * `php artisan media:tiers` — which deploy.sh runs on every deploy — catches
+ * anything uploaded before it did.
+ *
+ * Matched on the folder, not the extension. Every upload is a .webp, and so
+ * are the copies, so extension alone cannot tell a master from its own
+ * thumbnail — deriving a tier from a tier would ask for `<hash>-thumb-thumb`.
+ */
+const UPLOADS = '/uploads/';
+
+/** A copy, not a master. Guards against building `-thumb-thumb`. */
+const IS_TIER = /-(?:card|thumb)\.webp$/i;
 
 /**
  * The WebP variant for a master, or null when there is not one.
  *
- * Null for an SVG placeholder (already tiny, no raster variants exist), and
- * null for anything the merchant uploaded through the media library — those
- * arrive as /uploads/…/<hash>.webp, already re-encoded and size-capped by
- * ImageStore, and inventing a `-thumb` URL for one would be a 404 in place of
- * a photograph.
+ * Null for an SVG placeholder — already tiny, and no raster copies exist.
+ *
+ * Uploads DO get copies: ImageStore writes them at upload time and deploy.sh
+ * backfills anything older. That ordering is load-bearing, because a derived
+ * URL which does not exist is a 404 inside a <source>, and a <source> that
+ * fails does not fall back to the <img> — it shows a broken image.
  *
  * @param {string} src
  * @param {'full'|'card'|'thumb'} kind
@@ -44,9 +69,18 @@ export function imageVariant(src, kind = 'card') {
   if (dot < 1) return null;
 
   const ext = path.slice(dot).toLowerCase();
-  if (!MASTERS.includes(ext)) return null;
 
+  const isMaster = MASTERS.includes(ext) && path.includes(PRODUCTS);
+  const isUpload = ext === '.webp' && path.includes(UPLOADS) && !IS_TIER.test(path);
+
+  if (!isMaster && !isUpload) return null;
+
+  // 'full' for an upload is the file we already have: ImageStore caps every
+  // upload at 2000px and stores it as WebP, so there is no larger copy to
+  // point at and re-stating the same URL in a <source> is a wasted element.
   const suffix = kind === 'full' ? '' : `-${kind}`;
+
+  if (isUpload && kind === 'full') return null;
 
   return `${path.slice(0, dot)}${suffix}.webp`;
 }

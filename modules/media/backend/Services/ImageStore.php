@@ -59,6 +59,25 @@ class ImageStore
     private const MAX_EDGE = 2000;
 
     /**
+     * Smaller copies written beside the main file, suffix => longest edge.
+     *
+     * The same two sizes tools/gen-product-tiers.py cuts for the seeded
+     * photographs, and for the same reason: a 2000px master rendered into a
+     * 64px cart thumb is a hundred times the pixels the box can show. An
+     * uploaded photo should not be heavier than a seeded one just because it
+     * arrived through the panel.
+     *
+     * Written at upload time rather than on demand. A resize-on-request
+     * endpoint is a CPU cost on every cache miss and a denial-of-service
+     * target on a shared host; this is a fixed cost once, at the moment
+     * somebody is already waiting for an upload.
+     */
+    private const TIERS = [
+        '-card'  => 640,
+        '-thumb' => 128,
+    ];
+
+    /**
      * Refuse anything whose declared dimensions exceed this, before decoding.
      * 50 megapixels is far beyond any product photo and still leaves room for
      * a modern phone camera held wrong.
@@ -122,6 +141,12 @@ class ImageStore
 
             $this->encode($resized, $absolute);
 
+            // The smaller copies. Failing to write one is NOT fatal: the main
+            // file is on disk and every consumer falls back to it, so a full
+            // disk or a permissions problem costs bytes on a page rather than
+            // the upload the merchant is waiting on.
+            $this->writeTiers($resized, $relative);
+
             $out = [
                 'path'   => $relative,
                 'mime'   => 'image/webp',
@@ -155,6 +180,88 @@ class ImageStore
         }
 
         @unlink($real);
+
+        // And the tiers. Leaving them behind is an orphan nothing references
+        // and nothing can ever find again — the row that named them is gone.
+        foreach (array_keys(self::TIERS) as $suffix) {
+            $tier = realpath($this->absolutePath($this->tierPath($relativePath, $suffix)));
+
+            if ($tier !== false && str_starts_with($tier, $root)) {
+                @unlink($tier);
+            }
+        }
+    }
+
+    /**
+     * `/uploads/2026/08/<hash>.webp` -> `/uploads/2026/08/<hash>-card.webp`
+     *
+     * Public and static-shaped on purpose: the backfill command and anything
+     * that ever needs to name a tier must derive it exactly the same way, and
+     * a second copy of this three-line rule is a second copy that can be
+     * subtly different.
+     */
+    public function tierPath(string $relativePath, string $suffix): string
+    {
+        $dot = strrpos($relativePath, '.');
+
+        if ($dot === false) {
+            return $relativePath . $suffix;
+        }
+
+        return substr($relativePath, 0, $dot) . $suffix . substr($relativePath, $dot);
+    }
+
+    /**
+     * Write every tier for an image already decoded into memory.
+     *
+     * Takes the GD handle rather than a path so an upload decodes once. Used
+     * by the backfill command too, which opens the stored WebP itself.
+     *
+     * @return int how many were written
+     */
+    public function writeTiers(\GdImage $image, string $relativePath): int
+    {
+        $written = 0;
+
+        foreach (self::TIERS as $suffix => $edge) {
+            $absolute = $this->absolutePath($this->tierPath($relativePath, $suffix));
+
+            // Never upscale. A 96px logo does not become sharper as a 640px
+            // file, it becomes a bigger blurry one.
+            $scaled = max(imagesx($image), imagesy($image)) > $edge
+                ? $this->fitTo($image, $edge)
+                : $image;
+
+            try {
+                // encode() returns void and throws on failure, so reaching
+                // the next line IS the success signal.
+                $this->encode($scaled, $absolute);
+                $written++;
+            } catch (\Throwable) {
+                // Bytes on a page, not a failed upload — see the caller.
+            } finally {
+                if ($scaled !== $image) {
+                    imagedestroy($scaled);
+                }
+            }
+        }
+
+        return $written;
+    }
+
+    /** A copy of $image whose longest edge is $edge, preserving the ratio. */
+    private function fitTo(\GdImage $image, int $edge): \GdImage
+    {
+        $w = imagesx($image);
+        $h = imagesy($image);
+        $ratio = $edge / max($w, $h);
+
+        $out = imagescale($image, max(1, (int) round($w * $ratio)), max(1, (int) round($h * $ratio)));
+
+        // imagescale returns false under memory pressure. Handing back the
+        // original means the tier is written full-size — heavier than
+        // intended, but correct, which is the right way for this to fail.
+        return $out === false ? $image : $out;
     }
 
     /** A GD image from a file, by the type getimagesize() confirmed. */

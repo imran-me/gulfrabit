@@ -88,4 +88,18 @@ php artisan route:cache --quiet
 # JSON only. There is no resources/views directory to compile, and calling it
 # fails the whole step for nothing.
 
+# ---- 6. Image copies ------------------------------------------------------
+# The storefront derives a thumbnail's URL from the master's path rather than
+# being told it — every consumer stores a plain path string, which is what
+# lets modules/media be deleted without breaking a product. The cost is that a
+# derived URL which does not exist is a 404 inside a <picture><source>, and a
+# <source> that fails does NOT fall back to the <img>; it shows a broken image.
+#
+# So the copies have to exist before the page asks for them, and the only way
+# to guarantee that ordering is to do it here, in the same breath as the
+# deploy. Idempotent and cheap: images that already have their copies are
+# skipped without being decoded.
+say "Writing image copies"
+php artisan media:tiers || say "!!! media:tiers failed — uploaded images will serve full size."
+
 say "Done — now on ${REMOTE:0:7}"

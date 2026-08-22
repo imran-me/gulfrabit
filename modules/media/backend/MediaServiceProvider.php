@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Media;
 
 use Illuminate\Support\ServiceProvider;
+use Modules\Media\Console\BackfillTiers;
 use Modules\Media\Services\FolderTree;
 use Modules\Media\Services\ImageStore;
 
@@ -33,6 +34,11 @@ class MediaServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__ . '/Migrations');
+
+        // Console only, so the command does not exist on a web request.
+        if ($this->app->runningInConsole()) {
+            $this->commands([BackfillTiers::class]);
+        }
 
         $this->app->booted(function (): void {
             $this->loadRoutes();
