@@ -102,9 +102,12 @@ class AdminHeroController extends Controller
     }
 
     /** POST /api/admin/hero/{slide}/restore */
-    public function restore(int $slide): JsonResponse
+    public function restore(string $slide): JsonResponse
     {
-        $model = HeroSlide::withTrashed()->findOrFail($slide);
+        // A route parameter arrives as a string; cast here rather than leaning
+        // on the container being in coercive mode. See the same note on
+        // AdminCustomerController::restore.
+        $model = HeroSlide::withTrashed()->findOrFail((int) $slide);
 
         if (! $model->trashed()) {
             return response()->json(['message' => 'That banner is not deleted.'], 422);

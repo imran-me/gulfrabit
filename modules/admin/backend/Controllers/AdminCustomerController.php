@@ -124,9 +124,14 @@ class AdminCustomerController extends Controller
      * restored by that act, because deleting is a tidying of the list and not
      * a ban. See AuthService::loginWithVerifiedPhone in modules/auth.
      */
-    public function restore(int $user): JsonResponse
+    public function restore(string $user): JsonResponse
     {
-        $model = User::withTrashed()->findOrFail($user);
+        // Typed as a string and cast here, not hinted `int`. A route parameter
+        // arrives as a string, and it only survives an `int` hint because the
+        // container that calls this is not in strict mode — a rule about
+        // another file, which this one declares strict_types precisely to stop
+        // depending on.
+        $model = User::withTrashed()->findOrFail((int) $user);
 
         if (! $model->trashed()) {
             return response()->json(['message' => 'That customer is not deleted.'], 422);

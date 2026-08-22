@@ -125,8 +125,16 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::patch('/{sku}', [AdminProductController::class, 'update'])->name('update');
             // Unlists — soft delete, so past orders keep their product. The
             // route below puts it back.
-            Route::delete('/{sku}', [AdminProductController::class, 'destroy'])->name('destroy');
-            Route::post('/{sku}/restore', [AdminProductController::class, 'restore'])->name('restore');
+            //
+            // Behind `admin.owner` like every other delete in the panel. This
+            // pair predates that rule and was left open when the rest were
+            // gated, which meant the products screen hid its Remove button
+            // from a manager and then accepted the request anyway if one was
+            // sent. A hidden control is not a permission.
+            Route::middleware('admin.owner')->group(function (): void {
+                Route::delete('/{sku}', [AdminProductController::class, 'destroy'])->name('destroy');
+                Route::post('/{sku}/restore', [AdminProductController::class, 'restore'])->name('restore');
+            });
         });
 
         // Coupons and offers. Bound by `code`, not id: the code is what the
