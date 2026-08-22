@@ -14,4 +14,13 @@ use Modules\B2b\Controllers\AdminQuoteController;
 Route::prefix('admin')->name('admin.')->middleware(['admin', 'admin:orders'])->group(function (): void {
     Route::get('/quotes', [AdminQuoteController::class, 'index'])->name('quotes.index');
     Route::post('/quotes/{quoteRequest}/status', [AdminQuoteController::class, 'status'])->name('quotes.status');
+
+    // Deleting is an owner's call, as everywhere else in the panel. Soft: the
+    // request keeps its lines and its status, and comes back whole.
+    Route::middleware('admin.owner')->group(function (): void {
+        Route::delete('/quotes/{quoteRequest}', [AdminQuoteController::class, 'destroy'])
+            ->withTrashed()->name('quotes.destroy');
+        Route::post('/quotes/{quoteRequest}/restore', [AdminQuoteController::class, 'restore'])
+            ->name('quotes.restore');
+    });
 });

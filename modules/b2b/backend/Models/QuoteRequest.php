@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * A request for quote — a lead, not an order.
@@ -20,6 +21,12 @@ class QuoteRequest extends Model
 {
     use HasFactory;
 
+    /* Submitting is public, so the inbox gets spam. Deleting takes a request
+       out of it without marking it `lost` — a status that means a real lead
+       went to a competitor, and a number somebody reports on. The lines stay
+       attached, so a genuine enquiry deleted by mistake comes back whole. */
+    use SoftDeletes;
+
     protected $fillable = [
         'reference', 'user_id', 'company', 'contact_name', 'contact_phone',
         'contact_email', 'notes', 'indicative_total_poisha', 'status', 'responded_at',
@@ -29,6 +36,7 @@ class QuoteRequest extends Model
     {
         return [
             'responded_at'            => 'datetime',
+            'deleted_at'              => 'datetime',
             'indicative_total_poisha' => 'integer',
         ];
     }

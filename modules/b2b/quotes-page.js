@@ -9,6 +9,7 @@
 
 import { adminFetch } from '../admin/backend/api.js';
 import { escapeHtml } from '../admin/admin-shell.js';
+import { canDelete, confirmDelete, toast } from '../admin/admin-delete.js';
 
 const NEXT = {
   new:       [['reviewing', 'Start reviewing'], ['lost', 'Not proceeding']],
@@ -31,9 +32,16 @@ async function load() {
   const body = document.querySelector('[data-q-body]');
   const status = document.querySelector('[data-q-filters]').status.value;
 
+  // `deleted` is a place, not a status — a deleted request keeps whatever
+  // status it had, so it goes on its own parameter rather than pretending to
+  // be a sixth value of `status`.
+  const qs = status === 'deleted'
+    ? 'deleted=1'
+    : `status=${encodeURIComponent(status)}`;
+
   let payload;
   try {
-    payload = await adminFetch(`/quotes?status=${encodeURIComponent(status)}`);
+    payload = await adminFetch(`/quotes?${qs}`);
   } catch (err) {
     body.innerHTML = `<tr><td colspan="7" class="atable__empty">${
       err.status === 404 || !err.status
@@ -49,19 +57,26 @@ async function load() {
 
 function paint({ data, meta }) {
   const body = document.querySelector('[data-q-body]');
+  const inTrash = document.querySelector('[data-q-filters]').status.value === 'deleted';
+
   document.querySelector('[data-q-count]').textContent =
-    `${meta.openCount} waiting on us · ${meta.total} shown`;
+    `${meta.openCount} waiting on us · ${meta.total} shown`
+    + (meta.deletedCount ? ` · ${meta.deletedCount} deleted` : '');
 
   if (!data.length) {
-    body.innerHTML = '<tr><td colspan="7" class="atable__empty">Nothing here.</td></tr>';
+    body.innerHTML = `<tr><td colspan="7" class="atable__empty">${
+      inTrash
+        ? 'Nothing has been deleted. Requests you delete land here, and can be put back.'
+        : 'Nothing here.'
+    }</td></tr>`;
     return;
   }
 
   body.innerHTML = data.map((q) => `
-    <tr>
+    <tr class="${q.deletedAt ? 'is-deleted' : ''}">
       <td>${escapeHtml(q.reference)}</td>
       <td>
-        <strong>${escapeHtml(q.company)}</strong>
+        <strong class="atable__name">${escapeHtml(q.company)}</strong>
         ${q.notes ? `<div class="atable__sub">${escapeHtml(q.notes.slice(0, 70))}</div>` : ''}
       </td>
       <td>
@@ -76,15 +91,36 @@ function paint({ data, meta }) {
       </td>
       <td class="atable__num">৳ ${Number(q.indicativeTaka).toLocaleString('en-BD')}</td>
       <td>${waiting(q)}</td>
-      <td>${(NEXT[q.status] || []).map(([to, label]) => `
-        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
-                data-move="${escapeHtml(q.reference)}" data-to="${to}">${escapeHtml(label)}</button>`).join(' ')
-        || '<span class="atable__sub">—</span>'}</td>
+      <td>${
+        // A deleted request offers one thing. Its stage moves are not drawn:
+        // "Quote sent" on a request nobody can see is an offer to do work that
+        // will not reach anyone.
+        q.deletedAt
+          ? (canDelete()
+              ? `<button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
+                         data-q-restore="${escapeHtml(q.reference)}">Restore</button>`
+              : '<span class="atable__sub">Deleted</span>')
+          : `${(NEXT[q.status] || []).map(([to, label]) => `
+              <button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
+                      data-move="${escapeHtml(q.reference)}" data-to="${to}">${escapeHtml(label)}</button>`).join(' ')}
+             ${canDelete()
+               ? `<button class="alink-btn alink-btn--danger" type="button"
+                          data-q-del="${escapeHtml(q.reference)}">Delete</button>`
+               : ''}`
+      }</td>
     </tr>
     ${lineRow(q)}`).join('');
 
   body.querySelectorAll('[data-move]').forEach((btn) => {
     btn.addEventListener('click', () => move(btn.dataset.move, btn.dataset.to, btn));
+  });
+
+  body.querySelectorAll('[data-q-del]').forEach((btn) => {
+    btn.addEventListener('click', () => remove(btn, data.find((q) => q.reference === btn.dataset.qDel)));
+  });
+
+  body.querySelectorAll('[data-q-restore]').forEach((btn) => {
+    btn.addEventListener('click', () => putBack(btn));
   });
 
   body.querySelectorAll('[data-lines]').forEach((btn) => {
@@ -148,6 +184,58 @@ function lineRow(q) {
  * A B2B enquiry that waits 48 hours is usually one that has already phoned
  * somebody else, so the number is the point of this screen.
  */
+/* ---- Deleting -----------------------------------------------------------
+   The inbox needed somewhere to put junk. Submitting an RFQ is public, which
+   is the right call — procurement staff ask before they sign up — and the
+   cost of it is spam that used to sit in the list forever or get marked
+   `lost`. `lost` means a real lead went to a competitor and is a number
+   somebody reports on; filling it with junk makes the win rate meaningless. */
+
+async function remove(btn, q) {
+  const ok = await confirmDelete({
+    title: `Delete ${q?.reference ?? 'this request'}?`,
+    body: q?.lines
+      ? `${q.company} — ${q.lines} line${q.lines === 1 ? '' : 's'}. The lines go with it and come `
+        + 'back with it, so a genuine enquiry deleted by mistake returns whole.'
+      : 'It leaves the inbox. This is not the same as marking it Lost, which is for a real lead.',
+    confirm: 'Delete request',
+  });
+  if (!ok) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+
+  try {
+    const { message } = await adminFetch(
+      `/quotes/${encodeURIComponent(q.reference)}`, { method: 'DELETE' });
+    toast(message || `${q.reference} deleted.`);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Delete';
+    return toast(err.message, false);
+  }
+
+  load();
+}
+
+async function putBack(btn) {
+  const ref = btn.dataset.qRestore;
+  btn.disabled = true;
+  btn.textContent = 'Restoring…';
+
+  try {
+    const { message } = await adminFetch(
+      `/quotes/${encodeURIComponent(ref)}/restore`, { method: 'POST' });
+    toast(message || `${ref} is back in the inbox.`);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Restore';
+    return toast(err.message, false);
+  }
+
+  load();
+}
+
 function waiting(q) {
   const h = q.waitingHours;
   const label = h < 24 ? `${h}h` : `${Math.floor(h / 24)}d`;

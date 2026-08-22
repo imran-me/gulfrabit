@@ -36,11 +36,17 @@ class AdminQuoteController extends Controller
         $data = $request->validate([
             'status'  => ['sometimes', 'in:new,reviewing,quoted,won,lost,open'],
             'perPage' => ['sometimes', 'integer', 'min:10', 'max:100'],
+            'deleted' => ['sometimes', 'boolean'],
         ]);
 
         $query = QuoteRequest::query()->with('items');
 
-        if (($data['status'] ?? 'open') === 'open') {
+        // The Deleted tab, and it takes precedence over the status filter: a
+        // deleted request keeps whatever status it had, and "new requests that
+        // are also deleted" is not a question the desk asks.
+        if ($request->boolean('deleted')) {
+            $query->onlyTrashed()->latest();
+        } elseif (($data['status'] ?? 'open') === 'open') {
             // Oldest first, deliberately. A newest-first inbox buries the
             // request that has been waiting three days under the one that
             // arrived this morning, and the old one is the one costing money.
@@ -86,6 +92,7 @@ class AdminQuoteController extends Controller
                 'indicativeTaka' => intdiv((int) $q->indicative_total_poisha, 100),
                 'notes'       => $q->notes,
                 'receivedAt'  => $q->created_at?->toIso8601String(),
+                'deletedAt'   => $q->deleted_at?->toIso8601String(),
                 // How long it has been sitting. The number staff should be
                 // looking at, computed here so every screen agrees.
                 'waitingHours' => $q->created_at ? (int) $q->created_at->diffInHours(now()) : 0,
@@ -95,8 +102,53 @@ class AdminQuoteController extends Controller
                 'currentPage' => $page->currentPage(),
                 'lastPage'    => $page->lastPage(),
                 'openCount'   => QuoteRequest::query()->whereIn('status', self::OPEN)->count(),
+                'deletedCount' => QuoteRequest::onlyTrashed()->count(),
             ],
         ]);
+    }
+
+    /**
+     * DELETE /api/admin/quotes/{quoteRequest}
+     *
+     * The inbox needed somewhere to put junk. Submitting an RFQ is public and
+     * unauthenticated — deliberately, because procurement staff ask before
+     * they sign up — and the cost of that is spam, which until now either sat
+     * in the inbox forever or got marked `lost`.
+     *
+     * `lost` is the wrong drawer. It means a real lead went to a competitor,
+     * and it is a number somebody reports on; filling it with junk makes the
+     * win rate meaningless. This is the right drawer.
+     */
+    public function destroy(QuoteRequest $quoteRequest): JsonResponse
+    {
+        if ($quoteRequest->trashed()) {
+            return response()->json(['message' => 'That request is already deleted.'], 422);
+        }
+
+        // The lines go with it and come back with it — they are the whole
+        // content of the request, and a genuine enquiry deleted by mistake has
+        // to return whole rather than as an empty header.
+        $quoteRequest->delete();
+
+        return response()->json([
+            'message' => "{$quoteRequest->reference} deleted. It is in the Deleted tab and can be put back.",
+        ]);
+    }
+
+    /** POST /api/admin/quotes/{quoteRequest}/restore */
+    public function restore(string $quoteRequest): JsonResponse
+    {
+        $model = QuoteRequest::withTrashed()->where('reference', $quoteRequest)->firstOrFail();
+
+        if (! $model->trashed()) {
+            return response()->json(['message' => 'That request is not deleted.'], 422);
+        }
+
+        $model->restore();
+
+        // Back with the status it had, so a request that was already being
+        // worked does not reappear at the top of the queue as brand new.
+        return response()->json(['message' => "{$model->reference} is back in the inbox."]);
     }
 
     /** POST /api/admin/quotes/{quoteRequest}/status */
