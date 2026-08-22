@@ -623,7 +623,7 @@ function cell(a) {
            mode. It is the only accessibility work this panel asks for, and
            anything that takes two clicks to reach does not get written. -->
       <input class="input-gr mlib__alt" type="text" data-alt="${a.id}"
-             value="${escapeHtml(a.alt || '')}"
+             value="${escapeHtml(a.alt || '')}" draggable="false"
              placeholder="Describe this image">
 
       <button type="button" class="mbtn mbtn--quiet mlib__del" data-del="${a.id}">Delete</button>
@@ -697,6 +697,14 @@ async function fileImages(ids, folderId) {
  * ------------------------------------------------------------------ */
 
 function onDragStart(e) {
+  // Selecting text in the alt-text field would otherwise start dragging the
+  // card the field sits on, which makes the one field on this screen that
+  // needs typing the one field you cannot edit with a mouse.
+  if (e.target.closest('input, textarea')) {
+    e.preventDefault();
+    return;
+  }
+
   const card = e.target.closest('[data-drag-asset]');
 
   if (card) {
