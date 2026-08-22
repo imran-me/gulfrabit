@@ -26,7 +26,6 @@
  * route; see Middleware/RequireOwner.php.
  */
 
-import { escapeHtml } from './admin-shell.js';
 
 /* Both the versioned <script src> and the unversioned imports evaluate this
    file, so module-scoped state is per-instance. Anything that must be a
@@ -150,28 +149,4 @@ function ensureToast() {
   state.toast = document.querySelector('[data-atoast]');
   state.toast.addEventListener('click', () => state.toast.classList.remove('is-on'));
   return state.toast;
-}
-
-/**
- * The row control, so a delete looks identical on every list in the panel.
- *
- * Returns an empty string for anyone who is not an owner — the endpoint would
- * refuse them anyway, and a button that always errors is worse than no button.
- *
- * @param {string|number} id  echoed back on the element as data-adel-id
- * @param {string} label      the record's name, for the accessible label
- */
-export function deleteButton(id, label) {
-  if (!canDelete()) return '';
-  return '<button type="button" class="alink-btn alink-btn--danger"'
-    + ' data-adel-id="' + escapeHtml(String(id)) + '"'
-    + ' aria-label="Delete ' + escapeHtml(label) + '">Delete</button>';
-}
-
-/** The same, for a row already sitting in the Deleted tab. */
-export function restoreButton(id, label) {
-  if (!canDelete()) return '';
-  return '<button type="button" class="alink-btn"'
-    + ' data-arestore-id="' + escapeHtml(String(id)) + '"'
-    + ' aria-label="Restore ' + escapeHtml(label) + '">Restore</button>';
 }

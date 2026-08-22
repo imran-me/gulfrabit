@@ -112,7 +112,7 @@ function paintTabs(meta) {
   host.innerHTML = `
     <button class="atab${inTrash ? '' : ' is-on'}" type="button" data-cust-tab=""
             aria-current="${inTrash ? 'false' : 'page'}">
-      Customers${badge(inTrash ? undefined : meta.total)}
+      Customers${badge(meta.liveCount)}
     </button>
     <button class="atab atab--trash${inTrash ? ' is-on' : ''}" type="button" data-cust-tab="1"
             aria-current="${inTrash ? 'page' : 'false'}">

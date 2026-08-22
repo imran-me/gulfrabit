@@ -72,10 +72,12 @@ class AdminCustomerController extends Controller
                 'perPage'     => $page->perPage(),
                 'currentPage' => $page->currentPage(),
                 'lastPage'    => $page->lastPage(),
-                // Counted under the same search but the opposite side of the
-                // drawer, so the Deleted tab answers the question actually
-                // being asked rather than a different one — and shows the same
-                // number whichever side you are standing on.
+                // Both sides counted under the same search, and both computed
+                // regardless of which tab is open — each badge has to predict
+                // what clicking it would show, from wherever you are standing.
+                // `total` above is the page's own total and flips with the tab,
+                // so it cannot do that job.
+                'liveCount'    => $this->filtered(['deleted' => false] + $data)->count(),
                 'deletedCount' => $this->filtered(['deleted' => true] + $data)->count(),
             ],
         ]);

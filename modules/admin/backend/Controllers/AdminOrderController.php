@@ -148,7 +148,12 @@ class AdminOrderController extends Controller
      */
     private function stageCounts(array $data): array
     {
-        $found = $this->filtered($data)
+        // Always the LIVE side, whichever tab is open. Every badge on this bar
+        // has to predict what clicking it would show, and clicking a stage
+        // leaves the drawer (see the tab handler in orders-page.js) — so stage
+        // counts taken from the trashed set would be counts of a list nobody
+        // can navigate to.
+        $found = $this->filtered(['deleted' => false] + $data)
             ->getQuery()
             ->select('status', DB::raw('count(*) as aggregate'))
             ->groupBy('status')
@@ -160,10 +165,9 @@ class AdminOrderController extends Controller
             $counts[$stage] = (int) ($found[$stage] ?? 0);
         }
 
-        // Counted against the same search but the OPPOSITE side of the drawer,
-        // so the Deleted tab shows how many deleted orders match what is being
-        // searched for while you are standing in the live list — and still
-        // shows the same number once you are standing in it.
+        // And this one is always the trashed side, for the same reason: the
+        // Deleted badge predicts the Deleted tab from wherever you are
+        // standing, and reads the same from both sides of it.
         $counts['deleted'] = $this->filtered(['deleted' => true] + $data)->count();
 
         return $counts;
