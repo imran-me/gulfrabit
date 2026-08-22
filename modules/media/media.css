@@ -421,64 +421,40 @@
 .msheet__more { padding: 0 var(--space-4) var(--space-4); text-align: center; }
 
 /* ------------------------------------------------------------------ *
- * The Images screen (modules/media/library.html)
+ * The folder palette
+ *
+ * Seven tokens, resolved here and nowhere else. `data-c="amber"` on any
+ * element tints the folder icon inside it and paints a stripe down its left
+ * edge — so a colour set once in the dialog shows up in the tree, on the
+ * tiles, in the destination picker and on the "filed under" chip without any
+ * of them knowing what amber is.
+ *
+ * Tinted at 20-ish percent against the panel background rather than used raw:
+ * a saturated icon beside grey text reads as an alert, and seven alerts in a
+ * sidebar is noise. The point is to tell folders apart at a glance, not to
+ * decorate.
  * ------------------------------------------------------------------ */
 
-.mlib {
-  display: grid;
-  /* Two across on a phone. One would waste the width; three leaves no room
-     for the alt-text field under each. */
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: var(--space-4);
-}
+[data-c] { --fc: var(--gr-ink); }
+[data-c="amber"]   { --fc: #b45309; }
+[data-c="rose"]    { --fc: #be123c; }
+[data-c="violet"]  { --fc: #6d28d9; }
+[data-c="sky"]     { --fc: #0369a1; }
+[data-c="emerald"] { --fc: #047857; }
+[data-c="teal"]    { --fc: #0f766e; }
+[data-c="slate"]   { --fc: #475569; }
 
-.mlib__item {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  background: var(--surface-raised, #fff);
-  border: 1px solid var(--gr-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-3);
-  transition: border-color var(--dur-fast) var(--ease-out),
-              box-shadow var(--dur-fast) var(--ease-out);
-}
-
-.mlib__item:hover { border-color: var(--gr-cyan); box-shadow: var(--shadow-sm); }
-
-.mlib__pic {
-  position: relative;
-  aspect-ratio: 1;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  background: #fafafa;
-}
-
-.mlib__pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-.mlib__meta { display: grid; gap: 2px; font-size: var(--fs-12); min-width: 0; }
-
-.mlib__name {
-  font-weight: var(--fw-semibold);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.mlib__dims { color: var(--text-muted); }
-
-.mlib__alt { font-size: var(--fs-12); }
-
-.mlib__del { align-self: flex-start; color: var(--gr-error); }
-.mlib__del:hover { border-color: var(--gr-error); color: var(--gr-error); }
+[data-c] > .mtree__label .mico,
+[data-c] .mfold__open .mico,
+[data-c].mpick__row .mico,
+[data-c].mlib__where .mico { color: var(--fc); }
 
 /* ------------------------------------------------------------------ *
  * The file manager (modules/media/library.html)
  *
  * Mobile first, and the layout is the honest consequence of that: a folder
  * tree beside a grid does not fit on a 360px screen, so on a phone the tree
- * is a scrolling strip ABOVE the contents and only becomes a sidebar when
+ * is a scrolling panel ABOVE the contents and only becomes a sidebar when
  * there is width to spare. Two arrangements of the same markup, no second
  * template, and nothing is hidden on the small one.
  * ------------------------------------------------------------------ */
@@ -491,6 +467,33 @@
 }
 
 .mfm__head-acts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+.mfm__intro { margin-bottom: var(--space-5); }
+.mfm__intro p { margin: 0; font-size: var(--fs-14); color: color-mix(in srgb, var(--gr-ink) 68%, transparent); line-height: 1.6; }
+
+.mfm__tips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-3) !important;
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--gr-border);
+  font-size: var(--fs-12) !important;
+}
+
+.mfm__tips span { display: inline-flex; align-items: center; gap: 6px; }
+
+.mfm__tips kbd {
+  font: inherit;
+  font-size: 11px;
+  padding: 1px 6px;
+  border: 1px solid var(--gr-border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--gr-ink) 4%, transparent);
+}
+
+/* --- the tree ------------------------------------------------------- */
 
 .mfm__side {
   border: 1px solid var(--gr-border);
@@ -528,11 +531,7 @@
 
 .mfm__side-add:hover { border-color: var(--gr-cyan); color: var(--gr-cyan); }
 
-.mfm__tree {
-  padding: var(--space-2);
-  max-height: 320px;
-  overflow: auto;
-}
+.mfm__tree { padding: var(--space-2); max-height: 320px; overflow: auto; }
 
 .mtree__kids {
   /* The indent guide. A tree without one is a list of names at slightly
@@ -543,6 +542,7 @@
 }
 
 .mtree__row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 2px;
@@ -550,12 +550,21 @@
   transition: background var(--dur-fast) var(--ease-out);
 }
 
-.mtree__row:hover { background: color-mix(in srgb, var(--gr-ink) 4%, transparent); }
-
-.mtree__row.is-on {
-  background: color-mix(in srgb, var(--gr-cyan) 12%, transparent);
+/* The colour stripe. Two pixels, on the row rather than the icon, so a folder
+   is findable by colour even when the icon is off screen behind a long name. */
+.mtree__row[data-c]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--fc);
 }
 
+.mtree__row:hover { background: color-mix(in srgb, var(--gr-ink) 4%, transparent); }
+.mtree__row.is-on { background: color-mix(in srgb, var(--gr-cyan) 12%, transparent); }
 .mtree__row.is-on > .mtree__label { font-weight: var(--fw-semibold); }
 
 /* Lit only while a legal drop hovers it — see targetOf() in library-page.js,
@@ -580,12 +589,7 @@
   padding: 0;
 }
 
-.mtree__twist svg {
-  width: 13px;
-  height: 13px;
-  transition: transform var(--dur-fast) var(--ease-out);
-}
-
+.mtree__twist svg { width: 13px; height: 13px; transition: transform 180ms var(--ease-out); }
 .mtree__twist.is-open svg { transform: rotate(90deg); }
 
 .mtree__label {
@@ -605,18 +609,11 @@
   border-radius: var(--radius-sm);
 }
 
-.mtree__label > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.mtree__label > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .mtree__label small,
 .mfold__count,
-.mpick__row small {
-  color: color-mix(in srgb, var(--gr-ink) 45%, transparent);
-  font-size: var(--fs-12);
-}
+.mpick__row small { color: color-mix(in srgb, var(--gr-ink) 45%, transparent); font-size: var(--fs-12); }
 
 .mtree__label small { margin-left: auto; padding-left: var(--space-2); }
 
@@ -629,7 +626,7 @@
   color: color-mix(in srgb, var(--gr-ink) 45%, transparent);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  /* Visible on hover on a mouse, always visible on touch — where there is no
+  /* Visible on hover with a mouse, always visible on touch — where there is no
      hover, and a control that only appears on one does not exist. */
   opacity: 0;
   transition: opacity var(--dur-fast) var(--ease-out);
@@ -638,9 +635,7 @@
 .mtree__row:hover .mtree__more,
 .mtree__more:focus-visible { opacity: 1; }
 
-@media (hover: none) {
-  .mtree__more { opacity: 1; }
-}
+@media (hover: none) { .mtree__more { opacity: 1; } }
 
 .mtree__empty {
   margin: var(--space-2) 0 0;
@@ -653,7 +648,7 @@
 
 /* --- the contents pane ---------------------------------------------- */
 
-.mfm__main { min-width: 0; }
+.mfm__main { min-width: 0; position: relative; }
 
 .mfm__bar {
   display: flex;
@@ -664,13 +659,9 @@
   margin-bottom: var(--space-3);
 }
 
-.mfm__crumbs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px;
-  min-width: 0;
-}
+.mfm__tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+
+.mfm__crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; min-width: 0; }
 
 .mfm__crumb {
   border: 0;
@@ -684,13 +675,7 @@
 }
 
 .mfm__crumb:hover { background: color-mix(in srgb, var(--gr-cyan) 10%, transparent); }
-
-.mfm__crumb.is-now {
-  color: var(--gr-ink);
-  font-weight: var(--fw-semibold);
-  cursor: default;
-}
-
+.mfm__crumb.is-now { color: var(--gr-ink); font-weight: var(--fw-semibold); cursor: default; }
 .mfm__sep { color: color-mix(in srgb, var(--gr-ink) 30%, transparent); }
 
 .mfm__deep {
@@ -702,7 +687,64 @@
   cursor: pointer;
 }
 
+.mfm__sort select { font-size: var(--fs-12); padding: 5px 8px; }
+
+/* Segmented control — view and thumbnail size */
+.mseg {
+  display: inline-flex;
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-raised, #fff);
+}
+
+.mseg button {
+  border: 0;
+  border-left: 1px solid var(--gr-border);
+  background: transparent;
+  color: color-mix(in srgb, var(--gr-ink) 55%, transparent);
+  font: inherit;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  min-width: 30px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.mseg button:first-child { border-left: 0; }
+.mseg button svg { width: 15px; height: 15px; }
+.mseg button:hover { background: color-mix(in srgb, var(--gr-ink) 5%, transparent); }
+
+.mseg button.is-on {
+  background: color-mix(in srgb, var(--gr-cyan) 14%, transparent);
+  color: var(--gr-cyan);
+}
+
 .mfm__search { display: block; margin-bottom: var(--space-4); }
+.mfm__bulk { margin-bottom: var(--space-4); }
+.mfm__danger { color: var(--gr-error); }
+.mfm__danger:hover { border-color: var(--gr-error); }
+.mfm__queue { margin-bottom: var(--space-4); }
+.mfm__more { text-align: center; padding: var(--space-5) 0; }
+
+.mfm__empty {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  text-align: center;
+  padding: var(--space-7, 48px) var(--space-4);
+  border: 1px dashed var(--gr-border);
+  border-radius: var(--radius-lg);
+  color: color-mix(in srgb, var(--gr-ink) 55%, transparent);
+  font-size: var(--fs-14);
+}
+
+.mfm__empty strong { font-size: var(--fs-16); color: var(--gr-ink); }
+
+/* --- folder tiles ---------------------------------------------------- */
 
 .mfm__folders {
   display: grid;
@@ -718,17 +760,29 @@
   border: 1px solid var(--gr-border);
   border-radius: var(--radius-lg);
   background: var(--surface-raised, #fff);
+  overflow: hidden;
   transition: border-color var(--dur-fast) var(--ease-out),
               box-shadow var(--dur-fast) var(--ease-out),
-              background var(--dur-fast) var(--ease-out);
+              transform var(--dur-fast) var(--ease-out);
 }
 
-.mfold:hover { border-color: var(--gr-cyan); box-shadow: var(--shadow-sm); }
+.mfold[data-c]::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--fc);
+}
+
+@media (hover: hover) {
+  .mfold:hover { border-color: var(--gr-cyan); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+}
 
 .mfold.is-drop {
   border-color: var(--gr-cyan);
   border-style: dashed;
   background: color-mix(in srgb, var(--gr-cyan) 10%, transparent);
+  transform: scale(1.015);
 }
 
 .mfold__open {
@@ -746,15 +800,9 @@
   text-align: left;
   padding: var(--space-3);
   cursor: pointer;
-  border-radius: var(--radius-lg);
 }
 
-.mfold__open .mico {
-  grid-area: icon;
-  width: 26px;
-  height: 26px;
-  color: var(--gr-cyan);
-}
+.mfold__open .mico { grid-area: icon; width: 26px; height: 26px; color: var(--gr-cyan); }
 
 .mfold__name {
   grid-area: name;
@@ -775,21 +823,112 @@
   background: transparent;
   color: color-mix(in srgb, var(--gr-ink) 45%, transparent);
   cursor: pointer;
-  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
 }
 
 .mfold__more:hover { background: color-mix(in srgb, var(--gr-ink) 5%, transparent); }
 
-/* --- image cards, in selection and in flight ------------------------- */
+/* --- the grid, at three sizes ---------------------------------------- */
+
+.mlib { display: grid; gap: var(--space-4); }
+.mlib--s { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: var(--space-3); }
+.mlib--m { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); }
+.mlib--l { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+
+/* The alt field is noise at the small size — at 118px the picture is the
+   whole point, and the drawer is one click away for anything else. */
+.mlib--s .mlib__alt,
+.mlib--s .mlib__dims { display: none; }
+
+.mlib__item {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--surface-raised, #fff);
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out),
+              opacity 160ms var(--ease-out);
+  /* Cards fade in as they paint. Staggering is done with nth-child rather than
+     an inline delay per card, so a repaint of 48 items is still one string. */
+  animation: mfade 260ms var(--ease-out) both;
+}
+
+.mlib__item:nth-child(1)  { animation-delay: 0ms; }
+.mlib__item:nth-child(2)  { animation-delay: 20ms; }
+.mlib__item:nth-child(3)  { animation-delay: 40ms; }
+.mlib__item:nth-child(4)  { animation-delay: 60ms; }
+.mlib__item:nth-child(5)  { animation-delay: 80ms; }
+.mlib__item:nth-child(6)  { animation-delay: 100ms; }
+.mlib__item:nth-child(7)  { animation-delay: 120ms; }
+.mlib__item:nth-child(8)  { animation-delay: 140ms; }
+.mlib__item:nth-child(n+9) { animation-delay: 160ms; }
+
+@keyframes mfade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (hover: hover) {
+  .mlib__item:hover { border-color: var(--gr-cyan); box-shadow: var(--shadow-sm); }
+}
+
+.mlib__item.is-picked {
+  border-color: var(--gr-cyan);
+  box-shadow: 0 0 0 1px var(--gr-cyan) inset;
+  background: color-mix(in srgb, var(--gr-cyan) 5%, var(--surface-raised, #fff));
+}
 
 .mlib__item[draggable="true"] { cursor: grab; }
-.mlib__item.is-picked { border-color: var(--gr-cyan); box-shadow: 0 0 0 1px var(--gr-cyan) inset; }
+.mlib__item:active { cursor: grabbing; }
 
-/* Everything dims a little while a drag is in progress, so the folders — the
-   only legal targets — are the part of the screen that still looks live. */
-body.is-dragging-media .mlib__item { opacity: .55; }
-body.is-dragging-media .mfold,
-body.is-dragging-media .mtree__row { opacity: 1; }
+.mlib__pic {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #fafafa;
+  cursor: zoom-in;
+}
+
+.mlib__pic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 320ms var(--ease-out);
+}
+
+@media (hover: hover) {
+  .mlib__item:hover .mlib__pic img { transform: scale(1.04); }
+}
+
+/* The "View" tag that fades up on hover. It exists because a thumbnail that
+   opens something has to say so — otherwise the only discoverable click on
+   the card is the checkbox. */
+.mlib__zoom {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translate(-50%, 6px);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(10, 10, 10, .72);
+  color: #fff;
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out);
+}
+
+@media (hover: hover) {
+  .mlib__pic:hover .mlib__zoom { opacity: 1; transform: translate(-50%, 0); }
+}
 
 .mlib__sel {
   position: absolute;
@@ -800,21 +939,197 @@ body.is-dragging-media .mtree__row { opacity: 1; }
   display: grid;
   place-items: center;
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, #fff 78%, transparent);
+  background: color-mix(in srgb, #fff 80%, transparent);
   backdrop-filter: blur(2px);
   cursor: pointer;
 }
 
 .mlib__sel input { width: 16px; height: 16px; cursor: pointer; accent-color: var(--gr-cyan); }
 
+/* A quiet flag, not a warning: missing alt text is very common and shouting
+   about it on eighty cards would train the merchant to ignore the colour. */
+.mlib__noalt {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, #fff 82%, transparent);
+  color: color-mix(in srgb, var(--gr-ink) 55%, transparent);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.mlib__meta { display: grid; gap: 2px; font-size: var(--fs-12); min-width: 0; }
+
+.mlib__name { font-weight: var(--fw-semibold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mlib__dims { color: var(--text-muted); }
+
 .mlib__where {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   color: color-mix(in srgb, var(--gr-ink) 50%, transparent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mlib__where .mico { width: 12px; height: 12px; }
+
+.mlib__alt { font-size: var(--fs-12); }
+
+/* --- the list view ---------------------------------------------------- */
+
+.mlist { display: grid; gap: 2px; }
+
+.mlist__row {
+  display: grid;
+  grid-template-columns: 32px 44px minmax(0, 2.2fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised, #fff);
+  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+
+.mlist__row:hover { background: color-mix(in srgb, var(--gr-ink) 3%, transparent); }
+.mlist__row.is-picked { border-color: var(--gr-cyan); background: color-mix(in srgb, var(--gr-cyan) 7%, transparent); }
+.mlist__row[draggable="true"] { cursor: grab; }
+
+.mlist__sel { display: grid; place-items: center; }
+.mlist__sel input { width: 16px; height: 16px; accent-color: var(--gr-cyan); cursor: pointer; }
+
+.mlist__thumb {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #fafafa;
+  padding: 0;
+  cursor: zoom-in;
+}
+
+.mlist__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.mlist__name {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+
+.mlist__name strong { font-size: var(--fs-14); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.mlist__name small {
+  font-size: var(--fs-12);
+  color: color-mix(in srgb, var(--gr-ink) 48%, transparent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The four metadata columns fold away on a phone rather than squeezing the
+   name to nothing. The same facts are in the drawer, one tap away. */
+.mlist__col { display: none; font-size: var(--fs-12); color: color-mix(in srgb, var(--gr-ink) 55%, transparent); }
+.mlist__del { color: var(--gr-error); }
+
+/* --- while dragging --------------------------------------------------- */
+
+/* Everything dims a little during a drag, so the folders — the only legal
+   targets — are the part of the screen that still looks live. */
+body.is-dragging-media .mlib__item,
+body.is-dragging-media .mlist__row { opacity: .5; }
+body.is-dragging-media .mlib__item.is-picked,
+body.is-dragging-media .mlist__row.is-picked { opacity: .85; }
+body.is-dragging-media .mfold,
+body.is-dragging-media .mtree__row { opacity: 1; }
+
+.mdragchip {
+  position: fixed;
+  top: -1000px;
+  left: -1000px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--gr-ink, #111);
+  color: #fff;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* --- the file-drop hint ----------------------------------------------- */
+
+.mfm__dropveil {
+  position: absolute;
+  inset: -8px;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  border: 2px dashed var(--gr-cyan);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--gr-cyan) 8%, color-mix(in srgb, #fff 88%, transparent));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;          /* never eats the drop it is announcing */
+  transition: opacity 140ms var(--ease-out), visibility 140ms;
+}
+
+.mfm.is-file-over .mfm__dropveil { opacity: 1; visibility: visible; }
+
+.mfm__dropveil > div {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  text-align: center;
+  color: var(--gr-ink);
+}
+
+.mfm__dropveil svg { width: 34px; height: 34px; color: var(--gr-cyan); }
+.mfm__dropveil strong { font-size: var(--fs-18); }
+.mfm__dropveil span { font-size: var(--fs-12); color: color-mix(in srgb, var(--gr-ink) 60%, transparent); }
+
+/* Folders stay visible through the veil, because dropping ONTO one is the
+   whole reason the hint mentions them. */
+.mfm.is-file-over .mfm__folders,
+.mfm.is-file-over .mfm__crumbs { position: relative; z-index: 6; }
+
+/* --- loading skeletons ------------------------------------------------- */
+
+.mskel { display: grid; gap: var(--space-4); }
+.mskel--grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); }
+.mskel--list { grid-template-columns: 1fr; gap: 2px; }
+
+.mskel__cell {
+  border-radius: var(--radius-lg);
+  background: linear-gradient(100deg,
+    color-mix(in srgb, var(--gr-ink) 5%, transparent) 30%,
+    color-mix(in srgb, var(--gr-ink) 9%, transparent) 50%,
+    color-mix(in srgb, var(--gr-ink) 5%, transparent) 70%);
+  background-size: 300% 100%;
+  animation: mshimmer 1.4s linear infinite;
+  animation-delay: calc(var(--i) * 60ms);
+}
+
+.mskel--grid .mskel__cell { aspect-ratio: .82; }
+.mskel--list .mskel__cell { height: 60px; border-radius: var(--radius-sm); }
+
+@keyframes mshimmer {
+  from { background-position: 150% 0; }
+  to   { background-position: -150% 0; }
+}
 
 /* ------------------------------------------------------------------ *
  * The ⋮ menu on a folder
@@ -823,14 +1138,20 @@ body.is-dragging-media .mtree__row { opacity: 1; }
 .mmenu {
   position: absolute;
   z-index: 80;
-  min-width: 180px;
+  min-width: 190px;
   padding: 4px;
   border: 1px solid var(--gr-border);
   border-radius: var(--radius-md, 10px);
   background: var(--surface-raised, #fff);
   box-shadow: var(--shadow-md, 0 10px 30px rgba(0,0,0,.14));
   display: grid;
+  transform-origin: top left;
+  transform: scale(.96);
+  opacity: 0;
+  transition: transform 120ms var(--ease-out), opacity 120ms var(--ease-out);
 }
+
+.mmenu.is-in { transform: none; opacity: 1; }
 
 .mmenu button {
   border: 0;
@@ -849,6 +1170,181 @@ body.is-dragging-media .mtree__row { opacity: 1; }
 .mmenu button.is-danger:hover { background: color-mix(in srgb, var(--gr-error) 10%, transparent); }
 
 /* ------------------------------------------------------------------ *
+ * Toasts
+ * ------------------------------------------------------------------ */
+
+.mtoasts {
+  position: fixed;
+  z-index: 95;
+  left: var(--space-4);
+  right: var(--space-4);
+  bottom: var(--space-4);
+  display: grid;
+  gap: var(--space-2);
+  justify-items: stretch;
+  pointer-events: none;
+}
+
+.mtoast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px var(--space-3);
+  border-radius: var(--radius-md, 10px);
+  background: var(--gr-ink, #111);
+  color: #fff;
+  font-size: var(--fs-14);
+  box-shadow: 0 12px 32px rgba(0,0,0,.22);
+  pointer-events: auto;
+  transform: translateY(12px);
+  opacity: 0;
+  transition: transform 220ms var(--ease-out), opacity 220ms var(--ease-out);
+}
+
+.mtoast.is-in { transform: none; opacity: 1; }
+.mtoast.is-out { transform: translateY(6px); opacity: 0; }
+
+.mtoast__icon { display: grid; place-items: center; flex: 0 0 auto; }
+.mtoast__icon svg { width: 18px; height: 18px; }
+.mtoast.is-ok .mtoast__icon { color: #4ade80; }
+.mtoast.is-bad .mtoast__icon { color: #fb7185; }
+.mtoast.is-info .mtoast__icon { color: #7dd3fc; }
+
+.mtoast__text { flex: 1 1 auto; min-width: 0; line-height: 1.45; }
+
+.mtoast__act {
+  flex: 0 0 auto;
+  border: 1px solid rgba(255,255,255,.34);
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.mtoast__act:hover { background: rgba(255,255,255,.16); }
+.mtoast__act:disabled { opacity: .5; cursor: default; }
+
+.mtoast__x {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,.6);
+  font-size: var(--fs-18);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.mtoast__x:hover { color: #fff; }
+
+/* ------------------------------------------------------------------ *
+ * The image drawer
+ * ------------------------------------------------------------------ */
+
+.mdrawer { position: fixed; inset: 0; z-index: 88; }
+
+.mdrawer__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(10,10,10,.35);
+  opacity: 0;
+  transition: opacity 220ms var(--ease-out);
+}
+
+.mdrawer.is-open .mdrawer__scrim { opacity: 1; }
+
+.mdrawer__panel {
+  position: absolute;
+  inset: auto 0 0 0;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-raised, #fff);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: 0 -18px 48px rgba(0,0,0,.18);
+  transform: translateY(100%);
+  transition: transform 280ms var(--ease-out);
+}
+
+.mdrawer.is-open .mdrawer__panel { transform: none; }
+
+.mdrawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--gr-border);
+}
+
+.mdrawer__steps { display: flex; gap: var(--space-2); }
+
+.mdrawer__step,
+.mdrawer__x {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font-size: var(--fs-16);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.mdrawer__step:hover,
+.mdrawer__x:hover { border-color: var(--gr-cyan); color: var(--gr-cyan); }
+.mdrawer__x { border-color: transparent; font-size: var(--fs-20, 20px); }
+
+.mdrawer__body { overflow: auto; padding: var(--space-4); display: grid; gap: var(--space-4); }
+
+.mdrawer__stage {
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md, 10px);
+  /* The chequerboard, so a transparent PNG reads as transparent rather than
+     as a white picture on a white panel. */
+  background:
+    linear-gradient(45deg, #f1f1f1 25%, transparent 25%, transparent 75%, #f1f1f1 75%) 0 0 / 16px 16px,
+    linear-gradient(45deg, #f1f1f1 25%, #fff 25%, #fff 75%, #f1f1f1 75%) 8px 8px / 16px 16px;
+  padding: var(--space-3);
+}
+
+.mdrawer__stage img { max-width: 100%; max-height: 44vh; display: block; border-radius: var(--radius-sm); }
+
+.mdrawer__name { margin: 0; font-size: var(--fs-16); font-weight: var(--fw-semibold); word-break: break-word; }
+
+.mdrawer__facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); margin: 0; }
+.mdrawer__facts > div { display: grid; gap: 2px; }
+
+.mdrawer__facts dt {
+  font-size: var(--fs-12);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--gr-ink) 48%, transparent);
+}
+
+.mdrawer__facts dd { margin: 0; font-size: var(--fs-14); font-weight: var(--fw-semibold); }
+
+.mdrawer__field { display: grid; gap: var(--space-2); }
+.mdrawer__field > span { font-size: var(--fs-12); font-weight: var(--fw-semibold); letter-spacing: .04em; text-transform: uppercase; color: color-mix(in srgb, var(--gr-ink) 55%, transparent); }
+.mdrawer__field small { font-size: var(--fs-12); color: color-mix(in srgb, var(--gr-ink) 48%, transparent); }
+.mdrawer__field textarea { resize: vertical; font: inherit; font-size: var(--fs-14); }
+
+.mdrawer__url { display: flex; gap: var(--space-2); }
+.mdrawer__url input { flex: 1 1 auto; min-width: 0; font-size: var(--fs-12); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+.mdrawer__acts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.mdrawer__acts .mbtn { text-decoration: none; }
+
+/* ------------------------------------------------------------------ *
  * The dialogs (folders.js)
  *
  * Not window.prompt and not window.confirm: both look like the browser
@@ -859,11 +1355,10 @@ body.is-dragging-media .mtree__row { opacity: 1; }
 .mdlg {
   position: fixed;
   inset: 0;
-  z-index: 90;
+  z-index: 92;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 0;
 }
 
 .mdlg__scrim {
@@ -891,11 +1386,7 @@ body.is-dragging-media .mtree__row { opacity: 1; }
 
 .mdlg.is-open .mdlg__panel { transform: none; opacity: 1; }
 
-.mdlg__title {
-  margin: 0 0 var(--space-2);
-  font-size: var(--fs-18);
-  font-weight: var(--fw-semibold);
-}
+.mdlg__title { margin: 0 0 var(--space-2); font-size: var(--fs-18); font-weight: var(--fw-semibold); }
 
 .mdlg__hint,
 .mdlg__text {
@@ -915,29 +1406,42 @@ body.is-dragging-media .mtree__row { opacity: 1; }
   color: color-mix(in srgb, var(--gr-ink) 55%, transparent);
 }
 
-.mdlg__empty {
-  margin: 0;
-  padding: var(--space-4);
-  font-size: var(--fs-14);
-  color: color-mix(in srgb, var(--gr-ink) 50%, transparent);
-}
+.mdlg__field > span small { text-transform: none; letter-spacing: 0; font-weight: var(--fw-regular, 400); opacity: .7; }
 
-.mdlg__foot {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-2);
-}
+.mdlg__empty { margin: 0; padding: var(--space-4); font-size: var(--fs-14); color: color-mix(in srgb, var(--gr-ink) 50%, transparent); }
+.mdlg__foot { display: flex; justify-content: flex-end; gap: var(--space-2); }
 
-.mbtn.is-primary {
-  background: var(--gr-cyan);
-  border-color: var(--gr-cyan);
-  color: #fff;
-}
-
+.mbtn.is-primary { background: var(--gr-cyan); border-color: var(--gr-cyan); color: #fff; }
 .mbtn.is-primary:hover { box-shadow: var(--shadow-sm); }
-
 .mbtn.is-danger { border-color: var(--gr-error); color: var(--gr-error); }
 .mbtn.is-danger:hover { background: color-mix(in srgb, var(--gr-error) 10%, transparent); }
+
+/* Colour swatches */
+
+.mswatches { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+.mswatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--fc, #cbd5e1);
+  cursor: pointer;
+  padding: 0;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.mswatch[data-c] { background: var(--fc); }
+
+.mswatch.is-none {
+  background:
+    linear-gradient(45deg, transparent 45%, var(--gr-border) 45%, var(--gr-border) 55%, transparent 55%),
+    #fff;
+  border-color: var(--gr-border);
+}
+
+.mswatch:hover { transform: scale(1.08); }
+.mswatch.is-on { box-shadow: 0 0 0 2px var(--surface-raised, #fff), 0 0 0 4px var(--gr-ink); }
 
 /* The destination list inside chooseFolder() */
 
@@ -969,30 +1473,18 @@ body.is-dragging-media .mtree__row { opacity: 1; }
 }
 
 .mpick__row:hover:not(:disabled) { background: color-mix(in srgb, var(--gr-ink) 5%, transparent); }
-
-.mpick__row.is-on {
-  background: color-mix(in srgb, var(--gr-cyan) 14%, transparent);
-  font-weight: var(--fw-semibold);
-}
+.mpick__row.is-on { background: color-mix(in srgb, var(--gr-cyan) 14%, transparent); font-weight: var(--fw-semibold); }
 
 /* Greyed rather than hidden: a folder someone can see in the sidebar and not
    in this list reads as a bug, not as a rule. */
 .mpick__row.is-blocked { opacity: .38; cursor: not-allowed; }
-
 .mpick__row small { margin-left: auto; }
 
 /* ------------------------------------------------------------------ *
  * Folder browsing inside the picker sheet
  * ------------------------------------------------------------------ */
 
-.msheet__crumbs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px;
-  padding: var(--space-3) var(--space-4) 0;
-}
-
+.msheet__crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: var(--space-3) var(--space-4) 0; }
 .msheet__crumbs:empty { display: none; }
 
 .msheet__crumb {
@@ -1010,12 +1502,7 @@ body.is-dragging-media .mtree__row { opacity: 1; }
 .msheet__crumb.is-now { color: var(--gr-ink); font-weight: var(--fw-semibold); cursor: default; }
 .msheet__sep { color: color-mix(in srgb, var(--gr-ink) 30%, transparent); font-size: var(--fs-12); }
 
-.msheet__folders {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4) 0;
-}
+.msheet__folders { display: flex; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-3) var(--space-4) 0; }
 
 .msheet__folder {
   display: inline-flex;
@@ -1034,7 +1521,28 @@ body.is-dragging-media .mtree__row { opacity: 1; }
 
 .msheet__folder:hover { border-color: var(--gr-cyan); color: var(--gr-cyan); }
 .msheet__folder .mico { width: 14px; height: 14px; }
+.msheet__folder[data-c] .mico { color: var(--fc); }
 .msheet__folder small { color: color-mix(in srgb, var(--gr-ink) 45%, transparent); }
+
+/* ------------------------------------------------------------------ *
+ * Motion off, for anyone who asked for it at the OS level.
+ * A file manager is usable without a single transition; it is not usable if
+ * the animations make someone ill.
+ * ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .mlib__item,
+  .mskel__cell,
+  .mtoast,
+  .mmenu,
+  .mdrawer__panel,
+  .mdlg__panel,
+  .mlib__pic img,
+  .mfold { animation: none !important; transition: none !important; }
+
+  .mdrawer__panel,
+  .mdlg__panel { transform: none; opacity: 1; }
+}
 
 /* ------------------------------------------------------------------ *
  * Tablet and up: a centred dialog rather than a bottom sheet.
@@ -1043,12 +1551,11 @@ body.is-dragging-media .mtree__row { opacity: 1; }
 @media (min-width: 768px) {
   .msheet { align-items: center; justify-content: center; padding: var(--space-6); }
 
-  /* The tree becomes a sidebar. 236px is the width at which a folder three
+  /* The tree becomes a sidebar. 240px is the width at which a folder three
      levels deep still shows its name before the ellipsis. */
-  .mfm { grid-template-columns: 236px minmax(0, 1fr); gap: var(--space-5); }
+  .mfm { grid-template-columns: 240px minmax(0, 1fr); gap: var(--space-5); }
 
   .mfm__tree { max-height: min(62vh, 640px); }
-
   .mfm__side { position: sticky; top: var(--space-4); }
 
   /* A centred dialog, like the sheet — a panel stuck to the bottom edge of a
@@ -1060,6 +1567,27 @@ body.is-dragging-media .mtree__row { opacity: 1; }
     border-radius: var(--radius-lg);
     transform: translateY(12px) scale(.98);
   }
+
+  /* The drawer moves to the right edge, where a side panel belongs, and the
+     grid stays visible beside it — which is the whole reason it is a drawer
+     and not a modal: arrow keys walk the folder with it open. */
+  .mdrawer__panel {
+    inset: 0 0 0 auto;
+    width: min(440px, 92vw);
+    max-height: none;
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    box-shadow: -18px 0 48px rgba(0,0,0,.16);
+    transform: translateX(100%);
+  }
+
+  .mdrawer__stage img { max-height: 38vh; }
+
+  /* Toasts settle into the bottom-right corner rather than spanning the page. */
+  .mtoasts { left: auto; right: var(--space-5); bottom: var(--space-5); width: min(420px, 40vw); }
+
+  /* The list view earns its metadata columns once there is room for them. */
+  .mlist__row { grid-template-columns: 32px 44px minmax(0, 2.4fr) 90px 74px minmax(0, 1fr) 84px auto; }
+  .mlist__col { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .msheet__panel {
     max-width: 720px;

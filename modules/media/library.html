@@ -82,8 +82,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=ffd95ef0">
-  <link rel="stylesheet" href="../../modules/admin/admin.css?v=7a00c109">
-  <link rel="stylesheet" href="../../modules/media/media.css?v=6a981a60">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=8336bddf">
+  <link rel="stylesheet" href="../../modules/media/media.css?v=ff388ffc">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -126,13 +126,19 @@
            filing. Deleting an image here removes it everywhere it is used;
            moving one between folders changes nothing on the live shop, because
            the web address of a picture never depends on where it is filed. -->
-      <div class="acard" style="margin-bottom:var(--space-5)">
-        <p class="admin__sub" style="margin:0">
+      <div class="acard mfm__intro">
+        <p>
           Every image uploaded anywhere in the panel lands here. Folders are
           <strong>filing only</strong> — moving a picture never changes its web
           address, so the shop keeps showing it. The number on a thumbnail is
           <strong>how many places use it</strong>; deleting one of those leaves a
           blank space on the live site, so the panel asks first.
+        </p>
+        <p class="mfm__tips">
+          <span><kbd>drag</kbd> onto a folder to file</span>
+          <span><kbd>shift</kbd>-click for a range</span>
+          <span><kbd>/</kbd> to search</span>
+          <span>drop files anywhere to upload</span>
         </p>
       </div>
 
@@ -147,49 +153,89 @@
                     title="New top-level folder" aria-label="New top-level folder">+</button>
           </div>
           <nav class="mfm__tree" data-lib-tree aria-label="Folders">
-            <p class="admin__sub" style="padding:var(--space-3)">Loading…</p>
+            <p class="mtree__empty">Loading…</p>
           </nav>
         </aside>
 
         <section class="mfm__main">
           <div class="mfm__bar">
             <nav class="mfm__crumbs" data-lib-crumbs aria-label="Breadcrumb"></nav>
-            <label class="mfm__deep" data-lib-deep-wrap hidden>
-              <input type="checkbox" data-lib-deep>
-              <span>Include subfolders</span>
-            </label>
+
+            <div class="mfm__tools">
+              <label class="mfm__deep" data-lib-deep-wrap hidden>
+                <input type="checkbox" data-lib-deep>
+                <span>Include subfolders</span>
+              </label>
+
+              <label class="mfm__sort">
+                <span class="sr-only">Sort images</span>
+                <select class="input-gr" data-lib-sort></select>
+              </label>
+
+              <!-- Thumbnail size. Small to scan a folder of two hundred, large
+                   to tell two near-identical product shots apart. -->
+              <div class="mseg" data-lib-size role="group" aria-label="Thumbnail size">
+                <button type="button" data-size="s" aria-pressed="false" title="Small thumbnails">S</button>
+                <button type="button" data-size="m" aria-pressed="true" title="Medium thumbnails">M</button>
+                <button type="button" data-size="l" aria-pressed="false" title="Large thumbnails">L</button>
+              </div>
+
+              <div class="mseg" data-lib-view role="group" aria-label="View">
+                <button type="button" data-view="grid" aria-pressed="true" title="Grid" aria-label="Grid view">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
+                </button>
+                <button type="button" data-view="list" aria-pressed="false" title="List" aria-label="List view">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg>
+                </button>
+              </div>
+            </div>
           </div>
 
           <label class="mfm__search">
             <span class="sr-only">Search images</span>
-            <input class="input-gr" type="search" placeholder="Search by file name or description"
+            <input class="input-gr" type="search" placeholder="Search by file name or description  ( / )"
                    data-lib-search>
           </label>
 
           <!-- Appears only with a selection. Same component as the orders
                screen's bulk bar, on purpose — one selection idiom in the
                panel, learned once. -->
-          <div class="abulk" data-lib-bulk hidden>
+          <div class="abulk mfm__bulk" data-lib-bulk hidden>
             <strong data-bulk-count></strong>
             <div class="abulk__actions">
               <button class="btn-gr btn-sm-gr" type="button" data-bulk-move>Move to folder…</button>
+              <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-bulk-all>Select all</button>
+              <button class="btn-gr btn-ghost-gr btn-sm-gr mfm__danger" type="button" data-bulk-delete>Delete</button>
             </div>
-            <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-bulk-clear>Clear selection</button>
+            <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-bulk-clear>Clear</button>
           </div>
+
+          <!-- Progress rows for anything dragged in from the desktop. Hidden
+               until there is something to say. -->
+          <div class="msheet__queue mfm__queue" data-lib-queue hidden></div>
 
           <div class="mfm__folders" data-lib-folders hidden></div>
 
-          <div class="mlib" data-lib-grid>
-            <p class="admin__sub">Loading images…</p>
+          <div class="mlib mlib--m" data-lib-grid></div>
+
+          <!-- The observer watches this; the button below it is what still
+               works when the observer never fires. -->
+          <div data-lib-sentinel aria-hidden="true"></div>
+
+          <div class="mfm__more">
+            <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-lib-more hidden>Load more</button>
           </div>
 
-          <div style="text-align:center;padding:var(--space-5) 0">
-            <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-lib-more hidden>Load more</button>
+          <!-- The drop hint, painted over the pane while files are overhead. -->
+          <div class="mfm__dropveil" aria-hidden="true">
+            <div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+              <strong>Drop to upload</strong>
+              <span>Onto a folder to file them there</span>
+            </div>
           </div>
         </section>
       </div>
-
-      <p class="aerror" data-lib-note hidden role="alert"></p>
     </main>
   </div>
 
@@ -205,6 +251,6 @@
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=73f64c7d"></script>
-  <script type="module" src="../../modules/media/library-page.js?v=37e2b77b"></script>
+  <script type="module" src="../../modules/media/library-page.js?v=5ea48772"></script>
 </body>
 </html>

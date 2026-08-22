@@ -95,11 +95,11 @@ export function subtreeIds(tree, id) {
  * Writing
  * ------------------------------------------------------------------ */
 
-export function createFolder(name, parentId) {
+export function createFolder({ name, color = null, parentId = null }) {
   return adminFetch('/media/folders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, parentId: parentId ?? null }),
+    body: JSON.stringify({ name, color, parentId }),
   });
 }
 
@@ -134,34 +134,80 @@ export function moveAssets(ids, folderId) {
  * ------------------------------------------------------------------ */
 
 /**
- * One-field dialog. Resolves with the trimmed string, or null if dismissed.
+ * The palette, mirrored from MediaFolder::COLORS.
  *
- * @param {{title:string, label:string, value?:string, confirm?:string, hint?:string}} opts
+ * Mirrored and not fetched, because the swatches have to paint before the
+ * first request comes back. The server is still the authority: it drops a
+ * token it does not recognise rather than trusting this list.
  */
-export function askText({ title, label, value = '', confirm = 'Save', hint = '' }) {
+export const COLORS = ['amber', 'rose', 'violet', 'sky', 'emerald', 'teal', 'slate'];
+
+/**
+ * Name a folder and give it a colour. Resolves `{name, color}` or null.
+ *
+ * One dialog for both create and rename, because they ask the same question
+ * and a merchant who learned the colour swatches while creating should not
+ * have to go looking for them again to change one.
+ *
+ * @param {{title:string, name?:string, color?:string|null, confirm?:string}} opts
+ */
+export function askFolder({ title, name = '', color = null, confirm = 'Save' }) {
+  let picked = color;
+
   return dialog({
     title,
-    hint,
     body: `
       <label class="mdlg__field">
-        <span>${escape(label)}</span>
-        <input class="input-gr" type="text" data-input value="${escape(value)}"
-               maxlength="80" autocomplete="off" spellcheck="false">
-      </label>`,
+        <span>Folder name</span>
+        <input class="input-gr" type="text" data-input value="${escape(name)}"
+               maxlength="80" autocomplete="off" spellcheck="false"
+               placeholder="Ramadan 2026">
+      </label>
+
+      <div class="mdlg__field">
+        <span>Colour <small>optional</small></span>
+        <div class="mswatches" data-swatches>
+          <button type="button" class="mswatch is-none" data-color="" title="No colour"
+                  aria-label="No colour"></button>
+          ${COLORS.map((c) => `
+            <button type="button" class="mswatch" data-color="${c}" data-c="${c}"
+                    title="${c}" aria-label="${c}"></button>`).join('')}
+        </div>
+      </div>`,
     confirm,
-    // Enter submits, because a one-field dialog that needs the mouse to
-    // confirm is a dialog that gets typed into and then abandoned.
     wire: (panel, done) => {
       const input = panel.querySelector('[data-input]');
+
       input.focus();
       input.select();
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          done(input.value.trim() || null);
-        }
+
+      const mark = () => panel.querySelectorAll('[data-color]').forEach((b) => {
+        b.classList.toggle('is-on', (b.dataset.color || null) === picked);
       });
-      return () => input.value.trim() || null;
+
+      panel.querySelectorAll('[data-color]').forEach((b) => {
+        b.addEventListener('click', () => {
+          picked = b.dataset.color || null;
+          mark();
+        });
+      });
+
+      mark();
+
+      // Enter submits. A two-field dialog that needs the mouse to confirm is a
+      // dialog that gets typed into and then abandoned.
+      input.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+
+        e.preventDefault();
+        const value = input.value.trim();
+        if (value) done({ name: value, color: picked });
+      });
+
+      return () => {
+        const value = input.value.trim();
+        return value ? { name: value, color: picked } : null;
+      };
     },
   });
 }
@@ -183,7 +229,7 @@ export function chooseFolder({ title, tree, exclude = new Set(), current = null,
     rows.push(`
       <button type="button" class="mpick__row${blocked ? ' is-blocked' : ''}"
               data-folder="${folder.id}" ${blocked ? 'disabled' : ''}
-              style="--depth:${depth}">
+              style="--depth:${depth}"${folder.color ? ` data-c="${folder.color}"` : ''}>
         ${folderIcon()}
         <span>${escape(folder.name)}</span>
         ${folder.images ? `<small>${folder.images}</small>` : ''}
