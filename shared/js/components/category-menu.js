@@ -10,10 +10,17 @@ import { categoryURL } from '../core/paths.js';
  *
  * WHAT IT REPLACES AND WHAT IT LEAVES ALONE
  * -----------------------------------------
- * Only the Shop column grid and the drawer's category list. The fixed items —
- * Deals, About, My Account — are hand-authored and stay hand-authored. They
- * are not categories, and a "menu manager" that let someone delete My Account
- * from the header would be a footgun, not a feature.
+ * The Shop column grid, the drawer's category list, the footer's Shop list,
+ * and the category shortcuts in the top bar. The fixed items — Deals, About,
+ * Track Order, My Account — are hand-authored and stay hand-authored. They are
+ * not categories, and a "menu manager" that let someone delete My Account from
+ * the header would be a footgun, not a feature.
+ *
+ * The shortcuts were the exception until they were the bug. They were three
+ * hand-typed links, so ticking "In menu" in the admin panel could not put a
+ * category in the one part of the header that is visible without opening
+ * anything — and two of the three had gone on pointing at categories that no
+ * longer existed, which is a 404 in a promoted position.
  *
  * WHY IT FETCHES RATHER THAN IMPORTS
  * ----------------------------------
@@ -48,8 +55,9 @@ export function initCategoryMenu() {
   const grid = document.querySelector('[data-mega-grid]');
   const drawer = document.querySelector('[data-mobile-shop]');
   const footer = document.querySelector('[data-footer-shop]');
+  const slots = [...document.querySelectorAll('[data-nav-slot]')];
 
-  if (!grid && !drawer && !footer) return;
+  if (!grid && !drawer && !footer && !slots.length) return;
 
   load().then((categories) => {
     // An empty list is not the same as a failed request. It means every
@@ -60,6 +68,51 @@ export function initCategoryMenu() {
     if (grid) grid.innerHTML = columns(categories).map(column).join('');
     if (drawer) drawer.innerHTML = categories.map(drawerRows).join('');
     if (footer) footerRows(footer, categories);
+    if (slots.length) shortcuts(slots, categories);
+  });
+}
+
+/**
+ * The category shortcuts in the top bar.
+ *
+ * FIXED SLOTS, NOT A REWRITTEN LIST. The bar's width is measured, not
+ * flexible: the whole row is hidden below 1580px because that is the width at
+ * which it stops fitting, and the figure was arrived at by measuring the row
+ * as authored (see the note by .nav-item-optional in gulfrabit.css). A list
+ * this filled freely would put five categories in a row sized for three and
+ * push the search field off the edge on exactly the wide screens the row
+ * exists for. So the markup owns how many there are, and this owns which.
+ *
+ * A slot with no category left to show is hidden rather than emptied — an
+ * empty .nav-item still takes its gap, and three of those look like the header
+ * failed to load.
+ *
+ * Flash Sale is skipped: it is already a fixed item in the bar, in its own
+ * colour, and listing it twice is the kind of small wrongness that makes a
+ * header look unfinished.
+ */
+function shortcuts(slots, categories) {
+  const promoted = categories.filter((c) => !PROMO_HREF[c.slug]);
+
+  slots.forEach((slot, i) => {
+    const category = promoted[i];
+
+    if (!category) {
+      slot.hidden = true;
+      return;
+    }
+
+    const href = url(category.slug);
+
+    // header-nav.js marks the current page on load, which is before these
+    // exist. Rather than make that module wait on this one — the nav must not
+    // depend on the API being up — the same one-line test is applied here, to
+    // the only links that arrive late.
+    const here = (location.pathname + location.search).includes(category.slug);
+
+    slot.hidden = false;
+    slot.innerHTML = `<a class="nav-link" href="${esc(href)}"
+      data-nav-match="${esc(category.slug)}"${here ? ' aria-current="page"' : ''}>${esc(category.name)}</a>`;
   });
 }
 

@@ -119,31 +119,22 @@
           <div class="mega-menu" role="menu">
             <div class="mega-menu__grid" data-mega-grid>
               <div>
-                <p class="mega-menu__col-title">Food &amp; Pantry</p>
-                <a class="mega-menu__link" href="/shop?slug=dates-nuts">Dates &amp; Nuts</a>
-                <a class="mega-menu__link" href="/shop?slug=chocolates-dairy">Chocolates &amp; Dairy</a>
-              </div>
-              <div>
-                <p class="mega-menu__col-title">Home &amp; Kitchen</p>
-                <a class="mega-menu__link" href="/shop?slug=kitchen-appliances">Kitchen Appliances</a>
-                <a class="mega-menu__link" href="/shop?slug=home-decor">Home Decor</a>
-              </div>
-              <div>
-                <p class="mega-menu__col-title">Family &amp; Style</p>
-                <a class="mega-menu__link" href="/shop?slug=fashion-clothes">Fashion &amp; Clothes</a>
-                <a class="mega-menu__link" href="/shop?slug=kids-toys">Kids &amp; Toys</a>
+                <p class="mega-menu__col-title">Shop</p>
+                <a class="mega-menu__link" href="/category/beauty-personal-care">Beauty &amp; Personal Care</a>
+                <a class="mega-menu__link" href="/category/home-decor">Home Decor</a>
+                <a class="mega-menu__link" href="/category/kitchen-appliances">Kitchen Appliances</a>
+                <a class="mega-menu__link" href="/category/dates-nuts">Dates &amp; Nuts</a>
                 <a class="mega-menu__link" href="/deals">Flash Sale</a>
               </div>
             </div>
           </div>
         </div>
-        <!-- Shortcuts to the launch categories. Electronics and Industrial used
-             to sit here; both are switched off in categories.json for now, and a
-             nav item pointing at a category the storefront no longer lists is a
-             dead end with a promoted position. -->
-        <div class="nav-item nav-item-optional"><a class="nav-link" href="/shop?slug=dates-nuts" data-nav-match="dates-nuts">Dates &amp; Nuts</a></div>
-        <div class="nav-item nav-item-optional"><a class="nav-link" href="/shop?slug=chocolates-dairy" data-nav-match="chocolates-dairy">Chocolates &amp; Dairy</a></div>
-        <div class="nav-item nav-item-optional"><a class="nav-link" href="/shop?slug=fashion-clothes" data-nav-match="fashion-clothes">Fashion</a></div>
+        <!-- Category shortcuts, filled by category-menu.js from the live
+             categories — see the same block in shared/components/header.html
+             for why there are exactly three and why they start empty. -->
+        <div class="nav-item nav-item-optional" data-nav-slot hidden></div>
+        <div class="nav-item nav-item-optional" data-nav-slot hidden></div>
+        <div class="nav-item nav-item-optional" data-nav-slot hidden></div>
         <div class="nav-item"><a class="nav-link" href="/deals" data-nav-match="modules/deals" style="color:var(--lime-ink)">Flash Sale</a></div>
         <div class="nav-item"><a class="nav-link" href="/about" data-nav-match="about">About</a></div>
         <!-- "Where is my order" is the most-asked question in a cash-on-delivery
@@ -197,12 +188,10 @@
           Home <span class="mobile-nav__bn bn" lang="bn">হোম</span></a></li>
       </ul>
       <ul class="mobile-nav__list" role="list" data-mobile-shop>
-        <li style="--i:1"><a class="mobile-nav__link" href="/shop?slug=chocolates-dairy">Chocolates &amp; Dairy</a></li>
-        <li style="--i:2"><a class="mobile-nav__link" href="/shop?slug=home-decor">Home Decor</a></li>
-        <li style="--i:3"><a class="mobile-nav__link" href="/shop?slug=kitchen-appliances">Kitchen Appliances</a></li>
-        <li style="--i:4"><a class="mobile-nav__link" href="/shop?slug=dates-nuts">Dates &amp; Nuts</a></li>
-        <li style="--i:5"><a class="mobile-nav__link" href="/shop?slug=kids-toys">Kids &amp; Toys</a></li>
-        <li style="--i:6"><a class="mobile-nav__link" href="/shop?slug=fashion-clothes">Fashion &amp; Clothes</a></li>
+        <li style="--i:1"><a class="mobile-nav__link" href="/category/beauty-personal-care">Beauty &amp; Personal Care</a></li>
+        <li style="--i:2"><a class="mobile-nav__link" href="/category/home-decor">Home Decor</a></li>
+        <li style="--i:3"><a class="mobile-nav__link" href="/category/kitchen-appliances">Kitchen Appliances</a></li>
+        <li style="--i:4"><a class="mobile-nav__link" href="/category/dates-nuts">Dates &amp; Nuts</a></li>
         <li style="--i:7"><a class="mobile-nav__link" href="/deals">Flash Sale</a></li>
       </ul>
       <ul class="mobile-nav__list mobile-nav__list--minor" role="list">
@@ -718,12 +707,10 @@
         <nav aria-label="Shop"><p class="mega-menu__col-title">Shop</p>
           <ul role="list" class="stack-2 footer-links" data-footer-shop>
             <li data-footer-keep="flash-sale"><a href="/deals">Flash Sale</a></li>
-            <li><a href="/shop?slug=dates-nuts">Dates &amp; Nuts</a></li>
-            <li><a href="/shop?slug=chocolates-dairy">Chocolates &amp; Dairy</a></li>
-            <li><a href="/shop?slug=kitchen-appliances">Kitchen Appliances</a></li>
-            <li><a href="/shop?slug=home-decor">Home Decor</a></li>
-            <li><a href="/shop?slug=fashion-clothes">Fashion &amp; Clothes</a></li>
-            <li><a href="/shop?slug=kids-toys">Kids &amp; Toys</a></li>
+            <li><a href="/category/beauty-personal-care">Beauty &amp; Personal Care</a></li>
+            <li><a href="/category/home-decor">Home Decor</a></li>
+            <li><a href="/category/kitchen-appliances">Kitchen Appliances</a></li>
+            <li><a href="/category/dates-nuts">Dates &amp; Nuts</a></li>
           </ul>
         </nav>
         <nav aria-label="Company"><p class="mega-menu__col-title">Company</p>
