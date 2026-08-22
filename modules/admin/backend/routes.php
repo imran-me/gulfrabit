@@ -146,8 +146,13 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::get('/', [AdminCategoryController::class, 'index'])->name('index');
             Route::post('/', [AdminCategoryController::class, 'store'])->name('store');
             Route::patch('/{category}', [AdminCategoryController::class, 'update'])->name('update');
-            // Refuses while products are attached — see the controller.
-            Route::delete('/{category}', [AdminCategoryController::class, 'destroy'])->name('destroy');
+            // Refuses while products or sub-categories are attached — see the
+            // controller. Soft, so the third case those guards cannot cover —
+            // deleting the right kind of category by mistake — has a way back.
+            Route::middleware('admin.owner')->group(function (): void {
+                Route::delete('/{category}', [AdminCategoryController::class, 'destroy'])->name('destroy');
+                Route::post('/{category}/restore', [AdminCategoryController::class, 'restore'])->name('restore');
+            });
         });
     });
 });

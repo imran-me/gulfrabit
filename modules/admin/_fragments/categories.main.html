@@ -65,4 +65,10 @@
         <p class="admin__sub">Loading categories…</p>
       </div>
 
+      <!-- What has been deleted, under everything else, and only when there
+           is something in it. Filled by categories-page.js from the same
+           payload as the grid above — a couple of dozen categories is not
+           enough to justify a second page to look at three of them. -->
+      <section class="acat-bin" data-cat-bin hidden aria-label="Deleted categories"></section>
+
       <p class="aerror" data-cat-error hidden role="alert"></p>

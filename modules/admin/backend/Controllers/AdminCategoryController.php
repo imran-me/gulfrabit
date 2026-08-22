@@ -32,9 +32,16 @@ use Modules\Catalog\Models\Product;
 class AdminCategoryController extends Controller
 {
     /** GET /api/admin/categories */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
+        // Deleted categories come back in the SAME payload rather than behind a
+        // separate tab. There are a couple of dozen categories in total, not a
+        // paginated list of thousands, and the screen is a grid of cards you
+        // arrange — a second page to look at three deleted ones would be more
+        // navigation than the problem deserves. The client draws them in their
+        // own section below the live ones.
         $categories = Category::query()
+            ->withTrashed()
             ->withCount(['products as product_count'])
             ->withCount(['products as live_product_count' => fn ($q) => $q->where('is_active', true)])
             ->orderBy('sort_order')
@@ -50,6 +57,7 @@ class AdminCategoryController extends Controller
             'data' => $categories->map(fn (Category $c): array => [
                 'slug'        => $c->slug,
                 'name'        => $c->name,
+                'deletedAt'   => $c->deleted_at?->toIso8601String(),
                 'blurb'       => $c->blurb,
                 'audience'    => $c->audience,
                 'icon'        => $c->icon,
@@ -266,6 +274,28 @@ class AdminCategoryController extends Controller
 
         $category->delete();
 
-        return response()->json(['message' => 'Category removed.']);
+        return response()->json([
+            'message' => "{$category->name} deleted. It is under Deleted below, and can be put back.",
+        ]);
+    }
+
+    /**
+     * POST /api/admin/categories/{category}/restore
+     *
+     * Brings back the slug, the blurb, the image, the audience and the place
+     * in the menu order — none of which survive being re-typed, because a new
+     * slug is a new URL and every link to the old one stops working.
+     */
+    public function restore(string $category): JsonResponse
+    {
+        $model = Category::withTrashed()->where('slug', $category)->firstOrFail();
+
+        if (! $model->trashed()) {
+            return response()->json(['message' => 'That category is not deleted.'], 422);
+        }
+
+        $model->restore();
+
+        return response()->json(['message' => "{$model->name} is back."]);
     }
 }

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * A catalog category. Self-referencing, so sub-categories are rows with a parent.
@@ -21,6 +22,12 @@ class Category extends Model
 {
     use HasFactory;
 
+    /* Products sit on `category_id`, and a soft-deleted category keeps its
+       id — so restoring one reconnects everything by itself. Re-creating a
+       category by hand cannot: a new slug is a new URL, and every link to
+       the old one in the world stops working. */
+    use SoftDeletes;
+
     protected $fillable = [
         'slug', 'name', 'icon', 'image', 'blurb',
         'audience', 'parent_id', 'sort_order', 'is_active', 'show_in_menu', 'menu_order',
@@ -31,6 +38,7 @@ class Category extends Model
         return [
             'is_active'  => 'boolean',
             'sort_order' => 'integer',
+            'deleted_at' => 'datetime',
         ];
     }
 

@@ -17,6 +17,7 @@
 
 import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
+import { canDelete, confirmDelete, toast } from './admin-delete.js';
 
 let categories = [];
 
@@ -84,17 +85,25 @@ async function load() {
  * ------------------------------------------------------------------ */
 
 function paint() {
-  const live = categories.filter((c) => c.isActive).length;
-  const subs = categories.filter((c) => c.parent).length;
+  /* Deleted categories arrive in the same payload — there are a couple of
+     dozen categories in total, not a paginated list of thousands, so a
+     separate tab would be more navigation than the problem deserves. They are
+     kept out of every count and every arrangement above, and drawn in their
+     own section underneath. */
+  const shown = categories.filter((c) => !c.deletedAt);
+  const binned = categories.filter((c) => c.deletedAt);
+
+  const live = shown.filter((c) => c.isActive).length;
+  const subs = shown.filter((c) => c.parent).length;
 
   document.querySelector('[data-cat-count]').textContent =
-    `${categories.length} categories${subs ? ` (${subs} sub)` : ''} · ${live} live on the site`;
+    `${shown.length} categories${subs ? ` (${subs} sub)` : ''} · ${live} live on the site`;
 
-  const parents = categories.filter((c) => !c.parent);
-  const orphans = categories.filter((c) => c.parent && !byslug(c.parent));
+  const parents = shown.filter((c) => !c.parent);
+  const orphans = shown.filter((c) => c.parent && !byslug(c.parent));
 
   const html = parents.map((p) => {
-    const children = categories.filter((c) => c.parent === p.slug);
+    const children = shown.filter((c) => c.parent === p.slug);
 
     return card(p) + (children.length
       ? `<div class="acat-kids">${children.map((c) => card(c, p)).join('')}</div>`
@@ -106,8 +115,32 @@ function paint() {
   document.querySelector('[data-cat-list]').innerHTML =
     html + orphans.map((c) => card(c)).join('');
 
+  paintBin(binned);
   hideBrokenThumbs();
   wire();
+}
+
+/**
+ * What has been deleted, under everything else.
+ *
+ * Present only when there is something in it. A permanently visible "Deleted
+ * (0)" heading on a screen that is mostly used for arranging live categories
+ * is a heading people stop seeing.
+ */
+function paintBin(binned) {
+  const host = document.querySelector('[data-cat-bin]');
+  if (!host) return;
+
+  host.hidden = !binned.length;
+  if (!binned.length) { host.innerHTML = ''; return; }
+
+  host.innerHTML = `
+    <h2 class="h5">Deleted</h2>
+    <p class="admin__sub" style="margin-top:0">
+      Restoring brings back the slug, the blurb, the image and the place in the menu — none of
+      which survive being re-typed, because a new slug is a new URL.
+    </p>
+    <div class="acat-grid">${binned.map((c) => card(c)).join('')}</div>`;
 }
 
 /**
@@ -141,6 +174,28 @@ function card(c, parent = null) {
   // products are gone" being a bug and being an explanation.
   const mutedByParent = parent && !parent.isActive;
   const off = !c.isActive || mutedByParent;
+
+  // A deleted category is not arrangeable, switchable or editable — it is not
+  // in the catalogue. Drawing its switches would offer to publish something
+  // that is not there.
+  if (c.deletedAt) {
+    return `
+    <article class="acat is-off is-deleted" data-cat="${escapeHtml(c.slug)}">
+      <div class="acat__head">
+        ${thumb(c)}
+        <div class="acat__ident">
+          <h2 class="acat__name">${escapeHtml(c.name)}</h2>
+          <span class="acat__slug">/${escapeHtml(c.slug)}</span>
+        </div>
+      </div>
+      <div class="acat__counts">
+        <div><strong>${c.products}</strong> products</div>
+      </div>
+      ${canDelete()
+        ? '<div class="acat__switches"><button type="button" class="btn-gr btn-outline-gr btn-sm-gr" data-cat-restore>Restore</button></div>'
+        : ''}
+    </article>`;
+  }
 
   return `
     <article class="acat${off ? ' is-off' : ''}${parent ? ' acat--child' : ''}"
@@ -178,6 +233,16 @@ function card(c, parent = null) {
           <span class="aswitch__track"></span>
           <span>In menu</span>
         </label>
+        ${
+          // Pushed to the far end of the row by .acat__delete, away from the
+          // two switches this screen is mostly used to flip. The server still
+          // refuses while products or sub-categories are attached; the button
+          // is drawn anyway so the refusal can explain itself, which is more
+          // use than a control that is silently missing.
+          canDelete()
+            ? '<button type="button" class="alink-btn alink-btn--danger acat__delete" data-cat-delete>Delete</button>'
+            : ''
+        }
       </div>
     </article>`;
 }
@@ -241,6 +306,14 @@ function wire() {
   document.querySelectorAll('[data-cat-image]').forEach((btn) => {
     btn.addEventListener('click', () => changeImage(btn));
   });
+
+  document.querySelectorAll('[data-cat-delete]').forEach((btn) => {
+    btn.addEventListener('click', () => remove(btn));
+  });
+
+  document.querySelectorAll('[data-cat-restore]').forEach((btn) => {
+    btn.addEventListener('click', () => putBack(btn));
+  });
 }
 
 /**
@@ -252,7 +325,10 @@ function fillParentOptions() {
   const select = document.querySelector('[data-cat-parents]');
   if (!select) return;
 
-  const eligible = categories.filter((c) => !c.parent);
+  // Deleted categories are excluded: offering one as a parent would create a
+  // sub-category inside something that is not in the catalogue, and the new
+  // child would be invisible the moment it was made.
+  const eligible = categories.filter((c) => !c.parent && !c.deletedAt);
   const keep = select.value;
 
   select.innerHTML = '<option value="">Top level — its own category</option>'
@@ -447,6 +523,65 @@ function resetForm(form) {
 /* ------------------------------------------------------------------ */
 
 const byslug = (slug) => categories.find((c) => c.slug === slug);
+
+/* ---- Deleting -----------------------------------------------------------
+   The server refuses while products or sub-categories are attached, and those
+   refusals are the useful part of this control: they tell the merchant what is
+   in the way. So the button is drawn on every card and the answer is shown,
+   rather than the button being hidden and the reason with it. */
+
+async function remove(btn) {
+  const slug = btn.closest('[data-cat]').dataset.cat;
+  const c = byslug(slug);
+  if (!c) return;
+
+  const ok = await confirmDelete({
+    title: `Delete ${c.name}?`,
+    // The product count is the fact that decides whether this will even be
+    // allowed, so it is the fact the dialog leads with.
+    body: c.products > 0
+      ? `${c.products} product${c.products === 1 ? ' is' : 's are'} in this category. `
+        + 'The server will refuse — switch the category off instead, which hides it and its '
+        + 'products together.'
+      : 'Its slug, blurb, image and place in the menu are kept, and it can be put back.',
+  });
+  if (!ok) return;
+
+  btn.disabled = true;
+
+  try {
+    const { message } = await adminFetch(`/categories/${encodeURIComponent(slug)}`, { method: 'DELETE' });
+    toast(message || `${c.name} deleted.`);
+  } catch (err) {
+    btn.disabled = false;
+    // 422 here is the server explaining what is attached. That sentence is the
+    // whole value of the click, so it goes in the loud toast rather than the
+    // quiet one.
+    return toast(err.message, false);
+  }
+
+  load();
+}
+
+async function putBack(btn) {
+  const slug = btn.closest('[data-cat]').dataset.cat;
+  const c = byslug(slug);
+
+  btn.disabled = true;
+  btn.textContent = 'Restoring…';
+
+  try {
+    const { message } = await adminFetch(
+      `/categories/${encodeURIComponent(slug)}/restore`, { method: 'POST' });
+    toast(message || `${c?.name ?? 'Category'} is back.`);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Restore';
+    return toast(err.message, false);
+  }
+
+  load();
+}
 
 function note(message) {
   const el = document.querySelector('[data-cat-error]');
