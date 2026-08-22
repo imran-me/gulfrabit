@@ -23,9 +23,13 @@ same way removing a module does not drop its tables.
 | `POST /api/admin/media/folders` | create |
 | `PATCH /api/admin/media/folders/{id}` | rename, move, or both |
 | `DELETE /api/admin/media/folders/{id}` | delete, refused while occupied unless `?force=1` |
+| `POST /api/admin/media/delete-many` | delete a selection; in-use images are skipped and reported |
 | `modules/media/library.html` | the **Images** screen — the file manager |
 | `media-picker.js` | the picker, for any screen that needs one |
 | `folders.js` | the tree, and the dialogs that edit it |
+| `uploader.js` | the upload itself, shared by both screens |
+| `image-drawer.js` | one image, up close |
+| `toast.js` | what just happened, and Undo |
 
 All routes are staff-only, gated on the `products` capability.
 
@@ -65,6 +69,51 @@ cannot hold the tree in their head and the sidebar has run out of indent.
 holds anything, and forcing it moves the contents up to the parent. A folder is
 filing; an image is a picture on a live shop, and conflating the two is how a
 catalogue is lost by tidying up.
+
+Folders carry an optional **colour** — a token from `MediaFolder::COLORS`, never
+a hex, because a free colour picker lets someone choose white on white. CSS
+resolves it: `data-c="amber"` on any element tints the folder icon inside it,
+so the tree, the tiles, the destination picker and the "filed under" chip all
+follow without knowing what amber is.
+
+## The three rules the Images screen is built on
+
+Worth knowing before changing anything on that screen, because most of its code
+exists to keep one of them true.
+
+1. **Every gesture has a plain twin.** Drag onto a folder, or press "Move to
+   folder…". Shift-click a range, or tick the boxes. A drag is hard on a touch
+   screen and impossible from a keyboard, so it is always the fast path and
+   never the only path. Adding a drag-only action is the one change this screen
+   will not accept.
+
+2. **Reversible things do not ask; irreversible things do.** Filing is
+   high-volume and low-stakes — a merchant moves forty pictures and gets one
+   wrong. Confirming all forty to catch the one taxes every correct action, and
+   taxed confirmations get clicked through without reading. So a move offers
+   Undo, and Undo returns each image to the folder it individually came from.
+   Deleting a file has nothing to undo it with, so that one asks, every time.
+
+3. **The panel says what it did.** Every write raises a toast. On a grid of two
+   hundred the only other feedback is a thumbnail quietly appearing or
+   vanishing somewhere off screen.
+
+Keyboard: `/` focuses search, `Ctrl/⌘+A` selects everything loaded, `Esc` drops
+the selection, `Delete` deletes it (after asking). With the drawer open, `←` and
+`→` walk the folder and load the next page when they reach the end.
+
+## Uploading
+
+`uploader.js` owns it, and both screens call it. Two copies would have drifted
+the day one learned about folders and the other did not — a bug that reads as
+"uploads from the picker file correctly, uploads from the library do not" and
+reproduces for nobody.
+
+Files dropped on the Images screen upload into the folder they were dropped on,
+or into the folder currently open. There is also a document-level
+`preventDefault` for file drags: without it, a near-miss makes the browser
+navigate to the dropped JPEG, the panel disappears, and the merchant has no
+idea what they did.
 
 ## Using the picker from another screen
 
