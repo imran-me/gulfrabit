@@ -602,12 +602,26 @@ async function send(file, row) {
       bar.style.width = '100%';
       row.classList.add('is-done');
       label.textContent = payload.duplicate ? 'already had it' : 'done';
+      // The full sentence says WHERE a duplicate already lives, which is the
+      // part that explains why it did not appear in this folder.
+      if (payload.message) row.title = payload.message;
 
       if (payload.data) {
         // Newest first, and de-duplicated: an existing image re-uploaded must
         // not appear twice in the grid.
-        state.items = [payload.data, ...state.items.filter((a) => a.id !== payload.data.id)];
-        paintGrid();
+        //
+        // Shown only if it actually belongs in the view being looked at. A
+        // re-upload of a photo already filed elsewhere comes back with its
+        // existing folder, and dropping it into this grid would claim it is
+        // in a folder it is not in.
+        const belongs = state.scope === 'all'
+          || (state.scope === 'root' && payload.data.folderId == null)
+          || payload.data.folderId === state.scope;
+
+        if (belongs) {
+          state.items = [payload.data, ...state.items.filter((a) => a.id !== payload.data.id)];
+          paintGrid();
+        }
       }
 
       setTimeout(() => row.remove(), 2000);

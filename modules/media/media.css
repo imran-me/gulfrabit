@@ -474,11 +474,592 @@
 .mlib__del:hover { border-color: var(--gr-error); color: var(--gr-error); }
 
 /* ------------------------------------------------------------------ *
+ * The file manager (modules/media/library.html)
+ *
+ * Mobile first, and the layout is the honest consequence of that: a folder
+ * tree beside a grid does not fit on a 360px screen, so on a phone the tree
+ * is a scrolling strip ABOVE the contents and only becomes a sidebar when
+ * there is width to spare. Two arrangements of the same markup, no second
+ * template, and nothing is hidden on the small one.
+ * ------------------------------------------------------------------ */
+
+.mfm {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.mfm__head-acts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+.mfm__side {
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised, #fff);
+  overflow: hidden;
+}
+
+.mfm__side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3) var(--space-2);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--gr-ink) 55%, transparent);
+  border-bottom: 1px solid var(--gr-border);
+}
+
+.mfm__side-add {
+  border: 1px solid var(--gr-border);
+  background: transparent;
+  color: inherit;
+  border-radius: var(--radius-sm);
+  width: 26px;
+  height: 26px;
+  font-size: var(--fs-16);
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.mfm__side-add:hover { border-color: var(--gr-cyan); color: var(--gr-cyan); }
+
+.mfm__tree {
+  padding: var(--space-2);
+  max-height: 320px;
+  overflow: auto;
+}
+
+.mtree__kids {
+  /* The indent guide. A tree without one is a list of names at slightly
+     different x positions, which is not the same thing at all. */
+  margin-left: 14px;
+  padding-left: 8px;
+  border-left: 1px solid var(--gr-border);
+}
+
+.mtree__row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.mtree__row:hover { background: color-mix(in srgb, var(--gr-ink) 4%, transparent); }
+
+.mtree__row.is-on {
+  background: color-mix(in srgb, var(--gr-cyan) 12%, transparent);
+}
+
+.mtree__row.is-on > .mtree__label { font-weight: var(--fw-semibold); }
+
+/* Lit only while a legal drop hovers it — see targetOf() in library-page.js,
+   which refuses a folder dropped into its own child before this ever runs. */
+.mtree__row.is-drop,
+.mfm__crumb.is-drop {
+  background: color-mix(in srgb, var(--gr-cyan) 20%, transparent);
+  outline: 2px dashed var(--gr-cyan);
+  outline-offset: -2px;
+}
+
+.mtree__twist {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--gr-ink) 50%, transparent);
+  cursor: pointer;
+  padding: 0;
+}
+
+.mtree__twist svg {
+  width: 13px;
+  height: 13px;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.mtree__twist.is-open svg { transform: rotate(90deg); }
+
+.mtree__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-14);
+  text-align: left;
+  padding: 5px 4px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.mtree__label > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mtree__label small,
+.mfold__count,
+.mpick__row small {
+  color: color-mix(in srgb, var(--gr-ink) 45%, transparent);
+  font-size: var(--fs-12);
+}
+
+.mtree__label small { margin-left: auto; padding-left: var(--space-2); }
+
+.mtree__more {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 26px;
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--gr-ink) 45%, transparent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  /* Visible on hover on a mouse, always visible on touch — where there is no
+     hover, and a control that only appears on one does not exist. */
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.mtree__row:hover .mtree__more,
+.mtree__more:focus-visible { opacity: 1; }
+
+@media (hover: none) {
+  .mtree__more { opacity: 1; }
+}
+
+.mtree__empty {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-3);
+  font-size: var(--fs-12);
+  color: color-mix(in srgb, var(--gr-ink) 50%, transparent);
+}
+
+.mico { width: 16px; height: 16px; flex: 0 0 auto; }
+
+/* --- the contents pane ---------------------------------------------- */
+
+.mfm__main { min-width: 0; }
+
+.mfm__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.mfm__crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mfm__crumb {
+  border: 0;
+  background: transparent;
+  color: var(--gr-cyan);
+  font: inherit;
+  font-size: var(--fs-14);
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.mfm__crumb:hover { background: color-mix(in srgb, var(--gr-cyan) 10%, transparent); }
+
+.mfm__crumb.is-now {
+  color: var(--gr-ink);
+  font-weight: var(--fw-semibold);
+  cursor: default;
+}
+
+.mfm__sep { color: color-mix(in srgb, var(--gr-ink) 30%, transparent); }
+
+.mfm__deep {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-12);
+  color: color-mix(in srgb, var(--gr-ink) 60%, transparent);
+  cursor: pointer;
+}
+
+.mfm__search { display: block; margin-bottom: var(--space-4); }
+
+.mfm__folders {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.mfold {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised, #fff);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out);
+}
+
+.mfold:hover { border-color: var(--gr-cyan); box-shadow: var(--shadow-sm); }
+
+.mfold.is-drop {
+  border-color: var(--gr-cyan);
+  border-style: dashed;
+  background: color-mix(in srgb, var(--gr-cyan) 10%, transparent);
+}
+
+.mfold__open {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: "icon name" "icon count";
+  align-items: center;
+  gap: 0 var(--space-3);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  padding: var(--space-3);
+  cursor: pointer;
+  border-radius: var(--radius-lg);
+}
+
+.mfold__open .mico {
+  grid-area: icon;
+  width: 26px;
+  height: 26px;
+  color: var(--gr-cyan);
+}
+
+.mfold__name {
+  grid-area: name;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-14);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mfold__count { grid-area: count; }
+
+.mfold__more {
+  flex: 0 0 auto;
+  width: 32px;
+  border: 0;
+  border-left: 1px solid var(--gr-border);
+  background: transparent;
+  color: color-mix(in srgb, var(--gr-ink) 45%, transparent);
+  cursor: pointer;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+}
+
+.mfold__more:hover { background: color-mix(in srgb, var(--gr-ink) 5%, transparent); }
+
+/* --- image cards, in selection and in flight ------------------------- */
+
+.mlib__item[draggable="true"] { cursor: grab; }
+.mlib__item.is-picked { border-color: var(--gr-cyan); box-shadow: 0 0 0 1px var(--gr-cyan) inset; }
+
+/* Everything dims a little while a drag is in progress, so the folders — the
+   only legal targets — are the part of the screen that still looks live. */
+body.is-dragging-media .mlib__item { opacity: .55; }
+body.is-dragging-media .mfold,
+body.is-dragging-media .mtree__row { opacity: 1; }
+
+.mlib__sel {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, #fff 78%, transparent);
+  backdrop-filter: blur(2px);
+  cursor: pointer;
+}
+
+.mlib__sel input { width: 16px; height: 16px; cursor: pointer; accent-color: var(--gr-cyan); }
+
+.mlib__where {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: color-mix(in srgb, var(--gr-ink) 50%, transparent);
+}
+
+.mlib__where .mico { width: 12px; height: 12px; }
+
+/* ------------------------------------------------------------------ *
+ * The ⋮ menu on a folder
+ * ------------------------------------------------------------------ */
+
+.mmenu {
+  position: absolute;
+  z-index: 80;
+  min-width: 180px;
+  padding: 4px;
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface-raised, #fff);
+  box-shadow: var(--shadow-md, 0 10px 30px rgba(0,0,0,.14));
+  display: grid;
+}
+
+.mmenu button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-14);
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.mmenu button:hover { background: color-mix(in srgb, var(--gr-ink) 6%, transparent); }
+.mmenu button.is-danger { color: var(--gr-error); }
+.mmenu button.is-danger:hover { background: color-mix(in srgb, var(--gr-error) 10%, transparent); }
+
+/* ------------------------------------------------------------------ *
+ * The dialogs (folders.js)
+ *
+ * Not window.prompt and not window.confirm: both look like the browser
+ * warning you about something, which is the wrong tone for naming a folder,
+ * and neither can be made to look like the rest of the panel.
+ * ------------------------------------------------------------------ */
+
+.mdlg {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+
+.mdlg__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 10, .45);
+  opacity: 0;
+  transition: opacity 180ms var(--ease-out);
+}
+
+.mdlg.is-open .mdlg__scrim { opacity: 1; }
+
+.mdlg__panel {
+  position: relative;
+  width: 100%;
+  max-height: 86vh;
+  overflow: auto;
+  background: var(--surface-raised, #fff);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: var(--space-5);
+  transform: translateY(16px);
+  opacity: 0;
+  transition: transform 200ms var(--ease-out), opacity 200ms var(--ease-out);
+}
+
+.mdlg.is-open .mdlg__panel { transform: none; opacity: 1; }
+
+.mdlg__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-18);
+  font-weight: var(--fw-semibold);
+}
+
+.mdlg__hint,
+.mdlg__text {
+  margin: 0 0 var(--space-4);
+  font-size: var(--fs-14);
+  color: color-mix(in srgb, var(--gr-ink) 62%, transparent);
+  line-height: 1.5;
+}
+
+.mdlg__field { display: grid; gap: var(--space-2); margin-bottom: var(--space-4); }
+
+.mdlg__field > span {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--gr-ink) 55%, transparent);
+}
+
+.mdlg__empty {
+  margin: 0;
+  padding: var(--space-4);
+  font-size: var(--fs-14);
+  color: color-mix(in srgb, var(--gr-ink) 50%, transparent);
+}
+
+.mdlg__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.mbtn.is-primary {
+  background: var(--gr-cyan);
+  border-color: var(--gr-cyan);
+  color: #fff;
+}
+
+.mbtn.is-primary:hover { box-shadow: var(--shadow-sm); }
+
+.mbtn.is-danger { border-color: var(--gr-error); color: var(--gr-error); }
+.mbtn.is-danger:hover { background: color-mix(in srgb, var(--gr-error) 10%, transparent); }
+
+/* The destination list inside chooseFolder() */
+
+.mpick {
+  max-height: 46vh;
+  overflow: auto;
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+}
+
+.mpick__row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* The indent IS the hierarchy here — there is no room for guide lines in a
+     dialog, and a flat list of names cannot say which "Dates" is meant. */
+  padding: 7px 8px 7px calc(8px + var(--depth, 0) * 18px);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-14);
+  text-align: left;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.mpick__row:hover:not(:disabled) { background: color-mix(in srgb, var(--gr-ink) 5%, transparent); }
+
+.mpick__row.is-on {
+  background: color-mix(in srgb, var(--gr-cyan) 14%, transparent);
+  font-weight: var(--fw-semibold);
+}
+
+/* Greyed rather than hidden: a folder someone can see in the sidebar and not
+   in this list reads as a bug, not as a rule. */
+.mpick__row.is-blocked { opacity: .38; cursor: not-allowed; }
+
+.mpick__row small { margin-left: auto; }
+
+/* ------------------------------------------------------------------ *
+ * Folder browsing inside the picker sheet
+ * ------------------------------------------------------------------ */
+
+.msheet__crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4) 0;
+}
+
+.msheet__crumbs:empty { display: none; }
+
+.msheet__crumb {
+  border: 0;
+  background: transparent;
+  color: var(--gr-cyan);
+  font: inherit;
+  font-size: var(--fs-12);
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.msheet__crumb:hover { background: color-mix(in srgb, var(--gr-cyan) 10%, transparent); }
+.msheet__crumb.is-now { color: var(--gr-ink); font-weight: var(--fw-semibold); cursor: default; }
+.msheet__sep { color: color-mix(in srgb, var(--gr-ink) 30%, transparent); font-size: var(--fs-12); }
+
+.msheet__folders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) 0;
+}
+
+.msheet__folder {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 10px;
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-12);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.msheet__folder:hover { border-color: var(--gr-cyan); color: var(--gr-cyan); }
+.msheet__folder .mico { width: 14px; height: 14px; }
+.msheet__folder small { color: color-mix(in srgb, var(--gr-ink) 45%, transparent); }
+
+/* ------------------------------------------------------------------ *
  * Tablet and up: a centred dialog rather than a bottom sheet.
  * ------------------------------------------------------------------ */
 
 @media (min-width: 768px) {
   .msheet { align-items: center; justify-content: center; padding: var(--space-6); }
+
+  /* The tree becomes a sidebar. 236px is the width at which a folder three
+     levels deep still shows its name before the ellipsis. */
+  .mfm { grid-template-columns: 236px minmax(0, 1fr); gap: var(--space-5); }
+
+  .mfm__tree { max-height: min(62vh, 640px); }
+
+  .mfm__side { position: sticky; top: var(--space-4); }
+
+  /* A centred dialog, like the sheet — a panel stuck to the bottom edge of a
+     wide screen is a phone control that followed the layout up. */
+  .mdlg { align-items: center; padding: var(--space-6); }
+
+  .mdlg__panel {
+    max-width: 520px;
+    border-radius: var(--radius-lg);
+    transform: translateY(12px) scale(.98);
+  }
 
   .msheet__panel {
     max-width: 720px;
