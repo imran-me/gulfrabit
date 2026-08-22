@@ -6,6 +6,7 @@ namespace Modules\Admin;
 
 use Illuminate\Support\ServiceProvider;
 use Modules\Admin\Middleware\RequireAdmin;
+use Modules\Admin\Middleware\RequireOwner;
 use Modules\Admin\Models\AdminUser;
 use Modules\Admin\Services\AdminAuthService;
 
@@ -33,6 +34,13 @@ class AdminServiceProvider extends ServiceProvider
         $this->registerGuard();
 
         $this->app['router']->aliasMiddleware('admin', RequireAdmin::class);
+
+        // Stacks on top of an area check rather than replacing it, so a
+        // destructive route reads ['admin:orders', 'admin.owner'] — "may work
+        // orders, and is an owner". Registered here because every module's
+        // delete routes use it, and they already name `admin` from this same
+        // registry; this adds no new coupling that was not there already.
+        $this->app['router']->aliasMiddleware('admin.owner', RequireOwner::class);
 
         $this->app->booted(function (): void {
             $this->loadRoutes();
