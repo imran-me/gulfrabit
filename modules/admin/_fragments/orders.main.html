@@ -17,6 +17,10 @@
            it, and two controls for one value is how they end up disagreeing. -->
       <form class="afilters" data-orders-filters>
         <input type="hidden" name="status" value="">
+        <!-- Owned by the Deleted tab in the bar above, for the same reason
+             `status` is owned by the stage tabs: two controls for one value is
+             how they end up disagreeing. -->
+        <input type="hidden" name="deleted" value="">
         <div class="afilters__field">
           <label for="f-q">Search</label>
           <input class="input-gr" id="f-q" name="q" type="search" placeholder="Order no, phone or name">

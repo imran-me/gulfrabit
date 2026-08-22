@@ -23,6 +23,7 @@
 
 import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
+import { canDelete, confirmDelete, toast } from './admin-delete.js';
 import { TRANSITION_LABELS, NEEDS_REASON, stageLabel } from './order-stages.js';
 
 let order = null;
@@ -69,6 +70,18 @@ function paintHeader() {
   document.querySelector('[data-order-meta]').textContent =
     `${stageLabel(order.status)} · ${order.paymentStatus} via ${order.paymentMethod} · placed ${when(order.placedAt)}${ad}`;
   document.title = `${order.orderNumber} — GulfRabit Admin`;
+
+  // Stated outright, because everything else on this screen still looks like a
+  // working order — the items are there, the totals are there, the timeline is
+  // there. Only the actions differ, and a difference is not an explanation.
+  const banner = document.querySelector('[data-order-deleted]');
+  if (banner) {
+    banner.hidden = !order.deletedAt;
+    banner.textContent = order.deletedAt
+      ? `This order was deleted on ${when(order.deletedAt)}. It does not appear in any list, `
+        + 'count or dashboard figure. Nothing about it has been destroyed.'
+      : '';
+  }
 }
 
 function paintItems() {
@@ -266,25 +279,103 @@ function paintActions() {
       Print slip
     </a>`;
 
-  if (!order.allowedTransitions.length) {
-    host.innerHTML = slip
-      + `<span class="admin__sub">No further changes possible from ${escapeHtml(stageLabel(order.status))}.</span>`;
+  // A deleted order shows one control and no stage moves. The server already
+  // sends it no transitions; this is about not also offering a reprint, which
+  // would put a slip for an order that is off the floor into somebody's hand.
+  if (order.deletedAt) {
+    host.innerHTML = canDelete()
+      ? `<button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-restore>Restore this order</button>
+         <span class="admin__sub">Deleted ${escapeHtml(when(order.deletedAt))}. Restoring puts it back in ${
+           escapeHtml(stageLabel(order.status).toLowerCase())
+         }.</span>`
+      : `<span class="admin__sub">This order was deleted ${escapeHtml(when(order.deletedAt))}. Only an owner can restore it.</span>`;
+
+    host.querySelector('[data-restore]')?.addEventListener('click', (e) => restore(e.currentTarget));
     return;
   }
 
-  // The ending moves get the quieter button. Both are one click away, but the
-  // one that carries the order forward is the one the eye lands on — which is
-  // the right default a hundred times a day.
-  host.innerHTML = slip + order.allowedTransitions.map((to) => `
-    <button class="btn-gr ${NEEDS_REASON.includes(to) ? 'btn-outline-gr' : 'btn-primary-gr'} btn-sm-gr"
-            type="button" data-transition="${escapeHtml(to)}">
-      ${escapeHtml(TRANSITION_LABELS[to] || to)}
-    </button>`).join('');
+  // Delete is drawn last, after the moves and after the slip — the far end of
+  // the row from "Confirm", which is the button the hand goes to a hundred
+  // times a day.
+  const del = canDelete()
+    ? '<button class="btn-gr btn-danger-gr btn-sm-gr" type="button" data-delete>Delete order</button>'
+    : '';
+
+  if (!order.allowedTransitions.length) {
+    host.innerHTML = slip
+      + `<span class="admin__sub">No further changes possible from ${escapeHtml(stageLabel(order.status))}.</span>`
+      + del;
+  } else {
+    // The ending moves get the quieter button. Both are one click away, but the
+    // one that carries the order forward is the one the eye lands on — which is
+    // the right default a hundred times a day.
+    host.innerHTML = slip + order.allowedTransitions.map((to) => `
+      <button class="btn-gr ${NEEDS_REASON.includes(to) ? 'btn-outline-gr' : 'btn-primary-gr'} btn-sm-gr"
+              type="button" data-transition="${escapeHtml(to)}">
+        ${escapeHtml(TRANSITION_LABELS[to] || to)}
+      </button>`).join('') + del;
+  }
 
   host.querySelectorAll('[data-transition]').forEach((btn) => {
     btn.addEventListener('click', () => transition(btn.dataset.transition, btn));
   });
+  host.querySelector('[data-delete]')?.addEventListener('click', (e) => remove(e.currentTarget));
 }
+
+/* ---- Deleting -----------------------------------------------------------
+   The same act as the row menu on the orders list, asked the same way. The
+   difference is that here the whole order is on screen while it is asked, so
+   the dialog can be shorter and still be understood. */
+
+async function remove(btn) {
+  const ok = await confirmDelete({
+    title: `Delete ${order.orderNumber}?`,
+    // The books are the part people do not expect, so it is the part that gets
+    // said. Deleting never reverses a posted sale — that is a deliberate act
+    // on the Journal screen, or it does not happen.
+    body: order.paymentStatus === 'paid'
+      ? 'This order has been paid and posted. Deleting it does not reverse the sale in the books '
+        + 'or put its stock back — do those on the Journal and Stock screens if you need them.'
+      : 'It leaves every list and every count. Items, timeline, notes and refunds stay with it.',
+    confirm: 'Delete order',
+  });
+  if (!ok) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+
+  try {
+    const { message } = await adminFetch(`/orders/${encodeURIComponent(order.orderNumber)}`, { method: 'DELETE' });
+    toast(message || `${order.orderNumber} deleted.`);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Delete order';
+    return toast(err.message, false);
+  }
+
+  // Reload rather than repaint: deleting changes the actions, the banner and
+  // the timeline all at once, and re-deriving that here is how this screen
+  // starts disagreeing with the database.
+  location.reload();
+}
+
+async function restore(btn) {
+  btn.disabled = true;
+  btn.textContent = 'Restoring…';
+
+  try {
+    const { message } = await adminFetch(
+      `/orders/${encodeURIComponent(order.orderNumber)}/restore`, { method: 'POST' });
+    toast(message || `${order.orderNumber} restored.`);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Restore this order';
+    return toast(err.message, false);
+  }
+
+  location.reload();
+}
+
 
 async function transition(to, btn) {
   // Cancelling, returning and marking spam are the moves that cost money,

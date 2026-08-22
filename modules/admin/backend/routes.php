@@ -66,7 +66,11 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         // and the ones added later.
         Route::middleware('admin:orders')->prefix('orders')->name('orders.')->group(function (): void {
             Route::get('/', [AdminOrderController::class, 'index'])->name('index');
-            Route::get('/{order}', [AdminOrderController::class, 'show'])->name('show');
+            // withTrashed, so a deleted order still opens from the Deleted tab.
+            // Without it the link in that tab 404s, and "I can see it in the
+            // list but I cannot open it to decide whether to restore it" is a
+            // worse screen than not having the tab.
+            Route::get('/{order}', [AdminOrderController::class, 'show'])->withTrashed()->name('show');
             Route::post('/{order}/transition', [AdminOrderController::class, 'transition'])->name('transition');
             // Internal notes. Anyone who may work an order may write on it —
             // the warehouse noting "box crushed, repacked" is exactly the kind
@@ -75,6 +79,19 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             // Refunds carry a second, narrower check inside the controller:
             // `orders` gets you the screen, it does not get you the money.
             Route::post('/{order}/refund', [AdminOrderController::class, 'refund'])->name('refund');
+
+            // Deleting is an owner's call — `admin:orders` on the group gets
+            // you the screen, `admin.owner` gets you this. Soft only: the row,
+            // its items, its timeline and its refunds all stay, and restore
+            // puts it back in the stage it left from.
+            Route::middleware('admin.owner')->group(function (): void {
+                // withTrashed here too, so deleting something already
+                // deleted answers "that order is already deleted" rather than
+                // a bare 404 that reads as "no such order".
+                Route::delete('/{order}', [AdminOrderController::class, 'destroy'])
+                    ->withTrashed()->name('destroy');
+                Route::post('/{order}/restore', [AdminOrderController::class, 'restore'])->name('restore');
+            });
         });
 
         // Customers. The most sensitive area in the panel — a searchable index

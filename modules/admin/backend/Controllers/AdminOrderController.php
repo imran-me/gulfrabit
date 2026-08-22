@@ -53,6 +53,11 @@ class AdminOrderController extends Controller
             'from'          => ['sometimes', 'date'],
             'to'            => ['sometimes', 'date', 'after_or_equal:from'],
             'perPage'       => ['sometimes', 'integer', 'min:10', 'max:100'],
+            // The Deleted tab. A separate axis from `status`, not a tenth
+            // stage: a deleted order KEEPS the stage it was in, so that
+            // restoring it puts it back where it was rather than at the start
+            // of the pipeline.
+            'deleted'       => ['sometimes', 'boolean'],
         ]);
 
         $query = $this->filtered($data)
@@ -93,6 +98,13 @@ class AdminOrderController extends Controller
     private function filtered(array $data): Builder
     {
         $query = Order::query();
+
+        // Eloquent's global scope already hides deleted orders from every
+        // other caller; this is the one screen allowed to look in the drawer,
+        // and only when it asks.
+        if (! empty($data['deleted'])) {
+            $query->onlyTrashed();
+        }
 
         if (isset($data['paymentStatus'])) {
             $query->where('payment_status', $data['paymentStatus']);
@@ -148,6 +160,12 @@ class AdminOrderController extends Controller
             $counts[$stage] = (int) ($found[$stage] ?? 0);
         }
 
+        // Counted against the same search but the OPPOSITE side of the drawer,
+        // so the Deleted tab shows how many deleted orders match what is being
+        // searched for while you are standing in the live list — and still
+        // shows the same number once you are standing in it.
+        $counts['deleted'] = $this->filtered(['deleted' => true] + $data)->count();
+
         return $counts;
     }
 
@@ -164,6 +182,7 @@ class AdminOrderController extends Controller
                 'paymentStatus' => $order->payment_status,
                 'paymentMethod' => $order->payment_method,
                 'placedAt'      => $order->placed_at?->toIso8601String(),
+                'deletedAt'     => $order->deleted_at?->toIso8601String(),
 
                 'customer' => [
                     'name'  => $order->customer_name,
@@ -279,6 +298,91 @@ class AdminOrderController extends Controller
         return response()->json(['data' => $note->toAdminArray()], 201);
     }
 
+    /**
+     * DELETE /api/admin/orders/{order}
+     *
+     * Takes the order off the floor. Does not destroy it — see the migration
+     * that added `deleted_at` for why destroying one is not on offer at any
+     * price: stock movements and journal entries point at this row, and the
+     * order number is printed on a slip in somebody's hand.
+     *
+     * WHAT THIS DELIBERATELY DOES NOT DO
+     * ----------------------------------
+     * It does not reverse the journal entry, and it does not put stock back.
+     * Both are real decisions with their own screens, and doing either as a
+     * side effect of a delete is how a set of books stops balancing and how a
+     * shelf count stops matching the shelf. The panel says as much before
+     * asking: a paid order's confirm dialog names the reversal it is not doing.
+     *
+     * The note is written BEFORE the delete and inside the same transaction, so
+     * there is no window in which the order is gone with nothing recording who
+     * removed it — and because it is an ordinary order note it is still there,
+     * in the timeline, if the order is restored a week later.
+     */
+    public function destroy(Request $request, Order $order): JsonResponse
+    {
+        if ($order->trashed()) {
+            return response()->json(['message' => 'That order is already deleted.'], 422);
+        }
+
+        $admin = $request->user('admin');
+
+        DB::transaction(function () use ($order, $admin): void {
+            if ($this->notesReady()) {
+                OrderNote::create([
+                    'order_id'        => $order->id,
+                    'body'            => 'Order deleted and moved to the Deleted tab.',
+                    'author_admin_id' => $admin->id,
+                    'author_name'     => $admin->name,
+                ]);
+            }
+
+            $order->delete();
+        });
+
+        return response()->json([
+            'message' => "{$order->order_number} deleted. It is in the Deleted tab and can be put back.",
+        ]);
+    }
+
+    /**
+     * POST /api/admin/orders/{order}/restore
+     *
+     * Back to the stage it was in, not to the start of the pipeline. A
+     * restored order that reappears as `placed` would have to be walked
+     * through confirm, pack and dispatch a second time for a parcel that has
+     * already gone — which is why `status` is untouched by both directions of
+     * this pair.
+     */
+    public function restore(Request $request, string $order): JsonResponse
+    {
+        $model = Order::withTrashed()->where('order_number', $order)->firstOrFail();
+
+        if (! $model->trashed()) {
+            return response()->json(['message' => 'That order is not deleted.'], 422);
+        }
+
+        $admin = $request->user('admin');
+
+        DB::transaction(function () use ($model, $admin): void {
+            $model->restore();
+
+            if ($this->notesReady()) {
+                OrderNote::create([
+                    'order_id'        => $model->id,
+                    'body'            => 'Order restored from the Deleted tab.',
+                    'author_admin_id' => $admin->id,
+                    'author_name'     => $admin->name,
+                ]);
+            }
+        });
+
+        return response()->json([
+            'message' => "{$model->order_number} is back in "
+                . str_replace('_', ' ', $model->status) . '.',
+        ]);
+    }
+
     /** POST /api/admin/orders/{order}/refund */
     public function refund(OrderRefundRequest $request, Order $order): JsonResponse
     {
@@ -343,12 +447,20 @@ class AdminOrderController extends Controller
             'itemCount'     => $o->items->sum('qty'),
             'totalTaka'     => intdiv($o->total_poisha, 100),
             'placedAt'      => $o->placed_at?->toIso8601String(),
+            // Null for a live order. The row draws itself struck through when
+            // this is set, so a screenshot of the Deleted tab can never be
+            // mistaken for the live list.
+            'deletedAt'     => $o->deleted_at?->toIso8601String(),
 
             // The same list the detail screen gets, from the same map the
             // server enforces — so the row can offer "Confirm" without the
             // browser ever deciding what is legal. Working twenty orders
             // through a stage should not mean opening twenty pages.
-            'allowedTransitions' => $this->fulfilment->allowedTransitions($o, $role),
+            //
+            // Empty for a deleted order. It is not in the pipeline any more,
+            // and offering "Start packing" on a row in the Deleted tab invites
+            // somebody to work an order that is not there.
+            'allowedTransitions' => $o->trashed() ? [] : $this->fulfilment->allowedTransitions($o, $role),
         ];
     }
 }

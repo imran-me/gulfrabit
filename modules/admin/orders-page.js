@@ -19,9 +19,14 @@
 
 import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
+import { canDelete, confirmDelete, toast } from './admin-delete.js';
 import { STAGES, TRANSITION_LABELS, NEEDS_REASON, stageLabel, stageTone } from './order-stages.js';
 
-const FILTER_KEYS = ['q', 'status', 'paymentStatus', 'from', 'to'];
+/* `deleted` is a filter like any other so it lives in the URL with the rest:
+   the Deleted tab has to survive a reload and be shareable, exactly as the
+   stage tabs beside it are. It is a separate axis from `status` — a deleted
+   order keeps the stage it was in, so restoring puts it back where it was. */
+const FILTER_KEYS = ['q', 'status', 'paymentStatus', 'from', 'to', 'deleted'];
 let page = 1;
 
 /* The current page's rows, and which of them are ticked. Selection is cleared
@@ -51,6 +56,7 @@ function init() {
     // one — it restores the DEFAULT attribute, which is empty here, so the
     // stage genuinely goes back to "all". Stated because it looks like a bug.
     form.status.value = '';
+    form.deleted.value = '';
     page = 1;
     load();
   });
@@ -61,8 +67,20 @@ function init() {
   // every load, and handlers attached to buttons that get replaced are handlers
   // that quietly stop working.
   document.querySelector('[data-orders-tabs]')?.addEventListener('click', (e) => {
+    if (e.target.closest('[data-trash]')) {
+      // Entering the drawer clears the stage, because "cancelled orders that
+      // are also deleted" is a question nobody has asked and a tab bar showing
+      // two current tabs at once is a tab bar that has stopped explaining
+      // where you are.
+      form.deleted.value = '1';
+      form.status.value = '';
+      page = 1;
+      return load();
+    }
+
     const tab = e.target.closest('[data-stage]');
     if (!tab) return;
+    form.deleted.value = '';
     form.status.value = tab.dataset.stage;
     page = 1;
     load();
@@ -71,6 +89,12 @@ function init() {
   // Same reasoning for the rows: delegated once to the tbody, which survives
   // every repaint, rather than re-bound to buttons that are thrown away.
   document.querySelector('[data-orders-body]')?.addEventListener('click', (e) => {
+    const del = e.target.closest('[data-adel-id]');
+    if (del) return remove([del.dataset.adelId], del);
+
+    const back = e.target.closest('[data-arestore-id]');
+    if (back) return putBack(back.dataset.arestoreId, back);
+
     const btn = e.target.closest('[data-move]');
     if (btn) move(btn);
   });
@@ -95,6 +119,8 @@ function init() {
     const btn = e.target.closest('[data-bulk]');
     if (!btn) return;
     if (btn.dataset.bulk === 'print') return printSlips();
+    if (btn.dataset.bulk === 'delete') return remove([...selected], btn);
+    if (btn.dataset.bulk === 'restore') return putBackMany([...selected], btn);
     bulkMove(btn.dataset.bulk, btn);
   });
 
@@ -121,23 +147,37 @@ function paintTabs(counts) {
   const host = document.querySelector('[data-orders-tabs]');
   if (!host) return;
 
-  const current = document.querySelector('[data-orders-filters]')?.status.value || '';
+  const form = document.querySelector('[data-orders-filters]');
+  const current = form?.status.value || '';
+  const inTrash = !!form?.deleted.value;
   const tabs = [{ key: '', label: 'All orders' }, ...STAGES];
 
-  host.innerHTML = tabs.map(({ key, label }) => {
-    const n = counts[key || 'all'];
-    const on = key === current;
-    return `
-      <button class="atab${on ? ' is-on' : ''}" type="button" data-stage="${key}"
+  const tab = (key, label, on, extraClass = '') => `
+      <button class="atab${on ? ' is-on' : ''}${extraClass}" type="button" data-stage="${key}"
               aria-current="${on ? 'page' : 'false'}">
         ${escapeHtml(label)}${
           // No badge at all until the numbers land, rather than a flash of
           // zeroes that then corrects itself — a "0" that turns into "7" reads
           // as the screen having been wrong.
-          n === undefined ? '' : `<span class="atab__count">${n.toLocaleString('en-BD')}</span>`
+          counts[key || 'all'] === undefined
+            ? ''
+            : `<span class="atab__count">${counts[key || 'all'].toLocaleString('en-BD')}</span>`
         }
       </button>`;
-  }).join('');
+
+  /* While the Deleted tab is open no stage tab is current, because you are not
+     standing in a stage — you are standing in the drawer. Clicking any stage
+     leaves the drawer, which is why `data-trash` is read as "leave" below. */
+  host.innerHTML = tabs.map(({ key, label }) => tab(key, label, !inTrash && key === current)).join('')
+    + `
+      <button class="atab atab--trash${inTrash ? ' is-on' : ''}" type="button" data-trash
+              aria-current="${inTrash ? 'page' : 'false'}">
+        Deleted${
+          counts.deleted === undefined
+            ? ''
+            : `<span class="atab__count">${counts.deleted.toLocaleString('en-BD')}</span>`
+        }
+      </button>`;
 }
 
 async function load() {
@@ -180,21 +220,26 @@ function paint({ data, meta }) {
 
   paintTabs(meta.counts || {});
 
-  const stage = document.querySelector('[data-orders-filters]').status.value;
+  const form = document.querySelector('[data-orders-filters]');
+  const stage = form.status.value;
+  const inTrash = !!form.deleted.value;
   count.textContent = meta.total === 0
-    ? 'No orders match these filters.'
-    : `${meta.total.toLocaleString('en-BD')} order${meta.total === 1 ? '' : 's'}${
-        stage ? ` in ${stageLabel(stage).toLowerCase()}` : ''
-      }`;
+    ? (inTrash ? 'Nothing deleted.' : 'No orders match these filters.')
+    : `${meta.total.toLocaleString('en-BD')} ${inTrash ? 'deleted ' : ''}order${
+        meta.total === 1 ? '' : 's'
+      }${stage ? ` in ${stageLabel(stage).toLowerCase()}` : ''}`;
 
   if (!data.length) {
     // Named, because an empty stage is usually good news. "Nothing here" makes
     // an empty Placed tab look like a broken screen when it means every order
     // has been called.
+    const inTrash = !!document.querySelector('[data-orders-filters]').deleted.value;
     body.innerHTML = `<tr><td colspan="10" class="atable__empty">${
-      stage
-        ? `Nothing in ${escapeHtml(stageLabel(stage).toLowerCase())} right now.`
-        : 'Nothing here. Try widening the filters.'
+      inTrash
+        ? 'Nothing has been deleted. Orders you delete land here, and can be put back.'
+        : stage
+          ? `Nothing in ${escapeHtml(stageLabel(stage).toLowerCase())} right now.`
+          : 'Nothing here. Try widening the filters.'
     }</td></tr>`;
     document.querySelector('[data-orders-pager]').hidden = true;
     return;
@@ -205,14 +250,14 @@ function paint({ data, meta }) {
   rows = data;
 
   body.innerHTML = data.map((o) => `
-    <tr>
+    <tr class="${o.deletedAt ? 'is-deleted' : ''}">
       <td class="atable__pick">
         <input type="checkbox" data-pick="${escapeHtml(o.orderNumber)}"
                ${selected.has(o.orderNumber) ? 'checked' : ''}
                aria-label="Select ${escapeHtml(o.orderNumber)}">
       </td>
       <td><a href="/admin/order?no=${encodeURIComponent(o.orderNumber)}">${escapeHtml(o.orderNumber)}</a></td>
-      <td>
+      <td class="atable__name">
         <div>${escapeHtml(o.customerName)}</div>
         <div class="atable__sub">${escapeHtml(o.customerPhone)}</div>
       </td>
@@ -277,6 +322,20 @@ function paintBulk() {
     return acc === null ? allowed : acc.filter((t) => allowed.includes(t));
   }, null) || [];
 
+  // In the drawer the only bulk action that means anything is putting them
+  // back — printing a slip for a deleted order, or moving it through a stage,
+  // are both offers to work an order that is not on the floor.
+  const inTrash = !!document.querySelector('[data-orders-filters]').deleted.value;
+
+  if (inTrash) {
+    document.querySelector('[data-bulk-actions]').innerHTML = canDelete()
+      ? `<button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-bulk="restore">
+           Restore ${n}
+         </button>`
+      : '<span class="atable__sub">Only an owner can restore a deleted order.</span>';
+    return;
+  }
+
   document.querySelector('[data-bulk-actions]').innerHTML = `
     <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-bulk="print">
       Print ${n} slip${n === 1 ? '' : 's'}
@@ -285,6 +344,16 @@ function paintBulk() {
       <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-bulk="${escapeHtml(t)}">
         ${escapeHtml(TRANSITION_LABELS[t] || t)}
       </button>`).join('')}
+    ${
+      // Delete is offered whatever stage the selection is in — unlike a move,
+      // it does not have to be legal for all of them, because it is the same
+      // act on every order regardless of where that order had got to.
+      canDelete()
+        ? `<button class="btn-gr btn-sm-gr btn-danger-gr" type="button" data-bulk="delete">
+             Delete ${n}
+           </button>`
+        : ''
+    }
     ${shared.length ? '' : '<span class="atable__sub">These orders are at different stages — no move applies to all of them.</span>'}`;
 }
 
@@ -336,6 +405,114 @@ async function bulkMove(to, btn) {
   load();
 }
 
+/* ---- Deleting ----------------------------------------------------------
+   One function for the row and the bulk bar, because they are the same act on
+   a list of one or a list of twenty, and two copies would have drifted the
+   first time the wording changed. */
+
+/**
+ * Delete one order or twenty, after asking once.
+ *
+ * The dialog names the money, when there is money to name. An order that has
+ * been paid has already been posted to the books, and deleting it here does
+ * NOT reverse that — the ledger is reversed deliberately, on the Journal
+ * screen, or it is not reversed at all. Saying so at the moment of the click
+ * is the only place that warning is any use.
+ */
+async function remove(list, btn) {
+  const picked = rows.filter((o) => list.includes(o.orderNumber));
+  const paid = picked.filter((o) => o.paymentStatus === 'paid');
+  const one = list.length === 1;
+
+  const ok = await confirmDelete({
+    title: one
+      ? `Delete ${list[0]}?`
+      : `Delete ${list.length} orders?`,
+    body: paid.length
+      ? `${paid.length === 1 ? 'One of these has' : `${paid.length} of these have`} been paid. `
+        + 'Deleting does not reverse the sale in the books or put stock back — '
+        + 'do those on the Journal and Stock screens if you need them.'
+      : 'The order leaves every list and every count. Its items, timeline and refunds stay with it.',
+    confirm: one ? 'Delete order' : `Delete ${list.length} orders`,
+  });
+  if (!ok) return;
+
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = one ? 'Deleting…' : `Deleting ${list.length}…`;
+
+  /* One request each rather than a bulk endpoint, exactly as bulkMove does and
+     for the same reason: each order gets its own note recording who removed
+     it, and one order that refuses must not stop the other nineteen. */
+  const results = await Promise.all(list.map((no) =>
+    adminFetch(`/orders/${encodeURIComponent(no)}`, { method: 'DELETE' })
+      .then(() => ({ no, ok: true }))
+      .catch((err) => ({ no, ok: false, message: err.message }))));
+
+  report(results, btn, original, 'deleted');
+}
+
+/** Put one order back, from its row in the Deleted tab. */
+async function putBack(no, btn) {
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Restoring…';
+
+  try {
+    const { message } = await adminFetch(`/orders/${encodeURIComponent(no)}/restore`, { method: 'POST' });
+    toast(message || `${no} restored.`);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = original;
+    return toast(err.message, false);
+  }
+
+  load();
+}
+
+/** The same for a selection. No confirm: restoring is not the dangerous one. */
+async function putBackMany(list, btn) {
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = `Restoring ${list.length}…`;
+
+  const results = await Promise.all(list.map((no) =>
+    adminFetch(`/orders/${encodeURIComponent(no)}/restore`, { method: 'POST' })
+      .then(() => ({ no, ok: true }))
+      .catch((err) => ({ no, ok: false, message: err.message }))));
+
+  report(results, btn, original, 'restored');
+}
+
+/**
+ * Say what happened to all of them, naming the ones that did not.
+ *
+ * Settled rather than all-or-nothing, so a single refusal — somebody else got
+ * there first, a role that is not an owner — leaves the rest done and names
+ * the one that is not. A silent partial success is how a merchant ends up
+ * believing twenty orders went and finding nineteen.
+ */
+function report(results, btn, original, verb) {
+  const failed = results.filter((r) => !r.ok);
+
+  if (!failed.length) {
+    toast(results.length === 1
+      ? `${results[0].no} ${verb}.`
+      : `${results.length} orders ${verb}.`);
+  } else if (failed.length === results.length) {
+    btn.disabled = false;
+    btn.textContent = original;
+    toast(failed[0].message, false);
+    return;                       // nothing moved, so nothing to reload for
+  } else {
+    toast(`${results.length - failed.length} of ${results.length} ${verb}. `
+      + failed.map((f) => `${f.no}: ${f.message}`).join(' '), false);
+  }
+
+  clearSelection();
+  load();
+}
+
 /**
  * The one button that moves this order forward, on its own row.
  *
@@ -358,7 +535,19 @@ function rowAction(o) {
   const endings = all.filter((t) => NEEDS_REASON.includes(t));
   const no = escapeHtml(o.orderNumber);
 
-  if (!next && !endings.length) {
+  // A row in the Deleted tab has exactly one thing to offer. Its stage moves
+  // are already empty (the server sends none for a deleted order), so this is
+  // about not also drawing the Open link as if nothing had happened.
+  if (o.deletedAt) {
+    return `<div class="arow-actions">${
+      canDelete()
+        ? `<button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
+                   data-arestore-id="${no}">Restore</button>`
+        : '<span class="atable__sub">Deleted</span>'
+    }</div>`;
+  }
+
+  if (!next && !endings.length && !canDelete()) {
     return `<a class="atable__sub" href="/admin/order?no=${encodeURIComponent(o.orderNumber)}">Open</a>`;
   }
 
@@ -373,7 +562,7 @@ function rowAction(o) {
   // pixels from "Confirm", on every row of a list somebody works at speed, is
   // a mis-click waiting to happen — and this one texts a customer. Opening the
   // menu is the pause; the reason prompt after it is the confirmation.
-  const menu = endings.length
+  const menu = endings.length || canDelete()
     ? `<details class="amenu">
          <summary aria-label="More actions for order ${no}">⋯</summary>
          <div class="amenu__list">
@@ -381,6 +570,14 @@ function rowAction(o) {
              <button type="button" data-move="${escapeHtml(t)}" data-order="${no}">
                ${escapeHtml(TRANSITION_LABELS[t] || t)}
              </button>`).join('')}
+           ${
+             // Last in the menu, and only for an owner. It shares the endings'
+             // second click for the same reason they have one: this is the row
+             // of a list somebody works at speed, and the pause is the point.
+             canDelete()
+               ? `<button type="button" class="amenu__danger" data-adel-id="${no}">Delete order</button>`
+               : ''
+           }
          </div>
        </details>`
     : '';

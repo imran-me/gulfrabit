@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * A placed order — a historical record, never a live view.
@@ -22,6 +23,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     use HasFactory;
+
+    /* Deleting an order takes it off every screen and out of every count; it
+       does not destroy it. Stock movements and journal entries reference this
+       row, and the order number is on a packing slip in somebody's hand — see
+       the migration for the full reasoning. Restored from the panel's Deleted
+       tab with its items, its timeline and its refunds intact. */
+    use SoftDeletes;
 
     /** Statuses a customer can still cancel from. */
     public const CANCELLABLE = ['placed', 'confirmed'];
@@ -41,6 +49,7 @@ class Order extends Model
     {
         return [
             'placed_at'              => 'datetime',
+            'deleted_at'             => 'datetime',
             'subtotal_poisha'        => 'integer',
             'discount_poisha'        => 'integer',
             'delivery_charge_poisha' => 'integer',

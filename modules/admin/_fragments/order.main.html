@@ -11,6 +11,13 @@
         <div class="aactions" data-order-actions></div>
       </div>
 
+      <!-- Shown only for a deleted order. The controls below already change
+           when one is deleted, but a page whose buttons are different is not
+           the same as a page that says why — and this screen is reachable
+           directly from a bookmark or an old link, with no Deleted tab visible
+           to explain what you are looking at. -->
+      <p class="abanner abanner--deleted" data-order-deleted hidden></p>
+
       <div class="aorder">
         <section class="acard" aria-labelledby="oi-head">
           <h2 class="h5" id="oi-head">Items</h2>

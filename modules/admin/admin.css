@@ -690,6 +690,20 @@
 }
 .amenu__list button:hover { background: var(--wash-hover); }
 
+/* The exception to the rule directly above, and the reason that rule is worth
+   keeping. Cancelling and returning ARE ordinary parts of running a shop, so
+   they stay in the panel's normal ink; deleting is not, so it gets the colour
+   back. Ruled off as well as coloured — the separator is what stops a fast
+   hand landing on it while aiming for the item above. */
+.amenu__list .amenu__danger {
+  color: var(--gr-error);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-hairline);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+.amenu__list .amenu__danger:hover { background: rgba(200, 30, 30, .08); }
+
 /* Room for a menu opened on one of the last rows.
    .atable-wrap scrolls sideways, and CSS will not let one axis clip while the
    other stays visible — `overflow-y: visible` beside `overflow-x: auto`
@@ -1115,3 +1129,19 @@
 
 .alink-btn--danger { color: var(--gr-error); }
 .alink-btn--danger:hover { color: var(--gr-error); text-decoration-thickness: 2px; }
+
+/* A page-level statement of fact, for a record whose own screen would
+   otherwise look ordinary. Used by the order screen when the order it is
+   showing has been deleted — reachable from a bookmark, with no Deleted tab
+   on screen to explain what you are looking at. */
+.abanner {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+}
+.abanner--deleted {
+  background: rgba(200, 30, 30, .08);
+  border: 1px solid rgba(200, 30, 30, .22);
+  color: var(--gr-error);
+}
