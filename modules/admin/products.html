@@ -186,7 +186,15 @@
         </p>
       </div>
 
+      <!-- The catalogue, and what has been taken out of it. Painted by
+           products-page.js; the Deleted count comes from the server. -->
+      <nav class="atabs" data-prod-tabs aria-label="Catalogue lists"></nav>
+
       <form class="afilters" data-prod-filters>
+        <!-- Owned by the tab bar above, like `status` on the orders
+             screen: two controls for one value is how they end up
+             disagreeing. -->
+        <input type="hidden" name="deleted" value="">
         <div class="afilters__field">
           <label for="pf-q">Search</label>
           <input class="input-gr" id="pf-q" name="q" type="search" placeholder="Title, SKU or brand">
@@ -260,6 +268,6 @@
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=73f64c7d"></script>
-  <script type="module" src="../../modules/admin/products-page.js?v=fcce14ca"></script>
+  <script type="module" src="../../modules/admin/products-page.js?v=d023303c"></script>
 </body>
 </html>

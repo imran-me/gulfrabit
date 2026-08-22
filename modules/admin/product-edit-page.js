@@ -8,6 +8,7 @@
 
 import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
+import { canDelete, confirmDelete } from './admin-delete.js';
 
 let product = null;
 let categories = [];
@@ -68,7 +69,14 @@ async function load() {
   fill();
   paintHistory();
   document.querySelector('[data-pe-form]').addEventListener('submit', save);
-  document.querySelector('[data-pe-delete]')?.addEventListener('click', unlist);
+  const del = document.querySelector('[data-pe-delete]');
+  if (del) {
+    // Owner-only, and hidden rather than disabled: a control that refuses
+    // the person looking at it is only a source of confusion. The route
+    // behind it carries the real check.
+    del.hidden = !canDelete();
+    del.addEventListener('click', unlist);
+  }
 }
 
 function fill() {
@@ -562,11 +570,11 @@ async function save(e) {
 async function unlist() {
   const btn = document.querySelector('[data-pe-delete]');
 
-  if (!confirm(
-    `Remove "${product.title}" from the shop?\n\n`
-    + 'It disappears from the site and from search. Orders that already contain it '
-    + 'are not affected, and nothing is erased — it can be restored.'
-  )) return;
+  const ok = await confirmDelete({
+    title: `Remove "${product.title}" from the shop?`,
+    body: 'It disappears from the site and from search. Orders that already contain it are not affected.',
+  });
+  if (!ok) return;
 
   btn.disabled = true;
 

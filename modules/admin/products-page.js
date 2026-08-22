@@ -8,6 +8,7 @@
 
 import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
+import { canDelete, confirmDelete, toast } from './admin-delete.js';
 
 let page = 1;
 let categories = [];
@@ -28,12 +29,31 @@ async function init() {
   // came back unfiltered. setupCreate() is what fills the options.
   await setupCreate();
 
+  paintTabs({});   // drawn immediately, the count filled in when it arrives
+
   const params = new URLSearchParams(location.search);
-  ['q', 'noCost', 'category', 'sort'].forEach((k) => { if (params.has(k) && form[k]) form[k].value = params.get(k); });
+  ['q', 'noCost', 'category', 'sort', 'deleted'].forEach((k) => {
+    if (params.has(k) && form[k]) form[k].value = params.get(k);
+  });
   page = Math.max(1, Number(params.get('page')) || 1);
 
   form.addEventListener('submit', (e) => { e.preventDefault(); page = 1; load(); });
-  document.querySelector('[data-prod-clear]')?.addEventListener('click', () => { form.reset(); page = 1; load(); });
+  document.querySelector('[data-prod-clear]')?.addEventListener('click', () => {
+    form.reset();
+    // reset() restores a hidden input's default attribute rather than clearing
+    // it; that default is empty, so Clear does leave the Deleted tab.
+    form.deleted.value = '';
+    page = 1;
+    load();
+  });
+
+  document.querySelector('[data-prod-tabs]')?.addEventListener('click', (e) => {
+    const tab = e.target.closest('[data-prod-tab]');
+    if (!tab) return;
+    form.deleted.value = tab.dataset.prodTab;
+    page = 1;
+    load();
+  });
   document.querySelector('[data-cost-gap-filter]')?.addEventListener('click', () => {
     form.noCost.value = '1';
     page = 1;
@@ -178,7 +198,7 @@ async function load() {
   const form = document.querySelector('[data-prod-filters]');
 
   const qs = new URLSearchParams();
-  ['q', 'noCost', 'category', 'sort'].forEach((k) => {
+  ['q', 'noCost', 'category', 'sort', 'deleted'].forEach((k) => {
     const v = form[k]?.value.trim();
     if (v) qs.set(k, v);
   });
@@ -203,13 +223,47 @@ async function load() {
   paint(payload);
 }
 
+/**
+ * The catalogue, and what has been taken out of it.
+ *
+ * destroy() has soft-deleted since this screen was written and restore() has
+ * existed just as long — but nothing in the panel could see a deleted product,
+ * so "it can be restored" was a promise with no screen behind it. This is that
+ * screen.
+ */
+function paintTabs(meta) {
+  const host = document.querySelector('[data-prod-tabs]');
+  if (!host) return;
+
+  const inTrash = !!document.querySelector('[data-prod-filters]')?.deleted.value;
+  const badge = (n) => (n === undefined ? '' : `<span class="atab__count">${n.toLocaleString('en-BD')}</span>`);
+
+  host.innerHTML = `
+    <button class="atab${inTrash ? '' : ' is-on'}" type="button" data-prod-tab=""
+            aria-current="${inTrash ? 'false' : 'page'}">
+      Catalogue${badge(inTrash ? undefined : meta.total)}
+    </button>
+    <button class="atab atab--trash${inTrash ? ' is-on' : ''}" type="button" data-prod-tab="1"
+            aria-current="${inTrash ? 'page' : 'false'}">
+      Deleted${badge(meta.deletedCount)}
+    </button>`;
+}
+
 function paint({ data, meta }) {
   const body = document.querySelector('[data-prod-body]');
-  document.querySelector('[data-prod-count]').textContent =
-    `${meta.total.toLocaleString('en-BD')} product${meta.total === 1 ? '' : 's'}`;
+  const inTrash = !!document.querySelector('[data-prod-filters]').deleted.value;
 
+  paintTabs(meta);
+
+  document.querySelector('[data-prod-count]').textContent = inTrash
+    ? `${meta.total.toLocaleString('en-BD')} deleted product${meta.total === 1 ? '' : 's'}`
+    : `${meta.total.toLocaleString('en-BD')} product${meta.total === 1 ? '' : 's'}`;
+
+  // The missing-cost worklist is about products that are for sale. Leading the
+  // Deleted tab with "14 products have no cost" would be counting work that
+  // does not need doing.
   const gap = document.querySelector('[data-cost-gap]');
-  if (meta.missingCost > 0) {
+  if (meta.missingCost > 0 && !inTrash) {
     gap.hidden = false;
     document.querySelector('[data-cost-gap-n]').textContent = meta.missingCost;
   } else {
@@ -217,14 +271,18 @@ function paint({ data, meta }) {
   }
 
   if (!data.length) {
-    body.innerHTML = '<tr><td colspan="7" class="atable__empty">Nothing matches these filters.</td></tr>';
+    body.innerHTML = `<tr><td colspan="7" class="atable__empty">${
+      inTrash
+        ? 'Nothing has been deleted. Products you remove land here, and can be put back.'
+        : 'Nothing matches these filters.'
+    }</td></tr>`;
     document.querySelector('[data-prod-pager]').hidden = true;
     return;
   }
 
   body.innerHTML = data.map((p, i) => `
-    <tr>
-      <td>
+    <tr class="${p.deletedAt ? 'is-deleted' : ''}">
+      <td class="atable__name">
         <a href="/admin/products/edit?sku=${encodeURIComponent(p.sku)}">${escapeHtml(p.title)}</a>
         <div class="atable__sub">${escapeHtml(p.sku)}${p.brand ? ` · ${escapeHtml(p.brand)}` : ''}</div>
       </td>
@@ -239,11 +297,21 @@ function paint({ data, meta }) {
       }</td>
       <td class="atable__num">${p.marginPct == null ? '<span class="atable__sub">—</span>' : `${p.marginPct}%`}</td>
       <td>${status(p)}</td>
-      <td class="atable__actions">
-        <a class="btn-gr btn-ghost-gr btn-sm-gr" href="/admin/products/edit?sku=${encodeURIComponent(p.sku)}">Edit</a>
-        <button class="btn-gr btn-ghost-gr btn-sm-gr aact-remove" type="button"
-                data-prod-remove="${i}">Remove</button>
-      </td>
+      <td class="atable__actions">${
+        p.deletedAt
+          // Editing a deleted product is not offered: the edit screen saves to
+          // a catalogue this product is not in, so every field on it would be
+          // a change nobody can see. Put it back first, then edit it.
+          ? (canDelete()
+              ? `<button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
+                         data-prod-restore="${i}">Restore</button>`
+              : '<span class="atable__sub">Deleted</span>')
+          : `<a class="btn-gr btn-ghost-gr btn-sm-gr" href="/admin/products/edit?sku=${encodeURIComponent(p.sku)}">Edit</a>
+             ${canDelete()
+               ? `<button class="btn-gr btn-ghost-gr btn-sm-gr aact-remove" type="button"
+                          data-prod-remove="${i}">Remove</button>`
+               : ''}`
+      }</td>
     </tr>`).join('');
 
   // The button carries only the row INDEX; sku and title are read back from
@@ -253,6 +321,10 @@ function paint({ data, meta }) {
   // out of it. An integer cannot.
   body.querySelectorAll('[data-prod-remove]').forEach((btn) =>
     btn.addEventListener('click', () => remove(btn, data[Number(btn.dataset.prodRemove)])));
+
+  // Same index trick as above, and for the same reason — see the note there.
+  body.querySelectorAll('[data-prod-restore]').forEach((btn) =>
+    btn.addEventListener('click', () => putBack(btn, data[Number(btn.dataset.prodRestore)])));
 
   const pager = document.querySelector('[data-prod-pager]');
   pager.hidden = meta.lastPage <= 1;
@@ -283,16 +355,17 @@ async function remove(btn, row) {
   const skuVal = row.sku;
   const title = row.title;
 
-  if (!confirm(
-    `Remove "${title}" from the shop?\n\n`
-    + 'It disappears from the site and from search. Orders that already contain it '
-    + 'are not affected, and nothing is erased — it can be restored.'
-  )) return;
+  const ok = await confirmDelete({
+    title: `Remove "${title}" from the shop?`,
+    body: 'It disappears from the site and from search. Orders that already contain it are not affected.',
+  });
+  if (!ok) return;
 
   btn.disabled = true;
 
   try {
-    await adminFetch(`/products/${encodeURIComponent(skuVal)}`, { method: 'DELETE' });
+    const { message } = await adminFetch(`/products/${encodeURIComponent(skuVal)}`, { method: 'DELETE' });
+    toast(message || `${title} removed from the shop.`);
   } catch (err) {
     btn.disabled = false;
     return problem(err.message);
@@ -307,6 +380,44 @@ async function remove(btn, row) {
   }
 
   load();   // the row is gone from server truth; repaint from it
+}
+
+/**
+ * Put a deleted product back in the catalogue — still unlisted.
+ *
+ * destroy() sets is_active false on the way out precisely so this cannot
+ * republish a product to the shop by surprise; restoring returns it to the
+ * catalogue where its price history and stock ledger are waiting, and listing
+ * it again stays a separate, deliberate act on the edit screen.
+ *
+ * No confirm dialog. Restoring is the safe direction, and asking "are you
+ * sure?" about undoing something is how people learn to click through the
+ * question that matters.
+ */
+async function putBack(btn, row) {
+  if (!row) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Restoring…';
+
+  try {
+    const { message } = await adminFetch(
+      `/products/${encodeURIComponent(row.sku)}/restore`, { method: 'POST' });
+    toast(message || `${row.title} is back in the catalogue.`);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Restore';
+    return toast(err.message, false);
+  }
+
+  // Same step-back as remove(): if that was the last row in the Deleted tab,
+  // the page number now points past the end and the screen would come back
+  // empty with no pager to get out of.
+  if (page > 1 && document.querySelectorAll('[data-prod-restore]').length === 1) {
+    page -= 1;
+  }
+
+  load();
 }
 
 function status(p) {

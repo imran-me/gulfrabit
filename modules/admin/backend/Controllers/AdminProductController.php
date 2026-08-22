@@ -51,9 +51,19 @@ class AdminProductController extends Controller
             'noCost'    => ['sometimes', 'boolean'],
             'perPage'   => ['sometimes', 'integer', 'min:10', 'max:100'],
             'sort'      => ['sometimes', 'in:title,newest,price-desc'],
+            'deleted'   => ['sometimes', 'boolean'],
         ]);
 
         $query = Product::query()->with('category:id,slug,name');
+
+        // The Deleted tab. destroy() has soft-deleted since this controller was
+        // written and restore() has existed just as long, but nothing in the
+        // panel could SEE a deleted product — so "it can be restored" was a
+        // promise with no screen behind it, and the only way to keep it was to
+        // ask somebody with database access.
+        if ($request->boolean('deleted')) {
+            $query->onlyTrashed();
+        }
 
         // Title A→Z stays the default: this screen is mostly "find the product
         // I already know the name of". Newest-first exists for the other
@@ -106,6 +116,7 @@ class AdminProductController extends Controller
                 'marginPct'  => $this->marginPercent($p),
                 'inStock'    => $p->in_stock,
                 'isActive'   => $p->is_active,
+                'deletedAt'  => $p->deleted_at?->toIso8601String(),
             ], $page->items()),
             'meta' => [
                 'total'       => $page->total(),
@@ -115,6 +126,12 @@ class AdminProductController extends Controller
                 // Surfaced so the screen can lead with it rather than making
                 // somebody page through looking for gaps.
                 'missingCost' => Product::query()->whereNull('cost_poisha')->count(),
+                // Unfiltered on purpose, unlike the orders and customers
+                // screens. Those search a list you are working; this one is a
+                // catalogue you search by name, and "12 deleted products match
+                // the word cumin" is not a question anyone asks — "is there
+                // anything in the bin at all" is.
+                'deletedCount' => Product::onlyTrashed()->count(),
             ],
         ]);
     }
