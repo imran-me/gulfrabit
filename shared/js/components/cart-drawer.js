@@ -11,6 +11,7 @@
 
 import * as store from '../core/state.js';
 import { siteURL } from '../core/paths.js';
+import { imageSource } from '../core/product-image.js';
 import { formatBDT } from '../utils/format-currency.js';
 import { trapFocus } from '../utils/focus-trap.js';
 
@@ -76,7 +77,9 @@ function render() {
 
   linesEl.innerHTML = cart.map((l) => `
     <div class="cart-line" data-line-id="${l.id}" data-variant="${l.variant ?? ''}">
-      <img class="cart-line__thumb" src="${l.image}" alt="${escapeAttr(l.title)}" loading="lazy">
+      <picture>${imageSource(l.image, 'thumb')}
+        <img class="cart-line__thumb" src="${l.image}" alt="${escapeAttr(l.title)}" loading="lazy">
+      </picture>
       <div>
         <div class="cart-line__title">${escapeHtml(l.title)}</div>
         <div class="cart-line__meta">${l.variant ? `<strong>${escapeHtml(l.variant)}</strong> · ` : ''}${l.brand ? escapeHtml(l.brand) + ' · ' : ''}Qty

@@ -16,6 +16,7 @@
 import { formatBDT, discountLabel, savingsLabel } from '../utils/format-currency.js';
 import * as store from '../core/state.js';
 import { productURL, siteURL } from '../core/paths.js';
+import { imageSource } from '../core/product-image.js';
 import { toast } from './toast-notifications.js';
 
 const HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
@@ -94,11 +95,8 @@ export function productBadges(product, max = 2) {
  * tiny and have no raster variants.
  */
 function cardSources(image) {
-  const src = String(image || '');
-  if (!src.toLowerCase().endsWith('.jpg')) return '';
-  const base = escapeAttr(src.slice(0, -4));
-  return `
-          <source srcset="${base}-card.webp" type="image/webp">`;
+  const tag = imageSource(image, 'card');
+  return tag ? `\n          ${tag}` : '';
 }
 
 /**

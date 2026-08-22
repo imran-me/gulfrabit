@@ -7,6 +7,7 @@
 
 import { getProductById, getRelated, getAllProducts } from './backend/api.js';
 import { storage } from '../../shared/js/core/storage.js';
+import { imageVariant } from '../../shared/js/core/product-image.js';
 import { formatBDT, discountLabel, savingsLabel } from '../../shared/js/utils/format-currency.js';
 import * as store from '../../shared/js/core/state.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
@@ -144,9 +145,10 @@ function appendLd(obj) {
  * for any image the catalogue holds.
  */
 function variant(src, kind) {
-  const s = String(src || '');
-  if (!s.toLowerCase().endsWith('.jpg')) return s;
-  return s.slice(0, -4) + (kind === 'card' ? '-card.webp' : '.webp');
+  // Falls back to the master when there is no variant — a placeholder SVG, or
+  // a photograph the merchant uploaded — so the <source> is simply the same
+  // file the <img> already points at and nothing 404s.
+  return imageVariant(src, kind) || String(src || '');
 }
 
 function paintGallery(p) {

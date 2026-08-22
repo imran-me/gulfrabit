@@ -11,6 +11,7 @@ import { getProductById } from '../../../modules/catalog/backend/api.js';
 import { formatBDT, discountLabel, savingsLabel } from '../utils/format-currency.js';
 import * as store from '../core/state.js';
 import { productURL, siteURL } from '../core/paths.js';
+import { imageSource } from '../core/product-image.js';
 import { toast } from './toast-notifications.js';
 import { openCartDrawer } from './cart-drawer.js';
 import { trapFocus } from '../utils/focus-trap.js';
@@ -48,7 +49,9 @@ export async function openQuickView(id) {
     <button class="btn-icon-gr" data-qv-close aria-label="Close" style="position:absolute;top:.75rem;right:.75rem;z-index:2;background:var(--surface-sunken)">✕</button>
     <div style="display:grid;grid-template-columns:1fr;gap:0">
       <div style="display:grid;grid-template-columns:1fr;gap:0" class="quickview-grid">
-        <img src="${p.image}" alt="${escapeAttr(p.title)}" style="width:100%;height:100%;object-fit:cover;aspect-ratio:1;background:var(--surface-sunken)">
+        <picture>${imageSource(p.image, 'card')}
+          <img src="${p.image}" alt="${escapeAttr(p.title)}" style="width:100%;height:100%;object-fit:cover;aspect-ratio:1;background:var(--surface-sunken)">
+        </picture>
         <div style="padding:2rem">
           ${p.brand ? `<div class="product-card__brand">${escapeHtml(p.brand)}${p.origin ? ' · ' + escapeHtml(p.origin) : ''}</div>` : ''}
           <h2 class="h3" style="margin:.5rem 0 1rem">${escapeHtml(p.title)}</h2>

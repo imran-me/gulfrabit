@@ -84,6 +84,11 @@ jobs:
           python3 tools/htaccess-check.py
           python3 tools/sync-delivery-copy.py --check
           python3 tools/gen-sourcing-facts.py --check
+          # A product photo added without its web variants means the storefront
+          # serves a 400 KB master into a 40px box. The renderer falls back
+          # safely, so this never breaks a page — it just quietly gets heavy,
+          # which is exactly the kind of thing only a check notices.
+          python3 tools/gen-product-tiers.py --check
 
       - name: Ship to Hostinger
         uses: burnett01/rsync-deployments@7.0.1

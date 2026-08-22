@@ -14,6 +14,7 @@
 import { suggest, getDeals } from '../../../modules/catalog/backend/api.js';
 import { loadJSON } from '../core/json-cache.js';
 import { productURL, siteURL } from '../core/paths.js';
+import { imageSource } from '../core/product-image.js';
 import { debounce } from '../utils/debounce.js';
 import { formatBDT } from '../utils/format-currency.js';
 
@@ -38,7 +39,9 @@ function setup(form) {
       } else {
         panel.innerHTML = items.map((it) => `
           <a class="search-suggest__item" href="${productURL(encodeURIComponent(it.id))}">
-            <img src="${it.image}" alt="" width="40" height="40" loading="lazy">
+            <picture>${imageSource(it.image, 'thumb')}
+              <img src="${it.image}" alt="" width="40" height="40" loading="lazy">
+            </picture>
             <span><span class="search-suggest__title">${escapeHtml(it.title)}</span>
             <span class="caption">${escapeHtml(it.brand || '')}</span></span>
           </a>`).join('');
