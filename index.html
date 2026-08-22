@@ -101,7 +101,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
       <a class="site-header__logo" href="/" aria-label="GulfRabit home">
-        <img src="assets/logo/gulfrabit-mark.png" alt="" width="38" height="38">
+        <picture>
+          <source type="image/webp" srcset="assets/logo/gulfrabit-mark-120.webp">
+          <img src="assets/logo/gulfrabit-mark-120.png" alt="" width="38" height="38">
+        </picture>
         <span class="site-header__wordmark">GulfRabit</span>
       </a>
       <nav class="primary-nav" aria-label="Primary">
@@ -175,7 +178,11 @@
        categories. Keep the two in step — same order, same flat shape. -->
   <aside id="mobileNav" class="gr-offcanvas" aria-hidden="true" aria-label="Menu">
     <div class="mobile-nav__head">
-      <img class="mobile-nav__logo" src="assets/logo/gulfrabit-logo.png" alt="GulfRabit" width="80" height="80">
+      <picture>
+        <source type="image/webp" srcset="assets/logo/gulfrabit-logo-240.webp">
+        <img class="mobile-nav__logo" src="assets/logo/gulfrabit-logo-240.png"
+             alt="GulfRabit" width="80" height="80" loading="lazy" decoding="async">
+      </picture>
       <button class="btn-icon-gr" type="button" data-close-mobile-nav aria-label="Close menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
     <nav class="mobile-nav__body" aria-label="Mobile">
@@ -677,7 +684,12 @@
                with shared/components/footer.html — this page is hand-authored
                and every other page is generated from that partial. -->
           <a class="footer-logo" href="/" aria-label="GulfRabit home">
-            <img class="footer-logo__mark" src="assets/logo/gulfrabit-mark.png" alt="" width="520" height="520">
+            <picture>
+              <source type="image/webp" sizes="60px"
+                      srcset="assets/logo/gulfrabit-mark-120.webp 120w, assets/logo/gulfrabit-mark-240.webp 240w">
+              <img class="footer-logo__mark" src="assets/logo/gulfrabit-mark-120.png"
+                   alt="" width="60" height="60" loading="lazy" decoding="async">
+            </picture>
             <span class="footer-logo__type">
               <span class="footer-logo__word">GulfRabit</span>
               <span class="footer-logo__tag">Shop Smart. Hop Fast.</span>

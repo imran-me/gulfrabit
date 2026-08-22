@@ -4,7 +4,13 @@
   <div class="admin" data-admin-shell hidden>
     <aside class="admin__side">
       <a class="admin__brand" href="/admin">
-        <img src="/assets/logo/gulfrabit-mark.png" alt="">
+        <!-- 120px into a 32px box. The 520px master is 216 KB and this
+             sidebar is on every admin screen — including the ones the
+             catalogue actually gets maintained from, on a phone. -->
+        <picture>
+          <source type="image/webp" srcset="/assets/logo/gulfrabit-mark-120.webp">
+          <img src="/assets/logo/gulfrabit-mark-120.png" alt="">
+        </picture>
         <span>GulfRabit<small>Admin</small></span>
       </a>
 

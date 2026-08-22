@@ -224,7 +224,13 @@
    that does not fit — so the deficit went looking for something else to
    crush and found the Home glyph. A search field that is 12px narrower than
    it wants is invisible to a shopper; a missing icon is not. */
-.header-search__input { flex: 1; min-width: 0; background: none; border: 0; color: var(--text-primary); font-size: var(--fs-14); outline: none; }
+/* 16px, not 14. iOS Safari ZOOMS THE WHOLE PAGE when a text field smaller
+   than 16px takes focus, and it does not zoom back out — the visitor is left
+   on a horizontally scrolled shop and has to pinch their way back. Every other
+   field in the panel inherits the 16px body size and is fine; this one set its
+   own, and it is the search box, which is the first thing a phone visitor
+   taps. The two pixels were never worth it. */
+.header-search__input { flex: 1; min-width: 0; background: none; border: 0; color: var(--text-primary); font-size: var(--fs-16); outline: none; }
 .header-search__input::placeholder { color: var(--text-muted); }
 
 /* ---- Count badge on cart / wishlist icons ---------------------------- */

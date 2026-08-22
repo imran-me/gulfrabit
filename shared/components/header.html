@@ -31,7 +31,13 @@
 
     <!-- Logo -->
     <a class="site-header__logo" href="/" aria-label="GulfRabit home">
-      <img src="/assets/logo/gulfrabit-mark.png" alt="" width="38" height="38">
+      <!-- 120px into a 38px box covers a 3x phone. The 520px master is the
+           source, not a web asset: it was 216 KB, render-blocking, on every
+           page. tools/gen-logo-images.py writes these. -->
+      <picture>
+        <source type="image/webp" srcset="/assets/logo/gulfrabit-mark-120.webp">
+        <img src="/assets/logo/gulfrabit-mark-120.png" alt="" width="38" height="38">
+      </picture>
       <span class="site-header__wordmark">GulfRabit</span>
     </a>
 
@@ -141,7 +147,11 @@
      categories. Keep the two in step — same order, same flat shape. -->
 <aside id="mobileNav" class="gr-offcanvas" aria-hidden="true" aria-label="Menu">
   <div class="mobile-nav__head">
-    <img class="mobile-nav__logo" src="/assets/logo/gulfrabit-logo.png" alt="GulfRabit" width="80" height="80">
+    <picture>
+      <source type="image/webp" srcset="/assets/logo/gulfrabit-logo-240.webp">
+      <img class="mobile-nav__logo" src="/assets/logo/gulfrabit-logo-240.png"
+           alt="GulfRabit" width="80" height="80" loading="lazy" decoding="async">
+    </picture>
     <button class="btn-icon-gr" type="button" data-close-mobile-nav aria-label="Close menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M18 6 6 18M6 6l12 12"/></svg>
     </button>

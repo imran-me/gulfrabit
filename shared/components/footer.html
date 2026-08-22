@@ -23,7 +23,12 @@
              reader can both have. alt="" on the mark because the anchor is
              already labelled — otherwise it announces the brand twice. -->
         <a class="footer-logo" href="/" aria-label="GulfRabit home">
-          <img class="footer-logo__mark" src="/assets/logo/gulfrabit-mark.png" alt="" width="520" height="520">
+          <picture>
+            <source type="image/webp" sizes="60px"
+                    srcset="/assets/logo/gulfrabit-mark-120.webp 120w, /assets/logo/gulfrabit-mark-240.webp 240w">
+            <img class="footer-logo__mark" src="/assets/logo/gulfrabit-mark-120.png"
+                 alt="" width="60" height="60" loading="lazy" decoding="async">
+          </picture>
           <span class="footer-logo__type">
             <span class="footer-logo__word">GulfRabit</span>
             <span class="footer-logo__tag">Shop Smart. Hop Fast.</span>
