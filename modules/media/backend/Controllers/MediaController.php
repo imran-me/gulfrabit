@@ -51,7 +51,9 @@ class MediaController extends Controller
     {
         $perPage = min(60, max(12, (int) $request->query('perPage', 24)));
 
-        $query = MediaAsset::query()->latest('id');
+        $query = MediaAsset::query();
+
+        $this->applySort($query, (string) $request->query('sort', 'new'));
 
         $scope = (string) $request->query('folder', 'all');
 
@@ -85,6 +87,30 @@ class MediaController extends Controller
                 'total'   => $page->total(),
             ],
         ]);
+    }
+
+    /**
+     * The orders the panel offers, and nothing else.
+     *
+     * A whitelist rather than a column name from the query string: `sort` is
+     * user input, and passing user input to orderBy is how a listing endpoint
+     * becomes a way to read the schema one 500 at a time.
+     *
+     * Every order ends with a tiebreak on id. Without it, twenty images
+     * uploaded in the same second have no defined order, so page 2 can repeat
+     * a row from page 1 and quietly hide another one for ever.
+     */
+    private function applySort($query, string $sort): void
+    {
+        match ($sort) {
+            'old'   => $query->oldest('created_at'),
+            'name'  => $query->orderBy('original_name'),
+            'large' => $query->orderByDesc('bytes'),
+            'used'  => $query->orderByDesc('usage_count'),
+            default => $query->latest('created_at'),
+        };
+
+        $query->orderByDesc('id');
     }
 
     /**
@@ -236,6 +262,64 @@ class MediaController extends Controller
                 $moved === 1 ? '' : 's',
                 $where
             ),
+        ]);
+    }
+
+    /**
+     * POST /api/admin/media/delete-many — delete a selection.
+     *
+     * Same rule as the single delete, applied per image rather than to the
+     * batch: anything still in use is SKIPPED and reported, the rest go. The
+     * alternative — refusing the whole batch because one photo is on a product
+     * page — makes tidying up forty images impossible for the sake of one, and
+     * the merchant has no way to find out which one without clicking through
+     * all forty.
+     */
+    public function destroyMany(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'ids'   => ['required', 'array', 'min:1', 'max:200'],
+            'ids.*' => ['integer'],
+            'force' => ['sometimes', 'boolean'],
+        ]);
+
+        $force = (bool) ($data['force'] ?? false);
+
+        $deleted = 0;
+        $skipped = 0;
+        $paths = [];
+
+        DB::transaction(function () use ($data, $force, &$deleted, &$skipped, &$paths): void {
+            foreach (MediaAsset::query()->whereIn('id', $data['ids'])->get() as $asset) {
+                if ($asset->usage_count > 0 && ! $force) {
+                    $skipped++;
+                    continue;
+                }
+
+                $paths[] = $asset->path;
+                $asset->delete();
+                $deleted++;
+            }
+        });
+
+        // Files only after the rows are safely gone — a file with no row is
+        // invisible and reclaimable, a row with no file is a broken image in
+        // every picker.
+        foreach ($paths as $path) {
+            $this->store->delete($path);
+        }
+
+        return response()->json([
+            'deleted' => $deleted,
+            'skipped' => $skipped,
+            'message' => $skipped
+                ? sprintf(
+                    '%d deleted. %d left alone because %s still in use.',
+                    $deleted,
+                    $skipped,
+                    $skipped === 1 ? 'it is' : 'they are'
+                )
+                : sprintf('%d image%s deleted.', $deleted, $deleted === 1 ? '' : 's'),
         ]);
     }
 

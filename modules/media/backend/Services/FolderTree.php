@@ -82,9 +82,10 @@ class FolderTree
         return MediaAsset::query()->whereNull('folder_id')->count();
     }
 
-    public function create(?MediaFolder $parent, string $name, ?int $by): MediaFolder
+    public function create(?MediaFolder $parent, string $name, ?int $by, ?string $color = null): MediaFolder
     {
         $name = $this->cleanName($name);
+        $color = $this->cleanColor($color);
         $depth = $parent ? $parent->depth + 1 : 0;
 
         if ($depth > MediaFolder::MAX_DEPTH) {
@@ -95,7 +96,7 @@ class FolderTree
 
         $this->refuseDuplicate($parent?->id, $name, null);
 
-        return DB::transaction(function () use ($parent, $name, $depth, $by): MediaFolder {
+        return DB::transaction(function () use ($parent, $name, $color, $depth, $by): MediaFolder {
             // `path` needs the id, and the id does not exist until the insert.
             // Saving twice inside a transaction is the honest way to do that;
             // the alternative is a client-generated key, which buys nothing
@@ -103,6 +104,7 @@ class FolderTree
             $folder = MediaFolder::create([
                 'parent_id'  => $parent?->id,
                 'name'       => $name,
+                'color'      => $color,
                 'path'       => 'pending',
                 'depth'      => $depth,
                 'created_by' => $by,
@@ -123,6 +125,13 @@ class FolderTree
         // `path` is ids, so a rename touches nothing else. That is the whole
         // reason it is ids and not names.
         $folder->update(['name' => $name]);
+
+        return $folder;
+    }
+
+    public function recolor(MediaFolder $folder, ?string $color): MediaFolder
+    {
+        $folder->update(['color' => $this->cleanColor($color)]);
 
         return $folder;
     }
@@ -275,6 +284,18 @@ class FolderTree
         }
 
         return $name;
+    }
+
+    /**
+     * An unknown colour becomes no colour rather than an error.
+     *
+     * The value only ever decides which swatch is painted. Refusing the whole
+     * request because a token was misspelt would lose a folder name someone
+     * typed, to protect a decoration.
+     */
+    private function cleanColor(?string $color): ?string
+    {
+        return in_array($color, MediaFolder::COLORS, true) ? $color : null;
     }
 
     /**

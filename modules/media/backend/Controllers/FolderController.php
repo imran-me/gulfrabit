@@ -44,6 +44,7 @@ class FolderController extends Controller
                 'unfiled'  => $this->tree->unfiledCount(),
                 'total'    => MediaAsset::query()->count(),
                 'maxDepth' => MediaFolder::MAX_DEPTH,
+                'colors'   => MediaFolder::COLORS,
             ],
         ]);
     }
@@ -54,12 +55,18 @@ class FolderController extends Controller
         $data = $request->validate([
             'name'     => ['required', 'string', 'max:120'],
             'parentId' => ['nullable', 'integer', 'exists:media_folders,id'],
+            'color'    => ['nullable', 'string', 'max:16'],
         ]);
 
         $parent = $this->folderOrNull($data['parentId'] ?? null);
 
         try {
-            $folder = $this->tree->create($parent, $data['name'], $request->user('admin')?->id);
+            $folder = $this->tree->create(
+                $parent,
+                $data['name'],
+                $request->user('admin')?->id,
+                $data['color'] ?? null,
+            );
         } catch (RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         }
@@ -78,12 +85,17 @@ class FolderController extends Controller
     {
         $data = $request->validate([
             'name'     => ['sometimes', 'string', 'max:120'],
+            'color'    => ['sometimes', 'nullable', 'string', 'max:16'],
             'parentId' => ['sometimes', 'nullable', 'integer', 'exists:media_folders,id'],
         ]);
 
         try {
             if (array_key_exists('name', $data)) {
                 $folder = $this->tree->rename($folder, $data['name']);
+            }
+
+            if (array_key_exists('color', $data)) {
+                $folder = $this->tree->recolor($folder, $data['color']);
             }
 
             if (array_key_exists('parentId', $data)) {

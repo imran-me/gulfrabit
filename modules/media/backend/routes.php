@@ -35,6 +35,7 @@ Route::prefix('admin')
         Route::get('/media', [MediaController::class, 'index'])->name('index');
         Route::post('/media', [MediaController::class, 'store'])->name('store');
         Route::post('/media/move', [MediaController::class, 'move'])->name('move');
+        Route::post('/media/delete-many', [MediaController::class, 'destroyMany'])->name('destroyMany');
         Route::patch('/media/{asset}', [MediaController::class, 'update'])->name('update');
         Route::delete('/media/{asset}', [MediaController::class, 'destroy'])->name('destroy');
     });

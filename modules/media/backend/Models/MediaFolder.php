@@ -26,6 +26,7 @@ use Modules\Admin\Models\AdminUser;
  * @property int         $id
  * @property int|null    $parent_id
  * @property string      $name
+ * @property string|null $color
  * @property string      $path
  * @property int         $depth
  * @property int|null    $created_by
@@ -42,7 +43,17 @@ class MediaFolder extends Model
      */
     public const MAX_DEPTH = 5;
 
-    protected $fillable = ['parent_id', 'name', 'path', 'depth', 'created_by'];
+    /**
+     * The palette. Tokens, not hexes — see the migration.
+     *
+     * Seven plus "no colour", because a picker with twenty swatches is a
+     * decision nobody wants to make while they are trying to file a photo,
+     * and because seven is comfortably more than the number of top-level
+     * folders a shop this size will ever have.
+     */
+    public const COLORS = ['amber', 'rose', 'violet', 'sky', 'emerald', 'teal', 'slate'];
+
+    protected $fillable = ['parent_id', 'name', 'color', 'path', 'depth', 'created_by'];
 
     protected function casts(): array
     {
@@ -114,6 +125,7 @@ class MediaFolder extends Model
             'id'       => $this->id,
             'parentId' => $this->parent_id,
             'name'     => $this->name,
+            'color'    => $this->color,
             'depth'    => $this->depth,
             // Direct is what the folder itself holds; deep includes every
             // subfolder. The panel shows direct, and uses deep to warn before

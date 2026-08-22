@@ -28,11 +28,9 @@
  * thumb is at the bottom and a centred dialog puts every control out of reach.
  */
 
-import { adminFetch, csrfHeader } from '/modules/admin/backend/api.js';
+import { adminFetch } from '/modules/admin/backend/api.js';
 import { fetchTree, folderIcon, trail } from './folders.js';
-
-const MAX_BYTES = 8 * 1024 * 1024;
-const ACCEPT = 'image/jpeg,image/png,image/webp,image/gif';
+import { ACCEPT, uploadFiles } from './uploader.js';
 
 let sheet = null;
 let resolveOpen = null;
@@ -535,116 +533,38 @@ function tile(a) {
 
 /* ------------------------------------------------------------------ *
  * Upload
+ *
+ * The mechanics live in uploader.js, shared with the Images screen. All this
+ * knows is which folder is open and what to do with a row that lands.
  * ------------------------------------------------------------------ */
 
-function upload(files) {
-  const images = files.filter((f) => f.type.startsWith('image/'));
-  if (!images.length) return;
+async function upload(files) {
+  await uploadFiles(files, {
+    folderId: typeof state.scope === 'number' ? state.scope : null,
+    queue: sheet.querySelector('[data-queue]'),
+    onUploaded: (data) => {
+      // Newest first, and de-duplicated: an existing image re-uploaded must
+      // not appear twice in the grid.
+      //
+      // Shown only if it actually belongs in the view being looked at. A
+      // re-upload of a photo already filed elsewhere comes back with its
+      // existing folder, and dropping it into this grid would claim it is in
+      // a folder it is not in.
+      const belongs = state.scope === 'all'
+        || (state.scope === 'root' && data.folderId == null)
+        || data.folderId === state.scope;
 
-  const queue = sheet.querySelector('[data-queue]');
-  queue.hidden = false;
+      if (!belongs) return;
 
-  // Each file is its own request. One 8 MB photo failing on a patchy mobile
-  // connection must not discard the four that already went up.
-  images.forEach((file) => {
-    const row = document.createElement('div');
-    row.className = 'mrow';
-    row.innerHTML = `
-      <span class="mrow__name">${escape(file.name)}</span>
-      <span class="mrow__bar"><i style="width:0%"></i></span>
-      <span class="mrow__state">waiting</span>`;
-    queue.append(row);
-
-    if (file.size > MAX_BYTES) {
-      fail(row, 'over 8 MB');
-      return;
-    }
-
-    send(file, row);
-  });
-}
-
-async function send(file, row) {
-  const bar = row.querySelector('.mrow__bar i');
-  const label = row.querySelector('.mrow__state');
-  label.textContent = 'uploading';
-
-  let headers;
-  try {
-    headers = await csrfHeader();
-  } catch {
-    return fail(row, 'session expired');
-  }
-
-  // XHR rather than fetch, only because fetch still has no upload progress in
-  // any shipping browser. On mobile data an 8 MB photo is a slow minute, and a
-  // spinner with no progress reads as a hang.
-  const xhr = new XMLHttpRequest();
-  const body = new FormData();
-  body.append('file', file);
-
-  // Into the folder being browsed. "All images" and the top level are both
-  // the top level for an upload — there is no such place as "everywhere" to
-  // put a new file.
-  if (typeof state.scope === 'number') body.append('folderId', String(state.scope));
-
-  xhr.upload.addEventListener('progress', (ev) => {
-    if (ev.lengthComputable) {
-      bar.style.width = `${Math.round((ev.loaded / ev.total) * 100)}%`;
-    }
+      state.items = [data, ...state.items.filter((a) => a.id !== data.id)];
+      paintGrid();
+    },
   });
 
-  xhr.addEventListener('load', () => {
-    let payload = {};
-    try { payload = JSON.parse(xhr.responseText); } catch { /* keep {} */ }
-
-    if (xhr.status >= 200 && xhr.status < 300) {
-      bar.style.width = '100%';
-      row.classList.add('is-done');
-      label.textContent = payload.duplicate ? 'already had it' : 'done';
-      // The full sentence says WHERE a duplicate already lives, which is the
-      // part that explains why it did not appear in this folder.
-      if (payload.message) row.title = payload.message;
-
-      if (payload.data) {
-        // Newest first, and de-duplicated: an existing image re-uploaded must
-        // not appear twice in the grid.
-        //
-        // Shown only if it actually belongs in the view being looked at. A
-        // re-upload of a photo already filed elsewhere comes back with its
-        // existing folder, and dropping it into this grid would claim it is
-        // in a folder it is not in.
-        const belongs = state.scope === 'all'
-          || (state.scope === 'root' && payload.data.folderId == null)
-          || payload.data.folderId === state.scope;
-
-        if (belongs) {
-          state.items = [payload.data, ...state.items.filter((a) => a.id !== payload.data.id)];
-          paintGrid();
-        }
-      }
-
-      setTimeout(() => row.remove(), 2000);
-      return;
-    }
-
-    fail(row, payload.message || `failed (${xhr.status})`);
-  });
-
-  xhr.addEventListener('error', () => fail(row, 'network error'));
-
-  xhr.open('POST', '/api/admin/media');
-  xhr.withCredentials = true;
-  xhr.setRequestHeader('Accept', 'application/json');
-  Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
-  // Content-Type is deliberately NOT set: the browser must add the multipart
-  // boundary itself, and setting it by hand produces a body PHP cannot parse.
-  xhr.send(body);
-}
-
-function fail(row, message) {
-  row.classList.add('is-failed');
-  row.querySelector('.mrow__state').textContent = message;
+  // A new folder cannot appear from an upload, but the counts on the chips can
+  // change, and a stale "12" beside a folder that now holds 15 is the kind of
+  // small wrongness that makes someone stop trusting the numbers.
+  refreshTree();
 }
 
 /* ------------------------------------------------------------------ */
