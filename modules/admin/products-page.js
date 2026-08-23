@@ -80,6 +80,7 @@ async function init() {
 
     if (btn.dataset.bulk === 'delete') return removeMany(list, btn);
     if (btn.dataset.bulk === 'restore') return putBackMany(list, btn);
+    if (btn.dataset.bulk === 'purge') return purge(list, btn);
 
     setListed(list, btn.dataset.bulk === 'list', btn);
   });
@@ -358,7 +359,9 @@ function paint({ data, meta }) {
           // a change nobody can see. Put it back first, then edit it.
           ? (canDelete()
               ? `<button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
-                         data-prod-restore="${i}">Restore</button>`
+                         data-prod-restore="${i}">Restore</button>
+                 <button class="btn-gr btn-ghost-gr btn-sm-gr aact-remove" type="button"
+                         data-prod-purge="${i}">Delete for ever</button>`
               : '<span class="atable__sub">Deleted</span>')
           : `<a class="btn-gr btn-ghost-gr btn-sm-gr" href="/admin/products/edit?sku=${encodeURIComponent(p.sku)}">Edit</a>
              ${canDelete()
@@ -379,6 +382,9 @@ function paint({ data, meta }) {
   // Same index trick as above, and for the same reason — see the note there.
   body.querySelectorAll('[data-prod-restore]').forEach((btn) =>
     btn.addEventListener('click', () => putBack(btn, data[Number(btn.dataset.prodRestore)])));
+
+  body.querySelectorAll('[data-prod-purge]').forEach((btn) =>
+    btn.addEventListener('click', () => purge([data[Number(btn.dataset.prodPurge)].sku], btn)));
 
   // Every reload replaces the rows, so nothing stays ticked — see the note by
   // `selected`. Called after the body is painted so the header box clears too.
@@ -466,7 +472,8 @@ function paintBulk() {
 
   const actions = inTrash
     ? (canDelete()
-        ? [['restore', 'Restore', 'btn-outline-gr']]
+        ? [['restore', 'Restore', 'btn-outline-gr'],
+           ['purge', 'Delete for ever', 'btn-ghost-gr aact-remove']]
         : [])
     : [
         ['unlist', 'Unlist', 'btn-outline-gr'],
@@ -551,6 +558,167 @@ async function putBackMany(list, btn) {
       .catch((err) => ({ sku, ok: false, message: err.message }))));
 
   report(results, btn, original, 'restored, still unlisted', true);
+}
+
+/* ------------------------------------------------------------------ *
+ * Emptying the bin
+ *
+ * The one thing on this screen that is not reversible, and it is built to
+ * feel like it.
+ *
+ * IT DELIBERATELY DOES NOT USE confirmDelete(). That helper's promise — "it
+ * moves to the Deleted tab, where you can put it back" — is true of every
+ * other delete in the panel, which is exactly why people click through it
+ * without reading. Borrowing the same dialog for the one action where the
+ * promise is false would spend the reflex it built on the worst possible
+ * case. See the note at the top of admin-delete.js.
+ *
+ * THE SERVER WRITES THE WARNING, not this file. A purge erases the stock
+ * ledger and the price history for that product, and how much of either
+ * exists is a fact only the database knows. So the first request is sent
+ * WITHOUT confirm, comes back 409 carrying the counts, and the dialog states
+ * them: "41 stock movements and 6 price changes will be erased" is something
+ * a merchant can weigh. "This cannot be undone" is true of half this screen
+ * and has stopped meaning anything.
+ * ------------------------------------------------------------------ */
+
+async function purge(list, btn) {
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Checking…';
+
+  // The dry run. Every one of these is expected to fail with 409 — that IS
+  // the answer — so a 2xx here would mean the server purged without being
+  // asked to, and is worth treating as the anomaly it would be.
+  const checks = await Promise.all(list.map((sku) =>
+    adminFetch(`/products/${encodeURIComponent(sku)}/permanent`, { method: 'DELETE' })
+      .then(() => ({ sku, blocked: false, counts: null, message: '' }))
+      .catch((err) => ({
+        sku,
+        blocked: !!err.body?.blocked,
+        counts: err.body?.counts ?? null,
+        message: err.message,
+      }))));
+
+  const blocked = checks.filter((c) => c.blocked);
+
+  // Counts are the whole point of the dry run, so anything that came back
+  // without them does not go in the dialog. That covers the stale-page case —
+  // a row purged from another tab is already gone and answers 404 — and the
+  // anomaly where a 2xx means the server purged without being asked.
+  const canGo = checks.filter((c) => !c.blocked && c.counts);
+  const unclear = checks.filter((c) => !c.blocked && !c.counts);
+
+  btn.disabled = false;
+  btn.textContent = original;
+
+  if (unclear.length) {
+    toast(`${unclear.map((u) => u.sku).join(', ')}: ${unclear[0].message}`, false);
+  }
+
+  if (!canGo.length) {
+    // Everything chosen is refused outright — a gift reward, most likely.
+    // Nothing to confirm, so nothing is asked.
+    if (blocked.length) toast(blocked[0].message, false);
+    return unclear.length ? load() : undefined;
+  }
+
+  const ok = await confirmForever(canGo, blocked);
+  if (!ok) return;
+
+  btn.disabled = true;
+  btn.textContent = `Deleting ${canGo.length}…`;
+
+  const results = await Promise.all(canGo.map(({ sku }) =>
+    adminFetch(`/products/${encodeURIComponent(sku)}/permanent?confirm=1`, { method: 'DELETE' })
+      .then(() => ({ sku, ok: true }))
+      .catch((err) => ({ sku, ok: false, message: err.message }))));
+
+  report(results, btn, original, 'deleted for good', true);
+}
+
+/**
+ * The last question, asked in its own words.
+ *
+ * Built here rather than in admin-delete.js because it is the only permanent
+ * delete in the panel today. The moment a second screen needs one, this moves
+ * there — the same rule the stylesheets follow about promoting on repeat.
+ *
+ * @param {Array<{sku:string,counts:object|null,message:string}>} going
+ * @param {Array<{sku:string,message:string}>} blocked
+ * @returns {Promise<boolean>}
+ */
+function confirmForever(going, blocked) {
+  const total = going.reduce((sum, g) => ({
+    stockMovements: sum.stockMovements + (g.counts?.stockMovements ?? 0),
+    priceChanges: sum.priceChanges + (g.counts?.priceChanges ?? 0),
+    orderLines: sum.orderLines + (g.counts?.orderLines ?? 0),
+  }), { stockMovements: 0, priceChanges: 0, orderLines: 0 });
+
+  const one = going.length === 1;
+
+  // For a single product the server already wrote the sentence, with its name
+  // in it. For several, the totals are summed here — one dialog with a real
+  // number beats twelve dialogs nobody reads to the end.
+  const body = one
+    ? going[0].message
+    : [
+        `${going.length} products will be erased, along with `,
+        total.stockMovements || total.priceChanges
+          ? `${total.stockMovements} stock movement${total.stockMovements === 1 ? '' : 's'} `
+            + `and ${total.priceChanges} price change${total.priceChanges === 1 ? '' : 's'}.`
+          : 'no stock or price history.',
+        total.orderLines
+          ? ` The ${total.orderLines} past order line${total.orderLines === 1 ? '' : 's'} `
+            + 'containing them keep their own copy of the name and price, so those orders still read correctly.'
+          : ' None of them have ever been ordered.',
+      ].join('');
+
+  const dlg = document.querySelector('[data-pforever]') ?? (() => {
+    document.body.insertAdjacentHTML('beforeend', [
+      '<dialog class="adel adel--forever" data-pforever>',
+      '  <form method="dialog" class="adel__panel">',
+      '    <h2 class="adel__title" data-pf-title></h2>',
+      '    <p class="adel__body" data-pf-body></p>',
+      '    <p class="adel__undo" data-pf-blocked hidden></p>',
+      '    <p class="adel__body"><strong>There is no bin after this one.</strong></p>',
+      '    <div class="adel__actions">',
+      '      <button type="submit" value="cancel" class="btn-gr btn-outline-gr" data-pf-cancel>Keep them</button>',
+      '      <button type="submit" value="confirm" class="btn-gr btn-danger-gr" data-pf-confirm></button>',
+      '    </div>',
+      '  </form>',
+      '</dialog>',
+    ].join('\n'));
+
+    return document.querySelector('[data-pforever]');
+  })();
+
+  dlg.querySelector('[data-pf-title]').textContent = one
+    ? 'Delete this product for ever?'
+    : `Delete ${going.length} products for ever?`;
+
+  dlg.querySelector('[data-pf-body]').textContent = body;
+
+  // Named, not counted. "One was skipped" sends the merchant looking; the SKU
+  // is the thing they can search for on the screen they are already on.
+  const blockedEl = dlg.querySelector('[data-pf-blocked]');
+  blockedEl.hidden = !blocked.length;
+  blockedEl.textContent = blocked.length
+    ? `${blocked.map((b) => b.sku).join(', ')} cannot be deleted for good and will be left in the bin. `
+      + blocked[0].message
+    : '';
+
+  dlg.querySelector('[data-pf-confirm]').textContent = one
+    ? 'Delete for ever'
+    : `Delete ${going.length} for ever`;
+
+  return new Promise((resolve) => {
+    dlg.addEventListener('close', () => resolve(dlg.returnValue === 'confirm'), { once: true });
+    dlg.showModal();
+    // Cancel holds focus, for the same reason it does in admin-delete.js: the
+    // default answer to this question is no.
+    dlg.querySelector('[data-pf-cancel]').focus();
+  });
 }
 
 /**

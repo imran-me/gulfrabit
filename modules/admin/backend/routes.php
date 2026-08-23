@@ -134,6 +134,10 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::middleware('admin.owner')->group(function (): void {
                 Route::delete('/{sku}', [AdminProductController::class, 'destroy'])->name('destroy');
                 Route::post('/{sku}/restore', [AdminProductController::class, 'restore'])->name('restore');
+                // The bin's own delete. Reachable only for a product already
+                // in the bin, and it answers 409 with the count of what it
+                // would erase until ?confirm=1 says go — see purge().
+                Route::delete('/{sku}/permanent', [AdminProductController::class, 'purge'])->name('purge');
             });
         });
 

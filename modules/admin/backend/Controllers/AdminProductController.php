@@ -385,6 +385,126 @@ class AdminProductController extends Controller
     }
 
     /**
+     * DELETE /api/admin/products/{sku}/permanent
+     *
+     * The bin's own delete. Only reachable for a product that is ALREADY in
+     * the bin — deleting twice is the two-step, and it is a better one than a
+     * checkbox on the first dialog because the two clicks are days apart and
+     * on different screens.
+     *
+     * WHAT THIS DESTROYS, and why it still answers 409 the first time.
+     *
+     * A soft delete takes a product out of the catalogue and keeps everything
+     * about it. This does not. The foreign keys decide, and they say three
+     * different things:
+     *
+     *   order_items      -> the product_id goes null, the LINE STAYS. Order
+     *                       lines are full snapshots — title, sku, brand,
+     *                       price — so a past order still reads correctly
+     *                       when the product behind it no longer exists. This
+     *                       is the reason a purge is possible at all.
+     *   quote_request_items -> the same.
+     *
+     *   stock_movements  -> CASCADE. The stock ledger for this product is
+     *   stock_levels        gone, and it is an append-only record everywhere
+     *   product_price_changes  else in this codebase. So is the price history.
+     *
+     *   gift_rewards     -> RESTRICT. The database refuses outright, and it is
+     *                       right to: a reward pointing at nothing is a
+     *                       promise the checkout cannot keep.
+     *
+     * So the first request counts what will be lost and refuses with the
+     * numbers in it. `?confirm=1` is the merchant answering a question that
+     * named a real quantity, rather than agreeing to the word "permanently".
+     */
+    public function purge(Request $request, string $sku): JsonResponse
+    {
+        // onlyTrashed, not withTrashed: purging something still in the
+        // catalogue would skip the bin entirely, and the bin IS the safety.
+        $product = Product::onlyTrashed()->where('sku', $sku)->firstOrFail();
+
+        // The hard refusal, checked before anything else because no amount of
+        // confirming makes it possible — the database would throw, and a
+        // 500 is a worse answer than a sentence.
+        $gifts = DB::table('gift_rewards')->where('product_id', $product->id)->count();
+
+        if ($gifts > 0) {
+            return response()->json([
+                'message' => "{$product->title} is given away as a gift reward, so it cannot be "
+                    . 'deleted for good. Remove it from Coupons & offers first, then try again.',
+                'blocked' => true,
+            ], 409);
+        }
+
+        $counts = [
+            'stockMovements' => DB::table('stock_movements')->where('product_id', $product->id)->count(),
+            'priceChanges'   => DB::table('product_price_changes')->where('product_id', $product->id)->count(),
+            'orderLines'     => DB::table('order_items')->where('product_id', $product->id)->count(),
+        ];
+
+        if (! $request->boolean('confirm')) {
+            return response()->json([
+                'message' => $this->purgeWarning($product->title, $counts),
+                'counts'  => $counts,
+            ], 409);
+        }
+
+        DB::transaction(function () use ($product): void {
+            // The images are NOT touched. They live in the media library and
+            // may be on three other products; removing a product is not a
+            // reason to take a photograph off the shop.
+            $product->forceDelete();
+        });
+
+        return response()->json([
+            'message' => "{$product->title} has been deleted for good.",
+        ]);
+    }
+
+    /**
+     * The sentence the merchant has to read before the second click.
+     *
+     * Written as quantities rather than adjectives. "This cannot be undone" is
+     * true of everything on this screen and has stopped meaning anything;
+     * "41 stock movements and 6 price changes will be erased" is a fact
+     * somebody can weigh.
+     *
+     * @param  array{stockMovements:int,priceChanges:int,orderLines:int}  $counts
+     */
+    private function purgeWarning(string $title, array $counts): string
+    {
+        $losses = [];
+
+        if ($counts['stockMovements'] > 0) {
+            $losses[] = $counts['stockMovements'] . ' stock movement'
+                . ($counts['stockMovements'] === 1 ? '' : 's');
+        }
+
+        if ($counts['priceChanges'] > 0) {
+            $losses[] = $counts['priceChanges'] . ' price change'
+                . ($counts['priceChanges'] === 1 ? '' : 's');
+        }
+
+        $message = $losses
+            ? sprintf('Deleting %s for good also erases its %s. ', $title, implode(' and ', $losses))
+            : sprintf('%s has no stock or price history to lose. ', $title);
+
+        if ($counts['orderLines'] > 0) {
+            $message .= sprintf(
+                'The %d past order line%s that %s it keep%s their own copy of the name and price, so those orders still read correctly.',
+                $counts['orderLines'],
+                $counts['orderLines'] === 1 ? '' : 's',
+                $counts['orderLines'] === 1 ? 'contains' : 'contain',
+                $counts['orderLines'] === 1 ? 's' : '',
+            );
+        } else {
+            $message .= 'It has never been ordered.';
+        }
+
+        return $message;
+    }
+
+    /**
      * An arrival date, or null.
      *
      * Null and the empty string both mean "it is here now" — the form sends an
