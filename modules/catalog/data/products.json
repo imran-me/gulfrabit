@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "note": "Mirrors the LIVE catalogue as of 6 August 2026 — thirteen products across dates-nuts and oil-ghee. Same rule as categories.json: the database is the authority, because CatalogSeeder writes is_active only on create and never overwrites a merchant's decision. Re-sync from GET /api/catalog/products after a merchandising change, or a fresh install rebuilds a shop that no longer exists. getAllProducts() in modules/catalog/backend/api.js filters on this flag, so an inactive product is absent from category pages, search, suggestions, deals, related rails and the home shelves alike.",
+    "note": "Mirrors the LIVE catalogue as of 6 August 2026 — thirteen products across dates-nuts and oil-ghee. Same rule as categories.json: the database is the authority, because CatalogSeeder writes is_active only on create and never overwrites a merchant's decision. Re-sync from GET /api/catalog/products after a merchandising change, or a fresh install rebuilds a shop that no longer exists. getAllProducts() in modules/catalog/backend/api.js filters on this flag, so an inactive product is absent from category pages, search, suggestions, deals, related rails and the home shelves alike. RATING AND REVIEWCOUNT ARE ALWAYS ZERO HERE and must stay that way: they used to carry invented figures (4.7 from 288 reviews, for products that had never been reviewed) which the product page published to Google as AggregateRating. They are computed from modules/reviews now — ReviewService::recount() is the only thing that may write them — so a number typed into this file is a claim with nothing behind it.",
     "currency": "BDT",
     "version": 2,
     "barcodeNote": "MOCK EAN-13 codes (valid check digit, not GS1-registered) — replace with the real supplier barcodes before launch. tools/gen-sourcing-facts.py verifies every check digit."
@@ -20,8 +20,8 @@
       "images": [
         "/assets/images/products/gr-1101.jpg"
       ],
-      "rating": 4.9,
-      "reviewCount": 168,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "featured",
@@ -113,8 +113,8 @@
       "images": [
         "/assets/images/products/gr-1102.jpg"
       ],
-      "rating": 4.8,
-      "reviewCount": 241,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "bestseller"
@@ -204,8 +204,8 @@
       "images": [
         "/assets/images/products/gr-1103.jpg"
       ],
-      "rating": 4.7,
-      "reviewCount": 96,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "new"
@@ -297,8 +297,8 @@
       "images": [
         "/assets/images/products/gr-1201.jpg"
       ],
-      "rating": 4.9,
-      "reviewCount": 74,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "featured",
@@ -380,8 +380,8 @@
       "images": [
         "/assets/images/products/gr-1202.jpg"
       ],
-      "rating": 4.7,
-      "reviewCount": 203,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "bestseller"
@@ -474,8 +474,8 @@
       "images": [
         "/assets/images/products/gr-1203.jpg"
       ],
-      "rating": 4.8,
-      "reviewCount": 88,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "new"
@@ -566,8 +566,8 @@
       "images": [
         "/assets/images/products/gr-1401.jpg"
       ],
-      "rating": 4.8,
-      "reviewCount": 132,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "bestseller"
@@ -656,8 +656,8 @@
       "images": [
         "/assets/images/products/gr-1402.jpg"
       ],
-      "rating": 4.9,
-      "reviewCount": 157,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "featured",
@@ -744,8 +744,8 @@
       "images": [
         "/assets/images/products/gr-1501.jpg"
       ],
-      "rating": 4.8,
-      "reviewCount": 119,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "new"
@@ -829,8 +829,8 @@
       "images": [
         "/assets/images/products/gr-1502.jpg"
       ],
-      "rating": 4.9,
-      "reviewCount": 143,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "bestseller"
@@ -916,8 +916,8 @@
       "images": [
         "/assets/images/products/gr-1503.jpg"
       ],
-      "rating": 4.8,
-      "reviewCount": 61,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "featured",
@@ -1001,8 +1001,8 @@
       "images": [
         "/assets/images/products/gr-1601.jpg"
       ],
-      "rating": 4.8,
-      "reviewCount": 187,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "featured",
@@ -1086,8 +1086,8 @@
       "images": [
         "/assets/images/products/gr-1602.jpg"
       ],
-      "rating": 4.7,
-      "reviewCount": 164,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "bestseller"
@@ -1173,8 +1173,8 @@
         "/assets/images/products/gr-1801.jpg",
         "/assets/images/products/gr-1801-2.jpg"
       ],
-      "rating": 4.7,
-      "reviewCount": 92,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "featured",
@@ -1263,8 +1263,8 @@
         "/assets/images/products/gr-1901.jpg",
         "/assets/images/products/gr-1901-2.jpg"
       ],
-      "rating": 4.8,
-      "reviewCount": 214,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "bestseller"
@@ -1345,8 +1345,8 @@
         "/assets/images/products/gr-1902.jpg",
         "/assets/images/products/gr-1902-2.jpg"
       ],
-      "rating": 4.9,
-      "reviewCount": 176,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "featured",
@@ -1424,8 +1424,8 @@
       "images": [
         "/assets/images/products/gr-1903.jpg"
       ],
-      "rating": 4.7,
-      "reviewCount": 128,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "new"
@@ -1510,8 +1510,8 @@
       "images": [
         "/assets/images/products/gr-1904.jpg"
       ],
-      "rating": 4.8,
-      "reviewCount": 152,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "new"
@@ -1600,8 +1600,8 @@
       "images": [
         "/assets/images/products/gr-1905.jpg"
       ],
-      "rating": 4.6,
-      "reviewCount": 118,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "new"
@@ -1687,8 +1687,8 @@
       "images": [
         "/assets/images/products/gr-1906.jpg"
       ],
-      "rating": 4.7,
-      "reviewCount": 104,
+      "rating": 0,
+      "reviewCount": 0,
       "inStock": true,
       "tags": [
         "new"

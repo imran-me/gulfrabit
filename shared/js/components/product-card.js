@@ -24,8 +24,23 @@ const EYE   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 const SCALE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M12 3v18M5 7h14M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/></svg>';
 const STAR  = '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
 
-/** Star rating markup (filled vs muted). */
+/**
+ * Star rating markup (filled vs muted), or nothing to rate yet.
+ *
+ * A product with no reviews used to draw five grey stars and "(0)", which
+ * reads as a BAD product rather than a new one — five empty stars is what a
+ * one-star review looks like from across the room. Now it says so in words.
+ *
+ * This matters more than it looks: ratings are computed from real reviews now,
+ * so every genuinely new product starts here, and a shop that punishes its own
+ * new products in the grid is a shop that will be tempted to invent numbers
+ * again.
+ */
 function starsHTML(rating = 0, count = 0) {
+  if (!count || !rating) {
+    return '<span class="caption">No reviews yet</span>';
+  }
+
   const full = Math.round(rating);
   let s = '<span class="product-card__stars" aria-label="Rated ' + rating + ' out of 5">';
   for (let i = 1; i <= 5; i++) {

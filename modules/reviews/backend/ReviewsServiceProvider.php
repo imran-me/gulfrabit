@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Reviews;
 
 use Illuminate\Support\ServiceProvider;
+use Modules\Reviews\Console\RecountRatings;
 use Modules\Reviews\Services\ReviewService;
 
 /**
@@ -29,6 +30,11 @@ class ReviewsServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__ . '/Migrations');
+
+        // Console only, so the command does not exist on a web request.
+        if ($this->app->runningInConsole()) {
+            $this->commands([RecountRatings::class]);
+        }
 
         $this->app->booted(function (): void {
             $this->loadRoutes();

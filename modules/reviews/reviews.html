@@ -77,7 +77,7 @@ try {
     } catch (e) { /* private mode, or nothing stored — the built-in theme stands. */ }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campaigns — GulfRabit Admin</title>
+  <title>Reviews — GulfRabit Admin</title>
   <meta name="description" content="GulfRabit staff panel.">
   <meta name="theme-color" content="#0A0A0A">
   <meta name="author" content="GulfRabit">
@@ -86,11 +86,11 @@ try {
   <!-- Social / Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GulfRabit">
-  <meta property="og:title" content="Campaigns — GulfRabit Admin">
+  <meta property="og:title" content="Reviews — GulfRabit Admin">
   <meta property="og:description" content="GulfRabit staff panel.">
   <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Campaigns — GulfRabit Admin">
+  <meta name="twitter:title" content="Reviews — GulfRabit Admin">
   <meta name="twitter:description" content="GulfRabit staff panel.">
   <link rel="icon" href="../../favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
@@ -108,6 +108,7 @@ try {
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=672caade">
   <link rel="stylesheet" href="../../modules/admin/admin.css?v=bd935aa2">
+  <link rel="stylesheet" href="../../modules/reviews/reviews-admin.css?v=c8554edb">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -142,66 +143,34 @@ try {
 
 <div class="admin__head">
         <div>
-          <h1 class="admin__title">Campaigns</h1>
-          <p class="admin__sub" data-cg-sub>What each ad sold, next to the organic baseline.</p>
-        </div>
-        <!-- Range as a select, not tabs: four options, one decision, and it
-             reads at a glance which window the whole screen is showing. -->
-        <div class="afilters__field" style="max-width:180px">
-          <label for="cg-days">Period</label>
-          <select class="select-gr" id="cg-days" data-cg-days>
-            <option value="7">Last 7 days</option>
-            <option value="30" selected>Last 30 days</option>
-            <option value="90">Last 90 days</option>
-            <option value="365">Last year</option>
-          </select>
+          <h1 class="admin__title">Reviews</h1>
+          <p class="admin__sub" data-rv-count>Loading…</p>
         </div>
       </div>
 
-      <p class="aerror" data-cg-error hidden role="alert"></p>
-
-      <!-- The three numbers a budget decision needs: how much selling the ads
-           did, how much of all selling that is, and how many orders it took. -->
-      <div class="acards" data-cg-cards hidden>
-        <div class="acard">
-          <span class="acard__n" data-cg-ad-revenue>—</span>
-          <span class="acard__l">Revenue from ads</span>
-        </div>
-        <div class="acard">
-          <span class="acard__n" data-cg-ad-share>—</span>
-          <span class="acard__l">Share of all revenue</span>
-        </div>
-        <div class="acard">
-          <span class="acard__n" data-cg-ad-orders>—</span>
-          <span class="acard__l">Orders from ads</span>
-        </div>
+      <!-- Said once, because it is the whole shape of the feature: nothing
+           here reached the shop by itself, and the rating on a product page is
+           computed from what is published on this screen. -->
+      <div class="acard" style="margin-bottom:var(--space-5)">
+        <p class="admin__sub" style="margin:0">
+          Every review is written by a customer whose order for that product was
+          <strong>delivered</strong>, and waits here until you publish it. A product's star
+          rating is worked out from the published ones — so publishing and rejecting
+          are what move the number, and nothing else can.
+        </p>
       </div>
 
-      <div class="atable-wrap" style="margin-top:var(--space-5)">
-        <table class="atable">
-          <thead>
-            <tr>
-              <th scope="col">Campaign</th>
-              <th scope="col">Source</th>
-              <th scope="col" class="atable__num">Orders</th>
-              <th scope="col" class="atable__num">Cancelled</th>
-              <th scope="col" class="atable__num">Revenue</th>
-              <th scope="col">Last order</th>
-            </tr>
-          </thead>
-          <tbody data-cg-body>
-            <tr><td colspan="6" class="atable__empty">Loading campaigns…</td></tr>
-          </tbody>
-        </table>
+      <nav class="atabs" data-rv-tabs aria-label="Review lists"></nav>
+
+      <div data-rv-list class="stack-4">
+        <p class="admin__sub">Loading reviews…</p>
       </div>
 
-      <!-- Spend lives in Meta on purpose — see the module README. Saying so
-           here stops the next person hunting for a column that was never
-           meant to exist. -->
-      <p class="admin__sub" style="margin-top:var(--space-4)">
-        Ad <em>spend</em> stays in Meta Ads Manager; this screen shows what each campaign
-        <em>sold</em>. Put the two side by side and the budget writes itself.
-      </p>
+      <nav class="apager" data-rv-pager hidden aria-label="Review pages">
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-rv-prev>← Previous</button>
+        <span data-rv-page-label></span>
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-rv-next>Next →</button>
+      </nav>
     </main>
   </div>
 
@@ -218,6 +187,6 @@ try {
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=73f64c7d"></script>
-  <script type="module" src="../../modules/marketing/campaigns-page.js?v=f28fcde8"></script>
+  <script type="module" src="../../modules/reviews/reviews-page.js?v=3ca19167"></script>
 </body>
 </html>

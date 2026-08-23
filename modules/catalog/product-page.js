@@ -18,7 +18,6 @@ import { initWishlistButtons } from '../../shared/js/components/wishlist.js';
 import { getParam, pathKey, setCanonical, setPageMeta } from '../../shared/js/core/router-helpers.js';
 import { track, productPayload } from '../../shared/js/core/analytics.js';
 import { categoryURL, productURL, siteURL } from '../../shared/js/core/paths.js';
-import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 import { initBuyBar } from './pdp-buybar.js';
 
 const STAR = '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
@@ -493,73 +492,34 @@ function injectFaqSchema(faq) {
 }
 
 /* ---- Reviews (localStorage-backed, with a write-review form) ---------- */
-function reviewsKey(id) { return `reviews:${id}`; }
-
-function getReviews(p) {
-  const stored = storage.get(reviewsKey(p.id), null);
-  if (stored) return stored;
-  // Seed one on-brand review so the section isn't empty on first visit.
-  return p.reviewCount ? [{ name: 'Verified buyer', rating: Math.round(p.rating || 5), text: 'Exactly as described — authentic and well packed.', date: '2026-07-10' }] : [];
-}
-
-function renderReviews(p) {
+/**
+ * The reviews section, from modules/reviews.
+ *
+ * WHAT WAS HERE BEFORE was a localStorage fake: any visitor could type any
+ * name, the "review" was visible only in the browser that wrote it, and a
+ * hardcoded "Verified buyer — exactly as described" was seeded underneath so
+ * the section never looked empty. The stars above it came from a number in a
+ * fixture. None of it was real, and the page publishes those figures to Google
+ * as AggregateRating.
+ *
+ * Dynamic import with a .catch, like the media picker: a product page must
+ * still sell the product when a module it decorates is missing. Without the
+ * module the tab simply says there is nothing to show.
+ */
+async function renderReviews(p) {
   const host = document.querySelector('[data-pdp-reviews]');
-  const reviews = getReviews(p);
-  const avg = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : (p.rating || 0);
+  if (!host) return;
 
-  const summary = reviews.length
-    ? `<div class="review-summary"><span class="review-summary__avg">${avg.toFixed(1)}</span>
-         <span><span class="review-card__stars">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5 - Math.round(avg))}</span>
-         <div class="caption">${reviews.length} review${reviews.length === 1 ? '' : 's'}</div></span></div>`
-    : '<p class="text-muted-gr">No reviews yet. Be the first to review this product.</p>';
+  const panel = await import('/modules/reviews/reviews-panel.js').catch(() => null);
 
-  const list = reviews.map((r) => `
-    <div class="review-card">
-      <div class="review-card__head"><strong>${escapeHtml(r.name)}</strong><span class="caption">${escapeHtml(r.date || '')}</span></div>
-      <div class="review-card__stars" aria-label="${r.rating} out of 5">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
-      <p style="margin-top:.5rem">${escapeHtml(r.text)}</p>
-    </div>`).join('');
+  if (!panel) {
+    host.innerHTML = '<p class="text-muted-gr">Reviews are not available right now.</p>';
+    return;
+  }
 
-  host.innerHTML = `
-    ${summary}
-    <div class="stack-4" style="margin-top:1.5rem">${list}</div>
-    <form class="review-form stack-4" data-review-form novalidate style="margin-top:1.5rem">
-      <h3 class="h5">Write a review</h3>
-      <div class="star-input" data-star-input role="radiogroup" aria-label="Your rating">
-        ${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-star="${n}" aria-label="${n} star${n > 1 ? 's' : ''}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg></button>`).join('')}
-      </div>
-      <div class="field-gr" data-field><label class="label-gr" for="rv-name">Name</label><input id="rv-name" class="input-gr" name="name" data-validate="required|min:2" data-label="Name"><span class="field-error" data-error></span></div>
-      <div class="field-gr" data-field><label class="label-gr" for="rv-text">Review</label><textarea id="rv-text" class="textarea-gr" name="text" data-validate="required|min:8" data-label="Review"></textarea><span class="field-error" data-error></span></div>
-      <button class="btn-gr btn-primary-gr" type="submit">Submit review</button>
-    </form>`;
-
-  wireReviewForm(p, host);
+  panel.mountReviews(host, p);
 }
 
-function wireReviewForm(p, host) {
-  const form = host.querySelector('[data-review-form]');
-  attachLiveValidation(form);
-  let rating = 0;
-  const stars = [...form.querySelectorAll('[data-star]')];
-  const paint = (val, cls) => stars.forEach((b, i) => b.classList.toggle(cls, i < val));
-  stars.forEach((btn, i) => {
-    btn.addEventListener('mouseenter', () => paint(i + 1, 'is-hover'));
-    btn.addEventListener('mouseleave', () => paint(0, 'is-hover'));
-    btn.addEventListener('click', () => { rating = i + 1; paint(rating, 'is-on'); });
-  });
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const { valid, values } = validateForm(form);
-    if (!rating) { toast.error('Please choose a star rating.'); return; }
-    if (!valid) return;
-    const reviews = getReviews(p);
-    reviews.unshift({ name: values.name, rating, text: values.text, date: new Date().toISOString().slice(0, 10) });
-    storage.set(reviewsKey(p.id), reviews);
-    toast.success('Thanks — your review was added.');
-    renderReviews(p);
-  });
-}
 
 function wireActions(p) {
   const stepper = document.querySelector('[data-qty-stepper]');

@@ -1,0 +1,30 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Reviews</h1>
+          <p class="admin__sub" data-rv-count>Loading…</p>
+        </div>
+      </div>
+
+      <!-- Said once, because it is the whole shape of the feature: nothing
+           here reached the shop by itself, and the rating on a product page is
+           computed from what is published on this screen. -->
+      <div class="acard" style="margin-bottom:var(--space-5)">
+        <p class="admin__sub" style="margin:0">
+          Every review is written by a customer whose order for that product was
+          <strong>delivered</strong>, and waits here until you publish it. A product's star
+          rating is worked out from the published ones — so publishing and rejecting
+          are what move the number, and nothing else can.
+        </p>
+      </div>
+
+      <nav class="atabs" data-rv-tabs aria-label="Review lists"></nav>
+
+      <div data-rv-list class="stack-4">
+        <p class="admin__sub">Loading reviews…</p>
+      </div>
+
+      <nav class="apager" data-rv-pager hidden aria-label="Review pages">
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-rv-prev>← Previous</button>
+        <span data-rv-page-label></span>
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-rv-next>Next →</button>
+      </nav>

@@ -493,6 +493,7 @@ ADMIN_NAV = [
     "/modules/courier/courier-nav.js",
     "/modules/inventory/inventory-nav.js",
     "/modules/media/media-nav.js",
+    "/modules/reviews/reviews-nav.js",
     "/modules/hero/hero-nav.js",
     "/modules/highlights/highlights-nav.js",
     "/modules/marketing/marketing-nav.js",
@@ -589,6 +590,11 @@ ADMIN_PAGES = [
      "modules/marketing/_fragments/campaigns.main.html",
      ["/modules/admin/admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/marketing/campaigns-page.js"], True),
+
+    ("modules/reviews/reviews.html", "Reviews — GulfRabit Admin",
+     "modules/reviews/_fragments/reviews.main.html",
+     ["/modules/admin/admin.css", "/modules/reviews/reviews-admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/reviews/reviews-page.js"], True),
 
     ("modules/media/library.html", "Images — GulfRabit Admin",
      "modules/media/_fragments/library.main.html",

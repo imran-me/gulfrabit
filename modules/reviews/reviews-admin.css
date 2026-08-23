@@ -1,0 +1,81 @@
+/* reviews-admin.css — the moderation queue.
+ *
+ * Cards rather than table rows, and that is the whole layout decision: the
+ * thing being judged is a paragraph of someone's writing, and a paragraph in a
+ * table cell is either truncated to uselessness or it wrecks the row heights.
+ * The merchant has to READ these, so they are laid out to be read.
+ *
+ * Tokens come from shared/css/style.css and modules/admin/admin.css. Nothing
+ * here invents a colour.
+ */
+
+.arv {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.arv__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.arv__who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+
+.arv__stars {
+  color: var(--gr-cyan);
+  letter-spacing: 2px;
+  /* Tabular so five stars occupy the same width on every card and the eye can
+     scan the column rather than re-finding it on each row. */
+  font-variant-numeric: tabular-nums;
+}
+
+.arv__title {
+  margin: 0;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-16);
+}
+
+.arv__body {
+  margin: 0;
+  /* A measure, not the full card width. Beyond about 75 characters the eye
+     loses the start of the next line, and this is the one screen in the panel
+     whose job is reading prose. */
+  max-width: 72ch;
+  line-height: 1.6;
+  /* A review is customer input: it may be one 400-character word. */
+  overflow-wrap: anywhere;
+}
+
+.arv__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--gr-border);
+}
+
+.arv__acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* On a phone the actions go full width and stack: Publish and Reject sitting
+   side by side at 40px wide is how the wrong one gets tapped. */
+@media (max-width: 559.98px) {
+  .arv__foot { align-items: stretch; }
+  .arv__acts { width: 100%; }
+  .arv__acts .btn-gr { flex: 1 1 auto; }
+}
