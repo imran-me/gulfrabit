@@ -13,6 +13,18 @@ import { canDelete, confirmDelete, toast } from './admin-delete.js';
 let page = 1;
 let categories = [];
 
+/* The current page's rows, and which of them are ticked.
+ *
+ * Keyed by SKU, because that is what every product endpoint is bound on and
+ * it is stable across a reload in a way a row index is not.
+ *
+ * Selection is cleared whenever the list reloads, exactly as it is on the
+ * orders screen and for the same reason: after a bulk action the rows
+ * underneath are no longer the rows that were chosen, and a selection that
+ * survives that is a selection that acts on products nobody meant to touch. */
+let rows = [];
+const selected = new Set();
+
 /** The media module, or null if it is not installed. See categories-page.js. */
 let media = null;
 
@@ -38,6 +50,39 @@ async function init() {
   page = Math.max(1, Number(params.get('page')) || 1);
 
   form.addEventListener('submit', (e) => { e.preventDefault(); page = 1; load(); });
+
+  document.querySelector('[data-prod-body]')?.addEventListener('change', (e) => {
+    const box = e.target.closest('[data-pick]');
+    if (!box) return;
+
+    if (box.checked) selected.add(box.dataset.pick);
+    else selected.delete(box.dataset.pick);
+
+    paintBulk();
+  });
+
+  // "Every product on this page", not every product matching the filters.
+  // Ticking a box must never quietly select two thousand rows the merchant
+  // cannot see; the count in the bar is then a number they can check.
+  document.querySelector('[data-select-all]')?.addEventListener('change', (e) => {
+    rows.forEach((r) => (e.target.checked ? selected.add(r.sku) : selected.delete(r.sku)));
+    document.querySelectorAll('[data-pick]').forEach((b) => { b.checked = e.target.checked; });
+    paintBulk();
+  });
+
+  document.querySelector('[data-bulk-clear]')?.addEventListener('click', clearSelection);
+
+  document.querySelector('[data-bulk-actions]')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-bulk]');
+    if (!btn) return;
+
+    const list = [...selected];
+
+    if (btn.dataset.bulk === 'delete') return removeMany(list, btn);
+    if (btn.dataset.bulk === 'restore') return putBackMany(list, btn);
+
+    setListed(list, btn.dataset.bulk === 'list', btn);
+  });
   document.querySelector('[data-prod-clear]')?.addEventListener('click', () => {
     form.reset();
     // reset() restores a hidden input's default attribute rather than clearing
@@ -205,13 +250,13 @@ async function load() {
   if (page > 1) qs.set('page', String(page));
   history.replaceState(null, '', qs.toString() ? `?${qs}` : location.pathname);
 
-  body.innerHTML = '<tr><td colspan="7" class="atable__empty">Loading…</td></tr>';
+  body.innerHTML = '<tr><td colspan="8" class="atable__empty">Loading…</td></tr>';
 
   let payload;
   try {
     payload = await adminFetch(`/products?${qs}`);
   } catch (err) {
-    body.innerHTML = `<tr><td colspan="7" class="atable__empty">${
+    body.innerHTML = `<tr><td colspan="8" class="atable__empty">${
       err.status === 404 || !err.status
         ? 'No backend connected yet — products appear once the API is live.'
         : escapeHtml(err.message)
@@ -253,6 +298,10 @@ function paint({ data, meta }) {
   const body = document.querySelector('[data-prod-body]');
   const inTrash = !!document.querySelector('[data-prod-filters]').deleted.value;
 
+  // Held so the bulk bar can decide what is offered without asking the server
+  // again, and so select-all knows what "this page" contains.
+  rows = data;
+
   paintTabs(meta);
 
   document.querySelector('[data-prod-count]').textContent = inTrash
@@ -271,7 +320,7 @@ function paint({ data, meta }) {
   }
 
   if (!data.length) {
-    body.innerHTML = `<tr><td colspan="7" class="atable__empty">${
+    body.innerHTML = `<tr><td colspan="8" class="atable__empty">${
       inTrash
         ? 'Nothing has been deleted. Products you remove land here, and can be put back.'
         : 'Nothing matches these filters.'
@@ -282,6 +331,11 @@ function paint({ data, meta }) {
 
   body.innerHTML = data.map((p, i) => `
     <tr class="${p.deletedAt ? 'is-deleted' : ''}">
+      <td class="atable__pick">
+        <input type="checkbox" data-pick="${escapeHtml(p.sku)}"
+               ${selected.has(p.sku) ? 'checked' : ''}
+               aria-label="Select ${escapeHtml(p.title)}">
+      </td>
       <td class="atable__name">
         <a href="/admin/products/edit?sku=${encodeURIComponent(p.sku)}">${escapeHtml(p.title)}</a>
         <div class="atable__sub">${escapeHtml(p.sku)}${p.brand ? ` · ${escapeHtml(p.brand)}` : ''}</div>
@@ -326,6 +380,10 @@ function paint({ data, meta }) {
   body.querySelectorAll('[data-prod-restore]').forEach((btn) =>
     btn.addEventListener('click', () => putBack(btn, data[Number(btn.dataset.prodRestore)])));
 
+  // Every reload replaces the rows, so nothing stays ticked — see the note by
+  // `selected`. Called after the body is painted so the header box clears too.
+  clearSelection();
+
   const pager = document.querySelector('[data-prod-pager]');
   pager.hidden = meta.lastPage <= 1;
   document.querySelector('[data-ppage-label]').textContent = `Page ${meta.currentPage} of ${meta.lastPage}`;
@@ -344,6 +402,192 @@ function placement(p) {
   const chips = (p.tags ?? []).filter((t) => NAMES[t]).map((t) =>
     `<span class="achip">${NAMES[t]}</span>`);
   return chips.length ? `<div class="achips">${chips.join('')}</div>` : '';
+}
+
+/* ------------------------------------------------------------------ *
+ * Working the whole selection
+ *
+ * ARCHIVE IS CALLED UNLIST, because the catalogue already has that state and
+ * it already has that name. A product with is_active false is off the shop
+ * and still in the catalogue — its price history, its stock ledger and its
+ * place in past orders all intact — which is exactly what "archive" is asked
+ * for. Adding a third word for it would give the panel two names for one
+ * state, and the screens that say "Unlisted" today would start disagreeing
+ * with the button that produced it.
+ *
+ * So there are three things you can do to a selection, and they are the three
+ * states a product can be in:
+ *
+ *   List     on the shop
+ *   Unlist   in the catalogue, off the shop        <- the archive
+ *   Delete   in the Deleted tab, restorable        <- the bin
+ *
+ * Each is one request per product rather than a bulk endpoint, exactly as the
+ * orders screen does and for the same reason: one product that refuses — a
+ * validation rule, a race with somebody else's edit — must not stop the other
+ * nineteen, and the report below can then name the ones that did not go.
+ * ------------------------------------------------------------------ */
+
+function clearSelection() {
+  selected.clear();
+
+  document.querySelectorAll('[data-pick]').forEach((b) => { b.checked = false; });
+
+  const all = document.querySelector('[data-select-all]');
+  if (all) all.checked = false;
+
+  paintBulk();
+}
+
+/**
+ * What can be done to everything currently ticked.
+ *
+ * The Deleted tab offers only Restore: listing something that is not in the
+ * catalogue is not a state, and the server would refuse it.
+ *
+ * Delete and Restore are drawn only for an owner, because that is what the
+ * route enforces — see RequireOwner. Unlist and List are not gated: curating
+ * the catalogue is the job of anyone who may reach this screen at all, and
+ * neither one destroys anything.
+ */
+function paintBulk() {
+  const bar = document.querySelector('[data-prod-bulk]');
+  if (!bar) return;
+
+  const n = selected.size;
+  bar.hidden = n === 0;
+
+  if (!n) return;
+
+  bar.querySelector('[data-bulk-count]').textContent =
+    `${n} product${n === 1 ? '' : 's'} selected`;
+
+  const inTrash = !!document.querySelector('[data-prod-filters]').deleted.value;
+
+  const actions = inTrash
+    ? (canDelete()
+        ? [['restore', 'Restore', 'btn-outline-gr']]
+        : [])
+    : [
+        ['unlist', 'Unlist', 'btn-outline-gr'],
+        ['list', 'Put on the shop', 'btn-ghost-gr'],
+        ...(canDelete() ? [['delete', 'Delete', 'btn-ghost-gr aact-remove']] : []),
+      ];
+
+  bar.querySelector('[data-bulk-actions]').innerHTML = actions.length
+    ? actions.map(([key, label, cls]) =>
+        `<button class="btn-gr ${cls} btn-sm-gr" type="button" data-bulk="${key}">${label}</button>`).join('')
+    : '<span class="atable__sub">Only an owner can restore a deleted product.</span>';
+}
+
+/**
+ * List or unlist a selection.
+ *
+ * Unlisting is the archive, and it deliberately does NOT ask first. It takes
+ * products off the shop and changes nothing else, the button that undoes it is
+ * sitting next to it, and a confirmation on a reversible bulk action is how
+ * people learn to click through the one that matters.
+ */
+async function setListed(list, active, btn) {
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = active ? `Listing ${list.length}…` : `Unlisting ${list.length}…`;
+
+  const results = await Promise.all(list.map((sku) =>
+    adminFetch(`/products/${encodeURIComponent(sku)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isActive: active }),
+    })
+      .then(() => ({ sku, ok: true }))
+      .catch((err) => ({ sku, ok: false, message: err.message }))));
+
+  report(results, btn, original, active ? 'put on the shop' : 'unlisted');
+}
+
+/** Delete a selection. This one asks — it is the only one that is not a toggle. */
+async function removeMany(list, btn) {
+  const one = list.length === 1;
+  const picked = rows.filter((r) => list.includes(r.sku));
+  const live = picked.filter((r) => r.isActive).length;
+
+  const ok = await confirmDelete({
+    title: one
+      ? `Remove "${picked[0]?.title ?? list[0]}" from the shop?`
+      : `Delete ${list.length} products?`,
+    // Naming how many are currently ON THE SHOP is the number that matters:
+    // deleting an unlisted product changes nothing a customer can see, and
+    // deleting fourteen live ones empties fourteen pages.
+    body: live
+      ? `${live === 1 ? 'One of these is' : `${live} of these are`} on the shop right now and `
+        + 'will disappear from it, and from search. Orders that already contain them are not affected.'
+      : 'None of these are on the shop, so nothing a customer can see changes. '
+        + 'Orders that already contain them are not affected.',
+    confirm: one ? 'Delete product' : `Delete ${list.length} products`,
+  });
+  if (!ok) return;
+
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = `Deleting ${list.length}…`;
+
+  const results = await Promise.all(list.map((sku) =>
+    adminFetch(`/products/${encodeURIComponent(sku)}`, { method: 'DELETE' })
+      .then(() => ({ sku, ok: true }))
+      .catch((err) => ({ sku, ok: false, message: err.message }))));
+
+  report(results, btn, original, 'deleted', true);
+}
+
+/** Put a selection back. No confirm: restoring is not the dangerous direction. */
+async function putBackMany(list, btn) {
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = `Restoring ${list.length}…`;
+
+  const results = await Promise.all(list.map((sku) =>
+    adminFetch(`/products/${encodeURIComponent(sku)}/restore`, { method: 'POST' })
+      .then(() => ({ sku, ok: true }))
+      .catch((err) => ({ sku, ok: false, message: err.message }))));
+
+  report(results, btn, original, 'restored, still unlisted', true);
+}
+
+/**
+ * Say what happened, including the half that did not.
+ *
+ * A partial failure is the case worth designing for: nineteen went and one did
+ * not, and a bare "done" would leave the merchant believing all twenty had.
+ * The failures are named by SKU, because that is the thing they can search
+ * for on the screen they are already looking at.
+ */
+function report(results, btn, original, verb, removesRows = false) {
+  const failed = results.filter((r) => !r.ok);
+
+  if (!failed.length) {
+    toast(results.length === 1
+      ? `1 product ${verb}.`
+      : `${results.length} products ${verb}.`);
+  } else if (failed.length === results.length) {
+    btn.disabled = false;
+    btn.textContent = original;
+    return toast(failed[0].message, false);   // nothing changed, nothing to reload for
+  } else {
+    toast(`${results.length - failed.length} of ${results.length} ${verb}. `
+      + failed.map((f) => `${f.sku}: ${f.message}`).join(' '), false);
+  }
+
+  // Only when the rows actually LEFT this list. Deleting the whole of page
+  // three empties it, and reloading a page past the end shows "nothing
+  // matches" with no pager to get back — so step back first. Unlisting is not
+  // that: the products stay on the Catalogue tab, wearing a different pill,
+  // and stepping back would jump the merchant away from the work they just did.
+  if (removesRows && page > 1 && failed.length < results.length
+      && results.length - failed.length >= rows.length) {
+    page -= 1;
+  }
+
+  load();
 }
 
 /**

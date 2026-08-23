@@ -260,10 +260,23 @@ try {
         </div>
       </form>
 
+      <!-- Appears only with a selection, and offers only what makes sense for
+           the tab you are on — see paintBulk(). The same component and the
+           same idiom as the orders screen: one way to work a list, learned
+           once. -->
+      <div class="abulk" data-prod-bulk hidden>
+        <strong data-bulk-count></strong>
+        <div class="abulk__actions" data-bulk-actions></div>
+        <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-bulk-clear>Clear selection</button>
+      </div>
+
       <div class="atable-wrap">
         <table class="atable">
           <thead>
             <tr>
+              <th scope="col" class="atable__pick">
+                <input type="checkbox" data-select-all aria-label="Select every product on this page">
+              </th>
               <th scope="col">Product</th>
               <th scope="col">Category</th>
               <th scope="col">Price</th>
@@ -274,7 +287,7 @@ try {
             </tr>
           </thead>
           <tbody data-prod-body>
-            <tr><td colspan="7" class="atable__empty">Loading products…</td></tr>
+            <tr><td colspan="8" class="atable__empty">Loading products…</td></tr>
           </tbody>
         </table>
       </div>
@@ -299,6 +312,6 @@ try {
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=73f64c7d"></script>
-  <script type="module" src="../../modules/admin/products-page.js?v=d023303c"></script>
+  <script type="module" src="../../modules/admin/products-page.js?v=ec8c32c6"></script>
 </body>
 </html>
