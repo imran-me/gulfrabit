@@ -38,6 +38,7 @@ return [
     Modules\Sms\SmsServiceProvider::class,
     Modules\Delivery\DeliveryServiceProvider::class,
     Modules\Theme\ThemeServiceProvider::class,
+    Modules\Reviews\ReviewsServiceProvider::class,
 
     // Added as each module grows a Laravel layer. The frontend for these already
     // runs on the mock seam in modules/<feature>/backend/api.js:
