@@ -403,9 +403,41 @@
   /* Nothing to collapse: the strip has no width to give back. */
   .admin__rail  { display: none; }
 
-  .anav__group { margin-top: 0 !important; }
+  /* ONE scrolling row, not six stacked ones.
+     The groups are block boxes, so wrapping the links inside each one still
+     put every group on a line of its own: Overview, Trade, Catalogue,
+     Warehouse, Books and Settings took SIX rows, and on a 390x780 phone the
+     navigation filled the entire screen — the page title was below the fold
+     on every admin screen. `display: contents` dissolves the group boxes so
+     all sixteen links become items of one flex row, and the row scrolls
+     sideways like the stage tabs on the orders table do.
+     paintNav() scrolls the current screen into view, so the row opens where
+     you are standing rather than at the start. */
+  .anav {
+    display: flex;
+    gap: var(--space-2);
+    overflow-x: auto;
+    overflow-y: hidden;
+    /* The row is flush with the strip's edge, but the first and last chips
+       still need the strip's padding or they sit against the screen. */
+    margin-inline: calc(var(--space-4) * -1);
+    padding-inline: var(--space-4);
+    scroll-padding-inline: var(--space-4);
+    /* Room for a focus ring the clipped row would otherwise cut in half. */
+    padding-block: 2px;
+    scrollbar-width: none;
+  }
+  .anav::-webkit-scrollbar { display: none; }
+  .anav__group { display: contents; }
   .anav__title { display: none; }
-  .anav ul { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .anav ul { display: flex; flex-wrap: nowrap; gap: var(--space-2); }
+  /* The group boundaries survive as a rule, since their headings cannot. */
+  .anav__group + .anav__group ul {
+    margin-left: var(--space-2);
+    padding-left: calc(var(--space-2) + var(--space-2));
+    border-left: 1px solid rgba(255, 255, 255, .12);
+  }
+  .anav__link { flex: 0 0 auto; }
   /* Name, role and sign-out on one line rather than stacked. */
   .admin__who-name { display: inline; margin-right: var(--space-2); }
   .admin__signout { margin-top: 0; margin-left: var(--space-2); }
@@ -1202,6 +1234,38 @@
   text-decoration-color: rgba(232, 207, 142, .4);
 }
 .admin__signout:hover { color: #FFF3C4; }
+
+/* On the phone strip it is not a card. Boxed, it claimed a whole row of a
+   390px screen for a name and a role that are reference, not work — and this
+   rule is declared here rather than up in Responsive because it has to come
+   AFTER the card it undoes. */
+@media (max-width: 899.98px) {
+  .admin__who {
+    background: none;
+    border: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+  .admin__who-name {
+    margin-right: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .admin__signout { margin-left: 0; white-space: nowrap; }
+}
+
+/* Below 560 the wordmark goes and the mark stands alone, so the brand and the
+   identity fit on one line instead of two. "GulfRabit ADMIN" set at 20px is
+   half a small phone's width spent telling someone which panel they opened. */
+@media (max-width: 559.98px) {
+  .admin__brand span { display: none; }
+  .admin__brand { flex: 0 0 auto; }
+}
 
 /* ---- Deleting, everywhere -----------------------------------------------
    The confirm dialog, the result toast, the Deleted tab and the red row link.

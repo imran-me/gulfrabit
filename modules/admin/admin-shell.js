@@ -209,7 +209,34 @@ function paintNav(session) {
 
   if (!allowed.length) {
     host.innerHTML = '<p class="anav__empty">Your role has no screens assigned. Ask an owner.</p>';
+    return;
   }
+
+  scrollCurrentIntoView(host);
+}
+
+/**
+ * On a phone the sidebar is one sideways-scrolling row of sixteen chips, and
+ * it opens at the start of that row — so someone who tapped through to an
+ * order is looking at Dashboard and Orders while the screen they are actually
+ * on sits off the right edge, with nothing marking where they are.
+ *
+ * Centred rather than merely scrolled to, because the point is to show what is
+ * on either side of here, not to park the current chip against an edge.
+ *
+ * Rects rather than offsetLeft: `.anav` is not a positioned element, so
+ * offsetParent is somewhere further up the sidebar and offsetLeft is measured
+ * from there. And scrollLeft rather than scrollIntoView(), which on a row this
+ * shallow will also scroll the PAGE to bring the strip into view — jumping
+ * past the page heading on arrival at every screen.
+ */
+function scrollCurrentIntoView(host) {
+  const current = host.querySelector('.anav__link.is-current');
+  if (!current || host.scrollWidth <= host.clientWidth) return;
+
+  const item = current.getBoundingClientRect();
+  const row = host.getBoundingClientRect();
+  host.scrollLeft += item.left - row.left - (row.width - item.width) / 2;
 }
 
 /**
