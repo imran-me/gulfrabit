@@ -1682,12 +1682,18 @@ a:hover { color: var(--link-hover); }
 }
 .field-gr--light .input-gr::placeholder { color: var(--text-muted); }
 
-/* Quantity stepper */
-.qty-stepper { display: inline-flex; align-items: center; border: 1px solid var(--border-input); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-sunken); }
-.qty-stepper__btn { width: 42px; height: 46px; display: grid; place-items: center; background: none; border: 0; color: var(--text-primary); cursor: pointer; font-size: var(--fs-20); transition: background var(--dur-fast) var(--ease-out); }
+/* Quantity stepper
+   flex-shrink:0 throughout, because a `width` on a flex item is a starting
+   size, not a promise. This sits in the cart row's control strip next to
+   "Save for later" and "Remove", and with nothing holding it the 42px buttons
+   were measured at 26px on a 412px phone and 13px on a 360px one — the width
+   of the cheapest Android sold in this market. Thirteen pixels is not a
+   button you can hit while holding a bus rail. */
+.qty-stepper { display: inline-flex; align-items: center; flex: 0 0 auto; border: 1px solid var(--border-input); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-sunken); }
+.qty-stepper__btn { width: 42px; height: 46px; flex: 0 0 auto; display: grid; place-items: center; background: none; border: 0; color: var(--text-primary); cursor: pointer; font-size: var(--fs-20); transition: background var(--dur-fast) var(--ease-out); }
 .qty-stepper__btn:hover:not(:disabled) { background: var(--wash-hover); color: var(--link); }
 .qty-stepper__btn:disabled { opacity: .4; cursor: not-allowed; }
-.qty-stepper__input { width: 48px; height: 46px; text-align: center; background: none; border: 0; color: var(--text-primary); font-variant-numeric: tabular-nums; font-weight: var(--fw-semibold); outline: none; }
+.qty-stepper__input { width: 48px; height: 46px; flex: 0 0 auto; text-align: center; background: none; border: 0; color: var(--text-primary); font-variant-numeric: tabular-nums; font-weight: var(--fw-semibold); outline: none; }
 
 /* ---- Honeypot -----------------------------------------------------------
    A field for bots. Offscreen rather than display:none, because the cruder
