@@ -105,8 +105,21 @@ class Promotion extends Model
             return 0;
         }
 
+        // Rounded DOWN to a whole taka, because every consumer of this figure
+        // divides it by 100 independently and a fractional taka makes the four
+        // numbers on the receipt stop adding up. GULF10 on a ৳1,299 basket is
+        // 12,990 poisha; intdiv() then reported subtotal 1299, discount 129 and
+        // total 1169, and 1299 − 129 is 1170. The customer's confirmation, their
+        // order history, the admin order screen and the packing slip all
+        // disagreed by one taka — and on a cash-on-delivery order that is the
+        // number the rider is told to collect.
+        //
+        // Down rather than nearest: the discount can then never exceed the
+        // percentage the code promises, nor max_discount_poisha, nor the goods
+        // it applies to. Every other money figure here is already taka-aligned,
+        // so this was the only place a fraction could enter.
         $discount = $this->type === 'pct'
-            ? (int) floor($base * $this->value / 100)
+            ? intdiv((int) floor($base * $this->value / 100), 100) * 100
             : $this->value;
 
         if ($this->max_discount_poisha !== null) {
