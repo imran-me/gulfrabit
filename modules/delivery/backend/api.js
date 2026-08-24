@@ -54,9 +54,45 @@ export async function getDistrictsByDivision() {
   // TODO: backend — GET /api/delivery/districts
   if (districtCache) return districtCache;
 
-  const res = await fetch(siteURL('modules/delivery/data/districts.json'));
+  const url = siteURL('modules/delivery/data/districts.json');
+
+  // Three attempts before giving up. The one outcome checkout cannot survive
+  // is an empty select: the district field is marked required, so a single
+  // request dropped by a phone that changed cell tower mid-load leaves a box
+  // with nothing in it and a Place Order button that can never be satisfied.
+  // Half a second of retrying turns a lost order into a slightly slow one.
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (attempt) await new Promise((resolve) => setTimeout(resolve, 250 * attempt));
+    try {
+      return await fetchDistricts(url);
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  // Rethrown rather than answered with an empty object: {} is a valid-looking
+  // answer that yields a select with no options and nothing on screen to
+  // explain it. Callers catch this and say so in the field itself —
+  // wireDistricts() in checkout-page.js, fillDistricts() in express-page.js.
+  throw lastError;
+}
+
+/**
+ * One attempt at the district file, memoised on success.
+ *
+ * @param {string} url
+ * @returns {Promise<Record<string, District[]>>}
+ */
+async function fetchDistricts(url) {
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`districts.json ${res.status}`);
   const { districts } = await res.json();
+
+  // A body that parses but carries no districts is a failure, not an empty
+  // country. Caching {} for it would hand every later caller a select with no
+  // options that never rejects, so nothing downstream would know to say why.
+  if (!Array.isArray(districts) || districts.length === 0) throw new Error('districts.json carried no districts');
 
   districtCache = districts.reduce((byDivision, d) => {
     (byDivision[d.division] ||= []).push({ key: d.id, name: d.name, zone: d.zone });

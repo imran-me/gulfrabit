@@ -35,7 +35,7 @@ import { siteURL } from '../../shared/js/core/paths.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';
 import { DEFAULT_OPTION, getDistrictsByDivision, quoteForDistrict } from '../delivery/backend/api.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
-import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
+import { validateForm, attachLiveValidation, setFieldError } from '../../shared/js/utils/validate-form.js';
 import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 import { track, productPayload, getAttribution } from '../../shared/js/core/analytics.js';
@@ -130,8 +130,15 @@ async function fillDistricts() {
       select.append(group);
     }
   } catch {
-    // The zone still defaults to metro and the order can still be placed; a
-    // missing district list must not block a sale.
+    // The delivery API has already retried; there is genuinely nothing to
+    // choose from. The select is marked required, so left alone it makes the
+    // confirm sheet unreachable — and a toast scrolls away, taking the only
+    // explanation with it. Drop the rule and keep the reason in the field,
+    // where it stays until the page is reloaded and the list can be tried
+    // again; the metro default prices the delivery in the meantime.
+    select.removeAttribute('data-validate');
+    select.closest('[data-field]')?.classList.remove('is-invalid');
+    setFieldError(select, 'We couldn’t load the district list. Reload the page to try again — we need it to work out your delivery charge.');
     toast.error?.('Couldn’t load districts — pick your area in the address line.');
   }
 }
@@ -352,7 +359,12 @@ function buildOrder() {
 
 function addressLine() {
   const g = (n) => form.querySelector(`[name="${n}"]`)?.value.trim() || '';
-  const district = form.querySelector('[data-district]')?.selectedOptions[0]?.textContent || '';
+  const select = form.querySelector('[data-district]');
+  // The placeholder option counts as selected until a real district is picked,
+  // so reading it blind puts the words "Select district" on the confirm sheet
+  // and into the stored order's address. Reachable now that a district list
+  // that would not load drops the required rule instead of blocking the sale.
+  const district = select?.value ? select.selectedOptions[0].textContent : '';
   return [g('fullName'), g('address'), g('area'), district, g('phone')].filter(Boolean).join(', ');
 }
 

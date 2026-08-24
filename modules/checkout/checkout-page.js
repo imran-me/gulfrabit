@@ -12,7 +12,7 @@ import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { siteURL } from '../../shared/js/core/paths.js';
 import { DEFAULT_OPTION, getDistrictsByDivision, quoteForDistrict } from '../delivery/backend/api.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
-import { validateForm, validateField, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
+import { validateForm, validateField, attachLiveValidation, setFieldError } from '../../shared/js/utils/validate-form.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
 import { track, cartPayload, getAttribution } from '../../shared/js/core/analytics.js';
 import { createOrder, persistOrderLocally } from './backend/api.js';
@@ -199,8 +199,13 @@ async function wireDistricts() {
   try {
     byDivision = await getDistrictsByDivision();
   } catch {
-    // Leave the zone radios fully selectable — a failed district lookup must
-    // not block checkout, it just costs us the automatic resolution.
+    // The list is genuinely unreachable — the delivery API has already retried.
+    // The select is now a box with nothing in it, and it is marked required,
+    // so leaving it as it stands means Place Order refuses for good and never
+    // says why. Drop the rule, put the reason where the customer is already
+    // looking, and let the zone radios — which ship enabled — price the
+    // delivery instead.
+    districtsUnavailable(select);
     return;
   }
 
@@ -222,6 +227,38 @@ async function wireDistricts() {
 
   select.addEventListener('change', () => applyDistrict(select.value));
   if (select.value) applyDistrict(select.value);
+}
+
+/**
+ * Turn the empty district select into something a customer can get past.
+ *
+ * Delivery still has to be priced, so the address line carries the district
+ * and step 2's zone radios stay fully selectable — the same no-JS path the
+ * markup was built around. The wording stops short of promising the order
+ * will go through: PlaceOrderRequest still has district required|exists, so
+ * once the API is live an order sent without one comes back refused, and a
+ * reload is the only thing that can fetch the list again.
+ */
+function districtsUnavailable(select) {
+  select.removeAttribute('data-validate');
+  // A red flag left over from a Next click that landed while the list was
+  // still loading would otherwise sit on a field we have just stopped asking
+  // for, and nothing would ever clear it.
+  select.closest('[data-field]')?.classList.remove('is-invalid');
+  setFieldError(select, 'We couldn’t load the district list. Reload the page to try again — we need it to work out your delivery charge.');
+}
+
+/**
+ * The chosen district's label, or ''.
+ *
+ * The placeholder option counts as selected until someone picks a real one,
+ * so reading selectedOptions blind yields the words "Select your district" —
+ * which, now that an unfillable select no longer blocks submit, would be
+ * written into the stored order's address and read back on the receipt.
+ */
+function chosenDistrictName() {
+  const select = form.querySelector('[data-district]');
+  return select?.value ? select.selectedOptions[0].textContent : '';
 }
 
 async function applyDistrict(districtKey) {
@@ -335,7 +372,7 @@ async function paintSummary() {
 
 function paintReview() {
   const g = (n) => form.querySelector(`[name="${n}"]`)?.value || '';
-  const districtName = form.querySelector('[data-district]')?.selectedOptions[0]?.textContent || '';
+  const districtName = chosenDistrictName();
   setText('[data-review-address]', [g('fullName'), g('address'), g('area'), districtName, g('phone')].filter(Boolean).join(', '));
   setText('[data-review-delivery]', form.querySelector('[data-delivery]:checked')?.closest('.option-card').querySelector('.option-card__title').textContent || '');
   setText('[data-review-payment]', form.querySelector('[data-payment]:checked')?.closest('.option-card').querySelector('.option-card__title').textContent || '');
@@ -438,7 +475,7 @@ async function placeOrder(e) {
         // variant is part of what was bought: an order record that says
         // "Ajwa Dates" without the pack size cannot be picked or refunded.
         items: cart.map((l) => ({ id: l.id, title: l.title, variant: l.variant ?? null, qty: l.qty, price: l.price, image: l.image })),
-        address: [g('address'), g('area'), form.querySelector('[data-district]')?.selectedOptions[0]?.textContent]
+        address: [g('address'), g('area'), chosenDistrictName()]
           .filter(Boolean).join(', '),
         phone: g('phone'),
         email: g('email') || null,

@@ -108,6 +108,34 @@ function wireError(input, errEl) {
   }
 }
 
+/**
+ * Put a message in a field's error slot that the customer cannot type away.
+ *
+ * The rules above answer "what did you get wrong"; this answers "what went
+ * wrong on our side" — a district list that would not load, for one. It
+ * deliberately does not set is-invalid: that state means "fix this and try
+ * again", and painting a control the customer has no way to fix turns an
+ * explanation into a dead end. Same slot and same screen-reader link
+ * validateField uses, so nothing new appears on screen.
+ *
+ * aria-invalid is cleared for the same reason. A submit that ran while the
+ * list was still loading will have set it, and once the rule is dropped
+ * nothing else ever clears it — a screen reader would go on calling a field
+ * invalid that we have stopped asking for.
+ *
+ * @param {HTMLElement} input the control the message belongs to
+ * @param {string} message plain text, shown under the field
+ */
+export function setFieldError(input, message) {
+  const field = input.closest('[data-field]') || input.closest('.field-gr');
+  const errEl = field?.querySelector('[data-error]');
+  if (!errEl) return;
+
+  wireError(input, errEl);
+  errEl.textContent = message;
+  input.removeAttribute('aria-invalid');
+}
+
 /** Validate a single input element. Returns true|false and updates its field UI. */
 export function validateField(input, form) {
   const spec = input.getAttribute('data-validate');
