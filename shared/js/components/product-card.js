@@ -467,9 +467,17 @@ export function enhanceProductCards(root = document) {
 
     card.querySelector('[data-action="quickview"]')?.addEventListener('click', () => {
       // Quick-view modal is optional enhancement; fall back to the PDP link.
+      //
+      // product() with the parentheses. It is an accessor — see the note at
+      // its declaration — and reading .id off the function itself gave
+      // undefined, so openQuickView looked up the product "undefined", found
+      // nothing, and painted "Product not found." over a card whose photo and
+      // price were still on screen behind it. On every card, in every grid and
+      // rail. The fallback had the same slip: productURL(fn) is '', so the
+      // escape hatch went to /product/ rather than the product.
       import('./quick-view-modal.js')
-        .then((m) => m.openQuickView(product.id))
-        .catch(() => { window.location.href = productURL(product); });
+        .then((m) => m.openQuickView(product().id))
+        .catch(() => { window.location.href = productURL(product()); });
     });
   });
 }
