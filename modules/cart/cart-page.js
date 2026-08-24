@@ -31,6 +31,7 @@ if (storedPromo && typeof storedPromo !== 'string') storage.set('cart-promo', pr
 
 store.subscribe(store.EVENTS.CART, render);
 document.querySelector('[data-promo-apply]')?.addEventListener('click', applyPromo);
+document.querySelector('[data-promo-remove]')?.addEventListener('click', removePromo);
 render();
 
 async function render() {

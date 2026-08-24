@@ -409,6 +409,17 @@ async function placeOrder(e) {
   if (result && result.ok === false) {
     // The server said no and said why — stock, promo, district. The cart is
     // untouched; the customer fixes the named problem and tries again.
+    //
+    // Except a promo refusal, which the customer cannot fix: checkout has no
+    // promo UI, so a stored code the server has stopped accepting refused the
+    // order on every retry, forever, about a code shown nowhere on the page.
+    // Drop it and repaint, so tapping Place Order again actually can succeed —
+    // at the undiscounted price, which is the honest outcome and is now
+    // visible in the summary before they tap.
+    if (/code|promo|coupon|discount|spend/i.test(result.message || '')) {
+      storage.remove('cart-promo');
+      await paintSummary();
+    }
     if (btn) btn.disabled = false;
     toast.error(result.message);
     return;
