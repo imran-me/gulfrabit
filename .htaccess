@@ -173,6 +173,10 @@ RedirectMatch 404 ^/(composer\.(json|lock)|artisan|phpunit\.xml|context\.md|BACK
     AddType font/woff2 .woff2
     AddType image/svg+xml .svg
     AddType application/manifest+json .webmanifest
+    # Pinned, because the DEFLATE list below has to name the type the server
+    # actually resolves .js to, and that answer changed under us: Apache 2.4.55
+    # and LiteSpeed both map .js to text/javascript now.
+    AddType application/javascript .js .mjs
 </IfModule>
 
 # ---- Compression -------------------------------------------------------
@@ -180,8 +184,14 @@ RedirectMatch 404 ^/(composer\.(json|lock)|artisan|phpunit\.xml|context\.md|BACK
 # gzip_types omits application/javascript. Do not repeat that.
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
-    AddOutputFilterByType DEFLATE application/javascript application/x-javascript
-    AddOutputFilterByType DEFLATE application/json image/svg+xml
+    # text/javascript is not a nicety. Apache 2.4.55+ and LiteSpeed — the stack
+    # this deploys to — both serve .js as text/javascript, and this list named
+    # only the application/* spellings. The home page's 30 module files are
+    # 205 KB and the product page's 35 are 231 KB; unlisted, every byte of that
+    # went down the wire raw. Which is the 411 KB mistake in the comment above,
+    # made in a different spelling.
+    AddOutputFilterByType DEFLATE application/javascript application/x-javascript text/javascript
+    AddOutputFilterByType DEFLATE application/json image/svg+xml application/manifest+json
 </IfModule>
 
 # ---- Caching -----------------------------------------------------------
