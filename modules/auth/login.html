@@ -115,7 +115,7 @@ try {
        different one before the first paint when the server has already
        told this visitor which theme is published. -->
   <link rel="stylesheet" href="../../modules/theme/theme-trio.css?v=dd326453">
-  <link rel="stylesheet" href="../../modules/auth/auth.css?v=90cffd9a">
+  <link rel="stylesheet" href="../../modules/auth/auth.css?v=5e0f784d">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -412,6 +412,7 @@ try {
           <div style="display:flex;gap:.5rem;max-width:360px">
             <div class="field-gr" data-field style="margin:0;flex:1">
               <input id="footer-email" class="input-gr" type="email" name="email" placeholder="you@email.com"
+                     autocomplete="email" inputmode="email" enterkeyhint="send"
                      data-validate="required|email" data-label="Email" aria-label="Email address">
               <span class="field-error" data-error></span>
             </div>

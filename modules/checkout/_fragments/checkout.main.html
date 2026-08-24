@@ -98,9 +98,9 @@
           <!-- Card fields (shown only when Card selected) -->
           <div data-card-fields hidden style="margin-top:var(--space-4)">
             <div class="form-grid">
-              <div class="field-gr col-span-2" data-field><label class="label-gr" for="cardNum">Card number <span class="label-gr__bn bn" lang="bn">কার্ড নম্বর</span></label><input id="cardNum" class="input-gr" name="cardNum" inputmode="numeric" placeholder="4242 4242 4242 4242" data-validate="numeric" data-label="Card number"><span class="field-error" data-error></span></div>
-              <div class="field-gr" data-field><label class="label-gr" for="cardExp">Expiry <span class="label-gr__bn bn" lang="bn">মেয়াদ</span></label><input id="cardExp" class="input-gr" name="cardExp" placeholder="MM/YY"><span class="field-error" data-error></span></div>
-              <div class="field-gr" data-field><label class="label-gr" for="cardCvc">CVC <span class="label-gr__bn bn" lang="bn">সিভিসি</span></label><input id="cardCvc" class="input-gr" name="cardCvc" inputmode="numeric" placeholder="123"><span class="field-error" data-error></span></div>
+              <div class="field-gr col-span-2" data-field><label class="label-gr" for="cardNum">Card number <span class="label-gr__bn bn" lang="bn">কার্ড নম্বর</span></label><input id="cardNum" class="input-gr" name="cardNum" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242" data-validate="numeric" data-label="Card number"><span class="field-error" data-error></span></div>
+              <div class="field-gr" data-field><label class="label-gr" for="cardExp">Expiry <span class="label-gr__bn bn" lang="bn">মেয়াদ</span></label><input id="cardExp" class="input-gr" name="cardExp" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/YY"><span class="field-error" data-error></span></div>
+              <div class="field-gr" data-field><label class="label-gr" for="cardCvc">CVC <span class="label-gr__bn bn" lang="bn">সিভিসি</span></label><input id="cardCvc" class="input-gr" name="cardCvc" inputmode="numeric" autocomplete="cc-csc" placeholder="123"><span class="field-error" data-error></span></div>
             </div>
           </div>
           <!-- TODO: connect to payment gateway -->

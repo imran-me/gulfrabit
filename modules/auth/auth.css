@@ -13,4 +13,14 @@
 .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--border-hairline); }
 .auth-meta { display: flex; justify-content: space-between; align-items: center; font-size: var(--fs-14); }
 .pw-toggle { position: relative; }
-.pw-toggle__btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: 0; color: var(--text-muted); cursor: pointer; padding: 6px; }
+/* 44x44, measured. It was 28x38 — a padding value rather than a size — which
+   is the smallest control on the two forms where a phone keyboard is already
+   covering half the screen, and the one people reach for when a password has
+   gone wrong. The icon inside stays 20px; the box around it is the target. */
+.pw-toggle__btn {
+  position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+  display: grid; place-items: center;
+  width: 44px; height: 44px;
+  background: none; border: 0; padding: 0;
+  color: var(--text-muted); cursor: pointer;
+}
