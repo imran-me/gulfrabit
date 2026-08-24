@@ -138,7 +138,10 @@ function writeArea(state) {
   if (!can.allowed) {
     return `<p class="rv-note">${esc(can.message)}${
       can.reason === 'signed-out'
-        ? ' <a href="/account/login">Sign in</a>'
+        // /login, not /account/login — the latter has no rewrite and lands on
+        // the 404 page, which is where this link pointed until a headless
+        // browser walked into it.
+        ? ' <a href="/login">Sign in</a>'
         : ''
     }</p>`;
   }

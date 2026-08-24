@@ -396,12 +396,32 @@ def scripts(module_js, theme=True):
 </html>
 """
 
+# Pages that are served from a URL OTHER than their own path, where a relative
+# asset reference resolves against the wrong directory.
+#
+# /404.html is the whole list. `ErrorDocument 404 /404.html` serves this file
+# for every missing URL WITHOUT redirecting, so the browser is still sitting at
+# /account/login and resolves `shared/css/gulfrabit.css` to
+# /account/shared/css/gulfrabit.css — which 404s in turn. The result is the
+# error page rendered with no CSS and no JS at all: serif text, blue underlined
+# links, broken-image icons. Every mistyped deep link on the site looked like
+# that, and it was invisible from here because /404.html itself, opened
+# directly, is at the root and works perfectly.
+SERVED_FROM_ANYWHERE = {"404.html"}
+
+
 def relativize(html, out):
     """Rewrite site-root-absolute paths (/shared, /assets, /modules, /index.html,
     /favicon…, /site.webmanifest, url(/…)) into paths RELATIVE to this output
     page's depth, so the build works at a domain root OR a project subpath
     (e.g. user.github.io/repo/). External URLs (https://…) and #anchors are
     untouched because they don't begin with `="/` or `url(/`."""
+    if out in SERVED_FROM_ANYWHERE:
+        # Left absolute. It costs the subpath deployment this function exists
+        # for — but that deployment is hypothetical and a stylesheet-less error
+        # page on the live domain is not.
+        return html
+
     depth = out.count("/")            # e.g. modules/x/y.html -> 2, index.html -> 0
     prefix = "../" * depth            # "" for root pages
     if not prefix:
