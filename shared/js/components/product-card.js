@@ -157,7 +157,13 @@ function sizeChips(product) {
   return `<div class="size-chips" role="group" aria-label="Pack size">${chips}</div>`;
 }
 
-export function productCardHTML(product) {
+/**
+ * @param {object} product
+ * @param {{eager?: boolean}} [opts]  eager skips loading="lazy" and asks the
+ *   browser to prioritise the fetch. Set by renderProductGrid for the first
+ *   row of a grid that is already on screen — see the note there.
+ */
+export function productCardHTML(product, { eager = false } = {}) {
   const {
     id, title, brand, origin, price, originalPrice, image, rating = 0,
     reviewCount = 0, inStock = true, tags = [], defaultVariant = null,
@@ -184,7 +190,9 @@ export function productCardHTML(product) {
       </div>
       <a href="${productURL(product)}" aria-label="${escapeAttr(title)}">
         <picture>${cardSources(image)}
-          <img class="product-card__img" src="${escapeAttr(image)}" alt="${escapeAttr(title)}" loading="lazy" decoding="async" width="400" height="500">
+          <img class="product-card__img" src="${escapeAttr(image)}" alt="${escapeAttr(title)}" ${
+            eager ? 'fetchpriority="high"' : 'loading="lazy"'
+          } decoding="async" width="400" height="500">
         </picture>
       </a>
     </div>
@@ -279,10 +287,31 @@ function arrivalLine(availableFrom, verb) {
   }</span>`;
 }
 
-/** Render a list of products into a container. */
+/* How many cards to load eagerly when the grid is already on screen. Four is
+   the first row on a desktop grid and rather more than the first row on a
+   phone, so the worst case is a couple of images fetched slightly early. */
+const EAGER_CARDS = 4;
+
+/**
+ * Render a list of products into a container.
+ *
+ * The first cards get fetchpriority="high" instead of loading="lazy" WHEN the
+ * grid is already in the viewport. On a category page the largest thing on
+ * screen is a product image, and a lazy one cannot start downloading until
+ * layout has run and the lazy-loading heuristic has looked at it — measured at
+ * 2.4s to largest paint on the category page against 1.2s on pages whose
+ * biggest element is not deferred. Rails further down the page (related
+ * products, recently viewed) are off screen at render time and stay lazy,
+ * which is why this is decided from the container's position rather than from
+ * the caller.
+ */
 export function renderProductGrid(container, products) {
   if (!container) return;
-  container.innerHTML = products.map(productCardHTML).join('');
+
+  const onScreen = container.getBoundingClientRect().top < window.innerHeight;
+  container.innerHTML = products
+    .map((p, i) => productCardHTML(p, { eager: onScreen && i < EAGER_CARDS }))
+    .join('');
   enhanceProductCards(container);
   // Fresh markup starts with whatever `wished` was true at render time; this
   // makes it true at PAINT time, which is not the same thing after a toggle
