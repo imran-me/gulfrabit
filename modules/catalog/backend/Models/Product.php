@@ -307,7 +307,47 @@ class Product extends Model
             'stockDisplay'  => isset($v['stock_display']) && $v['stock_display'] !== null
                 ? (int) $v['stock_display']
                 : null,
-        ], $this->variants ?? []);
+        ], $this->rawVariants());
+    }
+
+    /**
+     * The stored variants, as a clean list of rows.
+     *
+     * WHY THIS EXISTS. `variants` is a JSON column, so what comes back is
+     * whatever was written — and not everything that has ever written it wrote
+     * a list of objects. A single variant saved as one object, a null left in
+     * the array by an edit, a row that is a bare string: each of those reaches
+     * `array_map(fn (array $v) => …)` as a non-array and raises a TypeError,
+     * which is a 500 on every endpoint that serialises the product.
+     *
+     * That was live. Four products in this catalogue answered 500 to a bulk
+     * archive — not because archiving failed, it had already committed, but
+     * because building the RESPONSE threw while reading their variants. The
+     * same fault sat behind the edit screen and the create form for as long as
+     * those rows have existed.
+     *
+     * So: keep the rows that are rows, drop the rest, and reindex. A product
+     * with one unreadable variant shows its other variants instead of showing
+     * an error page, which is the right way round for a shop.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function rawVariants(): array
+    {
+        $stored = $this->variants;
+
+        if (! is_array($stored)) {
+            return [];
+        }
+
+        // A single variant written as one object, rather than a list holding
+        // one object. Its keys are the variant's own fields, so the values are
+        // strings and numbers and every one of them fails the array hint.
+        if (array_key_exists('label', $stored) || array_key_exists('price_poisha', $stored)) {
+            $stored = [$stored];
+        }
+
+        return array_values(array_filter($stored, 'is_array'));
     }
 
     /**
@@ -322,14 +362,21 @@ class Product extends Model
      */
     public function variantsAdmin(): array
     {
-        $public = $this->variantsTaka();
+        // Paired by index against the SAME cleaned list variantsTaka() reads,
+        // rather than against the raw column. array_map over two arrays pads
+        // the shorter one with null and the closure's `array` hint then throws
+        // — so any disagreement between the two lists was a 500 rather than a
+        // missing stock figure.
+        $stored = $this->rawVariants();
 
         return array_map(
-            fn (array $row, array $stored): array => $row + [
-                'stockQty' => ($stored['stock_qty'] ?? null) === null ? null : (int) $stored['stock_qty'],
+            fn (array $row, int $i): array => $row + [
+                'stockQty' => ($stored[$i]['stock_qty'] ?? null) === null
+                    ? null
+                    : (int) $stored[$i]['stock_qty'],
             ],
-            $public,
-            array_values($this->variants ?? []),
+            $this->variantsTaka(),
+            array_keys($this->variantsTaka()),
         );
     }
 
