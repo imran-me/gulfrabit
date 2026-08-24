@@ -270,11 +270,27 @@ async function load() {
   const body = document.querySelector('[data-prod-body]');
   const form = document.querySelector('[data-prod-filters]');
 
+  // EVERY named control in the filter form, rather than a list of keys typed
+  // out here.
+  //
+  // The typed list is what broke the Archived tab: it read
+  // ['q','noCost','category','sort','deleted'], the new `archived` input was
+  // not on it, and so the request asked for the CATALOGUE while the tab badge
+  // — which reads its own count straight off the server — said 51. Two numbers
+  // from two places, one of them filtered, and a screen that said "Archived
+  // 51" and listed nothing.
+  //
+  // Reading the form means a control cannot exist and be ignored. Empty values
+  // are still skipped, which is the only thing the typed list was buying.
   const qs = new URLSearchParams();
-  ['q', 'noCost', 'category', 'sort', 'deleted'].forEach((k) => {
-    const v = form[k]?.value.trim();
-    if (v) qs.set(k, v);
+
+  [...form.elements].forEach((el) => {
+    if (!el.name) return;
+
+    const v = String(el.value ?? '').trim();
+    if (v) qs.set(el.name, v);
   });
+
   if (page > 1) qs.set('page', String(page));
   history.replaceState(null, '', qs.toString() ? `?${qs}` : location.pathname);
 
