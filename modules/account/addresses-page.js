@@ -62,7 +62,14 @@ function save(e) {
   e.preventDefault();
   const { valid, values } = validateForm(form);
   if (!valid) return;
-  const id = values.id || `a-${Date.now().toString(36)}`;
+
+  // Read straight off the field. validateForm() only walks [data-validate],
+  // and the hidden id has no rules to validate — so values.id was always
+  // undefined, every edit minted a fresh id, findIndex below never matched,
+  // and "save" on an edited address appended a second copy of it. A customer
+  // correcting a house number ended up with two near-identical addresses, and
+  // deleting the wrong one threw away the correction.
+  const id = form.querySelector('[name="id"]')?.value || `a-${Date.now().toString(36)}`;
   const record = { id, label: values.label, line1: values.line1, city: values.city, postcode: values.postcode || '', country: 'Bangladesh', isDefault: form.isDefault.checked };
   const idx = addresses.findIndex((a) => a.id === id);
   if (idx >= 0) addresses[idx] = record; else addresses.push(record);
