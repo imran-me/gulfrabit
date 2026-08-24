@@ -38,8 +38,6 @@
  */
 
 import { storage, session, KEYS } from '../../shared/js/core/storage.js';
-import { startNoorSky, stopNoorSky } from './noor-sky.js';
-import { startNakshiScene, stopNakshiScene } from './nakshi-scene.js';
 
 /** The only values that may ever reach the DOM. */
 const THEMES = ['classic', 'luxe', 'trio', 'noor', 'nakshi', 'utsab'];
@@ -140,7 +138,7 @@ export function applyTheme(name) {
   else {
     // Stop the conductor BEFORE the sweep, or a roll already in flight
     // re-populates the sky a moment after it was cleared.
-    stopNoorSky();
+    noorSky.stop();
     document.querySelectorAll('[data-noor-fx]').forEach((n) => n.remove());
   }
 
@@ -153,7 +151,7 @@ export function applyTheme(name) {
     // Same ordering rule as above, and it matters more here: a tiger crossing
     // is a 46-second animation, so a roll that lands after the sweep would
     // leave one walking across whatever theme the visitor switched to.
-    stopNakshiScene();
+    nakshiScene.stop();
     document.querySelectorAll('[data-nakshi-fx]').forEach((n) => n.remove());
   }
 
@@ -161,6 +159,61 @@ export function applyTheme(name) {
   else stopFestival();
   return theme;
 }
+
+/* ---- Scene loaders -----------------------------------------------------
+ * A theme's renderer, fetched when the theme is worn and not one byte before.
+ *
+ * noor-sky.js is 46 KB and drags noor-physics.js behind it; nakshi-scene.js is
+ * another 13 KB. Imported at the top of this file, all 70 KB were fetched,
+ * parsed and compiled on every page of a shop wearing Trio — for code that
+ * could never run. utsab-gl.js was already dodging this with a dynamic import
+ * (immediately below, and the reasoning there is the reasoning here); these
+ * two now do the same.
+ *
+ * Arriving late is safe because both are conductors over CSS that already
+ * stands on its own: theme-noor paints its night and theme-nakshi its cloth
+ * whether or not the renderer ever shows up. A failed import is a still
+ * background, not a broken page.
+ */
+function lazyScene(load, theme, startFn, stopFn) {
+  let mod = null;
+  let wanted = false;
+
+  return {
+    start() {
+      wanted = true;
+
+      const go = () => {
+        if (mod) {
+          if (wanted && currentTheme() === theme) mod[startFn]();
+          return;
+        }
+        load()
+          .then((m) => {
+            mod = m;
+            // The theme can change while the fetch is in flight, and on a slow
+            // connection that window is seconds long. Without this check the
+            // sky arrives over whatever theme the visitor switched to.
+            if (wanted && currentTheme() === theme) m[startFn]();
+          })
+          .catch(() => { /* the theme's own CSS is already the background */ });
+      };
+
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go, { once: true });
+      else go();
+    },
+
+    /* Free when the module was never fetched, which is the usual case: every
+       applyTheme() on every other theme calls this, and it does nothing. */
+    stop() {
+      wanted = false;
+      mod?.[stopFn]();
+    },
+  };
+}
+
+const noorSky = lazyScene(() => import('./noor-sky.js'), 'noor', 'startNoorSky', 'stopNoorSky');
+const nakshiScene = lazyScene(() => import('./nakshi-scene.js'), 'nakshi', 'startNakshiScene', 'stopNakshiScene');
 
 /* ---- The festival ------------------------------------------------------
  * Utsab is a special-occasion theme, so its renderer is the one thing in this
@@ -238,11 +291,7 @@ function armField() {
     return;
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startNakshiScene);
-  } else {
-    startNakshiScene();
-  }
+  nakshiScene.start();
 }
 
 /* ---- The gold burst ----------------------------------------------------
@@ -506,7 +555,7 @@ function armNight() {
     // The sky: moon, stars, and a random loop of meteors, fireflies and the
     // occasional phoenix. Everything it makes carries [data-noor-fx], so the
     // sweep above takes the whole sky down when the theme changes.
-    startNoorSky();
+    noorSky.start();
 
     // The overture: once per session, the night opens. The curtain is
     // animation-driven CSS with pointer-events:none — nothing can strand it
