@@ -213,31 +213,25 @@ async function shelf(rail, limit) {
   return getFeatured(rail, limit);
 }
 
-/**
- * A shelf ONLY when the merchant has actually curated it — null otherwise.
- *
- * Best Sellers needs the distinction shelf() doesn't make. That grid is real
- * authored HTML in index.html: the no-JS content, the SEO content, and the
- * no-backend fallback. Swapping it for client-rendered cards is only an
- * improvement when the replacement is something a person chose — the server
- * says so with `source: "curated"`. A tag fallback would repaint the same
- * products with none of the static markup's benefits, so it is not taken.
- */
-async function curatedShelf(rail, limit) {
-  try {
-    const res = await fetch(`/api/highlights/${rail}`, {
-      headers: { Accept: 'application/json' },
-    });
-    if (!res.ok) return null;
 
-    const { data, source } = await res.json();
-    if (source === 'curated' && Array.isArray(data) && data.length) {
-      return data.slice(0, limit);
-    }
-  } catch {
-    // Offline, or no API — the authored HTML stands.
-  }
-  return null;
+/**
+ * Hide the whole section a shelf lives in, when the shelf has nothing.
+ *
+ * Walks up to the <section> rather than emptying the rail, because the heading
+ * and the "Shop all" link are the parts that look broken: a title with white
+ * space under it is a page that did not finish loading, and no amount of empty
+ * rail explains itself.
+ *
+ * Nothing is removed from the DOM. `hidden` is reversible, and the next load
+ * with products in it paints normally.
+ */
+function hideIfEmpty(host, items) {
+  if (!host) return;
+
+  const section = host.closest('section');
+  if (!section) return;
+
+  section.hidden = !items || !items.length;
 }
 
 /* ---- Category grid (authored HTML → live categories) ------------------
@@ -372,28 +366,44 @@ async function initCategoryGrid() {
 async function initProductSections() {
   const premiumRail = document.querySelector('[data-rail="premium"]');
   const newRail = document.querySelector('[data-rail="new"]');
-  // Best Sellers stays authored HTML until the merchant curates the
-  // 'bestseller' shelf in the Home page screen — then their picks replace it,
-  // in their order. No skeleton for it: the static grid is already content,
-  // and blanking real cards to show placeholders would be a downgrade.
   const bestGrid = document.querySelector('[data-grid="bestseller"]');
 
   if (premiumRail) renderProductSkeletons(premiumRail, 6);
   if (newRail) renderProductSkeletons(newRail, 6);
 
-  if (bestGrid) {
-    curatedShelf('bestseller', 8).then((picks) => {
-      if (picks) renderProductGrid(bestGrid, picks);
-    }).catch(() => {});
-  }
-
   try {
-    const [premium, fresh] = await Promise.all([
+    // BEST SELLERS IS NOW A SHELF LIKE THE OTHER TWO, and that is a behaviour
+    // change worth stating.
+    //
+    // It used to call curatedShelf(), which answers only when the merchant has
+    // picked products and returns null otherwise — leaving the authored grid
+    // in index.html standing. That grid is four products hand-written into the
+    // page, so the shop advertised them as best sellers no matter what the
+    // catalogue said: they could be unlisted, archived, or deleted and the
+    // home page kept selling them, with no control anywhere in the panel able
+    // to take them down. A merchant asking "why will this not go away?" was
+    // asking a fair question with no answer.
+    //
+    // shelf() is curated-then-tagged-then-nothing, the same ladder premium and
+    // new have always used. The authored markup keeps its real job: it is the
+    // first paint and the no-JS content. It just no longer outlives the data.
+    const [premium, fresh, best] = await Promise.all([
       shelf('premium', 8),
       shelf('new', 8),
+      bestGrid ? shelf('bestseller', 8) : Promise.resolve([]),
     ]);
+
     if (premiumRail) renderProductGrid(premiumRail, premium);
     if (newRail) renderProductGrid(newRail, fresh);
+    if (bestGrid) renderProductGrid(bestGrid, best);
+
+    // A shelf with nothing on it hides its whole section — heading, "Shop all"
+    // and everything. An empty rail under a live heading reads as a page that
+    // failed to load, and three of them on a shop whose catalogue is empty
+    // reads as a broken site rather than an empty one.
+    hideIfEmpty(premiumRail, premium);
+    hideIfEmpty(newRail, fresh);
+    hideIfEmpty(bestGrid, best);
     // Only once there are cards to measure: the recycler works in card widths
     // and an empty rail has none. Both shelves march — they are the same kind
     // of thing, and one moving beside one standing still looks like the still

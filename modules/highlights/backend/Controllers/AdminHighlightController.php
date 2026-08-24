@@ -115,11 +115,15 @@ class AdminHighlightController extends Controller
 
         return response()->json([
             'message' => $skus === []
-                // Says what happens next, because an empty shelf is not blank
-                // on the site. What "next" is differs per rail: most fall back
-                // to the tag, but Best Sellers falls back to its authored HTML
-                // grid (see emptyNote in Highlight::RAILS) — and telling the
-                // merchant the wrong one sends them hunting for a bug.
+                // Says what happens next, because an empty shelf is not
+                // necessarily blank on the site: it falls back to the tag, and
+                // only hides when that is empty too.
+                //
+                // `emptyNote` overrides this per rail and no rail sets one
+                // today — Best Sellers did, back when it fell through to an
+                // authored HTML grid instead of the tag. The hook stays for
+                // the next rail whose fallback is not the ordinary one; the
+                // wrong sentence here sends a merchant hunting for a bug.
                 ? (isset(Highlight::RAILS[$rail]['emptyNote'])
                     ? 'Shelf cleared. ' . Highlight::RAILS[$rail]['emptyNote']
                     : 'Shelf cleared. It will show tagged products until you pick some.')
