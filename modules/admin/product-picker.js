@@ -60,6 +60,16 @@ export function mountProductPicker(host, { exclude = () => new Set(), onPick, pl
   let debounce;
   let token = 0;
 
+  /* An empty list has four different causes and they need four different
+   * sentences. Saying "type to search" after a search has already run and come
+   * back with nothing is the worst of them: it tells the merchant the control
+   * is waiting for them when the truth is there is nothing to find. That is
+   * exactly what happened on a catalogue where every product had been
+   * archived — the picker looked broken and the real answer, "your catalogue
+   * is empty", was never said. */
+  let searched = false;
+  let rawCount = 0;
+
   const close = () => {
     list.hidden = true;
     input.setAttribute('aria-expanded', 'false');
@@ -69,9 +79,7 @@ export function mountProductPicker(host, { exclude = () => new Set(), onPick, pl
 
   const paint = () => {
     if (!results.length) {
-      list.innerHTML = `<li class="ppick__none">${
-        input.value.trim() ? 'Nothing matches that.' : 'Type to search the catalogue.'
-      }</li>`;
+      list.innerHTML = `<li class="ppick__none">${escapeHtml(emptyReason())}</li>`;
       list.hidden = false;
       input.setAttribute('aria-expanded', 'true');
       return;
@@ -98,6 +106,29 @@ export function mountProductPicker(host, { exclude = () => new Set(), onPick, pl
     if (active >= 0) input.setAttribute('aria-activedescendant', `${id}-o${active}`);
   };
 
+  /** Which of the four. */
+  function emptyReason() {
+    const term = input.value.trim();
+
+    if (!searched) return 'Type to search the catalogue.';
+
+    // The search DID return products; the exclude filter took them all. On a
+    // shelf that means they are already on it, which is worth saying rather
+    // than leaving the merchant to search for something they have already got.
+    if (rawCount > 0) {
+      return term
+        ? `Every product matching "${term}" is already on this shelf.`
+        : 'Everything here is already on this shelf.';
+    }
+
+    if (term) return `Nothing matches "${term}".`;
+
+    // No term, nothing in the catalogue at all. The actionable one: the
+    // picker only offers the working catalogue, so archived and deleted
+    // products are absent by design and this is where that shows up.
+    return 'No products in the catalogue. Anything archived or deleted is not offered here.';
+  }
+
   const search = async (term) => {
     // Every request carries a token and only the newest one is allowed to
     // paint. Typing "saf" fires three searches and they can come back in any
@@ -109,6 +140,8 @@ export function mountProductPicker(host, { exclude = () => new Set(), onPick, pl
       payload = await adminFetch(`/products?perPage=12${term ? `&q=${encodeURIComponent(term)}` : ''}`);
     } catch {
       if (mine === token) {
+        searched = true;
+        rawCount = 0;
         results = [];
         paint();
       }
@@ -118,6 +151,9 @@ export function mountProductPicker(host, { exclude = () => new Set(), onPick, pl
     if (mine !== token) return;
 
     const already = exclude();
+
+    searched = true;
+    rawCount = payload.data.length;
 
     results = payload.data.filter((p) => !already.has(p.sku));
     active = results.length ? 0 : -1;
