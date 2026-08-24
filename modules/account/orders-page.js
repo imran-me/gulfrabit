@@ -8,6 +8,7 @@
  * offering "Review this".
  */
 import { getOrders } from './backend/api.js';
+import { textSkeletons } from '../../shared/js/components/skeleton-loader.js';
 import { siteURL, productURL } from '../../shared/js/core/paths.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { ensureSession, wireLogout, statusBadge } from './account-common.js';
@@ -17,27 +18,84 @@ wireLogout();
 
 const listEl = document.querySelector('[data-orders-list]');
 const emptyEl = document.querySelector('[data-orders-empty]');
-let all = [];
+/** { ok:true, orders } | { ok:false, reason } — see getOrders(). */
+let result = { ok: true, orders: [] };
 let filter = 'all';
 
 init();
 
 async function init() {
-  all = await getOrders().catch(() => []);
-
   document.querySelectorAll('[data-filter]').forEach((btn) => btn.addEventListener('click', () => {
     filter = btn.dataset.filter;
     document.querySelectorAll('[data-filter]').forEach((b) => { b.classList.toggle('is-active', b === btn); b.classList.toggle('btn-outline-gr', b === btn); b.classList.toggle('btn-ghost-gr', b !== btn); });
     render();
   }));
+
+  await load();
+}
+
+async function load() {
+  // Something to look at while the request is out. The region used to be an
+  // empty div under four filter buttons — on a slow connection, whitespace
+  // with no explanation for as long as it took.
+  emptyEl.hidden = true;
+  listEl.innerHTML = Array.from({ length: 2 }, () =>
+    `<article class="order-card surface-gr" aria-hidden="true">${textSkeletons(4, ['35%', '90%', '80%', '45%'])}</article>`).join('');
+
+  result = await getOrders().catch(() => ({ ok: false, reason: 'error' }));
   render();
 }
 
+/**
+ * Every reason the list can be empty says which one it is.
+ *
+ * "No orders yet" is a claim about the customer's history. It must not be how
+ * the page reports a 500 or a 401 — a customer told their purchases are gone
+ * during an outage will reasonably re-place an order they already have.
+ */
 function render() {
-  const list = filter === 'all' ? all : all.filter((o) => o.status === filter);
-  if (!list.length) { listEl.innerHTML = ''; emptyEl.hidden = false; return; }
+  if (!result.ok) {
+    return showState(result.reason === 'auth'
+      ? {
+          title: 'Sign in to see your orders',
+          text: 'Your order history lives with your account.',
+          action: `<a class="btn-gr btn-primary-gr" href="${siteURL('login')}">Sign in</a>`,
+        }
+      : {
+          title: 'We could not load your orders',
+          text: 'Something went wrong at our end — your orders are safe. Please try again.',
+          action: '<button class="btn-gr btn-primary-gr" type="button" data-orders-retry>Try again</button>',
+        });
+  }
+
+  const list = filter === 'all' ? result.orders : result.orders.filter((o) => o.status === filter);
+
+  if (!list.length) {
+    return showState(filter === 'all'
+      ? {
+          title: 'No orders yet',
+          text: 'When you place an order it will appear here.',
+          action: '<a class="btn-gr btn-primary-gr" href="/">Start shopping</a>',
+        }
+      : {
+          title: 'Nothing here',
+          text: `You have no ${filter} orders. Try another filter.`,
+          action: '',
+        });
+  }
+
   emptyEl.hidden = true;
   listEl.innerHTML = list.map(orderCard).join('');
+}
+
+function showState({ title, text, action }) {
+  listEl.innerHTML = '';
+  emptyEl.innerHTML = `
+    <h2 class="empty-state__title">${title}</h2>
+    <p class="empty-state__text">${text}</p>
+    ${action}`;
+  emptyEl.hidden = false;
+  emptyEl.querySelector('[data-orders-retry]')?.addEventListener('click', load);
 }
 
 function orderCard(o) {
