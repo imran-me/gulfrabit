@@ -439,11 +439,33 @@ function paintTabs(p) {
 
   // Tab switching
   const btns = document.querySelectorAll('.tab-btn');
-  btns.forEach((btn) => btn.addEventListener('click', () => {
+
+  const show = (name) => {
+    const btn = [...btns].find((b) => b.dataset.tab === name);
+    if (!btn || btn.hidden) return false;
+
     btns.forEach((b) => { b.classList.remove('is-active'); b.setAttribute('aria-selected', 'false'); });
     btn.classList.add('is-active'); btn.setAttribute('aria-selected', 'true');
-    document.querySelectorAll('.tab-panel').forEach((panel) => { panel.hidden = panel.dataset.panel !== btn.dataset.tab; });
-  }));
+    document.querySelectorAll('.tab-panel').forEach((panel) => { panel.hidden = panel.dataset.panel !== name; });
+
+    return true;
+  };
+
+  btns.forEach((btn) => btn.addEventListener('click', () => show(btn.dataset.tab)));
+
+  // #reviews opens the Reviews tab and scrolls to it.
+  //
+  // This is what the "Write a review" link on a delivered order points at, and
+  // it is the only route to the form that anyone will actually take — nobody
+  // navigates back to a product page a week after delivery to look for a form.
+  // A link that lands on the Description tab with the reviews hidden behind an
+  // unlabelled click is a link that produces no reviews.
+  const wanted = location.hash.replace('#', '');
+
+  if (wanted && show(wanted)) {
+    document.querySelector('.product-tabs, [role="tablist"]')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 /* ---- FAQ --------------------------------------------------------------

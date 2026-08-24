@@ -47,6 +47,21 @@ class AdminDashboardController extends Controller
             }
         }
 
+        // Reviews waiting to be read. Same argument as the quotes card above:
+        // nothing reaches a product page until somebody publishes it, so a
+        // queue nobody notices is a queue of customers whose words never
+        // appear — and they are the customers who bothered to write.
+        //
+        // Schema::hasTable, because modules/reviews can be removed and the
+        // dashboard must not 500 when it has been.
+        if ($user->canAccess('products') && Schema::hasTable('product_reviews')) {
+            $unread = DB::table('product_reviews')->where('status', 'pending')->count();
+
+            if ($unread > 0) {
+                $cards['reviews'] = ['awaitingRead' => $unread];
+            }
+        }
+
         if ($user->canAccess('inventory') && Schema::hasTable('stock_levels')) {
             $cards['inventory'] = $this->inventoryCards();
         }

@@ -18,6 +18,7 @@ const CARD_LABELS = {
   outOfStock:       ['Out of stock', true],
   unpostedEntries:  ['Unposted journal entries', true],
   quotesWaiting:    ['Quote requests waiting', true],
+  awaitingRead:     ['Reviews waiting to be read', true],
 };
 
 /**
@@ -43,6 +44,7 @@ const CARD_LINKS = {
   outOfStock:      () => '/admin/stock?lowOnly=1',
   unpostedEntries: () => '/admin/journal',
   quotesWaiting:   () => '/admin/quotes',
+  awaitingRead:    () => '/admin/reviews',
 };
 
 function today() {
