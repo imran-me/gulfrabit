@@ -66,7 +66,7 @@ async function render() {
 function itemHTML(l) {
   return `
     <div class="cart-item" data-item="${l.id}" data-variant="${l.variant ?? ''}">
-      <a class="cart-item__media" href="${productURL(l)}"><img src="${l.image}" alt="${escapeAttr(l.title)}" loading="lazy"></a>
+      <a class="cart-item__media" href="${productURL(l)}"><img src="${escapeAttr(l.image)}" alt="${escapeAttr(l.title)}" loading="lazy"></a>
       <div>
         <a href="${productURL(l)}"><div class="cart-item__title">${escapeHtml(l.title)}</div></a>
         <!-- The size leads. Two lines of the same product in different packs are
@@ -91,7 +91,7 @@ function itemHTML(l) {
 function savedHTML(s) {
   return `
     <div class="cart-item" data-saved="${s.id}" data-saved-variant="${escapeAttr(s.variant ?? '')}">
-      <a class="cart-item__media" href="${productURL(s)}"><img src="${s.image}" alt="${escapeAttr(s.title)}" loading="lazy"></a>
+      <a class="cart-item__media" href="${productURL(s)}"><img src="${escapeAttr(s.image)}" alt="${escapeAttr(s.title)}" loading="lazy"></a>
       <div>
         <div class="cart-item__title">${escapeHtml(s.title)}</div>
         <!-- The size leads here for the same reason it does in the cart: two

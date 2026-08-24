@@ -70,7 +70,7 @@ function specRow(p) {
     .map((t) => `<tr><td>${t.min.toLocaleString()}+ pcs</td><td>${formatBDT(t.price)}</td></tr>`).join('');
   return `
     <article class="spec-row">
-      <a class="spec-row__media" href="${productURL(p)}"><img src="${p.image}" alt="${escapeAttr(p.title)}" loading="lazy"></a>
+      <a class="spec-row__media" href="${productURL(p)}"><img src="${escapeAttr(p.image)}" alt="${escapeAttr(p.title)}" loading="lazy"></a>
       <div>
         <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.4rem">
           <a href="${productURL(p)}"><strong>${escapeHtml(p.title)}</strong></a>

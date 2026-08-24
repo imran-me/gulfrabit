@@ -78,7 +78,7 @@ function render() {
   linesEl.innerHTML = cart.map((l) => `
     <div class="cart-line" data-line-id="${l.id}" data-variant="${l.variant ?? ''}">
       <picture>${imageSource(l.image, 'thumb')}
-        <img class="cart-line__thumb" src="${l.image}" alt="${escapeAttr(l.title)}" loading="lazy">
+        <img class="cart-line__thumb" src="${escapeAttr(l.image)}" alt="${escapeAttr(l.title)}" loading="lazy">
       </picture>
       <div>
         <div class="cart-line__title">${escapeHtml(l.title)}</div>

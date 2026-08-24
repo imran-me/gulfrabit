@@ -40,7 +40,7 @@ function setup(form) {
         panel.innerHTML = items.map((it) => `
           <a class="search-suggest__item" href="${productURL(encodeURIComponent(it.id))}">
             <picture>${imageSource(it.image, 'thumb')}
-              <img src="${it.image}" alt="" width="40" height="40" loading="lazy">
+              <img src="${escapeHtml(it.image)}" alt="" width="40" height="40" loading="lazy">
             </picture>
             <span><span class="search-suggest__title">${escapeHtml(it.title)}</span>
             <span class="caption">${escapeHtml(it.brand || '')}</span></span>
@@ -159,4 +159,13 @@ async function startPlaceholderRotation(input) {
   input.addEventListener('input', stop, { once: true });
 }
 
-function escapeHtml(str = '') { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+/* The textContent round-trip leaves the double quote alone, which is fine for
+   the title and brand above but not for the thumbnail's src: a suggestion
+   whose image path holds a quote would close the attribute and turn the rest
+   into an onerror handler. &quot; still renders as a plain " in text, so the
+   existing call sites read exactly as before. */
+function escapeHtml(str = '') {
+  return String(str).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}

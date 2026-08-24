@@ -50,7 +50,7 @@ export async function openQuickView(id) {
     <div style="display:grid;grid-template-columns:1fr;gap:0">
       <div style="display:grid;grid-template-columns:1fr;gap:0" class="quickview-grid">
         <picture>${imageSource(p.image, 'card')}
-          <img src="${p.image}" alt="${escapeAttr(p.title)}" style="width:100%;height:100%;object-fit:cover;aspect-ratio:1;background:var(--surface-sunken)">
+          <img src="${escapeAttr(p.image)}" alt="${escapeAttr(p.title)}" style="width:100%;height:100%;object-fit:cover;aspect-ratio:1;background:var(--surface-sunken)">
         </picture>
         <div style="padding:2rem">
           ${p.brand ? `<div class="product-card__brand">${escapeHtml(p.brand)}${p.origin ? ' · ' + escapeHtml(p.origin) : ''}</div>` : ''}

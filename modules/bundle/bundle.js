@@ -235,4 +235,17 @@ function addPicked() {
 function cssEscape(v) {
   return window.CSS?.escape ? CSS.escape(v) : String(v).replace(/["\\]/g, '\\$&');
 }
-function escapeHtml(str = '') { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+/* A div's textContent round-trip escapes &, < and > and leaves the double
+   quote alone, which is safe in text and useless in an attribute — and every
+   call above is an attribute: data-bundle-item, data-bundle-pick, the srcset
+   and the img src. A product image path holding a quote closed the src and
+   whatever followed it was read as more attributes, so `x" onerror="…` ran as
+   a handler the moment the broken image failed. Escaping the quote here
+   repairs all four sites at once; &quot; still renders as a plain " wherever
+   this is used for text, so nothing on screen changes. Same five-character
+   form as admin-shell.js, category-menu.js and reviews-panel.js. */
+function escapeHtml(str = '') {
+  return String(str).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}

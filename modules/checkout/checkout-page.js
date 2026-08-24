@@ -309,7 +309,7 @@ async function paintSummary() {
   const cart = store.getCart();
   document.querySelector('[data-summary-items]').innerHTML = cart.map((l) => `
     <div class="cart-line" style="grid-template-columns:48px 1fr auto">
-      <img class="cart-line__thumb" style="width:48px;height:48px" src="${l.image}" alt=""><div><div class="cart-line__title">${escapeHtml(l.title)}</div><div class="cart-line__meta">${l.variant ? `${escapeHtml(l.variant)} · ` : ''}Qty ${l.qty}</div></div>
+      <img class="cart-line__thumb" style="width:48px;height:48px" src="${escapeHtml(l.image)}" alt=""><div><div class="cart-line__title">${escapeHtml(l.title)}</div><div class="cart-line__meta">${l.variant ? `${escapeHtml(l.variant)} · ` : ''}Qty ${l.qty}</div></div>
       <div class="cart-line__price">${formatBDT(l.price * l.qty)}</div>
     </div>`).join('');
   const code = storage.get('cart-promo', null);
@@ -463,4 +463,13 @@ async function placeOrder(e) {
 }
 
 function setText(sel, v) { const el = document.querySelector(sel); if (el) el.textContent = v; }
-function escapeHtml(str = '') { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+/* The textContent round-trip escapes &, < and > but not the double quote, so
+   it cannot be trusted inside an attribute — and the order summary now puts a
+   stored cart line's image path in one. Without the quote, `x" onerror="…` as
+   an image path would run on the checkout page itself. &quot; renders as a
+   plain " in text, so the title and variant above are unaffected. */
+function escapeHtml(str = '') {
+  return String(str).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
