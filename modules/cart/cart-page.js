@@ -217,7 +217,23 @@ async function paintSummary(cart) {
   // Gift threshold. Awaited so the bar is in place before the summary is
   // considered painted — a bar that pops in after the total has settled reads
   // as a layout glitch.
-  await renderGiftProgress(document.querySelector('[data-gift-progress]'), subtotal);
+  //
+  // Failure is swallowed here, the same way the drawer's paintGift() does it.
+  // rewards.json is fetched through loadJSON, which throws on a 404 or a
+  // dropped connection, and that rejection used to abandon the rest of this
+  // function: the delivery estimate stayed on its "Calculated at checkout"
+  // placeholder, and — the part that costs orders — [data-mobile-cta] was
+  // never un-hidden, so a phone customer was left with no Checkout button.
+  // A missing reward may cost the rewards strip and nothing else.
+  const giftHost = document.querySelector('[data-gift-progress]');
+  try {
+    await renderGiftProgress(giftHost, subtotal);
+  } catch {
+    // The key is what tells renderGiftProgress the markup is still good, so it
+    // goes with the markup — otherwise a later successful render would trust
+    // an empty host and skip rebuilding it.
+    if (giftHost) { giftHost.hidden = true; giftHost.innerHTML = ''; delete giftHost.dataset.giftKey; }
+  }
 
   // Quote the metro rate as an estimate; checkout resolves the real zone.
   const delivery = subtotal === 0 ? '—' : `from ${formatBDT(DEFAULT_OPTION.cost)}`;
