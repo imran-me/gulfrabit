@@ -37,9 +37,14 @@ const STAR  = '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="1
  * again.
  */
 function starsHTML(rating = 0, count = 0) {
-  if (!count || !rating) {
-    return '<span class="caption">No reviews yet</span>';
-  }
+  // NOTHING, not "No reviews yet".
+  //
+  // The first version of this said so in words, which is honest on one card
+  // and a drumbeat on a grid of sixty — the shopper reads the same negative
+  // sixty times and concludes something is wrong with the shop rather than
+  // that it is new. Absence claims nothing. The product page still says it
+  // plainly, in the one place there is room to say it once.
+  if (!count || !rating) return '';
 
   const full = Math.round(rating);
   let s = '<span class="product-card__stars" aria-label="Rated ' + rating + ' out of 5">';
