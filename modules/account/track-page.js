@@ -1,10 +1,24 @@
 /**
  * track-page.js — order tracking with a status timeline.
- * Looks up an order by ?id= (or the lookup field) from the local order history
- * merged with the mock orders.json, and renders a stage timeline.
+ *
+ * WHERE THE ORDER COMES FROM, AND WHY IT CHANGED
+ * This page used to look an order up in localStorage MERGED WITH the fixture
+ * in data/orders.json, unconditionally. Two things fell out of that:
+ *
+ *  - The fixture is three fully-populated orders, and the lookup box's own
+ *    placeholder names one of them. Anyone who tapped the field and typed the
+ *    example was shown a delivered order, its contents, its total and the
+ *    street address it shipped to. On a public page, to a stranger.
+ *  - The genuine case failed. A customer who ordered on their phone and tracks
+ *    from a desktop, or who cleared their site data, had nothing in
+ *    localStorage and was told "Order not found" — while
+ *    GET /api/orders/{number}?phone= existed the whole time for exactly this.
+ *
+ * So: the server first, with the order number and the phone that placed it,
+ * which is the credential OrderController::show() checks. localStorage second,
+ * because it holds only what THIS device ordered. The fixture, not at all.
  */
 import { deliveryOption } from '../delivery/backend/api.js';
-import { getMockOrders } from './backend/api.js';
 import { storage, KEYS } from '../../shared/js/core/storage.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';
@@ -18,30 +32,66 @@ const resultEl = document.querySelector('[data-track-result]');
 const emptyEl = document.querySelector('[data-track-empty]');
 const form = document.querySelector('[data-track-lookup]');
 const input = document.querySelector('[data-track-input]');
+const phoneInput = document.querySelector('[data-track-phone]');
 
-let orders = [];
+/** Only what this browser placed. Never a fixture. */
+let mine = [];
 
 init();
 
-async function init() {
-  const local = storage.get(KEYS.ORDERS, []);
-  const mock = await getMockOrders().catch(() => []);
-  const seen = new Set();
-  orders = [...local, ...mock].filter((o) => (seen.has(o.id) ? false : seen.add(o.id)));
+function init() {
+  mine = storage.get(KEYS.ORDERS, []);
 
-  form.addEventListener('submit', (e) => { e.preventDefault(); track(input.value.trim()); });
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    track(input.value.trim(), phoneInput?.value.trim() || '');
+  });
 
+  // The confirmation page links here with ?id= and no phone, from the device
+  // that just ordered — so the local history is the right answer for it.
   const id = getParam('id');
-  if (id) { input.value = id; track(id); }
+  if (id) { input.value = id; track(id, ''); }
 }
 
-function track(id) {
+async function track(id, phone) {
   if (!id) return;
-  const order = orders.find((o) => o.id.toLowerCase() === id.toLowerCase());
+
+  const btn = form.querySelector('button[type="submit"]');
+  if (btn) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = 'Looking…'; }
+
+  const order = await lookup(id, phone);
+
+  if (btn) { btn.disabled = false; btn.textContent = btn.dataset.label || 'Track'; }
+
   if (!order) { resultEl.hidden = true; emptyEl.hidden = false; return; }
   emptyEl.hidden = true;
   resultEl.hidden = false;
   render(order);
+}
+
+/** The server when we hold the credential; this device's own history if not. */
+async function lookup(id, phone) {
+  if (phone) {
+    const remote = await fetchOrder(id, phone);
+    if (remote) return remote;
+  }
+  return mine.find((o) => String(o.id).toLowerCase() === id.toLowerCase()) || null;
+}
+
+async function fetchOrder(id, phone) {
+  try {
+    const res = await fetch(
+      `/api/orders/${encodeURIComponent(id)}?phone=${encodeURIComponent(phone)}`,
+      { headers: { Accept: 'application/json' }, credentials: 'same-origin' }
+    );
+    // A wrong phone and a non-existent order both answer 404, deliberately —
+    // see the note in OrderController::show(). Nothing to tell apart here.
+    if (!res.ok) return null;
+    return (await res.json()).data ?? null;
+  } catch {
+    // Offline, or no backend. Fall through to what this device remembers.
+    return null;
+  }
 }
 
 function render(o) {

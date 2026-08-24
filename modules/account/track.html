@@ -114,7 +114,7 @@ try {
        different one before the first paint when the server has already
        told this visitor which theme is published. -->
   <link rel="stylesheet" href="../../modules/theme/theme-trio.css?v=dd326453">
-  <link rel="stylesheet" href="../../modules/account/account.css?v=42e77c46">
+  <link rel="stylesheet" href="../../modules/account/account.css?v=ed738c7a">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -342,11 +342,22 @@ try {
     <header class="page-head"><p class="overline">Order tracking</p><h1 class="h2">Track your order</h1></header>
 
     <!-- Lookup -->
+    <!-- Order number AND the phone that placed it. That pair is the
+         credential OrderController::show() checks, and it is the only lookup
+         that can work from a device which did not place the order — someone
+         who ordered on their phone and is checking from a desktop, or who
+         cleared their browser data. Without the phone this page could only
+         ever read what this browser happened to remember. -->
     <form class="track-lookup" data-track-lookup novalidate>
       <input class="input-gr" type="text" name="id" data-track-input placeholder="Order number (e.g. GR-2026-1043)" aria-label="Order number"
-               autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="search">
+               autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="next">
+      <input class="input-gr" type="tel" name="phone" data-track-phone placeholder="Phone used to order" aria-label="Phone number used to place the order"
+               inputmode="numeric" autocomplete="tel" enterkeyhint="search">
       <button class="btn-gr btn-primary-gr" type="submit">Track</button>
     </form>
+    <p class="caption" style="margin:calc(var(--space-6) * -1 + var(--space-2)) 0 var(--space-6)">
+      The phone number is how we know the order is yours.
+    </p>
 
     <!-- Result -->
     <div data-track-result hidden>
@@ -537,6 +548,6 @@ try {
 
   <script type="module" src="../../shared/js/main.js?v=65e9eef8"></script>
   <script type="module" src="../../modules/theme/theme.js?v=174b6f6e"></script>
-  <script type="module" src="../../modules/account/track-page.js?v=e261c95a"></script>
+  <script type="module" src="../../modules/account/track-page.js?v=b5ca350f"></script>
 </body>
 </html>
