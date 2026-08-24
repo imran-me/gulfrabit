@@ -437,21 +437,81 @@ function paintTabs(p) {
   renderFaq(p);
   renderReviews(p);
 
-  // Tab switching
-  const btns = document.querySelectorAll('.tab-btn');
+  /* ---- Tab switching --------------------------------------------------
+     The fragment declares role="tablist" and role="tab", which is a promise:
+     a screen reader announces "tab, 1 of 5" and the user reaches for an arrow
+     key. Nothing was listening for one. No tab said which panel it controlled,
+     no panel said it was a tabpanel, and all five buttons sat in the tab order
+     — five presses to get past a control the customer may not want to open.
+     Roles without their behaviour are worse than plain buttons, because plain
+     buttons would not have promised anything. */
+  const btns = [...document.querySelectorAll('.tab-btn')];
+  const panels = [...document.querySelectorAll('.tab-panel')];
 
-  const show = (name) => {
-    const btn = [...btns].find((b) => b.dataset.tab === name);
+  // Paired here rather than in the fragment, so the ids cannot drift from the
+  // data-tab / data-panel names that already do the pairing.
+  btns.forEach((b) => { b.id = b.id || `tab-${b.dataset.tab}`; });
+
+  panels.forEach((panel) => {
+    const tab = btns.find((b) => b.dataset.tab === panel.dataset.panel);
+    if (!tab) return;
+
+    panel.id = panel.id || `panel-${panel.dataset.panel}`;
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', tab.id);
+    // Focusable, so Tab out of the strip lands inside the panel that was just
+    // opened and the keyboard can scroll it. These panels hold prose, and a
+    // prose panel with no focusable child is otherwise unreachable.
+    panel.tabIndex = 0;
+
+    tab.setAttribute('aria-controls', panel.id);
+  });
+
+  const show = (name, moveFocus = false) => {
+    const btn = btns.find((b) => b.dataset.tab === name);
     if (!btn || btn.hidden) return false;
 
-    btns.forEach((b) => { b.classList.remove('is-active'); b.setAttribute('aria-selected', 'false'); });
-    btn.classList.add('is-active'); btn.setAttribute('aria-selected', 'true');
-    document.querySelectorAll('.tab-panel').forEach((panel) => { panel.hidden = panel.dataset.panel !== name; });
+    btns.forEach((b) => {
+      const on = b === btn;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', String(on));
+      // Roving tabindex: the whole strip is one stop, arrows move within it.
+      b.tabIndex = on ? 0 : -1;
+    });
+
+    panels.forEach((panel) => { panel.hidden = panel.dataset.panel !== name; });
+    if (moveFocus) btn.focus();
 
     return true;
   };
 
   btns.forEach((btn) => btn.addEventListener('click', () => show(btn.dataset.tab)));
+
+  document.querySelector('[role="tablist"]')?.addEventListener('keydown', (e) => {
+    // A hidden tab is not in the ring — renderFaq() hides FAQ on a product
+    // with no questions, and arrowing onto it would open nothing.
+    const usable = btns.filter((b) => !b.hidden);
+    if (!usable.length) return;
+
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    let next = null;
+
+    if (step) {
+      const at = usable.indexOf(document.activeElement);
+      if (at === -1) return;
+      // Wraps: right from the last tab returns to the first.
+      next = usable[(at + step + usable.length) % usable.length];
+    } else if (e.key === 'Home') next = usable[0];
+    else if (e.key === 'End') next = usable[usable.length - 1];
+    else return;
+
+    e.preventDefault();
+    show(next.dataset.tab, true);
+  });
+
+  // The fragment ships with Description marked active, but nothing has set the
+  // roving tabindex or the panel wiring for that starting state yet.
+  show((btns.find((b) => b.classList.contains('is-active')) || btns[0])?.dataset.tab);
 
   // #reviews opens the Reviews tab and scrolls to it.
   //
