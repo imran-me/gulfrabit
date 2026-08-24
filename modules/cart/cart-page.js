@@ -90,11 +90,14 @@ function itemHTML(l) {
 
 function savedHTML(s) {
   return `
-    <div class="cart-item" data-saved="${s.id}">
+    <div class="cart-item" data-saved="${s.id}" data-saved-variant="${escapeAttr(s.variant ?? '')}">
       <a class="cart-item__media" href="${productURL(s)}"><img src="${s.image}" alt="${escapeAttr(s.title)}" loading="lazy"></a>
       <div>
         <div class="cart-item__title">${escapeHtml(s.title)}</div>
-        <div class="cart-item__meta">${escapeHtml(s.brand || '')}</div>
+        <!-- The size leads here for the same reason it does in the cart: two
+             saved packs of one product are otherwise identical on screen, and
+             the customer cannot tell which one they are moving back. -->
+        <div class="cart-item__meta">${s.variant ? `<strong>${escapeHtml(s.variant)}</strong>${s.brand ? ' · ' : ''}` : ''}${s.brand ? escapeHtml(s.brand) : ''}</div>
         <div class="cart-item__controls">
           <button class="cart-item__link" data-move>Move to cart</button>
           <button class="cart-item__link cart-item__link--danger" data-drop>Remove</button>
@@ -124,9 +127,15 @@ function wireItems(cart) {
 function wireSaved(saved) {
   savedEl.querySelectorAll('[data-saved]').forEach((row) => {
     const id = row.dataset.saved;
-    const item = saved.find((s) => s.id === id);
+    const variant = row.dataset.savedVariant || null;
+    // Matched on id AND variant, the same pair the cart lines are matched on.
+    // With both the 500 g and the 1 kg pack saved, id alone resolved every row
+    // to whichever was saved first, so "Move to cart" on the 1 kg row returned
+    // the 500 g one.
+    const item = saved.find((s) => s.id === id && (s.variant ?? null) === variant);
+    if (!item) return;
     row.querySelector('[data-move]').addEventListener('click', () => moveToCart(item));
-    row.querySelector('[data-drop]').addEventListener('click', () => { dropSaved(id); toast.info('Removed'); });
+    row.querySelector('[data-drop]').addEventListener('click', () => { dropSaved(id, variant); toast.info('Removed'); });
   });
 }
 
@@ -135,14 +144,29 @@ function saveForLater(line) {
   // variant travels with it, or Save for later on a 1 kg line moves a 500 g one
   // back into the cart when it returns.
   if (!saved.some((s) => s.id === line.id && (s.variant ?? null) === (line.variant ?? null))) {
-    saved.push({ id: line.id, title: line.title, brand: line.brand, price: line.price, image: line.image, variant: line.variant ?? null });
+    // moq travels with it too. This object is the only copy of the minimum
+    // that survives leaving the cart — store.addToCart() rebuilds the line
+    // from exactly these fields — so a saved line without it comes back as a
+    // plain retail line: a 1,000-unit reel returns at quantity 1, the stepper
+    // moves by 1, and the "min 1,000 units" badge is gone.
+    saved.push({ id: line.id, title: line.title, brand: line.brand, price: line.price, image: line.image, variant: line.variant ?? null, moq: line.moq ?? null });
   }
   storage.set(KEYS.SAVED_FOR_LATER, saved);
   store.removeFromCart(line.id, line.variant);
   toast.info('Saved for later');
 }
-function moveToCart(item) { dropSaved(item.id); store.addToCart(item, 1); toast.success('Moved to cart'); }
-function dropSaved(id) { storage.set(KEYS.SAVED_FOR_LATER, storage.get(KEYS.SAVED_FOR_LATER, []).filter((s) => s.id !== id)); render(); }
+// It comes back at its own minimum, not at 1. addToCart() ADDS the quantity to
+// a line that is already in the cart, and adding 1 to a 1,000-unit line leaves
+// 1,001 — a quantity the reel cannot be sold in.
+function moveToCart(item) {
+  dropSaved(item.id, item.variant ?? null);
+  store.addToCart(item, store.qtyBounds(item).min);
+  toast.success('Moved to cart');
+}
+function dropSaved(id, variant = null) {
+  storage.set(KEYS.SAVED_FOR_LATER, storage.get(KEYS.SAVED_FOR_LATER, []).filter((s) => !(s.id === id && (s.variant ?? null) === variant)));
+  render();
+}
 
 /* ---- Promo + summary -------------------------------------------------- */
 async function removePromo() {
