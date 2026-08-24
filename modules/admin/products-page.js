@@ -30,6 +30,23 @@ let media = null;
 
 document.addEventListener('admin:ready', init);
 
+/**
+ * Which of the three lists is showing.
+ *
+ * Two hidden inputs, one answer. They were read as `!!form.deleted.value` in
+ * six places when there were two tabs; with three, six copies of a two-way
+ * test is six chances to forget the middle one.
+ */
+function currentTab() {
+  const form = document.querySelector('[data-prod-filters]');
+  if (!form) return 'catalogue';
+
+  if (form.deleted?.value) return 'deleted';
+  if (form.archived?.value) return 'archived';
+
+  return 'catalogue';
+}
+
 async function init() {
   const form = document.querySelector('[data-prod-filters]');
   if (!form) return;
@@ -44,7 +61,7 @@ async function init() {
   paintTabs({});   // drawn immediately, the count filled in when it arrives
 
   const params = new URLSearchParams(location.search);
-  ['q', 'noCost', 'category', 'sort', 'deleted'].forEach((k) => {
+  ['q', 'noCost', 'category', 'sort', 'deleted', 'archived'].forEach((k) => {
     if (params.has(k) && form[k]) form[k].value = params.get(k);
   });
   page = Math.max(1, Number(params.get('page')) || 1);
@@ -81,14 +98,17 @@ async function init() {
     if (btn.dataset.bulk === 'delete') return removeMany(list, btn);
     if (btn.dataset.bulk === 'restore') return putBackMany(list, btn);
     if (btn.dataset.bulk === 'purge') return purge(list, btn);
+    if (btn.dataset.bulk === 'archive') return setArchived(list, true, btn);
+    if (btn.dataset.bulk === 'unarchive') return setArchived(list, false, btn);
 
     setListed(list, btn.dataset.bulk === 'list', btn);
   });
   document.querySelector('[data-prod-clear]')?.addEventListener('click', () => {
     form.reset();
     // reset() restores a hidden input's default attribute rather than clearing
-    // it; that default is empty, so Clear does leave the Deleted tab.
+    // it; that default is empty, so Clear does leave whichever tab you are on.
     form.deleted.value = '';
+    form.archived.value = '';
     page = 1;
     load();
   });
@@ -96,7 +116,14 @@ async function init() {
   document.querySelector('[data-prod-tabs]')?.addEventListener('click', (e) => {
     const tab = e.target.closest('[data-prod-tab]');
     if (!tab) return;
-    form.deleted.value = tab.dataset.prodTab;
+
+    // Exclusive by construction: a request carrying both would be answered by
+    // whichever the controller checks first, which is not a decision this
+    // screen should be leaving to reading order over there.
+    form.deleted.value = tab.dataset.prodTab === 'deleted' ? '1' : '';
+    form.archived.value = tab.dataset.prodTab === 'archived' ? '1' : '';
+
+    clearSelection();
     page = 1;
     load();
   });
@@ -281,23 +308,27 @@ function paintTabs(meta) {
   const host = document.querySelector('[data-prod-tabs]');
   if (!host) return;
 
-  const inTrash = !!document.querySelector('[data-prod-filters]')?.deleted.value;
   const badge = (n) => (n === undefined ? '' : `<span class="atab__count">${n.toLocaleString('en-BD')}</span>`);
+  const where = currentTab();
 
   host.innerHTML = `
-    <button class="atab${inTrash ? '' : ' is-on'}" type="button" data-prod-tab=""
-            aria-current="${inTrash ? 'false' : 'page'}">
-      Catalogue${badge(inTrash ? undefined : meta.total)}
+    <button class="atab${where === 'catalogue' ? ' is-on' : ''}" type="button" data-prod-tab="catalogue"
+            aria-current="${where === 'catalogue' ? 'page' : 'false'}">
+      Catalogue${badge(where === 'catalogue' ? meta.total : undefined)}
     </button>
-    <button class="atab atab--trash${inTrash ? ' is-on' : ''}" type="button" data-prod-tab="1"
-            aria-current="${inTrash ? 'page' : 'false'}">
+    <button class="atab${where === 'archived' ? ' is-on' : ''}" type="button" data-prod-tab="archived"
+            aria-current="${where === 'archived' ? 'page' : 'false'}">
+      Archived${badge(meta.archivedCount)}
+    </button>
+    <button class="atab atab--trash${where === 'deleted' ? ' is-on' : ''}" type="button" data-prod-tab="deleted"
+            aria-current="${where === 'deleted' ? 'page' : 'false'}">
       Deleted${badge(meta.deletedCount)}
     </button>`;
 }
 
 function paint({ data, meta }) {
   const body = document.querySelector('[data-prod-body]');
-  const inTrash = !!document.querySelector('[data-prod-filters]').deleted.value;
+  const where = currentTab();
 
   // Held so the bulk bar can decide what is offered without asking the server
   // again, and so select-all knows what "this page" contains.
@@ -305,15 +336,19 @@ function paint({ data, meta }) {
 
   paintTabs(meta);
 
-  document.querySelector('[data-prod-count]').textContent = inTrash
-    ? `${meta.total.toLocaleString('en-BD')} deleted product${meta.total === 1 ? '' : 's'}`
-    : `${meta.total.toLocaleString('en-BD')} product${meta.total === 1 ? '' : 's'}`;
+  const n = meta.total.toLocaleString('en-BD');
+  const plural = meta.total === 1 ? '' : 's';
+
+  document.querySelector('[data-prod-count]').textContent =
+    where === 'deleted' ? `${n} deleted product${plural}`
+      : where === 'archived' ? `${n} archived product${plural}`
+        : `${n} product${plural} in the catalogue`;
 
   // The missing-cost worklist is about products that are for sale. Leading the
   // Deleted tab with "14 products have no cost" would be counting work that
   // does not need doing.
   const gap = document.querySelector('[data-cost-gap]');
-  if (meta.missingCost > 0 && !inTrash) {
+  if (meta.missingCost > 0 && where === 'catalogue') {
     gap.hidden = false;
     document.querySelector('[data-cost-gap-n]').textContent = meta.missingCost;
   } else {
@@ -322,9 +357,12 @@ function paint({ data, meta }) {
 
   if (!data.length) {
     body.innerHTML = `<tr><td colspan="8" class="atable__empty">${
-      inTrash
+      where === 'deleted'
         ? 'Nothing has been deleted. Products you remove land here, and can be put back.'
-        : 'Nothing matches these filters.'
+        : where === 'archived'
+          ? 'Nothing is archived. Archiving takes a product off the shop and out of the '
+            + 'catalogue list without deleting it — for a line you no longer sell but want to keep.'
+          : 'Nothing matches these filters.'
     }</td></tr>`;
     document.querySelector('[data-prod-pager]').hidden = true;
     return;
@@ -364,6 +402,8 @@ function paint({ data, meta }) {
                          data-prod-purge="${i}">Delete for ever</button>`
               : '<span class="atable__sub">Deleted</span>')
           : `<a class="btn-gr btn-ghost-gr btn-sm-gr" href="/admin/products/edit?sku=${encodeURIComponent(p.sku)}">Edit</a>
+             <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button"
+                     data-prod-arch="${i}">${p.archivedAt ? 'Unarchive' : 'Archive'}</button>
              ${canDelete()
                ? `<button class="btn-gr btn-ghost-gr btn-sm-gr aact-remove" type="button"
                           data-prod-remove="${i}">Remove</button>`
@@ -382,6 +422,12 @@ function paint({ data, meta }) {
   // Same index trick as above, and for the same reason — see the note there.
   body.querySelectorAll('[data-prod-restore]').forEach((btn) =>
     btn.addEventListener('click', () => putBack(btn, data[Number(btn.dataset.prodRestore)])));
+
+  // Same index trick as the others — see the note above.
+  body.querySelectorAll('[data-prod-arch]').forEach((btn) => {
+    const row = data[Number(btn.dataset.prodArch)];
+    btn.addEventListener('click', () => setArchived([row.sku], !row.archivedAt, btn));
+  });
 
   body.querySelectorAll('[data-prod-purge]').forEach((btn) =>
     btn.addEventListener('click', () => purge([data[Number(btn.dataset.prodPurge)].sku], btn)));
@@ -468,18 +514,25 @@ function paintBulk() {
   bar.querySelector('[data-bulk-count]').textContent =
     `${n} product${n === 1 ? '' : 's'} selected`;
 
-  const inTrash = !!document.querySelector('[data-prod-filters]').deleted.value;
+  const where = currentTab();
+  const inTrash = where === 'deleted';
 
   const actions = inTrash
     ? (canDelete()
         ? [['restore', 'Restore', 'btn-outline-gr'],
            ['purge', 'Delete for ever', 'btn-ghost-gr aact-remove']]
         : [])
-    : [
-        ['unlist', 'Unlist', 'btn-outline-gr'],
-        ['list', 'Put on the shop', 'btn-ghost-gr'],
-        ...(canDelete() ? [['delete', 'Delete', 'btn-ghost-gr aact-remove']] : []),
-      ];
+    : where === 'archived'
+      ? [
+          ['unarchive', 'Put back in the catalogue', 'btn-outline-gr'],
+          ...(canDelete() ? [['delete', 'Delete', 'btn-ghost-gr aact-remove']] : []),
+        ]
+      : [
+          ['archive', 'Archive', 'btn-outline-gr'],
+          ['list', 'Put on the shop', 'btn-ghost-gr'],
+          ['unlist', 'Unlist', 'btn-ghost-gr'],
+          ...(canDelete() ? [['delete', 'Delete', 'btn-ghost-gr aact-remove']] : []),
+        ];
 
   bar.querySelector('[data-bulk-actions]').innerHTML = actions.length
     ? actions.map(([key, label, cls]) =>
@@ -510,6 +563,44 @@ async function setListed(list, active, btn) {
       .catch((err) => ({ sku, ok: false, message: err.message }))));
 
   report(results, btn, original, active ? 'put on the shop' : 'unlisted');
+}
+
+/**
+ * Archive a selection, or bring it back.
+ *
+ * ARCHIVE IS NOT UNLIST, and the difference is why it needed its own column.
+ * Unlisted is where every product STARTS — a new one is created unlisted so it
+ * cannot reach the shop mid-typo — so "unlisted" cannot also mean "put away",
+ * or every product would be born in the archive. Four states, all distinct:
+ *
+ *   Put on the shop   listed, customers see it
+ *   Unlist            in the catalogue list, off the shop
+ *   Archive           out of the catalogue list entirely, off the shop
+ *   Delete            in the bin
+ *
+ * Archiving unlists on the way in, server-side, so nothing put away is still
+ * for sale. Coming back does NOT relist: it returns to the catalogue unlisted,
+ * and putting it on the shop stays a separate, deliberate act.
+ *
+ * No confirmation. It is reversible, the button that reverses it is on the tab
+ * the products just moved to, and the toast says where they went.
+ */
+async function setArchived(list, archiving, btn) {
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = archiving ? `Archiving ${list.length}…` : `Restoring ${list.length}…`;
+
+  const verb = archiving ? 'archive' : 'unarchive';
+
+  const results = await Promise.all(list.map((sku) =>
+    adminFetch(`/products/${encodeURIComponent(sku)}/${verb}`, { method: 'POST' })
+      .then(() => ({ sku, ok: true }))
+      .catch((err) => ({ sku, ok: false, message: err.message }))));
+
+  // removesRows: they leave whichever tab they were on, so the page can now be
+  // past the end exactly as it can after a delete.
+  report(results, btn, original,
+    archiving ? 'archived' : 'back in the catalogue, still unlisted', true);
 }
 
 /** Delete a selection. This one asks — it is the only one that is not a toggle. */
@@ -833,6 +924,7 @@ async function putBack(btn, row) {
 }
 
 function status(p) {
+  if (p.archivedAt) return '<span class="apill apill--wait">Archived</span>';
   if (!p.isActive) return '<span class="apill apill--wait">Unlisted</span>';
   return p.inStock
     ? '<span class="apill apill--ok">In stock</span>'

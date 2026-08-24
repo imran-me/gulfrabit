@@ -1,9 +1,13 @@
 /**
- * orders-page.js — order history: merges locally-placed orders (localStorage)
- * with the mock order history (orders.json), with status filters.
+ * orders-page.js — order history, with status filters.
+ *
+ * The merging of localStorage and the fixture used to happen here AND in
+ * backend/api.js, in two copies that had drifted apart in their de-duplication.
+ * It happens in getOrders() now, which also asks the server first — see the
+ * note there for why that stopped being optional once these rows started
+ * offering "Review this".
  */
-import { getMockOrders } from './backend/api.js';
-import { storage, KEYS } from '../../shared/js/core/storage.js';
+import { getOrders } from './backend/api.js';
 import { siteURL, productURL } from '../../shared/js/core/paths.js';
 import { formatBDT } from '../../shared/js/utils/format-currency.js';
 import { ensureSession, wireLogout, statusBadge } from './account-common.js';
@@ -19,11 +23,7 @@ let filter = 'all';
 init();
 
 async function init() {
-  const local = storage.get(KEYS.ORDERS, []);
-  const mock = await getMockOrders().catch(() => []);
-  // Local orders first (newest), then mock history, de-duped by id.
-  const seen = new Set();
-  all = [...local, ...mock].filter((o) => (seen.has(o.id) ? false : seen.add(o.id)));
+  all = await getOrders().catch(() => []);
 
   document.querySelectorAll('[data-filter]').forEach((btn) => btn.addEventListener('click', () => {
     filter = btn.dataset.filter;

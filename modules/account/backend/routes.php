@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Modules\Account\Controllers\AddressController;
+use Modules\Account\Controllers\OrderHistoryController;
 use Modules\Account\Controllers\WishlistController;
 
 /**
@@ -17,6 +18,11 @@ use Modules\Account\Controllers\WishlistController;
  */
 
 Route::prefix('account')->name('account.')->middleware('auth:sanctum')->group(function (): void {
+
+    // The customer's own orders. Resolved through the signed-in user, so
+    // there is no id in the URL that could be edited into someone else's
+    // history — see the controller.
+    Route::get('/orders', [OrderHistoryController::class, 'index'])->name('orders.index');
 
     Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
     Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');

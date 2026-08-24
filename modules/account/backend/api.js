@@ -17,11 +17,43 @@ export async function getMockOrders() {
   return orders;
 }
 
+/**
+ * The customer's orders — the real ones when there is a server to ask.
+ *
+ * THE SEAM MATTERS MORE THAN IT USED TO. This returned a fixture plus whatever
+ * was in localStorage, which was fine while the page only listed things. It
+ * stopped being fine when "Review this" appeared on a delivered line: the
+ * review endpoint checks the real orders table, so a link built from a fixture
+ * order sends a customer to be told they never bought the thing they are
+ * looking at a receipt for.
+ *
+ * So the server answers first. It falls back to the old behaviour ONLY when
+ * there is no backend at all — a 404 or a network failure, which is what a
+ * static deployment of these files looks like. A 401 is not that: it is the
+ * real server saying "not signed in", and answering it with a fixture would
+ * show one visitor another person's order history. Same rule, and the same
+ * reason, as the guard at the top of modules/admin/backend/api.js.
+ */
 export async function getOrders() {
-  // TODO: backend — GET /orders. Today: local orders + mock history.
+  try {
+    const res = await fetch('/api/account/orders', {
+      headers: { Accept: 'application/json' },
+      credentials: 'same-origin',
+    });
+
+    if (res.ok) return (await res.json()).data ?? [];
+
+    // Anything the server actually answered — 401, 403, 500 — is the server's
+    // answer and stands. Only "there is nothing here" falls through.
+    if (res.status !== 404) return [];
+  } catch {
+    // TypeError from fetch: no server, or no network. Fall through.
+  }
+
   const local = storage.get(KEYS.ORDERS, []);
   const mock = await getMockOrders().catch(() => []);
   const seen = new Set();
+
   return [...local, ...mock].filter((o) => (seen.has(o.id) ? false : seen.add(o.id)));
 }
 

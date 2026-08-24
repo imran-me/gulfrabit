@@ -34,7 +34,7 @@ class Product extends Model
         'in_stock', 'stock_qty', 'stock_display', 'tags', 'dietary', 'search_terms',
         'short_description', 'description', 'faq',
         'moq', 'price_tiers', 'specs', 'datasheet',
-        'is_active',
+        'is_active', 'archived_at',
     ];
 
     protected function casts(): array
@@ -50,6 +50,7 @@ class Product extends Model
             'faq'                   => 'array',
             'in_stock'              => 'boolean',
             'is_active'             => 'boolean',
+            'archived_at'           => 'datetime',
             'available_from'        => 'date',
             'preorder_enabled'      => 'boolean',
             'preorder_limit'        => 'integer',
@@ -211,9 +212,35 @@ class Product extends Model
             ->orWhereDate('available_from', '<=', now()));
     }
 
+    /**
+     * The working catalogue — everything not put away.
+     *
+     * Archived is NOT unlisted; see the migration. A new product is unlisted
+     * and belongs here, an archived one is out of the way and does not.
+     */
+    public function scopeInCatalogue(Builder $q): Builder
+    {
+        return $q->whereNull('archived_at');
+    }
+
+    public function scopeArchived(Builder $q): Builder
+    {
+        return $q->whereNotNull('archived_at');
+    }
+
+    public function isArchived(): bool
+    {
+        return $this->archived_at !== null;
+    }
+
     public function scopeActive(Builder $q): Builder
     {
-        return $q->where('products.is_active', true)
+        // Archived is belt to is_active's braces. Archiving unlists as well,
+        // so this line should never be the one doing the work — but "should
+        // never" is exactly the assumption that puts a put-away product back
+        // on the shop after some future bulk edit flips is_active.
+        return $q->whereNull('products.archived_at')
+            ->where('products.is_active', true)
             ->where(fn (Builder $w) => $w
                 ->whereNull('category_id')
                 ->orWhereHas('category', fn (Builder $c) => $c

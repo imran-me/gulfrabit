@@ -123,6 +123,13 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::post('/', [AdminProductController::class, 'store'])->name('store');
             Route::get('/{sku}', [AdminProductController::class, 'show'])->name('show');
             Route::patch('/{sku}', [AdminProductController::class, 'update'])->name('update');
+
+            // Archiving is not a delete and is not gated like one. It is
+            // reversible, it destroys nothing, and putting the season's lines
+            // away is ordinary catalogue work for anyone who may reach this
+            // screen at all.
+            Route::post('/{sku}/archive', [AdminProductController::class, 'archive'])->name('archive');
+            Route::post('/{sku}/unarchive', [AdminProductController::class, 'unarchive'])->name('unarchive');
             // Unlists — soft delete, so past orders keep their product. The
             // route below puts it back.
             //

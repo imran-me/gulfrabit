@@ -52,6 +52,7 @@ class AdminProductController extends Controller
             'perPage'   => ['sometimes', 'integer', 'min:10', 'max:100'],
             'sort'      => ['sometimes', 'in:title,newest,price-desc'],
             'deleted'   => ['sometimes', 'boolean'],
+            'archived'  => ['sometimes', 'boolean'],
         ]);
 
         $query = Product::query()->with('category:id,slug,name');
@@ -63,6 +64,15 @@ class AdminProductController extends Controller
         // ask somebody with database access.
         if ($request->boolean('deleted')) {
             $query->onlyTrashed();
+        } elseif ($request->boolean('archived')) {
+            $query->archived();
+        } else {
+            // The Catalogue tab is the WORKING set, so archived products are
+            // absent from it by default. That is the whole point of putting
+            // something away: a merchant with two hundred seasonal lines
+            // should not have to read past them to find the forty they sell
+            // this month.
+            $query->inCatalogue();
         }
 
         // Title A→Z stays the default: this screen is mostly "find the product
@@ -116,6 +126,7 @@ class AdminProductController extends Controller
                 'marginPct'  => $this->marginPercent($p),
                 'inStock'    => $p->in_stock,
                 'isActive'   => $p->is_active,
+                'archivedAt' => $p->archived_at?->toIso8601String(),
                 'deletedAt'  => $p->deleted_at?->toIso8601String(),
             ], $page->items()),
             'meta' => [
@@ -132,6 +143,10 @@ class AdminProductController extends Controller
                 // the word cumin" is not a question anyone asks — "is there
                 // anything in the bin at all" is.
                 'deletedCount' => Product::onlyTrashed()->count(),
+                // Same reasoning as deletedCount: the tab badge answers "is
+                // there anything in there at all", which is a question about
+                // the archive and not about the filters currently applied.
+                'archivedCount' => Product::query()->archived()->count(),
             ],
         ]);
     }
@@ -380,6 +395,56 @@ class AdminProductController extends Controller
 
         return response()->json([
             'data'    => $product->toAdminArray(),
+            'message' => "{$product->title} is back in the catalogue, still unlisted.",
+        ]);
+    }
+
+    /**
+     * POST /api/admin/products/{sku}/archive
+     *
+     * Out of the working catalogue, kept for good. The reversible middle
+     * ground between "unlisted", which is where every product starts, and
+     * "deleted", which is the bin.
+     *
+     * It unlists on the way in, for the same reason destroy() does: something
+     * the merchant has put away must not still be for sale. Unarchiving does
+     * NOT relist — coming back from the archive returns a product to the
+     * catalogue, and putting it on the shop stays a separate, deliberate act.
+     */
+    public function archive(string $sku): JsonResponse
+    {
+        $product = Product::query()->where('sku', $sku)->firstOrFail();
+
+        if ($product->isArchived()) {
+            return response()->json([
+                'data'    => $product->toAdminArray(),
+                'message' => "{$product->title} is already archived.",
+            ]);
+        }
+
+        DB::transaction(function () use ($product): void {
+            $product->is_active = false;
+            $product->archived_at = now();
+            $product->save();
+        });
+
+        return response()->json([
+            'data'    => $product->fresh()->toAdminArray(),
+            'message' => "{$product->title} archived. It is off the shop and out of the catalogue list, "
+                . 'and nothing about it is lost.',
+        ]);
+    }
+
+    /** POST /api/admin/products/{sku}/unarchive — back to the catalogue, still unlisted. */
+    public function unarchive(string $sku): JsonResponse
+    {
+        $product = Product::query()->where('sku', $sku)->firstOrFail();
+
+        $product->archived_at = null;
+        $product->save();
+
+        return response()->json([
+            'data'    => $product->fresh()->toAdminArray(),
             'message' => "{$product->title} is back in the catalogue, still unlisted.",
         ]);
     }
