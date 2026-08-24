@@ -196,6 +196,47 @@ export async function signOut() {
   }
 }
 
+/* ---- "Something is happening" ------------------------------------------
+   Nearly every write in this panel is a button that sets `disabled = true` and
+   then waits. Disabled is 45% opacity and nothing else — no motion, no
+   message — so a save on a slow connection looked exactly like a save that had
+   silently failed, and the habit that grows out of that is pressing the button
+   again.
+
+   Rather than teach thirty call sites to say so themselves, the seam every one
+   of them goes through counts what is in flight and sets one attribute on
+   <html>. admin.css draws the bar. This file states the FACT — a request is
+   open — and owns none of the appearance.
+
+   Counted, not boolean: the orders screen fires the list and the stage counts
+   together, and the first to return would otherwise clear a bar the second one
+   still needs.
+
+   And delayed. Most of these calls come back in under a tenth of a second on a
+   local network, and a bar that appears and vanishes inside 80ms is a flicker
+   at the top of the screen that reads as a fault. It only appears for the
+   requests that are actually slow enough to be worth reporting. */
+const BUSY_AFTER_MS = 250;
+let inFlight = 0;
+let busyTimer = null;
+
+function busy(delta) {
+  inFlight = Math.max(0, inFlight + delta);
+
+  if (inFlight > 0) {
+    if (busyTimer === null) {
+      busyTimer = setTimeout(() => {
+        document.documentElement.setAttribute('data-admin-busy', '');
+      }, BUSY_AFTER_MS);
+    }
+    return;
+  }
+
+  clearTimeout(busyTimer);
+  busyTimer = null;
+  document.documentElement.removeAttribute('data-admin-busy');
+}
+
 /**
  * Fetch wrapper for admin screens.
  *
@@ -206,6 +247,19 @@ export async function signOut() {
  * @throws {Error & {status:number}} on any non-ok response
  */
 export async function adminFetch(path, options = {}) {
+  // try/finally around the whole call, so the counter comes back down on a
+  // thrown 403, a network failure and a 401 redirect alike. One early return
+  // that skips the decrement leaves the bar running for the rest of the
+  // session, on a panel where nothing is happening.
+  busy(1);
+  try {
+    return await send(path, options);
+  } finally {
+    busy(-1);
+  }
+}
+
+async function send(path, options) {
   // Writes need the CSRF header; GETs do not, and fetching a cookie for every
   // read would double the request count on screens that only ever read.
   const method = (options.method || 'GET').toUpperCase();

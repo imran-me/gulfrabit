@@ -505,6 +505,47 @@
    things that are broken; a packing queue is just work. */
 .acard--action .acard__n { color: var(--gr-cyan-dark); }
 
+/* ---- Something is happening -------------------------------------------
+   A hairline across the top of the window for as long as any admin request is
+   open. backend/api.js counts them and puts data-admin-busy on <html>; this is
+   the whole of what that looks like.
+
+   It exists because a disabled button is 45% opacity and nothing else. On a
+   slow connection a save in progress and a save that had silently died looked
+   identical, and the habit that grows out of that is pressing the button
+   again — which on a panel that takes payments is not a cosmetic problem.
+
+   Fixed to the viewport rather than sitting in the layout: it must not move a
+   single row of the table underneath it, or every slow request would nudge the
+   page and the row under the cursor would not be the row that gets clicked. */
+.admin::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(90deg,
+    transparent, var(--gr-cyan) 30%, var(--gr-gold-accent) 70%, transparent);
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+[data-admin-busy] .admin::before {
+  opacity: 1;
+  animation: a-busy 1.1s var(--ease-out) infinite;
+}
+@keyframes a-busy {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+/* Still reports, still does not travel. Someone who has asked for less motion
+   has not asked to be told less. */
+@media (prefers-reduced-motion: reduce) {
+  [data-admin-busy] .admin::before { animation: none; transform: none; }
+}
+
 /* ---- Fixture warning --------------------------------------------------
    Impossible to miss on purpose. If this banner is showing, nothing on the
    screen is secured, and that must never be a quiet detail. */
