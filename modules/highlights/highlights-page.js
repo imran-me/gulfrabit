@@ -13,9 +13,9 @@
 
 import { adminFetch } from '/modules/admin/backend/api.js';
 import { escapeHtml } from '/modules/admin/admin-shell.js';
+import { mountProductPicker } from '/modules/admin/product-picker.js';
 
 let rails = [];
-let catalogue = [];       // every product, for the picker
 let dirty = new Set();    // rail keys with unsaved changes
 
 document.addEventListener('admin:ready', init);
@@ -46,12 +46,6 @@ async function load() {
     return;
   }
 
-  try {
-    ({ data: catalogue } = await adminFetch('/products?perPage=100'));
-  } catch {
-    catalogue = [];
-  }
-
   dirty.clear();
   paint();
 }
@@ -71,13 +65,6 @@ function paint() {
 }
 
 function shelf(rail) {
-  const chosen = new Set(rail.items.map((i) => i.sku));
-
-  // Admin list rows are keyed `sku` (the storefront serialiser is the one
-  // that aliases it to `id`). Reading p.id here made every option's value
-  // empty and the picker inert against the real backend.
-  const available = catalogue.filter((p) => !chosen.has(p.sku));
-
   return `
     <section class="acard hlrail" data-hl-rail="${escapeHtml(rail.rail)}"
              style="margin-bottom:var(--space-5)">
@@ -105,12 +92,12 @@ function shelf(rail) {
            </p>`}
 
       <div class="hlrail__foot">
-        <select class="input-gr hlrail__add" data-hl-add>
-          <option value="">Add a product…</option>
-          ${available.map((p) =>
-            `<option value="${escapeHtml(p.sku)}">${escapeHtml(p.title)}${
-              p.isActive ? '' : ' (unlisted)'}</option>`).join('')}
-        </select>
+        <!-- A searchable picker, not a <select>. The dropdown listed every
+             product with no way to search it and no thumbnail, which stops
+             working somewhere around forty products and is actively wrong past
+             a hundred — the list came from one perPage=100 request, so the
+             rest of the catalogue was absent with nothing saying so. -->
+        <div class="hlrail__add" data-hl-add></div>
         <button type="button" class="btn-gr btn-primary-gr btn-sm-gr" data-hl-save disabled>
           Save this shelf
         </button>
@@ -163,26 +150,31 @@ function wire() {
       });
     });
 
-    section.querySelector('[data-hl-add]')?.addEventListener('change', (e) => {
-      const sku = e.target.value;
-      if (!sku) return;
+    const add = section.querySelector('[data-hl-add]');
 
-      const product = catalogue.find((p) => p.sku === sku);
-      if (!product) return;
+    if (add) {
+      mountProductPicker(add, {
+        // Read fresh on every search rather than captured once: the shelf
+        // changes underneath the picker as products are added, and a stale
+        // set would keep offering one that is already on it.
+        exclude: () => new Set(rail.items.map((i) => i.sku)),
+        placeholder: `Add to ${rail.label.toLowerCase()}…`,
+        onPick: (product) => {
+          rail.items.push({
+            sku: product.sku,
+            title: product.title,
+            image: product.image,
+            price: product.priceTaka,
+            // The server recomputes this on reload; the optimistic value only
+            // has to be right about the product's own switch, which is what
+            // the search result already told us.
+            hidden: product.isActive ? null : 'unlisted',
+          });
 
-      rail.items.push({
-        sku: product.sku,
-        title: product.title,
-        image: product.image,
-        price: product.priceTaka,
-        // The server recomputes this on reload; the optimistic value only has
-        // to be right about the product's own switch, which is what the
-        // catalogue list already told us.
-        hidden: product.isActive ? null : 'unlisted',
+          touch(key);
+        },
       });
-
-      touch(key);
-    });
+    }
 
     section.querySelector('[data-hl-save]')?.addEventListener('click', () => save(key));
   });

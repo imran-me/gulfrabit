@@ -1200,3 +1200,66 @@
   border: 1px solid rgba(232, 179, 66, .35);
   color: var(--text-primary);
 }
+
+/* ------------------------------------------------------------------ *
+ * The product picker (modules/admin/product-picker.js)
+ *
+ * A combobox, not a dropdown. Lives here rather than in the one screen that
+ * uses it today because it is a panel-level control — the same argument
+ * admin-delete.js makes — and because the next screen that needs to find a
+ * product should not have to import from modules/highlights to get it.
+ * ------------------------------------------------------------------ */
+
+.ppick { position: relative; }
+
+.ppick__list {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  /* Ten rows is about the point where a list stops being scannable and starts
+     being a page; past that the answer is a better search, not a longer list. */
+  max-height: 22rem;
+  overflow-y: auto;
+  background: var(--surface-raised, #fff);
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-md, 10px);
+  box-shadow: 0 12px 32px rgba(16, 32, 44, .16);
+}
+
+.ppick__opt {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+/* One highlight for both the keyboard and the mouse. Two — :hover doing one
+   thing and the arrow keys another — puts two rows in a chosen-looking state
+   at once, and Enter then takes the one the eye is not on. */
+.ppick__opt.is-active { background: color-mix(in srgb, var(--gr-cyan) 14%, transparent); }
+
+.ppick__pic {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-sunken, #f4f4f4);
+}
+
+.ppick__pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.ppick__text { display: grid; gap: 1px; min-width: 0; }
+.ppick__text strong { font-size: var(--fs-14); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ppick__text small { font-size: var(--fs-12); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ppick__price { font-size: var(--fs-12); color: var(--text-muted); white-space: nowrap; }
+
+.ppick__none { padding: 10px; font-size: var(--fs-14); color: var(--text-muted); }
