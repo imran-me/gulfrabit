@@ -471,6 +471,10 @@ try {
         <h2 class="h5" style="margin-bottom:var(--space-4)">Order Summary <span class="head-gr__bn bn" lang="bn">অর্ডার সারাংশ</span></h2>
         <div data-summary-items style="max-height:280px;overflow:auto;margin-bottom:var(--space-4)"></div>
         <div class="summary-row"><span>Subtotal</span><span class="tabular" data-sum-subtotal>৳ 0</span></div>
+        <!-- The discount the cart page already showed. Without this row the
+             customer applied a code, watched the cart total drop, then arrived
+             here to a total that had quietly gone back up. -->
+        <div class="summary-row" data-sum-discount-row hidden><span>Promo <span data-sum-promo></span></span><span class="tabular" data-sum-discount>৳ 0</span></div>
         <!-- GENERATED-DELIVERY-BEGIN checkout-summary -->
         <div class="summary-row"><span>Delivery</span><span class="tabular" data-sum-delivery>৳ 70</span></div>
         <!-- GENERATED-DELIVERY-END checkout-summary -->
@@ -637,6 +641,6 @@ try {
 
   <script type="module" src="../../shared/js/main.js?v=65e9eef8"></script>
   <script type="module" src="../../modules/theme/theme.js?v=174b6f6e"></script>
-  <script type="module" src="../../modules/checkout/checkout-page.js?v=d7280410"></script>
+  <script type="module" src="../../modules/checkout/checkout-page.js?v=84852250"></script>
 </body>
 </html>

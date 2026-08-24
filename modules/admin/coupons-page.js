@@ -51,6 +51,13 @@ async function load() {
   try {
     ({ data: coupons } = await adminFetch('/promotions'));
   } catch (err) {
+    /* The count line lives in the masthead and is only written by paint(),
+       which a failed load never reaches — so the heading went on saying
+       "Loading…" underneath a page that had already given up and said so.
+       Two statements on one screen, contradicting each other, and the stale
+       one on top. Every other list screen in the panel clears it here; these
+       two were missed. */
+    document.querySelector('[data-cp-count]').textContent = '';
     host.innerHTML = `<p class="admin__sub">${
       err.status === 404 || !err.status
         ? 'No backend connected yet — coupons appear once the API is live.'

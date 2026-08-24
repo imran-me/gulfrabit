@@ -16,6 +16,7 @@ import { validateForm, validateField, attachLiveValidation } from '../../shared/
 import { toast } from '../../shared/js/components/toast-notifications.js';
 import { track, cartPayload, getAttribution } from '../../shared/js/core/analytics.js';
 import { createOrder, persistOrderLocally } from './backend/api.js';
+import { validatePromo } from '../cart/backend/api.js';
 import { adaptPaymentOptions, maybeRedirectToGateway } from './payment-ui.js';
 
 const form = document.querySelector('[data-checkout-form]');
@@ -24,6 +25,11 @@ const indicators = [...document.querySelectorAll('[data-step-indicator]')];
 let current = 1;
 // Default to the metro rate; the radios (and later the district) refine it.
 let deliveryCost = DEFAULT_OPTION.cost;
+/* The promo discount in taka. Up here with the rest of the module state for
+   the reason the note below gives: init() runs on line 41, paintSummary() is
+   one of the first things it calls, and total() reads this — declared down
+   with the summary code it would still be in its temporal dead zone. */
+let discount = 0;
 
 /* Declared ABOVE init(), which runs on the next line — `const` is in its
    temporal dead zone until the statement executes, so leaving these down with
@@ -286,20 +292,45 @@ function wirePayment() {
   }));
 }
 
-/* ---- Summary + review ------------------------------------------------- */
+/* ---- Summary + review -------------------------------------------------
+ * The discount is held here rather than recomputed per caller, because
+ * validating a code is async and total() is read synchronously from four
+ * places — the summary, the review line, the Purchase pixel and the local
+ * fallback order. paintSummary() is the single writer; every one of those four
+ * used to omit the discount entirely.
+ *
+ * Re-validated on every paint against the LIVE subtotal, exactly as the cart
+ * page does, so a basket that drops below a code's minimum spend loses the
+ * discount here too instead of carrying a figure the server will refuse. */
 function subtotal() { return store.cartSubtotal(); }
-function total() { return subtotal() + deliveryCost; }
+function total() { return Math.max(0, subtotal() - discount) + deliveryCost; }
 
-function paintSummary() {
+async function paintSummary() {
   const cart = store.getCart();
   document.querySelector('[data-summary-items]').innerHTML = cart.map((l) => `
     <div class="cart-line" style="grid-template-columns:48px 1fr auto">
       <img class="cart-line__thumb" style="width:48px;height:48px" src="${l.image}" alt=""><div><div class="cart-line__title">${escapeHtml(l.title)}</div><div class="cart-line__meta">${l.variant ? `${escapeHtml(l.variant)} · ` : ''}Qty ${l.qty}</div></div>
       <div class="cart-line__price">${formatBDT(l.price * l.qty)}</div>
     </div>`).join('');
+  const code = storage.get('cart-promo', null);
+  const promo = code ? await validatePromo(code, subtotal()) : null;
+  discount = promo?.valid ? promo.discount : 0;
+
+  const row = document.querySelector('[data-sum-discount-row]');
+  if (row) {
+    row.hidden = discount <= 0;
+    setText('[data-sum-promo]', discount > 0 ? `(${code})` : '');
+    setText('[data-sum-discount]', `−${formatBDT(discount)}`);
+  }
+
   setText('[data-sum-subtotal]', formatBDT(subtotal()));
   setText('[data-sum-delivery]', formatBDT(deliveryCost));
   setText('[data-sum-total]', formatBDT(total()));
+
+  // The review step reads total() too, and it is painted from a different
+  // trigger — repaint it here so the two can never show different numbers.
+  if (!document.querySelector('[data-review-items]')?.children.length) return;
+  paintReview();
 }
 
 function paintReview() {
@@ -310,6 +341,10 @@ function paintReview() {
   setText('[data-review-payment]', form.querySelector('[data-payment]:checked')?.closest('.option-card').querySelector('.option-card__title').textContent || '');
   document.querySelector('[data-review-items]').innerHTML = store.getCart().map((l) =>
     `<div class="review-line"><span>${l.qty} × ${escapeHtml(l.title)}${l.variant ? ` (${escapeHtml(l.variant)})` : ''}</span><span class="tabular">${formatBDT(l.price * l.qty)}</span></div>`).join('')
+    + (discount > 0
+      ? `<div class="review-line"><span>Promo discount</span><span class="tabular">−${formatBDT(discount)}</span></div>`
+      : '')
+    + `<div class="review-line"><span>Delivery</span><span class="tabular">${formatBDT(deliveryCost)}</span></div>`
     + `<div class="review-line" style="border:0;font-weight:600"><span>Total</span><span class="tabular">${formatBDT(total())}</span></div>`;
 }
 
