@@ -6,6 +6,7 @@ namespace Modules\Reviews;
 
 use Illuminate\Support\ServiceProvider;
 use Modules\Reviews\Console\RecountRatings;
+use Modules\Reviews\Console\SeedDemoReviews;
 use Modules\Reviews\Services\ReviewService;
 
 /**
@@ -33,7 +34,7 @@ class ReviewsServiceProvider extends ServiceProvider
 
         // Console only, so the command does not exist on a web request.
         if ($this->app->runningInConsole()) {
-            $this->commands([RecountRatings::class]);
+            $this->commands([RecountRatings::class, SeedDemoReviews::class]);
         }
 
         $this->app->booted(function (): void {
