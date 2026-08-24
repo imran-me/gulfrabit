@@ -26,7 +26,13 @@ let filtered = [];   // after filters+sort
 let shown = 0;
 let filtersApi = null;
 
-init();
+init().catch((err) => {
+  console.error('[category] failed to load products', err);
+  grid.innerHTML = '<p class="text-muted-gr" style="grid-column:1/-1">Couldn’t load products. Check your connection and refresh.</p>';
+  if (countEl) countEl.textContent = '—';
+  if (emptyEl) emptyEl.hidden = true;
+  if (loadMoreBtn) loadMoreBtn.hidden = true;
+});
 
 async function init() {
   /* No ?slug= is Shop All, not a default category. It used to fall back to

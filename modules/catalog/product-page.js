@@ -31,7 +31,10 @@ let currentQty = 1;
  */
 let currentVariant = null;
 
-init();
+init().catch((err) => {
+  console.error('[pdp] failed to load product', err);
+  renderLoadError();
+});
 
 async function init() {
   // ?id= for every existing link; the path for /product/<slug>. The rewrite
@@ -674,6 +677,31 @@ async function loadRelated(p) {
  * missing product onto the home page tells a search engine they are the same
  * page, which is a different lie from the one being fixed.
  */
+
+/**
+ * The page could not load its products.
+ *
+ * init() had no catch, so a rejected fetch — offline, a flaky mobile
+ * connection, a truncated response — escaped as an unhandled rejection and
+ * everything after the await simply never ran. What the customer was left
+ * looking at was the markup's own placeholder: skeleton cards shimmering
+ * forever, or a heading still reading "Loading…". Nothing on the page ever
+ * admitted that it had given up.
+ */
+function renderLoadError() {
+  document.querySelector('[data-pdp]').innerHTML = `
+    <div class="empty-state" style="grid-column:1/-1">
+      <h1 class="empty-state__title">We couldn’t load this product</h1>
+      <p class="empty-state__text">Check your connection and try again.</p>
+      <button class="btn-gr btn-primary-gr" type="button" onclick="location.reload()">Reload</button>
+    </div>`;
+  // Replacing [data-pdp] wholesale also takes the Add to Cart and wishlist
+  // buttons with it. They ship in the markup fully clickable and are only
+  // wired by wireActions(), which never ran — so on the stuck page they were
+  // live controls that silently did nothing.
+  document.querySelector('[data-pdp-buybar], .buy-bar')?.remove();
+}
+
 function renderNotFound() {
   const robots = document.querySelector('meta[name="robots"]')
     ?? document.head.appendChild(Object.assign(document.createElement('meta'), { name: 'robots' }));

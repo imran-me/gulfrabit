@@ -18,7 +18,12 @@ const sortSel = document.querySelector('[data-sort]');
 let base = [];      // raw search hits
 let filtersApi = null;
 
-init();
+init().catch((err) => {
+  console.error('[search] failed to search', err);
+  grid.innerHTML = '<p class="text-muted-gr" style="grid-column:1/-1">Couldn’t run that search. Check your connection and try again.</p>';
+  if (countEl) countEl.textContent = '—';
+  if (emptyEl) emptyEl.hidden = true;
+});
 
 async function init() {
   const q = (getParam('q', '') || '').trim();

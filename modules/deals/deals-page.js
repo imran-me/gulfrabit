@@ -14,7 +14,14 @@ const sortSel = document.querySelector('[data-sort]');
 
 let deals = [];
 
-init();
+init().catch((err) => {
+  console.error('[deals] failed to load deals', err);
+  topEl.closest('section').hidden = true;
+  allEl.innerHTML = '<p class="text-muted-gr" style="grid-column:1/-1">Couldn’t load today’s deals. Check your connection and refresh.</p>';
+  const n = document.querySelector('[data-deal-count]');
+  if (n) n.textContent = '—';
+  if (emptyEl) emptyEl.hidden = true;
+});
 
 async function init() {
   renderProductSkeletons(topEl, 4);

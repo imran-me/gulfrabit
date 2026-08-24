@@ -185,8 +185,16 @@ try {
                role="combobox" aria-expanded="true" aria-controls="apal-list"
                aria-autocomplete="list">
       </div>
+      <!-- tabindex="-1" because the list scrolls, and a browser makes a
+           scrollable box a tab stop so it can be scrolled with the arrow keys.
+           That put a stop between the search field and the end of the dialog
+           where the combobox pattern says there is none: Tab off the input
+           landed on the list, and the arrow keys there scroll it instead of
+           moving the selection, because the selection is driven from the
+           input. It is still scrolled — by the input's own arrow handling,
+           which brings the active row into view. -->
       <ul class="apal__list" id="apal-list" role="listbox" data-palette-list
-          aria-label="Screens"></ul>
+          tabindex="-1" aria-label="Screens"></ul>
       <p class="apal__none" data-palette-none hidden>No screen matches that.</p>
       <p class="apal__hint">
         <kbd>↑</kbd><kbd>↓</kbd> to move · <kbd>Enter</kbd> to open · <kbd>Esc</kbd> to close

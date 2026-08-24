@@ -13,6 +13,16 @@ import { toast } from './toast-notifications.js';
 export function initWishlistButtons(root = document) {
   root.querySelectorAll('[data-wishlist-toggle]').forEach((btn) => {
     if (btn.dataset.ready) return;
+
+    /* No id, no product. main.js binds this over the whole document at
+       DOMContentLoaded, and the product page's static wishlist button carries
+       empty data-* until product-page.js fills them in. When that page failed
+       to load, the button stayed bound to {id:"", title:"", price:0} — and
+       tapping it toasted "Saved to wishlist" and wrote that empty row into the
+       customer's wishlist. Left unmarked as ready, so the real binding still
+       happens once the data arrives. */
+    if (!btn.dataset.id) return;
+
     btn.dataset.ready = 'true';
     const product = {
       id: btn.dataset.id,
