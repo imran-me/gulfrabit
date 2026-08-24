@@ -934,7 +934,7 @@ def sync_index_theme():
     land on. A shop whose home page is Classic and whose every other page is
     Luxe is not a theme, it is a bug, so this is not optional polish.
 
-    Two things are synced, and the second was the expensive one to learn:
+    Three things are synced, and the second was the expensive one to learn:
 
       the ATTRIBUTE  — <html data-theme>, so --theme reaches the home page.
 
@@ -946,7 +946,13 @@ def sync_index_theme():
       and looked, convincingly, like nothing had been built at all.
       Regenerating the block removes the possibility.
 
-    The links also gain the same ?v= content hash every other page's assets
+      the ASSET VERSIONS — every local stylesheet and script href/src put
+      through asset(), the same function head() uses everywhere else. Typed
+      by hand, they carried no ?v= at all, so the home page and every other
+      page asked for the same two files under two different URLs and the
+      visitor downloaded them twice. See the pass itself for the detail.
+
+    The theme links also gain the same ?v= content hash every other page's assets
     carry. index.html had none, so the busiest page in the shop was the one
     page that could serve a stale cached theme after a deploy.
 
@@ -1017,6 +1023,31 @@ def sync_index_theme():
     if not boot_hits:
         print("WARNING: index.html has no theme bootstrap to sync — the home "
               "page will flash the wrong theme when one is published")
+
+    # EVERY LOCAL STYLESHEET AND SCRIPT, hashed by the same asset() every
+    # generated page's links go through.
+    #
+    # These were typed by hand and carried no ?v= at all, which cost more than
+    # a stale cache: a URL with a query string is a different cache entry from
+    # the same URL without one. The home page asked for
+    # shared/css/gulfrabit.css, the very next page asked for
+    # shared/css/gulfrabit.css?v=<hash>, and so a visitor who landed on the
+    # home page and clicked once downloaded gulfrabit.css, main.js and
+    # theme.js a second time — the largest files in the shop, on the journey
+    # every visitor makes.
+    #
+    # Any existing query is dropped before rehashing, so the pass is
+    # idempotent and a hand-typed hash cannot survive a build. index.html sits
+    # at the root, so its hrefs have no "../" and asset() is handed the
+    # leading "/" it requires, then loses it again.
+    def _rehash(m):
+        return f'{m.group(1)}="{asset("/" + m.group(2)).lstrip("/")}"'
+
+    new = re.sub(
+        r'\b(href|src)="((?:shared|modules)/[^"?]+\.(?:css|js))(?:\?[^"]*)?"',
+        _rehash,
+        new,
+    )
 
     if new != html:
         with open(path, "w", encoding="utf-8", newline="\n") as f:
