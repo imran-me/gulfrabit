@@ -204,30 +204,65 @@
   .admin.is-rail .admin__side:has(:focus-visible) { padding-inline: var(--space-4); }
 }
 
-.admin__main { min-width: 0; padding: var(--space-6); background: #FBFAF7; }
+.admin__main {
+  /* Named, because the masthead below has to cancel exactly this padding to
+     span the full width when it sticks, and the two used to be typed twice
+     with only the desktop pair kept in step. */
+  --admin-pad-x: var(--space-6);
+  --admin-pad-y: var(--space-6);
+  min-width: 0;
+  padding: var(--admin-pad-y) var(--admin-pad-x);
+  background: #FBFAF7;
+}
 /* The page head is a masthead now: title on a drawn rule that carries one
    short gold segment — the same engraver's habit as the storefront, at a
    tool's volume. */
 .admin__head {
   border-bottom: 1px solid var(--border-hairline);
-  padding-bottom: var(--space-4);
   position: relative;
 }
 .admin__head::after {
   content: "";
   position: absolute;
-  left: 0; bottom: -1px;
+  left: var(--admin-pad-x); bottom: -1px;
   width: 64px; height: 2px;
   background: linear-gradient(90deg, #C9A24B, rgba(201, 162, 75, .2));
 }
 
+/* THE MASTHEAD STAYS.
+   It carries the screen's title and, on half the screens, its primary action —
+   "+ New product", "Add a coupon". Two hundred products in the table below and
+   both were somewhere above the top of the window: the only way back to the
+   button that adds a product was to scroll a list of products to the top.
+
+   It spans the full width rather than sitting inside the main column's
+   padding, so rows passing beneath it disappear under an edge rather than
+   under a floating rectangle with the page showing either side. */
 .admin__head {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: var(--space-6);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #FBFAF7;
+  margin: calc(var(--admin-pad-y) * -1) calc(var(--admin-pad-x) * -1) var(--space-6);
+  padding: var(--admin-pad-y) var(--admin-pad-x) var(--space-4);
+  transition: padding var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+/* Tightened once it is actually holding position — a masthead that keeps its
+   full standing height takes 140px of a laptop permanently, and it is the
+   table underneath that people came to read. The shadow is what says the rows
+   are going UNDER it rather than being cut off. */
+.admin__head.is-stuck {
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+  box-shadow: 0 6px 18px -12px rgba(4, 25, 31, .55);
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin__head { transition: none; }
 }
 .admin__title { margin: 0; font-size: var(--fs-31); line-height: var(--lh-tight); }
 .admin__sub { margin: var(--space-2) 0 0; color: var(--text-secondary); }
@@ -597,7 +632,7 @@
   /* Name, role and sign-out on one line rather than stacked. */
   .admin__who-name { display: inline; margin-right: var(--space-2); }
   .admin__signout { margin-top: 0; margin-left: var(--space-2); }
-  .admin__main { padding: var(--space-5) var(--space-4); }
+  .admin__main { --admin-pad-x: var(--space-4); --admin-pad-y: var(--space-5); }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -101,6 +101,7 @@ async function boot() {
   const allowed = paintNav(session);
   wireRail(root);
   wirePalette(root, allowed);
+  wireMasthead(root);
   root.hidden = false;
   document.dispatchEvent(new CustomEvent('admin:ready', { detail: { session } }));
 }
@@ -245,6 +246,30 @@ function scrollCurrentIntoView(host) {
   const item = current.getBoundingClientRect();
   const row = host.getBoundingClientRect();
   host.scrollLeft += item.left - row.left - (row.width - item.width) / 2;
+}
+
+/**
+ * Tells the masthead when it is holding position, so it can tighten up and
+ * cast the shadow that says the rows are passing under it.
+ *
+ * An IntersectionObserver rather than a scroll listener: a scroll handler that
+ * reads getBoundingClientRect() does it on every frame of every scroll, on the
+ * screens with the longest tables, and forces a layout each time to answer a
+ * question whose answer changes twice a page.
+ *
+ * The 1px top rootMargin is what makes it work at all. Stuck, the masthead's
+ * top edge sits exactly at 0 and is therefore still fully inside the viewport;
+ * shrinking the root by a pixel puts that edge outside it, so the ratio drops
+ * below 1 at the moment it lands and returns to 1 when it lifts off.
+ */
+function wireMasthead(root) {
+  const head = root.querySelector('.admin__head');
+  if (!head || !('IntersectionObserver' in window)) return;
+
+  new IntersectionObserver(
+    ([entry]) => head.classList.toggle('is-stuck', entry.intersectionRatio < 1),
+    { threshold: [1], rootMargin: '-1px 0px 0px 0px' },
+  ).observe(head);
 }
 
 /* ---- Jump to a screen -----------------------------------------------------
@@ -414,8 +439,29 @@ function highlight(label, q) {
  */
 export { adminFetch };
 
+/**
+ * Escape a value for interpolation into HTML — including into an ATTRIBUTE.
+ *
+ * This used to serialise through a detached div's textContent. That escapes
+ * &, < and > and NOTHING ELSE, because those are the only characters that
+ * matter in text position — but ~265 call sites across the panel drop the
+ * result inside a double-quoted attribute:
+ *
+ *     data-name="${escapeHtml(c.name)}"        customers-page.js
+ *     aria-label="Delete ${escapeHtml(c.name)}"
+ *
+ * c.name is whatever the shopper typed into the checkout's Full name field. A
+ * customer registering as   Rahim" onmouseenter="fetch('/api/admin/…')
+ * closed the attribute and opened their own, stored, on a row the shop owner's
+ * cursor crosses while working the orders list.
+ *
+ * Quotes are escaped now. &quot; renders as a plain " in text position, so
+ * every existing call site keeps reading correctly and every attribute site
+ * becomes safe at once. Same form as the escapers in category-menu.js and
+ * reviews-panel.js — copied deliberately, so there is one shape to remember.
+ */
 export function escapeHtml(str = '') {
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
+  return String(str).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
 }
