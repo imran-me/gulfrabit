@@ -9,12 +9,18 @@
  *                            record, every figure recomputed there
  *   { ok: false, message }   the server REFUSED — out of stock, bad district,
  *                            a dead promo. The customer can act on the message.
- *   null                     no backend at all. The caller falls back to the
+ *   { ok: false, offline }   the request never arrived. Same handling as a
+ *                            refusal: keep the cart, re-enable the button,
+ *                            say why. Explicitly NOT the mock.
+ *   null                     no backend at all — a 404 or 501, meaning this is
+ *                            a static file server. The caller falls back to the
  *                            localStorage mock, which is what this shop is
  *                            until the API deploys — a fallback, not an error.
  *
  * The refused/absent distinction is the whole design: a 422 must stop the sale
- * and say why, while a 404 from a static file server must stop nothing.
+ * and say why, while a 404 from a static file server must stop nothing. The
+ * offline shape exists because those were once the same null, and on a live
+ * shop that meant a flickering connection produced a confirmation page.
  *
  * WHY A CART SYNC HAPPENS HERE
  * ----------------------------
@@ -129,9 +135,25 @@ export async function createOrder(p) {
     const { data } = await res.json();
     return { ok: true, order: data };
   } catch {
-    // Network down mid-flow. Nothing was charged (COD, and gateways are not
-    // integrated); the caller decides between retry copy and the local mock.
-    return null;
+    // The request never reached a server: offline, DNS, TLS, an aborted
+    // request — the everyday case for a mid-range Android on a weak signal,
+    // which is this shop's audience.
+    //
+    // This used to return null, the same null that means "static host, write
+    // the mock". On gulfrabit.com Laravel is serving, so a 404 essentially
+    // never happens and null could only mean the network died — and the
+    // callers answered it by fabricating GR-2026-<random>, calling
+    // clearCart(), and navigating to a green confirmation page. The customer
+    // lost their basket, kept an order number that exists nowhere, and could
+    // not even retry. Nobody at GulfRabit ever learned the sale had happened.
+    //
+    // ok:false is a shape both checkouts already handle correctly: re-enable
+    // the button, toast the reason, leave the cart alone.
+    return {
+      ok: false,
+      offline: true,
+      message: 'We could not reach the shop. Check your connection and tap Place Order again.',
+    };
   }
 }
 
