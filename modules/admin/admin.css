@@ -658,6 +658,33 @@
   border-radius: var(--radius-lg);
 }
 .afilters__field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 150px; min-width: 0; }
+
+/* ONE HEIGHT ACROSS THE ROW.
+   The row bottom-aligns, which hid the fact that nothing in it agreed: the
+   search box came out 52px, the date pickers 54 (a date input carries a
+   calendar button the others do not), and Apply and Clear 38. A filter bar
+   with a button two-thirds the height of the field beside it reads as a bar
+   somebody assembled rather than designed.
+
+   `height` and not `min-height`, because min-height is what the storefront's
+   controls already set and then exceed — 0.75rem of padding either side of a
+   16px line is 52px whatever the minimum says, and the date input's picker
+   pushes past even that. A fixed height with the padding taken off the block
+   axis is what makes every control in the row the same size; each one centres
+   its own contents.
+
+   Scoped to .afilters. The panel's other fields — the product editor, the
+   coupon form — are forms to be filled in carefully, not a row of switches to
+   be flicked, and they keep the storefront's roomier control. */
+.afilters .input-gr,
+.afilters .select-gr,
+.afilters__actions .btn-gr {
+  height: 42px;
+  min-height: 0;
+  padding-block: 0;
+  font-size: var(--fs-14);
+}
+.afilters .select-gr { background-position: right var(--space-3) center; padding-right: var(--space-6); }
 .afilters__field--wide { flex-basis: 100%; }
 .afilters__field label { font-size: var(--fs-12); font-weight: var(--fw-semibold); color: var(--text-secondary); }
 .afilters__actions { display: flex; gap: var(--space-2); }

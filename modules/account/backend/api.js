@@ -34,6 +34,21 @@ export async function getMockOrders() {
  * show one visitor another person's order history. Same rule, and the same
  * reason, as the guard at the top of modules/admin/backend/api.js.
  */
+/**
+ * The customer's order history, as a result rather than a bare array.
+ *
+ *   { ok: true,  orders }              the list, however long — including zero
+ *   { ok: false, reason: 'auth' }      401/403: signed out, not empty
+ *   { ok: false, reason: 'error' }     500 and friends: broken, not empty
+ *
+ * It used to return [] for all three. The page reads an empty array as "No
+ * orders yet — when you place an order it will appear here", so a 500 during
+ * an outage told every customer their purchase history was empty and invited
+ * them to buy it all again. A 401 did the same thing silently, and this
+ * storefront has no real sign-in yet, so on the live site that was not the
+ * outage case — it was every visitor, every time, permanently, on top of a
+ * localStorage history that checkout had genuinely written.
+ */
 export async function getOrders() {
   try {
     const res = await fetch('/api/account/orders', {
@@ -41,11 +56,12 @@ export async function getOrders() {
       credentials: 'same-origin',
     });
 
-    if (res.ok) return (await res.json()).data ?? [];
+    if (res.ok) return { ok: true, orders: (await res.json()).data ?? [] };
 
-    // Anything the server actually answered — 401, 403, 500 — is the server's
-    // answer and stands. Only "there is nothing here" falls through.
-    if (res.status !== 404) return [];
+    // Anything the server actually answered is the server's answer and stands.
+    // Only "there is nothing here" falls through to the local history.
+    if (res.status === 401 || res.status === 403) return { ok: false, reason: 'auth' };
+    if (res.status !== 404) return { ok: false, reason: 'error' };
   } catch {
     // TypeError from fetch: no server, or no network. Fall through.
   }
@@ -54,7 +70,10 @@ export async function getOrders() {
   const mock = await getMockOrders().catch(() => []);
   const seen = new Set();
 
-  return [...local, ...mock].filter((o) => (seen.has(o.id) ? false : seen.add(o.id)));
+  return {
+    ok: true,
+    orders: [...local, ...mock].filter((o) => (seen.has(o.id) ? false : seen.add(o.id))),
+  };
 }
 
 export async function getAddresses() { return storage.get(KEYS.ADDRESSES, []); }
