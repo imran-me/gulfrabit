@@ -139,15 +139,52 @@ function initAnnouncement() {
   });
 }
 
-/* ---- Full-screen search overlay --------------------------------------- */
+/* ---- Full-screen search overlay ---------------------------------------
+   The markup says role="dialog" aria-modal="true", and for a long time the
+   behaviour said neither. Tabbing out of the search box landed on the hero
+   links behind the overlay — content a screen reader had just been told did
+   not exist, because that is what aria-modal means. The page behind scrolled
+   too, and closing dropped focus wherever Tab had wandered to.
+
+   The mobile drawer above already does all three correctly. This is the same
+   contract: trap, lock, restore. */
 function initSearchOverlay() {
   const overlay = document.querySelector('.search-overlay');
   const openBtns = document.querySelectorAll('[data-open-search]');
   if (!overlay || !openBtns.length) return;
+
   const input = overlay.querySelector('input');
-  const open = () => { overlay.classList.add('is-open'); setTimeout(() => input?.focus(), 60); };
-  const close = () => overlay.classList.remove('is-open');
-  openBtns.forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); open(); }));
+  let releaseTrap = null;
+
+  const open = () => {
+    overlay.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    openBtns.forEach((b) => b.setAttribute('aria-expanded', 'true'));
+
+    // Trapped first, so it captures the button that is still focused as the
+    // place to send focus back to. Then the search box specifically — the
+    // first focusable in the DOM is the close button, and opening search only
+    // to land on "Close search" is a joke at the customer's expense.
+    releaseTrap = trapFocus(overlay);
+    setTimeout(() => input?.focus(), 60);
+  };
+
+  const close = () => {
+    // Guarded: Escape is bound to the document, so this runs on every Escape
+    // anywhere on the site. Without the guard, closing an already-closed
+    // overlay would yank focus back to the search button.
+    if (!overlay.classList.contains('is-open')) return;
+
+    overlay.classList.remove('is-open');
+    document.body.style.overflow = '';
+    openBtns.forEach((b) => b.setAttribute('aria-expanded', 'false'));
+    if (releaseTrap) { releaseTrap(); releaseTrap = null; }
+  };
+
+  openBtns.forEach((b) => {
+    b.setAttribute('aria-expanded', 'false');
+    b.addEventListener('click', (e) => { e.preventDefault(); open(); });
+  });
   overlay.querySelector('[data-close-search]')?.addEventListener('click', close);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 }
