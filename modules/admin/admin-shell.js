@@ -99,6 +99,7 @@ async function boot() {
   if (session.isFixture) warnFixture();
   paintIdentity(session);
   paintNav(session);
+  wireRail(root);
   root.hidden = false;
   document.dispatchEvent(new CustomEvent('admin:ready', { detail: { session } }));
 }
@@ -118,6 +119,42 @@ function warnFixture() {
       <span>No backend is running, so nobody has been authenticated and nothing here is secured.
       This must never be reachable outside local development.</span>
     </div>`);
+}
+
+/* The rail preference, remembered per browser rather than per account: it is
+   about the screen somebody is sitting at, not about who they are. A staff
+   member on a 13" laptop wants it railed on that laptop and open on the
+   desk monitor, under the same sign-in.
+
+   Applied while the shell is still `hidden`, so the panel never paints wide
+   and then snaps narrow. */
+const RAIL_KEY = 'gr:admin-rail';
+
+function wireRail(root) {
+  const btn = root.querySelector('[data-admin-rail]');
+  if (!btn) return;
+
+  let on = false;
+  try {
+    on = localStorage.getItem(RAIL_KEY) === 'on';
+  } catch {
+    /* Private mode. The panel opens wide, which is the safe default. */
+  }
+  apply(on);
+
+  btn.addEventListener('click', () => {
+    on = !on;
+    apply(on);
+    try {
+      localStorage.setItem(RAIL_KEY, on ? 'on' : 'off');
+    } catch { /* nothing to remember it with; the toggle still works this visit */ }
+  });
+
+  function apply(state) {
+    root.classList.toggle('is-rail', state);
+    btn.setAttribute('aria-expanded', String(!state));
+    btn.setAttribute('aria-label', state ? 'Expand sidebar' : 'Collapse sidebar');
+  }
 }
 
 function paintIdentity(session) {

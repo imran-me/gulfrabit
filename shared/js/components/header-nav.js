@@ -109,22 +109,43 @@ function initMobileDrawer() {
   }
 }
 
-/* ---- Cart / wishlist count badges ------------------------------------- */
+/* ---- Cart / wishlist count badges -------------------------------------
+   The number goes in the CONTROL'S NAME, not just in the badge.
+
+   Both badges used to be aria-live="polite" spans inside a button carrying its
+   own aria-label. An aria-label overrides the element's contents, so the badge
+   was never read as part of "Open cart" — a screen reader user could sit on
+   the cart button and not be told there was anything in it. What they were
+   told, the moment the count changed, was a bare "3": a number with no noun,
+   arriving on top of the toast that had just said what was added.
+
+   So the span is aria-hidden now and the count is written into the button's
+   label. Changing an aria-label does not announce, which is the point: the
+   toast is the announcement, and the button finally reads correctly when the
+   user arrives at it. */
 function initCountBadges() {
   const cartBadge = document.querySelector('[data-cart-count]');
   const wishBadge = document.querySelector('[data-wishlist-count]');
 
-  const syncCart = () => setBadge(cartBadge, store.cartCount());
-  const syncWish = () => setBadge(wishBadge, store.wishlistCount());
+  const syncCart = () => setBadge(cartBadge, store.cartCount(), 'Open cart');
+  const syncWish = () => setBadge(wishBadge, store.wishlistCount(), 'Wishlist');
 
   syncCart(); syncWish();
   store.subscribe(store.EVENTS.CART, syncCart);
   store.subscribe(store.EVENTS.WISHLIST, syncWish);
 
-  function setBadge(el, count) {
+  function setBadge(el, count, name) {
     if (!el) return;
     el.textContent = count > 99 ? '99+' : String(count);
     el.classList.toggle('is-active', count > 0);
+
+    // The badge shows "99+"; the label says the real number, because "99+
+    // items" is a design decision about width and not something worth reading
+    // aloud.
+    el.closest('button, a')?.setAttribute(
+      'aria-label',
+      count ? `${name}, ${count} item${count === 1 ? '' : 's'}` : `${name}, empty`
+    );
   }
 }
 
