@@ -354,7 +354,6 @@
   margin: 12vh auto auto;
   padding: 0;
   overflow: hidden;
-  display: flex;
   flex-direction: column;
   border: 1px solid var(--gr-border);
   border-radius: var(--radius-lg);
@@ -363,6 +362,11 @@
   color: var(--text-primary);
 }
 .apal::backdrop { background: rgba(4, 25, 31, .46); }
+/* The display switch belongs on [open], not on the element. A bare
+   `display: flex` here beats the user agent's `dialog:not([open]) {display:none}`
+   — the whole palette then sits in the page, closed, painted over the orders
+   table, permanently. */
+.apal[open] { display: flex; }
 
 .apal__search {
   display: flex;
@@ -722,11 +726,39 @@
    width, and the alternative — dropping columns — hides the one somebody
    needed. */
 .atable-wrap { overflow-x: auto; background: var(--surface-raised); border: 1px solid var(--gr-border); border-radius: var(--radius-lg); }
+
+/* THE COLUMN HEADINGS HAVE TO STAY, AND FOR A LONG TIME THEY DID NOT.
+   `.atable thead th` has said `position: sticky; top: 0` from the beginning
+   and it never once held. Sticky is measured against the nearest scrollport,
+   and .atable-wrap is one: it sets overflow-x for the sideways scroll, and CSS
+   will not let a box scroll on one axis and stay visible on the other — the
+   used value of overflow-y becomes auto with it. So the headings were pinned
+   to the top of a box that had no height to scroll, which is to say pinned to
+   nothing, and forty rows into a list of orders every column was unlabelled.
+   Which column was Total and which was Payment, on a screen where the answer
+   decides whether somebody gets refunded.
+
+   Giving that box a height is what makes its scrollport real, and the sticky
+   header along with it. The list screens only — a table that is one section of
+   a detail page (an order's items, a customer's orders) is short and belongs
+   to the card around it, and those sit inside .acard rather than directly in
+   the main column.
+
+   The cap leaves room for the masthead above and the pager below, and never
+   goes under 24rem: on a short laptop in landscape, a strictly proportional
+   cap leaves a letterbox showing four rows. */
+.admin__main > .atable-wrap {
+  overflow: auto;
+  max-height: max(24rem, calc(100vh - 12rem));
+  overscroll-behavior: contain;
+}
 .atable { width: 100%; border-collapse: collapse; font-size: var(--fs-14); min-width: 720px; }
 .atable--tight { min-width: 0; }
 .atable th, .atable td { text-align: left; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-hairline); vertical-align: top; }
 .atable thead th {
   position: sticky; top: 0;
+  /* Opaque, and it has to be: transparent, the rows scrolling underneath
+     show straight through the headings. */
   background: var(--surface-sunken);
   font-size: var(--fs-12); text-transform: uppercase; letter-spacing: .06em;
   color: var(--text-muted); white-space: nowrap;
