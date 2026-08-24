@@ -13,8 +13,12 @@
 
 /* ---- Frame ------------------------------------------------------------ */
 .admin {
+  /* The one place the sidebar's width is stated. The rail below re-declares
+     it rather than overriding the grid and the aside separately, which is how
+     the two used to drift apart by a pixel or two at the seam. */
+  --admin-side-w: 248px;
   display: grid;
-  grid-template-columns: 248px minmax(0, 1fr);
+  grid-template-columns: var(--admin-side-w) minmax(0, 1fr);
   min-height: 100vh;
   background: var(--surface-sunken);
 }
@@ -50,11 +54,21 @@
   color: #fff;
   text-decoration: none;
 }
-.admin__brand img { width: 32px; height: 32px; }
-.admin__brand {
+.admin__brand img { width: 32px; height: 32px; flex: 0 0 auto; }
+.admin__brand picture { display: contents; }
+
+/* Brand and the rail toggle share the sidebar's first row. The rule that used
+   to sit under the brand belongs to the row, not the link — hung on the link
+   it stopped short of the toggle and left a notch in the hairline. */
+.admin__top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   padding-bottom: var(--space-4);
   border-bottom: 1px solid rgba(232, 207, 142, .22);
 }
+.admin__brand { flex: 1 1 auto; min-width: 0; }
+.admin__brand span { min-width: 0; }
 .admin__brand small {
   display: block;
   font-family: var(--font-body);
@@ -63,6 +77,108 @@
   letter-spacing: .08em;
   text-transform: uppercase;
   opacity: .6;
+}
+
+/* ---- The rail toggle -------------------------------------------------- */
+.admin__rail {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: none;
+  border: 1px solid rgba(232, 207, 142, .22);
+  border-radius: var(--radius-sm);
+  color: rgba(255, 255, 255, .7);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.admin__rail svg { width: 17px; height: 17px; }
+.admin__rail:hover { background: rgba(79, 201, 228, .14); color: #fff; }
+.admin__rail:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
+/* The bar in the icon moves to the side the panel would go. Two states, one
+   glyph — a second icon swapped in by JavaScript is a second thing to keep
+   in step with the actual state. */
+.admin.is-rail .admin__rail svg { transform: scaleX(-1); }
+
+/* ---- Railed --------------------------------------------------------------
+   Icons only, 72px wide — and the labels come back on hover or keyboard focus,
+   the whole sidebar sliding out OVER the work area rather than pushing it. A
+   rail that hides the names and offers no way to read them is a memory test,
+   and a rail that reflows the table underneath every time the pointer crosses
+   it is worse than no rail at all.
+
+   Desktop only. Below 900 the sidebar is already a strip (see Responsive), and
+   a hover-to-reveal control on a touch screen reveals nothing. */
+@media (min-width: 900px) {
+  .admin.is-rail { --admin-side-w: 72px; }
+  .admin.is-rail .admin__side {
+    width: var(--admin-side-w);
+    padding-inline: var(--space-2);
+    /* Above the work area, so the flyout covers the table instead of being
+       painted under it. */
+    z-index: 30;
+    transition: width var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+  .admin.is-rail .admin__brand span,
+  .admin.is-rail .anav__title,
+  .admin.is-rail .anav__link > span:not(.anav__icon),
+  .admin.is-rail .admin__who-name,
+  .admin.is-rail .admin__who-role,
+  .admin.is-rail .admin__signout { display: none; }
+
+  .admin.is-rail .admin__top { justify-content: center; }
+  .admin.is-rail .admin__brand { display: none; }
+  .admin.is-rail .anav__link { justify-content: center; padding-inline: 0; }
+  /* The group headings are gone, so the groups need some other edge or the
+     sixteen icons read as one undifferentiated column. */
+  .admin.is-rail .anav__group + .anav__group {
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid rgba(255, 255, 255, .10);
+  }
+  .admin.is-rail .admin__who { text-align: center; }
+
+  /* Open on hover, and on keyboard focus — tabbing into a rail that stays shut
+     lands you on sixteen unlabelled icons. */
+  .admin.is-rail .admin__side:hover,
+  .admin.is-rail .admin__side:focus-within {
+    width: 248px;
+    box-shadow: 12px 0 32px rgba(4, 25, 31, .28);
+  }
+  .admin.is-rail .admin__side:hover .admin__brand span,
+  .admin.is-rail .admin__side:focus-within .admin__brand span,
+  .admin.is-rail .admin__side:hover .anav__title,
+  .admin.is-rail .admin__side:focus-within .anav__title,
+  .admin.is-rail .admin__side:hover .anav__link > span:not(.anav__icon),
+  .admin.is-rail .admin__side:focus-within .anav__link > span:not(.anav__icon),
+  .admin.is-rail .admin__side:hover .admin__who-name,
+  .admin.is-rail .admin__side:focus-within .admin__who-name,
+  .admin.is-rail .admin__side:hover .admin__signout,
+  .admin.is-rail .admin__side:focus-within .admin__signout { display: block; }
+  .admin.is-rail .admin__side:hover .admin__who-role,
+  .admin.is-rail .admin__side:focus-within .admin__who-role { display: inline-block; }
+  .admin.is-rail .admin__side:hover .admin__brand,
+  .admin.is-rail .admin__side:focus-within .admin__brand { display: flex; }
+  .admin.is-rail .admin__side:hover .admin__top,
+  .admin.is-rail .admin__side:focus-within .admin__top { justify-content: flex-start; }
+  .admin.is-rail .admin__side:hover .anav__link,
+  .admin.is-rail .admin__side:focus-within .anav__link {
+    justify-content: flex-start;
+    padding-inline: var(--space-3);
+  }
+  .admin.is-rail .admin__side:hover .anav__group + .anav__group,
+  .admin.is-rail .admin__side:focus-within .anav__group + .anav__group {
+    margin-top: var(--space-5);
+    padding-top: 0;
+    border-top: 0;
+  }
+  .admin.is-rail .admin__side:hover .admin__who,
+  .admin.is-rail .admin__side:focus-within .admin__who { text-align: left; }
+  .admin.is-rail .admin__side:hover,
+  .admin.is-rail .admin__side:focus-within { padding-inline: var(--space-4); }
 }
 
 .admin__main { min-width: 0; padding: var(--space-6); background: #FBFAF7; }
@@ -263,9 +379,11 @@
      is brand → nav → who, so without this the full-width nav splits them and
      the strip costs three rows instead of two — 60-odd pixels of a phone
      screen spent on nothing. */
-  .admin__brand { order: 1; }
+  .admin__top   { order: 1; padding-bottom: 0; border-bottom: 0; }
   .admin__who   { order: 2; margin-left: auto; text-align: right; border-top: 0; padding-top: 0; }
   .anav         { order: 3; flex: 1 1 100%; }
+  /* Nothing to collapse: the strip has no width to give back. */
+  .admin__rail  { display: none; }
 
   .anav__group { margin-top: 0 !important; }
   .anav__title { display: none; }
@@ -277,7 +395,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .anav__link { transition: none; }
+  .anav__link,
+  .admin__rail,
+  .admin.is-rail .admin__side { transition: none; }
 }
 
 /* ---- Filters ---------------------------------------------------------- */

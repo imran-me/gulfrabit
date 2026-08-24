@@ -81,6 +81,15 @@ function summary(state, product) {
   const avg = state.meta?.average ?? product.rating ?? 0;
 
   if (!total) {
+    // Nothing is not the same as nothing-we-could-reach. With the endpoint
+    // down and a product carrying no snapshot count, this used to print "This
+    // product has no reviews yet" directly above "Reviews could not be loaded
+    // just now" — two sentences that cannot both be true, the confident one
+    // being the false one. Say nothing here and let the honest line stand
+    // alone. Where the snapshot DOES carry a count the summary below still
+    // draws from it, which is the point of keeping it.
+    if (state.offline) return '';
+
     return '<p class="text-muted-gr">This product has no reviews yet.</p>';
   }
 

@@ -107,7 +107,7 @@ try {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=7965032f">
-  <link rel="stylesheet" href="../../modules/admin/admin.css?v=d786f025">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=066059b4">
   <link rel="stylesheet" href="../../modules/theme/theme-admin.css?v=49a74d16">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
@@ -119,16 +119,31 @@ try {
        the page contains no data to protect. -->
   <div class="admin" data-admin-shell hidden>
     <aside class="admin__side">
-      <a class="admin__brand" href="../../admin">
-        <!-- 120px into a 32px box. The 520px master is 216 KB and this
-             sidebar is on every admin screen — including the ones the
-             catalogue actually gets maintained from, on a phone. -->
-        <picture>
-          <source type="image/webp" srcset="../../assets/logo/gulfrabit-mark-120.webp">
-          <img src="../../assets/logo/gulfrabit-mark-120.png" alt="">
-        </picture>
-        <span>GulfRabit<small>Admin</small></span>
-      </a>
+      <div class="admin__top">
+        <a class="admin__brand" href="../../admin">
+          <!-- 120px into a 32px box. The 520px master is 216 KB and this
+               sidebar is on every admin screen — including the ones the
+               catalogue actually gets maintained from, on a phone. -->
+          <picture>
+            <source type="image/webp" srcset="../../assets/logo/gulfrabit-mark-120.webp">
+            <img src="../../assets/logo/gulfrabit-mark-120.png" alt="">
+          </picture>
+          <span>GulfRabit<small>Admin</small></span>
+        </a>
+
+        <!-- Collapses the sidebar to a 72px rail of icons. Sixteen screens and
+             a 248px column cost a quarter of a 13" laptop's width, and the
+             screens that need the width most — the orders table, the product
+             editor — are the ones staff sit in all day. Railed, the sidebar
+             still opens on hover, so nothing is actually further away. -->
+        <button type="button" class="admin__rail" data-admin-rail
+                aria-expanded="true" aria-label="Collapse sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="16" rx="2"/>
+            <path d="M9 4v16"/>
+          </svg>
+        </button>
+      </div>
 
       <nav class="anav" aria-label="Admin sections" data-admin-nav></nav>
 
