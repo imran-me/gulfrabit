@@ -29,6 +29,29 @@ async function init() {
 function fillProductChoices(products) {
   const sel = document.querySelector('[data-rfq-product]');
   if (!sel) return;
+
+  const form = sel.closest('form');
+
+  /* An empty catalogue makes this form unsubmittable, because the endpoint
+     will only accept a line against a SKU that exists — so say that, rather
+     than leave a buyer filling in six fields for a Submit that can never
+     succeed. Happens when the industrial category is switched off, or when
+     the catalogue request failed; renderList() above has already put its own
+     notice where the rows would be. */
+  if (!products.length) {
+    sel.innerHTML = '<option value="">Catalogue unavailable</option>';
+    sel.disabled = true;
+    sel.removeAttribute('data-validate');
+
+    const btn = form?.querySelector('button[type="submit"]');
+    if (btn) btn.disabled = true;
+
+    form?.insertAdjacentHTML('beforeend',
+      `<p class="caption" style="margin-top:var(--space-3)">We could not load the industrial catalogue just now. `
+      + `Please <a href="${siteURL('contact')}">contact us</a> and we will quote by hand.</p>`);
+    return;
+  }
+
   sel.insertAdjacentHTML('beforeend', products
     .map((p) => `<option value="${escapeAttr(p.id)}">${escapeHtml(p.title)}${p.moq ? ` (MOQ ${p.moq})` : ''}</option>`)
     .join(''));
