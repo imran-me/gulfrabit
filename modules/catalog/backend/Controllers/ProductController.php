@@ -49,7 +49,21 @@ class ProductController extends Controller
      */
     public function show(Product $product): JsonResponse
     {
-        abort_unless($product->is_active, 404);
+        // "Sellable" is defined once, in Product::scopeActive(): the product's
+        // own flag, not archived, and the category AND its parent both
+        // switched on. This line used to test $product->is_active on its own,
+        // so switching a category off pulled it out of the listings, the
+        // search and the menu while /product/<slug> for everything inside it
+        // still answered 200 with a price and a working Add to Cart — the
+        // merchant had taken the range off the shop and it was still buyable
+        // by direct link. Asking the scope by primary key rather than
+        // re-testing the flags here costs one indexed lookup and stops the
+        // detail page drifting from the listings the next time "switched off"
+        // grows another condition.
+        abort_unless(
+            Product::query()->active()->whereKey($product->getKey())->exists(),
+            404,
+        );
 
         $product->load(['category:id,slug,name', 'subCategory:id,slug']);
 

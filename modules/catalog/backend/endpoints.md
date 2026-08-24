@@ -103,7 +103,7 @@ Bound on **SKU**, not the auto-increment id. Returns the product plus its
 `related` array so the PDP is a single request.
 
 **200** → `{ "data": { ...Product, "related": Product[] } }`
-**404** when the SKU is unknown or the product is inactive.
+**404** when the SKU is unknown, or the product is inactive, archived, or sits under a category (or parent category) that is switched off — `Product::scopeActive()` is the single definition, and `show()` asks it rather than keeping a copy.
 
 ---
 
