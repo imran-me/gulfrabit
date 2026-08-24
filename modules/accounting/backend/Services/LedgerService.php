@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Accounting\Services;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Modules\Accounting\Models\Account;
 use Modules\Accounting\Models\JournalEntry;
@@ -96,9 +97,17 @@ final class LedgerService
         }
 
         return DB::transaction(function () use ($memo, $resolved, $entryDate, $sourceType, $sourceId, $adminId, $adminName): JournalEntry {
+            // Normalised once, so the reference year and the stored column are
+            // reading the same string. The `date` validation rule accepts
+            // anything strtotime understands, so what arrives here is not
+            // reliably 'Y-m-d' — and the reference year is cut from it.
+            $date = $entryDate !== null
+                ? Carbon::parse($entryDate)->toDateString()
+                : now()->toDateString();
+
             $entry = JournalEntry::create([
-                'reference'  => $this->nextReference(),
-                'entry_date' => $entryDate ?? now()->toDateString(),
+                'reference'  => $this->nextReference($date),
+                'entry_date' => $date,
                 'memo'       => $memo,
                 'is_posted'  => true,
                 'posted_at'  => now(),
@@ -179,11 +188,40 @@ final class LedgerService
             ->exists();
     }
 
-    private function nextReference(): string
+    /**
+     * The next reference for an entry dated `$entryDate`, given as 'Y-m-d'.
+     *
+     * The year is the entry's own, not today's. A December receipt handed in
+     * during January belongs to December's books, and numbering it from `now()`
+     * wedged the ledger outright: the backdated entry took a current-year
+     * reference without adding to the current year's count, so the next entry
+     * was handed that same reference, the unique index on `reference` rejected
+     * it, and — the count never having moved — it rejected every entry after it
+     * too. Nothing could be posted at all, order postings included, until a row
+     * was edited by hand.
+     *
+     * One past the highest reference already issued for the year, rather than a
+     * count of that year's entries, because a count re-issues a number wherever
+     * the sequence has a gap — including the gap left by the mislabelled entry
+     * an already-wedged ledger is carrying, which is what lets this repair such
+     * a ledger instead of colliding with it forever.
+     */
+    private function nextReference(string $entryDate): string
     {
-        $year = now()->format('Y');
-        $count = JournalEntry::query()->whereYear('entry_date', $year)->count() + 1;
+        $prefix = sprintf('JE-%s-', substr($entryDate, 0, 4));
 
-        return sprintf('JE-%s-%05d', $year, $count);
+        // The counter is zero-padded to a fixed width, so ordering by text
+        // already gives the numerically highest; the longer-string-first sort
+        // covers the day the width outgrows five digits, where plain text order
+        // would put '99999' above '100000' and hand back a taken number.
+        $last = JournalEntry::query()
+            ->where('reference', 'like', $prefix.'%')
+            ->orderByRaw('LENGTH(reference) desc')
+            ->orderByDesc('reference')
+            ->value('reference');
+
+        $next = $last === null ? 1 : ((int) substr($last, strlen($prefix))) + 1;
+
+        return sprintf('%s%05d', $prefix, $next);
     }
 }
