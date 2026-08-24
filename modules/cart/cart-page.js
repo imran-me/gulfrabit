@@ -144,6 +144,16 @@ function moveToCart(item) { dropSaved(item.id); store.addToCart(item, 1); toast.
 function dropSaved(id) { storage.set(KEYS.SAVED_FOR_LATER, storage.get(KEYS.SAVED_FOR_LATER, []).filter((s) => s.id !== id)); render(); }
 
 /* ---- Promo + summary -------------------------------------------------- */
+async function removePromo() {
+  promoCode = null;
+  storage.remove('cart-promo');
+  const msg = document.querySelector('[data-promo-msg]');
+  if (msg) { msg.style.color = ''; msg.textContent = 'Promo code removed.'; }
+  const input = document.querySelector('[data-promo-input]');
+  if (input) input.value = '';
+  await paintSummary(store.getCart());
+}
+
 async function applyPromo() {
   const code = (document.querySelector('[data-promo-input]').value || '').trim().toUpperCase();
   const msg = document.querySelector('[data-promo-msg]');
@@ -174,6 +184,18 @@ async function paintSummary(cart) {
   // Recomputed every render, never stored: if the basket drops below the
   // minimum spend the discount disappears on its own, exactly as the server does.
   const result = promoCode ? await validatePromo(promoCode, subtotal) : null;
+
+  // A code that no longer qualifies is DROPPED, not merely hidden. Hiding the
+  // row while leaving it in storage is how a customer ended up unable to order
+  // at all: apply GULF10 at ৳1,200, remove an item to reach ৳800, and the cart
+  // correctly stops showing the discount — but checkout still posted GULF10,
+  // /cart/promo answered 422, and Place Order was refused with "Spend ৳1,000
+  // to use this code" about a code shown nowhere and removable nowhere.
+  if (result && !result.valid) {
+    promoCode = null;
+    storage.remove('cart-promo');
+  }
+
   const discount = result?.valid ? result.discount : 0;
   const total = Math.max(0, subtotal - discount);
 
@@ -185,6 +207,11 @@ async function paintSummary(cart) {
   const discRow = document.querySelector('[data-summary-discount-row]');
   if (discount > 0) { discRow.hidden = false; setText('[data-summary-discount]', `−${formatBDT(discount)}`); setText('[data-summary-promo-code]', `(${promoCode})`); }
   else if (discRow) discRow.hidden = true;
+
+  // Applied by mistake, or from a ?coupon= link the customer never chose —
+  // there was no way to take one off short of clearing site data.
+  const removeBtn = document.querySelector('[data-promo-remove]');
+  if (removeBtn) removeBtn.hidden = discount <= 0;
 
   // Gift threshold. Awaited so the bar is in place before the summary is
   // considered painted — a bar that pops in after the total has settled reads

@@ -1241,6 +1241,29 @@
   gap: var(--space-4);
 }
 
+/* THE SENTENCE THAT EXPLAINS AN EMPTY SCREEN IS NOT A CARD.
+   Categories and coupons both write their empty and their failed state into
+   this grid as a paragraph, and a paragraph in a grid is a grid item: it took
+   one 280px column at the top left and wrapped "No backend connected yet —
+   coupons appear once the API is live." into four short lines in a ribbon,
+   next to nothing, looking for all the world like the first card in a list
+   that had loaded.
+
+   Spanning every column is the fix; the rest is making it read as what it is —
+   a note about the whole screen. Dashed, because a dashed border is the shape
+   the panel already uses for a place where something is meant to be and is
+   not (see .acat__image with no picture). */
+.acat-grid > .admin__sub {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--space-7) var(--space-5);
+  text-align: center;
+  text-wrap: pretty;
+  border: 1px dashed var(--gr-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+}
+
 .acat {
   background: var(--surface-raised);
   border: 1px solid var(--gr-border);
