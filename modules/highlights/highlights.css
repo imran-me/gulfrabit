@@ -102,3 +102,120 @@
   .hlitem { grid-template-columns: 20px minmax(0, 1fr) auto; }
   .hlitem__pic { display: none; }
 }
+
+/* ------------------------------------------------------------------ *
+ * Curating a shelf — the parts added when this screen grew up
+ * ------------------------------------------------------------------ */
+
+/* How many of the picks actually reach the home page. Sits directly under the
+   shelf heading, because it changes the meaning of the list below it. */
+.hlcap {
+  margin: 0 0 var(--space-3);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--gr-ink) 4%, transparent);
+  font-size: var(--fs-12);
+  color: color-mix(in srgb, var(--gr-ink) 62%, transparent);
+}
+
+.hlcap code { font-size: inherit; }
+.hlcap--full { background: color-mix(in srgb, var(--gr-success, #2ea043) 10%, transparent); }
+.hlcap--under { background: color-mix(in srgb, var(--gr-warn, #d29922) 14%, transparent); }
+
+/* The drag handle. Its own column so a drag never starts from the title —
+   selecting the product name to copy it should not pick the row up. */
+.hlitem__grip {
+  cursor: grab;
+  padding: 0 2px;
+  color: color-mix(in srgb, var(--gr-ink) 30%, transparent);
+  font-size: var(--fs-16);
+  line-height: 1;
+  user-select: none;
+}
+
+.hlitem:active .hlitem__grip { cursor: grabbing; }
+
+.hlitem.is-dragging { opacity: .4; }
+
+/* The insertion point, drawn on the row being hovered rather than as a gap
+   opening up — a list that reflows under the cursor is a list you cannot aim
+   at on a trackpad. */
+.hlitem.is-over { box-shadow: inset 0 2px 0 0 var(--gr-cyan); }
+
+/* Past the shelf's visible count. Dimmed, not hidden: it is still a pick and
+   still draggable, and hiding it would make the count disagree with the list. */
+.hlitem.is-benched { opacity: .55; }
+.hlitem.is-benched .hlitem__n { text-decoration: line-through; }
+
+/* "Also on" — the cross-shelf view. */
+.hlalsos { display: inline-flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+
+.hlalso {
+  border: 1px dashed var(--gr-border);
+  background: transparent;
+  color: color-mix(in srgb, var(--gr-ink) 55%, transparent);
+  font: inherit;
+  font-size: var(--fs-12);
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.hlalso:hover { border-color: var(--gr-cyan); color: var(--gr-cyan); }
+
+.hlalso.is-on {
+  border-style: solid;
+  border-color: var(--gr-cyan);
+  background: color-mix(in srgb, var(--gr-cyan) 12%, transparent);
+  color: var(--gr-cyan);
+}
+
+/* The unsaved bar. Fixed, because the thing it is warning about is precisely
+   that the Save button has scrolled out of view. */
+.hlbar {
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  bottom: var(--space-4);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: calc(100vw - 2rem);
+  padding: 10px var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--gr-ink, #111);
+  color: #fff;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .24);
+  animation: hlbar-in 200ms var(--ease-out) both;
+}
+
+@keyframes hlbar-in {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.hlbar__text { font-size: var(--fs-14); }
+.hlbar__text strong { font-weight: var(--fw-semibold); }
+
+/* On a phone it spans the width rather than floating as a pill — a centred
+   pill on a 360px screen is a pill with two words on three lines. */
+@media (max-width: 559.98px) {
+  .hlbar {
+    left: var(--space-3);
+    right: var(--space-3);
+    transform: none;
+    border-radius: var(--radius-md, 10px);
+    justify-content: space-between;
+  }
+
+  @keyframes hlbar-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hlbar { animation: none; }
+}

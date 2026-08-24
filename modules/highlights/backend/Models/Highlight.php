@@ -31,13 +31,28 @@ class Highlight extends Model
      * as the floor means an unconfigured install still shows products rather
      * than three blank strips.
      */
+    /**
+     * How many products each shelf actually RENDERS on the home page.
+     *
+     * Kept here because the panel needs it and nothing else knew it: the
+     * numbers live in home.js as arguments to shelf() and shelf('bestseller',
+     * 8), so a merchant could curate twelve products, save, and have the last
+     * four never appear with nothing on the screen saying why. MAX_PER_RAIL in
+     * the controller is the storage cap; this is the visible one, and they are
+     * different questions.
+     *
+     * If a rail's size changes in home.js, change it here too — there is no
+     * way for one to read the other across a static build and an API.
+     */
     public const RAILS = [
         'premium' => [
+            'shows'       => 8,
             'label'       => 'Premium picks',
             'blurb'       => 'The first rail under the hero. Most-seen shelf on the site.',
             'fallbackTag' => 'premium',
         ],
         'new' => [
+            'shows'       => 8,
             'label'       => 'New arrivals',
             'blurb'       => 'Further down the home page.',
             'fallbackTag' => 'new',
@@ -55,6 +70,7 @@ class Highlight extends Model
         // uncurated Best Sellers shows the authored HTML. Telling a merchant
         // otherwise sends them debugging a tag that is working as designed.
         'bestseller' => [
+            'shows'       => 8,
             'label'       => 'Best sellers',
             'blurb'       => 'The big grid mid-page. Static until you curate it.',
             'fallbackTag' => 'bestseller',

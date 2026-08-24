@@ -35,6 +35,10 @@ class AdminHighlightController extends Controller
             $rails[] = [
                 'rail'  => $key,
                 'label' => $config['label'],
+                // How many of these actually reach the home page. Curating
+                // twelve into a shelf that renders eight is a real thing to
+                // do — the last four are the bench — but it has to be VISIBLE.
+                'shows' => $config['shows'],
                 'blurb' => $config['blurb'],
                 'fallbackTag' => $config['fallbackTag'],
                 // Per-rail truth about what an empty shelf shows. Null means
