@@ -89,6 +89,15 @@ final class ProductQueryService
 
         return Product::query()
             ->active()
+            // The map below reads $p->category?->slug. Without this the
+            // relation lazy-loads per row, and AppServiceProvider turns lazy
+            // loading into an exception outside production — so the whole
+            // suggest endpoint 500'd on the first suggestion that had a
+            // category, killing the dropdown on local and staging with every
+            // keystroke. In production it was an N+1: up to six extra selects
+            // per keypress on an endpoint every shopper hits while typing.
+            // related() and deals() both eager-load; only this one was missed.
+            ->with('category:id,slug')
             ->where(function (Builder $q) use ($term): void {
                 $q->where('title', 'like', "%{$term}%")
                     ->orWhere('brand', 'like', "%{$term}%")
