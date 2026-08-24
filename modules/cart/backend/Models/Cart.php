@@ -56,7 +56,18 @@ class Cart extends Model
                 ->first();
 
             if ($existing !== null) {
-                $existing->qty = min($existing->qty + $incoming->qty, CartItem::MAX_QTY);
+                // The ceiling is the product's here too. Folding a guest cart
+                // holding a 1,000-unit reel into the user's cart on login used
+                // to truncate the merged line to 99, and a merge says nothing
+                // to the customer about what it changed. loadMissing() because
+                // $existing came from its own query — a bare $existing->product
+                // is a lazy read, which AppServiceProvider makes throw outside
+                // production.
+                $existing->loadMissing('product');
+                $existing->qty = min(
+                    $existing->qty + $incoming->qty,
+                    CartItem::maxQtyFor($existing->product?->moq),
+                );
                 $existing->save();
                 continue;
             }

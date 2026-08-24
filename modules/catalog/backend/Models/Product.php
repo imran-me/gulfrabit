@@ -59,6 +59,12 @@ class Product extends Model
             'original_price_poisha' => 'integer',
             'cost_poisha'           => 'integer',
             'review_count'          => 'integer',
+            // unsignedInteger in the schema, but left uncast it arrives as the
+            // string "1000" under PDO's emulated prepares, and
+            // CartItem::maxQtyFor() declares ?int under strict_types — that
+            // combination is a TypeError on the first B2B add-to-cart, not
+            // merely a wrong number.
+            'moq'                   => 'integer',
         ];
     }
 

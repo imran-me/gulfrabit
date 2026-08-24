@@ -22,8 +22,38 @@ class CartItem extends Model
 {
     use HasFactory;
 
-    /** Matches the frontend stepper cap, so the two cannot disagree. */
+    /**
+     * The ceiling for a product that has NO minimum order quantity. It was
+     * never the ceiling for every product, whatever its name suggests — read it
+     * through maxQtyFor(), which should be the only thing that touches it.
+     */
     public const MAX_QTY = 99;
+
+    /**
+     * cart_items.qty and order_items.qty are both unsignedSmallInteger, so
+     * 65,535 is the largest quantity the schema can actually hold. A ceiling
+     * above it would pass validation and then fail the INSERT with an
+     * out-of-range QueryException — a 500 in place of a 422 the customer could
+     * act on.
+     */
+    public const COLUMN_MAX_QTY = 65535;
+
+    /**
+     * The most of one product a single cart line may hold.
+     *
+     * The rule is the storefront's: maxQty() in shared/js/core/state.js offers
+     * moq * 1,000 on the stepper for a product bought in multiples, and 99 for
+     * everything else. The server used to answer a flat 99 to both, so a
+     * 1,000-unit reel — offered by the product page, labelled "min 1,000 units"
+     * in the cart — could not be bought at all: Place Order came back 422 with
+     * "You can order up to 99 of an item at a time."
+     */
+    public static function maxQtyFor(?int $moq): int
+    {
+        return $moq !== null && $moq > 0
+            ? min($moq * 1000, self::COLUMN_MAX_QTY)
+            : self::MAX_QTY;
+    }
 
     protected $fillable = ['cart_id', 'product_id', 'variant', 'qty', 'added_price_poisha'];
 

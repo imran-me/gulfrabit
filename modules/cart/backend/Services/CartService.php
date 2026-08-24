@@ -95,13 +95,13 @@ final class CartService
             ->first();
 
         if ($line !== null) {
-            $line->qty = $this->clampQty($line->qty + $qty);
+            $line->qty = $this->clampQty($line->qty + $qty, $product->moq);
             $line->save();
         } else {
             $cart->items()->create([
                 'product_id'         => $product->id,
                 'variant'            => $variant,
-                'qty'                => $this->clampQty($qty),
+                'qty'                => $this->clampQty($qty, $product->moq),
                 'added_price_poisha' => $product->price_poisha,
             ]);
         }
@@ -118,7 +118,13 @@ final class CartService
         if ($qty <= 0) {
             $line->delete();
         } else {
-            $line->qty = $this->clampQty($qty);
+            // The ceiling is this product's moq, and $line was fetched on its
+            // own, so the product has to be pulled in deliberately:
+            // AppServiceProvider turns an unloaded relation read into a
+            // LazyLoadingViolationException outside production, which would
+            // throw on every quantity edit in development.
+            $line->loadMissing('product');
+            $line->qty = $this->clampQty($qty, $line->product?->moq);
             $line->save();
         }
 
@@ -299,8 +305,19 @@ final class CartService
         return array_values(array_unique($notices));
     }
 
-    private function clampQty(int $qty): int
+    /**
+     * A line's ceiling is the product's, not a flat 99: a reel of 1,000
+     * switches is one line of 1,000, not eleven-and-a-bit lines of 99. Clamping
+     * everything to CartItem::MAX_QTY silently rewrote such an order to 99
+     * units — at a unit price that only exists at 1,000 — and the only clue the
+     * customer would have had is a number in their cart they never typed. That
+     * is why $moq is required rather than optional: a caller that does not know
+     * the product cannot quietly get the retail answer.
+     *
+     * $moq is null for retail products, which keeps the 99 ceiling.
+     */
+    private function clampQty(int $qty, ?int $moq): int
     {
-        return max(1, min($qty, CartItem::MAX_QTY));
+        return max(1, min($qty, CartItem::maxQtyFor($moq)));
     }
 }

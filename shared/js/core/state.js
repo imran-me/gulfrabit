@@ -54,7 +54,10 @@ const RETAIL_MAX = 99;
 function minQty(line) { return Math.max(1, Number(line?.moq) || 1); }
 function maxQty(line) {
   const moq = Number(line?.moq) || 0;
-  return moq ? moq * 1000 : RETAIL_MAX;
+  // 65,535 is all cart_items.qty can hold (unsignedSmallInteger), and the
+  // server clamps there as well — a stepper that went higher would only earn a
+  // 422 the customer can do nothing about.
+  return moq ? Math.min(moq * 1000, 65535) : RETAIL_MAX;
 }
 function clampQty(line, qty) {
   const n = Number.isFinite(qty) ? qty : minQty(line);
