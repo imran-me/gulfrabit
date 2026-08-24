@@ -15,7 +15,23 @@ async function init() {
   const products = await getProductsByCategory('industrial-raw-materials');
   renderList(products);
   renderDatasheets(products);
+  fillProductChoices(products);
   wireRFQ();
+}
+
+/**
+ * The RFQ's product list, drawn from the same catalogue as the rows above.
+ *
+ * It has to be a real SKU. SubmitQuoteRequest validates items.*.sku with
+ * exists:products,sku, and the admin inbox reads each line back against the
+ * product it names.
+ */
+function fillProductChoices(products) {
+  const sel = document.querySelector('[data-rfq-product]');
+  if (!sel) return;
+  sel.insertAdjacentHTML('beforeend', products
+    .map((p) => `<option value="${escapeAttr(p.id)}">${escapeHtml(p.title)}${p.moq ? ` (MOQ ${p.moq})` : ''}</option>`)
+    .join(''));
 }
 
 function renderList(products) {
@@ -45,7 +61,7 @@ function specRow(p) {
         <table class="tier-table"><tbody>${tiers}</tbody></table>
       </div>
       <div style="display:flex;flex-direction:column;gap:.5rem">
-        <a class="btn-gr btn-primary-gr btn-sm-gr" href="#rfq">Request Quote</a>
+        <a class="btn-gr btn-primary-gr btn-sm-gr" href="#rfq" data-rfq-pick="${escapeAttr(p.id)}">Request Quote</a>
         ${p.datasheet ? `<a class="btn-gr btn-ghost-gr btn-sm-gr" href="${p.datasheet}" download>Datasheet</a>` : ''}
       </div>
     </article>`;
@@ -62,18 +78,86 @@ function renderDatasheets(products) {
     </div>`).join('') || '<p class="text-muted-gr">Datasheets available on request.</p>';
 }
 
+/**
+ * The RFQ, actually sent.
+ *
+ * This handler used to validate, reset the form, and toast "RFQ received. Our
+ * team will respond within 48 hours." There was no network call anywhere in
+ * it: the lead was gone the instant the form reset, and the answer to "what
+ * does the buyer see when the API is down" was the same as when it is up.
+ *
+ * None of that was a missing feature. POST /api/b2b/quotes is live, throttled,
+ * and deliberately public; QuoteService and the quote_requests tables are
+ * migrated; quotes-page.js is a finished admin inbox. The shop owner has been
+ * watching a screen the storefront could never fill.
+ */
 function wireRFQ() {
   const form = document.querySelector('[data-rfq-form]');
   if (!form) return;
+
   attachLiveValidation(form);
-  form.addEventListener('submit', (e) => {
+
+  // "Request Quote" on a catalogue row lands here with that row already
+  // chosen, rather than on an empty form the buyer has to match back to
+  // whatever they were reading.
+  document.querySelectorAll('[data-rfq-pick]').forEach((a) => a.addEventListener('click', () => {
+    const sel = form.querySelector('[data-rfq-product]');
+    if (sel) sel.value = a.dataset.rfqPick;
+  }));
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
     const { valid } = validateForm(form);
     if (!valid) { toast.error('Please complete the required fields.'); return; }
-    // TODO: backend — POST /b2b/rfq (see modules/b2b/backend/endpoints.md).
-    form.reset();
-    form.querySelectorAll('.is-valid').forEach((f) => f.classList.remove('is-valid'));
-    toast.success('RFQ received. Our team will respond within 48 hours.');
+
+    const btn = form.querySelector('button[type="submit"]');
+    const label = btn?.innerHTML;
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+    const restore = () => { if (btn) { btn.disabled = false; btn.innerHTML = label; } };
+
+    const g = (n) => form.querySelector(`[name="${n}"]`)?.value.trim() || '';
+
+    try {
+      const res = await fetch('/api/b2b/quotes', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company: g('company'),
+          contact: g('contact'),
+          phone: g('phone'),
+          email: g('email') || null,
+          notes: g('notes') || null,
+          // An array from the start, because the server has always taken one.
+          // Today's form fills a single line.
+          items: [{ sku: g('sku'), qty: Number(g('qty')) }],
+        }),
+      });
+
+      const body = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        // The form is deliberately NOT reset. An RFQ that clears itself on a
+        // refusal makes the buyer retype every field to correct one of them.
+        restore();
+        toast.error(body.message || 'That could not be sent. Please check the details and try again.');
+        return;
+      }
+
+      form.reset();
+      form.querySelectorAll('.is-valid').forEach((f) => f.classList.remove('is-valid'));
+      restore();
+
+      const ref = body.data?.reference;
+      toast.success(ref
+        ? `RFQ ${ref} received. Our B2B desk replies within one working day.`
+        : 'RFQ received. Our B2B desk replies within one working day.');
+    } catch {
+      // It never reached the server. Say so, and leave every field where it is.
+      restore();
+      toast.error('We could not send that - check your connection and try again.');
+    }
   });
 }
 
