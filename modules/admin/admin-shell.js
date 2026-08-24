@@ -98,8 +98,9 @@ async function boot() {
 
   if (session.isFixture) warnFixture();
   paintIdentity(session);
-  paintNav(session);
+  const allowed = paintNav(session);
   wireRail(root);
+  wirePalette(root, allowed);
   root.hidden = false;
   document.dispatchEvent(new CustomEvent('admin:ready', { detail: { session } }));
 }
@@ -169,9 +170,15 @@ function paintIdentity(session) {
   });
 }
 
+/**
+ * Paints the sidebar and hands back the screens this role may open, so the
+ * jump-to list is built from the same filtered set rather than a second copy
+ * of the same rule. Two places deciding what a warehouse account may see is
+ * how one of them ends up offering a door the other has already shut.
+ */
 function paintNav(session) {
   const host = document.querySelector('[data-admin-nav]');
-  if (!host) return;
+  if (!host) return [];
 
   // Hide what this role cannot open. The server enforces the same rule, so
   // this is about not offering a door that will be shut in their face.
@@ -209,10 +216,11 @@ function paintNav(session) {
 
   if (!allowed.length) {
     host.innerHTML = '<p class="anav__empty">Your role has no screens assigned. Ask an owner.</p>';
-    return;
+    return allowed;
   }
 
   scrollCurrentIntoView(host);
+  return allowed;
 }
 
 /**
@@ -237,6 +245,167 @@ function scrollCurrentIntoView(host) {
   const item = current.getBoundingClientRect();
   const row = host.getBoundingClientRect();
   host.scrollLeft += item.left - row.left - (row.width - item.width) / 2;
+}
+
+/* ---- Jump to a screen -----------------------------------------------------
+   Sixteen screens in six groups. Even open, the sidebar does not show all of
+   them on a 900px-tall laptop — Books and Settings are below the fold — and
+   railed it shows none of their names. Somebody who knows they want the
+   journal should not have to go looking for it in a list.
+
+   So: Ctrl+K (Command+K on a Mac), and a button in the sidebar that says so.
+   A shortcut nobody is told about is not a feature, and a panel used by
+   warehouse staff and accountants cannot assume anyone read a changelog.
+
+   The list is the screens THIS ROLE may open, taken from the same filtered
+   array the sidebar was painted from. A jump-to that offers a door the sidebar
+   has already shut is a way to find out your account is refused, one 403 at a
+   time. */
+function wirePalette(root, allowed) {
+  const dlg = root.querySelector('[data-admin-palette]');
+  const input = dlg?.querySelector('[data-palette-input]');
+  const list = dlg?.querySelector('[data-palette-list]');
+  const none = dlg?.querySelector('[data-palette-none]');
+  const opener = root.querySelector('[data-admin-find]');
+  if (!dlg || !input || !list || !none) return;
+
+  /* The label on the button has to match the key that actually works. Printing
+     "Ctrl K" to somebody on a Mac teaches them the wrong thing about the panel
+     and then does nothing when they press it. */
+  const mac = /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent);
+  const keyLabel = root.querySelector('[data-admin-find-key]');
+  if (keyLabel) keyLabel.textContent = mac ? '⌘ K' : 'Ctrl K';
+
+  let shown = [];
+  let active = 0;
+
+  render('');
+
+  opener?.addEventListener('click', open);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'k' && e.key !== 'K') return;
+    if (!(mac ? e.metaKey : e.ctrlKey)) return;
+    // Only ours to take once we know we can honour it — otherwise the
+    // browser's own Ctrl+K is swallowed for nothing.
+    e.preventDefault();
+    if (dlg.open) close(); else open();
+  });
+
+  /* Escape, the backdrop click and the focus trap are the dialog element's
+     own doing. Nothing here re-implements them, which is the point of using
+     one: a hand-rolled overlay's trap stops being true the moment somebody
+     adds a focusable child, and nobody notices for a year. */
+  dlg.addEventListener('close', () => {
+    input.value = '';
+    render('');
+    opener?.setAttribute('aria-expanded', 'false');
+  });
+
+  // The backdrop is part of the dialog element, so a click on it lands on the
+  // dialog itself rather than on any of its children.
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+
+  input.addEventListener('input', () => render(input.value.trim().toLowerCase()));
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown')      move(1);
+    else if (e.key === 'ArrowUp')   move(-1);
+    else if (e.key === 'Home')      move(-shown.length);
+    else if (e.key === 'End')       move(shown.length);
+    else if (e.key === 'Enter')     go();
+    else return;
+    e.preventDefault();
+  });
+
+  list.addEventListener('click', (e) => {
+    const li = e.target.closest('[data-index]');
+    if (!li) return;
+    active = Number(li.dataset.index);
+    go();
+  });
+
+  /* Highlighting the row under the pointer as well as the one the arrows are
+     on would give two "selected" rows and no way to tell which Enter takes. */
+  list.addEventListener('pointermove', (e) => {
+    const li = e.target.closest('[data-index]');
+    if (li && Number(li.dataset.index) !== active) {
+      active = Number(li.dataset.index);
+      paintActive();
+    }
+  });
+
+  function open() {
+    if (dlg.open) return;
+    dlg.showModal();
+    opener?.setAttribute('aria-expanded', 'true');
+    input.focus();
+  }
+
+  function close() {
+    if (dlg.open) dlg.close();
+  }
+
+  function render(q) {
+    shown = q
+      ? allowed.filter((s) => `${s.label} ${s.group}`.toLowerCase().includes(q))
+      : allowed.slice();
+    active = 0;
+
+    list.innerHTML = shown.map((s, i) => `
+      <li class="apal__item" role="option" id="apal-o${i}" data-index="${i}" aria-selected="false">
+        <span class="apal__icon" aria-hidden="true">${s.icon}</span>
+        <span class="apal__label">${highlight(s.label, q)}</span>
+        <span class="apal__group">${escapeHtml(s.group)}</span>
+      </li>`).join('');
+
+    none.hidden = shown.length > 0;
+    list.hidden = shown.length === 0;
+    paintActive();
+  }
+
+  function move(by) {
+    if (!shown.length) return;
+    // Clamped, not wrapped. Held down, a wrapping list runs past the end and
+    // back to the top, and you lose your place in a list of sixteen.
+    active = Math.min(shown.length - 1, Math.max(0, active + by));
+    paintActive();
+  }
+
+  function paintActive() {
+    const rows = list.children;
+    for (let i = 0; i < rows.length; i++) {
+      rows[i].classList.toggle('is-active', i === active);
+      rows[i].setAttribute('aria-selected', String(i === active));
+    }
+    // What the arrows are on, said out loud. Without it a screen reader
+    // announces the box and never mentions that the selection moved.
+    input.setAttribute('aria-activedescendant', shown.length ? `apal-o${active}` : '');
+    rows[active]?.scrollIntoView({ block: 'nearest' });
+  }
+
+  function go() {
+    const screen = shown[active];
+    if (!screen) return;
+    // Already here. Reloading the page you are standing on loses unsaved work
+    // in the product editor for no gain.
+    if (location.pathname === screen.href) return close();
+    location.assign(screen.href);
+  }
+}
+
+/**
+ * The matched run of the label, marked. Every piece is escaped on its own and
+ * only then joined, because escaping the whole string first moves the indices
+ * this slices at — `&` becomes five characters and the mark lands mid-entity.
+ */
+function highlight(label, q) {
+  if (!q) return escapeHtml(label);
+  const at = label.toLowerCase().indexOf(q);
+  if (at < 0) return escapeHtml(label);
+  return escapeHtml(label.slice(0, at))
+    + `<mark>${escapeHtml(label.slice(at, at + q.length))}</mark>`
+    + escapeHtml(label.slice(at + q.length));
 }
 
 /**

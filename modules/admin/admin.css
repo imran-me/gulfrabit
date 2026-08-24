@@ -122,6 +122,8 @@
     z-index: 30;
     transition: width var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
   }
+  .admin.is-rail .anav-find span,
+  .admin.is-rail .anav-find kbd,
   .admin.is-rail .admin__brand span,
   .admin.is-rail .anav__title,
   .admin.is-rail .anav__link > span:not(.anav__icon),
@@ -136,6 +138,7 @@
   .admin.is-rail .admin__top { flex-direction: column; gap: var(--space-3); }
   .admin.is-rail .admin__brand { flex: 0 0 auto; justify-content: center; }
   .admin.is-rail .anav__link { justify-content: center; padding-inline: 0; }
+  .admin.is-rail .anav-find { justify-content: center; padding-inline: 0; }
   /* The group headings are gone, so the groups need some other edge or the
      sixteen icons read as one undifferentiated column. */
   .admin.is-rail .anav__group + .anav__group {
@@ -165,12 +168,16 @@
   .admin.is-rail .admin__side:has(:focus-visible) .anav__title,
   .admin.is-rail .admin__side:hover .anav__link > span:not(.anav__icon),
   .admin.is-rail .admin__side:has(:focus-visible) .anav__link > span:not(.anav__icon),
+  .admin.is-rail .admin__side:hover .anav-find span,
+  .admin.is-rail .admin__side:has(:focus-visible) .anav-find span,
   .admin.is-rail .admin__side:hover .admin__who-name,
   .admin.is-rail .admin__side:has(:focus-visible) .admin__who-name,
   .admin.is-rail .admin__side:hover .admin__signout,
   .admin.is-rail .admin__side:has(:focus-visible) .admin__signout { display: block; }
   .admin.is-rail .admin__side:hover .admin__who-role,
-  .admin.is-rail .admin__side:has(:focus-visible) .admin__who-role { display: inline-block; }
+  .admin.is-rail .admin__side:has(:focus-visible) .admin__who-role,
+  .admin.is-rail .admin__side:hover .anav-find kbd,
+  .admin.is-rail .admin__side:has(:focus-visible) .anav-find kbd { display: inline-block; }
   .admin.is-rail .admin__side:hover .admin__brand,
   .admin.is-rail .admin__side:has(:focus-visible) .admin__brand { flex: 1 1 auto; justify-content: flex-start; }
   .admin.is-rail .admin__side:hover .admin__top,
@@ -179,7 +186,9 @@
     gap: var(--space-2);
   }
   .admin.is-rail .admin__side:hover .anav__link,
-  .admin.is-rail .admin__side:has(:focus-visible) .anav__link {
+  .admin.is-rail .admin__side:has(:focus-visible) .anav__link,
+  .admin.is-rail .admin__side:hover .anav-find,
+  .admin.is-rail .admin__side:has(:focus-visible) .anav-find {
     justify-content: flex-start;
     padding-inline: var(--space-3);
   }
@@ -265,6 +274,139 @@
 .anav__icon { display: inline-flex; width: 18px; height: 18px; flex: 0 0 auto; }
 .anav__icon svg { width: 100%; height: 100%; }
 .anav__empty { font-size: var(--fs-14); opacity: .7; }
+
+/* ---- Jump to a screen -------------------------------------------------
+   The sidebar's own control, sitting above the nav rather than inside it: it
+   is a way to reach every screen, not one of them. */
+.anav-find {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: rgba(4, 25, 31, .45);
+  border: 1px solid rgba(232, 207, 142, .18);
+  border-radius: var(--radius-sm);
+  color: rgba(255, 255, 255, .62);
+  font: inherit;
+  font-size: var(--fs-14);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.anav-find:hover { border-color: rgba(79, 201, 228, .45); color: #fff; }
+.anav-find:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
+.anav-find svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.anav-find span { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; }
+.anav-find kbd {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, .06);
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: .04em;
+  color: rgba(255, 255, 255, .7);
+}
+
+/* The dialog. Near the top rather than dead centre: the list grows downward,
+   and a box that is vertically centred moves its own search field every time
+   the number of matches changes. */
+.apal {
+  width: min(94vw, 520px);
+  max-height: min(70vh, 32rem);
+  margin: 12vh auto auto;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  box-shadow: 0 24px 64px rgba(4, 25, 31, .34);
+  color: var(--text-primary);
+}
+.apal::backdrop { background: rgba(4, 25, 31, .46); }
+
+.apal__search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-hairline);
+  color: var(--text-muted);
+}
+.apal__search svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.apal__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--fs-16);
+  color: var(--text-primary);
+}
+/* The box IS the dialog; a ring drawn around the input inside it would be a
+   second border 20px in from the first. */
+.apal__input:focus { outline: none; }
+
+.apal__list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-2);
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+.apal__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  cursor: pointer;
+}
+/* One highlight, driven by the arrow keys, whether the pointer or the keyboard
+   last moved it — see the pointermove handler. Two would mean two rows looking
+   selected and no way to know which one Enter takes. */
+.apal__item.is-active { background: rgba(27, 180, 212, .12); box-shadow: inset 2px 0 0 var(--gr-gold-accent); }
+.apal__icon { display: inline-flex; width: 18px; height: 18px; flex: 0 0 auto; color: var(--text-secondary); }
+.apal__icon svg { width: 100%; height: 100%; }
+.apal__label { flex: 1 1 auto; min-width: 0; }
+.apal__label mark { background: rgba(201, 162, 75, .3); color: inherit; border-radius: 2px; }
+.apal__group {
+  flex: 0 0 auto;
+  font-size: var(--fs-12);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.apal__none { margin: 0; padding: var(--space-6) var(--space-5); text-align: center; color: var(--text-muted); font-size: var(--fs-14); }
+.apal__hint {
+  margin: 0;
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--border-hairline);
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-size: var(--fs-12);
+}
+.apal__hint kbd {
+  padding: 1px 5px;
+  margin-right: 2px;
+  border: 1px solid var(--gr-border);
+  border-radius: 3px;
+  background: var(--surface-raised);
+  font-family: var(--font-body);
+  font-size: 10px;
+}
+/* The hint is for a keyboard, and a phone has none — it is one more line to
+   scroll past on the screen with the least room. */
+@media (max-width: 599.98px) {
+  .apal__hint { display: none; }
+  .apal { margin-top: 6vh; }
+}
 
 /* ---- Identity / sign out ---------------------------------------------- */
 .admin__who {
@@ -398,10 +540,24 @@
      the strip costs three rows instead of two — 60-odd pixels of a phone
      screen spent on nothing. */
   .admin__top   { order: 1; padding-bottom: 0; border-bottom: 0; }
-  .admin__who   { order: 2; margin-left: auto; text-align: right; border-top: 0; padding-top: 0; }
-  .anav         { order: 3; flex: 1 1 100%; }
+  .anav-find    { order: 2; margin-left: auto; }
+  .admin__who   { order: 3; text-align: right; border-top: 0; padding-top: 0; }
+  .anav         { order: 4; flex: 1 1 100%; }
   /* Nothing to collapse: the strip has no width to give back. */
   .admin__rail  { display: none; }
+  /* The jump-to earns its place on the phone more than anywhere — the strip is
+     a scrolling row of sixteen and only three or four are on screen. But it
+     earns it as a button, not as a sentence and a keyboard shortcut nobody on
+     a phone can press. */
+  .anav-find {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
+    justify-content: center;
+    padding: 0;
+  }
+  .anav-find span,
+  .anav-find kbd { display: none; }
 
   /* ONE scrolling row, not six stacked ones.
      The groups are block boxes, so wrapping the links inside each one still

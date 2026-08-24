@@ -107,7 +107,7 @@ try {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=7965032f">
-  <link rel="stylesheet" href="../../modules/admin/admin.css?v=ad109170">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=99b15a5c">
   <link rel="stylesheet" href="../../modules/highlights/highlights.css?v=0c614682">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
@@ -145,6 +145,21 @@ try {
         </button>
       </div>
 
+      <!-- The visible half of the jump-to. A keyboard shortcut nobody is told
+           about is not a feature, so the shortcut is printed on the control
+           that also works when clicked. admin-shell.js writes Ctrl or the
+           Command glyph into the <kbd> depending on the platform. -->
+      <button type="button" class="anav-find" data-admin-find
+              aria-label="Jump to a screen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>
+        </svg>
+        <!-- Short, because the shortcut has to fit beside it inside 248px, and
+             the accessible name is on the button rather than in this span. -->
+        <span>Jump to…</span>
+        <kbd data-admin-find-key>Ctrl K</kbd>
+      </button>
+
       <nav class="anav" aria-label="Admin sections" data-admin-nav></nav>
 
       <div class="admin__who">
@@ -153,6 +168,31 @@ try {
         <button type="button" class="admin__signout" data-admin-signout>Sign out</button>
       </div>
     </aside>
+
+    <!-- A real <dialog>, opened with showModal(). The focus trap, Escape, the
+         inert background and returning focus to whatever opened it are all the
+         platform's job then, and none of them can quietly stop being true the
+         way a hand-rolled overlay's can. The list is filled by admin-shell.js
+         from the same registry the sidebar paints from, so a screen this role
+         may not open is not offered here either. -->
+    <dialog class="apal" data-admin-palette aria-label="Jump to a screen">
+      <div class="apal__search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>
+        </svg>
+        <input class="apal__input" type="text" data-palette-input
+               placeholder="Jump to a screen…" autocomplete="off"
+               spellcheck="false" aria-label="Jump to a screen"
+               role="combobox" aria-expanded="true" aria-controls="apal-list"
+               aria-autocomplete="list">
+      </div>
+      <ul class="apal__list" id="apal-list" role="listbox" data-palette-list
+          aria-label="Screens"></ul>
+      <p class="apal__none" data-palette-none hidden>No screen matches that.</p>
+      <p class="apal__hint">
+        <kbd>↑</kbd><kbd>↓</kbd> to move · <kbd>Enter</kbd> to open · <kbd>Esc</kbd> to close
+      </p>
+    </dialog>
 
     <main class="admin__main" id="main">
 
@@ -182,7 +222,7 @@ try {
   </div>
 
   <script type="module" src="../../shared/js/main.js?v=65e9eef8"></script>
-  <script type="module" src="../../modules/admin/admin-shell.js?v=21b9b9af"></script>
+  <script type="module" src="../../modules/admin/admin-shell.js?v=f5137267"></script>
   <script type="module" src="../../modules/admin/admin-nav.js?v=130be8cb"></script>
   <script type="module" src="../../modules/courier/courier-nav.js?v=f4fd5181"></script>
   <script type="module" src="../../modules/inventory/inventory-nav.js?v=1b82ef57"></script>
