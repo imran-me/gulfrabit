@@ -107,13 +107,17 @@ try {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=7965032f">
-  <link rel="stylesheet" href="../../modules/admin/admin.css?v=cedfb395">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=fcf6d290">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
 </head>
 <body>
-<main class="alogin" id="main">
+<!-- data-admin-shell so the shop's furniture stays out of the staff
+       sign-in too: cart-drawer.js and mobile-tabbar.js both decline when
+       it is present, and without it this page was showing a customer
+       Home / Shop / Cart / Account bar under a staff password box. -->
+  <main class="alogin" id="main" data-admin-shell>
     <form class="alogin__box" data-admin-login novalidate>
       <div class="alogin__brand">
         <picture>

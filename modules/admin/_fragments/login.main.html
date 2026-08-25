@@ -1,4 +1,8 @@
-  <main class="alogin" id="main">
+  <!-- data-admin-shell so the shop's furniture stays out of the staff
+       sign-in too: cart-drawer.js and mobile-tabbar.js both decline when
+       it is present, and without it this page was showing a customer
+       Home / Shop / Cart / Account bar under a staff password box. -->
+  <main class="alogin" id="main" data-admin-shell>
     <form class="alogin__box" data-admin-login novalidate>
       <div class="alogin__brand">
         <picture>

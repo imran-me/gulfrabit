@@ -138,6 +138,15 @@ export function closeCartDrawer() {
 
 /** Initialise the drawer and bind any [data-open-cart] triggers (header icon). */
 export function initCartDrawer() {
+  /* Not in the staff panel. The admin screens load shared/js/main.js for the
+     handful of utilities they share with the shop, and every init in it ran —
+     so a shopping cart drawer, 359px of fixed overlay with a "Continue
+     shopping" button in it, was being built into all twenty-two admin screens.
+     Invisible until something opened it, and nothing there ever would, but it
+     is the customer's furniture standing in the merchant's office. The tab bar
+     twenty lines into mobile-tabbar.js already declines for the same reason. */
+  if (document.querySelector('[data-admin-shell]')) return;
+
   build();
   document.querySelectorAll('[data-open-cart]').forEach((btn) =>
     btn.addEventListener('click', (e) => { e.preventDefault(); openCartDrawer(); }));
