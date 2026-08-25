@@ -64,7 +64,18 @@ class ProductStoreRequest extends FormRequest
             // created in a shape the edit screen is then unable to express.
             'unit' => ['sometimes', 'nullable', 'string', 'max:32'],
 
-            'tags'          => ['sometimes', 'array', 'max:12'],
+            // Merchandising lists. dietary and searchTerms stay bounded so a
+            // paste accident cannot put a thousand entries in a JSON column
+            // that is read on every render.
+            //
+            // tags is deliberately UNBOUNDED, by the owner's decision. It is
+            // the merchant's own labelling vocabulary — the four placement
+            // tags plus whatever they choose to file a product under — and a
+            // cap of twelve meant eight usable labels once the placements were
+            // counted, discovered only after pressing Save. The per-tag length
+            // cap below still stands, so the column cannot take a novel; it
+            // can take a long list of short words, which is what a tag is.
+            'tags'          => ['sometimes', 'array'],
             'tags.*'        => ['string', 'max:32'],
             'dietary'       => ['sometimes', 'array', 'max:12'],
             'dietary.*'     => ['string', 'max:32'],

@@ -33,6 +33,11 @@ class ProductIndexRequest extends FormRequest
             'brands.*'   => ['string', 'max:96'],
             'origins'    => ['sometimes', 'array', 'max:30'],
             'origins.*'  => ['string', 'max:64'],
+            // Still capped, and this one is not the merchant's limit — a
+            // product may carry as many tags as its owner likes (see
+            // ProductUpdateRequest). This is how many a SHOPPER may filter by
+            // in one request, and each becomes its own whereJsonContains, so
+            // the number is a query-cost ceiling rather than a vocabulary one.
             'tags'       => ['sometimes', 'array', 'max:12'],
             'tags.*'     => ['string', 'max:32'],
             'dietary'    => ['sometimes', 'array', 'max:12'],
