@@ -52,6 +52,22 @@ async function fromApi(path) {
       // call on this page goes straight to the JSON instead of paying for a
       // round trip that will fail the same way.
       if (res.status === 404) apiAlive = false;
+
+      // Anything else is a backend that is up and broken, and falling back to
+      // the JSON is still right for the customer — yesterday's catalogue beats
+      // an error page to somebody trying to buy something. What was wrong was
+      // doing it in complete silence: a 500 on /categories served the shop a
+      // stale fixture, so a merchant who had just switched a category on in
+      // the panel saw the menu ignore them, with nothing anywhere saying the
+      // API had failed. The shop stays up; the failure stops being invisible.
+      else {
+        console.error(
+          '[catalog] /api/catalog%s answered %d — serving the bundled JSON instead. '
+          + 'The shop is showing fallback data until this is fixed.',
+          path, res.status,
+        );
+      }
+
       return null;
     }
     apiAlive = true;
