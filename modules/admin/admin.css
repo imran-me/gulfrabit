@@ -1581,6 +1581,186 @@
   .admin__brand { flex: 0 0 auto; }
 }
 
+/* ======================================================================
+   THE PANEL ON A PHONE
+   ----------------------------------------------------------------------
+   The shop owner works from a phone. Every list screen here is a wide
+   table — orders is ten columns and 817px, products eight and 720, and
+   stock, journal, movements, campaigns, quotes and couriers are all six or
+   seven — so `.atable { min-width: 720px }` and the sideways scroll on
+   `.atable-wrap` meant reading an order number, swiping right to find its
+   total, and losing the order number off the left edge on the way. There
+   is no row heading to hold on to in a table. Once per column, per row.
+
+   Under 720px each row becomes a card and each cell is printed beside its
+   column's name. The names come from the <thead> at runtime — see
+   modules/admin/admin-table-cards.js — so a moved column cannot leave a
+   mislabelled cell behind.
+   ====================================================================== */
+@media (max-width: 720px) {
+  /* The sideways scroll goes, and with it the height cap that existed to
+     give the sticky headings a scrollport. There are no headings to stick
+     down here: they are printed inside the cards instead, so a cap would
+     only trap the list in a short window inside a page that already
+     scrolls. */
+  .admin__main > .atable-wrap,
+  .atable-wrap {
+    overflow: visible;
+    max-height: none;
+    background: none;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .atable { min-width: 0; display: block; font-size: var(--fs-14); }
+  .atable thead { display: none; }
+  .atable tbody { display: block; }
+
+  .atable tbody tr {
+    display: block;
+    position: relative;
+    background: var(--surface-raised);
+    border: 1px solid var(--gr-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-3);
+  }
+  .atable tbody tr:last-child { margin-bottom: 0; }
+  /* The hover wash is a pointer affordance and there is no pointer here;
+     on a card it just looks like the row is stuck in a selected state. */
+  .atable tbody tr:hover { background: var(--surface-raised); }
+
+  .atable td {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: baseline;
+    /* start, not stretch: a status pill is a shape that should hug its word.
+       Stretched it becomes a full-width bar and reads as a progress meter. */
+    justify-items: start;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border-hairline);
+    text-align: left;
+  }
+
+  /* Every child pinned to the value column. Several cells hold more than one
+     thing — the customer cell is a name over a phone number, the status cell
+     is a pill with a pre-order date under it — and left to auto-placement the
+     second one wrapped into column 1, landing under the label at the card's
+     left margin as if it were a field of its own. */
+  .atable td > * { grid-column: 2; }
+
+  .atable tbody tr td:last-child { border-bottom: 0; padding-bottom: 0; }
+
+  /* The row's controls take the whole width and lose their heading. That
+     heading exists for a screen reader working across a table — printed on a
+     card it is two wrapped lines of "MOVE TO NEXT STAGE" beside one small
+     button. The <th> keeps it; the card does not repeat it. */
+  .atable td:has(.amenu),
+  .atable td:has(.arow-actions) { grid-template-columns: minmax(0, 1fr); }
+  .atable td:has(.amenu)::before,
+  .atable td:has(.arow-actions)::before { content: none; }
+
+  .atable td::before {
+    content: attr(data-label);
+    font-size: var(--fs-12);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-muted);
+    font-weight: var(--fw-semibold);
+  }
+
+  /* A cell with no heading — the select-all column, the row-actions column —
+     spans the card instead of leaving a 7.5rem hole where a label would go. */
+  .atable td:not([data-label]) { grid-template-columns: minmax(0, 1fr); }
+  .atable td:not([data-label])::before { content: none; }
+
+  /* Numbers stop being right-aligned once they are in a two-column grid:
+     against the label they read as a value, not as a column. */
+  .atable__num { text-align: left; }
+
+  /* The checkbox rides at the top of the card with the actions, not as a
+     row of its own — picking rows for a bulk action is the one thing you do
+     to a card without reading it. */
+  .atable td.atable__pick {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    width: auto;
+    padding: 0;
+    border: 0;
+  }
+  .atable td.atable__pick input { width: 22px; height: 22px; }
+  /* Room for it, so a long order number does not run under the checkbox. */
+  .atable tbody tr td:first-of-type:not(.atable__pick),
+  .atable td.atable__pick + td { padding-right: 2.5rem; }
+
+  /* "No backend connected yet — orders appear once the API is live." used to
+     live inside the sideways scroller, which meant an explanation you had to
+     scroll sideways to finish reading. */
+  .atable td.atable__empty {
+    display: block;
+    padding: var(--space-6) var(--space-4) !important;
+    text-align: center;
+    border: 1px solid var(--gr-border);
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+  }
+  .atable tbody tr:has(.atable__empty) {
+    border: 0; background: none; padding: 0;
+  }
+
+  /* Row controls wrap rather than being held on one line — that rule exists
+     for a table cell 9rem wide, and here they have the whole card. */
+  .arow-actions { flex-wrap: wrap; }
+
+  /* The pop-up menu was pushed down by 9rem of padding so it could escape
+     the scroller. The scroller is gone, so that hack would just leave nine
+     empty rems under the last card. */
+  .atable-wrap:has(.amenu[open]) { padding-bottom: 0; }
+}
+
+/* ---- Controls a finger has to hit --------------------------------------
+   Sixteen pixels is not a typography choice on iOS: Safari zooms the whole
+   page in when a field smaller than that takes focus, and then the merchant
+   is pinching back out to see the list they were filtering. Every filter bar
+   in the panel was at 14px. The 42px height stays — the row of switches is
+   still a row of switches — it is only the text that grows. */
+@media (max-width: 720px) {
+  .afilters .input-gr,
+  .afilters .select-gr,
+  .afilters__actions .btn-gr,
+  .apedit .input-gr,
+  .apedit .select-gr,
+  .apedit textarea.input-gr { font-size: var(--fs-16); }
+
+  .afilters .input-gr,
+  .afilters .select-gr { height: 46px; }
+  .afilters__actions .btn-gr { min-height: 46px; }
+
+  /* Two per row rather than a 150px basis that leaves a stranded third. */
+  .afilters__field { flex: 1 1 calc(50% - var(--space-2)); }
+  .afilters__field--wide { flex-basis: 100%; }
+}
+
+/* Sign out was 54x22 — a text link, and the one control in the masthead that
+   ends a session. The nav chips were 38px and the find button 36px. None of
+   them were unreachable, all of them were smaller than the finger aiming at
+   them, and this is the furniture of every screen in the panel. */
+@media (pointer: coarse) {
+  .admin__signout { display: inline-flex; align-items: center; min-height: 44px; }
+  .anav__link { min-height: 44px; }
+  .anav-find { width: 44px; height: 44px; }
+  .amenu > summary { min-height: 44px; display: inline-flex; align-items: center; }
+  .admin__brand { min-height: 44px; display: inline-flex; align-items: center; }
+
+  /* The panel's own buttons were 38px — "+ New product", "+ Upload images",
+     "Save note", the thing you came to the screen to press. Scoped inside the
+     shell so the storefront's buttons, which are already 44 or more, are not
+     touched. */
+  [data-admin-shell] .btn-gr { min-height: 44px; }
+}
+
 /* ---- Deleting, everywhere -----------------------------------------------
    The confirm dialog, the result toast, the Deleted tab and the red row link.
    One set of rules for a dozen screens across eight modules, because a

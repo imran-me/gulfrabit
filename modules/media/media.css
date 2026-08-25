@@ -530,6 +530,20 @@
 }
 
 .mfm__side-add:hover { border-color: var(--gr-cyan); color: var(--gr-cyan); }
+/* 26x26 for a "+" that adds a folder, and 30x28 for the S / M / L and grid /
+   list toggles. All fine under a mouse, all smaller than the fingertip aiming
+   at them — and this is the screen the merchant uses one-handed while holding
+   a phone in the other. */
+@media (pointer: coarse) {
+  .mfm__side-add { min-width: 44px; min-height: 44px; }
+
+  /* Under 16px, iOS zooms the page the moment the control takes focus — and
+     the sort select and the depth toggle sit right above a grid the merchant
+     is trying to look at. */
+  .mfm__sort .input-gr,
+  .mfm__sort select,
+  .mfm__deep select { font-size: var(--fs-16); }
+}
 
 .mfm__tree { padding: var(--space-2); max-height: 320px; overflow: auto; }
 
@@ -1340,6 +1354,10 @@ body.is-dragging-media .mtree__row { opacity: 1; }
 
 .mdrawer__url { display: flex; gap: var(--space-2); }
 .mdrawer__url input { flex: 1 1 auto; min-width: 0; font-size: var(--fs-12); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+/* 12px monospace fits a long path, and on iOS it also zooms the whole drawer
+   in the moment the field is tapped — which is every time, because tapping it
+   is how the path gets copied. The path scrolls inside the box instead. */
+@media (pointer: coarse) { .mdrawer__url input { font-size: var(--fs-16); } }
 
 .mdrawer__acts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .mdrawer__acts .mbtn { text-decoration: none; }
@@ -1599,4 +1617,13 @@ body.is-dragging-media .mtree__row { opacity: 1; }
   }
 
   .msheet.is-open .msheet__panel { transform: none; opacity: 1; }
+}
+
+/* The S / M / L and grid / list toggles, big enough to hit.
+   Down here rather than with the other touch rules four hundred lines up: the
+   `.mseg button` block that sets height 28px comes after them, and at equal
+   specificity the later rule wins. */
+@media (pointer: coarse) {
+  .mseg button { height: 44px; min-width: 44px; }
+  .mseg button svg { width: 18px; height: 18px; }
 }

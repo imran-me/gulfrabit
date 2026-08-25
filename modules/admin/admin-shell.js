@@ -19,6 +19,7 @@
  */
 
 import { adminFetch, getSession, signOut } from './backend/api.js';
+import { initTableCards } from './admin-table-cards.js';
 
 /* Shared across module instances for the same reason the boot flag lives on
    the document (see boot): the build's versioned <script src> and the nav
@@ -102,6 +103,9 @@ async function boot() {
   wireRail(root);
   wirePalette(root, allowed);
   wireMasthead(root);
+  // Before the screens paint, so the observer is watching when the first
+  // fetch lands. See admin-table-cards.js for why every list screen needs it.
+  initTableCards(document);
   root.hidden = false;
   document.dispatchEvent(new CustomEvent('admin:ready', { detail: { session } }));
 }
