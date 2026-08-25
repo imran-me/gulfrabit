@@ -430,6 +430,14 @@ function fail(message) {
   const el = document.querySelector('[data-order-error]');
   el.textContent = message;
   el.hidden = false;
+
+  // Brought to the person who pressed the button, not just unhidden somewhere
+  // below them. See the note on fail() in product-edit-page.js: an error slot
+  // further down the page than the control that triggered it reads as the
+  // button having done nothing at all.
+  el.tabIndex = -1;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.focus({ preventScroll: true });
 }
 
 const money = (n) => Number(n).toLocaleString('en-BD');

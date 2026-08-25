@@ -603,5 +603,14 @@ function fail(message) {
   el.textContent = message;
   el.hidden = false;
   el.style.background = '';
+
+  // Brought to the person who pressed the button, not just unhidden somewhere
+  // below them. See the note on fail() in product-edit-page.js: an error slot
+  // further down the page than the control that triggered it reads as the
+  // button having done nothing at all.
+  el.tabIndex = -1;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.focus({ preventScroll: true });
+
   el.style.color = '';
 }

@@ -683,10 +683,29 @@ function note(message) {
   el.hidden = false;
 }
 
+/**
+ * Why a save was refused — brought to the person who pressed Save.
+ *
+ * This used to unhide the message and stop. The Save button is at the foot of
+ * the details column and this slot is thirty-odd lines of markup further down,
+ * past the pricing card and the danger zone — which on a phone is well past
+ * the bottom of the screen. So pressing Save appeared to do nothing at all,
+ * and the reason it had not saved was somewhere below, unread. That is how
+ * "The tags field must not have more than 12 items." went unseen.
+ *
+ * role="alert" on the element already announced it to a screen reader; this is
+ * the same courtesy for everyone else. tabindex -1 so focus can land on a
+ * paragraph, and focus rather than scroll alone because it also puts the
+ * keyboard back at the message instead of at a button that did nothing.
+ */
 function fail(message) {
   const el = document.querySelector('[data-pe-error]');
   el.textContent = message;
   el.hidden = false;
+
+  el.tabIndex = -1;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.focus({ preventScroll: true });
 }
 
 function when(iso) {
