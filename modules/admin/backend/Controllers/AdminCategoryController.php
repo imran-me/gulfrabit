@@ -43,7 +43,15 @@ class AdminCategoryController extends Controller
         $categories = Category::query()
             ->withTrashed()
             ->withCount(['products as product_count'])
-            ->withCount(['products as live_product_count' => fn ($q) => $q->where('is_active', true)])
+            // products.is_active, QUALIFIED. withCount builds a correlated
+            // subquery, so the outer `categories` row is in scope inside it —
+            // and categories has an is_active column of its own. MySQL calls
+            // that ambiguous and refuses the whole query (SQLSTATE 23000,
+            // "Column 'is_active' in where clause is ambiguous"), which is a
+            // 500 on the one screen in the panel that runs it. SQLite resolves
+            // it to the inner table and never complained, which is how it got
+            // this far.
+            ->withCount(['products as live_product_count' => fn ($q) => $q->where('products.is_active', true)])
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
@@ -62,7 +70,14 @@ class AdminCategoryController extends Controller
                 'audience'    => $c->audience,
                 'icon'        => $c->icon,
                 'image'       => $c->image,
-                'parent'      => $c->parent_id ? ($slugById[$c->parent_id] ?? null) : null,
+                // ->get(), not [$id] ?? null. A Collection's offsetGet does a
+                // bare $this->items[$key], so a parent_id with no row in the
+                // set raises an undefined-key WARNING inside it — and Laravel's
+                // error handler turns any reported warning into an
+                // ErrorException. The ?? sees the null it returns and suppresses
+                // nothing, because the throw already happened. One orphaned
+                // parent_id and the whole screen is a 500 reading "Server Error".
+                'parent'      => $c->parent_id ? $slugById->get($c->parent_id) : null,
                 'isActive'    => $c->is_active,
                 'showInMenu'  => $c->show_in_menu,
                 'sortOrder'   => $c->sort_order,
