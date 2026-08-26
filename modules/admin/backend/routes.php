@@ -11,6 +11,7 @@ use Modules\Admin\Controllers\AdminCustomerController;
 use Modules\Admin\Controllers\AdminOrderController;
 use Modules\Admin\Controllers\AdminProductController;
 use Modules\Admin\Controllers\AdminPromotionController;
+use Modules\Admin\Controllers\AdminStaffController;
 
 /**
  * Admin module routes — the module's entire routing surface.
@@ -177,6 +178,35 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
                 Route::delete('/{category}', [AdminCategoryController::class, 'destroy'])->name('destroy');
                 Route::post('/{category}/restore', [AdminCategoryController::class, 'restore'])->name('restore');
             });
+        });
+
+        // Staff accounts — who works here, and what each of them may do.
+        //
+        // `admin:staff` is the entire gate, and `owner` is the only role
+        // holding that capability (AdminUser::CAPABILITIES). No `admin.owner`
+        // stacked on top: that middleware exists to say "you may work this
+        // area AND you may delete", and nothing in here deletes. Staff
+        // accounts are disabled, never removed, so an ex-employee's name stays
+        // attached to the stock movements and order transitions they made —
+        // see AdminStaffController's docblock.
+        Route::middleware('admin:staff')->prefix('staff')->name('staff.')->group(function (): void {
+            Route::get('/', [AdminStaffController::class, 'index'])->name('index');
+            Route::post('/', [AdminStaffController::class, 'store'])->name('store');
+            Route::patch('/{staff}', [AdminStaffController::class, 'update'])->name('update');
+
+            // POST, not PATCH. A reset does not edit a field somebody supplied
+            // — it MINTS a credential and hands it back once, which is a
+            // different kind of act and deserves a URL that says so.
+            Route::post('/{staff}/password', [AdminStaffController::class, 'resetPassword'])
+                ->name('password');
+
+            // Clears the five-failures lockout without touching the password.
+            Route::post('/{staff}/unlock', [AdminStaffController::class, 'unlock'])->name('unlock');
+
+            // The panel's version of removing somebody. There is deliberately
+            // no DELETE on this resource anywhere in this file.
+            Route::post('/{staff}/disable', [AdminStaffController::class, 'disable'])->name('disable');
+            Route::post('/{staff}/enable', [AdminStaffController::class, 'enable'])->name('enable');
         });
     });
 });

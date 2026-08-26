@@ -1,0 +1,390 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Admin\Controllers;
+
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Str;
+use Modules\Admin\Models\AdminUser;
+use Modules\Admin\Requests\StaffStoreRequest;
+use Modules\Admin\Requests\StaffUpdateRequest;
+
+/**
+ * Staff accounts: who works here, and what each of them may do.
+ *
+ * This is the screen that hands out access, which makes it the screen anyone
+ * with a foothold in the panel wants most. Four decisions follow from that and
+ * run through every method below.
+ *
+ * OWNER ONLY, AND NOT AS A COURTESY
+ * ---------------------------------
+ * Every route here is behind `admin:staff`, and `owner` is the only role that
+ * holds that capability — see AdminUser::CAPABILITIES. A manager cannot read
+ * this list, let alone appoint anybody. The screen is also absent from their
+ * sidebar, but that is decoration; the middleware is the control.
+ *
+ * NOBODY IS EVER DELETED
+ * ----------------------
+ * There is no destroy() here, and there is not meant to be. An ex-employee's
+ * name is on stock movements, order transitions, refunds and journal entries,
+ * and an audit trail whose actor ids point at nothing has stopped answering
+ * the one question it exists for. So accounts are DISABLED instead: they
+ * cannot sign in, they keep every record they touched, and they can be
+ * switched back on the day somebody returns from leave. The table carries no
+ * `deleted_at` column at all — the same decision, recorded one layer down in
+ * the 2026_07_27 migration.
+ *
+ * THIS PANEL MUST ALWAYS HAVE AN ACTIVE OWNER
+ * -------------------------------------------
+ * A panel with no active owner cannot appoint one, because appointing is
+ * itself an owner-only act. The way back is SSH, an .env edit and the seeder,
+ * which for a shop owner on a Friday evening means the panel is gone until
+ * somebody technical is free. Every method that could remove the last one
+ * refuses; see refuse() and AdminUser::isLastActiveOwner().
+ *
+ * PASSWORDS ARE GENERATED, SHOWN ONCE, NEVER READABLE AGAIN
+ * --------------------------------------------------------
+ * store() and resetPassword() are the only two places a plaintext credential
+ * exists, and in both it lives exactly as long as one response body. Nothing
+ * stores it, so nothing can hand it back — a forgotten password is a reset,
+ * not a lookup. See store() for why the server picks it rather than the owner.
+ */
+class AdminStaffController extends Controller
+{
+    /**
+     * GET /api/admin/staff
+     *
+     * Everyone, in one response, unpaginated. A shop has five to twenty staff
+     * accounts; paginating twelve rows adds a control that never moves and a
+     * second request to discover it was not needed.
+     *
+     * The role catalogue rides along in `meta`, so the create form's dropdown
+     * is built from what the server actually accepts. A copy of the role list
+     * in the JavaScript is a copy that drifts, and the way you find out is a
+     * 422 on a role the form itself offered.
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $me    = $request->user('admin');
+        $staff = AdminUser::query()->get();
+
+        /* Counted once, here, rather than asking isLastActiveOwner() per row —
+           that method runs a query, and twenty rows would be twenty queries to
+           answer a question with one number in it. The write paths still call
+           it, because there they ask about a single row and the answer has to
+           be current as of that write rather than as of a list drawn earlier. */
+        $activeOwners = $staff->where('role', 'owner')->where('is_active', true)->count();
+
+        /* Sorted in PHP by the order roles appear in AdminUser::ROLES, which is
+           deliberately most-powerful-first: an owner opening this screen should
+           see who holds the keys before they see anything else. In SQL this is
+           ORDER BY FIELD or a CASE ladder — one more dialect-specific fragment,
+           for a list that never fills a page. */
+        $rank = array_flip(AdminUser::ROLES);
+
+        $rows = $staff
+            ->sortBy(fn (AdminUser $u): array => [$rank[$u->role] ?? 99, mb_strtolower($u->name)])
+            ->values()
+            ->map(fn (AdminUser $u): array => $u->toStaffArray() + [
+                // A fact about the REQUEST, not about the row, which is why it
+                // is composed here and not in the model.
+                'isSelf'     => $u->id === $me->id,
+                'lockedRole' => $this->roleLockReason($u, $me, $activeOwners),
+            ]);
+
+        return response()->json([
+            'data' => $rows,
+            'meta' => [
+                'total'       => $staff->count(),
+                'activeCount' => $staff->where('is_active', true)->count(),
+                'ownerCount'  => $activeOwners,
+                'roles'       => AdminUser::roleCatalogue(),
+            ],
+        ]);
+    }
+
+    /**
+     * POST /api/admin/staff
+     *
+     * Creates the account and generates its password, which is returned ONCE
+     * in this response and never again. Nothing stores the plaintext, so no
+     * endpoint can read it back.
+     *
+     * WHY THE SERVER PICKS THE PASSWORD
+     * ---------------------------------
+     * The alternative is a password box on the form, and a password box on a
+     * form gets the shop's name and a year. This is the rule AdminUserSeeder
+     * already applies to the very first owner — generate it, show it once — so
+     * the only route to a weak staff credential in this shop is the owner of
+     * that credential deliberately choosing one later.
+     *
+     * The plaintext is in the response body, which is what "shown once" costs
+     * without a mail dependency: same-origin, over TLS in production, and
+     * never to be written to a log. It is named `password` rather than
+     * something coy precisely so nobody mistakes it for a token worth keeping.
+     */
+    public function store(StaffStoreRequest $request): JsonResponse
+    {
+        $password = Str::password(20);
+
+        $staff = AdminUser::create([
+            'name'      => $request->string('name')->toString(),
+            'email'     => $request->string('email')->toString(),
+            'role'      => $request->string('role')->toString(),
+            // Plaintext in, hash stored: the model's `hashed` cast does it on
+            // set. Passing Hash::make() here would also work — the cast lets an
+            // already-hashed value through — but one file doing it two ways is
+            // how somebody eventually double-hashes a password and spends an
+            // afternoon working out why a correct one is refused.
+            'password'  => $password,
+            'is_active' => true,
+        ]);
+
+        return response()->json([
+            'data'     => $staff->toStaffArray() + ['isSelf' => false, 'lockedRole' => null],
+            'password' => $password,
+            'message'  => "{$staff->name} can now sign in as " . AdminUser::labelFor($staff->role)
+                . '. Hand over the password below — it is not stored anywhere and cannot be '
+                . 'shown a second time.',
+        ], 201);
+    }
+
+    /**
+     * PATCH /api/admin/staff/{staff}
+     *
+     * Name, email and role. Not the password (that is a reset — it returns a
+     * credential, and no ordinary save should be in that business) and not
+     * `is_active` (that is disable/enable, which carries its own refusals and
+     * must not ride along in a form that mostly fixes typos).
+     */
+    public function update(StaffUpdateRequest $request, AdminUser $staff): JsonResponse
+    {
+        $me   = $request->user('admin');
+        $data = $request->validated();
+
+        /* Asked again here, even though index() already told the client which
+           rows are locked and why. That answer went to a browser — a place
+           where rules are displayed, not a place where they are kept. */
+        if (array_key_exists('role', $data) && $data['role'] !== $staff->role) {
+            if ($staff->id === $me->id) {
+                return $this->refuse(
+                    'You cannot change your own role. Ask another owner to do it — an owner '
+                    . 'who demotes themselves by accident has no way to undo it.'
+                );
+            }
+
+            if ($staff->isLastActiveOwner()) {
+                return $this->refuse(
+                    "{$staff->name} is the only active owner. Make somebody else an owner "
+                    . 'first, then change this account — otherwise nobody is left who can '
+                    . 'manage staff at all.'
+                );
+            }
+        }
+
+        $wasRole = $staff->role;
+        $staff->fill($data)->save();
+
+        /* Said in terms of what actually changed. "Saved." after a promotion is
+           technically true and tells the owner nothing about the one thing they
+           hesitated over before clicking. */
+        $message = $staff->role !== $wasRole
+            ? "{$staff->name} is now " . AdminUser::labelFor($staff->role)
+                . '. It applies to the next screen they open — the session guard reads their '
+                . 'role fresh on every request, so they do not have to sign in again.'
+            : "{$staff->name}'s details saved.";
+
+        return response()->json([
+            'data' => $staff->toStaffArray() + [
+                'isSelf'     => $staff->id === $me->id,
+                'lockedRole' => $this->roleLockReason($staff, $me, null),
+            ],
+            'message' => $message,
+        ]);
+    }
+
+    /**
+     * POST /api/admin/staff/{staff}/password
+     *
+     * A fresh generated password, shown once, exactly as store() does it. This
+     * is the forgotten-password path: on a panel with five accounts that is an
+     * owner and a colleague standing in the same shop, not a reset email with
+     * a token to expire and an SMTP server to keep alive.
+     *
+     * It also clears any lockout. Somebody who has just tripped the five-
+     * failure lock BY not remembering their password is exactly who this is
+     * for, and handing them a new password they then cannot use for fifteen
+     * minutes would be a joke at their expense.
+     */
+    public function resetPassword(AdminUser $staff): JsonResponse
+    {
+        $password = Str::password(20);
+
+        $staff->forceFill([
+            'password'        => $password,   // hashed by the cast; see store()
+            'failed_attempts' => 0,
+            'locked_until'    => null,
+        ])->save();
+
+        return response()->json([
+            'data'     => $staff->toStaffArray(),
+            'password' => $password,
+            'message'  => "New password for {$staff->name}. Their old one stopped working just "
+                . 'now, and this is the only time this one is shown.',
+        ]);
+    }
+
+    /**
+     * POST /api/admin/staff/{staff}/unlock
+     *
+     * Clears the lock without touching the password — for the ordinary case
+     * where somebody mistyped a password they do know, five times, and is now
+     * locked out of a shift they are standing in the middle of. The
+     * alternative is waiting fifteen minutes, and a rule that stops staff
+     * working is a rule staff route around by sharing one login.
+     */
+    public function unlock(AdminUser $staff): JsonResponse
+    {
+        if (! $staff->isLocked()) {
+            return response()->json([
+                'message' => "{$staff->name}'s account is not locked — they can sign in now.",
+            ], 422);
+        }
+
+        $staff->forceFill(['failed_attempts' => 0, 'locked_until' => null])->save();
+
+        return response()->json([
+            'data'    => $staff->toStaffArray(),
+            'message' => "{$staff->name} can sign in again.",
+        ]);
+    }
+
+    /**
+     * POST /api/admin/staff/{staff}/disable
+     *
+     * The panel's version of removing somebody — see the class docblock for
+     * why there is no delete. Takes effect immediately, including on a session
+     * they already have open: RequireAdmin checks `is_active` on every single
+     * request rather than once at sign-in, so a disabled account's next click
+     * is a 401 and the login screen.
+     */
+    public function disable(Request $request, AdminUser $staff): JsonResponse
+    {
+        $me = $request->user('admin');
+
+        if (! $staff->is_active) {
+            return response()->json([
+                'message' => "{$staff->name}'s account is already disabled.",
+            ], 422);
+        }
+
+        if ($staff->id === $me->id) {
+            return $this->refuse(
+                'You cannot disable your own account. You would be signed out on your next '
+                . 'click, with nobody left in this browser who could switch it back on.'
+            );
+        }
+
+        if ($staff->isLastActiveOwner()) {
+            return $this->refuse(
+                "{$staff->name} is the only active owner. Disabling them would leave this "
+                . 'panel with nobody who can manage staff, and no way to appoint anyone from '
+                . 'inside it. Make somebody else an owner first.'
+            );
+        }
+
+        $staff->forceFill(['is_active' => false])->save();
+
+        return response()->json([
+            'data'    => $staff->toStaffArray() + ['isSelf' => false, 'lockedRole' => null],
+            'message' => "{$staff->name} can no longer sign in. Everything they did stays on "
+                . 'record with their name on it, and you can switch them back on any time.',
+        ]);
+    }
+
+    /**
+     * POST /api/admin/staff/{staff}/enable
+     *
+     * Also clears any lockout on the way back in. A lock left over from
+     * whatever happened before the account was disabled is not a fact about
+     * today, and greeting somebody's first shift back with "account locked"
+     * would be a puzzle with no clue attached.
+     *
+     * It deliberately does NOT reset the password: they may well remember it,
+     * and issuing a new one that has to be handed over makes returning from
+     * two weeks' leave harder than it needs to be. Reset it separately if they
+     * have forgotten.
+     */
+    public function enable(Request $request, AdminUser $staff): JsonResponse
+    {
+        if ($staff->is_active) {
+            return response()->json([
+                'message' => "{$staff->name}'s account is already active.",
+            ], 422);
+        }
+
+        $staff->forceFill([
+            'is_active'       => true,
+            'failed_attempts' => 0,
+            'locked_until'    => null,
+        ])->save();
+
+        $me = $request->user('admin');
+
+        return response()->json([
+            'data' => $staff->toStaffArray() + [
+                'isSelf'     => $staff->id === $me->id,
+                'lockedRole' => $this->roleLockReason($staff, $me, null),
+            ],
+            'message' => "{$staff->name} can sign in again as "
+                . AdminUser::labelFor($staff->role) . '.',
+        ]);
+    }
+
+    /* ---- Shared refusals ------------------------------------------------ */
+
+    /**
+     * Why this row's role cannot be changed, or null if it can.
+     *
+     * The same two questions update() asks, answered for the whole list at
+     * once so the client can disable a dropdown WITH ITS REASON VISIBLE rather
+     * than leave a control mysteriously missing. A control that vanishes
+     * teaches nobody anything; one that says "this is the only owner" teaches
+     * the rule once and is never asked about again.
+     *
+     * @param int|null $activeOwners pre-counted, where the caller has a whole
+     *   list to answer for; null asks the database about this row alone.
+     */
+    private function roleLockReason(AdminUser $row, AdminUser $me, ?int $activeOwners): ?string
+    {
+        if ($row->id === $me->id) {
+            return 'You cannot change your own role — ask another owner.';
+        }
+
+        $isLastOwner = $activeOwners === null
+            ? $row->isLastActiveOwner()
+            : ($row->role === 'owner' && $row->is_active && $activeOwners === 1);
+
+        return $isLastOwner
+            ? 'The only active owner. Appoint another owner before changing this one.'
+            : null;
+    }
+
+    /**
+     * 422, not 403.
+     *
+     * A 403 says "you are not allowed to do this", which is untrue here — an
+     * owner IS allowed to change roles and disable accounts; that is the whole
+     * point of the screen. What has been refused is this particular move,
+     * because of the state it would leave the panel in. That is a rule
+     * violation, the same shape as an illegal order transition, and it is
+     * reported the same way.
+     */
+    private function refuse(string $message): JsonResponse
+    {
+        return response()->json(['message' => $message], 422);
+    }
+}

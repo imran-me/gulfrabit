@@ -78,6 +78,80 @@ class AdminUser extends Authenticatable
         'editor'    => ['dashboard', 'content'],
     ];
 
+    /**
+     * What each role is called on screen, and what it means in one sentence.
+     *
+     * Kept in this class, immediately under CAPABILITIES, because the two must
+     * agree: a blurb that promises something the capability list does not grant
+     * is a lie told at exactly the moment somebody is deciding what access to
+     * hand a new employee. Changing one without the other should feel wrong,
+     * and it does when they are eight lines apart.
+     *
+     * `warehouse` is labelled "Employee" deliberately. The role was named for
+     * the job it was invented for, but it is the general shop-floor account —
+     * the person who works orders and stock without touching money, customers
+     * or the delete button — and "Warehouse" reads as a place this shop does
+     * not have. The STORED value stays `warehouse`: renaming an enum member
+     * that every existing row and a dozen permission checks refer to buys one
+     * nicer word in the database and costs a migration nobody needed.
+     *
+     * @var array<string, array{label: string, blurb: string}>
+     */
+    public const ROLE_META = [
+        'owner' => [
+            'label' => 'Owner',
+            'blurb' => 'The whole panel, including staff accounts and deleting records. '
+                . 'Give this only to someone you would trust with the bank login.',
+        ],
+        'manager' => [
+            'label' => 'Manager',
+            'blurb' => 'Orders, customers, the catalogue and the books, and can authorise '
+                . 'refunds. Cannot manage staff, and cannot delete anything.',
+        ],
+        'warehouse' => [
+            'label' => 'Employee',
+            'blurb' => 'Moves orders through the stages and manages stock. Cannot cancel an '
+                . 'order, refund, delete or archive, and never sees customers or money.',
+        ],
+        'accounts' => [
+            'label' => 'Accounts',
+            'blurb' => 'The books, expenses and reports, plus the money side of orders. '
+                . 'Cannot edit the catalogue or customer records.',
+        ],
+        'editor' => [
+            'label' => 'Editor',
+            'blurb' => 'Website copy, images and home-page content. Never sees an order or '
+                . 'a customer.',
+        ],
+    ];
+
+    /** The on-screen name for a role, falling back to the stored value. */
+    public static function labelFor(string $role): string
+    {
+        return self::ROLE_META[$role]['label'] ?? ucfirst($role);
+    }
+
+    /**
+     * The role catalogue, for any screen that offers a choice of role.
+     *
+     * Assembled from ROLES, ROLE_META and CAPABILITIES together, so a picker
+     * cannot offer a role that grants nothing, or describe one in words the
+     * capability list does not back up. The staff screen renders whatever this
+     * returns and holds no list of its own — add a role here and the dropdown
+     * has it, with its blurb and the areas it opens.
+     *
+     * @return array<int, array{value: string, label: string, blurb: string, capabilities: array<int, string>}>
+     */
+    public static function roleCatalogue(): array
+    {
+        return array_map(static fn (string $role): array => [
+            'value'        => $role,
+            'label'        => self::labelFor($role),
+            'blurb'        => self::ROLE_META[$role]['blurb'] ?? '',
+            'capabilities' => self::CAPABILITIES[$role] ?? [],
+        ], self::ROLES);
+    }
+
     /** @return array<int, string> */
     public function capabilities(): array
     {
@@ -114,6 +188,30 @@ class AdminUser extends Authenticatable
         return $this->locked_until !== null && $this->locked_until->isFuture();
     }
 
+    /**
+     * Is this the only active owner left?
+     *
+     * The question the staff screen must ask before every demotion and every
+     * disable. A panel with no active owner cannot appoint one — the staff
+     * screen is itself owner-only — so the way back is SSH, an .env edit and
+     * the seeder, which for a shop owner on a Friday means the panel is simply
+     * gone until somebody technical is free.
+     *
+     * Counted over ACTIVE owners, not all of them. A second owner who was
+     * disabled last month cannot sign in to fix anything, so leaning on their
+     * row to permit this demotion would be counting a door that is bricked up.
+     */
+    public function isLastActiveOwner(): bool
+    {
+        return $this->role === 'owner'
+            && $this->is_active
+            && self::query()
+                ->where('role', 'owner')
+                ->where('is_active', true)
+                ->whereKeyNot($this->getKey())
+                ->doesntExist();
+    }
+
     /** The shape the admin client is allowed to see about itself. */
     public function toAdminArray(): array
     {
@@ -123,6 +221,36 @@ class AdminUser extends Authenticatable
             'email'        => $this->email,
             'role'         => $this->role,
             'capabilities' => $this->capabilities(),
+        ];
+    }
+
+    /**
+     * The shape the staff screen shows about SOMEBODY ELSE.
+     *
+     * Deliberately not toAdminArray(). That one answers "who am I signed in
+     * as" and is handed to every page in the panel; this one answers "who works
+     * here" and carries the state of the account — disabled, locked out, last
+     * seen, from where. Merging them would put a colleague's lockout status and
+     * last IP into the payload every screen loads on boot, which is more than
+     * any screen but this one has a reason to know.
+     */
+    public function toStaffArray(): array
+    {
+        return [
+            'id'          => $this->id,
+            'name'        => $this->name,
+            'email'       => $this->email,
+            'role'        => $this->role,
+            'roleLabel'   => self::labelFor($this->role),
+            'isActive'    => $this->is_active,
+            'isLocked'    => $this->isLocked(),
+            'lockedUntil' => $this->locked_until?->toIso8601String(),
+            'lastLoginAt' => $this->last_login_at?->toIso8601String(),
+            // Shown so an owner can notice one account signing in from two
+            // places — the usual sign that a login has been shared rather than
+            // a second account created.
+            'lastLoginIp' => $this->last_login_ip,
+            'createdAt'   => $this->created_at?->toIso8601String(),
         ];
     }
 }

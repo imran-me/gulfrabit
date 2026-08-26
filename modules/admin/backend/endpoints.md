@@ -126,6 +126,108 @@ that one annotates a click, this one holds a whole phone call.
 
 ---
 
+## Staff — `/api/admin/staff`
+
+**Owner only.** Every route below is behind `admin:staff`, and `owner` is the
+only role holding that capability. A manager cannot read this list, let alone
+appoint anybody.
+
+**No `DELETE`, anywhere on this resource, and none is coming.** An ex-employee's
+name is on stock movements, order transitions, refunds and journal entries; an
+audit trail whose actor ids point at nothing has stopped answering the one
+question it exists for. Accounts are *disabled* instead — they cannot sign in,
+they keep their history, and they can be switched back on. The table carries no
+`deleted_at` column at all.
+
+### `GET /api/admin/staff`
+
+Everyone, unpaginated. A shop has five to twenty staff accounts.
+
+```json
+{
+  "data": [{
+    "id": 3, "name": "Rahim Uddin", "email": "rahim@…",
+    "role": "warehouse", "roleLabel": "Employee",
+    "isActive": true, "isLocked": false, "lockedUntil": null,
+    "lastLoginAt": "2026-08-25T09:12:44+06:00", "lastLoginIp": "103.x.x.x",
+    "createdAt": "2026-07-30T…",
+    "isSelf": false, "lockedRole": null
+  }],
+  "meta": { "total": 6, "activeCount": 5, "ownerCount": 1, "roles": [ … ] }
+}
+```
+
+`meta.roles` is the **role catalogue** — `{ value, label, blurb, capabilities[] }`
+per role, built from `AdminUser::ROLES`, `ROLE_META` and `CAPABILITIES` together.
+The create form's dropdown renders from this rather than from a copy in the
+JavaScript, so the picker can never offer a role the server would refuse.
+
+`lockedRole` is a *sentence or null*, not a boolean: it says why this row's role
+cannot be changed, so the client can disable the control **with its reason
+showing** instead of leaving it mysteriously absent. It is not the control —
+`update` asks the same questions again, because a reason sent to a browser is a
+suggestion.
+
+### `POST /api/admin/staff`
+
+```json
+{ "name": "Rahim Uddin", "email": "rahim@gulfrabit.com", "role": "warehouse" }
+```
+
+Note what is **not** in the request: a password. The server generates one with
+`Str::password(20)` — the same rule `AdminUserSeeder` applies to the first owner
+— so a weak staff credential cannot be typed into this shop at all.
+
+**201** → the row, plus `"password"` carrying the plaintext **once**. Nothing
+stores it, so no endpoint can read it back; a forgotten password is a reset, not
+a lookup. Same-origin, TLS in production, and **never to be logged**.
+
+**422** → `email.unique` says to re-enable the existing account rather than make
+a second one, so their history stays attached.
+
+### `PATCH /api/admin/staff/{staff}`
+
+Name, email, role. Not the password (that is a reset — it mints a credential)
+and not `is_active` (that is disable/enable, which has its own refusals and must
+not ride along in a form that mostly fixes typos).
+
+**422** on either of two moves that would lock the panel:
+
+- changing **your own** role — an owner who demotes themselves by accident has
+  no way to undo it;
+- changing the role of the **only active owner** — a panel with no active owner
+  cannot appoint one, because appointing is itself an owner-only act.
+
+### `POST /api/admin/staff/{staff}/password`
+
+A fresh generated password, shown once, and it clears any lockout on the way —
+somebody who tripped the five-failure lock *by* not remembering their password
+is precisely who this is for.
+
+**200** → `{ data, password, message }`
+
+### `POST /api/admin/staff/{staff}/unlock`
+
+Clears the lock without touching the password: they do know it, they mistyped it
+five times, and they are standing in the middle of a shift.
+
+**422** → the account is not locked.
+
+### `POST /api/admin/staff/{staff}/disable` · `…/enable`
+
+Disable is this panel's version of removing somebody. It takes effect
+**immediately, including on a session already open** — `RequireAdmin` checks
+`is_active` on every request rather than once at sign-in, so the next click is a
+401 and the login screen.
+
+**422** → already in that state; disabling **yourself**; or disabling the **only
+active owner**.
+
+Enable also clears any stale lockout, but deliberately does *not* reset the
+password — somebody back from two weeks' leave may well remember it.
+
+---
+
 ## Errors
 
 | Code | Meaning |
