@@ -121,6 +121,7 @@
     RewriteRule ^admin/quotes/?$ modules/b2b/quotes.html [L,QSA]
     RewriteRule ^admin/pnl/?$ modules/accounting/pnl.html [L,QSA]
     RewriteRule ^admin/journal/?$ modules/accounting/journal.html [L,QSA]
+    RewriteRule ^admin/staff/?$ modules/admin/staff.html [L,QSA]
 
     # --- /index.html is not a URL, it is a filename ---------------------
     # Matched on THE_REQUEST (the original request line) rather than on the

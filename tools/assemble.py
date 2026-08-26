@@ -656,6 +656,15 @@ ADMIN_PAGES = [
      ["/modules/admin/admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/accounting/journal-page.js"], True),
 
+    # Owner-only, and the only screen that can hand out access to the others.
+    # No extra css beyond admin.css: the password panel and the role reference
+    # both live in there, because they are admin chrome rather than a module of
+    # their own.
+    ("modules/admin/staff.html", "Staff — GulfRabit Admin",
+     "modules/admin/_fragments/staff.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/admin/staff-page.js"], True),
+
     # chrome=True, even though the sidebar is useless on a sheet of paper.
     #
     # The shell is not decoration: boot() returns early when [data-admin-shell]

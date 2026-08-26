@@ -85,3 +85,22 @@ registerScreen({
   order: 34,
   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
 });
+
+registerScreen({
+  id: 'staff',
+  label: 'Staff',
+  href: '/admin/staff',
+  // The only role holding `staff` is `owner`, so this entry simply does not
+  // exist for anybody else's sidebar. That is courtesy, not security — the
+  // routes behind it carry `admin:staff` and refuse on their own.
+  area: 'staff',
+  // Filed under Settings rather than Trade: it changes nothing about what is
+  // sold, only who is allowed to sell it. After Appearance (80), because a
+  // shop is dressed far more often than it is staffed.
+  group: 'Settings',
+  order: 85,
+  // An ID badge, not the two figures Customers uses. Those are the people who
+  // buy; these are the people who work here, and a sidebar where the two look
+  // alike is a sidebar where somebody opens the wrong one.
+  icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2.2"/><path d="M5.6 16.6a3.7 3.7 0 0 1 6.8 0"/><path d="M15 9.5h3.4M15 13h3.4"/></svg>',
+});

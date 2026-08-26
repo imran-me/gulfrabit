@@ -1,0 +1,104 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Staff</h1>
+          <p class="admin__sub" data-st-count>Loading…</p>
+        </div>
+        <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-st-new
+                aria-expanded="false" aria-controls="st-form">+ Add staff member</button>
+      </div>
+
+      <!-- The two things about this screen that are not obvious, and both of
+           which are otherwise discovered the hard way — one by looking for a
+           Delete button that is not there, the other by closing the panel that
+           had the password in it. -->
+      <div class="acard" style="margin-bottom:var(--space-5)">
+        <p class="admin__sub" style="margin:0">
+          <strong>Nobody is deleted here.</strong> A staff account is <em>disabled</em> instead:
+          they stop being able to sign in, and their name stays on every order they moved and
+          every stock count they made. Switch them back on whenever you like.
+          <br>
+          <strong>Passwords are generated and shown once.</strong> There is no box to type one
+          into and no screen that can show one again — if somebody forgets theirs, reset it and
+          hand them the new one.
+        </p>
+      </div>
+
+      <form class="acard acat-new" id="st-form" data-st-form hidden style="margin-bottom:var(--space-5)">
+        <div class="afilters__field">
+          <label for="st-name">Their name</label>
+          <input class="input-gr" id="st-name" name="name" type="text" required
+                 minlength="2" maxlength="120" autocomplete="off" placeholder="e.g. Rahim Uddin">
+        </div>
+
+        <div class="afilters__field afilters__field--wide">
+          <label for="st-email">Their email
+            <span class="atable__sub">— this is what they sign in with</span></label>
+          <input class="input-gr" id="st-email" name="email" type="email" required
+                 maxlength="191" autocomplete="off" placeholder="rahim@gulfrabit.com">
+        </div>
+
+        <!-- No role is preselected. This is the field that decides what a new
+             person can reach, and a dropdown that arrives with an answer
+             already in it is a dropdown that gets scrolled past. -->
+        <div class="afilters__field afilters__field--wide">
+          <label for="st-role">What they may do</label>
+          <select class="input-gr" id="st-role" name="role" data-st-role required
+                  aria-describedby="st-role-blurb"></select>
+          <!-- The chosen role, in a sentence, painted from the server's own
+               role catalogue — so it can never describe access the role has
+               not actually been granted. -->
+          <p class="atable__sub" id="st-role-blurb" data-st-role-blurb></p>
+        </div>
+
+        <div class="acat-new__actions">
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Create account</button>
+          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-st-cancel>Cancel</button>
+        </div>
+
+        <p class="aerror" data-st-form-error hidden role="alert"></p>
+      </form>
+
+      <!-- Where a newly minted password appears, exactly once.
+           Deliberately not a toast. A toast fades after four seconds, and this
+           is the only copy of this credential that will ever exist — it stays
+           until somebody dismisses it on purpose. -->
+      <div class="asecret" data-st-secret hidden role="status" aria-live="polite">
+        <div class="asecret__head">
+          <p class="asecret__title" data-st-secret-title></p>
+          <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-st-secret-done>
+            I have saved it
+          </button>
+        </div>
+        <div class="asecret__row">
+          <code class="asecret__value" data-st-secret-value></code>
+          <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-st-secret-copy>Copy</button>
+        </div>
+        <p class="asecret__note" data-st-secret-note></p>
+      </div>
+
+      <div class="atable-wrap">
+        <table class="atable">
+          <thead>
+            <tr>
+              <th scope="col">Person</th>
+              <th scope="col">Role</th>
+              <th scope="col">Status</th>
+              <th scope="col">Last sign-in</th>
+              <th scope="col"><span class="visually-hidden">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody data-st-body>
+            <tr><td colspan="5" class="atable__empty">Loading staff…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- The whole permission model, in plain words, on the screen where
+           somebody is choosing between them. The same table in a README is a
+           table nobody standing at this form has open. -->
+      <details class="acard aroles" style="margin-top:var(--space-5)">
+        <summary class="aroles__summary">What each role can do</summary>
+        <div class="aroles__body" data-st-roles>
+          <p class="admin__sub">Loading…</p>
+        </div>
+      </details>
