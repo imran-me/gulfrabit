@@ -107,7 +107,7 @@ try {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=7965032f">
-  <link rel="stylesheet" href="../../modules/admin/admin.css?v=c37e11db">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=50f36e09">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -164,6 +164,11 @@ try {
       <div class="admin__who">
         <div class="admin__who-name" data-admin-name>—</div>
         <span class="admin__who-role" data-admin-role>—</span>
+        <!-- Every role gets this, which is why it lives in the shell and not on
+             a screen: an Employee account's whole panel is Orders and Stock,
+             so there is nowhere else it could go. It is also what stops the
+             generated password being permanent — see AdminStaffController. -->
+        <button type="button" class="admin__whoact" data-admin-password>Change password</button>
         <button type="button" class="admin__signout" data-admin-signout>Sign out</button>
       </div>
     </aside>
@@ -174,6 +179,50 @@ try {
          way a hand-rolled overlay's can. The list is filled by admin-shell.js
          from the same registry the sidebar paints from, so a screen this role
          may not open is not offered here either. -->
+    <!-- Changing your own password. A real <dialog> for the same reasons the
+         jump-to is one: the focus trap, Escape and the inert background are
+         the platform's job, and on a form carrying three password fields none
+         of those are things to re-implement.
+
+         No method="dialog" on the form — that closes the dialog INSTEAD of
+         submitting, which on this form would look exactly like a password
+         change that worked. -->
+    <dialog class="adel" data-admin-pw aria-labelledby="apw-title">
+      <form class="adel__panel" data-admin-pw-form>
+        <h2 class="adel__title" id="apw-title">Change your password</h2>
+        <p class="adel__body">
+          Your current password is asked for because a signed-in browser left open on a
+          counter is the thing this protects against, not a stolen session.
+        </p>
+
+        <div class="afilters__field afilters__field--wide">
+          <label for="apw-current">Current password</label>
+          <input class="input-gr" id="apw-current" name="current" type="password"
+                 required autocomplete="current-password">
+        </div>
+
+        <div class="afilters__field afilters__field--wide">
+          <label for="apw-new">New password
+            <span class="atable__sub">— at least 12 characters, with letters and numbers</span></label>
+          <input class="input-gr" id="apw-new" name="password" type="password"
+                 required minlength="12" autocomplete="new-password">
+        </div>
+
+        <div class="afilters__field afilters__field--wide">
+          <label for="apw-again">New password again</label>
+          <input class="input-gr" id="apw-again" name="password_confirmation" type="password"
+                 required minlength="12" autocomplete="new-password">
+        </div>
+
+        <p class="aerror" data-admin-pw-error hidden role="alert"></p>
+
+        <div class="adel__actions">
+          <button type="button" class="btn-gr btn-outline-gr" data-admin-pw-cancel>Cancel</button>
+          <button type="submit" class="btn-gr btn-primary-gr">Change password</button>
+        </div>
+      </form>
+    </dialog>
+
     <dialog class="apal" data-admin-palette aria-label="Jump to a screen">
       <div class="apal__search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -232,7 +281,7 @@ try {
   </div>
 
   <script type="module" src="../../shared/js/main.js?v=65e9eef8"></script>
-  <script type="module" src="../../modules/admin/admin-shell.js?v=888345b4"></script>
+  <script type="module" src="../../modules/admin/admin-shell.js?v=9a40c72d"></script>
   <script type="module" src="../../modules/admin/admin-nav.js?v=63c228f2"></script>
   <script type="module" src="../../modules/courier/courier-nav.js?v=f4fd5181"></script>
   <script type="module" src="../../modules/inventory/inventory-nav.js?v=1b82ef57"></script>

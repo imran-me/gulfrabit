@@ -20,6 +20,7 @@
 
 import { adminFetch, getSession, signOut } from './backend/api.js';
 import { initTableCards } from './admin-table-cards.js';
+import { toast } from './admin-delete.js';
 
 /* Shared across module instances for the same reason the boot flag lives on
    the document (see boot): the build's versioned <script src> and the nav
@@ -103,6 +104,7 @@ async function boot() {
   wireRail(root);
   wirePalette(root, allowed);
   wireMasthead(root);
+  wirePassword(root);
   // Before the screens paint, so the observer is watching when the first
   // fetch lands. See admin-table-cards.js for why every list screen needs it.
   initTableCards(document);
@@ -274,6 +276,77 @@ function wireMasthead(root) {
     ([entry]) => head.classList.toggle('is-stuck', entry.intersectionRatio < 1),
     { threshold: [1], rootMargin: '-1px 0px 0px 0px' },
   ).observe(head);
+}
+
+/* ---- Changing your own password ---------------------------------------
+   Chrome, not a screen, because every role needs it and most roles have
+   nowhere else it could live: an Employee account's whole panel is Orders and
+   Stock, and there is no Settings page in it to hang this off.
+
+   It is also the piece that makes the generated credentials honest. The Staff
+   screen mints a twenty-character password and shows it once; without a way
+   for the person holding it to replace it with something they can remember,
+   that password is permanent and lives on whatever they wrote it down on. */
+function wirePassword(root) {
+  const dlg = root.querySelector('[data-admin-pw]');
+  const form = dlg?.querySelector('[data-admin-pw-form]');
+  const err = dlg?.querySelector('[data-admin-pw-error]');
+  const opener = root.querySelector('[data-admin-password]');
+  if (!dlg || !form || !err || !opener) return;
+
+  const submit = form.querySelector('button[type="submit"]');
+
+  opener.addEventListener('click', () => {
+    // Reset before every open. A dialog that reopens still holding the
+    // password somebody typed and then cancelled is a password sitting in the
+    // DOM of a page left open on a counter.
+    form.reset();
+    err.hidden = true;
+    dlg.showModal();
+    form.elements.current.focus();
+  });
+
+  dlg.querySelector('[data-admin-pw-cancel]')?.addEventListener('click', () => dlg.close());
+  // The backdrop is part of the dialog, so a click on it lands on the dialog
+  // itself rather than on any of its children.
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  dlg.addEventListener('close', () => { form.reset(); err.hidden = true; });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    err.hidden = true;
+    submit.disabled = true;
+    submit.textContent = 'Changing…';
+
+    try {
+      const { message } = await adminFetch('/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          /* form.elements, never form.<name>. `name` and `method` are
+             HTMLFormElement's own properties and shadow the named getter, so
+             `form.name` is a string and `form.method` is "get" — while
+             `form.current` beside them would work fine. One idiom, so the next
+             field added here cannot land on the wrong side of that line. */
+          current: form.elements.current.value,
+          password: form.elements.password.value,
+          password_confirmation: form.elements.password_confirmation.value,
+        }),
+      });
+      dlg.close();
+      toast(message);
+    } catch (error) {
+      /* Laravel keys its 422 by field and adminFetch carries the parsed body
+         along. Listing them beats the summary sentence, which for two bad
+         fields says only that the data was invalid. */
+      const fields = error.body?.errors ? Object.values(error.body.errors).flat() : [];
+      err.textContent = fields.length ? fields.join(' ') : error.message;
+      err.hidden = false;
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'Change password';
+    }
+  });
 }
 
 /* ---- Jump to a screen -----------------------------------------------------

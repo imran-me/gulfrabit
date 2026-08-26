@@ -129,7 +129,8 @@
   .admin.is-rail .anav__link > span:not(.anav__icon),
   .admin.is-rail .admin__who-name,
   .admin.is-rail .admin__who-role,
-  .admin.is-rail .admin__signout { display: none; }
+  .admin.is-rail .admin__signout,
+  .admin.is-rail .admin__whoact { display: none; }
 
   /* The mark stays — it is the link home as well as the badge, and a rail
      whose top 40px is one anonymous button belongs to no product. Stacked
@@ -173,7 +174,9 @@
   .admin.is-rail .admin__side:hover .admin__who-name,
   .admin.is-rail .admin__side:has(:focus-visible) .admin__who-name,
   .admin.is-rail .admin__side:hover .admin__signout,
-  .admin.is-rail .admin__side:has(:focus-visible) .admin__signout { display: block; }
+  .admin.is-rail .admin__side:has(:focus-visible) .admin__signout,
+  .admin.is-rail .admin__side:hover .admin__whoact,
+  .admin.is-rail .admin__side:has(:focus-visible) .admin__whoact { display: block; }
   .admin.is-rail .admin__side:hover .admin__who-role,
   .admin.is-rail .admin__side:has(:focus-visible) .admin__who-role,
   .admin.is-rail .admin__side:hover .anav-find kbd,
@@ -466,7 +469,13 @@
   text-transform: uppercase;
   letter-spacing: .06em;
 }
-.admin__signout {
+/* The sidebar's link-buttons: change password, and sign out.
+   `.admin__signout` keeps its name rather than being renamed to something
+   neutral, because the railed and phone layouts both target it by that name —
+   a rename would have to land in four places at once to stay correct, and the
+   one that gets missed fails silently at a breakpoint nobody is looking at. */
+.admin__signout,
+.admin__whoact {
   margin-top: var(--space-3);
   background: none;
   border: 0;
@@ -476,7 +485,11 @@
   cursor: pointer;
   text-decoration: underline;
 }
-.admin__signout:hover { color: #fff; }
+.admin__signout:hover,
+.admin__whoact:hover { color: #fff; }
+
+/* Space between the two, so they read as two links rather than one long one. */
+.admin__whoact { margin-right: var(--space-3); }
 
 /* ---- Cards ------------------------------------------------------------ */
 .acards {
@@ -676,7 +689,8 @@
   .anav__link { flex: 0 0 auto; }
   /* Name, role and sign-out on one line rather than stacked. */
   .admin__who-name { display: inline; margin-right: var(--space-2); }
-  .admin__signout { margin-top: 0; margin-left: var(--space-2); }
+  .admin__signout,
+  .admin__whoact { margin-top: 0; margin-left: var(--space-2); }
   .admin__main { --admin-pad-x: var(--space-4); --admin-pad-y: var(--space-5); }
 }
 

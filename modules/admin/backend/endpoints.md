@@ -126,6 +126,40 @@ that one annotates a click, this one holds a whole phone call.
 
 ---
 
+## `POST /api/admin/password`
+
+Change your **own** password. Behind `admin` and nothing narrower — every role
+needs it, and it is what stops a generated password being permanent. Throttled
+10/min: it takes a guess at the current password, so it is one more place worth
+grinding at.
+
+```json
+{ "current": "…", "password": "…", "password_confirmation": "…" }
+```
+
+The current password is required even though the session already proves who
+this is. The threat is not a forged session — it is a signed-in browser left
+open on a shop counter, where "change the password, own the account" would
+otherwise cost an attacker four seconds.
+
+New password: at least 12 characters, with letters and numbers, and it must
+differ from the current one. Deliberately weaker than the 20-character
+generated ones and deliberately not `uncompromised()` — that rule would have
+this shop's server calling a third-party API on every password change, which is
+the merchant's trade to make rather than a default.
+
+**200** → changed. The current session survives (the guard authenticates from
+the session payload, not by re-checking the hash), so nobody is signed out
+mid-task. Other browsers signed in as the same account also survive; ending
+those would need `AuthenticateSession` on the admin stack.
+
+**422** → wrong current password, weak new one, or the two copies disagree.
+Deliberately **not 401** for a wrong current password: a 401 would trip the
+client's own interceptor and send the browser to the login page, turning a typo
+into what looks like an expired session.
+
+---
+
 ## Staff — `/api/admin/staff`
 
 **Owner only.** Every route below is behind `admin:staff`, and `owner` is the

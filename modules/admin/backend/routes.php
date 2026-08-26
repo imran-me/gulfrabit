@@ -53,6 +53,14 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
         Route::get('/me', [AdminAuthController::class, 'me'])->name('me');
 
+        // Changing your OWN password. Behind `admin` only — every role needs
+        // this, and it is what stops a generated password being permanent.
+        // Throttled because it takes a guess at the current password, which
+        // makes it one more place worth grinding at.
+        Route::post('/password', [AdminAuthController::class, 'changePassword'])
+            ->middleware('throttle:10,1')
+            ->name('password');
+
         // The dashboard aggregates across modules that may not be installed,
         // so the controller asks each one and skips what is absent.
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
