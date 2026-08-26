@@ -52,13 +52,25 @@ would be invisible to the person actually using the panel.
 One role per account, not a permission matrix — a matrix nobody maintains ends
 up with everyone as owner. `AdminUser::CAPABILITIES` is the whole truth:
 
-| Role | Areas |
-|---|---|
-| `owner` | everything, including staff and settings |
-| `manager` | orders, customers, products, inventory, accounting, content |
-| `warehouse` | orders, inventory — **no money** |
-| `accounts` | accounting, orders — cannot edit customers or the catalogue |
-| `editor` | content only — never sees an order or a customer |
+| Role | Shown as | Areas |
+|---|---|---|
+| `owner` | Owner | everything, including staff and settings |
+| `manager` | Manager | orders, customers, products, inventory, accounting, content |
+| `warehouse` | **Employee** | orders, inventory — **no money** |
+| `accounts` | Accounts | accounting, orders — cannot edit customers or the catalogue |
+| `editor` | Editor | content only — never sees an order or a customer |
+
+`warehouse` is labelled **Employee** everywhere a human sees it
+(`AdminUser::ROLE_META`). It was named for the job it was invented for, but it
+is the general shop-floor account — the person who works orders and stock
+without touching money, customers or the delete button — and "Warehouse" reads
+as a place this shop does not have. The stored enum value is untouched:
+renaming a member that every row and a dozen checks refer to buys one nicer
+word and costs a migration nobody needed.
+
+Roles are handed out on **`/admin/staff`**, which only `owner` can open. That
+screen is also where accounts are disabled, unlocked, and have their passwords
+reset — see *Staff accounts* below.
 
 Every role has `dashboard`, so nobody signs in and finds nothing they may open.
 The dashboard controller still decides which *cards* each role receives, so
@@ -97,6 +109,7 @@ modules/admin/
   admin-shell.js         layout, nav registry, session guard
   login-page.js          the one page that must work signed-out
   dashboard-page.js      landing screen; registers itself like any module
+  staff-page.js          who works here — owner only; the screen that grants access
   admin.css              owns .admin*, .anav*, .acard*, .alogin*
   _fragments/            _shell.html, _shell-end.html, page fragments
   backend/
@@ -120,3 +133,31 @@ There is **no default password**. `AdminUserSeeder` reads `ADMIN_EMAIL` from
 `.env`, and if `ADMIN_PASSWORD` is unset it generates a strong one and prints
 it once. Seeders that ship `admin/admin123` are how storefronts get taken over
 in week one.
+
+That seeder creates the **first owner only**. Everybody after them is created
+from `/admin/staff` — the seeder is the bootstrap, not the hiring process.
+
+## Staff accounts
+
+`/admin/staff`, owner only (`admin:staff`, and `owner` is the only role holding
+that capability).
+
+**Nobody is deleted.** There is no `DELETE` on the staff resource and none is
+coming: an ex-employee's name is on stock movements, order transitions, refunds
+and journal entries, and an audit trail whose actor ids point at nothing has
+stopped answering the one question it exists for. Accounts are **disabled**
+instead — they cannot sign in, they keep their history, and they can be
+switched back on. `admin_users` carries no `deleted_at` column at all.
+Disabling lands on the account's *next click*, not their next sign-in, because
+`RequireAdmin` re-reads `is_active` on every request.
+
+**Passwords are generated and shown once.** There is no field on any form where
+a staff password can be typed, so a weak one cannot be introduced. Nothing
+stores the plaintext, so a forgotten password is a *reset*, not a lookup. Staff
+change their own from the **Change password** link under their name in the
+sidebar — that link is what stops a generated password being permanent.
+
+**Two moves are refused**, both of which would lock the panel: demoting or
+disabling yourself, and demoting or disabling the only active owner. A panel
+with no active owner cannot appoint one, because appointing is itself an
+owner-only act — recovery would be SSH, `.env` and the seeder.
