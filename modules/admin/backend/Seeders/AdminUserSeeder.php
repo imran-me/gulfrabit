@@ -26,8 +26,25 @@ class AdminUserSeeder extends Seeder
         $email = env('ADMIN_EMAIL');
 
         if (! $email) {
+            /* The message names the config cache when it is on, because that
+               is far and away the likeliest reason this fires on a server
+               where ADMIN_EMAIL is plainly sitting in .env.
+
+               A cached config means Laravel never loads .env at all, so env()
+               returns null for a value you can see with your own eyes — and
+               deploy.sh runs `config:cache` on every deploy, which makes that
+               the NORMAL state of a live server rather than an edge case.
+               Without this sentence the error sends you to look at the one
+               file that is already correct. */
             throw new RuntimeException(
                 'Set ADMIN_EMAIL in .env before seeding the admin account.'
+                . (app()->configurationIsCached()
+                    ? ' — but note this server is running a CACHED config, which means .env is '
+                        . 'not read at all and env() returns null even when the value is there. '
+                        . 'Run `php artisan config:clear`, seed, then `php artisan config:cache` '
+                        . 'again. deploy.sh caches on every deploy, so this is the usual state '
+                        . 'of a live server.'
+                    : '')
             );
         }
 
