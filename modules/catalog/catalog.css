@@ -291,7 +291,7 @@
   margin-top: var(--space-4);
   padding: var(--space-3) var(--space-4);
   border: 1px dashed var(--border-hairline);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   color: var(--text-muted);
   font-size: var(--fs-14);
 }

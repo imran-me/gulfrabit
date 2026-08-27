@@ -206,7 +206,7 @@
     left: var(--space-3);
     right: var(--space-3);
     transform: none;
-    border-radius: var(--radius-md, 10px);
+    border-radius: var(--radius-sm);
     justify-content: space-between;
   }
 

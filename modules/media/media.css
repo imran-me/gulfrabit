@@ -1155,7 +1155,7 @@ body.is-dragging-media .mtree__row { opacity: 1; }
   min-width: 190px;
   padding: 4px;
   border: 1px solid var(--gr-border);
-  border-radius: var(--radius-md, 10px);
+  border-radius: var(--radius-sm);
   background: var(--surface-raised, #fff);
   box-shadow: var(--shadow-md, 0 10px 30px rgba(0,0,0,.14));
   display: grid;
@@ -1204,7 +1204,7 @@ body.is-dragging-media .mtree__row { opacity: 1; }
   align-items: center;
   gap: var(--space-3);
   padding: 10px var(--space-3);
-  border-radius: var(--radius-md, 10px);
+  border-radius: var(--radius-sm);
   background: var(--gr-ink, #111);
   color: #fff;
   font-size: var(--fs-14);
@@ -1322,7 +1322,7 @@ body.is-dragging-media .mtree__row { opacity: 1; }
 .mdrawer__stage {
   display: grid;
   place-items: center;
-  border-radius: var(--radius-md, 10px);
+  border-radius: var(--radius-lg);
   /* The chequerboard, so a transparent PNG reads as transparent rather than
      as a white picture on a white panel. */
   background:

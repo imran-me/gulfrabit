@@ -20,7 +20,7 @@
   padding: var(--space-4) var(--space-5);
   background: var(--surface-raised);
   border: 1px solid var(--border-hairline);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   margin-bottom: var(--space-5);
 }
 .slip-bar__hint { display: block; color: var(--text-muted); font-size: var(--fs-12); margin-top: 2px; }
