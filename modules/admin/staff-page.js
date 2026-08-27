@@ -80,6 +80,7 @@ async function load() {
 
   fillRoleSelect();
   paintRolesReference();
+  paintTrail(payload.events ?? []);
   paint(payload.meta);
 }
 
@@ -182,6 +183,41 @@ function actionsCell(u) {
   }
 
   return `<div class="arow-actions">${bits.join('')}</div>`;
+}
+
+/* ---- The trail ---------------------------------------------------------- */
+
+/**
+ * Who changed what, newest first.
+ *
+ * The sentence is composed on the SERVER — see AdminUserEvent::sentence(). It
+ * has to be, because it depends on the role labels (`warehouse` reads as
+ * "Employee"), and a second copy of that mapping here is how the trail ends up
+ * telling somebody they were made a Warehouse.
+ */
+function paintTrail(events) {
+  const host = document.querySelector('[data-st-trail]');
+  if (!host) return;
+
+  if (!events.length) {
+    host.innerHTML = '<li class="atimeline__empty">Nothing yet. Every staff change from '
+      + 'here on is recorded — what changed, to whom, and who did it.</li>';
+    return;
+  }
+
+  host.innerHTML = events.map((e) => `
+    <li class="atimeline__item">
+      <div class="atimeline__what">
+        <strong>${escapeHtml(e.subject)}</strong> ${escapeHtml(e.sentence)}
+      </div>
+      <div class="atimeline__who">${
+        /* No "by" line where somebody acted on their own account. The sentence
+           already says "changed their own password", and following it with
+           "by Rahim" reads as a second person with the same name. */
+        e.isSelf ? escapeHtml(when(e.at))
+                 : `by ${escapeHtml(e.actor)} · ${escapeHtml(when(e.at))}`
+      }</div>
+    </li>`).join('');
 }
 
 /* ---- The role reference at the foot of the page ------------------------- */

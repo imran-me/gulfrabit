@@ -347,6 +347,22 @@ try {
         </table>
       </div>
 
+      <!-- The trail. Granting access is the most consequential thing anybody
+           does in this panel, and until this list it was the only consequential
+           one that left no trace: a price change is logged, an order moving
+           stage is logged with the name of whoever moved it, a customer erasure
+           is logged — but "who made Rahim an owner?" had no answer at all. -->
+      <section class="acard" style="margin-top:var(--space-5)" aria-labelledby="st-trail-h">
+        <h2 class="h5" id="st-trail-h">Recent changes</h2>
+        <p class="admin__sub" style="margin:-.5rem 0 var(--space-4)">
+          The last 40 changes to staff accounts, newest first. Append-only — nothing here can be
+          edited or taken back, which is the only thing that makes it worth reading.
+        </p>
+        <ol class="atimeline" data-st-trail>
+          <li class="atimeline__empty">Loading…</li>
+        </ol>
+      </section>
+
       <!-- The whole permission model, in plain words, on the screen where
            somebody is choosing between them. The same table in a README is a
            table nobody standing at this form has open. -->
@@ -372,6 +388,6 @@ try {
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=73f64c7d"></script>
-  <script type="module" src="../../modules/admin/staff-page.js?v=1f2314e0"></script>
+  <script type="module" src="../../modules/admin/staff-page.js?v=bc4e4104"></script>
 </body>
 </html>

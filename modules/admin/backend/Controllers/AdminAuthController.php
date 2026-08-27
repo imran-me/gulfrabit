@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
+use Modules\Admin\Models\AdminUserEvent;
 use Modules\Admin\Requests\AdminLoginRequest;
 use Modules\Admin\Requests\ChangePasswordRequest;
 use Modules\Admin\Services\AdminAuthService;
@@ -110,6 +111,14 @@ class AdminAuthController extends Controller
             'failed_attempts' => 0,
             'locked_until'    => null,
         ])->save();
+
+        /* Actor and subject are the same account here, which is the whole
+           reason AdminUserEvent::record() takes the actor rather than reaching
+           for the signed-in owner itself. Every other event on that trail is
+           somebody acting on somebody else; this one is not, and a helper that
+           assumed otherwise would attribute it correctly by accident and be
+           wrong the moment the assumption stopped holding. */
+        AdminUserEvent::record($user, AdminUserEvent::PASSWORD_CHANGED, $user);
 
         /* The current session survives, which is what anybody expects and
            saves a re-login in the middle of whatever they were doing: the

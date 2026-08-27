@@ -191,6 +191,26 @@ Everyone, unpaginated. A shop has five to twenty staff accounts.
 }
 ```
 
+`events` is the **audit trail** — the last 40 changes to staff accounts, newest
+first, each as a pre-composed sentence:
+
+```json
+{ "id": 12, "subject": "Rahim Uddin", "action": "role_changed",
+  "sentence": "changed from Employee to Manager",
+  "actor": "Md Imran", "isSelf": false, "at": "2026-08-27T14:02:11+06:00" }
+```
+
+It rides along with the list rather than sitting behind its own endpoint: it is
+read every time this screen opens and never on its own. The sentence is composed
+**server-side** because it depends on the role labels (`warehouse` reads as
+"Employee") — a second copy of that mapping in the JavaScript is how a trail
+ends up saying somebody was made a Warehouse.
+
+Written on all eight actions: `created`, `role_changed`, `details_changed`,
+`disabled`, `enabled`, `password_reset`, `unlocked`, and `password_changed`
+(the one a non-owner can cause — see `POST /api/admin/password`). Append-only:
+there is no edit route and no delete route, like the order timeline.
+
 `meta.roles` is the **role catalogue** — `{ value, label, blurb, capabilities[] }`
 per role, built from `AdminUser::ROLES`, `ROLE_META` and `CAPABILITIES` together.
 The create form's dropdown renders from this rather than from a copy in the

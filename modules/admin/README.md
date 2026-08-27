@@ -157,6 +157,15 @@ stores the plaintext, so a forgotten password is a *reset*, not a lookup. Staff
 change their own from the **Change password** link under their name in the
 sidebar — that link is what stops a generated password being permanent.
 
+**Every change is recorded.** `admin_user_events` logs all eight actions —
+created, role changed, details changed, disabled, enabled, password reset,
+unlocked, password changed — with who did it, to whom, and when. Granting access
+is the most consequential thing anybody does in this panel and was the only
+consequential thing leaving no trace: prices are logged, order stages are logged
+with the name of whoever moved them, but *"who made Rahim an owner?"* had no
+answer. Append-only, shown on the Staff screen, and neither id is a foreign key
+so the trail cannot be cascaded away by the act it exists to record.
+
 **Two moves are refused**, both of which would lock the panel: demoting or
 disabling yourself, and demoting or disabling the only active owner. A panel
 with no active owner cannot appoint one, because appointing is itself an

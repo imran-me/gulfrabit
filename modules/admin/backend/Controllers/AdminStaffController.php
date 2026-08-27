@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 use Modules\Admin\Models\AdminUser;
+use Modules\Admin\Models\AdminUserEvent;
 use Modules\Admin\Requests\StaffStoreRequest;
 use Modules\Admin\Requests\StaffUpdateRequest;
 
@@ -97,6 +98,23 @@ class AdminStaffController extends Controller
 
         return response()->json([
             'data' => $rows,
+            /* The trail rides along with the list rather than sitting behind
+               its own endpoint. It is read every single time this screen is
+               opened and never on its own, so a second request would be a
+               second round trip to render one page.
+
+               Forty, newest first. A shop makes a handful of these a year, so
+               forty is "all of it" in practice — and the screen says forty
+               rather than implying it is everything, because a cap that lies
+               about being complete is worse than no cap. */
+            'events' => AdminUserEvent::query()
+                // id as the tiebreaker: one save can write both a role change
+                // and a details change in the same second, and without it the
+                // two come back in whichever order the driver felt like.
+                ->latest('created_at')->latest('id')
+                ->limit(40)
+                ->get()
+                ->map(fn (AdminUserEvent $e): array => $e->toAdminArray()),
             'meta' => [
                 'total'       => $staff->count(),
                 'activeCount' => $staff->where('is_active', true)->count(),
@@ -143,6 +161,9 @@ class AdminStaffController extends Controller
             'is_active' => true,
         ]);
 
+        AdminUserEvent::record($staff, AdminUserEvent::CREATED, $request->user('admin'),
+            to: $staff->role);
+
         return response()->json([
             'data'     => $staff->toStaffArray() + ['isSelf' => false, 'lockedRole' => null],
             'password' => $password,
@@ -185,8 +206,23 @@ class AdminStaffController extends Controller
             }
         }
 
-        $wasRole = $staff->role;
+        $wasRole  = $staff->role;
+        $wasEmail = $staff->email;
         $staff->fill($data)->save();
+
+        /* wasChanged(), not a comparison against the request: a PATCH that
+           sends the values already on the row is an ordinary thing for a form
+           to do, and recording "changed from Manager to Manager" would fill the
+           trail with events that never happened. */
+        if ($staff->wasChanged('role')) {
+            AdminUserEvent::record($staff, AdminUserEvent::ROLE_CHANGED,
+                $me, $wasRole, $staff->role);
+        }
+
+        if ($staff->wasChanged('name') || $staff->wasChanged('email')) {
+            AdminUserEvent::record($staff, AdminUserEvent::DETAILS_CHANGED,
+                $me, $wasEmail, $staff->email);
+        }
 
         /* Said in terms of what actually changed. "Saved." after a promotion is
            technically true and tells the owner nothing about the one thing they
@@ -219,7 +255,7 @@ class AdminStaffController extends Controller
      * for, and handing them a new password they then cannot use for fifteen
      * minutes would be a joke at their expense.
      */
-    public function resetPassword(AdminUser $staff): JsonResponse
+    public function resetPassword(Request $request, AdminUser $staff): JsonResponse
     {
         $password = Str::password(20);
 
@@ -228,6 +264,8 @@ class AdminStaffController extends Controller
             'failed_attempts' => 0,
             'locked_until'    => null,
         ])->save();
+
+        AdminUserEvent::record($staff, AdminUserEvent::PASSWORD_RESET, $request->user('admin'));
 
         return response()->json([
             'data'     => $staff->toStaffArray(),
@@ -246,7 +284,7 @@ class AdminStaffController extends Controller
      * alternative is waiting fifteen minutes, and a rule that stops staff
      * working is a rule staff route around by sharing one login.
      */
-    public function unlock(AdminUser $staff): JsonResponse
+    public function unlock(Request $request, AdminUser $staff): JsonResponse
     {
         if (! $staff->isLocked()) {
             return response()->json([
@@ -255,6 +293,8 @@ class AdminStaffController extends Controller
         }
 
         $staff->forceFill(['failed_attempts' => 0, 'locked_until' => null])->save();
+
+        AdminUserEvent::record($staff, AdminUserEvent::UNLOCKED, $request->user('admin'));
 
         return response()->json([
             'data'    => $staff->toStaffArray(),
@@ -298,6 +338,8 @@ class AdminStaffController extends Controller
 
         $staff->forceFill(['is_active' => false])->save();
 
+        AdminUserEvent::record($staff, AdminUserEvent::DISABLED, $me);
+
         return response()->json([
             'data'    => $staff->toStaffArray() + ['isSelf' => false, 'lockedRole' => null],
             'message' => "{$staff->name} can no longer sign in. Everything they did stays on "
@@ -333,6 +375,7 @@ class AdminStaffController extends Controller
         ])->save();
 
         $me = $request->user('admin');
+        AdminUserEvent::record($staff, AdminUserEvent::ENABLED, $me);
 
         return response()->json([
             'data' => $staff->toStaffArray() + [
