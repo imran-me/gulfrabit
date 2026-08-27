@@ -2110,3 +2110,64 @@
    duty, still on the books. */
 .atable tr.is-off td { color: var(--text-secondary); }
 .atable tr.is-off .atable__name strong { opacity: .72; }
+
+/* ---- The permission grid, on the Staff screen --------------------------
+   One account's access, area by area. It sits inside .acat-new, which is a
+   wrapping flex row — so the full-width pieces take `flex-basis: 100%` rather
+   than a grid-column span, and each lands on its own line. */
+.astperm__head { flex-basis: 100%; }
+.astperm__head h3 { margin: 0 0 var(--space-1); }
+.astperm__head p { margin: 0; }
+
+.astperm__grid {
+  flex-basis: 100%;
+  display: grid;
+  gap: var(--space-4);
+  /* auto-fit rather than a fixed count: nine areas at three columns is a wall
+     on a laptop and a single column on a phone, and neither is a decision this
+     screen has to make in advance. */
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  margin: var(--space-2) 0;
+}
+
+/* An area nobody can open is dimmed rather than hidden. Hiding it would make
+   the grid reflow every time a box is ticked, and the thing you just turned
+   off would vanish from under the cursor. */
+.astperm__area {
+  margin: 0;
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  opacity: .55;
+  transition: opacity var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+
+.astperm__area.is-on {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--gr-cyan) 45%, var(--border-hairline));
+}
+
+.astperm__area legend {
+  padding: 0 var(--space-2);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--text-secondary);
+}
+
+.astperm__act {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 3px 0;
+  font-size: var(--fs-14);
+  cursor: pointer;
+}
+
+.astperm__act input { flex: 0 0 auto; }
+
+.astperm [data-st-perm-error] { flex-basis: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .astperm__area { transition: none; }
+}

@@ -37,6 +37,12 @@ let people = [];
 /** The id whose row is currently swapped into an edit form, or null. */
 let editingId = null;
 
+/** The id whose row is currently showing the permission grid, or null. */
+let permsId = null;
+
+/** The server's permission catalogue: [{key, label, actions:[{key,label,permission}]}]. */
+let areas = [];
+
 document.addEventListener('admin:ready', init);
 
 function init() {
@@ -76,6 +82,7 @@ async function load() {
   }
 
   roles = payload.meta.roles ?? [];
+  areas = payload.meta.areas ?? [];
   people = payload.data ?? [];
 
   fillRoleSelect();
@@ -103,9 +110,14 @@ function paint(meta) {
     `${meta.total} account${meta.total === 1 ? '' : 's'}`
     + (disabled ? ` · ${meta.activeCount} active, ${disabled} disabled` : '');
 
-  body.innerHTML = people
-    .map((u) => (u.id === editingId ? editRow(u) : row(u)))
-    .join('');
+  body.innerHTML = people.map(rowFor).join('');
+}
+
+/** A row is in one of three states: reading, editing details, editing access. */
+function rowFor(u) {
+  if (u.id === editingId) return editRow(u);
+  if (u.id === permsId) return permRow(u);
+  return row(u);
 }
 
 function row(u) {
@@ -123,8 +135,15 @@ function row(u) {
 }
 
 function roleCell(u) {
+  /* A customised account's role is no longer a description of what it may do,
+     so the badge says so. Without it the cell reads "Employee" while the person
+     has half the catalogue, and the role is the first thing anybody checks. */
+  const custom = u.isCustom
+    ? '<div class="atable__sub"><span class="apill apill--info">Custom access</span></div>'
+    : '';
+
   if (u.lockedRole) {
-    return `<span class="apill apill--label">${escapeHtml(u.roleLabel)}</span>
+    return `<span class="apill apill--label">${escapeHtml(u.roleLabel)}</span>${custom}
             <div class="atable__sub">${escapeHtml(u.lockedRole)}</div>`;
   }
 
@@ -134,7 +153,7 @@ function roleCell(u) {
       ${roles.map((r) => `
         <option value="${escapeHtml(r.value)}"${r.value === u.role ? ' selected' : ''}
         >${escapeHtml(r.label)}</option>`).join('')}
-    </select>`;
+    </select>${custom}`;
 }
 
 function statusCell(u) {
@@ -167,6 +186,14 @@ function actionsCell(u) {
     `<button type="button" class="alink-btn" data-st-reset="${u.id}">Reset password</button>`,
   ];
 
+  /* Not on your own row. The server refuses an access change to yourself —
+     somebody who takes away their own permissions by accident cannot undo it —
+     and the role cell already carries that sentence, so offering a button that
+     opens a grid nothing will save would be the worse half of both. */
+  if (!u.isSelf) {
+    bits.unshift(`<button type="button" class="alink-btn" data-st-perms="${u.id}">Access</button>`);
+  }
+
   if (u.isLocked) {
     bits.push(`<button type="button" class="alink-btn" data-st-unlock="${u.id}">Unlock</button>`);
   }
@@ -183,6 +210,180 @@ function actionsCell(u) {
   }
 
   return `<div class="arow-actions">${bits.join('')}</div>`;
+}
+
+/* ---- The permission grid ------------------------------------------------ */
+
+/**
+ * One account's access, area by area.
+ *
+ * Drawn from meta.areas — the server's own catalogue — so the grid can only
+ * offer permissions the server enforces. There is no list of areas or actions
+ * written down in this file, which is the same rule the role dropdown follows
+ * and for the same reason.
+ *
+ * The role select at the top is a STARTING POINT, not a filter: picking one
+ * ticks that preset's boxes and leaves them editable. Saving always sends the
+ * ticked list, so what you see is exactly what the account gets.
+ */
+function permRow(u) {
+  const held = new Set(u.permissions ?? []);
+
+  return `
+    <tr data-st-row="${u.id}">
+      <td colspan="5">
+        <form class="acat-new astperm" data-st-perm-form="${u.id}">
+          <div class="astperm__head">
+            <h3 class="h5">What ${escapeHtml(u.name)} may do</h3>
+            <p class="admin__sub">
+              ${u.isCustom
+                ? 'This account has its own list. Its role is only a label until you put it back.'
+                : `Following the ${escapeHtml(u.roleLabel)} preset. Tick anything and it becomes this account&rsquo;s own list.`}
+            </p>
+          </div>
+
+          <div class="afilters__field afilters__field--wide">
+            <label for="stp-role-${u.id}">Start from a role</label>
+            <select class="input-gr" id="stp-role-${u.id}" data-st-perm-preset>
+              <option value="">Choose a preset to fill the boxes…</option>
+              ${roles.map((r) => `<option value="${escapeHtml(r.value)}">${escapeHtml(r.label)}</option>`).join('')}
+            </select>
+          </div>
+
+          <div class="astperm__grid">
+            ${areas.map((a) => areaBox(a, held)).join('')}
+          </div>
+
+          <div class="acat-new__actions">
+            <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Save access</button>
+            ${u.isCustom
+              ? `<button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
+                         data-st-perm-follow="${u.id}">Go back to following the role</button>`
+              : ''}
+            <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button" data-st-perm-cancel>Cancel</button>
+          </div>
+
+          <p class="aerror" data-st-perm-error hidden role="alert"></p>
+        </form>
+      </td>
+    </tr>`;
+}
+
+function areaBox(area, held) {
+  const canView = held.has(`${area.key}.view`);
+
+  return `
+    <fieldset class="astperm__area${canView ? ' is-on' : ''}" data-st-area="${escapeHtml(area.key)}">
+      <legend>${escapeHtml(area.label)}</legend>
+      ${area.actions.map((act) => `
+        <label class="astperm__act">
+          <input type="checkbox" value="${escapeHtml(act.permission)}"
+                 data-st-action="${escapeHtml(act.key)}"
+                 ${held.has(act.permission) ? 'checked' : ''}>
+          <span>${escapeHtml(act.label)}</span>
+        </label>`).join('')}
+    </fieldset>`;
+}
+
+/**
+ * Keep the boxes honest about each other.
+ *
+ * Nothing in an area is reachable without being able to open it, so unticking
+ * "Open and read" unticks the rest, and ticking anything else ticks it back.
+ * The server would not be fooled by a saved list containing `orders.delete`
+ * without `orders.view` — every delete route is inside a group that checks
+ * view first — so a grid that let you save one would be a grid that quietly
+ * promised something it could not deliver.
+ */
+function cascadeArea(box, changed) {
+  const view = box.querySelector('[data-st-action="view"]');
+  if (!view) return;
+
+  if (changed === view && !view.checked) {
+    box.querySelectorAll('input[type="checkbox"]').forEach((c) => { c.checked = false; });
+  } else if (changed !== view && changed.checked) {
+    view.checked = true;
+  }
+
+  box.classList.toggle('is-on', view.checked);
+}
+
+function onPermChange(e) {
+  const box = e.target.closest('[data-st-area]');
+  if (box) return cascadeArea(box, e.target);
+
+  const preset = e.target.closest('[data-st-perm-preset]');
+  if (!preset) return;
+
+  const role = roles.find((r) => r.value === preset.value);
+  if (!role) return;
+
+  // Fills the boxes and leaves them editable — a preset, not a lock.
+  const want = new Set(role.permissions ?? []);
+  const form = preset.closest('[data-st-perm-form]');
+
+  form.querySelectorAll('input[type="checkbox"]').forEach((c) => {
+    c.checked = want.has(c.value);
+  });
+  form.querySelectorAll('[data-st-area]').forEach((box2) => {
+    box2.classList.toggle('is-on', !!box2.querySelector('[data-st-action="view"]')?.checked);
+  });
+}
+
+async function savePerms(form) {
+  const id = form.dataset.stPermForm;
+  const submit = form.querySelector('button[type="submit"]');
+  const err = form.querySelector('[data-st-perm-error]');
+
+  const permissions = [...form.querySelectorAll('input[type="checkbox"]:checked')]
+    .map((c) => c.value);
+
+  err.hidden = true;
+  submit.disabled = true;
+  submit.textContent = 'Saving…';
+
+  try {
+    const { message } = await adminFetch(`/staff/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ permissions }),
+    });
+    toast(message);
+  } catch (error) {
+    const fields = error.body?.errors ? Object.values(error.body.errors).flat() : [];
+    err.textContent = fields.length ? fields.join(' ') : error.message;
+    err.hidden = false;
+    submit.disabled = false;
+    submit.textContent = 'Save access';
+    return;
+  }
+
+  permsId = null;
+  load();
+}
+
+/** Hand the account back to its role — null, not an empty list. */
+async function followRole(btn) {
+  const id = btn.dataset.stPermFollow;
+
+  btn.disabled = true;
+  btn.textContent = 'Restoring…';
+
+  try {
+    const { message } = await adminFetch(`/staff/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ permissions: null }),
+    });
+    toast(message);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Go back to following the role';
+    return toast(err.message, false);
+  }
+
+  permsId = null;
+  load();
 }
 
 /* ---- The trail ---------------------------------------------------------- */
@@ -415,8 +616,17 @@ async function copySecret() {
 function onClick(e) {
   const el = (attr) => e.target.closest(`[${attr}]`);
 
+  const perms = el('data-st-perms');
+  if (perms) { permsId = Number(perms.dataset.stPerms); editingId = null; return repaint(); }
+
+  const permCancel = el('data-st-perm-cancel');
+  if (permCancel) { permsId = null; return repaint(); }
+
+  const follow = el('data-st-perm-follow');
+  if (follow) return followRole(follow);
+
   const edit = el('data-st-edit');
-  if (edit) { editingId = Number(edit.dataset.stEdit); return repaint(); }
+  if (edit) { editingId = Number(edit.dataset.stEdit); permsId = null; return repaint(); }
 
   const cancel = el('data-st-edit-cancel');
   if (cancel) { editingId = null; return repaint(); }
@@ -437,7 +647,7 @@ function onClick(e) {
 /** Repaint from the payload already in hand — no round trip to open an edit. */
 function repaint() {
   const body = document.querySelector('[data-st-body]');
-  body.innerHTML = people.map((u) => (u.id === editingId ? editRow(u) : row(u))).join('');
+  body.innerHTML = people.map(rowFor).join('');
   body.querySelector('[data-st-edit-form] input')?.focus();
 }
 
@@ -467,6 +677,12 @@ function editRow(u) {
 }
 
 async function onEditSubmit(e) {
+  const perms = e.target.closest('[data-st-perm-form]');
+  if (perms) {
+    e.preventDefault();
+    return savePerms(perms);
+  }
+
   const form = e.target.closest('[data-st-edit-form]');
   if (!form) return;
   e.preventDefault();
@@ -514,6 +730,9 @@ async function onEditSubmit(e) {
  * from here by the person making it, so it goes through on the click.
  */
 async function onChange(e) {
+  // The permission grid lives in the same delegated listener.
+  if (e.target.closest('[data-st-perm-form]')) return onPermChange(e);
+
   const select = e.target.closest('[data-st-role-for]');
   if (!select) return;
 
@@ -521,6 +740,23 @@ async function onChange(e) {
   const person = people.find((u) => String(u.id) === id);
   const role = roles.find((r) => r.value === select.value);
   if (!person || !role) return;
+
+  /* Changing the role of an account with its own list would otherwise do
+     nothing visible: the custom list keeps winning, and the dropdown would sit
+     there showing a role that means nothing. So the role change takes the
+     custom list with it, and says so before it does. */
+  if (person.isCustom) {
+    const ok = await confirmDelete({
+      title: `Replace ${person.name}'s custom access?`,
+      body: `They have a list of their own at the moment. Switching to `
+        + `${role.label} replaces it with that preset — anything you ticked by hand is lost.`,
+      confirm: `Use the ${role.label} preset`,
+      undo: 'You can set their permissions by hand again from Access.',
+    });
+    if (!ok) return repaint();
+
+    return applyRole(id, role, { permissions: null });
+  }
 
   if (role.value === 'owner') {
     const ok = await confirmDelete({
@@ -536,12 +772,23 @@ async function onChange(e) {
   }
 
   select.disabled = true;
+  return applyRole(id, role);
+}
 
+/**
+ * Send a role change, optionally clearing the custom list with it.
+ *
+ * Split out because two callers need it and they disagree about `permissions`:
+ * an ordinary role change leaves the field alone, while switching a customised
+ * account back to a preset must send null to clear it. Threading that through
+ * one function with a flag read worse than naming it.
+ */
+async function applyRole(id, role, extra = {}) {
   try {
     const { message } = await adminFetch(`/staff/${encodeURIComponent(id)}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role: role.value }),
+      body: JSON.stringify({ role: role.value, ...extra }),
     });
     toast(message);
   } catch (err) {
