@@ -40,6 +40,38 @@ SITE = "https://gulfrabit.com"
 # tool) cannot hit a NameError inside head().
 BUILD_THEME = "classic"
 
+
+def current_baked_theme():
+    """The theme this working tree is currently built with.
+
+    Read back off index.html's <html data-theme>, which sync_index_theme()
+    writes on every build and is therefore the one durable record of what the
+    last build baked.
+
+    THIS EXISTS BECAUSE THE DEFAULT USED TO BE DESTRUCTIVE. `--theme` defaulted
+    to "classic", so anyone running `python tools/assemble.py` to pick up an
+    unrelated change — a fragment edit, a new admin screen, a css tweak —
+    silently rebaked all 50 pages off whatever the merchant had published and
+    back to Classic. It is a one-word flag to forget and a 50-file diff to
+    notice, and the pages still look right locally because theme.js corrects
+    them from the API after the first paint. The visitor who pays for it is the
+    first-time one, with no mirror to read, who gets a frame of Classic.
+
+    So a bare run now preserves what is already there, and changing the theme
+    is something you have to actually ask for.
+    """
+    try:
+        html = read("index.html")
+    except OSError:
+        return "classic"
+
+    m = re.search(r'<html\b[^>]*?\sdata-theme="([^"]*)"', html)
+    theme = m.group(1) if m else "classic"
+
+    # A theme this build has never heard of is junk, not an instruction — the
+    # same rule --theme-from applies to an unexpected API answer.
+    return theme if theme in ("classic", *STOREFRONT_THEMES) else "classic"
+
 # Every theme layer, in cascade order. THE ONE LIST.
 #
 # This was two lists: head() built the links for the 44 generated pages, and
@@ -1078,8 +1110,12 @@ if __name__ == "__main__":
     # list is a list that goes stale silently. Without this, --theme nakshi was
     # rejected outright and a static deployment could not ship the new themes
     # at all.
-    _ap.add_argument("--theme", choices=["classic", *STOREFRONT_THEMES], default="classic",
-                     help="storefront theme to build in (default: classic)")
+    # default=None, not "classic": the two have to stay distinguishable, or
+    # "the user did not say" is indistinguishable from "the user said Classic"
+    # and the flag cannot preserve anything. See current_baked_theme().
+    _ap.add_argument("--theme", choices=["classic", *STOREFRONT_THEMES], default=None,
+                     help="storefront theme to build in "
+                          "(default: whatever index.html is already built with)")
     # --theme-from matters more now than it would have before.
     #
     # A page links only the theme it was BUILT with. So a build that guesses
@@ -1099,7 +1135,11 @@ if __name__ == "__main__":
                           '{"data":{"theme":"…"}}; falls back to --theme')
 
     _args = _ap.parse_args()
-    BUILD_THEME = _args.theme                     # noqa: F811 — overrides the module default
+    # noqa: F811 — overrides the module default
+    BUILD_THEME = _args.theme if _args.theme else current_baked_theme()
+
+    if not _args.theme:
+        print(f"no --theme given; keeping the {BUILD_THEME} theme index.html already carries")
 
     if _args.theme_from:
         import json as _json
