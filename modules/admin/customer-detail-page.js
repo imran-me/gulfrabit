@@ -70,7 +70,7 @@ function paintActions() {
       : '';
   }
 
-  if (!canDelete(session)) { host.innerHTML = ''; return; }
+  if (!canDelete('customers', session)) { host.innerHTML = ''; return; }
 
   host.innerHTML = customer.deletedAt
     ? '<button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-cust-restore>Restore customer</button>'

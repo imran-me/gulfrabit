@@ -411,7 +411,7 @@ function paint({ data, meta }) {
           // Editing a deleted product is not offered: the edit screen saves to
           // a catalogue this product is not in, so every field on it would be
           // a change nobody can see. Put it back first, then edit it.
-          ? (canDelete()
+          ? (canDelete('products')
               ? `<button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
                          data-prod-restore="${i}">Restore</button>
                  <button class="btn-gr btn-ghost-gr btn-sm-gr aact-remove" type="button"
@@ -420,7 +420,7 @@ function paint({ data, meta }) {
           : `<a class="btn-gr btn-ghost-gr btn-sm-gr" href="/admin/products/edit?sku=${encodeURIComponent(p.sku)}">Edit</a>
              <button class="btn-gr btn-ghost-gr btn-sm-gr" type="button"
                      data-prod-arch="${i}">${p.archivedAt ? 'Unarchive' : 'Archive'}</button>
-             ${canDelete()
+             ${canDelete('products')
                ? `<button class="btn-gr btn-ghost-gr btn-sm-gr aact-remove" type="button"
                           data-prod-remove="${i}">Remove</button>`
                : ''}`
@@ -514,7 +514,7 @@ function clearSelection() {
  * catalogue is not a state, and the server would refuse it.
  *
  * Delete and Restore are drawn only for an owner, because that is what the
- * route enforces — see RequireOwner. Unlist and List are not gated: curating
+ * route enforces — `admin:products.delete`. Unlist and List are not gated: curating
  * the catalogue is the job of anyone who may reach this screen at all, and
  * neither one destroys anything.
  */
@@ -534,20 +534,20 @@ function paintBulk() {
   const inTrash = where === 'deleted';
 
   const actions = inTrash
-    ? (canDelete()
+    ? (canDelete('products')
         ? [['restore', 'Restore', 'btn-outline-gr'],
            ['purge', 'Delete for ever', 'btn-ghost-gr aact-remove']]
         : [])
     : where === 'archived'
       ? [
           ['unarchive', 'Put back in the catalogue', 'btn-outline-gr'],
-          ...(canDelete() ? [['delete', 'Delete', 'btn-ghost-gr aact-remove']] : []),
+          ...(canDelete('products') ? [['delete', 'Delete', 'btn-ghost-gr aact-remove']] : []),
         ]
       : [
           ['archive', 'Archive', 'btn-outline-gr'],
           ['list', 'Put on the shop', 'btn-ghost-gr'],
           ['unlist', 'Unlist', 'btn-ghost-gr'],
-          ...(canDelete() ? [['delete', 'Delete', 'btn-ghost-gr aact-remove']] : []),
+          ...(canDelete('products') ? [['delete', 'Delete', 'btn-ghost-gr aact-remove']] : []),
         ];
 
   bar.querySelector('[data-bulk-actions]').innerHTML = actions.length

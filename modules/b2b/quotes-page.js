@@ -96,14 +96,14 @@ function paint({ data, meta }) {
         // "Quote sent" on a request nobody can see is an offer to do work that
         // will not reach anyone.
         q.deletedAt
-          ? (canDelete()
+          ? (canDelete('orders')
               ? `<button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
                          data-q-restore="${escapeHtml(q.reference)}">Restore</button>`
               : '<span class="atable__sub">Deleted</span>')
           : `${(NEXT[q.status] || []).map(([to, label]) => `
               <button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
                       data-move="${escapeHtml(q.reference)}" data-to="${to}">${escapeHtml(label)}</button>`).join(' ')}
-             ${canDelete()
+             ${canDelete('orders')
                ? `<button class="alink-btn alink-btn--danger" type="button"
                           data-q-del="${escapeHtml(q.reference)}">Delete</button>`
                : ''}`

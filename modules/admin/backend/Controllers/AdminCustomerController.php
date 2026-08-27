@@ -270,9 +270,10 @@ class AdminCustomerController extends Controller
     {
         $admin = $request->user('admin');
 
-        if ($admin->role !== 'owner') {
+        if (! $admin->may('customers.erase')) {
             return response()->json([
-                'message' => 'Only an owner can erase a customer.',
+                'message' => 'Your account cannot erase a customer. That is separate from '
+                    . 'deleting one, and has to be turned on for you by an owner.',
             ], 403);
         }
 

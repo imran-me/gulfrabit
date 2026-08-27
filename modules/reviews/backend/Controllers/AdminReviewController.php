@@ -96,7 +96,7 @@ class AdminReviewController extends Controller
      *
      * For spam, not for disagreement — rejecting is what disagreement is for,
      * and a rejected review can be reconsidered. This one is gone, which is
-     * why the route sits behind admin.owner with the rest of the deletes.
+     * why the route sits behind `admin:products.delete` with the rest of them.
      */
     public function destroy(ProductReview $review): JsonResponse
     {

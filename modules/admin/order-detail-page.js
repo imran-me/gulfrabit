@@ -304,7 +304,7 @@ function paintActions() {
   // sends it no transitions; this is about not also offering a reprint, which
   // would put a slip for an order that is off the floor into somebody's hand.
   if (order.deletedAt) {
-    host.innerHTML = canDelete()
+    host.innerHTML = canDelete('orders')
       ? `<button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-restore>Restore this order</button>
          <span class="admin__sub">Deleted ${escapeHtml(when(order.deletedAt))}. Restoring puts it back in ${
            escapeHtml(stageLabel(order.status).toLowerCase())
@@ -318,7 +318,7 @@ function paintActions() {
   // Delete is drawn last, after the moves and after the slip — the far end of
   // the row from "Confirm", which is the button the hand goes to a hundred
   // times a day.
-  const del = canDelete()
+  const del = canDelete('orders')
     ? '<button class="btn-gr btn-danger-gr btn-sm-gr" type="button" data-delete>Delete order</button>'
     : '';
 

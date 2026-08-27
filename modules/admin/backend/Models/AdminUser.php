@@ -22,7 +22,7 @@ class AdminUser extends Authenticatable
 
     protected $table = 'admin_users';
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'is_active'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'permissions', 'is_active'];
 
     /**
      * Never serialised, in any context. `$hidden` is a safety net rather than
@@ -36,6 +36,9 @@ class AdminUser extends Authenticatable
     {
         return [
             'password'        => 'hashed',
+            // null stays null — see the 2026_08_27 migration for why that is
+            // a different fact from an empty list.
+            'permissions'     => 'array',
             'is_active'       => 'boolean',
             'last_login_at'   => 'datetime',
             'locked_until'    => 'datetime',
@@ -43,40 +46,246 @@ class AdminUser extends Authenticatable
         ];
     }
 
-    /* ---- Roles ---------------------------------------------------------
-       Capabilities are derived from one role rather than stored per user. A
-       permission matrix nobody maintains drifts until everyone is an owner;
-       this cannot drift, because changing what a role may do is a code change
-       that gets reviewed. */
+    /* ---- Roles and permissions -----------------------------------------
+
+       A role is a PRESET, not a cage. It fills in a sensible set of
+       permissions; an owner may then tick or untick individual ones for one
+       person, and that account's own list is stored on its row.
+
+       The original design was one role per user and no matrix at all, on the
+       argument that a matrix nobody maintains drifts until everyone is an
+       owner. That risk is real and this does not pretend otherwise — but
+       "give this person the orders screen and nothing else" is an ordinary
+       thing for a shop to want, and five fixed roles cannot say it. The
+       compromise is that the matrix is opt-in: an account nobody has
+       customised follows its role exactly, and most never need more. */
 
     public const ROLES = ['owner', 'manager', 'warehouse', 'accounts', 'editor'];
 
     /**
-     * Which admin areas each role may open.
+     * Every permission this panel knows about, by area.
      *
-     * `owner` is listed explicitly rather than special-cased to `*`, so that
-     * reading this table tells you the whole truth about who sees what.
+     * THE ACTIONS ARE PER-AREA, NOT A GRID
+     * ------------------------------------
+     * A blanket area × action grid would invent `dashboard.delete` and
+     * `inventory.refund` — permissions for acts that do not exist, which then
+     * have to be explained away in the UI. Each area lists only what can
+     * genuinely be done in it, so every checkbox on the staff screen maps to a
+     * real thing the server checks.
+     *
+     * `view` is the one every area has, and it is what a bare `admin:<area>`
+     * on a route resolves to — so every route written before permissions
+     * existed keeps working, unchanged.
      *
      * @var array<string, array<int, string>>
      */
-    public const CAPABILITIES = [
-        // 'dashboard' is on every role: it is the panel's landing screen, and a
-        // staff member who signs in and finds no page they may open has no way
-        // to tell a permissions problem from a broken deployment. The dashboard
-        // controller still decides which CARDS each role receives, so warehouse
-        // lands somewhere real without being handed the day's revenue.
-        'owner'     => ['dashboard', 'orders', 'customers', 'products', 'inventory', 'accounting', 'content', 'staff', 'settings'],
-        'manager'   => ['dashboard', 'orders', 'customers', 'products', 'inventory', 'accounting', 'content'],
-        // Fulfils orders and moves stock. No money, no customer records beyond
-        // the delivery address printed on the packing slip.
-        'warehouse' => ['dashboard', 'orders', 'inventory'],
-        // The books and the reports. Cannot edit customers or the catalogue,
-        // because the person who records a transaction should not also be able
-        // to alter what it was for.
-        'accounts'  => ['dashboard', 'accounting', 'orders'],
-        // Website copy only. An editor never sees an order or a customer.
-        'editor'    => ['dashboard', 'content'],
+    public const PERMISSIONS = [
+        'dashboard'  => ['view'],
+        // `cancel` covers cancelled, returned and spam together: all three end
+        // an order rather than advancing it, and they were already one group in
+        // OrderFulfilmentService::RESTRICTED_TO_MANAGEMENT.
+        'orders'     => ['view', 'edit', 'cancel', 'refund', 'delete'],
+        // `erase` anonymises and is irreversible; `delete` merely takes them
+        // off the list. Two acts, never synonyms — see AdminCustomerController.
+        'customers'  => ['view', 'edit', 'erase', 'delete'],
+        // `archive` is its own permission rather than part of edit: putting the
+        // season away is routine catalogue work, and a shop may well want
+        // somebody who can do it without being able to change a price.
+        'products'   => ['view', 'edit', 'archive', 'delete'],
+        'inventory'  => ['view', 'edit'],
+        'accounting' => ['view', 'edit'],
+        'content'    => ['view', 'edit', 'delete'],
+        // `manage` rather than edit/delete: staff accounts are never deleted,
+        // and creating one, changing a role and disabling somebody are all the
+        // same decision — you trust a person with the keys or you do not.
+        'staff'      => ['view', 'manage'],
+        'settings'   => ['view', 'edit'],
     ];
+
+    /**
+     * What each area is called on screen, in the merchant's words rather than
+     * the code's. `products` is not "products" to the person ticking the box —
+     * it is the whole catalogue, coupons and images included.
+     *
+     * @var array<string, string>
+     */
+    public const AREA_LABELS = [
+        'dashboard'  => 'Dashboard',
+        'orders'     => 'Orders, couriers, campaigns and quotes',
+        'customers'  => 'Customers',
+        'products'   => 'Catalogue — products, categories, coupons, images, reviews',
+        'inventory'  => 'Stock',
+        'accounting' => 'Books — profit & loss and the journal',
+        'content'    => 'Website content and appearance',
+        'staff'      => 'Staff accounts',
+        'settings'   => 'Settings',
+    ];
+
+    /**
+     * What each action means, said as what the person can do rather than as the
+     * verb the code happens to use.
+     *
+     * @var array<string, string>
+     */
+    public const ACTION_LABELS = [
+        'view'    => 'Open and read',
+        'edit'    => 'Add and change',
+        'archive' => 'Archive and restore',
+        'cancel'  => 'Cancel, return or mark as spam',
+        'refund'  => 'Authorise refunds',
+        'erase'   => 'Erase permanently',
+        'delete'  => 'Delete',
+        'manage'  => 'Create accounts and set permissions',
+    ];
+
+    /**
+     * The permissions each role hands out.
+     *
+     * These reproduce exactly what the five roles could do before per-account
+     * permissions existed. That is the point of a preset: nothing changed on
+     * the day this shipped.
+     *
+     * `owner` is '*' rather than a list. It used to be spelled out, so that
+     * reading the table told you the whole truth — but the table now has thirty
+     * entries and would need a new one added to owner every time an area gains
+     * an action. A wildcard cannot be forgotten, and "an owner can do
+     * everything" is the one rule here that will never want an exception.
+     *
+     * @var array<string, array<int, string>>
+     */
+    public const ROLE_PERMISSIONS = [
+        'owner' => ['*'],
+
+        'manager' => [
+            'dashboard.view',
+            'orders.view', 'orders.edit', 'orders.cancel', 'orders.refund',
+            'customers.view', 'customers.edit',
+            'products.view', 'products.edit', 'products.archive',
+            'inventory.view', 'inventory.edit',
+            'accounting.view', 'accounting.edit',
+            'content.view', 'content.edit',
+        ],
+
+        // The shop floor. Moves parcels and stock; no money, no customer
+        // records, and cannot end an order — see the `cancel` note above.
+        'warehouse' => [
+            'dashboard.view',
+            'orders.view', 'orders.edit',
+            'inventory.view', 'inventory.edit',
+        ],
+
+        // Note `orders.edit` and `orders.cancel`: this role could already work
+        // orders as fully as a manager, because only warehouse was ever
+        // restricted. Preserved rather than tightened — narrowing it here would
+        // be a behaviour change smuggled in under a refactor.
+        'accounts' => [
+            'dashboard.view',
+            'accounting.view', 'accounting.edit',
+            'orders.view', 'orders.edit', 'orders.cancel', 'orders.refund',
+        ],
+
+        'editor' => [
+            'dashboard.view',
+            'content.view', 'content.edit',
+        ],
+    ];
+
+    /**
+     * Every permission string this panel knows, flattened.
+     *
+     * @return array<int, string>
+     */
+    public static function allPermissions(): array
+    {
+        $out = [];
+
+        foreach (self::PERMISSIONS as $area => $actions) {
+            foreach ($actions as $action) {
+                $out[] = "{$area}.{$action}";
+            }
+        }
+
+        return $out;
+    }
+
+    /** Is `orders.delete` a permission this panel actually has? */
+    public static function isKnownPermission(string $permission): bool
+    {
+        return in_array($permission, self::allPermissions(), true);
+    }
+
+    /**
+     * What a ROLE would grant, without needing an account to ask it of.
+     *
+     * The staff screen needs this to show what picking a preset would do,
+     * before anything is saved to anybody.
+     */
+    public static function roleMay(string $role, string $permission): bool
+    {
+        $held = self::ROLE_PERMISSIONS[$role] ?? [];
+
+        return in_array('*', $held, true) || in_array($permission, $held, true);
+    }
+
+    /**
+     * The permissions actually in force for this account.
+     *
+     * A stored list wins outright; null means "follow the role", which is what
+     * every account created before this feature carries and what any account
+     * nobody has customised keeps. Null and an empty array are different facts
+     * — see the 2026_08_27 migration.
+     *
+     * @return array<int, string>
+     */
+    public function effectivePermissions(): array
+    {
+        if ($this->permissions !== null) {
+            return $this->permissions;
+        }
+
+        return self::ROLE_PERMISSIONS[$this->role] ?? [];
+    }
+
+    /**
+     * The same list with the owner's wildcard spelled out, for anything that
+     * has to SHOW permissions rather than test one — a checkbox grid cannot
+     * tick '*'.
+     *
+     * Ordered by allPermissions() rather than by whatever order the stored
+     * array happens to be in, so the grid does not reshuffle after a save.
+     *
+     * @return array<int, string>
+     */
+    public function expandedPermissions(): array
+    {
+        $held = $this->effectivePermissions();
+
+        return in_array('*', $held, true)
+            ? self::allPermissions()
+            : array_values(array_intersect(self::allPermissions(), $held));
+    }
+
+    /** Has this account been given a list of its own, rather than its role's? */
+    public function hasCustomPermissions(): bool
+    {
+        return $this->permissions !== null;
+    }
+
+    /**
+     * May this staff member do one specific thing?
+     *
+     * The whole authority, and the only question the middleware and the
+     * controllers ask. Named `may` rather than `can` for the same reason
+     * canAccess() is not `can`: Laravel's Authorizable trait already owns
+     * `can()`, and redeclaring it with a narrower signature is a fatal error at
+     * class-load time — which is how that was found the first time.
+     */
+    public function may(string $permission): bool
+    {
+        $held = $this->effectivePermissions();
+
+        return in_array('*', $held, true) || in_array($permission, $held, true);
+    }
 
     /**
      * What each role is called on screen, and what it means in one sentence.
@@ -148,14 +357,32 @@ class AdminUser extends Authenticatable
             'value'        => $role,
             'label'        => self::labelFor($role),
             'blurb'        => self::ROLE_META[$role]['blurb'] ?? '',
-            'capabilities' => self::CAPABILITIES[$role] ?? [],
+            'capabilities' => array_values(array_filter(
+                array_keys(self::PERMISSIONS),
+                fn (string $area): bool => self::roleMay($role, "{$area}.view"),
+            )),
+            'permissions'  => (self::ROLE_PERMISSIONS[$role] ?? []) === ['*']
+                ? self::allPermissions()
+                : (self::ROLE_PERMISSIONS[$role] ?? []),
         ], self::ROLES);
     }
 
-    /** @return array<int, string> */
+    /**
+     * The areas this account may OPEN.
+     *
+     * Derived from the permission list rather than stored beside it. Two lists
+     * that have to agree is one list that eventually will not — and this one
+     * feeds the sidebar, so the failure mode is a nav item that 403s when it is
+     * clicked.
+     *
+     * @return array<int, string>
+     */
     public function capabilities(): array
     {
-        return self::CAPABILITIES[$this->role] ?? [];
+        return array_values(array_filter(
+            array_keys(self::PERMISSIONS),
+            fn (string $area): bool => $this->may("{$area}.view"),
+        ));
     }
 
     /**
@@ -174,7 +401,7 @@ class AdminUser extends Authenticatable
      */
     public function canAccess(string $area): bool
     {
-        return in_array($area, $this->capabilities(), true);
+        return $this->may("{$area}.view");
     }
 
     public function scopeActive(Builder $q): Builder
@@ -189,27 +416,38 @@ class AdminUser extends Authenticatable
     }
 
     /**
-     * Is this the only active owner left?
+     * Is this the only active account that could still manage staff?
      *
-     * The question the staff screen must ask before every demotion and every
-     * disable. A panel with no active owner cannot appoint one — the staff
-     * screen is itself owner-only — so the way back is SSH, an .env edit and
-     * the seeder, which for a shop owner on a Friday means the panel is simply
-     * gone until somebody technical is free.
+     * THIS USED TO ASK ABOUT THE OWNER ROLE, AND THAT STOPPED BEING THE
+     * QUESTION
+     * --------------------------------------------------------------------
+     * When capabilities came only from roles, "the last active owner" and "the
+     * last person who can manage staff" were the same sentence. Per-account
+     * permissions pulled them apart: an owner can now be handed a list without
+     * `staff.manage` in it, and a manager can be handed one with it.
      *
-     * Counted over ACTIVE owners, not all of them. A second owner who was
-     * disabled last month cannot sign in to fix anything, so leaning on their
-     * row to permit this demotion would be counting a door that is bricked up.
+     * Counting owners would then guard the wrong thing in both directions — it
+     * would refuse to demote an owner who could not manage staff anyway, and it
+     * would happily disable the one manager who could, leaving a panel nobody
+     * can appoint anybody from. So it asks about the ABILITY, which is what
+     * actually has to survive.
+     *
+     * Resolved in PHP rather than SQL because the answer lives in a nullable
+     * JSON column with a role fallback behind it, and a query that tried to
+     * express that would be a WHERE clause nobody could read. This panel holds
+     * five to twenty accounts.
      */
-    public function isLastActiveOwner(): bool
+    public function isLastStaffManager(): bool
     {
-        return $this->role === 'owner'
-            && $this->is_active
-            && self::query()
-                ->where('role', 'owner')
-                ->where('is_active', true)
-                ->whereKeyNot($this->getKey())
-                ->doesntExist();
+        if (! $this->is_active || ! $this->may('staff.manage')) {
+            return false;
+        }
+
+        return ! self::query()
+            ->where('is_active', true)
+            ->whereKeyNot($this->getKey())
+            ->get()
+            ->contains(fn (self $other): bool => $other->may('staff.manage'));
     }
 
     /** The shape the admin client is allowed to see about itself. */
@@ -221,6 +459,9 @@ class AdminUser extends Authenticatable
             'email'        => $this->email,
             'role'         => $this->role,
             'capabilities' => $this->capabilities(),
+            // The expanded list, so the client never has to know what '*'
+            // means. An owner arrives with all thirty spelled out.
+            'permissions'  => $this->expandedPermissions(),
         ];
     }
 
@@ -251,6 +492,10 @@ class AdminUser extends Authenticatable
             // a second account created.
             'lastLoginIp' => $this->last_login_ip,
             'createdAt'   => $this->created_at?->toIso8601String(),
+            'permissions' => $this->expandedPermissions(),
+            // Whether the role still describes this account, or whether
+            // somebody has ticked boxes and the role is now only a label.
+            'isCustom'    => $this->hasCustomPermissions(),
         ];
     }
 }

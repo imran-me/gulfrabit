@@ -179,7 +179,7 @@ function paintBin(binned) {
             <strong>${escapeHtml(s.headline || 'Untitled banner')}</strong>
             ${s.subline ? `<div class="atable__sub">${escapeHtml(s.subline)}</div>` : ''}
           </div>
-          ${canDelete()
+          ${canDelete('content')
             ? `<button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
                        data-hero-restore="${s.id}">Restore</button>`
             : ''}

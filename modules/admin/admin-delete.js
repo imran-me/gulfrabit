@@ -22,8 +22,9 @@
  * cannot be undone must NOT use this helper — it should say so in its own
  * words, at length, the way the customer erasure screen does.
  *
- * The dialog is a courtesy, not a control. The control is `admin.owner` on the
- * route; see Middleware/RequireOwner.php.
+ * The dialog is a courtesy, not a control. The control is the area's delete
+ * permission on the route — `admin:orders.delete`, `admin:products.delete` —
+ * see Middleware/RequireAdmin.php.
  */
 
 
@@ -38,14 +39,42 @@ const state = (globalThis.grAdminDelete ??= { session: null, dialog: null, toast
 document.addEventListener('admin:ready', (e) => { state.session = e.detail?.session ?? null; });
 
 /**
- * May the signed-in staff member delete?
+ * May the signed-in staff member do one specific thing?
  *
- * Owner only, everywhere, with no per-area exceptions — see RequireOwner.php
- * for why this is one rule rather than a matrix. Pass a session explicitly if
- * the caller has one to hand; otherwise the one from `admin:ready` is used.
+ * The session carries a flat list of `area.action` strings, already expanded —
+ * an owner arrives with every permission spelled out rather than a wildcard to
+ * interpret. So this is a membership test and nothing more; every rule about
+ * what the list CONTAINS lives on the server, in AdminUser.
+ *
+ * @param {string} permission e.g. 'orders.delete'
  */
-export function canDelete(session = state.session) {
-  return session?.role === 'owner';
+export function may(permission, session = state.session) {
+  const held = session?.permissions;
+  if (!Array.isArray(held)) return false;
+  // '*' should never reach a browser — the server expands it — but honouring
+  // it costs one comparison and avoids an owner losing every button to a
+  // serialisation change nobody thought to check here.
+  return held.includes('*') || held.includes(permission);
+}
+
+/**
+ * May they delete in this area?
+ *
+ * THIS USED TO BE `session.role === 'owner'`, FOR EVERY SCREEN AT ONCE
+ * -------------------------------------------------------------------
+ * That was one rule, deliberately, back when deleting was one question with
+ * the same answer everywhere. Permissions are per area now, which is the whole
+ * point — "may work orders but not delete them" is a thing a shop wants to be
+ * able to say — so the caller has to name the area it is drawing buttons for.
+ *
+ * The area is required rather than defaulted. A default would silently pick a
+ * side on every call site that forgot to pass one, and half of them would be
+ * wrong in the permissive direction.
+ *
+ * @param {string} area e.g. 'orders'
+ */
+export function canDelete(area, session = state.session) {
+  return may(`${area}.delete`, session);
 }
 
 /**

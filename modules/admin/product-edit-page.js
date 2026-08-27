@@ -81,7 +81,7 @@ async function load() {
     // Owner-only, and hidden rather than disabled: a control that refuses
     // the person looking at it is only a source of confusion. The route
     // behind it carries the real check.
-    del.hidden = !canDelete();
+    del.hidden = !canDelete('products');
     del.addEventListener('click', unlist);
   }
 }

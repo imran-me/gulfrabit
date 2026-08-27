@@ -6,7 +6,6 @@ namespace Modules\Admin;
 
 use Illuminate\Support\ServiceProvider;
 use Modules\Admin\Middleware\RequireAdmin;
-use Modules\Admin\Middleware\RequireOwner;
 use Modules\Admin\Models\AdminUser;
 use Modules\Admin\Services\AdminAuthService;
 
@@ -35,12 +34,16 @@ class AdminServiceProvider extends ServiceProvider
 
         $this->app['router']->aliasMiddleware('admin', RequireAdmin::class);
 
-        // Stacks on top of an area check rather than replacing it, so a
-        // destructive route reads ['admin:orders', 'admin.owner'] — "may work
-        // orders, and is an owner". Registered here because every module's
-        // delete routes use it, and they already name `admin` from this same
-        // registry; this adds no new coupling that was not there already.
-        $this->app['router']->aliasMiddleware('admin.owner', RequireOwner::class);
+        /* `admin.owner` used to be registered here, and every destructive
+           route in the panel carried it. It is gone: deleting is no longer
+           "are you an owner" but a permission per area — `admin:orders.delete`,
+           `admin:products.delete` — which is what makes "this person may work
+           orders but not delete them" expressible at all.
+
+           The middleware class went with it rather than being left registered
+           and unused, because an alias nothing calls is an alias somebody
+           eventually calls by mistake, reintroducing an owner-only gate into a
+           panel that no longer works that way. */
 
         $this->app->booted(function (): void {
             $this->loadRoutes();

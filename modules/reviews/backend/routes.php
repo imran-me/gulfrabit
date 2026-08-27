@@ -57,7 +57,7 @@ Route::prefix('admin')
 
         // Deleting is owner-only, like every other delete in the panel.
         // Rejecting is the reversible move and needs no such gate.
-        Route::middleware('admin.owner')->group(function (): void {
+        Route::middleware('admin:products.delete')->group(function (): void {
             Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy'])->name('destroy');
         });
     });

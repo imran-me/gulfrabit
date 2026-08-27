@@ -44,7 +44,7 @@ use Modules\Admin\Requests\StaffUpdateRequest;
  * itself an owner-only act. The way back is SSH, an .env edit and the seeder,
  * which for a shop owner on a Friday evening means the panel is gone until
  * somebody technical is free. Every method that could remove the last one
- * refuses; see refuse() and AdminUser::isLastActiveOwner().
+ * refuses; see refuse() and AdminUser::isLastStaffManager().
  *
  * PASSWORDS ARE GENERATED, SHOWN ONCE, NEVER READABLE AGAIN
  * --------------------------------------------------------
@@ -72,12 +72,14 @@ class AdminStaffController extends Controller
         $me    = $request->user('admin');
         $staff = AdminUser::query()->get();
 
-        /* Counted once, here, rather than asking isLastActiveOwner() per row —
+        /* Counted once, here, rather than asking isLastStaffManager() per row —
            that method runs a query, and twenty rows would be twenty queries to
            answer a question with one number in it. The write paths still call
            it, because there they ask about a single row and the answer has to
            be current as of that write rather than as of a list drawn earlier. */
-        $activeOwners = $staff->where('role', 'owner')->where('is_active', true)->count();
+        $activeManagers = $staff
+            ->filter(fn (AdminUser $u): bool => $u->is_active && $u->may('staff.manage'))
+            ->count();
 
         /* Sorted in PHP by the order roles appear in AdminUser::ROLES, which is
            deliberately most-powerful-first: an owner opening this screen should
@@ -93,7 +95,7 @@ class AdminStaffController extends Controller
                 // A fact about the REQUEST, not about the row, which is why it
                 // is composed here and not in the model.
                 'isSelf'     => $u->id === $me->id,
-                'lockedRole' => $this->roleLockReason($u, $me, $activeOwners),
+                'lockedRole' => $this->roleLockReason($u, $me, $activeManagers),
             ]);
 
         return response()->json([
@@ -118,8 +120,24 @@ class AdminStaffController extends Controller
             'meta' => [
                 'total'       => $staff->count(),
                 'activeCount' => $staff->where('is_active', true)->count(),
-                'ownerCount'  => $activeOwners,
+                // Renamed from ownerCount: what the screen has to warn about
+                // is the number of people who can still hand out access.
+                'managerCount' => $activeManagers,
                 'roles'       => AdminUser::roleCatalogue(),
+                /* The permission catalogue, so the grid on the staff screen is
+                   drawn from what the server actually enforces. Areas in the
+                   order they are declared, each with only the actions that area
+                   genuinely has — there is no `dashboard.delete` to explain
+                   away, because the server does not have one either. */
+                'areas' => array_map(static fn (string $area): array => [
+                    'key'     => $area,
+                    'label'   => AdminUser::AREA_LABELS[$area] ?? $area,
+                    'actions' => array_map(static fn (string $action): array => [
+                        'key'        => $action,
+                        'label'      => AdminUser::ACTION_LABELS[$action] ?? $action,
+                        'permission' => "{$area}.{$action}",
+                    ], AdminUser::PERMISSIONS[$area]),
+                ], array_keys(AdminUser::PERMISSIONS)),
             ],
         ]);
     }
@@ -158,6 +176,8 @@ class AdminStaffController extends Controller
             // how somebody eventually double-hashes a password and spends an
             // afternoon working out why a correct one is refused.
             'password'  => $password,
+            // Absent from the request means null means "follow the role".
+            'permissions' => $request->validated()['permissions'] ?? null,
             'is_active' => true,
         ]);
 
@@ -186,27 +206,44 @@ class AdminStaffController extends Controller
         $me   = $request->user('admin');
         $data = $request->validated();
 
+        $changesAccess = array_key_exists('role', $data) || array_key_exists('permissions', $data);
+
         /* Asked again here, even though index() already told the client which
            rows are locked and why. That answer went to a browser — a place
            where rules are displayed, not a place where they are kept. */
-        if (array_key_exists('role', $data) && $data['role'] !== $staff->role) {
-            if ($staff->id === $me->id) {
-                return $this->refuse(
-                    'You cannot change your own role. Ask another owner to do it — an owner '
-                    . 'who demotes themselves by accident has no way to undo it.'
-                );
-            }
+        if ($changesAccess && $staff->id === $me->id) {
+            return $this->refuse(
+                'You cannot change your own access. Ask another owner to do it — somebody '
+                . 'who takes away their own permissions by accident has no way to undo it.'
+            );
+        }
 
-            if ($staff->isLastActiveOwner()) {
+        /* One guard for two ways of causing the same disaster.
+           Demoting the last person who can manage staff and un-ticking
+           `staff.manage` on them are the same act with different UI, and a
+           guard that only knew about roles would have caught one and waved the
+           other through — leaving a panel nobody can appoint anybody from.
+
+           Asked of a COPY carrying the proposed change rather than by
+           reasoning about what the change implies. The rules for what a
+           permission list resolves to already live in one place; re-deriving
+           them here is how the two answers drift apart. */
+        if ($changesAccess && $staff->isLastStaffManager()) {
+            $after = clone $staff;
+            $after->fill($data);
+
+            if (! $after->may('staff.manage')) {
                 return $this->refuse(
-                    "{$staff->name} is the only active owner. Make somebody else an owner "
-                    . 'first, then change this account — otherwise nobody is left who can '
-                    . 'manage staff at all.'
+                    "{$staff->name} is the only active account that can manage staff. This "
+                    . 'change would leave nobody able to open this screen, and no way to fix '
+                    . 'it from inside the panel. Give somebody else staff access first.'
                 );
             }
         }
 
         $wasRole  = $staff->role;
+        $wasPerms = count($staff->expandedPermissions());
+        $wasCustom = $staff->hasCustomPermissions();
         $wasEmail = $staff->email;
         $staff->fill($data)->save();
 
@@ -222,6 +259,19 @@ class AdminStaffController extends Controller
         if ($staff->wasChanged('name') || $staff->wasChanged('email')) {
             AdminUserEvent::record($staff, AdminUserEvent::DETAILS_CHANGED,
                 $me, $wasEmail, $staff->email);
+        }
+
+        /* wasChanged('permissions') is not reliable for a json column — Laravel
+           compares the encoded strings, so a list with the same members in a
+           different order reads as a change. Comparing the resolved sets is the
+           question actually being asked: did what this person may do move? */
+        $nowCustom = $staff->hasCustomPermissions();
+        $nowPerms  = count($staff->expandedPermissions());
+
+        if ($nowCustom !== $wasCustom || $nowPerms !== $wasPerms) {
+            AdminUserEvent::record($staff, AdminUserEvent::PERMISSIONS_SET, $me,
+                (string) $wasPerms,
+                $nowCustom ? (string) $nowPerms : null);
         }
 
         /* Said in terms of what actually changed. "Saved." after a promotion is
@@ -328,11 +378,11 @@ class AdminStaffController extends Controller
             );
         }
 
-        if ($staff->isLastActiveOwner()) {
+        if ($staff->isLastStaffManager()) {
             return $this->refuse(
-                "{$staff->name} is the only active owner. Disabling them would leave this "
-                . 'panel with nobody who can manage staff, and no way to appoint anyone from '
-                . 'inside it. Make somebody else an owner first.'
+                "{$staff->name} is the only active account that can manage staff. Disabling "
+                . 'them would leave this panel with nobody able to appoint anyone, and no way '
+                . 'to fix it from inside. Give somebody else staff access first.'
             );
         }
 
@@ -398,21 +448,25 @@ class AdminStaffController extends Controller
      * teaches nobody anything; one that says "this is the only owner" teaches
      * the rule once and is never asked about again.
      *
-     * @param int|null $activeOwners pre-counted, where the caller has a whole
+     * @param int|null $activeManagers pre-counted, where the caller has a whole
      *   list to answer for; null asks the database about this row alone.
      */
-    private function roleLockReason(AdminUser $row, AdminUser $me, ?int $activeOwners): ?string
+    private function roleLockReason(AdminUser $row, AdminUser $me, ?int $activeManagers): ?string
     {
         if ($row->id === $me->id) {
-            return 'You cannot change your own role — ask another owner.';
+            return 'You cannot change your own access — ask another owner.';
         }
 
-        $isLastOwner = $activeOwners === null
-            ? $row->isLastActiveOwner()
-            : ($row->role === 'owner' && $row->is_active && $activeOwners === 1);
+        /* Counted by ABILITY rather than by role, because the two came apart
+           the moment permissions became per-account: an owner can be handed a
+           list without `staff.manage`, and a manager can be handed one with it.
+           Counting owners would guard the wrong thing in both directions. */
+        $isLastManager = $activeManagers === null
+            ? $row->isLastStaffManager()
+            : ($row->is_active && $row->may('staff.manage') && $activeManagers === 1);
 
-        return $isLastOwner
-            ? 'The only active owner. Appoint another owner before changing this one.'
+        return $isLastManager
+            ? 'The only account that can manage staff. Give somebody else staff access first.'
             : null;
     }
 

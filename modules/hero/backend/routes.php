@@ -36,7 +36,7 @@ Route::prefix('admin/hero')->name('admin.hero.')
         // Soft, and it switches the banner off on the way out — restoring must
         // not put one straight back onto the front page. sort_order survives,
         // so a restored banner returns to the place it held.
-        Route::middleware('admin.owner')->group(function (): void {
+        Route::middleware('admin:content.delete')->group(function (): void {
             Route::delete('/{slide}', [AdminHeroController::class, 'destroy'])
                 ->withTrashed()->name('destroy');
             Route::post('/{slide}/restore', [AdminHeroController::class, 'restore'])->name('restore');

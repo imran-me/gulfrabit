@@ -136,7 +136,7 @@ function row(r) {
             ? `<button class="btn-gr btn-ghost-gr btn-sm-gr" type="button"
                        data-rv-act="rejected" data-rv-id="${r.id}">Reject</button>`
             : ''}
-          ${canDelete()
+          ${canDelete('products')
             ? `<button class="btn-gr btn-ghost-gr btn-sm-gr aact-remove" type="button"
                        data-rv-act="delete" data-rv-id="${r.id}">Delete</button>`
             : ''}

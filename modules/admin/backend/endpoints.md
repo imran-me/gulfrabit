@@ -187,7 +187,8 @@ Everyone, unpaginated. A shop has five to twenty staff accounts.
     "createdAt": "2026-07-30T…",
     "isSelf": false, "lockedRole": null
   }],
-  "meta": { "total": 6, "activeCount": 5, "ownerCount": 1, "roles": [ … ] }
+  "meta": { "total": 6, "activeCount": 5, "managerCount": 1,
+            "roles": [ … ], "areas": [ … ] }
 }
 ```
 

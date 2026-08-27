@@ -15,9 +15,10 @@ Route::prefix('admin')->name('admin.')->middleware(['admin', 'admin:orders'])->g
     Route::get('/quotes', [AdminQuoteController::class, 'index'])->name('quotes.index');
     Route::post('/quotes/{quoteRequest}/status', [AdminQuoteController::class, 'status'])->name('quotes.status');
 
-    // Deleting is an owner's call, as everywhere else in the panel. Soft: the
+    // Deleting is its own permission, as everywhere else in the panel — quote
+    // requests live in the orders area, so it is the orders one. Soft: the
     // request keeps its lines and its status, and comes back whole.
-    Route::middleware('admin.owner')->group(function (): void {
+    Route::middleware('admin:orders.delete')->group(function (): void {
         Route::delete('/quotes/{quoteRequest}', [AdminQuoteController::class, 'destroy'])
             ->withTrashed()->name('quotes.destroy');
         Route::post('/quotes/{quoteRequest}/restore', [AdminQuoteController::class, 'restore'])

@@ -198,7 +198,7 @@ function card(c, parent = null) {
       <div class="acat__counts">
         <div><strong>${c.products}</strong> products</div>
       </div>
-      ${canDelete()
+      ${canDelete('products')
         ? '<div class="acat__switches"><button type="button" class="btn-gr btn-outline-gr btn-sm-gr" data-cat-restore>Restore</button></div>'
         : ''}
     </article>`;
@@ -246,7 +246,7 @@ function card(c, parent = null) {
           // refuses while products or sub-categories are attached; the button
           // is drawn anyway so the refusal can explain itself, which is more
           // use than a control that is silently missing.
-          canDelete()
+          canDelete('products')
             ? '<button type="button" class="alink-btn alink-btn--danger acat__delete" data-cat-delete>Delete</button>'
             : ''
         }

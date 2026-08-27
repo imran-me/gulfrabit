@@ -11,6 +11,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
+use Modules\Admin\Models\AdminUser;
 use Modules\Admin\Models\OrderNote;
 use Modules\Admin\Requests\OrderNoteRequest;
 use Modules\Admin\Requests\OrderRefundRequest;
@@ -69,11 +70,15 @@ class AdminOrderController extends Controller
         }
 
         $page = $query->paginate($data['perPage'] ?? 25);
-        $role = $request->user('admin')->role;
+
+        // The list draws the same stage buttons the detail screen does, so it
+        // asks the same question: may this account END an order, or only move
+        // it along? Resolved once here rather than per row.
+        $mayEnd = $request->user('admin')->may('orders.cancel');
 
         return response()->json([
             'data' => array_map(
-                fn (Order $o): array => $this->rowArray($o, $role),
+                fn (Order $o): array => $this->rowArray($o, $mayEnd),
                 $page->items(),
             ),
             'meta' => [
@@ -177,7 +182,8 @@ class AdminOrderController extends Controller
     public function show(Request $request, Order $order): JsonResponse
     {
         $order->load(['items', 'statusEvents', 'refunds']);
-        $role = $request->user('admin')->role;
+        $admin  = $request->user('admin');
+        $mayEnd = $admin->may('orders.cancel');
 
         return response()->json([
             'data' => [
@@ -256,8 +262,8 @@ class AdminOrderController extends Controller
 
                 // Computed server-side from the same map the server enforces,
                 // so the panel can never draw a button the API would refuse.
-                'allowedTransitions' => $this->fulfilment->allowedTransitions($order, $role),
-                'canRefund'          => $this->canRefund($role),
+                'allowedTransitions' => $this->fulfilment->allowedTransitions($order, $mayEnd),
+                'canRefund'          => $admin->may('orders.refund'),
             ],
         ]);
     }
@@ -271,7 +277,7 @@ class AdminOrderController extends Controller
             $order = $this->fulfilment->transition(
                 order:     $order,
                 to:        $request->string('to')->toString(),
-                role:      $admin->role,
+                mayEnd:    $admin->may('orders.cancel'),
                 actorId:   $admin->id,
                 actorName: $admin->name,
                 note:      $request->input('note'),
@@ -396,7 +402,7 @@ class AdminOrderController extends Controller
     {
         $admin = $request->user('admin');
 
-        if (! $this->canRefund($admin->role)) {
+        if (! $this->canRefund($admin)) {
             return response()->json([
                 'message' => 'Your role cannot authorise refunds.',
             ], 403);
@@ -424,9 +430,9 @@ class AdminOrderController extends Controller
      * parcels and is deliberately excluded, which is the same line the roles
      * table draws everywhere else.
      */
-    private function canRefund(string $role): bool
+    private function canRefund(AdminUser $admin): bool
     {
-        return in_array($role, ['owner', 'manager', 'accounts'], true);
+        return $admin->may('orders.refund');
     }
 
     /**
@@ -442,7 +448,7 @@ class AdminOrderController extends Controller
         return $this->notesReady ??= Schema::hasTable('order_notes');
     }
 
-    private function rowArray(Order $o, string $role): array
+    private function rowArray(Order $o, bool $mayEnd): array
     {
         return [
             'orderNumber'   => $o->order_number,
@@ -476,7 +482,7 @@ class AdminOrderController extends Controller
             // Empty for a deleted order. It is not in the pipeline any more,
             // and offering "Start packing" on a row in the Deleted tab invites
             // somebody to work an order that is not there.
-            'allowedTransitions' => $o->trashed() ? [] : $this->fulfilment->allowedTransitions($o, $role),
+            'allowedTransitions' => $o->trashed() ? [] : $this->fulfilment->allowedTransitions($o, $mayEnd),
         ];
     }
 }

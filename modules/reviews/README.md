@@ -76,7 +76,7 @@ publish. The queue is worked oldest-first, because the review that has waited
 longest is the customer who has waited longest.
 
 **Reject** is the reversible move and is what disagreement is for. **Delete** is
-for spam, is permanent, and sits behind `admin.owner` with every other delete in
+for spam, is permanent, and sits behind `admin:products.delete` with every other delete in
 the panel.
 
 ## If ratings ever look wrong

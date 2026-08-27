@@ -39,6 +39,10 @@ class StaffUpdateRequest extends FormRequest
                 Rule::unique('admin_users', 'email')->ignore($this->route('staff')),
             ],
             'role'  => ['sometimes', Rule::in(AdminUser::ROLES)],
+            // nullable is meaningful: null RESETS the account to follow its
+            // role again, which is the only way back out of a custom list.
+            'permissions'   => ['sometimes', 'nullable', 'array'],
+            'permissions.*' => ['string', Rule::in(AdminUser::allPermissions())],
         ];
     }
 
@@ -46,7 +50,8 @@ class StaffUpdateRequest extends FormRequest
     {
         return [
             'email.unique' => 'Another staff account already uses that email.',
-            'role.in'      => 'That is not a role this panel has.',
+            'role.in'          => 'That is not a role this panel has.',
+            'permissions.*.in' => 'That is not a permission this panel has.',
         ];
     }
 }

@@ -42,6 +42,12 @@ class StaffStoreRequest extends FormRequest
             // company address.
             'email' => ['required', 'email:rfc', 'max:191', Rule::unique('admin_users', 'email')],
             'role'  => ['required', Rule::in(AdminUser::ROLES)],
+            // Optional at creation. Left out, the account simply follows the
+            // role it was given, which is what most accounts want forever.
+            // nullable is meaningful: null RESETS the account to follow its
+            // role again, which is the only way back out of a custom list.
+            'permissions'   => ['sometimes', 'nullable', 'array'],
+            'permissions.*' => ['string', Rule::in(AdminUser::allPermissions())],
         ];
     }
 
@@ -51,7 +57,8 @@ class StaffStoreRequest extends FormRequest
             'email.unique' => 'A staff account already uses that email. If they left and have '
                 . 'come back, re-enable the existing account rather than making a second one — '
                 . 'their history stays attached to it.',
-            'role.in' => 'That is not a role this panel has.',
+            'role.in'         => 'That is not a role this panel has.',
+            'permissions.*.in' => 'That is not a permission this panel has.',
         ];
     }
 

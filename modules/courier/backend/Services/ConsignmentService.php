@@ -162,9 +162,11 @@ final class ConsignmentService
             $this->fulfilment->transition(
                 order:     $order,
                 to:        'shipped',
-                // 'owner' so a warehouse account handing over a parcel is not
-                // stopped by a restriction meant for cancellations.
-                role:      'owner',
+                // A handover is not one of the endings the restriction is
+                // about, but say so explicitly: a shop-floor account passing a
+                // parcel to a rider must not be stopped by a rule meant for
+                // cancellations.
+                mayEnd:    true,
                 actorId:   $adminId,
                 actorName: $adminName,
                 note:      "Handed to {$courier->name}",
@@ -214,10 +216,10 @@ final class ConsignmentService
                 $this->fulfilment->transition(
                     order:     $order,
                     to:        $implied,
-                    // 'owner' so the courier's report is not blocked by the
-                    // warehouse restriction — a returned parcel is a fact, not
-                    // a decision someone is making.
-                    role:      'owner',
+                    // The courier's report is not blocked by the restriction
+                    // — a returned parcel is a fact being recorded, not a
+                    // decision somebody is making.
+                    mayEnd:    true,
                     actorId:   null,
                     actorName: $consignment->courier?->name,
                     note:      "Reported by courier: {$status}",

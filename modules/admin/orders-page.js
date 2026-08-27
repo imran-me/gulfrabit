@@ -351,7 +351,7 @@ function paintBulk() {
   const inTrash = !!document.querySelector('[data-orders-filters]').deleted.value;
 
   if (inTrash) {
-    document.querySelector('[data-bulk-actions]').innerHTML = canDelete()
+    document.querySelector('[data-bulk-actions]').innerHTML = canDelete('orders')
       ? `<button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-bulk="restore">
            Restore ${n}
          </button>`
@@ -371,7 +371,7 @@ function paintBulk() {
       // Delete is offered whatever stage the selection is in — unlike a move,
       // it does not have to be legal for all of them, because it is the same
       // act on every order regardless of where that order had got to.
-      canDelete()
+      canDelete('orders')
         ? `<button class="btn-gr btn-sm-gr btn-danger-gr" type="button" data-bulk="delete">
              Delete ${n}
            </button>`
@@ -563,14 +563,14 @@ function rowAction(o) {
   // about not also drawing the Open link as if nothing had happened.
   if (o.deletedAt) {
     return `<div class="arow-actions">${
-      canDelete()
+      canDelete('orders')
         ? `<button class="btn-gr btn-outline-gr btn-sm-gr" type="button"
                    data-arestore-id="${no}">Restore</button>`
         : '<span class="atable__sub">Deleted</span>'
     }</div>`;
   }
 
-  if (!next && !endings.length && !canDelete()) {
+  if (!next && !endings.length && !canDelete('orders')) {
     return `<a class="atable__sub" href="/admin/order?no=${encodeURIComponent(o.orderNumber)}">Open</a>`;
   }
 
@@ -585,7 +585,7 @@ function rowAction(o) {
   // pixels from "Confirm", on every row of a list somebody works at speed, is
   // a mis-click waiting to happen — and this one texts a customer. Opening the
   // menu is the pause; the reason prompt after it is the confirmation.
-  const menu = endings.length || canDelete()
+  const menu = endings.length || canDelete('orders')
     ? `<details class="amenu">
          <summary aria-label="More actions for order ${no}">⋯</summary>
          <div class="amenu__list">
@@ -597,7 +597,7 @@ function rowAction(o) {
              // Last in the menu, and only for an owner. It shares the endings'
              // second click for the same reason they have one: this is the row
              // of a list somebody works at speed, and the pause is the point.
-             canDelete()
+             canDelete('orders')
                ? `<button type="button" class="amenu__danger" data-adel-id="${no}">Delete order</button>`
                : ''
            }

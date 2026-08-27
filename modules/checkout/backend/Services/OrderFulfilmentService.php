@@ -82,13 +82,17 @@ final class OrderFulfilmentService
     ];
 
     /**
-     * Transitions the warehouse role may NOT perform.
+     * The transitions that END an order rather than advancing it.
      *
-     * Warehouse moves parcels; it does not decide that an order stops being an
-     * order. Cancelling a paid order implies money going back, and the role
-     * that cannot see money should not be able to start that. `spam` sits here
-     * too: calling an order fake removes it from every figure the business is
-     * judged on, which is a management call.
+     * Cancelling a paid order implies money going back, and whoever cannot see
+     * money should not be able to start that. `spam` sits here too: calling an
+     * order fake removes it from every figure the business is judged on, which
+     * is a management call.
+     *
+     * Who may do these is NOT decided here. The caller passes `$mayEnd`, and
+     * the admin panel resolves it from the `orders.cancel` permission — this
+     * class deliberately does not know that roles or permissions exist, for the
+     * same reason it lives in checkout rather than in admin.
      */
     private const RESTRICTED_TO_MANAGEMENT = ['cancelled', 'returned', 'spam'];
 
@@ -100,11 +104,11 @@ final class OrderFulfilmentService
      *
      * @return array<int, string>
      */
-    public function allowedTransitions(Order $order, string $role): array
+    public function allowedTransitions(Order $order, bool $mayEnd = true): array
     {
         $next = self::TRANSITIONS[$order->status] ?? [];
 
-        if ($role === 'warehouse') {
+        if (! $mayEnd) {
             $next = array_values(array_diff($next, self::RESTRICTED_TO_MANAGEMENT));
         }
 
@@ -120,13 +124,13 @@ final class OrderFulfilmentService
     public function transition(
         Order $order,
         string $to,
-        string $role,
+        bool $mayEnd,
         ?int $actorId,
         ?string $actorName,
         ?string $note = null,
         string $actorType = 'staff',
     ): Order {
-        if (! in_array($to, $this->allowedTransitions($order, $role), true)) {
+        if (! in_array($to, $this->allowedTransitions($order, $mayEnd), true)) {
             throw new RuntimeException(
                 "An order that is {$order->status} cannot be marked {$to}."
             );

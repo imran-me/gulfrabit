@@ -36,6 +36,7 @@ class AdminUserEvent extends Model
     public const PASSWORD_RESET   = 'password_reset';
     public const PASSWORD_CHANGED = 'password_changed';
     public const UNLOCKED         = 'unlocked';
+    public const PERMISSIONS_SET  = 'permissions_set';
 
     /**
      * Write one event.
@@ -97,6 +98,14 @@ class AdminUserEvent extends Model
             self::PASSWORD_RESET   => 'password reset by an owner',
             self::PASSWORD_CHANGED => 'changed their own password',
             self::UNLOCKED         => 'unlocked after too many failed sign-ins',
+            /* Counts, not the list. from_value and to_value are 255-character
+               columns and twenty-five permission strings do not fit — and the
+               list that matters is the one in force NOW, which is on the row
+               this trail sits under. What the trail is for here is who changed
+               it and when, and that is recorded in full. */
+            self::PERMISSIONS_SET  => $this->to_value === null
+                ? 'permissions reset to follow the role'
+                : "permissions set by hand — {$this->from_value} of them before, {$this->to_value} now",
             // A row written by a version of the panel this one has not met.
             // Printing the raw action beats printing nothing, which would leave
             // a dated, attributed gap in the trail with no clue what it was.

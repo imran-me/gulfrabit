@@ -167,7 +167,7 @@ function paint({ data, meta }) {
    was, on the customer's own screen, behind a typed reason. */
 
 function rowAction(c) {
-  if (!canDelete()) return '';
+  if (!canDelete('customers')) return '';
   return c.deletedAt
     ? `<button type="button" class="alink-btn" data-arestore-id="${c.id}"
                data-name="${escapeHtml(c.name)}"

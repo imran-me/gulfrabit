@@ -174,7 +174,7 @@ function card(c) {
         // discount that is not in any checkout, and toggling one would be a
         // change with no visible effect anywhere.
         c.deletedAt
-          ? (canDelete()
+          ? (canDelete('products')
               ? `<button type="button" class="btn-gr btn-outline-gr btn-sm-gr"
                          data-cp-restore="${escapeHtml(c.code)}">Restore</button>`
               : '<span class="atable__sub">Deleted</span>')
@@ -195,7 +195,7 @@ function card(c) {
                // campaign cost" — can be read. Hiding the button hid the reason
                // with it, and left the merchant wondering why one card has a
                // Delete and the next does not.
-               canDelete()
+               canDelete('products')
                  ? `<button type="button" class="alink-btn alink-btn--danger acat__delete"
                             data-cp-del="${escapeHtml(c.code)}">Delete</button>`
                  : ''

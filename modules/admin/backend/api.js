@@ -62,6 +62,22 @@ const DEV_SESSION = {
   email: 'dev@localhost',
   role: 'owner',
   capabilities: ['dashboard', 'orders', 'customers', 'products', 'inventory', 'accounting', 'content', 'staff', 'settings'],
+  /* Spelled out rather than a '*', because that is the shape a real session
+     arrives in — the server expands the owner's wildcard before it leaves.
+     A fixture that carried a wildcard would be the only session in the panel
+     needing special handling, which is how a fixture stops rehearsing the
+     real thing. Must stay in step with AdminUser::PERMISSIONS. */
+  permissions: [
+    'dashboard.view',
+    'orders.view', 'orders.edit', 'orders.cancel', 'orders.refund', 'orders.delete',
+    'customers.view', 'customers.edit', 'customers.erase', 'customers.delete',
+    'products.view', 'products.edit', 'products.archive', 'products.delete',
+    'inventory.view', 'inventory.edit',
+    'accounting.view', 'accounting.edit',
+    'content.view', 'content.edit', 'content.delete',
+    'staff.view', 'staff.manage',
+    'settings.view', 'settings.edit',
+  ],
   isFixture: true,
 };
 
@@ -104,7 +120,7 @@ function readCookie(name) {
 
 /**
  * The signed-in staff member, or null.
- * @returns {Promise<null|{id:number,name:string,email:string,role:string,capabilities:string[]}>}
+ * @returns {Promise<null|{id:number,name:string,email:string,role:string,capabilities:string[],permissions:string[]}>}
  */
 export async function getSession() {
   try {
