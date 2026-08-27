@@ -226,8 +226,13 @@ suggestion.
 ### `POST /api/admin/staff`
 
 ```json
-{ "name": "Rahim Uddin", "email": "rahim@gulfrabit.com", "role": "warehouse" }
+{ "name": "Rahim Uddin", "email": "rahim@gulfrabit.com", "role": "warehouse",
+  "permissions": ["dashboard.view", "orders.view"] }
 ```
+
+`permissions` is optional. Left out, the account follows its role — which is
+what most accounts want forever. Sent, it becomes that account's own list and
+the role is only a label from then on.
 
 Note what is **not** in the request: a password. The server generates one with
 `Str::password(20)` — the same rule `AdminUserSeeder` applies to the first owner
@@ -288,10 +293,23 @@ password — somebody back from two weeks' leave may well remember it.
 | Code | Meaning |
 |---|---|
 | 401 | Not signed in. The client redirects to the login page. |
-| 403 | Signed in, wrong role. The screen says so rather than rendering an empty table. |
+| 403 | Signed in, but lacks the permission this route needs. The message names it in the panel's own words ("cannot authorise refunds there"), so the person can ask an owner for the exact box. |
 | 422 | Validation, or a failed sign-in. |
 
 403 is correct here, unlike the storefront's 404-for-other-people's-resources
 rule: the staff member is authenticated and known, and hiding the accounting
-area's existence from the warehouse team buys nothing while making a
-permissions problem look like a broken link.
+area's existence buys nothing while making a permissions problem look like a
+broken link.
+
+## Permissions on routes
+
+```php
+->middleware('admin')                  // any signed-in staff member
+->middleware('admin:orders')           // shorthand for orders.view
+->middleware('admin:orders.delete')    // checked literally
+```
+
+A bare area resolves to that area's `view` permission, which is what keeps
+every route written before per-account permissions existed working unchanged.
+`AdminUser::PERMISSIONS` is the catalogue; the staff screen's grid is drawn
+from it, so no client can offer a permission the server does not enforce.

@@ -47,36 +47,79 @@ When it is active, an unmissable banner sits at the top of every screen saying
 nothing is secured, and the console says the same. A console warning alone
 would be invisible to the person actually using the panel.
 
-## Roles
+## Roles and permissions
 
-One role per account, not a permission matrix — a matrix nobody maintains ends
-up with everyone as owner. `AdminUser::CAPABILITIES` is the whole truth:
+A role is a **preset**, not a cage. Picking one fills in a set of permissions;
+an owner may then tick individual boxes for that person on `/admin/staff` →
+**Access**. An account nobody has customised stores `null` and follows its role
+exactly — which is why nothing changed for anybody the day permissions shipped.
 
-| Role | Shown as | Areas |
+Permissions are `area.action` strings. `AdminUser::PERMISSIONS` is the whole
+truth about which actions each area has, and there is deliberately no blanket
+area × action grid — no `dashboard.delete`, no `inventory.refund`, because
+those acts do not exist.
+
+| Area | Actions |
+|---|---|
+| `dashboard` | view |
+| `orders` | view · edit · cancel · refund · delete |
+| `customers` | view · edit · erase · delete |
+| `products` | view · edit · archive · delete |
+| `inventory` | view · edit |
+| `accounting` | view · edit |
+| `content` | view · edit · delete |
+| `staff` | view · manage |
+| `settings` | view · edit |
+
+`AdminUser::ROLE_PERMISSIONS` holds the five presets. They reproduce exactly
+what the roles could do before permissions existed:
+
+| Role | Shown as | Preset |
 |---|---|---|
-| `owner` | Owner | everything, including staff and settings |
-| `manager` | Manager | orders, customers, products, inventory, accounting, content |
-| `warehouse` | **Employee** | orders, inventory — **no money** |
-| `accounts` | Accounts | accounting, orders — cannot edit customers or the catalogue |
-| `editor` | Editor | content only — never sees an order or a customer |
+| `owner` | Owner | `*` — everything, now and anything added later |
+| `manager` | Manager | orders, customers, catalogue, stock, books; refunds; **no deletes** |
+| `warehouse` | **Employee** | orders (view + edit) and stock. No money, no customers, cannot end an order |
+| `accounts` | Accounts | books, and orders including refunds |
+| `editor` | Editor | website content only |
 
 `warehouse` is labelled **Employee** everywhere a human sees it
 (`AdminUser::ROLE_META`). It was named for the job it was invented for, but it
-is the general shop-floor account — the person who works orders and stock
-without touching money, customers or the delete button — and "Warehouse" reads
-as a place this shop does not have. The stored enum value is untouched:
-renaming a member that every row and a dozen checks refer to buys one nicer
-word and costs a migration nobody needed.
+is the general shop-floor account, and "Warehouse" reads as a place this shop
+does not have. The stored enum value is untouched: renaming a member that every
+row and a dozen checks refer to buys one nicer word and costs a migration
+nobody needed.
 
-Roles are handed out on **`/admin/staff`**, which only `owner` can open. That
-screen is also where accounts are disabled, unlocked, and have their passwords
-reset — see *Staff accounts* below.
+### On a route
 
-Every role has `dashboard`, so nobody signs in and finds nothing they may open.
-The dashboard controller still decides which *cards* each role receives, so
-warehouse lands somewhere real without being handed the day's revenue. Roles
-filter data at the server, not in the browser — data the client hides is still
-data the client received.
+```php
+->middleware('admin')                  // any signed-in staff member
+->middleware('admin:orders')           // shorthand for orders.view
+->middleware('admin:orders.delete')    // checked literally
+```
+
+The bare-area shorthand is not sugar — it is what keeps thirty route groups
+across nine modules working unchanged now that permissions are finer than the
+areas those routes were written against.
+
+**There is no `admin.owner` any more.** "Deleting is an owner's call,
+everywhere" was a deliberate rule, argued at length in the middleware that
+enforced it — and it was precisely the rule that made *"may work orders, may
+not delete them"* impossible to say. Deletes are `<area>.delete` now, and
+`RequireOwner` is deleted rather than left registered and unused.
+
+### The one invariant
+
+At least one **active account able to manage staff** must always exist.
+`AdminUser::isLastStaffManager()` guards it, and one check covers all three
+ways to break it: demoting that person, un-ticking their `staff.manage` box, or
+disabling them. It counts the *ability*, not the owner role — the two came
+apart the moment permissions became per-account.
+
+Every role has `dashboard.view`, so nobody signs in and finds nothing they may
+open. The dashboard controller still decides which *cards* each account
+receives, so an Employee lands somewhere real without being handed the day's
+revenue. Permissions filter data at the server, not in the browser — data the
+client hides is still data the client received.
 
 ## Navigation is contributed, not hardcoded
 
