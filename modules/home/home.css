@@ -351,6 +351,21 @@ html.no-js .trust-marquee .trust-item__sub { font-size: var(--trust-sub); line-h
 .brand-wall__item { font-family: var(--font-display); font-weight: var(--fw-semibold); font-size: clamp(1.1rem, 2.4vw, var(--fs-25)); color: var(--text-muted); letter-spacing: .01em; transition: color var(--dur-base) var(--ease-out); }
 .brand-wall__item:hover { color: var(--text-primary); }
 
+/* On a phone the wall was costing about 300px — ten country names, set at
+   17.6px display type with 24px of air on every side of each one, wrapping
+   into four ragged rows. It is a credibility strip, not a headline: it earns
+   its place by being READ, not by being large, and at three quarters of the
+   screen it was reading as an empty card with words in it.
+ *
+ * Tighter leading and less type, same ten origins, about 130px. The gap is a
+ * fixed pair rather than the clamp: 5vw of a 375px screen is 18px, so the
+ * clamp was pinned to its 24px floor anyway and the fluid part never did
+ * anything at this size. */
+@media (max-width: 575.98px) {
+  .brand-wall { gap: 12px 20px; padding: var(--space-5) var(--space-4); }
+  .brand-wall__item { font-size: 1rem; }
+}
+
 /* ---- Category grid on home ------------------------------------------- */
 .home-cat-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, 1fr); }
 @media (min-width: 768px)  {
