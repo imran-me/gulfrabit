@@ -105,6 +105,53 @@ colours, the hairlines and the fully-drawn rules; it drops the drift, the
 sheens and the draw-in. Verified: `lux-drift` → `none`, transitions → ~0s,
 rules still at `scaleX(1)` so nothing is left half-rendered.
 
+## The second setting: home layout
+
+The same module also owns **how the home page is arranged** — the `Home layout`
+screen, `/admin/layout`. Seven sections, each with the shapes it can honestly
+take, and **a separate answer for phones and for computers**, because that is
+the whole point: a looping row of category tiles is right on a 390px screen and
+wrong on one where eight fit across with room to spare.
+
+| Section | Shapes | Default (computer / phone) |
+|---|---|---|
+| Shop by Category | `grid`, `loop` | grid / grid |
+| Trust strip | `static`, `loop` | static / **loop** |
+| Premium Picks | `march`, `rail`, `grid` | march / march |
+| Best Sellers | `grid`, `rail`, `march` | grid / grid |
+| New Arrivals | `march`, `rail`, `grid` | march / march |
+| Trusted origins | `wall`, `loop` | wall / wall |
+| Testimonials | `slider`, `grid`, `loop` | slider / slider |
+
+`loop` is a row that travels right-to-left for ever; `march` is a product shelf
+that drifts on its own; `rail` is the same row moved only when it is pushed.
+
+**Every default is the page exactly as authored**, so a shop that has never
+opened the screen — and a visitor whose stamp never ran — sees the site in the
+repository. That is what makes a failed read harmless.
+
+It reaches the page as ONE already-resolved attribute, stamped before the first
+paint by the bootstrap in `index.html`:
+
+```html
+<html data-lay="category:loop trust:static premium:march …">
+```
+
+so every rule in `modules/home/home.css` is a flat
+`html[data-lay~="category:loop"]` rather than the same block written out under
+two breakpoints. The dividing line is **768px**, and the admin screen says so
+in its column headings.
+
+`?lay=` previews an arrangement the same way `?theme=` previews a theme: never
+stored, never published, and it suppresses the server read. The panel offers
+one preview link per column.
+
+The **defaults exist in three places** — `HomeLayout::SECTIONS`,
+`modules/home/home-layout.js`, and the inline bootstrap in `index.html`. That
+is deliberate and each carries a note: the site is deployable with no backend,
+so the client needs its own copy, and the pre-paint stamp cannot import a
+module. The server stays the authority wherever there is one.
+
 ## Backend
 
 | Route | Auth | Notes |
@@ -112,6 +159,9 @@ rules still at `scaleX(1)` so nothing is left half-rendered.
 | `GET /api/theme` | public | Never 500s, never 404s. A missing table means "classic". |
 | `GET /api/admin/theme` | `admin:content` | What the panel shows as Live. |
 | `PUT /api/admin/theme` | `admin:content` | Validated against `SiteSetting::THEMES`. |
+| `GET /api/home-layout` | public | Same guarantee. A missing table means the shipped arrangement. |
+| `GET /api/admin/home-layout` | `admin:content` | The live layout and the vocabulary behind it. |
+| `PUT /api/admin/home-layout` | `admin:content` | Normalised rather than 422'd — see the controller. |
 
 `site_settings` is a general key/value table, not a `themes` table — the theme
 is the first shop-wide setting and will not be the last.
