@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Modules\Theme\Controllers\LayoutController;
 use Modules\Theme\Controllers\ThemeController;
 
 /*
@@ -20,4 +21,9 @@ Route::prefix('admin')
     ->group(function (): void {
         Route::get('/theme', [ThemeController::class, 'index'])->name('index');
         Route::put('/theme', [ThemeController::class, 'update'])->name('update');
+
+        // Arranging the home page is the same job as dressing the shop, so it
+        // sits behind the same capability rather than a new one.
+        Route::get('/home-layout', [LayoutController::class, 'index'])->name('layout.index');
+        Route::put('/home-layout', [LayoutController::class, 'update'])->name('layout.update');
     });
