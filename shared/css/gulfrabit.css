@@ -303,6 +303,34 @@ p + p { margin-top: var(--space-4); }
 
 /* ---- Lead / secondary / captions ------------------------------------- */
 .lead      { font-size: var(--fs-20); line-height: var(--lh-snug); color: var(--text-secondary); }
+
+/* ---- Hero headlines on a phone ---------------------------------------
+   A hero headline carries a measure — 16ch to 18ch — so that on a wide
+   screen it breaks where the author wants instead of running the width of
+   the page. That is a desktop instrument. On a 327px column the headline
+   cannot run wide in the first place, so the cap stops shaping the line and
+   only forces it to break early: "Raw materials for the electronics
+   industry." came out over FIVE lines of 36px type, and the B2B page opened
+   with a screen and a half of headline and paragraph before anything a buyer
+   could act on.
+
+   The measure was a style attribute, which no media query can answer. It is
+   a custom property now — still authored per headline, still the author's
+   number — and the phone simply stops applying it. With .h1 coming down to
+   30px as well, the same sentence lands in three lines.
+
+   30px, not the 36px floor of the clamp: 5vw of a phone is 18px, so the
+   fluid middle of clamp(2.25rem, 5vw, --fs-49) never engages below about
+   720px and every phone gets the desktop-authored floor. A hero is still the
+   largest thing on the page at 30px. */
+.hero-title { max-width: var(--measure, none); margin: .5rem 0; }
+@media (max-width: 575.98px) {
+  h1, .h1 { font-size: 1.875rem; }
+  .hero-title { max-width: none; }
+  /* The paragraph under it is a lead, not the body — but 20px of it runs
+     seven lines on a phone, which is a lead that has stopped leading. */
+  .lead { font-size: 1.0625rem; }
+}
 .text-muted-gr { color: var(--text-muted); }
 .caption   { font-size: var(--fs-14); color: var(--text-muted); }
 .overline  {
