@@ -872,10 +872,6 @@ html[data-lay~="new:grid"] [data-rail="new"] {
   html[data-lay~="premium:grid"] [data-rail="premium"],
   html[data-lay~="new:grid"] [data-rail="new"] { grid-template-columns: repeat(4, 1fr); }
 }
-/* Nothing to scroll, so nothing to scroll with. */
-html[data-lay~="premium:grid"] [data-rail-nav="premium"],
-html[data-lay~="new:grid"] [data-rail-nav="new"] { display: none !important; }
-
 /* The arrow pair a shelf gets when it becomes a row. Premium and New Arrivals
    carry theirs in the markup because they are rows by default; Best Sellers is
    a grid by default, so its pair is hidden until there is something to scroll.
@@ -887,6 +883,12 @@ html[data-lay~="bestseller:rail"] [data-rail-nav="bestseller"],
 html[data-lay~="bestseller:march"] [data-rail-nav="bestseller"] { display: flex; }
 
 .section-head__aside { display: flex; align-items: center; gap: var(--space-3); }
+
+/* Nothing to scroll, so nothing to scroll with. No !important: the arrow pairs
+   carry .rail-nav rather than an inline display, so ordinary specificity is
+   enough to overrule it. */
+html[data-lay~="premium:grid"] [data-rail-nav="premium"],
+html[data-lay~="new:grid"] [data-rail-nav="new"] { display: none; }
 
 /* A shelf asked to become a row. */
 html[data-lay~="bestseller:rail"] [data-rail="bestseller"],
