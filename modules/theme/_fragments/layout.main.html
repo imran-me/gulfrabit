@@ -1,0 +1,222 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Home layout</h1>
+          <p class="admin__sub">The shape of each section on the home page — and it can be a different shape on a phone than on a computer. Publishing takes effect for every visitor straight away; nothing is redeployed.</p>
+        </div>
+      </div>
+
+      <!-- The sections and the shapes they can wear are written into this page
+           rather than fetched and rendered. They are structural content, not
+           data: they change when somebody edits the home page, in the same
+           commit that adds the CSS for the new shape. The server holds the same
+           list (Modules\Theme\Models\HomeLayout) and validates every save
+           against it, so nothing here can ask for a shape the shop cannot
+           actually render. -->
+      <form data-layout-form>
+        <div class="atable-wrap">
+          <table class="atable">
+            <thead>
+              <tr>
+                <th scope="col">Section</th>
+                <th scope="col">On computers <span class="lay-th__note">768px and wider</span></th>
+                <th scope="col">On phones <span class="lay-th__note">under 768px</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" class="lay-row">
+                  Shop by Category
+                  <span class="atable__sub">The tiles under the trust strip.</span>
+                </th>
+                <td>
+                  <label class="visually-hidden" for="lay-category-d">Shop by Category, on computers</label>
+                  <select class="select-gr" id="lay-category-d" name="category.desktop">
+                    <option value="grid">Grid — every tile at once</option>
+                    <option value="loop">Moving loop — small tiles, right to left</option>
+                  </select>
+                </td>
+                <td>
+                  <label class="visually-hidden" for="lay-category-m">Shop by Category, on phones</label>
+                  <select class="select-gr" id="lay-category-m" name="category.mobile">
+                    <option value="grid">Grid — every tile at once</option>
+                    <option value="loop">Moving loop — small tiles, right to left</option>
+                  </select>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row" class="lay-row">
+                  Trust strip
+                  <span class="atable__sub">Import-Verified · Cold-Chain · Secure Payment · 24/7 Support.</span>
+                </th>
+                <td>
+                  <label class="visually-hidden" for="lay-trust-d">Trust strip, on computers</label>
+                  <select class="select-gr" id="lay-trust-d" name="trust.desktop">
+                    <option value="static">Still — four claims across</option>
+                    <option value="loop">Moving loop — chips, right to left</option>
+                  </select>
+                </td>
+                <td>
+                  <label class="visually-hidden" for="lay-trust-m">Trust strip, on phones</label>
+                  <select class="select-gr" id="lay-trust-m" name="trust.mobile">
+                    <option value="static">Still — two by two</option>
+                    <option value="loop">Moving loop — chips, right to left</option>
+                  </select>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row" class="lay-row">
+                  Premium Picks
+                  <span class="atable__sub">The first product shelf.</span>
+                </th>
+                <td>
+                  <label class="visually-hidden" for="lay-premium-d">Premium Picks, on computers</label>
+                  <select class="select-gr" id="lay-premium-d" name="premium.desktop">
+                    <option value="march">Drifting shelf — moves on its own</option>
+                    <option value="rail">Shelf — moves when pushed</option>
+                    <option value="grid">Grid — stands still and wraps</option>
+                  </select>
+                </td>
+                <td>
+                  <label class="visually-hidden" for="lay-premium-m">Premium Picks, on phones</label>
+                  <select class="select-gr" id="lay-premium-m" name="premium.mobile">
+                    <option value="march">Drifting shelf — moves on its own</option>
+                    <option value="rail">Shelf — moves when pushed</option>
+                    <option value="grid">Grid — stands still and wraps</option>
+                  </select>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row" class="lay-row">
+                  Best Sellers
+                  <span class="atable__sub">Between Premium Picks and the origins row.</span>
+                </th>
+                <td>
+                  <label class="visually-hidden" for="lay-bestseller-d">Best Sellers, on computers</label>
+                  <select class="select-gr" id="lay-bestseller-d" name="bestseller.desktop">
+                    <option value="grid">Grid — stands still and wraps</option>
+                    <option value="rail">Shelf — moves when pushed</option>
+                    <option value="march">Drifting shelf — moves on its own</option>
+                  </select>
+                </td>
+                <td>
+                  <label class="visually-hidden" for="lay-bestseller-m">Best Sellers, on phones</label>
+                  <select class="select-gr" id="lay-bestseller-m" name="bestseller.mobile">
+                    <option value="grid">Grid — stands still and wraps</option>
+                    <option value="rail">Shelf — moves when pushed</option>
+                    <option value="march">Drifting shelf — moves on its own</option>
+                  </select>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row" class="lay-row">
+                  New Arrivals
+                  <span class="atable__sub">The last product shelf, above the reviews.</span>
+                </th>
+                <td>
+                  <label class="visually-hidden" for="lay-new-d">New Arrivals, on computers</label>
+                  <select class="select-gr" id="lay-new-d" name="new.desktop">
+                    <option value="march">Drifting shelf — moves on its own</option>
+                    <option value="rail">Shelf — moves when pushed</option>
+                    <option value="grid">Grid — stands still and wraps</option>
+                  </select>
+                </td>
+                <td>
+                  <label class="visually-hidden" for="lay-new-m">New Arrivals, on phones</label>
+                  <select class="select-gr" id="lay-new-m" name="new.mobile">
+                    <option value="march">Drifting shelf — moves on its own</option>
+                    <option value="rail">Shelf — moves when pushed</option>
+                    <option value="grid">Grid — stands still and wraps</option>
+                  </select>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row" class="lay-row">
+                  Trusted origins
+                  <span class="atable__sub">The row of country names.</span>
+                </th>
+                <td>
+                  <label class="visually-hidden" for="lay-brands-d">Trusted origins, on computers</label>
+                  <select class="select-gr" id="lay-brands-d" name="brands.desktop">
+                    <option value="wall">Centred wall — wraps onto two lines</option>
+                    <option value="loop">Moving loop — one line, right to left</option>
+                  </select>
+                </td>
+                <td>
+                  <label class="visually-hidden" for="lay-brands-m">Trusted origins, on phones</label>
+                  <select class="select-gr" id="lay-brands-m" name="brands.mobile">
+                    <option value="wall">Centred wall — wraps onto two lines</option>
+                    <option value="loop">Moving loop — one line, right to left</option>
+                  </select>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row" class="lay-row">
+                  Testimonials
+                  <span class="atable__sub">What customers said.</span>
+                </th>
+                <td>
+                  <label class="visually-hidden" for="lay-testimonials-d">Testimonials, on computers</label>
+                  <select class="select-gr" id="lay-testimonials-d" name="testimonials.desktop">
+                    <option value="slider">Slider — one quote, arrows to page</option>
+                    <option value="grid">Grid — every quote at once</option>
+                    <option value="loop">Moving loop — right to left</option>
+                  </select>
+                </td>
+                <td>
+                  <label class="visually-hidden" for="lay-testimonials-m">Testimonials, on phones</label>
+                  <select class="select-gr" id="lay-testimonials-m" name="testimonials.mobile">
+                    <option value="slider">Slider — one quote, arrows to page</option>
+                    <option value="grid">Grid — every quote at once</option>
+                    <option value="loop">Moving loop — right to left</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="acard" style="margin-top:var(--space-5)">
+          <p class="admin__sub" style="margin:0">
+            <strong>One layout, everyone.</strong> Publishing changes the home page for every visitor — there is no per-visitor setting.
+            <br>
+            <strong>A moving loop never stops on its own.</strong> It drifts leftward and speeds up while the page is being scrolled. Two of them stacked — the trust strip and the categories under it — is a lot of movement on one screen; it is allowed, because sometimes it is what you want, but look at it on a phone before you publish it.
+            <br>
+            A visitor who has asked their device to <strong>reduce motion</strong> gets none of the loops, automatically. They see a row they can swipe instead, and nothing is hidden from them.
+            <br>
+            No shape changes a price, a product or which products are on a shelf. That is the <a href="/admin/home">Home page</a> screen.
+          </p>
+        </div>
+
+        <!-- Shown only when there is no backend to publish to — not an error,
+             but the merchant has to know this button cannot reach visitors. -->
+        <div class="acard theme-offline" data-layout-offline hidden>
+          <p class="admin__sub" style="margin:0">
+            <strong>No backend connected.</strong> The shop is serving the layout built into its pages, and this screen cannot change that for visitors — a universal setting needs somewhere central to store it.
+            <br>
+            <strong>Preview</strong> still works, and it is safe: it only changes the shop in the tab it opens.
+          </p>
+        </div>
+
+        <div class="theme-actions">
+          <button class="btn-gr btn-primary-gr" type="submit" data-layout-save>Publish to every visitor</button>
+          <!-- ?lay= is a preview, not a setting: it lasts as long as the tab,
+               is never stored, and is never published. The URL is shareable,
+               which is most of what asking somebody "does this look right?"
+               needs.
+
+               TWO links, because the whole point of this screen is that the
+               two answers differ. Each carries the shapes from its own column.
+               Opening the phone one on a computer shows the phone's SHAPES at
+               a computer's WIDTH — the arrangement is right, the proportions
+               are not; narrow the window to see both at once. -->
+          <a class="btn-gr btn-outline-gr" data-layout-preview="desktop" href="/index.html" target="_blank" rel="noopener">Preview computers</a>
+          <a class="btn-gr btn-outline-gr" data-layout-preview="mobile" href="/index.html" target="_blank" rel="noopener">Preview phones</a>
+          <span class="admin__sub" role="status" data-layout-status></span>
+        </div>
+      </form>

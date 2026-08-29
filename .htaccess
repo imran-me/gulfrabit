@@ -112,6 +112,7 @@
     RewriteRule ^admin/media/?$ modules/media/library.html [L,QSA]
     RewriteRule ^admin/reviews/?$ modules/reviews/reviews.html [L,QSA]
     RewriteRule ^admin/appearance/?$ modules/theme/appearance.html [L,QSA]
+    RewriteRule ^admin/layout/?$ modules/theme/layout.html [L,QSA]
     RewriteRule ^admin/home/?$ modules/highlights/highlights.html [L,QSA]
     RewriteRule ^admin/hero/?$ modules/hero/hero.html [L,QSA]
     # The printable order document. QSA matters more here than anywhere else in

@@ -229,3 +229,39 @@
   box-shadow: inset 0 1px 0 rgba(242, 206, 114, .35);
 }
 .theme-swatch--utsab .theme-swatch__cta { background: #56D8F0; }
+
+/* =========================================================================
+   Home layout screen
+
+   Shares this stylesheet with the theme picker because it is the same job on
+   the same shelf of the sidebar, and because it needs about fifteen lines.
+   ========================================================================= */
+
+/* The breakpoint, said out loud in the column heading. A merchant choosing
+   "on phones" is entitled to know where this shop thinks a phone ends, and the
+   answer is a fact about the CSS, not a preference. */
+.lay-th__note {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-regular);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* The section name is the row's header, so it is a <th> — which inherits the
+   thead's small-caps treatment unless it is told otherwise. */
+.lay-row {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: normal;
+  min-width: 11rem;
+}
+.lay-row .atable__sub { display: block; margin-top: 2px; font-weight: var(--fw-regular); }
+
+/* Wide enough for the longest option — "Drifting shelf - moves on its own" -
+   so the two columns do not jump width as the choice changes. */
+.atable .select-gr { min-width: 15rem; max-width: 100%; }

@@ -628,6 +628,11 @@ ADMIN_PAGES = [
      ["/modules/admin/admin.css", "/modules/theme/theme-admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/theme/theme-page.js"], True),
 
+    ("modules/theme/layout.html", "Home layout — GulfRabit Admin",
+     "modules/theme/_fragments/layout.main.html",
+     ["/modules/admin/admin.css", "/modules/theme/theme-admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/theme/layout-page.js"], True),
+
     ("modules/hero/hero.html", "Hero banners — GulfRabit Admin",
      "modules/hero/_fragments/hero.main.html",
      ["/modules/admin/admin.css"],
