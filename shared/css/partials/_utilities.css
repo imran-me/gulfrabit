@@ -61,6 +61,29 @@
   .section-sep--lg { margin-top: var(--space-9); }
 }
 
+/* ---- A breadcrumb belongs against the header, on a phone --------------
+   A page that opens with a breadcrumb was giving it the full .page-main top
+   padding, so on a 390px screen the trail floated in the middle of the gap
+   under the header rather than sitting under it — 24px of nothing above a
+   14px line, then 24px more below it before the h1. That is a third of the
+   fold spent on air around one line of navigation. The trail reads as a
+   continuation of the header anyway, not as the page's first content, so it
+   goes where the eye leaves the header. The room is not lost: the h1 keeps
+   its separation from the breadcrumb's own margin-bottom.
+
+   Phones only. A desktop screen has the height to afford the gap, and the
+   authored rhythm there is not the thing that was wrong — so the 768px block
+   below puts .page-main's own top padding back.
+
+   Only when the breadcrumb is genuinely first; a page that opens with a hero
+   or a heading keeps its padding. :has() is Chrome 105+ / Safari 15.4+ /
+   Firefox 121+, and anything older simply keeps today's spacing — a looser
+   page, never a broken one. */
+.page-main:has(> .breadcrumb-gr:first-child) { padding-block-start: var(--space-2); }
+@media (min-width: 768px) {
+  .page-main:has(> .breadcrumb-gr:first-child) { padding-block-start: var(--space-6); }
+}
+
 /* Light / dark section canvases (80/20 neutral system) */
 .canvas-dark  { background: var(--surface-page);     color: var(--text-primary); }
 .canvas-panel { background: var(--surface-band);   color: var(--text-primary); }
