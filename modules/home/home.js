@@ -20,6 +20,13 @@ import { initScrollReveal } from '../../shared/js/components/scroll-reveal.js';
 import { categoryURL } from '../../shared/js/core/paths.js';
 import { initHomeLayout, styleOf } from './home-layout.js';
 import { createMarquee } from './marquee.js';
+
+/* Module state, declared before the calls below rather than beside the code
+   that uses it: `const` does not hoist its value, and initSectionShapes() runs
+   on the line after next. */
+const marquees = new Map();          // section -> its marquee controller
+const railSchedulers = new Map();    // shelf -> the function that starts it
+const railProducts = new Map();      // shelf -> what is currently on it
 initHeroCarousel();
 initCategoryGrid();
 initProductSections();
@@ -805,10 +812,6 @@ function initRailAutoplay(rail) {
  * used, and a window can cross 768px at any moment. A shape that could only be
  * put on would leave the page showing two arrangements at once.
  */
-const marquees = new Map();
-const railSchedulers = new Map();
-const railProducts = new Map();
-
 function initSectionShapes() {
   const define = (section, viewport, track) => {
     const v = document.querySelector(viewport);
