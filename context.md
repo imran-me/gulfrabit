@@ -865,7 +865,7 @@ hidden rather than deleted.
 4. Refine, re-apply, re-check
 5. Only at 100% satisfaction, move to the next
 
-### §7g — THE BUILD CHECKS (run all nine before pushing)
+### §7g — THE BUILD CHECKS (run them all before pushing)
 
 ```
 python tools/assemble.py          # BUILD — pages + shared/css/gulfrabit.css
@@ -874,6 +874,7 @@ python tools/migration-order.py
 python tools/htaccess-check.py
 python tools/module-deps.py
 python tools/header-drift.py
+python tools/layout-drift.py
 python tools/hover-audit.py
 python tools/tailwind-inventory.py
 python tools/link-check.py
@@ -881,7 +882,7 @@ python tools/a11y-check.py
 python tools/sitemap.py
 ```
 
-All nine exit non-zero on failure. **Every one of them exists because
+All of them exit non-zero on failure. **Every one of them exists because
 something broke silently once** — that is the bar for adding another. None of
 them check taste; each catches a specific class of bug that produces no error
 at the moment it is introduced.
@@ -893,6 +894,7 @@ at the moment it is introduced.
 | `htaccess-check` | a blocking rule that 404s a needed file; a security header quietly removed | the regex is load-bearing and untestable without Apache |
 | `module-deps` | two modules importing each other | reads **JS as well as PHP** — the browser half was invisible |
 | `header-drift` | `index.html`'s hand-authored header falling behind the partial | the menu hooks updated 42 pages and missed the home page |
+| `layout-drift` | the home-layout vocabulary disagreeing across its four copies | the defaults live in PHP, in `home-layout.js`, in `index.html`'s pre-paint stamp and in the admin dropdowns; a bootstrap that disagrees paints one arrangement and swaps to another, on a first visit only |
 | `hover-audit` | `:hover` that moves or reveals, unguarded | **five** touch bugs from one cause, incl. every button staying lifted after a tap |
 | `tailwind-inventory` | a Tailwind class with no CDN to style it | fails the build; a missing class errors nowhere |
 | `link-check` | an internal link or asset resolving to nothing | 1,904 refs; `relativize()` rewrites paths per page depth |
