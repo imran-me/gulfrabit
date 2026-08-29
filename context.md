@@ -875,6 +875,7 @@ python tools/htaccess-check.py
 python tools/module-deps.py
 python tools/header-drift.py
 python tools/layout-drift.py
+node   tools/loop-check.mjs      # needs Edge or Chrome; SKIPS cleanly without one
 python tools/hover-audit.py
 python tools/tailwind-inventory.py
 python tools/link-check.py
@@ -887,6 +888,13 @@ something broke silently once** — that is the bar for adding another. None of
 them check taste; each catches a specific class of bug that produces no error
 at the moment it is introduced.
 
+`loop-check` is the only one that is not Python, and the only one that needs a
+browser: it measures a laid-out page, which is the one question a static reader
+cannot answer. It installs nothing — it serves the repo itself and drives
+whichever of Edge or Chrome is already on the machine — and it **skips**, exit
+0, when there is no browser to drive. A check that goes red where it simply
+cannot run is a check people learn to ignore.
+
 | check | catches | the incident |
 |---|---|---|
 | `php-check` | unregistered seeders, structural faults | 5 seeders were never registered |
@@ -894,6 +902,7 @@ at the moment it is introduced.
 | `htaccess-check` | a blocking rule that 404s a needed file; a security header quietly removed | the regex is load-bearing and untestable without Apache |
 | `module-deps` | two modules importing each other | reads **JS as well as PHP** — the browser half was invisible |
 | `header-drift` | `index.html`'s hand-authored header falling behind the partial | the menu hooks updated 42 pages and missed the home page |
+| `loop-check` | a looping home section whose track is narrower than its frame | the trust strip swept a 705px hole through itself at 1440px, and the category tiles a 312px one — both invisible at the phone widths where looping already worked |
 | `layout-drift` | the home-layout vocabulary disagreeing across its four copies | the defaults live in PHP, in `home-layout.js`, in `index.html`'s pre-paint stamp and in the admin dropdowns; a bootstrap that disagrees paints one arrangement and swaps to another, on a first visit only |
 | `hover-audit` | `:hover` that moves or reveals, unguarded | **five** touch bugs from one cause, incl. every button staying lifted after a tap |
 | `tailwind-inventory` | a Tailwind class with no CDN to style it | fails the build; a missing class errors nowhere |
