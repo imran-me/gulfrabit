@@ -61,6 +61,8 @@ async function init() {
     }
   }
 
+  paintSwatches(form);
+
   // The preview links track the dropdowns, so each always previews what the
   // merchant is looking at rather than what is published.
   const syncPreviews = () => {
@@ -73,7 +75,7 @@ async function init() {
       link.href = `/index.html?lay=${encodeURIComponent(tokens)}`;
     });
   };
-  form.addEventListener('change', syncPreviews);
+  form.addEventListener('change', () => { syncPreviews(); paintSwatches(form); });
   syncPreviews();
 
   form.addEventListener('submit', async (e) => {
@@ -93,6 +95,7 @@ async function init() {
          two ever differ, the merchant sees which one won. */
       fill(form, data?.layout);
       syncPreviews();
+      paintSwatches(form);
       status.textContent = 'Published. Every visitor sees it from their next page load.';
     } catch (err) {
       status.textContent = isBackendAbsent(err)
@@ -101,6 +104,22 @@ async function init() {
     }
 
     saveBtn.disabled = false;
+  });
+}
+
+/**
+ * Each dropdown's diagram, set from the option it is on.
+ *
+ * The swatch is a sibling of the <select> rather than something this file
+ * builds, so the markup stays readable and there is no shape here that the
+ * stylesheet does not already know how to draw. An unknown value simply leaves
+ * the attribute off, and the frame draws its default row — better than a
+ * diagram confidently showing the wrong thing.
+ */
+function paintSwatches(form) {
+  form.querySelectorAll('select[name*="."]').forEach((select) => {
+    const swatch = select.parentElement?.querySelector('[data-lay-swatch]');
+    if (swatch) swatch.dataset.shape = select.value;
   });
 }
 

@@ -265,3 +265,132 @@
 /* Wide enough for the longest option — "Drifting shelf - moves on its own" -
    so the two columns do not jump width as the choice changes. */
 .atable .select-gr { min-width: 15rem; max-width: 100%; }
+
+/* ---- What a shape looks like -------------------------------------------
+ *
+ * A dropdown reading "Drifting shelf" and one reading "Shelf" are two strings
+ * four words apart describing two things that look nothing alike. The theme
+ * picker next door has never asked anybody to choose a look from prose, and
+ * this screen should not either.
+ *
+ * So each dropdown carries a small diagram of the option it is on, and the
+ * ones that move, move. That is the point: "moves on its own" is a claim, and
+ * a swatch that drifts is the claim demonstrated rather than asserted.
+ *
+ * The diagram is never a rendering of the real section — no artwork, no copy,
+ * none of its proportions. It is a diagram of the ARRANGEMENT, which is the
+ * only thing this screen changes.
+ *
+ * THE FRAME IS A FIXED WIDTH ON PURPOSE. Everything below is arithmetic: a
+ * looping track has to stay wider than its frame for the whole of its travel,
+ * or the loop shows a bald patch at the moment it resets. A frame that took
+ * its width from the table column would make that a different sum in every
+ * layout, and the failure only appears at one window size.
+ *
+ *   frame 156 - padding 12          = 144px visible
+ *   6 tiles, 30 wide, 4 gap         = pitch 34, track 6x34-4 = 200px
+ *   travel is exactly ONE pitch     = 34px, leaving 166px covering 144px  ✓
+ *
+ * One pitch, and the tiles being identical, is what makes the reset invisible
+ * — the same trick as the real sections' -50%, done by hand because six tiles
+ * is not worth cloning.
+ */
+.lay-swatch {
+  display: block;
+  width: 156px;
+  max-width: 100%;
+  height: 38px;
+  margin-top: var(--space-2);
+  padding: 5px 6px;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+.lay-swatch__track {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  height: 100%;
+}
+.lay-swatch__track i {
+  display: block;
+  flex: 0 0 30px;
+  border-radius: 3px;
+  background: var(--gr-cyan);
+  opacity: .32;
+}
+
+/* Everything at once, wrapping. Three across and two down reads as a grid at
+   this size, where two across reads as a row. */
+.lay-swatch[data-shape="grid"] .lay-swatch__track {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 3px;
+}
+
+/* A plain row that fits, and stands still. Four, because four is what the
+   trust strip has. */
+.lay-swatch[data-shape="static"] .lay-swatch__track i:nth-child(n+5) { display: none; }
+.lay-swatch[data-shape="static"] .lay-swatch__track i { flex: 1 1 auto; }
+
+/* Centred, uneven, wrapping — the origins wall's own shape, which is a line of
+   words of different lengths rather than a set of tiles. */
+.lay-swatch[data-shape="wall"] .lay-swatch__track {
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 5px 6px;
+}
+.lay-swatch[data-shape="wall"] .lay-swatch__track i { height: 6px; border-radius: 999px; }
+.lay-swatch[data-shape="wall"] .lay-swatch__track i:nth-child(1) { flex-basis: 34px; }
+.lay-swatch[data-shape="wall"] .lay-swatch__track i:nth-child(2) { flex-basis: 20px; }
+.lay-swatch[data-shape="wall"] .lay-swatch__track i:nth-child(3) { flex-basis: 28px; }
+.lay-swatch[data-shape="wall"] .lay-swatch__track i:nth-child(4) { flex-basis: 24px; }
+.lay-swatch[data-shape="wall"] .lay-swatch__track i:nth-child(5) { flex-basis: 32px; }
+.lay-swatch[data-shape="wall"] .lay-swatch__track i:nth-child(6) { flex-basis: 18px; }
+
+/* One card at a time, its neighbours just showing at the edges. */
+.lay-swatch[data-shape="slider"] .lay-swatch__track { justify-content: center; gap: 6px; }
+.lay-swatch[data-shape="slider"] .lay-swatch__track i { display: none; }
+.lay-swatch[data-shape="slider"] .lay-swatch__track i:nth-child(-n+3) { display: block; }
+.lay-swatch[data-shape="slider"] .lay-swatch__track i:nth-child(2) { flex: 0 0 88px; opacity: .5; }
+.lay-swatch[data-shape="slider"] .lay-swatch__track i:nth-child(1),
+.lay-swatch[data-shape="slider"] .lay-swatch__track i:nth-child(3) { flex: 0 0 10px; opacity: .18; }
+
+/* The three row shapes share their geometry, so the sum at the top of this
+   block is proved once and not three times. What separates them is exactly
+   what separates them in the shop: whether the row moves without being pushed,
+   and whether it ever ends. */
+.lay-swatch[data-shape="rail"] .lay-swatch__track,
+.lay-swatch[data-shape="march"] .lay-swatch__track,
+.lay-swatch[data-shape="loop"] .lay-swatch__track { width: max-content; }
+
+/* A rail and a shelf run out: there is more ahead of you and nothing behind. */
+.lay-swatch[data-shape="rail"],
+.lay-swatch[data-shape="march"] {
+  -webkit-mask-image: linear-gradient(90deg, #000 74%, transparent);
+          mask-image: linear-gradient(90deg, #000 74%, transparent);
+}
+/* A loop does not: it fades at both ends, because there is as much behind you
+   as ahead. */
+.lay-swatch[data-shape="loop"] {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+}
+
+.lay-swatch[data-shape="march"] .lay-swatch__track { animation: lay-swatch-run 4.4s linear infinite; }
+.lay-swatch[data-shape="loop"] .lay-swatch__track { animation: lay-swatch-run 2.6s linear infinite; }
+
+@keyframes lay-swatch-run {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-34px, 0, 0); }   /* exactly one pitch */
+}
+
+/* A merchant who has asked their device for less motion is still entitled to
+   know which of these options moves. The dropdown says so in words; the
+   diagram stops saying it by demonstration. */
+@media (prefers-reduced-motion: reduce) {
+  .lay-swatch .lay-swatch__track { animation: none !important; transform: none !important; }
+}
