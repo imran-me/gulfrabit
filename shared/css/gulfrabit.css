@@ -1025,6 +1025,25 @@ a:hover { color: var(--link-hover); }
 .badge-out      { background: var(--surface-sunken); color: var(--text-muted); border: 1px solid var(--border-hairline); }
 .badge-origin   { background: var(--wash-hover); color: var(--text-secondary); border: 1px solid var(--border-hairline); text-transform: none; letter-spacing: 0; }
 
+/* On a card the badges are a glance, not a read — the price and the title do
+   the selling. Scaled to 60% of the base lozenge so they sit on the
+   photograph as marks rather than as labels competing with the body. Scoped
+   to the card's own stack: the same badges keep full size on the PDP and in
+   listings, where they are the thing being read. The whole stack scales
+   together, so a card showing Premium next to New never mixes two sizes. */
+.product-card__badges .badge-gr {
+  padding: 1.8px 5.4px;
+  font-size: 0.45rem;   /* 7.2px — 60% of the 12px base */
+  letter-spacing: .05em;
+  gap: 2px;
+}
+@media (max-width: 575.98px) {
+  /* Same 60% scale against the narrow-strip badge size. Placed after the base
+     block on purpose — the plain `.badge-gr` strip rule further up is written
+     before it and loses the cascade tie. */
+  .product-card__badges .badge-gr { padding: 1.2px 3.6px; font-size: 5.4px; letter-spacing: .04em; }
+}
+
 /* Arrival badges. Pre-order borrows the gold that this project reserves for
    premium and imported goods, because that is exactly what a pre-order is
    here — a container of something scarce that has not landed. Coming soon

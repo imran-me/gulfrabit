@@ -15,8 +15,19 @@
 .account-nav__link--danger:hover { color: var(--gr-error); }
 
 /* Overview stat cards */
-.stat-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, 1fr); }
-@media (min-width: 768px) { .stat-grid { grid-template-columns: repeat(3, 1fr); } }
+.stat-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(3, 1fr); }
+
+/* Three tiles in a two-column grid leaves the third one alone beside a hole,
+   which is the shape of a page that failed to load rather than a page with
+   three numbers on it. They are a number and a word — they do not need half
+   a phone screen each — so on a phone all three sit in one row, compact and
+   centred. One row instead of two, and no gap where a fourth tile isn't. */
+@media (max-width: 767.98px) {
+  .stat-grid { gap: var(--space-2); }
+  .stat-card { padding: var(--space-3) var(--space-2); text-align: center; }
+  .stat-card__num { font-size: var(--fs-25); line-height: 1.1; }
+  .stat-card__label { font-size: 11px; line-height: 1.25; }
+}
 .stat-card { padding: var(--space-5); transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out); }
 @media (hover: hover) {
   a.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--gr-cyan-dark); }
