@@ -196,6 +196,23 @@
 .field-error { font-size: var(--fs-12); color: var(--gr-error); min-height: 1em; }
 .field-gr.is-valid .input-gr { border-color: var(--gr-success); }
 
+/* ---- Two fields on one row -------------------------------------------
+   Lived in checkout.css, which is loaded by checkout and by nothing else —
+   so contact and addresses, which lay fields out the same way, each carried
+   their own `style="display:grid;grid-template-columns:1fr 1fr"` to stand in
+   for it. A style attribute answers no media query, so on those two pages the
+   pair stayed side by side all the way down to a 375px phone: two fields at
+   about 150px each, which is not two columns, it is one column of half-width
+   boxes. The same coupling bug .sort-field already has a note about — a
+   component on a page whose stylesheet cannot style it.
+
+   One column until there is room for two. */
+.form-grid { display: grid; gap: 0 var(--space-4); grid-template-columns: 1fr; }
+@media (min-width: 640px) {
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .form-grid .col-span-2 { grid-column: 1 / -1; }
+}
+
 /* Checkbox / radio */
 .check-gr { display: inline-flex; align-items: flex-start; gap: var(--space-2); cursor: pointer; font-size: var(--fs-14); color: var(--text-secondary); }
 .check-gr input { width: 20px; height: 20px; accent-color: var(--gr-cyan); margin-top: 1px; }
