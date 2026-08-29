@@ -34,6 +34,10 @@
 .order-status--cancelled { background: rgba(229,72,77,.14); color: var(--gr-error); }
 .order-item-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; }
 .order-item-row img { width: 48px; height: 48px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunken); }
+.order-item-row__title { flex: 1; min-width: 0; }
+/* The count and the money travel together — they are one fact ("two of them,
+   ৳ 1,750") and on a phone they move to their own line as one. */
+.order-item-row__meta { display: inline-flex; align-items: baseline; gap: var(--space-3); flex: none; }
 
 /* The invitation to review, on a delivered line. Quiet by design: it is an
    offer, not a task, and a button here would compete with Track and Buy again
@@ -49,11 +53,27 @@
 
 .order-item-row__review:hover { border-bottom-style: solid; }
 
-/* On a phone the row is already tight; the offer wraps under the title rather
-   than squeezing the price into two characters. */
+/* On a phone, four things in a row leaves the title about 129px — and a
+   thumbnail, a count, a price and an offer are all short, so the only one
+   that pays for it is the product name. "Medjool Dates — Jumbo Grade" came
+   out over three lines while ৳ 1,750 sat comfortably beside it. The name is
+   the line the customer is scanning for; it should not be the one squeezed.
+ *
+ * So the row becomes a small grid: the thumbnail keeps its column, the title
+ * takes the whole of the first row beside it, and the count, the price and
+ * the offer to review drop underneath. One extra line, a title that reads. */
 @media (max-width: 479.98px) {
-  .order-item-row { flex-wrap: wrap; }
-  .order-item-row__review { order: 9; margin-left: calc(48px + var(--space-3)); }
+  .order-item-row {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    column-gap: var(--space-3);
+    row-gap: 4px;
+    align-items: center;
+  }
+  .order-item-row img { grid-row: 1 / span 2; align-self: start; }
+  .order-item-row__title { grid-column: 2 / span 2; grid-row: 1; }
+  .order-item-row__review { grid-column: 2; grid-row: 2; justify-self: start; }
+  .order-item-row__meta { grid-column: 3; grid-row: 2; }
 }
 
 /* Order tracking timeline */

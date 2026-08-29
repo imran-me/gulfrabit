@@ -107,10 +107,10 @@ function orderCard(o) {
       </div>
       ${o.items.map((it) => `<div class="order-item-row">
         <img src="${it.image}" alt="">
-        <span style="flex:1">${escapeHtml(it.title)}</span>
+        <span class="order-item-row__title">${escapeHtml(it.title)}</span>
         ${reviewLink(o, it)}
-        <span class="caption">×${it.qty}</span>
-        <span class="tabular caption">${formatBDT(it.price * it.qty)}</span>
+        <span class="order-item-row__meta"><span class="caption">×${it.qty}</span
+          ><span class="tabular caption">${formatBDT(it.price * it.qty)}</span></span>
       </div>`).join('')}
       <div style="display:flex;gap:.75rem;margin-top:1rem">
         <a class="btn-gr btn-outline-gr btn-sm-gr" href="${siteURL(`track?id=${encodeURIComponent(o.id)}`)}">Track</a>

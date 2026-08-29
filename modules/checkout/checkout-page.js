@@ -291,11 +291,16 @@ async function applyDistrict(districtKey) {
   const note = form.querySelector('[data-delivery-resolved]');
   const quote = districtKey ? await quoteForDistrict(districtKey) : null;
 
+  const options = form.querySelector('[data-delivery-options]');
+
   if (!quote) {
     // Unknown district: unlock everything rather than guessing a zone. Quoting
     // the cheaper tier on an unserviceable address would undercharge us.
     form.querySelectorAll('[data-delivery]').forEach((r) => { r.disabled = false; });
     if (note) note.hidden = true;
+    // Nothing has been resolved, so the rate table is the only way to price
+    // the delivery — it has to be on screen.
+    if (options) options.open = true;
     return;
   }
 
@@ -314,10 +319,21 @@ async function applyDistrict(districtKey) {
 
   syncDeliverySelection();
 
+  /* Open only where there is a genuine second choice, which is Dhaka and its
+     Express upgrade. Everywhere else one zone applies and the other two are
+     ours, not theirs: the resolved line below is the whole answer, and the
+     table is three cards with two greyed out. */
+  if (options) options.open = expressAllowed;
+
   if (note) {
     const name = form.querySelector('[data-district]')?.selectedOptions[0]?.textContent || '';
     note.hidden = false;
-    note.innerHTML = `Delivering to <strong>${escapeHtml(name)}</strong> — ${escapeHtml(quote.label)}, ${escapeHtml(quote.eta)}.`;
+    /* THE CHARGE GOES IN THE LINE. It used to be readable only off the cards,
+       which is exactly what closes above — a resolved note that named the zone
+       and the ETA but not the price would have hidden the number the customer
+       is here for. */
+    note.innerHTML = `Delivering to <strong>${escapeHtml(name)}</strong> — ${escapeHtml(quote.label)}, `
+      + `${escapeHtml(quote.eta)} · <strong class="tabular">৳ ${quote.cost}</strong>`;
   }
 }
 
