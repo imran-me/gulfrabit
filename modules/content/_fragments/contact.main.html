@@ -9,13 +9,13 @@
       <!-- Form -->
       <form class="surface-gr" data-contact-form novalidate style="padding:var(--space-6)">
         <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0 var(--space-4)">
-          <div class="field-gr" data-field><label class="label-gr" for="c-name">Name <span class="req">*</span></label><input id="c-name" class="input-gr" name="name" autocomplete="name" data-validate="required|min:2" data-label="Name"><span class="field-error" data-error></span></div>
-          <div class="field-gr" data-field><label class="label-gr" for="c-email">Email <span class="req">*</span></label><input id="c-email" class="input-gr" type="email" name="email" type="email" autocomplete="email" inputmode="email" data-validate="required|email" data-label="Email"><span class="field-error" data-error></span></div>
+          <div class="field-gr" data-field><label class="label-gr" for="c-name">Name <span class="req">*</span></label><input id="c-name" class="input-gr" name="name" autocomplete="name" data-validate="required|min:2" data-label="Name" placeholder=" "><span class="field-error" data-error></span></div>
+          <div class="field-gr" data-field><label class="label-gr" for="c-email">Email <span class="req">*</span></label><input id="c-email" class="input-gr" type="email" name="email" type="email" autocomplete="email" inputmode="email" data-validate="required|email" data-label="Email" placeholder=" "><span class="field-error" data-error></span></div>
         </div>
         <div class="field-gr" data-field><label class="label-gr" for="c-subject">Subject</label>
           <select id="c-subject" class="select-gr" name="subject"><option>Order enquiry</option><option>Product question</option><option>Bulk / B2B sourcing</option><option>Feedback</option><option>Other</option></select>
         </div>
-        <div class="field-gr" data-field><label class="label-gr" for="c-message">Message <span class="req">*</span></label><textarea id="c-message" class="textarea-gr" name="message" data-validate="required|min:10" data-label="Message"></textarea><span class="field-error" data-error></span></div>
+        <div class="field-gr" data-field><label class="label-gr" for="c-message">Message <span class="req">*</span></label><textarea id="c-message" class="textarea-gr" name="message" data-validate="required|min:10" data-label="Message" placeholder=" "></textarea><span class="field-error" data-error></span></div>
         <button class="btn-gr btn-primary-gr btn-lg-gr" type="submit">Send message</button>
       </form>
 

@@ -1616,6 +1616,103 @@ a:hover { color: var(--link-hover); }
 .label-gr { font-size: var(--fs-14); font-weight: var(--fw-medium); color: var(--text-secondary); }
 .label-gr .req { color: var(--link); }
 
+/* ---- The label lives inside the box ----------------------------------
+   A label above a box costs a 21px line and the 8px under it before the box
+   even starts, and it spends that on a word the box then leaves blank space
+   to repeat. Seven of those down the checkout form was 200px — two thumb
+   scrolls — of naming things. So the label sits where the value will go and
+   gets out of the way when the value arrives: it shrinks to 12px and tucks
+   into the top of the box, still legible, still there while the customer
+   types, which is the one thing a placeholder-as-label can never do.
+
+   The box grows 48px -> 56px to seat both. Net per field is still ~21px
+   saved, and the form reads as boxes rather than as a list of words.
+
+   Scoped to a .field-gr that owns its label. The footer's newsletter label
+   sits outside its .field-gr and the admin panel labels its inputs its own
+   way; neither is this pattern and neither should be dragged into it. */
+.field-gr:has(> .label-gr) { position: relative; gap: var(--space-1); }
+
+.field-gr:has(> .label-gr) > .input-gr,
+.field-gr:has(> .label-gr) > .select-gr,
+.field-gr:has(> .label-gr) > .textarea-gr {
+  min-height: 56px;
+  padding: 1.5rem 1rem 0.45rem;
+}
+.field-gr:has(> .label-gr) > .select-gr { padding-right: 2.5rem; }
+.field-gr:has(> .label-gr) > .textarea-gr { min-height: 104px; }
+
+/* Resting: the label is the field's only content, sitting where the value
+   will. pointer-events:none so the box under it still takes the tap — the
+   label covers most of the control, and a label that swallows the click is
+   a control that does not open. */
+.field-gr:has(> .label-gr) > .label-gr {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  /* Half the box's 56px, not 50% — the containing block is the whole field,
+     which carries the error line under the box, and centring on THAT drops
+     the label through the bottom border. */
+  top: 1.75rem;
+  transform: translateY(-50%);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-regular);
+  line-height: 1.2;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  transition: top var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out),
+              font-size var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+
+/* A textarea is not one line tall, so its resting label belongs at the first
+   line of text, not in the middle of the box. */
+.field-gr:has(> .textarea-gr) > .label-gr { top: 1.5rem; transform: none; }
+
+/* Floated: on focus, once there is a value, or whenever the control shows
+   something of its own accord. A select always reads out an option and a
+   date input always shows its format, so for those the label is never in the
+   way and never comes down. */
+.field-gr:has(> .input-gr:focus) > .label-gr,
+.field-gr:has(> .input-gr:not(:placeholder-shown)) > .label-gr,
+.field-gr:has(> .textarea-gr:focus) > .label-gr,
+.field-gr:has(> .textarea-gr:not(:placeholder-shown)) > .label-gr,
+.field-gr:has(> .input-gr[type="date"]) > .label-gr,
+.field-gr:has(> .select-gr) > .label-gr {
+  top: 0.5rem;
+  transform: none;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+}
+.field-gr:has(> .input-gr:focus) > .label-gr,
+.field-gr:has(> .textarea-gr:focus) > .label-gr,
+.field-gr:has(> .select-gr:focus) > .label-gr { color: var(--gr-cyan-dark); }
+.field-gr.is-invalid:has(> .label-gr) > .label-gr { color: var(--gr-error); }
+
+/* The Bangla gloss is set in `em` further up, so it comes down with the
+   label of its own accord — but its 1.75 default leading would push the
+   floated label's line box past the box's padding. */
+.field-gr:has(> .label-gr) .label-gr__bn { line-height: 1; }
+
+/* A placeholder and a resting label cannot share the seat. The hint waits
+   until the label has floated out of it — which is the moment the customer
+   is actually typing and the moment the hint is worth reading. */
+.field-gr:has(> .label-gr) > .input-gr::placeholder,
+.field-gr:has(> .label-gr) > .textarea-gr::placeholder {
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.field-gr:has(> .label-gr) > .input-gr:focus::placeholder,
+.field-gr:has(> .label-gr) > .textarea-gr:focus::placeholder { opacity: 1; }
+
+/* Without :has() none of the above applies and the label stays a plain block
+   above the box — the form this shop shipped for a year. Older browsers get
+   a taller form, never a broken one. */
+
 /* ---- The Bengali gloss beside a field label ---------------------------
    Most of this shop's customers read Bangla first, and "Thana / Upazila" in
    Latin script is a translation of a Bangla word back into English. The
@@ -1628,7 +1725,7 @@ a:hover { color: var(--link-hover); }
    .bn (see _fonts.css) brings Noto Sans Bengali with it. */
 .label-gr__bn {
   font-weight: var(--fw-regular);
-  font-size: 0.8125rem;
+  font-size: 0.93em;
   color: var(--text-muted);
   /* Bangla's default 1.75 leading would tug the label's line box taller than
      its Latin neighbours and stagger the field tops. */

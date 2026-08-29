@@ -13,12 +13,12 @@
         <form data-auth-form data-auth-mode="register" novalidate>
           <div class="field-gr" data-field>
             <label class="label-gr" for="name">Full name</label>
-            <input id="name" class="input-gr" name="name" data-validate="required|min:3" data-label="Full name" autocomplete="name">
+            <input id="name" class="input-gr" name="name" data-validate="required|min:3" data-label="Full name" autocomplete="name" placeholder=" ">
             <span class="field-error" data-error></span>
           </div>
           <div class="field-gr" data-field>
             <label class="label-gr" for="email">Email</label>
-            <input id="email" class="input-gr" type="email" name="email" data-validate="required|email" data-label="Email" autocomplete="email">
+            <input id="email" class="input-gr" type="email" name="email" data-validate="required|email" data-label="Email" autocomplete="email" placeholder=" ">
             <span class="field-error" data-error></span>
           </div>
           <div class="field-gr" data-field>
@@ -29,14 +29,14 @@
           <div class="field-gr" data-field>
             <label class="label-gr" for="password">Password</label>
             <div class="pw-toggle">
-              <input id="password" class="input-gr" type="password" name="password" data-validate="required|min:6" data-label="Password" autocomplete="new-password">
+              <input id="password" class="input-gr" type="password" name="password" data-validate="required|min:6" data-label="Password" autocomplete="new-password" placeholder=" ">
               <button class="pw-toggle__btn" type="button" data-toggle-pw aria-label="Show password">👁</button>
             </div>
             <span class="field-error" data-error></span>
           </div>
           <div class="field-gr" data-field>
             <label class="label-gr" for="confirm">Confirm password</label>
-            <input id="confirm" class="input-gr" type="password" name="confirm" data-validate="required|match:#password" data-label="Confirmation" autocomplete="new-password">
+            <input id="confirm" class="input-gr" type="password" name="confirm" data-validate="required|match:#password" data-label="Confirmation" autocomplete="new-password" placeholder=" ">
             <span class="field-error" data-error></span>
           </div>
           <label class="check-gr" style="margin-bottom:var(--space-4)"><input type="checkbox" name="terms" data-validate="required" data-label="Terms"> I agree to the Terms &amp; Privacy Policy</label>

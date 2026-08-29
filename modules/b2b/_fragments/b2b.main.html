@@ -40,9 +40,9 @@
       <div class="rfq">
         <form data-rfq-form novalidate>
           <div class="rfq-grid">
-            <div class="field-gr" data-field><label class="label-gr" for="r-company">Company <span class="req">*</span></label><input id="r-company" class="input-gr" name="company" data-validate="required|min:2" data-label="Company"><span class="field-error" data-error></span></div>
-            <div class="field-gr" data-field><label class="label-gr" for="r-contact">Contact name <span class="req">*</span></label><input id="r-contact" class="input-gr" name="contact" data-validate="required|min:2" data-label="Contact"><span class="field-error" data-error></span></div>
-            <div class="field-gr" data-field><label class="label-gr" for="r-email">Email</label><input id="r-email" class="input-gr" type="email" name="email" autocomplete="email" inputmode="email" data-validate="email" data-label="Email"><span class="field-error" data-error></span></div>
+            <div class="field-gr" data-field><label class="label-gr" for="r-company">Company <span class="req">*</span></label><input id="r-company" class="input-gr" name="company" data-validate="required|min:2" data-label="Company" placeholder=" "><span class="field-error" data-error></span></div>
+            <div class="field-gr" data-field><label class="label-gr" for="r-contact">Contact name <span class="req">*</span></label><input id="r-contact" class="input-gr" name="contact" data-validate="required|min:2" data-label="Contact" placeholder=" "><span class="field-error" data-error></span></div>
+            <div class="field-gr" data-field><label class="label-gr" for="r-email">Email</label><input id="r-email" class="input-gr" type="email" name="email" autocomplete="email" inputmode="email" data-validate="email" data-label="Email" placeholder=" "><span class="field-error" data-error></span></div>
             <div class="field-gr" data-field><label class="label-gr" for="r-phone">Phone <span class="req">*</span></label><input id="r-phone" class="input-gr" type="tel" inputmode="numeric" autocomplete="tel" name="phone" data-validate="required|phone" data-label="Phone number" placeholder="01XXXXXXXXX"><span class="field-error" data-error></span></div>
             <div class="field-gr" data-field><label class="label-gr" for="r-product">Product / part <span class="req">*</span></label>
               <!-- A select, not free text. The quote endpoint stores a line
@@ -52,7 +52,7 @@
               <select id="r-product" class="select-gr" name="sku" data-rfq-product data-validate="required" data-label="Product">
                 <option value="">Choose a product…</option>
               </select><span class="field-error" data-error></span></div>
-            <div class="field-gr" data-field><label class="label-gr" for="r-qty">Quantity <span class="req">*</span></label><input id="r-qty" class="input-gr" name="qty" inputmode="numeric" data-validate="required|numeric" data-label="Quantity"><span class="field-error" data-error></span></div>
+            <div class="field-gr" data-field><label class="label-gr" for="r-qty">Quantity <span class="req">*</span></label><input id="r-qty" class="input-gr" name="qty" inputmode="numeric" data-validate="required|numeric" data-label="Quantity" placeholder=" "><span class="field-error" data-error></span></div>
             <div class="field-gr col-span-2" data-field><label class="label-gr" for="r-notes">Specifications / notes</label><textarea id="r-notes" class="textarea-gr" name="notes" placeholder="Tolerances, packaging, target price, delivery timeline…"></textarea></div>
           </div>
           <button class="btn-gr btn-gradient-gr btn-lg-gr" type="submit">Submit RFQ</button>

@@ -107,7 +107,7 @@ try {
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=5727925f">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=4b8c3472">
   <!-- The theme layer for this build. ONE theme, not seven: a theme sheet
        is inert without its [data-theme] on <html>, so linking them all
        meant every visitor downloading five themes they would never see,
@@ -115,7 +115,7 @@ try {
        different one before the first paint when the server has already
        told this visitor which theme is published. -->
   <link rel="stylesheet" href="../../modules/theme/theme-trio.css?v=dd326453">
-  <link rel="stylesheet" href="../../modules/checkout/checkout.css?v=c479c6d7">
+  <link rel="stylesheet" href="../../modules/checkout/checkout.css?v=28927737">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -371,7 +371,7 @@ try {
                removed here is friction removed from the highest-value form on
                the site. -->
           <div class="form-grid">
-            <div class="field-gr" data-field><label class="label-gr" for="fullName">Full name <span class="label-gr__bn bn" lang="bn">পুরো নাম</span> <span class="req">*</span></label><input id="fullName" class="input-gr" name="fullName" autocomplete="name" data-validate="required|min:3" data-label="Full name"><span class="field-error" data-error></span></div>
+            <div class="field-gr" data-field><label class="label-gr" for="fullName">Full name <span class="label-gr__bn bn" lang="bn">পুরো নাম</span> <span class="req">*</span></label><input id="fullName" class="input-gr" name="fullName" autocomplete="name" data-validate="required|min:3" data-label="Full name" placeholder=" "><span class="field-error" data-error></span></div>
             <div class="field-gr" data-field><label class="label-gr" for="phone">Phone <span class="label-gr__bn bn" lang="bn">ফোন</span> <span class="req">*</span></label><input id="phone" class="input-gr" name="phone" type="tel" inputmode="numeric" autocomplete="tel" data-validate="required|phone" data-label="Phone number" placeholder="01XXXXXXXXX"><span class="field-error" data-error></span></div>
             <div class="field-gr col-span-2" data-field><label class="label-gr" for="address">Address <span class="label-gr__bn bn" lang="bn">ঠিকানা</span> <span class="req">*</span></label><input id="address" class="input-gr" name="address" autocomplete="street-address" data-validate="required|min:6" data-label="Address" placeholder="House / road / area"><span class="field-error" data-error></span></div>
 
@@ -480,7 +480,20 @@ try {
            it below 1024px and re-opens it above. -->
       <details class="surface-gr order-summary" data-summary-panel open>
         <summary class="order-summary__head">
+          <!-- On a phone this becomes a legend notched into the panel's top
+               border, the way a fieldset names its group — the row itself is
+               then free to say WHAT is being bought. It stays an ordinary
+               heading inside the panel on desktop; only the position moves. -->
           <h2 class="h5 order-summary__title">Order Summary <span class="head-gr__bn bn" lang="bn">অর্ডার সারাংশ</span></h2>
+          <!-- What is in the basket, in one line: the phone hides the line-item
+               list (see checkout.css), so without this the closed row named
+               nothing the customer recognised. Written by paintSummary().
+
+               The count is a SEPARATE span because the title ellipses and it
+               must not: "Ajwa Dates — Madinah Sel…" and "…+ 1 more" is the
+               half a customer with two items needs to keep. -->
+          <span class="order-summary__names" data-summary-names></span>
+          <span class="order-summary__more" data-summary-more></span>
           <!-- The same figure as the Total row below, written by the same
                paint — see setText(), which writes every match, not the first.
                This is the closed row's whole reason to exist. -->
@@ -661,6 +674,6 @@ try {
 
   <script type="module" src="../../shared/js/main.js?v=65e9eef8"></script>
   <script type="module" src="../../modules/theme/theme.js?v=174b6f6e"></script>
-  <script type="module" src="../../modules/checkout/checkout-page.js?v=5f07622e"></script>
+  <script type="module" src="../../modules/checkout/checkout-page.js?v=8136a0d5"></script>
 </body>
 </html>
