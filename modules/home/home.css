@@ -474,8 +474,13 @@ html.no-js .trust-marquee .trust-item__sub { font-size: var(--trust-sub); line-h
     padding: 10px 6px 12px;
   }
   .home-cat-grid .category-card__media .category-card__icon { width: 34px; height: 34px; }
-  /* Proportional to the card: -4px on a tile this size is a jump. */
-  .home-cat-grid .category-card:hover { transform: translateY(-3px); }
+  /* Proportional to the card: -4px on a tile this size is a jump. Guarded like
+     every other lift in this file — on a touch screen :hover latches after a
+     tap and one tile sits raised above its neighbours until something else is
+     tapped. The 1200px width is not a promise that there is a pointer. */
+  @media (hover: hover) {
+    .home-cat-grid .category-card:hover { transform: translateY(-3px); }
+  }
 }
 
 /* ---- Category section on phones --------------------------------------
