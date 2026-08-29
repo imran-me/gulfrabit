@@ -261,6 +261,14 @@
 }
 .step-nav > .btn-gr { flex: 1 1 auto; justify-content: center; }
 
+/* ---- The amount, on the button that takes it --------------------------
+   The only figure a customer wants while filling this form is what they are
+   about to pay, and the summary holding it scrolls off the top of the page
+   within one swipe. On the button it cannot: that is the one element on
+   screen at every scroll position. The interpunct is decoration and lives
+   here rather than in the markup. */
+.btn-amount::before { content: "·"; margin: 0 .4em; opacity: .65; }
+
 /* ---- The floating Place Order button (phones and tablets) --------------
  *
  * The phone shows the whole form on one page, so the button that takes the
@@ -300,12 +308,25 @@
        tablet gets a 600px pill.
        HEIGHT: .btn-lg-gr's own 56px / 1rem 2rem / 20px, each × 0.8. */
     width: min(calc(80% - 38px), 320px);
-    min-height: 45px;
-    padding: 0.8rem 1.6rem;
+    /* TWO LINES, so the width stays what it was.
+       "Place Order · ৳ 4,915" and the Bangla gloss do not fit on one line of a
+       262px pill at any size worth reading, and neither the gloss nor the
+       amount is the half to drop: the gloss because the button that takes the
+       money is the last place on the site that should need translating, the
+       amount because it is the whole point of putting it here. Stacked, the
+       money is on the primary line and the pill keeps its footprint. */
+    flex-direction: column;
+    gap: 0;
+    min-height: 56px;
+    padding: 0.55rem 1.6rem;
     font-size: var(--fs-16);
     border-radius: var(--radius-pill);
     box-shadow: var(--shadow-lg);
   }
+  /* The gloss is a second line here, so the negative margin that pulls it up
+     against the English on a normal button would drag it into the text above. */
+  [data-place-order] .btn-bn { margin-inline-start: 0; font-size: var(--fs-12); }
+
   /* The nav row keeps only Back, which no longer has a partner to sit beside. */
   .step-nav > [data-nav-back] { flex: 1 1 100%; }
 
