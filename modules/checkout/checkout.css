@@ -436,6 +436,31 @@
   .step__line { min-width: 8px; }
 }
 
+/* ---- What the three disclosures do when they open ----------------------
+   The checkout now folds three things away — the summary's figures, the rate
+   table, the optional fields — and a <details> opens by simply existing, which
+   at this size reads as the page jumping rather than as something arriving.
+   Four pixels and a fade is enough to say "this came from under the line you
+   just tapped".
+
+   Open only. Closing cannot be animated on a native <details> without holding
+   the element open from script, and a disclosure that hesitates before it
+   closes is worse than one that just closes.
+
+   The whole block sits inside prefers-reduced-motion: no-preference, so a
+   customer who has asked for less gets the instant version. */
+@media (prefers-reduced-motion: no-preference) {
+  .order-summary[open] .order-summary__body,
+  .delivery-options[open] > *:not(summary),
+  .optional-fields[open] > *:not(summary) {
+    animation: co-reveal var(--dur-base) var(--ease-out);
+  }
+}
+@keyframes co-reveal {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
 /* ---- Order confirmation ---------------------------------------------- */
 .confirm-hero { text-align: center; padding: var(--space-8) 0 var(--space-6); }
 .confirm-check { width: 84px; height: 84px; margin: 0 auto var(--space-5); border-radius: var(--radius-pill); display: grid; place-items: center; background: var(--gr-gradient); color: #04222b; }
