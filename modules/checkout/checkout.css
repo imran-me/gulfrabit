@@ -217,7 +217,42 @@
 .step__line { flex: 1; min-width: 16px; height: 1px; background: var(--border-hairline); }
 
 .checkout-step[hidden] { display: none; }
-.checkout-step__title { margin-bottom: var(--space-5); }
+
+/* ---- Every section is a panel ------------------------------------------
+   The order summary was a bordered card and the four sections it sat above
+   were bare text on the page background, so the page had one object on it and
+   then a continuous scroll of headings and inputs with nothing to say where
+   one question ended and the next began. Same container for all of them, and
+   the checkout reads as three or four tidy blocks instead.
+
+   The heading goes quiet in the same move. Inside a panel the section name is
+   a LABEL, not a headline — the fields are the content — and 28px of display
+   type shouted it over them. Small, tracked and muted: the same treatment as
+   the order summary's own legend and .spec-heading on the product page, so
+   there is one way of writing a label across the site, and the page keeps
+   exactly one piece of display type: the H1 that names it. */
+.checkout-step {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+  margin-bottom: var(--space-4);
+}
+.checkout-step__title {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-muted);
+}
+/* 0.62em of 12px is unreadable; the gloss runs at nearly the label's size. */
+.checkout-step__title .head-gr__bn { font-size: .88em; }
+
+/* A block inside a section panel: spacing only, no second border. */
+.review-block + .review-block { margin-top: var(--space-4); }
 
 /* .form-grid moved to shared/css/partials/_forms.css — checkout was not the
    only page laying fields out in two columns, and it was the only one whose

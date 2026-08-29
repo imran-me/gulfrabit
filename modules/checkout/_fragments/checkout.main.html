@@ -127,12 +127,14 @@
         <!-- STEP 4 · Review -->
         <section class="checkout-step" data-step="4" hidden>
           <h2 class="h4 checkout-step__title">Review &amp; Place Order <span class="head-gr__bn bn" lang="bn">রিভিউ ও অর্ডার</span></h2>
-          <div class="surface-gr" style="padding:var(--space-5);margin-bottom:var(--space-4)">
+          <!-- Flat, not .surface-gr: the section around them is a panel now,
+               and a panel inside a panel is two borders saying one thing. -->
+          <div class="review-block">
             <div class="review-line"><span class="text-muted-gr">Ship to</span><span data-review-address>—</span></div>
             <div class="review-line"><span class="text-muted-gr">Delivery</span><span data-review-delivery>—</span></div>
             <div class="review-line"><span class="text-muted-gr">Payment</span><span data-review-payment>—</span></div>
           </div>
-          <div class="surface-gr" style="padding:var(--space-5)" data-review-items></div>
+          <div class="review-block" data-review-items></div>
         </section>
         <!-- ONE nav for the whole form, not one per section.
              With sections grouped, a per-section nav meant the Back of one and
