@@ -1,0 +1,53 @@
+<!-- =========================================================================
+     GulfRabit · FOOTER partial, checkout form
+     Paste before </body> on pages inside the funnel. Chosen per page by
+     MINIMAL_FOOTER in tools/assemble.py; every other page gets the canonical
+     shared/components/footer.html.
+
+     WHY A SECOND FOOTER EXISTS
+     The full footer is 1121px on a 375px phone — four columns of shop
+     navigation, a newsletter signup and a brand block, printed directly under
+     the button that takes the customer's money. It is a third of the checkout
+     page, and every link in it is a way out of the funnel offered at the exact
+     moment the customer has decided not to leave.
+
+     What survives is what a checkout footer is FOR: the acceptance marks, which
+     are most of what tells a first-time customer their money has somewhere
+     familiar to go, and the four legal links they may genuinely want before
+     paying — Shipping, FAQ, Privacy, Terms. No brand block, no newsletter, no
+     category columns, no social icons.
+
+     KEEP THE CLASS NAMES. .footer-bottom, .footer-pay and .footer-legal are
+     styled in shared/css/partials/_footer.css and are shared with the canonical
+     footer; this partial is a different SELECTION of the same components, not a
+     second set of styles.
+     ========================================================================= -->
+<footer class="site-footer canvas-panel" style="border-top:1px solid var(--border-hairline)">
+  <div class="gr-container" style="padding-block:var(--space-5)">
+    <div class="footer-bottom">
+      <p class="caption footer-bottom__copy">© 2026 GulfRabit. All rights reserved.</p>
+      <!-- The same marks, and the same caveat as the canonical footer: these
+           are third-party trademarks used as acceptance marks, to be swapped
+           for the official kits when merchant onboarding delivers them
+           (ACTION-REQUIRED.md §6d). COD is not a brand and gets no logo — a
+           banknote and the word, because it is the method most of these orders
+           will actually use. -->
+      <div class="footer-pay" aria-label="Accepted payment methods">
+        <span class="pay-mark"><img src="/assets/payments/bkash.svg" alt="bKash" width="247" height="113" loading="lazy" decoding="async"></span>
+        <span class="pay-mark"><img src="/assets/payments/nagad.svg" alt="Nagad" width="300" height="131" loading="lazy" decoding="async"></span>
+        <span class="pay-mark"><img src="/assets/payments/visa.svg" alt="Visa" width="498" height="162" loading="lazy" decoding="async"></span>
+        <span class="pay-mark pay-mark--symbol"><img src="/assets/payments/mastercard.svg" alt="Mastercard" width="641" height="397" loading="lazy" decoding="async"></span>
+        <span class="pay-mark pay-mark--cod">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="15" height="15" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.6v4.8M18 9.6v4.8"/></svg>
+          Cash on delivery
+        </span>
+      </div>
+    </div>
+    <div class="footer-legal">
+      <a href="/shipping-returns" class="caption">Shipping</a>
+      <a href="/faq" class="caption">FAQ</a>
+      <a href="/privacy" class="caption">Privacy</a>
+      <a href="/terms" class="caption">Terms</a>
+    </div>
+  </div>
+</footer>
