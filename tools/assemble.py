@@ -31,6 +31,10 @@ def write(p, s):
 
 HEADER = read("shared/components/header.html")
 FOOTER = read("shared/components/footer.html")
+# The funnel's own footer — acceptance marks and legal links, and nothing to
+# click away with. See the partial's own header for why, and MINIMAL_FOOTER
+# below for which pages get it.
+FOOTER_CHECKOUT = read("shared/components/footer-checkout.html")
 
 # Canonical site origin (placeholder domain — update when the domain is live).
 SITE = "https://gulfrabit.com"
@@ -511,8 +515,10 @@ def assemble(out, title, desc, main_html, css_links=None, module_js=None, cms_pa
     page += "  <!-- HEADER (inlined from shared/components/header.html) -->\n"
     page += HEADER + "\n\n"
     page += main_html.strip() + "\n\n"
-    page += "  <!-- FOOTER (inlined from shared/components/footer.html) -->\n"
-    page += FOOTER
+    minimal = out in MINIMAL_FOOTER
+    src = "footer-checkout.html" if minimal else "footer.html"
+    page += f"  <!-- FOOTER (inlined from shared/components/{src}) -->\n"
+    page += FOOTER_CHECKOUT if minimal else FOOTER
     page += scripts(module_js)
     if noindex:
         page = page.replace('<meta name="robots" content="index, follow">',
@@ -520,6 +526,20 @@ def assemble(out, title, desc, main_html, css_links=None, module_js=None, cms_pa
     page = relativize(page, out)
     write(out, page)
     print("wrote", out)
+
+# Pages that get the funnel footer instead of the canonical one.
+#
+# A set rather than a seventh field on every PAGES tuple: this is a property of
+# one page in fifty, and the tuples are already six wide. Add a page here and it
+# loses the shop navigation printed under its action; take it out again and the
+# full footer is back with nothing else to undo.
+#
+# The confirmation page is deliberately NOT here. The order is placed by then,
+# and "what else do you sell" is exactly the right question to put in front of
+# someone who has just bought something.
+MINIMAL_FOOTER = {
+    "modules/checkout/checkout.html",
+}
 
 # Storefront pages that must carry <meta name="robots" content="noindex">.
 # Keep this in step with NOINDEX in tools/sitemap.py — that file decides what

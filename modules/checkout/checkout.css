@@ -314,6 +314,11 @@
      Back — both of them things a customer taps. ~45px of pill, its 16px of
      air top and bottom, and the home-indicator inset. */
   .checkout-layout { padding-bottom: calc(77px + env(safe-area-inset-bottom, 0px)); }
+  /* And the same at the true bottom of the page: the funnel footer's last row
+     is Shipping / FAQ / Privacy / Terms, which is where a customer goes to
+     read a policy BEFORE paying — printing the pill on top of it is printing
+     it on top of the four links most likely to be wanted at that moment. */
+  .footer-checkout { padding-bottom: calc(61px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ---- The stepper on a phone -------------------------------------------
