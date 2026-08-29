@@ -67,6 +67,7 @@ async function init() {
   wireDistricts();
   wirePayment();
   wireSummaryPanel();
+  wireOptionalFields();
   // Async and unawaited on purpose: the page must not wait on a network call
   // to render, and until it answers the markup's own options stand.
   adaptPaymentOptions(form);
@@ -369,6 +370,26 @@ function wirePayment() {
     cardFields.hidden = !isCard;
     setCardRequired(isCard);
   }));
+}
+
+/**
+ * Email and delivery notes start folded away.
+ *
+ * Both are optional and neither is what the customer came to do, but they were
+ * two of the seven boxes in the first section — friction charged to every buyer
+ * to collect something from a few. The markup ships the disclosure open so a
+ * page with no JS asks for them as it always did; this closes it.
+ *
+ * Except when there is already something to see. A returning customer whose
+ * email came back from their account, or anyone who typed a note, went back to
+ * the cart and came forward again, must not have their own input hidden from
+ * them behind a link that says "Add".
+ */
+function wireOptionalFields() {
+  const box = form.querySelector('[data-optional-fields]');
+  if (!box) return;
+  const filled = [...box.querySelectorAll('input, textarea')].some((f) => f.value.trim());
+  box.open = filled;
 }
 
 /* ---- The summary panel on a phone --------------------------------------

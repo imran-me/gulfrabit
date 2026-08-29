@@ -258,6 +258,41 @@
    only page laying fields out in two columns, and it was the only one whose
    stylesheet said what that meant. */
 
+/* ---- The optional fields' own disclosure -------------------------------
+   Same quiet text toggle as the delivery rates, because it is the same kind of
+   offer: something available, not something required. It sits in the form grid
+   as a full-width item, so the two fields inside stack under it on any width. */
+.optional-fields { margin-bottom: var(--space-4); }
+.optional-fields__toggle {
+  list-style: none;
+  /* flex, and allowed to wrap: the label is a bilingual pair and the panel it
+     sits in is 279px wide on a 375px phone. Wrapping puts the gloss under the
+     English; not wrapping put it half a line away across the gap. */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  padding: var(--space-2) 0;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+  color: var(--link);
+  cursor: pointer;
+}
+.optional-fields__toggle::-webkit-details-marker { display: none; }
+/* One glyph for both states: a plus that becomes a close when the fields are
+   showing, so the toggle needs no second label. */
+.optional-fields__toggle::before {
+  content: "+";
+  font-size: 1.15em;
+  line-height: 1;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.optional-fields[open] .optional-fields__toggle::before { transform: rotate(45deg); }
+/* The gloss is a gloss: a size down and muted, as everywhere else on the site
+   the Bangla sits beside an English label rather than replacing it. */
+.optional-fields__bn { font-size: .9em; color: var(--text-muted); }
+.optional-fields[open] .optional-fields__toggle { margin-bottom: var(--space-3); }
+
 /* Delivery / payment option cards */
 .option-card { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-4); border: 1px solid var(--border-hairline); border-radius: var(--radius-lg); cursor: pointer; transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out); margin-bottom: var(--space-3); }
 /* Guarded: on touch, :hover latches after a tap, so a delivery option the

@@ -50,9 +50,22 @@
 
             <div class="field-gr" data-field><label class="label-gr" for="area">Area / Thana <span class="label-gr__bn bn" lang="bn">থানা</span></label><input id="area" class="input-gr" name="area" autocomplete="address-level2" data-label="Area" placeholder="Optional"><span class="field-error" data-error></span></div>
 
-            <div class="field-gr col-span-2" data-field><label class="label-gr" for="email">Email (optional) <span class="label-gr__bn bn" lang="bn">ইমেইল</span></label><input id="email" class="input-gr" name="email" type="email" autocomplete="email" data-validate="email" data-label="Email" placeholder="For the order receipt — we'll text you either way"><span class="field-error" data-error></span></div>
+            <!-- The two fields nobody has to fill, behind the one line that
+                 offers them. Neither is required and neither is what the
+                 customer came here to do, but between them they were two of the
+                 seven boxes on the first thing a phone sees — friction charged
+                 to every buyer to collect something from a few.
 
-            <div class="field-gr col-span-2" data-field><label class="label-gr" for="notes">Delivery notes (optional) <span class="label-gr__bn bn" lang="bn">নোট</span></label><textarea id="notes" class="textarea-gr" name="notes" style="min-height:80px" placeholder="Landmark, floor, or a time that suits you"></textarea></div>
+                 A <details>, so it ships open and a page with no JS asks for
+                 them exactly as before; checkout-page.js closes it on load, and
+                 leaves it open if either field already has a value. -->
+            <details class="optional-fields col-span-2" data-optional-fields open>
+              <summary class="optional-fields__toggle"><span>Add email or a note</span> <span class="optional-fields__bn bn" lang="bn">ইমেইল বা নোট</span></summary>
+
+              <div class="field-gr" data-field><label class="label-gr" for="email">Email (optional) <span class="label-gr__bn bn" lang="bn">ইমেইল</span></label><input id="email" class="input-gr" name="email" type="email" autocomplete="email" data-validate="email" data-label="Email" placeholder="For the order receipt — we'll text you either way"><span class="field-error" data-error></span></div>
+
+              <div class="field-gr" data-field><label class="label-gr" for="notes">Delivery notes (optional) <span class="label-gr__bn bn" lang="bn">নোট</span></label><textarea id="notes" class="textarea-gr" name="notes" style="min-height:80px" placeholder="Landmark, floor, or a time that suits you"></textarea></div>
+            </details>
           </div>
         </section>
 
