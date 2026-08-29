@@ -114,7 +114,7 @@ try {
        different one before the first paint when the server has already
        told this visitor which theme is published. -->
   <link rel="stylesheet" href="../../modules/theme/theme-trio.css?v=dd326453">
-  <link rel="stylesheet" href="../../modules/account/account.css?v=d1162b58">
+  <link rel="stylesheet" href="../../modules/account/account.css?v=80c9cfd6">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -349,10 +349,22 @@ try {
          cleared their browser data. Without the phone this page could only
          ever read what this browser happened to remember. -->
     <form class="track-lookup" data-track-lookup novalidate>
-      <input class="input-gr" type="text" name="id" data-track-input placeholder="Order number (e.g. GR-2026-1043)" aria-label="Order number"
+      <!-- Real labels, not placeholders standing in for them. A placeholder
+           leaves the moment you type, so the one screen where you might get
+           the format wrong is the one screen that has stopped telling you
+           what was asked for. The example moves to the placeholder, where an
+           example belongs — it appears on focus, once the label has floated
+           clear. -->
+      <div class="field-gr" data-field>
+        <label class="label-gr" for="trackId">Order number</label>
+        <input id="trackId" class="input-gr" type="text" name="id" data-track-input placeholder="e.g. GR-2026-1043"
                autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="next">
-      <input class="input-gr" type="tel" name="phone" data-track-phone placeholder="Phone used to order" aria-label="Phone number used to place the order"
+      </div>
+      <div class="field-gr" data-field>
+        <label class="label-gr" for="trackPhone">Phone used to order</label>
+        <input id="trackPhone" class="input-gr" type="tel" name="phone" data-track-phone placeholder=" "
                inputmode="numeric" autocomplete="tel" enterkeyhint="search">
+      </div>
       <button class="btn-gr btn-primary-gr" type="submit">Track</button>
     </form>
     <p class="caption" style="margin:calc(var(--space-6) * -1 + var(--space-2)) 0 var(--space-6)">
