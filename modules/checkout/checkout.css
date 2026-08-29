@@ -4,6 +4,17 @@
 .checkout-layout { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
 @media (min-width: 1024px) { .checkout-layout { grid-template-columns: 1fr 380px; align-items: start; } }
 
+/* ---- The order summary panel ------------------------------------------
+   A <details> so a phone can close it (see the block further down). Above
+   1024px it is simply an always-open panel: the marker is gone, the row is
+   not a control, and checkout-page.js keeps `open` set. */
+.order-summary { padding: var(--space-5); }
+.order-summary__head { list-style: none; cursor: default; }
+.order-summary__head::-webkit-details-marker { display: none; }
+.order-summary__title { margin: 0 0 var(--space-4); }
+/* The total, repeated in the head. Only a closed phone row shows it. */
+.order-summary__peek { display: none; }
+
 /* ---- Summary rows -----------------------------------------------------
    These rendered as "Subtotal৳ 4,785" — label and amount touching — because
    the only .summary-row rule on the site lives in cart.css, and the checkout
@@ -46,12 +57,48 @@
 @media (max-width: 1023.98px) {
   .order-summary {
     order: -1;
-    /* Compact: this is a reference, not the main content, and a full-height
-       panel above the form would push the first field off the fold. */
-    padding: var(--space-4) !important;
+    /* Padding moves off the panel and onto its two halves, so a CLOSED
+       summary is one row tall and not one row plus the panel's own air.
+       Closed is the resting state on a phone: this is a reference, not the
+       main content, and the panel at full height pushed the first field of
+       the form off the fold. The one figure it is consulted for before the
+       form is filled — the total — stays visible in the closed row. */
+    padding: 0;
   }
 
-  .order-summary h2 { font-size: var(--fs-16); margin-bottom: var(--space-3) !important; }
+  .order-summary__head {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    min-height: 44px;                       /* a thumb-sized target */
+    cursor: pointer;
+  }
+  /* Pushes the total and the chevron to the right edge, and keeps them there
+     when the total hides on open. */
+  .order-summary__title { margin: 0; margin-right: auto; font-size: var(--fs-16); }
+
+  .order-summary__peek {
+    display: inline;
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+  }
+  /* Open, the Total row below says it — and says it better, next to its
+     label. Two of the same number in one panel reads as two figures. */
+  .order-summary[open] .order-summary__peek { display: none; }
+
+  /* Own chevron, since list-style is off. Same shape and turn as the FAQ's
+     in catalog.css — one disclosure affordance across the site. */
+  .order-summary__head::after {
+    content: "";
+    width: 8px; height: 8px;
+    border-right: 2px solid var(--text-muted);
+    border-bottom: 2px solid var(--text-muted);
+    transform: rotate(45deg);
+    transition: transform var(--dur-base) var(--ease-out);
+    flex-shrink: 0;
+  }
+  .order-summary[open] .order-summary__head::after { transform: rotate(-135deg); }
+
+  .order-summary__body { padding: 0 var(--space-4) var(--space-4); }
 
   /* The line items collapse away. The totals are what a customer checks
      repeatedly; the list of what is in the basket they already know, and it

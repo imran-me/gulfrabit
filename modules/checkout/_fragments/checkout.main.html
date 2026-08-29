@@ -129,19 +129,39 @@
         </div>
       </form>
 
-      <!-- Sticky order summary -->
-      <aside class="surface-gr order-summary" style="padding:var(--space-5)">
-        <h2 class="h5" style="margin-bottom:var(--space-4)">Order Summary <span class="head-gr__bn bn" lang="bn">অর্ডার সারাংশ</span></h2>
-        <div data-summary-items style="max-height:280px;overflow:auto;margin-bottom:var(--space-4)"></div>
-        <div class="summary-row"><span>Subtotal</span><span class="tabular" data-sum-subtotal>৳ 0</span></div>
-        <!-- The discount the cart page already showed. Without this row the
-             customer applied a code, watched the cart total drop, then arrived
-             here to a total that had quietly gone back up. -->
-        <div class="summary-row" data-sum-discount-row hidden><span>Promo <span data-sum-promo></span></span><span class="tabular" data-sum-discount>৳ 0</span></div>
-        <!-- GENERATED-DELIVERY-BEGIN checkout-summary -->
-        <div class="summary-row"><span>Delivery</span><span class="tabular" data-sum-delivery>৳ 70</span></div>
-        <!-- GENERATED-DELIVERY-END checkout-summary -->
-        <div class="summary-row summary-row--total"><span>Total</span><span class="tabular" data-sum-total>৳ 0</span></div>
-      </aside>
+      <!-- Order summary — a panel beside the form on desktop, ONE ROW on a phone.
+           Every pixel above the fold on a phone belongs to the form; a
+           reference panel that took a third of it pushed the first field out
+           of sight. Closed, it still answers the only question asked of it
+           before the form is filled — what am I about to pay — because the
+           total rides in the closed row itself.
+
+           Native <details>, the same choice as the product FAQ: keyboard and
+           find-in-page work for free. It ships `open`, so the panel is whole
+           before a line of script runs — which is what desktop wants anyway,
+           and what a phone with JS off falls back to. checkout-page.js closes
+           it below 1024px and re-opens it above. -->
+      <details class="surface-gr order-summary" data-summary-panel open>
+        <summary class="order-summary__head">
+          <h2 class="h5 order-summary__title">Order Summary <span class="head-gr__bn bn" lang="bn">অর্ডার সারাংশ</span></h2>
+          <!-- The same figure as the Total row below, written by the same
+               paint — see setText(), which writes every match, not the first.
+               This is the closed row's whole reason to exist. -->
+          <span class="order-summary__peek tabular" data-sum-total>৳ 0</span>
+        </summary>
+
+        <div class="order-summary__body">
+          <div data-summary-items style="max-height:280px;overflow:auto;margin-bottom:var(--space-4)"></div>
+          <div class="summary-row"><span>Subtotal</span><span class="tabular" data-sum-subtotal>৳ 0</span></div>
+          <!-- The discount the cart page already showed. Without this row the
+               customer applied a code, watched the cart total drop, then arrived
+               here to a total that had quietly gone back up. -->
+          <div class="summary-row" data-sum-discount-row hidden><span>Promo <span data-sum-promo></span></span><span class="tabular" data-sum-discount>৳ 0</span></div>
+          <!-- GENERATED-DELIVERY-BEGIN checkout-summary -->
+          <div class="summary-row"><span>Delivery</span><span class="tabular" data-sum-delivery>৳ 70</span></div>
+          <!-- GENERATED-DELIVERY-END checkout-summary -->
+          <div class="summary-row summary-row--total"><span>Total</span><span class="tabular" data-sum-total>৳ 0</span></div>
+        </div>
+      </details>
     </div>
   </main>

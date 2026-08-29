@@ -197,9 +197,12 @@ def checkout_summary_default(zones: list[dict], payload: dict) -> str:
 
     checkout.js overwrites this the moment a zone is chosen, but the first
     radio is pre-checked, so the static value has to agree with it — otherwise
-    the summary briefly shows a charge the customer is not being asked to pay."""
+    the summary briefly shows a charge the customer is not being asked to pay.
+
+    Ten spaces of indent, not eight: the summary rows moved inside the
+    <details> body when the panel learned to collapse on a phone."""
     return (
-        f'        <div class="summary-row"><span>Delivery</span>'
+        f'          <div class="summary-row"><span>Delivery</span>'
         f'<span class="tabular" data-sum-delivery>৳ {zones[0]["costTaka"]}</span></div>'
     )
 

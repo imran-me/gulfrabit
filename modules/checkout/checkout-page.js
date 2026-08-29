@@ -38,6 +38,11 @@ let discount = 0;
 const wide = window.matchMedia('(min-width: 768px)');
 const STAGE_OF = { 1: 1, 2: 1, 3: 2, 4: 2 };   // desktop grouping
 
+/* The order summary is a <details>. It ships open — see the fragment — and
+   1024px is where the layout gains the second column to hold it open in. */
+const summaryPanel = document.querySelector('[data-summary-panel]');
+const roomForSummary = window.matchMedia('(min-width: 1024px)');
+
 const stageOf = (step) => (wide.matches ? STAGE_OF[step] : 1);
 const stageCount = () => (wide.matches ? 2 : 1);
 const visibleSteps = () => steps.filter((s) => stageOf(Number(s.dataset.step)) === current);
@@ -60,6 +65,7 @@ async function init() {
   wireDelivery();
   wireDistricts();
   wirePayment();
+  wireSummaryPanel();
   // Async and unawaited on purpose: the page must not wait on a network call
   // to render, and until it answers the markup's own options stand.
   adaptPaymentOptions(form);
@@ -329,6 +335,32 @@ function wirePayment() {
   }));
 }
 
+/* ---- The summary panel on a phone --------------------------------------
+ *
+ * One column has no room for a reference panel at full height: it lands above
+ * the form (see checkout.css for why it goes first) and pushes the first field
+ * the customer has to fill below the fold. Closed, it is a single row that
+ * still carries the total, which is the figure it is consulted for while the
+ * form is being filled; the breakdown is one tap away.
+ *
+ * Open/closed is set here rather than in the markup because CSS cannot set it
+ * and a media query cannot either. The markup ships `open`, so a phone with
+ * no JS gets the whole panel rather than a row it cannot expand.
+ */
+function wireSummaryPanel() {
+  if (!summaryPanel) return;
+  const sync = () => { summaryPanel.open = roomForSummary.matches; };
+  sync();
+  // A phone rotated to landscape past 1024px opens it; back again closes it.
+  roomForSummary.addEventListener('change', sync);
+  // Above 1024px the row is not a control — there is nothing to collapse to
+  // and the panel has its own column. preventDefault covers the click and the
+  // Enter/Space that a focused <summary> turns into one.
+  summaryPanel.addEventListener('click', (e) => {
+    if (roomForSummary.matches && e.target.closest('summary')) e.preventDefault();
+  });
+}
+
 /* ---- Summary + review -------------------------------------------------
  * The discount is held here rather than recomputed per caller, because
  * validating a code is async and total() is read synchronously from four
@@ -499,7 +531,10 @@ async function placeOrder(e) {
   window.location.href = siteURL(`order-confirmed?id=${encodeURIComponent(order.id)}`);
 }
 
-function setText(sel, v) { const el = document.querySelector(sel); if (el) el.textContent = v; }
+/* Every match, not the first: the total is written in two places on a phone —
+   the closed summary row and the Total line inside it — and a first-match-only
+   helper left the closed row reading ৳ 0 for the whole of checkout. */
+function setText(sel, v) { document.querySelectorAll(sel).forEach((el) => { el.textContent = v; }); }
 /* The textContent round-trip escapes &, < and > but not the double quote, so
    it cannot be trusted inside an attribute — and the order summary now puts a
    stored cart line's image path in one. Without the quote, `x" onerror="…` as
