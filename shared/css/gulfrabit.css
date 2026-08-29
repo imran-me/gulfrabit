@@ -1099,6 +1099,16 @@ a:hover { color: var(--link-hover); }
 }
 .announce-bar[hidden] { display: none; }
 
+/* On a phone the sentence ran to three lines — about 72px of gradient above
+   the header, on every page, before the shop starts. All three facts stay
+   (they are the delivery promise, and trimming the promise to save pixels is
+   the wrong economy); they are simply set at the size a strip of secondary
+   information deserves rather than at body size, which fits them in two. */
+@media (max-width: 575.98px) {
+  .announce-bar { font-size: var(--fs-12); }
+  .announce-bar__inner { padding: 6px 3rem; line-height: 1.3; }
+}
+
 /* ---- Header shell ---------------------------------------------------- */
 .site-header {
   position: sticky; top: 0; z-index: var(--z-header);
