@@ -180,14 +180,6 @@ export function productCardHTML(product, { eager = false } = {}) {
            data-price="${price}" data-image="${escapeAttr(image)}"
            data-variant="${escapeAttr(defaultVariant || '')}">
     <div class="product-card__media">
-      <div class="product-card__badges">${badges.join('')}</div>
-      <div class="product-card__actions">
-        <button class="btn-icon-gr" data-action="wishlist" aria-pressed="${wished}"
-                aria-label="${wished ? 'Remove from wishlist' : 'Add to wishlist'}"
-                style="background:var(--surface-sunken);${wished ? 'color:var(--lime-ink)' : ''}">${HEART}</button>
-        <button class="btn-icon-gr" data-action="quickview" aria-label="Quick view"
-                style="background:var(--surface-sunken)">${EYE}</button>
-      </div>
       <a href="${productURL(product)}" aria-label="${escapeAttr(title)}">
         <picture>${cardSources(image)}
           <img class="product-card__img" src="${escapeAttr(image)}" alt="${escapeAttr(title)}" ${
@@ -195,6 +187,20 @@ export function productCardHTML(product, { eager = false } = {}) {
           } decoding="async" width="400" height="500">
         </picture>
       </a>
+    </div>
+    <!-- Badges and actions live BETWEEN the photograph and the body, in one
+         row, rather than inside the photograph.
+         On a desktop card both are absolutely positioned back over the image
+         and this row collapses to nothing — the layout there is unchanged.
+         On a phone they stay where they are written and become a label strip
+         under the image. See _cards.css: "the photograph is the product". -->
+    <div class="product-card__labels">
+      <div class="product-card__badges">${badges.join('')}</div>
+      <div class="product-card__actions">
+        <button class="btn-icon-gr" data-action="wishlist" aria-pressed="${wished}"
+                aria-label="${wished ? 'Remove from wishlist' : 'Add to wishlist'}">${HEART}</button>
+        <button class="btn-icon-gr" data-action="quickview" aria-label="Quick view">${EYE}</button>
+      </div>
     </div>
     <div class="product-card__body">
       ${brand ? `<span class="product-card__brand">${escapeHtml(brand)}${origin ? ` · ${escapeHtml(origin)}` : ''}</span>` : ''}
@@ -362,7 +368,6 @@ function syncWishlistHearts(root = document) {
     if (!btn) return;
     const active = saved.has(card.dataset.id);
     btn.setAttribute('aria-pressed', String(active));
-    btn.style.color = active ? 'var(--lime-ink)' : '';
     btn.setAttribute('aria-label', active ? 'Remove from wishlist' : 'Add to wishlist');
   });
 }

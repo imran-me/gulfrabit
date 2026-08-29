@@ -118,8 +118,23 @@
   transition: transform var(--dur-fast) var(--ease-out),
               opacity var(--dur-fast) var(--ease-out);
 }
+.product-card__actions .btn-icon-gr { background: var(--surface-sunken); }
 .product-card__actions .btn-icon-gr svg { width: 17px; height: 17px; }
 .product-card__actions .btn-icon-gr:active { transform: scale(.9); opacity: 1; }
+.product-card__actions [data-action="wishlist"][aria-pressed="true"] { color: var(--lime-ink); }
+
+/* The row the badges and actions are WRITTEN in. Both children are absolutely
+   positioned above, so on a desktop card this box has no height and no
+   presence — the overlay is exactly what it was. It exists so that a phone
+   has somewhere to put them; see the strip in the phone block below. */
+.product-card__labels { display: flex; align-items: center; gap: var(--space-1); }
+
+/* Lives here, beside .product-card__actions, rather than down in the badge
+   section — it was below the phone block, and a phone rule that has to undo
+   `position: absolute` cannot do it from ABOVE the declaration it is undoing.
+   Same specificity, later source: the desktop rule was quietly winning inside
+   the phone's own media query. */
+.product-card__badges { position: absolute; top: var(--space-3); left: var(--space-3); display: flex; flex-direction: column; gap: var(--space-1); z-index: 2; }
 
 @media (hover: hover) {
   /* Where there IS a pointer, keep the original reveal — it is cleaner, and a
@@ -328,11 +343,71 @@
      much as the size: at 1.6 a 10px caption still reserves a 16px row. */
   .product-card__body .caption { font-size: 10px; line-height: 1.2; }
 
-  .product-card__badges { top: 6px; left: 6px; gap: 3px; }
+  /* ---- The photograph is the product ---------------------------------
+   *
+   * On a 163px card the Premium pill ran 78px — half the card's width — and
+   * the two 34px circles took the opposite corner, so the top 45% of the
+   * photograph was chrome. On a 280px desktop card the same furniture reads
+   * as a tasteful overlay; at this size it reads as something covering the
+   * thing you came to look at. A shop whose product photos are half-covered
+   * is a shop selling less, and the badge and the wishlist are worth exactly
+   * nothing if the customer cannot see what they are being offered.
+   *
+   * So they come off the image and become a label strip under it: badges
+   * left, actions right, one row. Nothing is removed and nothing moves to
+   * another page — the same two taps are in the same card, at the same size
+   * class, simply not standing on the photograph. The image is 100% visible.
+   *
+   * It costs ~30px of card height. That is the trade, made deliberately: a
+   * whole photograph is worth more than a third of a row.
+   */
+  .product-card__labels {
+    padding: 7px 10px 0;
+    gap: 4px;
+    /* Reserve the row even on a card with no badge, so two cards side by side
+       still line their titles up. */
+    min-height: 34px;
+  }
+  .product-card__badges,
+  .product-card__actions {
+    position: static;
+    flex-direction: row;
+    /* The hover block above hides the actions until hover, which is right for
+       a pointer and wrong here — and a narrow window on a desktop DOES report
+       hover. In the strip they are always present. */
+    opacity: 1;
+    transform: none;
+  }
+  .product-card__badges { gap: 4px; }
   .badge-gr { padding: 2px 6px; font-size: 9px; letter-spacing: .03em; }
 
-  .product-card__actions { top: 6px; right: 6px; gap: 6px; }
-  .product-card__actions .btn-icon-gr { width: 34px; height: 34px; }
+  /* Pushed to the far end of the strip, away from the badges. */
+  .product-card__actions { margin-left: auto; gap: 2px; }
+
+  /* Off the photograph they no longer need to be a lozenge fighting a
+     background for contrast — a plain glyph on the card's own surface is
+     quieter and reads as part of the card rather than as something dropped
+     on it. 27px keeps a comfortable target in a 34px row while leaving the
+     badges the width they need. */
+  .product-card__actions .btn-icon-gr {
+    /* 30px, up from the 34px lozenge but with none of its weight — and
+       larger than the 27px the strip would allow if the badges were long,
+       because nothing sits under these any more and a target that costs the
+       photograph nothing has no reason to be small. Past WCAG 2.5.8's 24px
+       either way. */
+    width: 30px; height: 30px;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    /* Secondary, not muted: muted is the colour of text you are not meant to
+       act on, and these are the two things on the card you can act on
+       besides buying it. */
+    color: var(--text-secondary);
+  }
+  .product-card__actions .btn-icon-gr svg { width: 18px; height: 18px; }
+
+  /* The strip carries the body's top padding now. */
+  .product-card__body { padding-top: 3px; }
 }
 
 /* ---- Category card --------------------------------------------------- */
@@ -433,7 +508,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.product-card__badges { position: absolute; top: var(--space-3); left: var(--space-3); display: flex; flex-direction: column; gap: var(--space-1); z-index: 2; }
 
 /* ---- Elevation on a white canvas -------------------------------------
    Card and page are both white now, so the hairline border does the
