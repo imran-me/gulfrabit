@@ -22,10 +22,15 @@
  *
  * PRIORITY, HIGHEST FIRST
  * -----------------------
- *   1. the server, via GET /api/home-layout
- *   2. the mirror of the server's last answer, stamped before first paint by
+ *   1. ?lay= in the URL — a PREVIEW. Never stored, never published, and it
+ *      suppresses the server read entirely so the person previewing actually
+ *      sees the thing they came to look at. This is how the panel's "Preview
+ *      in a new tab" works, and the URL is shareable, which is most of what
+ *      asking somebody "does this look right?" needs.
+ *   2. the server, via GET /api/home-layout
+ *   3. the mirror of the server's last answer, stamped before first paint by
  *      the inline bootstrap in index.html
- *   3. the arrangement the page is authored in — the defaults below
+ *   4. the arrangement the page is authored in — the defaults below
  *
  * A failure at 1 falls through to 2, and a failure at 2 to 3. Every default
  * below is what index.html and home.css already do on their own, so the whole
@@ -78,11 +83,41 @@ function resolve(layout, phone) {
   return out;
 }
 
+function tokens(resolved) {
+  return Object.entries(resolved).map(([k, v]) => `${k}:${v}`).join(' ');
+}
+
 function stamp(resolved) {
-  document.documentElement.setAttribute(
-    'data-lay',
-    Object.entries(resolved).map(([k, v]) => `${k}:${v}`).join(' '),
-  );
+  document.documentElement.setAttribute('data-lay', tokens(resolved));
+}
+
+/**
+ * ?lay=category:loop+trust:static — a resolved arrangement, straight from the
+ * panel's preview button.
+ *
+ * Every token is checked against the vocabulary before it is used, for the
+ * same reason the server checks it: this string is somebody else's URL and it
+ * ends up in an HTML attribute. Anything unrecognised is dropped, and a
+ * parameter that survives with nothing in it is treated as no preview at all.
+ */
+function readPreview() {
+  const raw = new URLSearchParams(location.search).get('lay');
+  if (!raw) return null;
+
+  const out = {};
+  for (const token of raw.trim().split(/\s+/)) {
+    const [section, style] = token.split(':');
+    if (SECTIONS[section]?.styles.includes(style)) out[section] = style;
+  }
+  if (!Object.keys(out).length) return null;
+
+  // Unnamed sections keep the shape the page is authored in, so a preview URL
+  // only has to carry what it is actually changing.
+  const phone = matchMedia(PHONE).matches;
+  for (const [key, spec] of Object.entries(SECTIONS)) {
+    out[key] ??= phone ? spec.mobile : spec.desktop;
+  }
+  return out;
 }
 
 /**
@@ -114,6 +149,18 @@ export function styleOf(section) {
  * are not called for nothing.
  */
 export function initHomeLayout(onChange) {
+  /* A preview is already resolved for the width it was opened at — the panel
+     builds it from the two dropdowns the merchant is looking at — so it is
+     stamped once and left alone. Nothing is fetched and nothing is mirrored:
+     a preview that wrote to storage would follow the merchant around the shop
+     afterwards, showing them an arrangement no visitor is seeing. */
+  const preview = readPreview();
+  if (preview) {
+    document.documentElement.setAttribute('data-lay', tokens(preview));
+    onChange(preview);
+    return;
+  }
+
   const phone = matchMedia(PHONE);
   let layout = normalise(readMirror());
   let last = '';

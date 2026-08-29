@@ -78,7 +78,20 @@
       var phone = window.matchMedia('(max-width: 767.98px)').matches;
       var toks = phone ? LAY_M : LAY_D;
 
-      var gl = localStorage.getItem('gr:home-layout');
+      /* ?lay= is a PREVIEW, straight from the panel's Preview button: an
+         already-resolved arrangement that outranks everything, is never
+         stored, and stops home-layout.js asking the server. Same validation
+         as below, because this half comes from a URL. */
+      var q = /[?&]lay=([^&]*)/.exec(location.search);
+      if (q) {
+        var pv = decodeURIComponent(q[1].replace(/\+/g, ' ')).split(/\s+/), keep = [];
+        for (var j = 0; j < pv.length; j++) {
+          if (/^[a-z]+:[a-z]+$/.test(pv[j])) keep.push(pv[j]);
+        }
+        if (keep.length) toks = keep.join(' ');
+      }
+
+      var gl = q ? null : localStorage.getItem('gr:home-layout');
       if (gl) {
         var lay = JSON.parse(gl), dev = phone ? 'mobile' : 'desktop', out = [];
         for (var sec in lay) {
@@ -91,7 +104,7 @@
         if (out.length) toks = out.join(' ');
       }
       document.documentElement.setAttribute('data-lay', toks);
-    } catch (e) { /* storage off, or a corrupt mirror — the shipped arrangement stands. */ }
+    } catch (e) { /* a preview already handled, storage off, or a corrupt mirror. */ }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GulfRabit — Premium Imports for Bangladesh. Shop Smart. Hop Fast.</title>
