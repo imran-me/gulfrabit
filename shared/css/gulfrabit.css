@@ -743,9 +743,9 @@ a:hover { color: var(--link-hover); }
    confirmation for most customers and a correction for the few who want a
    different size, so it must not out-shout the price above it.
 
-   Wraps rather than scrolls: three chips fit a 163px phone card on one line,
-   and a rare fourth dropping to a second line is better than a horizontally
-   scrolling strip inside a card that is itself inside a scrolling rail. */
+   Wraps rather than scrolls: a rare fourth size dropping to a second line is
+   better than a horizontally scrolling strip inside a card that is itself
+   inside a scrolling rail. */
 .size-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: var(--space-2); }
 .size-chip {
   flex: 0 1 auto;
@@ -778,6 +778,19 @@ a:hover { color: var(--link-hover); }
    sold it. */
 .size-chip:disabled { opacity: .45; cursor: not-allowed; text-decoration: line-through; }
 .size-chip:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
+
+/* The note above used to claim three chips fit a phone card on one line. They
+   did not: the body is 135px wide inside its padding and 200 g / 500 g / 1 kg
+   came to 157px, so EVERY three-size product carried a second row of chips —
+   about 28px on every card in every grid on the site, to show three words
+   that were already going to fit if they were asked to be a little smaller.
+   Trimmed to land on one line with room to spare. Still a 20px-tall target
+   against WCAG 2.5.8's 24px minimum in the axis that matters, and the chip is
+   a correction most customers never make — the size is already chosen. */
+@media (max-width: 575.98px) {
+  .size-chips { gap: 3px; }
+  .size-chip { padding: 3px 6px; font-size: 11px; }
+}
 
 .product-card__stars { display: inline-flex; align-items: center; gap: 1px; }
 .product-card__stars svg { display: block; }
@@ -1065,11 +1078,27 @@ a:hover { color: var(--link-hover); }
   letter-spacing: .05em;
   gap: 2px;
 }
+/* The 60% scale above is for a badge sitting ON the photograph, where being a
+   mark rather than a label is the whole point. On a phone it no longer sits
+   there: it sits in the label strip under the image, beside the wishlist,
+   which is a place for something to be READ.
+ *
+ * 60% of the phone size was 5.4px. At that size "PREMIUM" is not a mark, it
+ * is a dark smudge — smaller than the brand line directly beneath it, which
+ * puts the loudest claim on the card below the quietest text on it. A badge
+ * that cannot be read is not restraint, it is a badge that has been deleted
+ * and left on the page.
+ *
+ * Back to the strip's own 9px, which is the scale the brand line and the
+ * chips are set at, so the strip reads as one row of small type. Desktop is
+ * untouched — the mark on the photograph is still a mark. */
 @media (max-width: 575.98px) {
-  /* Same 60% scale against the narrow-strip badge size. Placed after the base
-     block on purpose — the plain `.badge-gr` strip rule further up is written
-     before it and loses the cascade tie. */
-  .product-card__badges .badge-gr { padding: 1.2px 3.6px; font-size: 5.4px; letter-spacing: .04em; }
+  .product-card__badges .badge-gr {
+    padding: 2px 6px;
+    font-size: 9px;
+    letter-spacing: .04em;
+    gap: 3px;
+  }
 }
 
 /* Arrival badges. Pre-order borrows the gold that this project reserves for
