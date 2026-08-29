@@ -51,22 +51,20 @@ final class HomeLayout
      *   static  a plain row, no motion of any kind
      *   wall    centred, wrapping, non-uniform — the brand wall's own shape
      *
-     * @var array<string, array{
-     *     label: string, blurb: string, styles: list<string>,
-     *     desktop: string, mobile: string
-     * }>
+     * Section keys only, with no human names beside them: the words a merchant
+     * reads are authored in modules/theme/_fragments/layout.main.html, and a
+     * second copy here would be a second copy to keep in step for no reader's
+     * benefit. What this constant is for is deciding what is ALLOWED.
+     *
+     * @var array<string, array{styles: list<string>, desktop: string, mobile: string}>
      */
     public const SECTIONS = [
         'category' => [
-            'label' => 'Shop by Category',
-            'blurb' => 'The category tiles under the trust strip.',
             'styles' => ['grid', 'loop'],
             'desktop' => 'grid',
             'mobile' => 'grid',
         ],
         'trust' => [
-            'label' => 'Trust strip',
-            'blurb' => 'Import-Verified, Cold-Chain, Secure Payment, 24/7 Support.',
             'styles' => ['static', 'loop'],
             // The band has always looped on phones and stood still above them:
             // four claims fit across a desktop container and do not on a phone.
@@ -74,36 +72,26 @@ final class HomeLayout
             'mobile' => 'loop',
         ],
         'premium' => [
-            'label' => 'Premium Picks',
-            'blurb' => 'The first product shelf.',
             'styles' => ['march', 'rail', 'grid'],
             'desktop' => 'march',
             'mobile' => 'march',
         ],
         'bestseller' => [
-            'label' => 'Best Sellers',
-            'blurb' => 'The shelf between Premium Picks and the origins wall.',
             'styles' => ['grid', 'rail', 'march'],
             'desktop' => 'grid',
             'mobile' => 'grid',
         ],
         'new' => [
-            'label' => 'New Arrivals',
-            'blurb' => 'The last product shelf, above the testimonials.',
             'styles' => ['march', 'rail', 'grid'],
             'desktop' => 'march',
             'mobile' => 'march',
         ],
         'brands' => [
-            'label' => 'Trusted origins',
-            'blurb' => 'The row of country names.',
             'styles' => ['wall', 'loop'],
             'desktop' => 'wall',
             'mobile' => 'wall',
         ],
         'testimonials' => [
-            'label' => 'Testimonials',
-            'blurb' => 'What customers said.',
             'styles' => ['slider', 'grid', 'loop'],
             'desktop' => 'slider',
             'mobile' => 'slider',
@@ -151,32 +139,6 @@ final class HomeLayout
                     ? $style
                     : $spec[$device];
             }
-        }
-
-        return $out;
-    }
-
-    /**
-     * The vocabulary itself, for the admin screen to build its controls from.
-     *
-     * The panel does not carry its own copy of the section list. It asks for
-     * this one, so adding a section here puts it on the screen with no second
-     * edit — and, more to the point, makes it impossible for the panel to offer
-     * a style the server would refuse.
-     *
-     * @return list<array<string, mixed>>
-     */
-    public static function vocabulary(): array
-    {
-        $out = [];
-        foreach (self::SECTIONS as $key => $spec) {
-            $out[] = [
-                'key' => $key,
-                'label' => $spec['label'],
-                'blurb' => $spec['blurb'],
-                'styles' => $spec['styles'],
-                'defaults' => ['desktop' => $spec['desktop'], 'mobile' => $spec['mobile']],
-            ];
         }
 
         return $out;

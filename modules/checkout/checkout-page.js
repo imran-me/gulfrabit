@@ -180,10 +180,20 @@ function revealFirstError() {
   toast.error('Please complete the highlighted field.');
 }
 
-/* ---- Prefill from mock user ------------------------------------------ */
+/* ---- Prefill from mock user ------------------------------------------
+   Never from the demo one. ensureSession() drops a "Guest Explorer" into
+   storage so the account area is explorable without a login, and that name
+   was arriving pre-typed in the delivery form — a name nobody entered, in
+   the one field a courier reads out loud. A customer who does not notice it
+   ships to a person who does not exist; a customer who does notice wonders
+   whose account they are in. An empty field asks a question. A wrong one
+   answers it wrongly.
+
+   The id test covers sessions already sitting in a returning visitor's
+   localStorage from before the flag existed. ---------------------------- */
 function prefillFromUser() {
   const user = store.getUser();
-  if (!user) return;
+  if (!user || user.isDemo || user.id === 'u-demo') return;
   setVal('fullName', user.name);
   setVal('phone', user.phone);
   const def = (user.addresses || []).find((a) => a.isDefault);
@@ -381,6 +391,13 @@ async function paintSummary() {
       <img class="cart-line__thumb" style="width:48px;height:48px" src="${escapeHtml(l.image)}" alt=""><div><div class="cart-line__title">${escapeHtml(l.title)}</div><div class="cart-line__meta">${l.variant ? `${escapeHtml(l.variant)} · ` : ''}Qty ${l.qty}</div></div>
       <div class="cart-line__price">${formatBDT(l.price * l.qty)}</div>
     </div>`).join('');
+  /* What the closed row on a phone is labelled with. The line-item list is
+     hidden at that width, so this is the only place the basket is named: one
+     line is its own title, more than one is the first plus a count — a phone
+     row cannot hold two product titles, and the rest is one tap away. */
+  setText('[data-summary-names]', cart[0].title);
+  setText('[data-summary-more]', cart.length > 1 ? `+${cart.length - 1} more` : '');
+
   const code = storage.get('cart-promo', null);
   const promo = code ? await validatePromo(code, subtotal()) : null;
   discount = promo?.valid ? promo.discount : 0;

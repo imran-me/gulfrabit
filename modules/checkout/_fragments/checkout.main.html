@@ -143,7 +143,20 @@
            it below 1024px and re-opens it above. -->
       <details class="surface-gr order-summary" data-summary-panel open>
         <summary class="order-summary__head">
+          <!-- On a phone this becomes a legend notched into the panel's top
+               border, the way a fieldset names its group — the row itself is
+               then free to say WHAT is being bought. It stays an ordinary
+               heading inside the panel on desktop; only the position moves. -->
           <h2 class="h5 order-summary__title">Order Summary <span class="head-gr__bn bn" lang="bn">অর্ডার সারাংশ</span></h2>
+          <!-- What is in the basket, in one line: the phone hides the line-item
+               list (see checkout.css), so without this the closed row named
+               nothing the customer recognised. Written by paintSummary().
+
+               The count is a SEPARATE span because the title ellipses and it
+               must not: "Ajwa Dates — Madinah Sel…" and "…+ 1 more" is the
+               half a customer with two items needs to keep. -->
+          <span class="order-summary__names" data-summary-names></span>
+          <span class="order-summary__more" data-summary-more></span>
           <!-- The same figure as the Total row below, written by the same
                paint — see setText(), which writes every match, not the first.
                This is the closed row's whole reason to exist. -->

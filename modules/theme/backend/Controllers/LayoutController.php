@@ -42,18 +42,19 @@ class LayoutController extends Controller
     }
 
     /**
-     * GET /api/admin/home-layout
+     * GET /api/admin/home-layout — what the panel shows as live.
      *
-     * The live arrangement AND the vocabulary it is drawn from. Both together,
-     * so the panel can render its controls from one request and can never
-     * offer a style this controller would then refuse.
+     * The vocabulary is deliberately NOT sent with it. The panel authors its
+     * own dropdowns, because which sections exist and which shapes they can
+     * wear are structural facts about the home page rather than data: they
+     * change in the same commit that adds the CSS for a new shape. Shipping a
+     * second copy of the list over the wire would invite the panel to render
+     * from it, and then a shape could reach a screen before the stylesheet
+     * that draws it. update() is what keeps the two honest.
      */
     public function index(): JsonResponse
     {
-        return response()->json(['data' => [
-            'layout' => $this->current(),
-            'sections' => HomeLayout::vocabulary(),
-        ]]);
+        return response()->json(['data' => ['layout' => $this->current()]]);
     }
 
     /**
