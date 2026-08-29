@@ -511,7 +511,10 @@ async function placeOrder(e) {
   // A slow server plus an anxious double-click must not become two orders.
   const btn = form.querySelector('[data-place-order]');
   if (btn?.disabled) return;
-  if (btn) btn.disabled = true;
+  /* Disabled AND said so. A greyed-out button on a slow network reads as a
+     broken one, and the customer's next move is a second tap or the back
+     button — on the last screen before an order exists. */
+  if (btn) { btn.disabled = true; btn.classList.add('is-placing'); }
 
   const g = (n) => form.querySelector(`[name="${n}"]`)?.value || '';
   const cart = store.getCart();
@@ -553,7 +556,7 @@ async function placeOrder(e) {
       storage.remove('cart-promo');
       await paintSummary();
     }
-    if (btn) btn.disabled = false;
+    if (btn) { btn.disabled = false; btn.classList.remove('is-placing'); }
     toast.error(result.message);
     return;
   }

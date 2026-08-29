@@ -339,6 +339,30 @@
    here rather than in the markup. */
 .btn-amount::before { content: "·"; margin: 0 .4em; opacity: .65; }
 
+/* ---- What the button says while the order is in flight ----------------
+   Only one of the two labels is ever in the box, so the button neither grows
+   nor shrinks when it changes what it says. */
+.btn-placing { display: none; align-items: center; gap: var(--space-2); }
+.btn-placing__label { display: inline-flex; align-items: center; gap: var(--space-2); }
+[data-place-order].is-placing .btn-gr__en,
+[data-place-order].is-placing .btn-bn { display: none; }
+[data-place-order].is-placing .btn-placing { display: inline-flex; }
+/* Disabled buttons drop to .45 opacity site-wide, which is right for one the
+   customer must not press and wrong for one that is working on their order. */
+[data-place-order].is-placing { opacity: 1; cursor: progress; }
+.btn-placing__spin {
+  width: 14px; height: 14px; flex: 0 0 auto;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: var(--radius-pill);
+  animation: btn-placing-spin .7s linear infinite;
+}
+@keyframes btn-placing-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  /* Still a mark that something is happening, just not a turning one. */
+  .btn-placing__spin { animation: none; border-top-color: currentColor; opacity: .5; }
+}
+
 /* ---- The floating Place Order button (phones and tablets) --------------
  *
  * The phone shows the whole form on one page, so the button that takes the
@@ -396,6 +420,10 @@
   /* The gloss is a second line here, so the negative margin that pulls it up
      against the English on a normal button would drag it into the text above. */
   [data-place-order] .btn-bn { margin-inline-start: 0; font-size: var(--fs-12); }
+  /* The working label takes the same two lines as the label it replaces, so
+     the pill does not change height the moment it is pressed. */
+  [data-place-order] .btn-placing { flex-direction: column; gap: 0; }
+  [data-place-order] .btn-placing__bn { font-size: var(--fs-12); opacity: .82; }
 
   /* The nav row keeps only Back, which no longer has a partner to sit beside. */
   .step-nav > [data-nav-back] { flex: 1 1 100%; }
