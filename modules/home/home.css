@@ -632,8 +632,15 @@ html.no-js .trust-marquee .trust-item__sub { font-size: var(--trust-sub); line-h
  */
 [data-rail-autoplay].is-stepping { scroll-snap-type: none; }
 
+/* KEYED ON THE SHAPE, not on [data-rail-autoplay]. That attribute says who owns
+   the arrows and it stays on the element whatever shape the shelf is in, so
+   fading on it put a soft right edge on a shelf the merchant had asked to stand
+   still — a grid of products with the last column half dissolved. The fade
+   belongs to the drift, and only the drift has it. */
 @media (max-width: 767.98px) {
-  [data-rail-autoplay] {
+  html[data-lay~="premium:march"] [data-rail="premium"],
+  html[data-lay~="new:march"] [data-rail="new"],
+  html[data-lay~="bestseller:march"] [data-rail="bestseller"] {
     -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent 100%);
     mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent 100%);
   }
@@ -642,7 +649,9 @@ html.no-js .trust-marquee .trust-item__sub { font-size: var(--trust-sub); line-h
      and a fade that softens an *incoming* card is meaningless on a rail that
      only moves when a finger moves it. It would just hide half a product. */
   @media (prefers-reduced-motion: reduce) {
-    [data-rail-autoplay] {
+    html[data-lay~="premium:march"] [data-rail="premium"],
+    html[data-lay~="new:march"] [data-rail="new"],
+    html[data-lay~="bestseller:march"] [data-rail="bestseller"] {
       -webkit-mask-image: none;
       mask-image: none;
     }
@@ -841,17 +850,9 @@ html[data-lay~="testimonials:loop"] .testi-card {
    CSS below only has to handle a shelf that has stopped being a row, or one
    that has become one.
 
-   The autoplay fade is keyed to "march" rather than to [data-rail-autoplay]:
-   that attribute is authored into index.html and stays there whatever shape
-   the shelf is in, and a fade over the right edge of a still grid is just a
-   column of half-faded products. */
-html[data-lay~="premium:march"] [data-rail="premium"],
-html[data-lay~="new:march"] [data-rail="new"],
-html[data-lay~="bestseller:march"] [data-grid="bestseller"] {
-  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent 100%);
-          mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent 100%);
-}
-
+   The drift's right-edge fade is a phone affordance and lives with the rest of
+   the autoplay CSS further up this file, keyed on "march" for the same reason
+   everything here is keyed on a shape rather than on an attribute. */
 /* A shelf asked to stand still. The column counts match .product-grid, so a
    shelf laid out as a grid sits in the same rhythm as Best Sellers above it. */
 html[data-lay~="premium:grid"] [data-rail="premium"],
@@ -875,11 +876,21 @@ html[data-lay~="new:grid"] [data-rail="new"] {
 html[data-lay~="premium:grid"] [data-rail-nav="premium"],
 html[data-lay~="new:grid"] [data-rail-nav="new"] { display: none !important; }
 
-/* A shelf asked to become a row. Best Sellers is authored as a grid and has no
-   arrows of its own — in either row shape it is swiped, which is how every
-   rail on a phone already works. */
-html[data-lay~="bestseller:rail"] [data-grid="bestseller"],
-html[data-lay~="bestseller:march"] [data-grid="bestseller"] {
+/* The arrow pair a shelf gets when it becomes a row. Premium and New Arrivals
+   carry theirs in the markup because they are rows by default; Best Sellers is
+   a grid by default, so its pair is hidden until there is something to scroll.
+   A row with a hidden scrollbar and no arrows is a shelf a mouse cannot reach
+   past the fourth product. */
+.rail-nav { display: flex; gap: .5rem; }
+[data-rail-nav="bestseller"] { display: none; }
+html[data-lay~="bestseller:rail"] [data-rail-nav="bestseller"],
+html[data-lay~="bestseller:march"] [data-rail-nav="bestseller"] { display: flex; }
+
+.section-head__aside { display: flex; align-items: center; gap: var(--space-3); }
+
+/* A shelf asked to become a row. */
+html[data-lay~="bestseller:rail"] [data-rail="bestseller"],
+html[data-lay~="bestseller:march"] [data-rail="bestseller"] {
   grid-template-columns: none;
   grid-auto-flow: column;
   grid-auto-columns: minmax(240px, 1fr);
@@ -888,10 +899,10 @@ html[data-lay~="bestseller:march"] [data-grid="bestseller"] {
   scrollbar-width: none;
   padding-bottom: var(--space-3);
 }
-html[data-lay~="bestseller:rail"] [data-grid="bestseller"] > *,
-html[data-lay~="bestseller:march"] [data-grid="bestseller"] > * { scroll-snap-align: start; }
-html[data-lay~="bestseller:rail"] [data-grid="bestseller"]::-webkit-scrollbar,
-html[data-lay~="bestseller:march"] [data-grid="bestseller"]::-webkit-scrollbar { display: none; }
+html[data-lay~="bestseller:rail"] [data-rail="bestseller"] > *,
+html[data-lay~="bestseller:march"] [data-rail="bestseller"] > * { scroll-snap-align: start; }
+html[data-lay~="bestseller:rail"] [data-rail="bestseller"]::-webkit-scrollbar,
+html[data-lay~="bestseller:march"] [data-rail="bestseller"]::-webkit-scrollbar { display: none; }
 
 /* ---- Reduced motion -----------------------------------------------------
    marquee.js never mounts under reduced motion, so ordinarily no clones exist

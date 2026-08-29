@@ -148,11 +148,11 @@
   <!-- Tailwind (Play CDN) + brand config -->
 
   <!-- GulfRabit design system (loads LAST so our tokens win) -->
-  <link rel="stylesheet" href="shared/css/gulfrabit.css?v=4b8c3472">
+  <link rel="stylesheet" href="shared/css/gulfrabit.css?v=34b6442f">
   <link rel="stylesheet" href="modules/theme/theme-trio.css?v=dd326453">
   <!-- The Luxe layer: inert without [data-theme="luxe"] on <html>, so the
        default theme renders exactly as it did before this file existed. -->
-  <link rel="stylesheet" href="modules/home/home.css?v=9eee4219">
+  <link rel="stylesheet" href="modules/home/home.css?v=8e0457df">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"WebSite","name":"GulfRabit","url":"https://gulfrabit.com","potentialAction":{"@type":"SearchAction","target":"https://gulfrabit.com/modules/catalog/search-results.html?q={search_term_string}","query-input":"required name=search_term_string"}}
   </script>
@@ -509,9 +509,21 @@
       <div class="gr-container">
         <div class="section-head">
           <div class="section-head__titles"><p class="overline">Loved by customers</p><h2 id="best-head">Best Sellers</h2></div>
-          <a href="/shop?slug=dates-nuts" class="btn-gr btn-ghost-gr">Shop all →</a>
+          <!-- Arrows only exist for this shelf when the panel has made it a row
+               (Appearance -> Home layout). As the grid it ships as there is
+               nothing to scroll, so home.css keeps them out of the DOM's way;
+               as a row on a computer there is no finger to swipe with, and a
+               scrollable box with a hidden scrollbar and no arrows is a shelf
+               a mouse cannot reach past the fourth product. -->
+          <div class="section-head__aside">
+            <div class="rail-nav" data-rail-nav="bestseller">
+              <button class="btn-icon-gr" data-rail-prev="bestseller" aria-label="Scroll left" style="border:1px solid var(--border-hairline)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M15 18l-6-6 6-6"/></svg></button>
+              <button class="btn-icon-gr" data-rail-next="bestseller" aria-label="Scroll right" style="border:1px solid var(--border-hairline)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M9 6l6 6-6 6"/></svg></button>
+            </div>
+            <a href="/shop?slug=dates-nuts" class="btn-gr btn-ghost-gr">Shop all →</a>
+          </div>
         </div>
-        <div class="product-grid" data-grid="bestseller" data-rail="bestseller" aria-label="Best sellers" data-static>
+        <div class="product-grid" data-grid="bestseller" data-rail="bestseller" data-rail-autoplay aria-label="Best sellers" data-static>
           <article class="product-card" data-reveal data-product-card data-id="gr-1102" data-title="Medjool Dates — Jumbo Grade" data-brand="GulfRabit Select" data-price="875" data-image="assets/images/products/gr-1102.jpg" data-variant="500 g">
             <div class="product-card__media">
               <div class="product-card__badges"><span class="badge-gr badge-sale">-5%</span></div>
