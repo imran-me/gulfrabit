@@ -11,7 +11,19 @@
 .order-summary { padding: var(--space-5); }
 .order-summary__head { list-style: none; cursor: default; }
 .order-summary__head::-webkit-details-marker { display: none; }
-.order-summary__title { margin: 0 0 var(--space-4); }
+/* The same label as every section title on this page — see .checkout-step__title
+   for the argument. It was the last piece of display type left inside a panel,
+   and on a desktop it sat beside four sections that had already gone quiet. */
+.order-summary__title {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-muted);
+}
+.order-summary__title .head-gr__bn { font-size: .88em; }
 /* Both belong to the phone's one-row form of this panel; desktop has the
    column to print the heading and the whole line-item list properly. */
 .order-summary__peek,
@@ -97,6 +109,7 @@
      Out of flow, so it costs the closed row no height. Its background paints
      over the border to cut the notch, and must therefore be the panel's own
      surface, not the page's. */
+  /* Placement only: the type is the shared label style set above. */
   .order-summary__title {
     position: absolute;
     top: 0;
@@ -107,17 +120,8 @@
                                                the text lands on the row's own
                                                16px inset below it */
     background: var(--surface-raised);
-    font-family: var(--font-body);
-    font-size: var(--fs-12);
-    font-weight: var(--fw-semibold);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--text-muted);
     white-space: nowrap;
   }
-  /* 0.62em of 12px is 7px — unreadable. The gloss is nearly the label's own
-     size here, which at this scale is what keeps the pair legible. */
-  .order-summary__title .head-gr__bn { font-size: .88em; }
 
   /* ---- ...and the row says what is in the basket ----------------------
      One line, ellipsed. It takes the space the heading used to hold, and
