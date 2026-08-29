@@ -43,7 +43,8 @@ const STAGE_OF = { 1: 1, 2: 1, 3: 2, 4: 2 };   // desktop grouping
 const summaryPanel = document.querySelector('[data-summary-panel]');
 const roomForSummary = window.matchMedia('(min-width: 1024px)');
 
-const stageOf = (step) => (wide.matches ? STAGE_OF[step] : 1);
+/* 0 means "no stage shows this" — see NO_REVIEW_ON_PHONE below. */
+const stageOf = (step) => (wide.matches ? STAGE_OF[step] : (step === 4 ? 0 : 1));
 const stageCount = () => (wide.matches ? 2 : 1);
 const visibleSteps = () => steps.filter((s) => stageOf(Number(s.dataset.step)) === current);
 
@@ -97,6 +98,15 @@ async function init() {
  * The grouping lives here rather than in the markup so the sections stay
  * independent and reorderable, and so a phone rotated to landscape past
  * 768px re-groups instead of being stuck in whatever it loaded as.
+ *
+ * NO_REVIEW_ON_PHONE. Step 4 restates the address, the delivery, the payment
+ * and the basket. On desktop that earns its place: those answers were given on
+ * the stage before and are off screen by the time the order is placed. On a
+ * phone every one of them is three hundred pixels further up the same scroll —
+ * 550px of a 3700px page spent telling the customer what they can already see,
+ * between them and the button. So below 768px step 4 belongs to no stage and
+ * is never shown; nothing reads from it (placeOrder() takes its figures from
+ * the fields), so removing it removes only the repetition.
  */
 function wireNav() {
   form.querySelector('[data-nav-next]')?.addEventListener('click', next);
