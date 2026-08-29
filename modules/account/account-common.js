@@ -14,7 +14,7 @@ import { toast } from '../../shared/js/components/toast-notifications.js';
 export function ensureSession() {
   let user = store.getUser();
   if (!user) {
-    user = { id: 'u-demo', name: 'Guest Explorer', email: 'guest@gulfrabit.com', tier: 'standard', addresses: [] };
+    user = { id: 'u-demo', isDemo: true, name: 'Guest Explorer', email: 'guest@gulfrabit.com', tier: 'standard', addresses: [] };
     store.setUser(user);
   }
   return user;

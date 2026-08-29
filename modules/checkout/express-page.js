@@ -417,7 +417,8 @@ async function showDone(order) {
 /* ---- Misc ------------------------------------------------------------- */
 function prefill() {
   const me = storage.get(KEYS.USER, null);
-  if (!me) return;
+  // Not from the demo session — see prefillFromUser() in checkout-page.js.
+  if (!me || me.isDemo || me.id === 'u-demo') return;
   const set = (n, v) => { const el = form.querySelector(`[name="${n}"]`); if (el && v && !el.value) el.value = v; };
   set('fullName', me.name);
   set('phone', me.phone);
