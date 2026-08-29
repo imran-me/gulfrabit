@@ -296,6 +296,7 @@
  * is not worth cloning.
  */
 .lay-swatch {
+  position: relative;
   display: block;
   width: 156px;
   max-width: 100%;
@@ -378,6 +379,24 @@
 .lay-swatch[data-shape="loop"] {
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
           mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+}
+
+/* A rail and a drifting shelf are the same row; what separates them is motion,
+   and a still frame cannot show motion. So the one that only moves when it is
+   pushed says so with a thumb — the diagram's way of saying "this is yours to
+   move". Without it the two swatches were identical whenever the page was not
+   animating, which is exactly the moment a screenshot, a print, or a reduced-
+   motion setting puts a merchant in. */
+.lay-swatch[data-shape="rail"]::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  bottom: 4px;
+  width: 38%;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--gr-cyan);
+  opacity: .55;
 }
 
 .lay-swatch[data-shape="march"] .lay-swatch__track { animation: lay-swatch-run 4.4s linear infinite; }
