@@ -6,12 +6,24 @@
  * One implementation, because the interesting parts took several passes to get
  * right and nobody should have to get them right twice:
  *
- *   THE TRACK IS DUPLICATED AND TRANSLATED -50%. One set is exactly half the
- *   cloned track, so the wrap is invisible. Spacing therefore has to live on
- *   the ITEM as a trailing margin, never as the flex `gap`: n items give n-1
- *   gaps, so with `gap` the halfway point lands short of one full set and the
- *   loop hitches, once, every cycle. Every stylesheet that opts a section into
- *   this must follow that rule — see home.css.
+ *   THE TRACK IS COPIED UNTIL IT OUTRUNS ITS FRAME, then translated by exactly
+ *   one copy. Two copies and -50% is the textbook version and it is only right
+ *   when one copy is already wider than the frame. Measured in a real browser
+ *   at 1440px: the trust strip's four chips are 631px inside a 1336px band, so
+ *   the -50% version swept a 705px hole through the loop once a cycle, and the
+ *   category tiles a 312px one. Both on the desktop side of a setting whose
+ *   whole point is that the two sides differ.
+ *
+ *   So the copy count is computed from measurement — ceil(frame / copy) + 1,
+ *   which guarantees the copies BEHIND the travel still cover the frame — and
+ *   the shift is handed to the keyframes as --gr-marquee-shift. The distance
+ *   travelled is always exactly one copy, so speed does not change with the
+ *   count: the duration in the stylesheet still means what it says.
+ *
+ *   Spacing therefore has to live on the ITEM as a trailing margin, never as
+ *   the flex `gap`: n items give n-1 gaps, so with `gap` the copy boundary
+ *   lands short of a full copy and the loop hitches. Every stylesheet that
+ *   opts a section into this must follow that rule — see home.css.
  *
  *   THE CLONES ARE NOT CONTENT. aria-hidden, and stripped of [data-reveal]:
  *   scroll-reveal only ever fires for the elements it was handed, so a clone
@@ -53,7 +65,14 @@ export const CLONE_CLASS = 'is-marquee-clone';
 export function createMarquee(viewport, track, { name = 'gr-marquee', onClone } = {}) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
+  /* Above this the DOM cost stops being worth it. Six copies covers a frame
+     six times its content; a section that thin is a section with nothing in
+     it, and looping one is not a layout problem this can solve. */
+  const MAX_COPIES = 6;
+
   let on = false;
+  let copies = 2;
+  let copyW = 0;
   let anim = null;
   let rate = DRIFT;
   let lastY = window.scrollY;
@@ -118,23 +137,36 @@ export function createMarquee(viewport, track, { name = 'gr-marquee', onClone } 
     if (reduced.matches) return;
     on = true;
 
-    [...track.children].forEach((item) => {
-      item.classList.add('is-visible');
-      const clone = item.cloneNode(true);
-      clone.classList.add(CLONE_CLASS);
-      clone.setAttribute('aria-hidden', 'true');
-      clone.removeAttribute('data-reveal');
-      clone.style.removeProperty('--reveal-delay');
-      // Nothing inside a clone is reachable, so nothing inside it may be
-      // focusable — otherwise tabbing walks into a copy of the row that a
-      // screen reader has been told is not there.
-      clone.querySelectorAll('a, button, input, select, textarea, [tabindex]')
-        .forEach((el) => el.setAttribute('tabindex', '-1'));
-      onClone?.(clone);
-      track.appendChild(clone);
-    });
+    const originals = [...track.children];
+    originals.forEach((item) => item.classList.add('is-visible'));
 
+    /* Measured BEFORE anything is cloned, so this is the width of one copy.
+       The track is already `width: max-content` by then — that comes from the
+       [data-lay] rule, which is stamped before the first paint, not from
+       .is-looping, which is added below. */
+    copyW = Math.max(1, track.scrollWidth);
+    copies = Math.min(MAX_COPIES, Math.max(2, Math.ceil(viewport.clientWidth / copyW) + 1));
+
+    for (let copy = 1; copy < copies; copy++) {
+      originals.forEach((item) => {
+        const clone = item.cloneNode(true);
+        clone.classList.add(CLONE_CLASS);
+        clone.setAttribute('aria-hidden', 'true');
+        clone.removeAttribute('data-reveal');
+        clone.style.removeProperty('--reveal-delay');
+        // Nothing inside a clone is reachable, so nothing inside it may be
+        // focusable — otherwise tabbing walks into a copy of the row that a
+        // screen reader has been told is not there.
+        clone.querySelectorAll('a, button, input, select, textarea, [tabindex]')
+          .forEach((el) => el.setAttribute('tabindex', '-1'));
+        onClone?.(clone);
+        track.appendChild(clone);
+      });
+    }
+
+    track.style.setProperty('--gr-marquee-shift', `${-100 / copies}%`);
     viewport.classList.add('is-looping');
+    window.addEventListener('resize', onResize);
 
     lastY = window.scrollY;
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -151,6 +183,7 @@ export function createMarquee(viewport, track, { name = 'gr-marquee', onClone } 
     on = false;
 
     window.removeEventListener('scroll', onScroll);
+    window.removeEventListener('resize', onResize);
     document.removeEventListener('visibilitychange', sync);
     io?.disconnect();
     io = null;
@@ -160,7 +193,23 @@ export function createMarquee(viewport, track, { name = 'gr-marquee', onClone } 
     anim = null;
 
     viewport.classList.remove('is-looping');
+    track.style.removeProperty('--gr-marquee-shift');
     track.querySelectorAll(`.${CLONE_CLASS}`).forEach((el) => el.remove());
+  }
+
+  /* A window dragged wider does not change which SHAPE a section is wearing,
+     so the layout controller has no reason to call anything — but it can leave
+     a frame wider than the copies behind the travel, which is the gap all over
+     again. Rebuild only when that is actually true; a narrower window is
+     already covered by copies it no longer needs. */
+  let resizeTimer = null;
+  function onResize() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (!on || (copies - 1) * copyW >= viewport.clientWidth) return;
+      unmount();
+      mount();
+    }, 200);
   }
 
   return { mount, unmount, mounted: () => on };

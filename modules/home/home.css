@@ -693,21 +693,27 @@ html.no-js .trust-marquee .trust-item__sub { font-size: var(--trust-sub); line-h
    — and a visitor whose stamp never ran — gets exactly the site in the
    repository. Only the non-default shapes are written out.
 
-   THE -50% RULE. Every looping section duplicates its track and translates it
-   -50%, so one set is exactly half the track and the wrap is invisible. That
-   only holds if spacing lives on the ITEM as a trailing margin rather than as
-   the flex `gap`: n items give n-1 gaps, so with `gap` the halfway point lands
-   short of one set and the loop hitches, once, every cycle. Every rule below
-   that sets `gap: 0` and a `margin-inline-end` is obeying that. See
-   modules/home/marquee.js, which owns the other half of the mechanism.
+   THE ONE-COPY RULE. Every looping section repeats its track until it is wider
+   than the frame, then travels exactly one copy — marquee.js measures and says
+   how far. That only wraps invisibly if spacing lives on the ITEM as a trailing
+   margin rather than as the flex `gap`: n items give n-1 gaps, so with `gap`
+   the copy boundary lands short of a full copy and the loop hitches, once,
+   every cycle. Every rule below that sets `gap: 0` and a `margin-inline-end` is
+   obeying that. See modules/home/marquee.js, which owns the measuring half.
    ========================================================================= */
 
-/* One set is exactly half a cloned track. marquee.js drives this animation's
-   SPEED from scroll velocity: it drifts on its own and surges while the page
-   is being scrolled, up or down alike. */
+/* Travel is exactly ONE copy of the track, and how much of the track that is
+   depends on how many copies marquee.js had to make to outrun the frame — so
+   it hands the figure over as --gr-marquee-shift. The -50% fallback is the
+   two-copy case, which is what this was before a 1440px screen showed that
+   four chips do not fill a 1336px band.
+
+   marquee.js also drives this animation's SPEED from scroll velocity: it
+   drifts on its own and surges while the page is being scrolled, up or down
+   alike. */
 @keyframes gr-marquee {
   from { transform: translate3d(0, 0, 0); }
-  to   { transform: translate3d(-50%, 0, 0); }
+  to   { transform: translate3d(var(--gr-marquee-shift, -50%), 0, 0); }
 }
 
 /* ---- Shop by Category, as a travelling row ------------------------------
