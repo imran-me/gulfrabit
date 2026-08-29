@@ -43,7 +43,7 @@ export function initMobileTabbar() {
 
   const item = (k, label, bn, href) => `
     <a class="tabbar__item${active === k ? ' is-active' : ''}" href="${href}"
-       ${active === k ? 'aria-current="page"' : ''}>${icon(k)}<span>${label}</span><span class="tabbar__bn bn" lang="bn">${bn}</span></a>`;
+       ${active === k ? 'aria-current="page"' : ''}>${icon(k)}<span class="tabbar__labels"><span>${label}</span><span class="tabbar__bn bn" lang="bn">${bn}</span></span></a>`;
 
   const nav = document.createElement('nav');
   nav.className = 'tabbar';
@@ -53,7 +53,7 @@ export function initMobileTabbar() {
     + item('shop', 'Shop', 'শপ', siteURL('shop'))
     + `<button class="tabbar__item" type="button" data-tabbar-cart>
          <span class="tabbar__iconwrap">${icon('cart')}<span class="tabbar__badge" data-tabbar-count hidden></span></span>
-         <span>Cart</span><span class="tabbar__bn bn" lang="bn">কার্ট</span></button>`
+         <span class="tabbar__labels"><span>Cart</span><span class="tabbar__bn bn" lang="bn">কার্ট</span></span></button>`
     + item('account', 'Account', 'অ্যাকাউন্ট', siteURL('account'));
   document.body.appendChild(nav);
   document.body.classList.add('has-tabbar');

@@ -2141,16 +2141,16 @@ img.settle.is-settled {
   z-index: 990;
   display: none;
   grid-template-columns: repeat(4, 1fr);
-  background: rgba(255, 255, 255, .96);
+  background: rgba(14, 124, 153, .96);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   backdrop-filter: blur(14px) saturate(140%);
-  border-top: 1px solid var(--border-hairline);
+  border-top: 1px solid rgba(255, 255, 255, .16);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 /* The glass needs the same honesty as the header: without backdrop-filter,
-   96% white is a page showing through the nav. */
+   96% of the brand teal is a page showing through the nav. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .tabbar { background: rgba(255, 255, 255, .99); }
+  .tabbar { background: var(--gr-cyan-dark); }
 }
 
 .tabbar__item {
@@ -2158,25 +2158,27 @@ img.settle.is-settled {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  min-height: 56px;
-  padding: 6px 2px 7px;
+  gap: 3px;
+  min-height: 53px;
+  padding: 5px 2px 6px;
   border: 0;
   background: none;
   font: inherit;
   font-size: 11px;
   font-weight: var(--fw-medium);
   line-height: 1;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, .82);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 .tabbar__item svg { width: 22px; height: 22px; }
-.tabbar__item.is-active { color: var(--link); }
-.tabbar__item:active { color: var(--gr-cyan-dark); }
+.tabbar__item.is-active { color: #fff; }
+.tabbar__item:active { color: #fff; }
 
-/* The Bangla under the English, both tiny — same pairing as the buttons. */
-.tabbar__bn { font-size: 9px; line-height: 1; opacity: .8; }
+/* The Bangla beside the English, not under it — one label line keeps the bar
+   short enough for a thumb to clear it on small phones. */
+.tabbar__labels { display: flex; align-items: baseline; gap: 4px; }
+.tabbar__bn { font-size: 9px; line-height: 1; opacity: .75; }
 
 .tabbar__iconwrap { position: relative; display: inline-flex; }
 .tabbar__badge {
@@ -2187,8 +2189,8 @@ img.settle.is-settled {
   height: 16px;
   padding: 0 4px;
   border-radius: var(--radius-pill);
-  background: var(--gr-cyan);
-  color: #fff;
+  background: #fff;
+  color: var(--gr-cyan-dark);
   font-size: 10px;
   font-weight: var(--fw-semibold);
   line-height: 16px;
@@ -2200,7 +2202,7 @@ img.settle.is-settled {
    bar would be a second navigation saying the same thing. */
 @media (max-width: 991.98px) {
   .tabbar { display: grid; }
-  body.has-tabbar { padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px)); }
+  body.has-tabbar { padding-bottom: calc(53px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ===== style.css (own rules) ===== */
