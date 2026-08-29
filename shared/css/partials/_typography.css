@@ -63,6 +63,24 @@ h2.section-title {
 
 h1, .h1 { font-size: clamp(2.25rem, 5vw, var(--fs-49)); font-weight: var(--fw-bold); letter-spacing: -0.028em; }
 h2, .h2 { font-size: clamp(1.9rem, 4vw, var(--fs-39)); letter-spacing: -0.022em; }
+
+/* The page's own title, on a phone. `.h2` bottoms out at its 1.9rem floor
+   for every width a phone has, so "Checkout" arrived at 30px — a desktop
+   headline on a 390px screen, taking a fifth of the fold to say a word the
+   customer just tapped to get to. A quarter off: 22.8px, still the largest
+   thing on the page and still first, but no longer the whole of it.
+
+   Only the title block — the h1 that opens a page. A PDP's product name, a
+   hero, a section heading and a confirmation each have sizes tuned for what
+   they do, and none of them are this. The Bangla gloss is set in `em`, so it
+   comes down with the English of its own accord. Desktop is restated rather
+   than left alone because this selector outranks the rule above it. */
+h1.h2.page-head,
+.page-head > h1.h2 { font-size: 1.425rem; }
+@media (min-width: 768px) {
+  h1.h2.page-head,
+  .page-head > h1.h2 { font-size: clamp(1.9rem, 4vw, var(--fs-39)); }
+}
 h3, .h3 { font-size: clamp(1.5rem, 3vw, var(--fs-31)); letter-spacing: -0.016em; }
 h4, .h4 { font-size: var(--fs-25); }
 h5, .h5 { font-size: var(--fs-20); font-weight: var(--fw-semibold); }

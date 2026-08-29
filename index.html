@@ -52,6 +52,46 @@
         }
       }
     } catch (e) { /* private mode, or nothing stored — the built-in theme stands. */ }
+
+    /* HOME LAYOUT, BEFORE THE FIRST PAINT.
+       The merchant arranges the home page's sections in the panel, separately
+       for phones and for computers. Whatever is chosen is stamped here as ONE
+       already-resolved attribute:
+
+           <html data-lay="category:loop trust:static …">
+
+       so every rule in home.css is a flat attribute selector instead of a pair
+       of media queries wrapped around each other. modules/home/home-layout.js
+       does the same thing again once it loads, from the server's answer, and
+       keeps it right across a resize.
+
+       THE DEFAULTS ARE SPELLED OUT BELOW, and they are a THIRD copy of the
+       table in Modules\Theme\Models\HomeLayout and modules/home/home-layout.js
+       — there are notes in both. They are here rather than left implicit
+       because "no attribute" and "the default attribute" have to render the
+       same, and the only way to guarantee that is to stamp before the first
+       paint on the very first visit, when there is nothing mirrored yet.
+       Without it a phone painted the desktop arrangement and then swapped. */
+    try {
+      var LAY_D = 'category:grid trust:static premium:march bestseller:grid new:march brands:wall testimonials:slider';
+      var LAY_M = 'category:grid trust:loop premium:march bestseller:grid new:march brands:wall testimonials:slider';
+      var phone = window.matchMedia('(max-width: 767.98px)').matches;
+      var toks = phone ? LAY_M : LAY_D;
+
+      var gl = localStorage.getItem('gr:home-layout');
+      if (gl) {
+        var lay = JSON.parse(gl), dev = phone ? 'mobile' : 'desktop', out = [];
+        for (var sec in lay) {
+          if (!Object.prototype.hasOwnProperty.call(lay, sec)) continue;
+          var st = lay[sec] && lay[sec][dev];
+          /* Both halves land in an HTML attribute, so both are held to the
+             only alphabet this vocabulary uses. */
+          if (/^[a-z]+$/.test(sec) && /^[a-z]+$/.test(st || '')) out.push(sec + ':' + st);
+        }
+        if (out.length) toks = out.join(' ');
+      }
+      document.documentElement.setAttribute('data-lay', toks);
+    } catch (e) { /* storage off, or a corrupt mirror — the shipped arrangement stands. */ }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GulfRabit — Premium Imports for Bangladesh. Shop Smart. Hop Fast.</title>
@@ -95,11 +135,11 @@
   <!-- Tailwind (Play CDN) + brand config -->
 
   <!-- GulfRabit design system (loads LAST so our tokens win) -->
-  <link rel="stylesheet" href="shared/css/gulfrabit.css?v=72168596">
+  <link rel="stylesheet" href="shared/css/gulfrabit.css?v=5727925f">
   <link rel="stylesheet" href="modules/theme/theme-trio.css?v=dd326453">
   <!-- The Luxe layer: inert without [data-theme="luxe"] on <html>, so the
        default theme renders exactly as it did before this file existed. -->
-  <link rel="stylesheet" href="modules/home/home.css?v=2648846e">
+  <link rel="stylesheet" href="modules/home/home.css?v=7d14317f">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"WebSite","name":"GulfRabit","url":"https://gulfrabit.com","potentialAction":{"@type":"SearchAction","target":"https://gulfrabit.com/modules/catalog/search-results.html?q={search_term_string}","query-input":"required name=search_term_string"}}
   </script>
@@ -326,11 +366,13 @@
     <!-- ---- TRUST STRIP ---- -->
     <section class="trust-band" aria-label="Why GulfRabit">
       <div class="gr-container trust-band__inner">
-        <!-- Below 768px this becomes a single-row loop (see modules/home/home.css
-             and initTrustMarquee in home.js). The four claims stay one flat list
-             in the DOM — the duplicate set the loop needs is cloned at runtime
-             and marked aria-hidden, so the markup a reader or crawler sees is
-             still four items, and with JS off it is simply a scrollable row. -->
+        <!-- On phones this is a single-row loop, and the panel can ask for the
+             same on computers or for neither (Appearance -> Home layout; see
+             the shapes section of modules/home/home.css and marquee.js). The
+             four claims stay one flat list in the DOM — the duplicate set the
+             loop needs is cloned at runtime and marked aria-hidden, so the
+             markup a reader or crawler sees is still four items, and with JS
+             off it is simply a scrollable row. -->
         <div class="trust-marquee" data-trust-marquee>
           <div class="trust-strip" data-trust-track data-reveal-stagger="80">
             <div class="trust-item" data-reveal><svg class="trust-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg><div><div class="trust-item__title">Import-Verified</div><div class="trust-item__sub">Authenticity checked</div></div></div>
@@ -370,6 +412,10 @@
              390px phone and 131px in the eight-across desktop row, so 140px
              picks the 160w and 280w tiers at 2x with nothing upscaled and the
              560w tier left for larger. Re-measure if the column count moves. -->
+        <!-- The clipping box the grid travels inside when the panel puts this
+             section into its looping shape (Appearance -> Home layout). Inert
+             otherwise: a bare block wrapper around a grid changes nothing. -->
+        <div class="cat-viewport" data-cat-viewport>
         <div class="home-cat-grid" data-reveal-stagger="60">
           <a class="category-card" href="/shop?slug=oil-ghee" data-reveal>
             <span class="category-card__media">
@@ -420,6 +466,7 @@
             </span>
             <h3 class="category-card__title">Flash Sale</h3><span class="category-card__count">Limited-time prices</span></a>
         </div>
+        </div>
       </div>
     </section>
 
@@ -428,15 +475,18 @@
       <div class="gr-container">
         <div class="section-head">
           <div class="section-head__titles"><p class="overline">Curated for You</p><h2 id="premium-head">Premium Picks</h2></div>
-          <div style="display:flex;gap:.5rem">
+          <div class="rail-nav" data-rail-nav="premium" style="display:flex;gap:.5rem">
             <button class="btn-icon-gr" data-rail-prev="premium" aria-label="Scroll left" style="border:1px solid var(--border-hairline)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M15 18l-6-6 6-6"/></svg></button>
             <button class="btn-icon-gr" data-rail-next="premium" aria-label="Scroll right" style="border:1px solid var(--border-hairline)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M9 6l6 6-6 6"/></svg></button>
           </div>
         </div>
-        <!-- data-rail-autoplay: home.js marches this shelf leftward, at every
-             width, at the same unhurried rate as the trust band under the hero.
-             The attribute is also what tells initRailArrows to leave the arrows
-             to the autoplay controller, so a tap and the drift do not fight. -->
+        <!-- data-rail-autoplay hands the arrows to the autoplay controller, so
+             a tap and the drift are never two things writing scrollLeft at
+             once. WHETHER it drifts is the merchant's call now (Appearance ->
+             Home layout) and defaults to yes, at every width, at the same
+             unhurried rate as the trust band under the hero. The attribute
+             stays put whatever shape is chosen — it says who owns the arrows,
+             not whether anything is moving. -->
         <div class="snap-rail" data-rail="premium" data-rail-autoplay role="list" aria-label="Premium picks"></div>
       </div>
     </section>
@@ -448,7 +498,7 @@
           <div class="section-head__titles"><p class="overline">Loved by customers</p><h2 id="best-head">Best Sellers</h2></div>
           <a href="/shop?slug=dates-nuts" class="btn-gr btn-ghost-gr">Shop all →</a>
         </div>
-        <div class="product-grid" data-grid="bestseller" aria-label="Best sellers" data-static>
+        <div class="product-grid" data-grid="bestseller" data-rail="bestseller" aria-label="Best sellers" data-static>
           <article class="product-card" data-reveal data-product-card data-id="gr-1102" data-title="Medjool Dates — Jumbo Grade" data-brand="GulfRabit Select" data-price="875" data-image="assets/images/products/gr-1102.jpg" data-variant="500 g">
             <div class="product-card__media">
               <div class="product-card__badges"><span class="badge-gr badge-sale">-5%</span></div>
@@ -570,6 +620,7 @@
              Every country below is the `origin` of a product in
              modules/catalog/data/products.json and can be checked against it. -->
         <div class="surface-gr" data-reveal>
+          <div class="brand-viewport" data-brand-viewport>
           <div class="brand-wall">
             <span class="brand-wall__item">Saudi&nbsp;Arabia</span>
             <span class="brand-wall__item">Afghanistan</span>
@@ -581,6 +632,7 @@
             <span class="brand-wall__item">Spain</span>
             <span class="brand-wall__item">Türkiye</span>
             <span class="brand-wall__item">Egypt</span>
+          </div>
           </div>
         </div>
       </div>
@@ -629,14 +681,15 @@
       <div class="gr-container">
         <div class="section-head">
           <div class="section-head__titles"><p class="overline">Fresh imports</p><h2 id="new-head">New Arrivals</h2></div>
-          <div style="display:flex;gap:.5rem">
+          <div class="rail-nav" data-rail-nav="new" style="display:flex;gap:.5rem">
             <button class="btn-icon-gr" data-rail-prev="new" aria-label="Scroll left" style="border:1px solid var(--border-hairline)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M15 18l-6-6 6-6"/></svg></button>
             <button class="btn-icon-gr" data-rail-next="new" aria-label="Scroll right" style="border:1px solid var(--border-hairline)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M9 6l6 6-6 6"/></svg></button>
           </div>
         </div>
-        <!-- Marches like Premium Picks above it. Same attribute, same reason:
-             it hands the arrows to the autoplay controller so a tap and the
-             drift are not two things writing scrollLeft at once. -->
+        <!-- Marches like Premium Picks above it, and is arranged from the same
+             screen. Same attribute, same reason: it hands the arrows to the
+             autoplay controller so a tap and the drift are not two things
+             writing scrollLeft at once. -->
         <div class="snap-rail" data-rail="new" data-rail-autoplay role="list" aria-label="New arrivals"></div>
       </div>
     </section>
@@ -644,6 +697,7 @@
     <!-- ---- TESTIMONIALS ---- -->
     <section class="section-gr testimonials" aria-label="Testimonials">
       <div class="gr-container">
+        <div class="testi-viewport" data-testi-viewport>
         <div class="testi-track" data-testi-track>
           <div class="testi-card"><div class="testi-card__inner">
             <div class="testi-stars" aria-label="5 out of 5">★★★★★</div>
@@ -666,7 +720,8 @@
             <p class="testi-author" lang="bn">শারমিন আক্তার · উত্তরা, ঢাকা</p>
           </div></div>
         </div>
-        <div style="display:flex;justify-content:center;gap:.5rem;margin-top:var(--space-4)">
+        </div>
+        <div class="testi-nav" data-testi-nav style="display:flex;justify-content:center;gap:.5rem;margin-top:var(--space-4)">
           <button class="btn-icon-gr" data-testi-prev aria-label="Previous testimonial" style="border:1px solid var(--border-hairline)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M15 18l-6-6 6-6"/></svg></button>
           <button class="btn-icon-gr" data-testi-next aria-label="Next testimonial" style="border:1px solid var(--border-hairline)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M9 6l6 6-6 6"/></svg></button>
         </div>
@@ -825,6 +880,6 @@
   <!-- ============================ SCRIPTS ============================ -->
   <script type="module" src="shared/js/main.js?v=65e9eef8"></script>
   <script type="module" src="modules/theme/theme.js?v=174b6f6e"></script>
-  <script type="module" src="modules/home/home.js?v=ef32148c"></script>
+  <script type="module" src="modules/home/home.js?v=c2dd2410"></script>
 </body>
 </html>

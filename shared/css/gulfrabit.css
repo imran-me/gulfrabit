@@ -92,6 +92,10 @@
   --font-body:    'Inter', 'Noto Sans Bengali', 'Noto Kufi Arabic', system-ui, -apple-system, sans-serif;
 
   /* Modular type scale · 1.25 ratio — pull sizes from here, never ad-hoc.  */
+  /* 11 sits below the reading scale on purpose and is not a body size —
+     it is for a label the eye skims past, the breadcrumb trail being the
+     first. Do not reach for it for anything a customer has to read. */
+  --fs-11: 0.6875rem; /* 11 — breadcrumb trail         */
   --fs-12: 0.75rem;   /* 12 — micro tags, legal        */
   --fs-14: 0.875rem;  /* 14 — small text, captions     */
   --fs-16: 1rem;      /* 16 — body base                */
@@ -271,6 +275,24 @@ h2.section-title {
 
 h1, .h1 { font-size: clamp(2.25rem, 5vw, var(--fs-49)); font-weight: var(--fw-bold); letter-spacing: -0.028em; }
 h2, .h2 { font-size: clamp(1.9rem, 4vw, var(--fs-39)); letter-spacing: -0.022em; }
+
+/* The page's own title, on a phone. `.h2` bottoms out at its 1.9rem floor
+   for every width a phone has, so "Checkout" arrived at 30px — a desktop
+   headline on a 390px screen, taking a fifth of the fold to say a word the
+   customer just tapped to get to. A quarter off: 22.8px, still the largest
+   thing on the page and still first, but no longer the whole of it.
+
+   Only the title block — the h1 that opens a page. A PDP's product name, a
+   hero, a section heading and a confirmation each have sizes tuned for what
+   they do, and none of them are this. The Bangla gloss is set in `em`, so it
+   comes down with the English of its own accord. Desktop is restated rather
+   than left alone because this selector outranks the rule above it. */
+h1.h2.page-head,
+.page-head > h1.h2 { font-size: 1.425rem; }
+@media (min-width: 768px) {
+  h1.h2.page-head,
+  .page-head > h1.h2 { font-size: clamp(1.9rem, 4vw, var(--fs-39)); }
+}
 h3, .h3 { font-size: clamp(1.5rem, 3vw, var(--fs-31)); letter-spacing: -0.016em; }
 h4, .h4 { font-size: var(--fs-25); }
 h5, .h5 { font-size: var(--fs-20); font-weight: var(--fw-semibold); }
@@ -1386,10 +1408,27 @@ a:hover { color: var(--link-hover); }
 .search-overlay .search-suggest { position: static; margin-top: var(--space-3); box-shadow: none; }
 
 /* ---- Breadcrumb ------------------------------------------------------ */
-.breadcrumb-gr { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: var(--fs-14); color: var(--text-muted); }
+/* The trail is orientation, not content. On a 390px screen it was 14px of
+   grey standing 24px clear of the h1 — the footprint of a line people read,
+   spent on one they skim. It drops to 11px and closes to 12px above the
+   title, so it reads as a label attached to the heading rather than a line
+   with a claim of its own.
+
+   11px rather than the halved 7px the eye asks for: the crumbs are links,
+   and below roughly 11px a link on a phone stops being reliably readable or
+   reliably hittable. The floor is legibility, not the arithmetic.
+
+   The margin lived in a style="margin-bottom:…" attribute repeated across
+   eight page fragments, which beat every stylesheet and answered no media
+   query — so it could not be a phone value at all until it moved here.
+   Desktop keeps both numbers it was authored with. */
+.breadcrumb-gr { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: var(--fs-11); color: var(--text-muted); margin-bottom: var(--space-3); }
 .breadcrumb-gr a { color: var(--text-muted); }
 .breadcrumb-gr a:hover { color: var(--link); }
 .breadcrumb-gr__sep { opacity: .5; }
+@media (min-width: 768px) {
+  .breadcrumb-gr { font-size: var(--fs-14); margin-bottom: var(--space-5); }
+}
 
 /* ---- Search: popular queries + merchandised placeholder ----------------
    Rotation timing is driven from search-autocomplete.js; the transition and

@@ -87,6 +87,10 @@
   --font-body:    'Inter', 'Noto Sans Bengali', 'Noto Kufi Arabic', system-ui, -apple-system, sans-serif;
 
   /* Modular type scale · 1.25 ratio — pull sizes from here, never ad-hoc.  */
+  /* 11 sits below the reading scale on purpose and is not a body size —
+     it is for a label the eye skims past, the breadcrumb trail being the
+     first. Do not reach for it for anything a customer has to read. */
+  --fs-11: 0.6875rem; /* 11 — breadcrumb trail         */
   --fs-12: 0.75rem;   /* 12 — micro tags, legal        */
   --fs-14: 0.875rem;  /* 14 — small text, captions     */
   --fs-16: 1rem;      /* 16 — body base                */

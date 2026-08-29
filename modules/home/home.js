@@ -18,12 +18,14 @@ import { renderProductSkeletons } from '../../shared/js/components/skeleton-load
 import { initScrollReveal } from '../../shared/js/components/scroll-reveal.js';
 
 import { categoryURL } from '../../shared/js/core/paths.js';
+import { initHomeLayout, styleOf } from './home-layout.js';
+import { createMarquee } from './marquee.js';
 initHeroCarousel();
 initCategoryGrid();
 initProductSections();
 initRailArrows();
 initTestimonials();
-initTrustMarquee();
+initSectionShapes();
 
 /* ---- Hero carousel ----------------------------------------------------
    The banners and their timing come from the admin panel (modules/hero). The
@@ -355,6 +357,7 @@ async function initCategoryGrid() {
   // invisible — exactly the failure this is replacing.
   const alreadyRevealed = !!grid.querySelector('.category-card.is-visible');
   grid.innerHTML = cats.map(categoryTile).join('');
+  remountMarquee('category');
   if (alreadyRevealed) {
     grid.querySelectorAll('[data-reveal]').forEach((el) => el.classList.add('is-visible'));
   } else {
@@ -404,12 +407,23 @@ async function initProductSections() {
     hideIfEmpty(premiumRail, premium);
     hideIfEmpty(newRail, fresh);
     hideIfEmpty(bestGrid, best);
-    // Only once there are cards to measure: the recycler works in card widths
-    // and an empty rail has none. Both shelves march — they are the same kind
-    // of thing, and one moving beside one standing still looks like the still
-    // one is broken.
-    if (premiumRail) { padRailForMarch(premiumRail, premium); initRailAutoplay(premiumRail); }
-    if (newRail) { padRailForMarch(newRail, fresh); initRailAutoplay(newRail); }
+    /* Only once there are cards to measure: the recycler works in card widths
+       and an empty rail has none.
+
+       WHICH SHELVES MARCH IS NOW THE MERCHANT'S CALL (Appearance -> Home
+       layout), and the default is that these two do — they are the same kind
+       of thing, and one moving beside one standing still looks like the still
+       one is broken. The autoplay controller is wired either way: it gates
+       itself on the shape and it owns the arrows, so a shelf set to `rail`
+       still steps when one is tapped. Only the runway is conditional, because
+       padding a grid would put the same product in it twice. */
+    const shelves = [[premiumRail, premium], [newRail, fresh], [bestGrid, best]];
+    shelves.forEach(([el, items]) => {
+      if (!el || !items?.length) return;
+      railProducts.set(el.dataset.rail, items);
+      if (styleOf(el.dataset.rail) === 'march') padRailForMarch(el, items);
+      initRailAutoplay(el);
+    });
   } catch (err) {
     console.error('[home] failed to load products', err);
     [premiumRail, newRail].forEach((el) => {
@@ -641,7 +655,11 @@ function initRailAutoplay(rail) {
      Owning the sub-pixel position is the whole fix. */
   let pos = 0;
 
-  const active = () => !still.matches;
+  /* Reduced motion stops it, and so does a shape that is not `march` — the
+     merchant may have asked for a shelf that only moves when it is pushed, or
+     for one that does not move at all. Read fresh on every check rather than
+     captured: the arrangement can change under a running page. */
+  const active = () => !still.matches && styleOf(rail.dataset.rail) === 'march';
   const canPlay = () => active() && inView && !hovered && !touched && !document.hidden && canLoop();
 
   /* .is-stepping switches scroll-snap off. Mandatory snapping drags every
@@ -759,135 +777,76 @@ function initRailAutoplay(rail) {
   arrow(`[data-rail-next="${rail.dataset.rail}"]`, forward);
   arrow(`[data-rail-prev="${rail.dataset.rail}"]`, backward);
 
+  // So a change of shape can start or stop this shelf without rebuilding it.
+  railSchedulers.set(rail.dataset.rail, schedule);
   schedule();
 }
 
-/* ---- Trust marquee (phones) -------------------------------------------
+/* ---- The shape each section is wearing ---------------------------------
  *
- * Below 768px the four trust claims are laid out as one travelling row
- * (modules/home/home.css). CSS can do the layout and the loop; it cannot do
- * the two things below.
+ * The merchant chooses this in Appearance → Home layout, separately for phones
+ * and for computers. home-layout.js resolves it and stamps it on <html>, and
+ * home.css does most of the work from there. What is left is the part CSS
+ * cannot do:
  *
- *   1. THE CLONE. A seamless loop needs the set present twice — the track
- *      translates by exactly -50% and the second copy is already where the
- *      first one was. Writing that duplicate into index.html would ship four
- *      extra headings to every screen reader, crawler and Reader Mode on every
- *      screen size, to serve a phone-only visual. So it's cloned here, marked
- *      aria-hidden, and hidden outright above 768px.
+ *   1. THE CLONES A SEAMLESS LOOP NEEDS. The track translates by exactly -50%,
+ *      so the second copy has to already be where the first one was. Writing
+ *      those duplicates into index.html would ship every heading twice to every
+ *      screen reader, crawler and Reader Mode, on every screen size, to serve
+ *      one shape. marquee.js makes them on demand and takes them away again, so
+ *      a section that is not looping carries no trace of them.
  *
- *   2. THE COUPLING TO SCROLL. The band drifts by itself, and any vertical
- *      scrolling — up OR down — surges it leftward, then it eases back to the
- *      drift over about a second. Direction is ignored on purpose: this is a
- *      ribbon that reacts to the page being read, not a scrubber that runs
- *      backwards when you go back up. Reading down the page and flicking back
- *      to the hero should both feel like they push it along.
+ *   2. THE PRODUCT SHELVES' DRIFT, which is a treadmill rather than a clone —
+ *      see initRailAutoplay — and so is switched on and off by shape rather
+ *      than built and torn down.
  *
- * Speed is changed via the Web Animations API rather than by rewriting
- * `animation-duration`: swapping the duration on a running CSS animation
- * re-maps its progress and the row jumps sideways. playbackRate leaves the
- * current position alone and only changes how fast it advances from here.
+ * EVERYTHING HERE APPLIES BOTH WAYS, because the arrangement can change under a
+ * running page: the server's answer arrives after the mirror's has already been
+ * used, and a window can cross 768px at any moment. A shape that could only be
+ * put on would leave the page showing two arrangements at once.
  */
-function initTrustMarquee() {
-  const marquee = document.querySelector('[data-trust-marquee]');
-  const track = marquee?.querySelector('[data-trust-track]');
-  if (!track) return;
-  // No loop at all under reduced motion — the CSS falls back to a swipeable
-  // row, and without the clones there is nothing extra to swipe past.
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+const marquees = new Map();
+const railSchedulers = new Map();
+const railProducts = new Map();
 
-  /* scroll-reveal observes each of the four items individually. Once the row is
-     a clipping track, items three and four are outside it at load and an
-     IntersectionObserver reports anything clipped by an ancestor as not
-     intersecting — so they never got .is-visible and looped past at opacity 0.
-     On phones the band's own travel is the entrance; take the per-item reveal
-     off it and let the desktop grid keep its stagger. */
-  const phone = window.matchMedia('(max-width: 767.98px)');
-  const originals = [...track.children];
-  const settle = () => {
-    if (phone.matches) originals.forEach((el) => el.classList.add('is-visible'));
+function initSectionShapes() {
+  const define = (section, viewport, track) => {
+    const v = document.querySelector(viewport);
+    const t = document.querySelector(track);
+    if (v && t) marquees.set(section, createMarquee(v, t));
   };
-  settle();
-  phone.addEventListener('change', settle);
+  define('trust', '[data-trust-marquee]', '[data-trust-track]');
+  define('category', '[data-cat-viewport]', '.home-cat-grid');
+  define('brands', '[data-brand-viewport]', '.brand-wall');
+  define('testimonials', '[data-testi-viewport]', '[data-testi-track]');
 
-  originals.forEach((item) => {
-    const clone = item.cloneNode(true);
-    clone.classList.add('trust-marquee__clone');
-    clone.setAttribute('aria-hidden', 'true');
-    // Decoration must not wait on the reveal observer — that only ever fires
-    // for the elements it was handed, so a clone carrying [data-reveal] would
-    // stay at opacity 0 forever and the loop would show four blanks.
-    clone.removeAttribute('data-reveal');
-    clone.style.removeProperty('--reveal-delay');
-    track.appendChild(clone);
+  initHomeLayout((shape) => {
+    marquees.forEach((m, section) => {
+      if (shape[section] === 'loop') m.mount();
+      else m.unmount();
+    });
+
+    /* A shelf just told to march needs the runway to march over, and one told
+       to stop needs its scheduler to notice. padRailForMarch does nothing to a
+       rail that is already long enough, so this stays cheap to call on every
+       change. */
+    railProducts.forEach((products, key) => {
+      const rail = document.querySelector(`[data-rail="${key}"]`);
+      if (shape[key] === 'march') padRailForMarch(rail, products);
+    });
+    railSchedulers.forEach((schedule) => schedule());
   });
-  marquee.classList.add('is-looping');
+}
 
-  const DRIFT = 1;      // resting rate: ~23px/s, slow enough to read at a glance
-  const MAX = 9;        // ceiling on a hard fling
-  const GAIN = 0.5;     // multiples of DRIFT per px scrolled in one frame
-  const DECAY = 0.9;    // per frame, back toward DRIFT
-
-  let anim = null;
-  let rate = DRIFT;
-  let lastY = window.scrollY;
-  let frame = null;
-
-  /* Re-resolved rather than cached once: the animation does not exist above
-     768px, so on a phone rotated to landscape or a resized desktop window this
-     picks it up whenever the media query starts applying. */
-  const running = () => {
-    if (!anim || anim.playState === 'idle') {
-      const found = track.getAnimations();
-      anim = found.find((a) => a.animationName === 'trust-marquee') || found[0] || null;
-    }
-    return anim;
-  };
-
-  const setRate = (r) => {
-    const a = running();
-    if (!a) return;
-    if (typeof a.updatePlaybackRate === 'function') a.updatePlaybackRate(r);
-    else a.playbackRate = r;
-  };
-
-  const ease = () => {
-    rate = DRIFT + (rate - DRIFT) * DECAY;
-    if (rate - DRIFT > 0.02) {
-      setRate(rate);
-      frame = requestAnimationFrame(ease);
-    } else {
-      rate = DRIFT;
-      setRate(DRIFT);
-      frame = null;          // idle again — no rAF loop ticking for nothing
-    }
-  };
-
-  window.addEventListener('scroll', () => {
-    const y = window.scrollY;
-    const delta = Math.abs(y - lastY);
-    lastY = y;
-    if (delta < 1) return;
-    // max(): a fast flick shouldn't be damped by the frame that follows it.
-    rate = Math.min(MAX, Math.max(rate, DRIFT + delta * GAIN));
-    setRate(rate);
-    if (!frame) frame = requestAnimationFrame(ease);
-  }, { passive: true });
-
-  // Don't animate a band nobody can see — it is offscreen for most of the page,
-  // and for the whole of a backgrounded tab. `inView` is kept so returning to
-  // the tab can resume it; the observer will not fire again on its own.
-  let inView = true;
-  const sync = () => {
-    const a = running();
-    if (!a) return;
-    if (inView && !document.hidden) a.play();
-    else a.pause();
-  };
-  if ('IntersectionObserver' in window) {
-    new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; sync(); },
-      { threshold: 0 }).observe(marquee);
-  }
-  document.addEventListener('visibilitychange', sync);
+/* The category tiles are re-rendered from the API, and that takes the loop's
+   clones with them — leaving a track half as long as the animation assumes,
+   which shows as a gap sweeping past every cycle. Rebuild them onto whatever
+   is in the grid now. */
+function remountMarquee(section) {
+  const m = marquees.get(section);
+  if (!m?.mounted()) return;
+  m.unmount();
+  m.mount();
 }
 
 /* ---- Testimonials slider ---------------------------------------------- */

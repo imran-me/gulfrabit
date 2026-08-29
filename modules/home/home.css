@@ -223,95 +223,94 @@
 .trust-band { border-top: 1px solid var(--border-hairline); border-bottom: 1px solid var(--border-hairline); background: var(--surface-band); }
 .trust-band__inner { padding-block: var(--space-5); }
 
-/* The clone home.js appends for the loop is a phone-only device. Hidden by
-   default so the four-column desktop grid never sprouts eight cells. */
-.trust-marquee__clone { display: none; }
-
-/* ---- Trust strip on phones: one row, looping ---------------------------
+/* ---- Trust strip: the travelling chip row -------------------------------
  *
- * The shared .trust-strip is a 2×2 grid below 768px. Two rows of full-size
+ * The shared .trust-strip is a 2x2 grid below 768px. Two rows of full-size
  * icons and 14/12 type is about 150px of the first screen spent on four short
- * claims, and it pushed Shop by Category off the fold entirely. Here the same
- * four items become a single ~40px row that travels.
+ * claims, and it pushed Shop by Category off the fold entirely. In its looping
+ * shape the same four items become a single ~40px row that travels.
  *
  * Nothing is truncated and no copy is dropped — the icons step 32→20px and the
  * type 14/12→11/10, and the loop carries whatever doesn't fit the viewport.
  * That is the point of looping it: on a 360px screen four chips of real copy
  * cannot all be on screen at once, so instead of shrinking the text until it
  * fits, the row shows ~2.5 at a time and keeps moving.
+ *
+ * WHO GETS IT
+ * -----------
+ * The panel decides, separately for phones and computers, and index.html
+ * stamps the resolved answer on <html> before the first paint. So this is one
+ * flat attribute selector and one copy of these declarations, rather than the
+ * same block written out under two breakpoints.
+ *
+ * `html.no-js` is the single case nothing can be stamped for. It gets the chip
+ * row at every width — on a wide screen that is four chips in a row, which is
+ * readable, just not the grid. Keeping the phone behaviour a JavaScript-off
+ * visitor has always had is worth that.
  */
+html[data-lay~="trust:loop"] .trust-marquee,
+html.no-js .trust-marquee {
+  --trust-icon: 20px;
+  /* Deliberately below the type scale: --fs-12 is the smallest token and
+     this is a supporting band, not body copy. 11/10 is what keeps a title
+     and its subtitle on one 40px chip. */
+  --trust-title: 0.6875rem;
+  --trust-sub: 0.625rem;
+
+  /* Base state is a finger-scrollable row. The animation is layered on top
+     by .is-looping, which marquee.js only adds AFTER it has cloned the set —
+     so a page with JS off gets a row it can swipe, never half a loop. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* Fade both ends, so a chip entering or leaving reads as travel rather
+     than as a card being guillotined by the viewport edge. Kept to 14px and
+     started at 40% rather than full transparency: a wider or harder fade
+     washes out the leading chip's icon, which sits only 8px in from its own
+     edge and is the first thing at rest on page load. */
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.4), #000 14px, #000 calc(100% - 14px), rgba(0,0,0,.4));
+          mask-image: linear-gradient(90deg, rgba(0,0,0,.4), #000 14px, #000 calc(100% - 14px), rgba(0,0,0,.4));
+}
+html[data-lay~="trust:loop"] .trust-marquee::-webkit-scrollbar,
+html.no-js .trust-marquee::-webkit-scrollbar { display: none; }
+
+html[data-lay~="trust:loop"] .trust-marquee .trust-strip,
+html.no-js .trust-marquee .trust-strip { display: flex; flex-wrap: nowrap; width: max-content; gap: 0; }
+
+/* Spacing lives on the chip as a trailing margin instead of the flex `gap`.
+   A cloned set gives eight items but only seven gaps, so with `gap` the
+   halfway point of the track lands half a gap short of one full set and the
+   loop hitches, once, every cycle. Margins make every item the same width
+   including its space, and -50% is then exactly one set. Every other looping
+   section in this file follows the same rule — see marquee.js. */
+html[data-lay~="trust:loop"] .trust-marquee .trust-item,
+html.no-js .trust-marquee .trust-item {
+  flex: 0 0 auto;
+  gap: var(--space-2);
+  margin-inline-end: var(--space-2);
+  padding: 0.375rem 0.75rem 0.375rem 0.5rem;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  background: var(--surface-page);
+}
+html[data-lay~="trust:loop"] .trust-marquee .trust-item__icon,
+html.no-js .trust-marquee .trust-item__icon { width: var(--trust-icon); height: var(--trust-icon); }
+html[data-lay~="trust:loop"] .trust-marquee .trust-item__title,
+html.no-js .trust-marquee .trust-item__title { font-size: var(--trust-title); line-height: 1.3; white-space: nowrap; }
+html[data-lay~="trust:loop"] .trust-marquee .trust-item__sub,
+html.no-js .trust-marquee .trust-item__sub { font-size: var(--trust-sub); line-height: 1.3; white-space: nowrap; }
+
+.trust-marquee.is-looping { overflow: hidden; }
+.trust-marquee.is-looping .trust-strip {
+  animation: gr-marquee 26s linear infinite;
+  will-change: transform;
+}
+
+/* Phones get the tighter band whatever shape the strip is in — it is a density
+   decision about a small screen, not part of the loop. */
 @media (max-width: 767.98px) {
   .trust-band__inner { padding-block: var(--space-3); }
-
-  .trust-marquee {
-    --trust-icon: 20px;
-    /* Deliberately below the type scale: --fs-12 is the smallest token and
-       this is a supporting band, not body copy. 11/10 is what keeps a title
-       and its subtitle on one 40px chip. */
-    --trust-title: 0.6875rem;
-    --trust-sub: 0.625rem;
-
-    /* Base state is a finger-scrollable row. The animation is layered on top
-       by .is-looping, which home.js only adds AFTER it has cloned the set —
-       so a page with JS off gets a row it can swipe, never half a loop. */
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    /* Fade both ends, so a chip entering or leaving reads as travel rather
-       than as a card being guillotined by the viewport edge. Kept to 14px and
-       started at 40% rather than full transparency: a wider or harder fade
-       washes out the leading chip's icon, which sits only 8px in from its own
-       edge and is the first thing at rest on page load. */
-    -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.4), #000 14px, #000 calc(100% - 14px), rgba(0,0,0,.4));
-            mask-image: linear-gradient(90deg, rgba(0,0,0,.4), #000 14px, #000 calc(100% - 14px), rgba(0,0,0,.4));
-  }
-  .trust-marquee::-webkit-scrollbar { display: none; }
-
-  .trust-marquee .trust-strip { display: flex; flex-wrap: nowrap; width: max-content; gap: 0; }
-
-  /* Spacing lives on the chip as a trailing margin instead of the flex `gap`.
-     A cloned set gives eight items but only seven gaps, so with `gap` the
-     halfway point of the track lands half a gap short of one full set and the
-     loop hitches, once, every cycle. Margins make every item the same width
-     including its space, and -50% is then exactly one set. */
-  .trust-marquee .trust-item {
-    flex: 0 0 auto;
-    gap: var(--space-2);
-    margin-inline-end: var(--space-2);
-    padding: 0.375rem 0.75rem 0.375rem 0.5rem;
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-pill);
-    background: var(--surface-page);
-  }
-  .trust-marquee .trust-item__icon { width: var(--trust-icon); height: var(--trust-icon); }
-  .trust-marquee .trust-item__title { font-size: var(--trust-title); line-height: 1.3; white-space: nowrap; }
-  .trust-marquee .trust-item__sub { font-size: var(--trust-sub); line-height: 1.3; white-space: nowrap; }
-
-  .trust-marquee.is-looping { overflow: hidden; }
-  .trust-marquee.is-looping .trust-item.trust-marquee__clone { display: flex; }
-  .trust-marquee.is-looping .trust-strip {
-    animation: trust-marquee 26s linear infinite;
-    will-change: transform;
-  }
-}
-
-/* One set is exactly half the cloned track, so -50% wraps seamlessly.
-   home.js drives this animation's SPEED from scroll velocity: it drifts on its
-   own and surges while the page is being scrolled, up or down alike. */
-@keyframes trust-marquee {
-  from { transform: translate3d(0, 0, 0); }
-  to   { transform: translate3d(-50%, 0, 0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* The global reduced-motion rule clamps every animation to 0.001ms and a
-     single iteration. Applied here that would snap the track to -50% and park
-     it there — a band permanently frozen mid-loop. Stop the loop outright and
-     give the row back to the finger. */
-  .trust-marquee.is-looping { overflow-x: auto; }
-  .trust-marquee.is-looping .trust-strip { animation: none !important; transform: none !important; }
-  .trust-marquee.is-looping .trust-item.trust-marquee__clone { display: none; }
 }
 
 /* ---- Industry / B2B band --------------------------------------------- */
@@ -643,4 +642,272 @@
       mask-image: none;
     }
   }
+}
+
+/* =========================================================================
+   SECTION SHAPES — chosen in the panel, not baked into the page
+   =========================================================================
+
+   Appearance → Home layout lets a merchant pick how each home-page section is
+   ARRANGED, separately for phones and for computers, and index.html stamps the
+   resolved answer on <html> before the first paint:
+
+       <html data-lay="category:loop trust:static premium:march …">
+
+   So every rule below is a flat `html[data-lay~="section:style"]` selector.
+   Resolving the device in JavaScript rather than in CSS is what keeps it flat:
+   the alternative is writing each rule twice, once under each breakpoint, and
+   the second copy is always the one that goes stale.
+
+   ABSENCE IS THE DEFAULT, AND THE DEFAULT IS THE PAGE AS AUTHORED. Nothing
+   here fires without an attribute, so a shop that has never opened the screen
+   — and a visitor whose stamp never ran — gets exactly the site in the
+   repository. Only the non-default shapes are written out.
+
+   THE -50% RULE. Every looping section duplicates its track and translates it
+   -50%, so one set is exactly half the track and the wrap is invisible. That
+   only holds if spacing lives on the ITEM as a trailing margin rather than as
+   the flex `gap`: n items give n-1 gaps, so with `gap` the halfway point lands
+   short of one set and the loop hitches, once, every cycle. Every rule below
+   that sets `gap: 0` and a `margin-inline-end` is obeying that. See
+   modules/home/marquee.js, which owns the other half of the mechanism.
+   ========================================================================= */
+
+/* One set is exactly half a cloned track. marquee.js drives this animation's
+   SPEED from scroll velocity: it drifts on its own and surges while the page
+   is being scrolled, up or down alike. */
+@keyframes gr-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+/* ---- Shop by Category, as a travelling row ------------------------------
+   The tiles shrink to about the width of their own artwork and stream past,
+   which on a phone shows the whole catalogue without spending two rows and a
+   scroll on it. The compact card treatment — art edge to edge, name
+   underneath, nothing laid over the photograph — is the one the desktop grid
+   already uses; here it applies at every width, because in this shape the tile
+   is small at every width. */
+html[data-lay~="category:loop"] .cat-viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* Both ends fade, so a tile entering or leaving reads as travel rather than
+     as a card cut off by the container. */
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.4), #000 16px, #000 calc(100% - 16px), rgba(0,0,0,.4));
+          mask-image: linear-gradient(90deg, rgba(0,0,0,.4), #000 16px, #000 calc(100% - 16px), rgba(0,0,0,.4));
+}
+html[data-lay~="category:loop"] .cat-viewport::-webkit-scrollbar { display: none; }
+
+html[data-lay~="category:loop"] .home-cat-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  width: max-content;
+  gap: 0;                                   /* the -50% rule — see the top */
+}
+html[data-lay~="category:loop"] .home-cat-grid .category-card {
+  flex: 0 0 auto;
+  /* Wide enough for "Kitchen Appliances" on two lines at 12px, narrow enough
+     that a 390px phone shows three and the edge of a fourth — which is what
+     tells the visitor the row moves. */
+  width: 116px;
+  min-height: 0;
+  margin-inline-end: var(--space-3);
+  padding: 0;
+  justify-content: flex-start;
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  border-color: rgba(27, 180, 212, .34);
+  box-shadow: 0 1px 3px rgba(16, 32, 44, .06);
+}
+html[data-lay~="category:loop"] .home-cat-grid .category-card__media {
+  margin: 0;
+  border-radius: 0;
+}
+/* The blurb is three or four extra words on a 116px tile. The name is the
+   control; the blurb is what the shop page is for. */
+html[data-lay~="category:loop"] .home-cat-grid .category-card__count { display: none; }
+html[data-lay~="category:loop"] .home-cat-grid .category-card__title {
+  padding: 9px 6px 11px;
+  text-align: center;
+  color: var(--link);
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: -.01em;
+}
+html[data-lay~="category:loop"] .home-cat-grid .category-card__icon { width: 30px; height: 30px; }
+
+/* A travelling tile must not lift under the pointer: it moves out from under
+   the cursor mid-transition and the hover latches on a tile that is no longer
+   there. The photograph still answers, which is enough. */
+@media (hover: hover) {
+  html[data-lay~="category:loop"] .home-cat-grid .category-card:hover {
+    transform: none;
+    border-color: var(--gr-cyan);
+  }
+}
+
+.cat-viewport.is-looping { overflow: hidden; }
+.cat-viewport.is-looping .home-cat-grid {
+  /* Slower than the trust band's 26s: these tiles are twice the height and
+     carry artwork, and the same rate reads as hurried. */
+  animation: gr-marquee 48s linear infinite;
+  will-change: transform;
+}
+
+/* ---- Trusted origins, as a travelling row ------------------------------- */
+html[data-lay~="brands:loop"] .brand-viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+html[data-lay~="brands:loop"] .brand-viewport::-webkit-scrollbar { display: none; }
+html[data-lay~="brands:loop"] .brand-wall {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  width: max-content;
+  gap: 0;                                   /* the -50% rule — see the top */
+  padding-block: var(--space-5);
+}
+html[data-lay~="brands:loop"] .brand-wall__item {
+  flex: 0 0 auto;
+  margin-inline-end: clamp(1.5rem, 5vw, 3.5rem);
+  white-space: nowrap;
+}
+.brand-viewport.is-looping { overflow: hidden; }
+.brand-viewport.is-looping .brand-wall {
+  animation: gr-marquee 40s linear infinite;
+  will-change: transform;
+}
+
+/* ---- Testimonials -------------------------------------------------------
+   The default pages one quote at a time. Two alternatives, and the arrows go
+   away for both: neither shape has pages to turn. */
+html[data-lay~="testimonials:grid"] [data-testi-nav],
+html[data-lay~="testimonials:loop"] [data-testi-nav] { display: none !important; }
+
+html[data-lay~="testimonials:grid"] .testi-track {
+  grid-auto-flow: row;
+  grid-auto-columns: auto;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: var(--space-4);
+  overflow: visible;
+  scroll-snap-type: none;
+}
+
+html[data-lay~="testimonials:loop"] .testi-viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+html[data-lay~="testimonials:loop"] .testi-viewport::-webkit-scrollbar { display: none; }
+html[data-lay~="testimonials:loop"] .testi-track {
+  display: flex;
+  flex-wrap: nowrap;
+  width: max-content;
+  gap: 0;                                   /* the -50% rule — see the top */
+  overflow: visible;
+  scroll-snap-type: none;
+}
+html[data-lay~="testimonials:loop"] .testi-card {
+  flex: 0 0 auto;
+  /* A quote is read, not glanced at, so these stay wide enough to hold four or
+     five lines without the eye travelling — and the loop is correspondingly
+     slow. */
+  width: min(340px, 82vw);
+  margin-inline-end: var(--space-4);
+  scroll-snap-align: none;
+}
+.testi-viewport.is-looping { overflow: hidden; }
+.testi-viewport.is-looping .testi-track {
+  animation: gr-marquee 70s linear infinite;
+  will-change: transform;
+}
+
+/* ---- Product shelves ----------------------------------------------------
+   Three shapes. "march" is a rail that drifts leftward on its own, "rail" is
+   the same row moved only by a finger or an arrow, and "grid" stands still and
+   wraps. The difference between march and rail is entirely in home.js — the
+   CSS below only has to handle a shelf that has stopped being a row, or one
+   that has become one.
+
+   The autoplay fade is keyed to "march" rather than to [data-rail-autoplay]:
+   that attribute is authored into index.html and stays there whatever shape
+   the shelf is in, and a fade over the right edge of a still grid is just a
+   column of half-faded products. */
+html[data-lay~="premium:march"] [data-rail="premium"],
+html[data-lay~="new:march"] [data-rail="new"],
+html[data-lay~="bestseller:march"] [data-grid="bestseller"] {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent 100%);
+          mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent 100%);
+}
+
+/* A shelf asked to stand still. The column counts match .product-grid, so a
+   shelf laid out as a grid sits in the same rhythm as Best Sellers above it. */
+html[data-lay~="premium:grid"] [data-rail="premium"],
+html[data-lay~="new:grid"] [data-rail="new"] {
+  grid-auto-flow: row;
+  grid-auto-columns: auto;
+  grid-template-columns: repeat(2, 1fr);
+  overflow: visible;
+  scroll-snap-type: none;
+  padding-bottom: 0;
+}
+@media (min-width: 768px) {
+  html[data-lay~="premium:grid"] [data-rail="premium"],
+  html[data-lay~="new:grid"] [data-rail="new"] { grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+}
+@media (min-width: 1024px) {
+  html[data-lay~="premium:grid"] [data-rail="premium"],
+  html[data-lay~="new:grid"] [data-rail="new"] { grid-template-columns: repeat(4, 1fr); }
+}
+/* Nothing to scroll, so nothing to scroll with. */
+html[data-lay~="premium:grid"] [data-rail-nav="premium"],
+html[data-lay~="new:grid"] [data-rail-nav="new"] { display: none !important; }
+
+/* A shelf asked to become a row. Best Sellers is authored as a grid and has no
+   arrows of its own — in either row shape it is swiped, which is how every
+   rail on a phone already works. */
+html[data-lay~="bestseller:rail"] [data-grid="bestseller"],
+html[data-lay~="bestseller:march"] [data-grid="bestseller"] {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(240px, 1fr);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: var(--space-3);
+}
+html[data-lay~="bestseller:rail"] [data-grid="bestseller"] > *,
+html[data-lay~="bestseller:march"] [data-grid="bestseller"] > * { scroll-snap-align: start; }
+html[data-lay~="bestseller:rail"] [data-grid="bestseller"]::-webkit-scrollbar,
+html[data-lay~="bestseller:march"] [data-grid="bestseller"]::-webkit-scrollbar { display: none; }
+
+/* ---- Reduced motion -----------------------------------------------------
+   marquee.js never mounts under reduced motion, so ordinarily no clones exist
+   and .is-looping is never added. These rules are the belt to those braces —
+   for the preference being switched on after the page loaded, when the class
+   and the clones are already there.
+
+   The global reduced-motion rule clamps every animation to 0.001ms and a
+   single iteration, which a marquee reads as "already finished": it would snap
+   the track to -50% and park it there, a row frozen mid-loop. Stop the loop
+   outright and give the row back to the finger. */
+@media (prefers-reduced-motion: reduce) {
+  .trust-marquee.is-looping,
+  .cat-viewport.is-looping,
+  .brand-viewport.is-looping,
+  .testi-viewport.is-looping { overflow-x: auto; }
+
+  .trust-marquee.is-looping .trust-strip,
+  .cat-viewport.is-looping .home-cat-grid,
+  .brand-viewport.is-looping .brand-wall,
+  .testi-viewport.is-looping .testi-track { animation: none !important; transform: none !important; }
+
+  .is-marquee-clone { display: none !important; }
 }
