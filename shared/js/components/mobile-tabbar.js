@@ -27,12 +27,13 @@ const icon = (k) =>
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${ICONS[k]}</svg>`;
 
 export function initMobileTabbar() {
-  /* Pages that own their bottom edge. The cart page and express checkout pin
+  /* Pages that own their bottom edge. The cart page and both checkouts pin
      their own action bars there; the product page pins the buy bar; the admin
      is staff furniture. Stacking a second bar under any of them either buries
-     the money button or doubles the chrome. */
+     the money button or doubles the chrome — and on a checkout the tab bar is
+     four ways out of the flow, printed under the button asking to complete it. */
   if (document.querySelector(
-    '[data-admin-shell], .cart-mobile-cta, [data-express-place], [data-pdp-buybar]')) return;
+    '[data-admin-shell], .cart-mobile-cta, [data-express-place], [data-place-order], [data-pdp-buybar]')) return;
   if (document.querySelector('.tabbar')) return;
 
   const path = location.pathname;

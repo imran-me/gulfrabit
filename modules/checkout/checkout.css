@@ -260,6 +260,61 @@
 }
 .step-nav > .btn-gr { flex: 1 1 auto; justify-content: center; }
 
+/* ---- The floating Place Order button (phones and tablets) --------------
+ *
+ * The phone shows the whole form on one page, so the button that takes the
+ * money sat at the bottom of a form taller than three screens — reachable
+ * only by scrolling past every field to look for it. Pinned, it is in the
+ * thumb's reach at every scroll position, which is the same argument the
+ * express checkout's bar (express.css) and the product page's buy bar make.
+ *
+ * FLOATING, not a full-width bar: a pill 20% shorter and 20% narrower than
+ * the in-flow button, with the page visible either side of it. A bar would
+ * be a fourth horizontal band on a screen that already carries a header, a
+ * summary and a stepper; the pill reads as one object sitting above the page
+ * instead of another edge glued to it.
+ *
+ * Because it owns the bottom edge, the checkout page no longer gets the
+ * mobile tab bar — see the exclusion list in shared/js/components/
+ * mobile-tabbar.js, which the cart, express and product pages are already on.
+ *
+ * Centred with `inset-inline: 0` + `margin-inline: auto`, NOT with
+ * translateX(-50%): .btn-gr already spends transform on its hover lift and
+ * its press, and a centred button that jumps half its width sideways the
+ * moment a thumb lands on it is worse than one that is not centred at all.
+ */
+@media (max-width: 1023.98px) {
+  [data-place-order] {
+    position: fixed;
+    inset-inline: 0;
+    margin-inline: auto;
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    z-index: 40;                            /* as express-bar; below the
+                                               header, drawer, modal, toast */
+    /* Four fifths of the button it replaces, in both directions.
+       WIDTH: that button filled the container, which is the viewport less
+       .gr-container's 24px either side — so 0.8 × (100% - 48px), written out
+       because a percentage on a fixed element resolves against the viewport
+       and not against the column the button used to sit in. Capped, or a
+       tablet gets a 600px pill.
+       HEIGHT: .btn-lg-gr's own 56px / 1rem 2rem / 20px, each × 0.8. */
+    width: min(calc(80% - 38px), 320px);
+    min-height: 45px;
+    padding: 0.8rem 1.6rem;
+    font-size: var(--fs-16);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-lg);
+  }
+  /* The nav row keeps only Back, which no longer has a partner to sit beside. */
+  .step-nav > [data-nav-back] { flex: 1 1 100%; }
+
+  /* Room for it. A fixed button covers whatever the page ends with, and what
+     this page ends with is the last field of the form and the nav's own
+     Back — both of them things a customer taps. ~45px of pill, its 16px of
+     air top and bottom, and the home-indicator inset. */
+  .checkout-layout { padding-bottom: calc(77px + env(safe-area-inset-bottom, 0px)); }
+}
+
 /* ---- The stepper on a phone -------------------------------------------
  * Four steps with labels and connecting lines need about 420px. At 360 it
  * wrapped to two ragged rows and stopped reading as a sequence at all.
