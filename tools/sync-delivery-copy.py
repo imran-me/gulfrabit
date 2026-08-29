@@ -127,12 +127,14 @@ def policy_table(zones: list[dict], payload: dict) -> str:
 
 
 def checkout_radios(zones: list[dict], payload: dict) -> str:
+    """The zone radios. Twelve spaces of indent, not ten: they moved inside the
+    <details> that hides the rate table once a district has resolved one."""
     out = []
     for i, z in enumerate(zones):
         selected = " is-selected" if i == 0 else ""
         checked = " checked" if i == 0 else ""
         out.append(
-            f'          <label class="option-card{selected}" data-delivery-card="{z["key"]}">'
+            f'            <label class="option-card{selected}" data-delivery-card="{z["key"]}">'
             f'<input type="radio" name="delivery" value="{z["key"]}" data-delivery '
             f'data-cost="{z["costTaka"]}"{checked}>'
             f'<span><span class="option-card__title">{esc(z["label"])}</span>'
