@@ -1,0 +1,51 @@
+/* ---- The mascot strip ---------------------------------------------------
+   A band across the foot of the viewport that the rabbit lives in.
+
+   THE TWO RULES THAT MATTER
+   -------------------------
+   1. It never takes a click. `pointer-events: none` on the whole strip, so
+      everything underneath — a product card, the mobile tab bar, a sticky
+      Place Order button — keeps working exactly as if the rabbit were not
+      there. Tapping the rabbit is handled by testing the pointer position
+      against where it is, in mascot.js, precisely so the canvas itself can
+      stay inert.
+   2. It is never above anything that matters. z-index 5 puts it over the page
+      background and under every piece of chrome the site has: the header (100),
+      the cart drawer, the modals, the toasts and the checkout's own fixed CTA
+      (40). A mascot that covers a control is a bug.
+*/
+.mascot {
+  position: fixed;
+  left: 0;
+  right: 0;
+  /* Sits ON the bottom edge. The height is set from script, because it is
+     derived from the viewport width — see resize() in mascot.js. */
+  bottom: 0;
+  z-index: 5;
+  pointer-events: none;
+  /* The canvas is transparent, so this is only here to stop the strip being
+     dragged or selected on a long press. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mascot canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Belt and braces with the JavaScript gate. If motion is unwelcome the module
+   never loads at all — but a stylesheet that agrees with the script costs
+   nothing and covers the case where the strip is already on the page when the
+   preference changes. */
+@media (prefers-reduced-motion: reduce) {
+  .mascot { display: none; }
+}
+
+/* Below this the strip would be a meaningful share of a small screen, and the
+   space belongs to the shop. The script refuses to load here too; this is the
+   same decision expressed where a designer would look for it. */
+@media (max-width: 479.98px) {
+  .mascot { display: none; }
+}

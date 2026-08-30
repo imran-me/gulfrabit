@@ -227,6 +227,43 @@ def _theme_sheet_map_js():
 STOREFRONT_THEMES = ["luxe", "trio", "noor", "nakshi", "utsab"]
 
 
+# Keep in step with Modules\Theme\Models\CardParts::PARTS and with
+# modules/theme/card-parts.js. tools/layout-drift.py fails the build when the
+# three disagree.
+CARD_PARTS = ["wishlist", "quickview", "discount", "tags", "brand", "rating", "saving"]
+
+
+def _card_bootstrap_js():
+    """The pre-paint product-card block, shared by head() and sync_index_theme().
+
+    A product card is on every page that lists anything, so unlike the home
+    layout this one is not a single page's concern — it is stamped everywhere,
+    from the same function, for the same reason the theme block is: a copy kept
+    in step by hand is a copy that goes stale.
+
+    The attribute lists only what is switched OFF, so absence means the card the
+    repository draws. There is no state in which a part disappears because
+    something failed — which is why this can sit in front of the first paint of
+    every page in the shop.
+
+    Indented to sit inside the <script> in head().
+    """
+    return """try {
+      var c = localStorage.getItem('gr:card');
+      if (c) {
+        var cp = JSON.parse(c);
+        var dev = window.matchMedia('(max-width: 767.98px)').matches ? 'mobile' : 'desktop';
+        var off = [];
+        for (var i = 0; i < CARD_PARTS.length; i++) {
+          var part = CARD_PARTS[i];
+          if (cp[part] && cp[part][dev] === false) off.push(part + ':off');
+        }
+        if (off.length) document.documentElement.setAttribute('data-card', off.join(' '));
+      }
+    } catch (e) { /* storage off, or nothing mirrored — the whole card is shown. */ }""".replace(
+        'CARD_PARTS', repr(CARD_PARTS).replace("'", '"'))
+
+
 def _theme_js_list():
     """STOREFRONT_THEMES as a JS array literal for the inline bootstrap."""
     return "[" + ",".join(f"'{t}'" for t in STOREFRONT_THEMES) + "]"
@@ -305,6 +342,12 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, cano
     # Only the BAKED theme's sheets. The other five are not linked at all —
     # see the note by THEME_SHEETS for why, and for what covers a visitor whose
     # published theme is not the one this build baked.
+    # Not on admin pages, for the same reason they do not follow the theme:
+    # the panel is the merchant's tool and must not restyle itself under them.
+    # A staff member hunting for the wishlist toggle in the product picker
+    # because the shop has it switched off is the panel lying about itself.
+    card_boot = _card_bootstrap_js() if luxe else ""
+
     baked = theme_links(BUILD_THEME) if luxe else []
     luxe_link = (
         THEME_LINK_NOTE
@@ -328,6 +371,14 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, cano
 <html lang="en" class="no-js"{cms_attr}{theme_attr}>
 <head>
   <meta charset="UTF-8">
+  <!-- BEFORE the script below, and that ordering is load-bearing.
+       A phone's layout viewport is 980px until this tag is parsed, so any
+       matchMedia('(max-width: 767.98px)') running above it answers "no" on a
+       390px phone. The pre-paint blocks below resolve a per-device setting,
+       and with this tag underneath them they resolved every phone as a
+       computer, painted the computer's answer, and let the modules correct it
+       after load — which is the flash those blocks exist to prevent. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
     /* Removes .no-js before first paint. Everything with [data-reveal] is
        hidden by CSS until IntersectionObserver reveals it — which means with
@@ -368,8 +419,9 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, cano
        Inline and above the stylesheet on purpose: a deferred script runs after
        the first paint, which is the flash it exists to prevent. */
 {_theme_bootstrap_js()}
+
+    {card_boot}
   </script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
   <meta name="description" content="{desc}">
   <meta name="theme-color" content="{theme}">
@@ -519,6 +571,23 @@ def assemble(out, title, desc, main_html, css_links=None, module_js=None, cms_pa
     src = "footer-checkout.html" if minimal else "footer.html"
     page += f"  <!-- FOOTER (inlined from shared/components/{src}) -->\n"
     page += FOOTER_CHECKOUT if minimal else FOOTER
+    # The mascot, last, and only where it is welcome. The module gates itself
+    # again at runtime on motion preference, connection and device — this is
+    # the coarse half of that decision, made at build time so a funnel page
+    # never even carries the tag.
+    #
+    # Script only: mascot.css is pulled in by the module itself if and when it
+    # decides to run, so the majority of visitors — who are turned away by the
+    # runtime gate — never request it at all.
+    if out not in NO_MASCOT:
+        # Normalised exactly as the cms_page branch above does, and for the same
+        # reason: `module_js` is a LIST on most pages and a bare string on the
+        # ones that load a single script. list() on a string yields one entry
+        # per character, which reaches asset() as an empty path and dies on the
+        # project root.
+        current = list(module_js) if isinstance(module_js, list) else ([module_js] if module_js else [])
+        module_js = current + ["/modules/mascot/mascot.js"]
+
     page += scripts(module_js)
     if noindex:
         page = page.replace('<meta name="robots" content="index, follow">',
@@ -526,6 +595,28 @@ def assemble(out, title, desc, main_html, css_links=None, module_js=None, cms_pa
     page = relativize(page, out)
     write(out, page)
     print("wrote", out)
+
+# Pages the rabbit stays off.
+#
+# The funnel, first and non-negotiably: cart, checkout, express and the
+# confirmation. Those pages exist to take money, and an animation hopping past
+# the Place Order button competes for attention at the exact moment attention
+# is worth the most. Whatever the mascot is worth on a category page, it is
+# worth less than one abandoned basket.
+#
+# 404 is here for a different reason: somebody who has hit a dead end wants the
+# way out, not a performance.
+#
+# mascot.js re-checks the pathname itself, so removing a page from this set is
+# not enough to put the rabbit on the funnel by accident — both would have to
+# be changed, which is the point.
+NO_MASCOT = {
+    "modules/cart/cart.html",
+    "modules/checkout/checkout.html",
+    "modules/checkout/express.html",
+    "modules/checkout/order-confirmation.html",
+    "404.html",
+}
 
 # Pages that get the funnel footer instead of the canonical one.
 #
@@ -1089,6 +1180,20 @@ def sync_index_theme():
     if not boot_hits:
         print("WARNING: index.html has no theme bootstrap to sync — the home "
               "page will flash the wrong theme when one is published")
+
+    new, card_hits = re.subn(
+        # \s already spans the newline, so the pattern needs no literal one.
+        r"try \{\s*var c = localStorage\.getItem\('gr:card'\);"
+        r".*?"
+        r"catch \(e\) \{ /\* storage off[^}]*\}",
+        lambda _m: _card_bootstrap_js(),
+        new,
+        count=1,
+        flags=re.S,
+    )
+    if not card_hits:
+        print("WARNING: index.html has no product-card bootstrap to sync — the "
+              "home page will flash card parts the shop has switched off")
 
     # EVERY LOCAL STYLESHEET AND SCRIPT, hashed by the same asset() every
     # generated page's links go through.

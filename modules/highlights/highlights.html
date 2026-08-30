@@ -2,6 +2,14 @@
 <html lang="en" class="no-js">
 <head>
   <meta charset="UTF-8">
+  <!-- BEFORE the script below, and that ordering is load-bearing.
+       A phone's layout viewport is 980px until this tag is parsed, so any
+       matchMedia('(max-width: 767.98px)') running above it answers "no" on a
+       390px phone. The pre-paint blocks below resolve a per-device setting,
+       and with this tag underneath them they resolved every phone as a
+       computer, painted the computer's answer, and let the modules correct it
+       after load — which is the flash those blocks exist to prevent. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
     /* Removes .no-js before first paint. Everything with [data-reveal] is
        hidden by CSS until IntersectionObserver reveals it — which means with
@@ -78,7 +86,6 @@ try {
 
     
   </script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home page — GulfRabit Admin</title>
   <meta name="description" content="GulfRabit staff panel.">
   <meta name="theme-color" content="#0A0A0A">
@@ -108,7 +115,7 @@ try {
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=80ea35a1">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=2be658cd">
   <link rel="stylesheet" href="../../modules/admin/admin.css?v=4f8ef8dc">
   <link rel="stylesheet" href="../../modules/highlights/highlights.css?v=bda84451">
   <script type="application/ld+json">
