@@ -450,38 +450,36 @@
     border-radius: var(--radius-pill);
 
     /* ---- The surface ---------------------------------------------------
-       Three layers, painted in one background, so the pill reads as a lit
-       physical object rather than a coloured rectangle:
+       NO background here, deliberately, and it took a bug to learn why.
 
-         1. a soft highlight at the top edge, where a light above it would
-            catch — this is what stops a flat fill looking like a sticker;
-         2. the brand gradient, rotated to 120° so the lime end lands in the
-            bottom-right corner of a WIDE short pill instead of running off
-            the end of it, which is what 135° did at this aspect ratio and
-            why this button had been reading as flat cyan;
-         3. a deepened cyan underneath, so the bottom edge is the shadowed
-            side and the whole thing has a direction of light. */
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.28) 0%, rgba(255,255,255,0) 46%),
-      linear-gradient(120deg, var(--gr-cyan) 0%, #6FC4A8 58%, var(--gr-lime) 100%),
-      var(--gr-cyan-dark);
+       An earlier version of this rule painted a three-layer gradient onto the
+       pill. It never once appeared: the active theme sets
+
+         [data-theme="trio"] .btn-gradient-gr { background: var(--gr-cyan); }
+
+       which is specificity (0,2,0) against this selector's (0,1,0), and its
+       comment says why — "flat logo cyan, no gradient fills on buttons", a
+       standard the merchant set deliberately. A rule that loses every time is
+       worse than no rule: it reads as intent to whoever finds it next.
+
+       So the colour belongs to the theme, in every theme, and what is left
+       here is everything that makes the pill feel like an object rather than
+       a coloured rectangle — depth, weight and response. Those work equally
+       well under a flat fill and a gradient one. */
+
     border: 0;
 
     /* Two shadows doing two jobs. The tight one is contact — it is what sits
        the pill ON the page. The wide tinted one is the glow that makes it the
        brightest thing on a white screen, in the button's own cyan rather than
        a neutral grey, because a grey shadow under a cyan button reads as dirt.
-       The inset hairline is the lit top edge again, at 1px. */
+       The inset hairline is a lit top edge at 1px, which is as much relief as
+       a flat fill can carry without becoming the gradient it is not. */
     box-shadow:
-      0 1px 2px rgba(4, 34, 43, .18),
-      0 10px 24px -6px rgba(27, 180, 212, .45),
-      0 18px 46px -12px rgba(4, 34, 43, .28),
-      inset 0 1px 0 rgba(255, 255, 255, .34);
-
-    /* Ink, not black. #04222B is the project's deep teal — true black on a
-       cyan-to-lime gradient reads as a hole punched in it. */
-    color: #04222B;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, .22);
+      0 1px 2px rgba(4, 34, 43, .2),
+      0 10px 24px -6px rgba(27, 180, 212, .5),
+      0 20px 48px -14px rgba(4, 34, 43, .3),
+      inset 0 1px 0 rgba(255, 255, 255, .26);
 
     transition:
       transform var(--dur-fast) var(--ease-out),
@@ -489,32 +487,54 @@
   }
 
   /* ---- Letting the page end under it ---------------------------------
-     THE FIX FOR WHAT THIS LOOKED LIKE. A fixed pill floats over whatever
-     happens to be scrolled beneath it, and with nothing in between it landed
-     squarely on the District select and read as a button covering an input —
-     which is indistinguishable, at a glance, from a broken layout.
+     A fixed pill floats over whatever happens to be scrolled beneath it, and
+     with nothing in between it lands squarely on a form field and reads as a
+     button covering an input. So the page fades out underneath it.
 
-     So the page fades out under it. The scrim is a pseudo-element rather than
-     new markup: the button already carries z-index 40 and therefore its own
-     stacking context, so a child at z-index -1 paints behind the pill and
-     still above the page. Nothing to add to the fragment, nothing to keep in
-     sync, and it cannot be left behind if the button is ever hidden.
+     ON .checkout-layout, NOT ON THE BUTTON, and that distinction is the whole
+     bug this replaced. The first version hung this off [data-place-order]
+     ::after at z-index -1, on the reasoning that the button carries z-index 40
+     and therefore its own stacking context, so a negative child would paint
+     behind it.
 
-     Transparent at the top so there is no visible edge — a hard line across
-     the form would be a worse artefact than the one being fixed. */
-  [data-place-order]::after {
+     That is not what negative z-index does. Painting order inside a stacking
+     context is: the element's own background and borders FIRST, then negative
+     z-index descendants, then content. So the scrim painted on top of the
+     pill's gradient and underneath its text — an opaque white lozenge with
+     "Place Order" still legible on it, which is exactly how it looked.
+
+     .checkout-layout is a plain grid: no transform, no filter, no opacity, no
+     position, so it creates no stacking context of its own and a fixed child
+     of it lands in the root one. z-index 39 then puts the scrim immediately
+     below the button's 40 and above the page, which is the whole requirement.
+
+     Transparent at the top so there is no visible edge — a hard line ruled
+     across the form would be a worse artefact than the one being fixed. */
+  /* Only while the pill is actually on screen. The button is `hidden` until
+     the review step and absent entirely on an empty cart — and a fade with no
+     button above it is just the bottom of the page dissolving for no reason,
+     which is precisely what it did to the footer's policy links. :has() is
+     already used elsewhere in this project for the same kind of "style a
+     container by what is inside it" question. */
+  body:has([data-place-order]:not([hidden])) .checkout-layout::after {
     content: "";
     position: fixed;
     inset-inline: 0;
     bottom: 0;
-    height: calc(132px + env(safe-area-inset-bottom, 0px));
+    /* Only as tall as it needs to be. This is a fixed band across the foot
+       of the viewport, so every pixel of it is also covering the bottom of
+       the page when the customer scrolls to the end — and the last thing down
+       there is the footer's Shipping / FAQ / Privacy / Terms row, which is
+       exactly what somebody reaches for BEFORE paying. Fully opaque only
+       across the pill's own band; a soft ramp above it. */
+    height: calc(104px + env(safe-area-inset-bottom, 0px));
     background: linear-gradient(
       to top,
       var(--surface-page) 0%,
-      var(--surface-page) 34%,
-      color-mix(in srgb, var(--surface-page) 72%, transparent) 62%,
+      var(--surface-page) 46%,
+      color-mix(in srgb, var(--surface-page) 62%, transparent) 74%,
       transparent 100%);
-    z-index: -1;
+    z-index: 39;
     pointer-events: none;
   }
 
@@ -582,8 +602,11 @@
   /* And the same at the true bottom of the page: the funnel footer's last row
      is Shipping / FAQ / Privacy / Terms, which is where a customer goes to
      read a policy BEFORE paying — printing the pill on top of it is printing
-     it on top of the four links most likely to be wanted at that moment. */
-  .footer-checkout { padding-bottom: calc(61px + env(safe-area-inset-bottom, 0px)); }
+     it on top of the four links most likely to be wanted at that moment.
+     Clears the SCRIM, not just the pill: the fade is 104px tall and the links
+     would otherwise end up dimmed inside it, which is the same complaint one
+     step quieter. */
+  .footer-checkout { padding-bottom: calc(118px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ---- The stepper on a phone -------------------------------------------
