@@ -90,32 +90,6 @@
 }
 @media (max-width: 360px) { .site-header__wordmark { display: none; } }
 
-/* Small-desktop header (992–1399): the full nav appears at 992, and at full
-   size its row is ~1140px of fixed-width content — nothing shrank, so the
-   whole PAGE scrolled sideways on 1024–1120 laptops. Measured, not guessed.
-   Everything stays visible; it just stops pretending the viewport is 1280:
-   tighter run of gaps, smaller nav type, and a search box that is finally
-   allowed to give ground (its input's min-width:auto was the anchor that
-   forced the overflow — a flex child cannot shrink past its content without
-   an explicit floor). */
-@media (min-width: 992px) and (max-width: 1399.98px) {
-  .site-header__inner { gap: var(--space-3); }
-  .primary-nav { gap: 2px; }
-  .nav-link { padding: 0.5rem 0.55rem; font-size: var(--fs-14); }
-  .header-search { min-width: 150px; }
-  .header-search__input { min-width: 0; }
-}
-
-/* The narrowest desktop slice cannot hold every ornament at once even
-   tightened, so two give way in priority order: the wordmark (the rabbit
-   mark still says who we are) and the account/wishlist icons (both live in
-   the account pages and the footer; cart stays). Nav labels and the search
-   box — the things a shopper actually uses — never degrade. */
-@media (min-width: 992px) and (max-width: 1179.98px) {
-  .site-header__wordmark { display: none; }
-  .header-action-optional { display: none !important; }
-}
-
 /* ---- The category shortcuts give way before anything else ---------------
    The nav row was measured to be exactly full at six items. Adding Track
    Order made it seven and the whole PAGE scrolled sideways again — 3px at
@@ -242,6 +216,49 @@
    taps. The two pixels were never worth it. */
 .header-search__input { flex: 1; min-width: 0; background: none; border: 0; color: var(--text-primary); font-size: var(--fs-16); outline: none; }
 .header-search__input::placeholder { color: var(--text-muted); }
+
+/* ---- The small-desktop header ------------------------------------------
+ *
+ * BELOW THE RULES IT OVERRIDES, AND THAT IS THE POINT. Everything here is a
+ * single class, exactly like the `.nav-link`, `.primary-nav` and
+ * `.header-search__input` rules above it. A media query does not add
+ * specificity, so between two rules that tie the LATER one wins — and while
+ * this block sat higher up the file next to the header shell, every
+ * declaration in it that a base rule also set was inert. It had never once
+ * applied.
+ *
+ * That is not a tidy-up. It is why the threshold in the block after this one
+ * kept having to move: 1400, then 1500, then 1540, then 1580, each time
+ * because the row was still overflowing at a width the tightening was
+ * supposed to have already fixed. The tightening was not running. Anything
+ * added here must stay below the base rules, or it joins them in doing
+ * nothing.
+ *
+ * Small-desktop header (992–1399): the full nav appears at 992, and at full
+ * size its row is ~1140px of fixed-width content — nothing shrank, so the
+ * whole PAGE scrolled sideways on 1024–1120 laptops. Measured, not guessed.
+ * Everything stays visible; it just stops pretending the viewport is 1280:
+ * tighter run of gaps, smaller nav type, and a search box that is finally
+ * allowed to give ground (its input's min-width:auto was the anchor that
+ * forced the overflow — a flex child cannot shrink past its content without
+ * an explicit floor). */
+@media (min-width: 992px) and (max-width: 1399.98px) {
+  .site-header__inner { gap: var(--space-3); }
+  .primary-nav { gap: 2px; }
+  .nav-link { padding: 0.5rem 0.55rem; font-size: var(--fs-14); }
+  .header-search { min-width: 150px; }
+  .header-search__input { min-width: 0; }
+}
+
+/* The narrowest desktop slice cannot hold every ornament at once even
+   tightened, so two give way in priority order: the wordmark (the rabbit
+   mark still says who we are) and the account/wishlist icons (both live in
+   the account pages and the footer; cart stays). Nav labels and the search
+   box — the things a shopper actually uses — never degrade. */
+@media (min-width: 992px) and (max-width: 1179.98px) {
+  .site-header__wordmark { display: none; }
+  .header-action-optional { display: none !important; }
+}
 
 /* ---- Count badge on cart / wishlist icons ---------------------------- */
 .action-badge {
