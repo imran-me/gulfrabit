@@ -198,7 +198,21 @@ async function main() {
       await cdp.send('Emulation.setDeviceMetricsOverride',
         { width: vp.width, height: vp.height, deviceScaleFactor: 1, mobile: vp.mobile }, sessionId);
       await cdp.send('Page.navigate', { url }, sessionId);
-      await new Promise((r) => setTimeout(r, 3500));
+
+      /* Polled, not slept. A fixed settle made this check FLAKY: on a busy
+         machine the modules had not mounted yet and it reported a loop that
+         "was asked to loop and did not" — a false alarm, which is the one
+         thing a build check must never produce. Twenty seconds against a local
+         static server is not slowness; it is a page that never arrived, and
+         that is worth failing on. */
+      const READY = `[${JSON.stringify(LOOPABLE.map((l) => l[1]))}]`
+        + `.every((s) => document.querySelector(s)?.classList.contains('is-looping'))`;
+      for (let waited = 0; waited < 20000; waited += 250) {
+        await new Promise((r) => setTimeout(r, 250));
+        const probe = await cdp.send('Runtime.evaluate',
+          { expression: READY, returnByValue: true }, sessionId).catch(() => null);
+        if (probe?.result?.value === true) break;
+      }
 
       const res = await cdp.send('Runtime.evaluate',
         { expression: PROBE, returnByValue: true }, sessionId);
