@@ -963,7 +963,14 @@ a:hover { color: var(--link-hover); }
     transform: none;
   }
   .product-card__badges { gap: 4px; }
-  .badge-gr { padding: 2px 6px; font-size: 9px; letter-spacing: .03em; }
+  /* The badges' own size is set further down, scoped to this stack. It used to
+     be set here too, unscoped, and that rule never applied: the plain
+     `.badge-gr` block below ties with it on specificity and wins on being
+     later. It is gone rather than revived — the only `.badge-gr` outside a
+     product card is the sale chip in the quick-view modal, which sits beside a
+     price and has been rendering at the full 12px for its whole life. Making
+     it 9px on phones would be shipping a change to a modal nobody asked to
+     change, on the strength of a rule that had never rendered. */
 
   /* Pushed to the far end of the strip, away from the badges. */
   .product-card__actions { margin-left: auto; gap: 2px; }
@@ -1278,32 +1285,6 @@ html[data-card~="saving:off"] .product-card .price-saving { display: none; }
 }
 @media (max-width: 360px) { .site-header__wordmark { display: none; } }
 
-/* Small-desktop header (992–1399): the full nav appears at 992, and at full
-   size its row is ~1140px of fixed-width content — nothing shrank, so the
-   whole PAGE scrolled sideways on 1024–1120 laptops. Measured, not guessed.
-   Everything stays visible; it just stops pretending the viewport is 1280:
-   tighter run of gaps, smaller nav type, and a search box that is finally
-   allowed to give ground (its input's min-width:auto was the anchor that
-   forced the overflow — a flex child cannot shrink past its content without
-   an explicit floor). */
-@media (min-width: 992px) and (max-width: 1399.98px) {
-  .site-header__inner { gap: var(--space-3); }
-  .primary-nav { gap: 2px; }
-  .nav-link { padding: 0.5rem 0.55rem; font-size: var(--fs-14); }
-  .header-search { min-width: 150px; }
-  .header-search__input { min-width: 0; }
-}
-
-/* The narrowest desktop slice cannot hold every ornament at once even
-   tightened, so two give way in priority order: the wordmark (the rabbit
-   mark still says who we are) and the account/wishlist icons (both live in
-   the account pages and the footer; cart stays). Nav labels and the search
-   box — the things a shopper actually uses — never degrade. */
-@media (min-width: 992px) and (max-width: 1179.98px) {
-  .site-header__wordmark { display: none; }
-  .header-action-optional { display: none !important; }
-}
-
 /* ---- The category shortcuts give way before anything else ---------------
    The nav row was measured to be exactly full at six items. Adding Track
    Order made it seven and the whole PAGE scrolled sideways again — 3px at
@@ -1430,6 +1411,49 @@ html[data-card~="saving:off"] .product-card .price-saving { display: none; }
    taps. The two pixels were never worth it. */
 .header-search__input { flex: 1; min-width: 0; background: none; border: 0; color: var(--text-primary); font-size: var(--fs-16); outline: none; }
 .header-search__input::placeholder { color: var(--text-muted); }
+
+/* ---- The small-desktop header ------------------------------------------
+ *
+ * BELOW THE RULES IT OVERRIDES, AND THAT IS THE POINT. Everything here is a
+ * single class, exactly like the `.nav-link`, `.primary-nav` and
+ * `.header-search__input` rules above it. A media query does not add
+ * specificity, so between two rules that tie the LATER one wins — and while
+ * this block sat higher up the file next to the header shell, every
+ * declaration in it that a base rule also set was inert. It had never once
+ * applied.
+ *
+ * That is not a tidy-up. It is why the threshold in the block after this one
+ * kept having to move: 1400, then 1500, then 1540, then 1580, each time
+ * because the row was still overflowing at a width the tightening was
+ * supposed to have already fixed. The tightening was not running. Anything
+ * added here must stay below the base rules, or it joins them in doing
+ * nothing.
+ *
+ * Small-desktop header (992–1399): the full nav appears at 992, and at full
+ * size its row is ~1140px of fixed-width content — nothing shrank, so the
+ * whole PAGE scrolled sideways on 1024–1120 laptops. Measured, not guessed.
+ * Everything stays visible; it just stops pretending the viewport is 1280:
+ * tighter run of gaps, smaller nav type, and a search box that is finally
+ * allowed to give ground (its input's min-width:auto was the anchor that
+ * forced the overflow — a flex child cannot shrink past its content without
+ * an explicit floor). */
+@media (min-width: 992px) and (max-width: 1399.98px) {
+  .site-header__inner { gap: var(--space-3); }
+  .primary-nav { gap: 2px; }
+  .nav-link { padding: 0.5rem 0.55rem; font-size: var(--fs-14); }
+  .header-search { min-width: 150px; }
+  .header-search__input { min-width: 0; }
+}
+
+/* The narrowest desktop slice cannot hold every ornament at once even
+   tightened, so two give way in priority order: the wordmark (the rabbit
+   mark still says who we are) and the account/wishlist icons (both live in
+   the account pages and the footer; cart stays). Nav labels and the search
+   box — the things a shopper actually uses — never degrade. */
+@media (min-width: 992px) and (max-width: 1179.98px) {
+  .site-header__wordmark { display: none; }
+  .header-action-optional { display: none !important; }
+}
 
 /* ---- Count badge on cart / wishlist icons ---------------------------- */
 .action-badge {
@@ -2259,6 +2283,14 @@ html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0)
   width: min(360px, calc(100vw - 2rem));
 }
 @media (max-width: 767px) { .toast-stack { left: 50%; right: auto; transform: translateX(-50%); bottom: var(--space-4); align-items: center; } }
+/* Where the tab bar exists, the toast must not land on top of it. A stack at
+   z-index 1100 over a nav at 990 does not merely look wrong — it swallows the
+   taps meant for Cart and Account for as long as it is up. */
+@media (max-width: 991.98px) {
+  body.has-tabbar .toast-stack {
+    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + var(--space-3));
+  }
+}
 .toast-gr {
   position: relative; overflow: hidden;
   display: flex; align-items: center; gap: var(--space-3);
@@ -2603,6 +2635,11 @@ img.settle.is-settled {
    pages that pin their own bottom bar (cart, express, product) never get it.
    ========================================================================= */
 
+/* The bar's height, in one place. The item's min-height sets it, the body's
+   padding reserves it and the toast stack clears it — three numbers that have
+   to agree, and did so only by having been typed the same three times. */
+:root { --tabbar-h: 53px; }
+
 .tabbar {
   position: fixed;
   inset-inline: 0;
@@ -2630,7 +2667,7 @@ img.settle.is-settled {
   align-items: center;
   justify-content: center;
   gap: 3px;
-  min-height: 53px;
+  min-height: var(--tabbar-h);
   padding: 5px 2px 6px;
   border: 0;
   background: none;
@@ -2673,7 +2710,7 @@ img.settle.is-settled {
    bar would be a second navigation saying the same thing. */
 @media (max-width: 991.98px) {
   .tabbar { display: grid; }
-  body.has-tabbar { padding-bottom: calc(53px + env(safe-area-inset-bottom, 0px)); }
+  body.has-tabbar { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ===== style.css (own rules) ===== */

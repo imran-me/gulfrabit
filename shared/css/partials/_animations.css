@@ -52,6 +52,14 @@ html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0)
   width: min(360px, calc(100vw - 2rem));
 }
 @media (max-width: 767px) { .toast-stack { left: 50%; right: auto; transform: translateX(-50%); bottom: var(--space-4); align-items: center; } }
+/* Where the tab bar exists, the toast must not land on top of it. A stack at
+   z-index 1100 over a nav at 990 does not merely look wrong — it swallows the
+   taps meant for Cart and Account for as long as it is up. */
+@media (max-width: 991.98px) {
+  body.has-tabbar .toast-stack {
+    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + var(--space-3));
+  }
+}
 .toast-gr {
   position: relative; overflow: hidden;
   display: flex; align-items: center; gap: var(--space-3);
