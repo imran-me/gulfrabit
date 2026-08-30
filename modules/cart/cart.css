@@ -77,13 +77,17 @@
    pressing the button — on the last control before payment. */
 .cart-mobile-cta { padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); }
 
-/* The bar is `position: fixed`, so it covers whatever the page ends with —
-   which here is the order summary and its total. Nothing reserved space for
-   it, so the last thing a customer wanted to read was permanently underneath
-   the button asking them to act on it. ~96px of bar plus the inset. */
-@media (max-width: 1023.98px) {
-  .cart-layout { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
-}
+/* The bar is `position: fixed`, so it covers whatever the page ends with.
+   That used to be the order summary and its total — the last thing a customer
+   wanted to read, permanently underneath the button asking them to act on it —
+   and 96px was reserved here to clear it.
+
+   THE FOOTER IS WHAT THE PAGE ENDS WITH NOW. Since the funnel footer replaced
+   the shop one (MINIMAL_FOOTER in tools/assemble.py) it follows the summary
+   immediately instead of a screen and a half later, so the space to reserve is
+   at the bottom of the FOOTER, where .footer-checkout reserves it. Keeping
+   this as well left ~96px of blank canvas between the summary card and the
+   footer: clearance for a bar that is no longer anywhere near it. */
 
 @media (hover: hover) {
   .cart-item__link:hover { color: var(--link); }
@@ -141,4 +145,13 @@
   font-size: var(--fs-12);
   color: var(--text-muted);
   white-space: nowrap;
+}
+
+/* ---- Room under the funnel footer -------------------------------------
+   This page pins its own bar (see above), and the funnel footer's last row is
+   Shipping / FAQ / Privacy / Terms — the four links a customer is most likely
+   to want BEFORE paying. Printing the bar on top of them is printing it on top
+   of exactly those. 79px of bar and its air, plus the home-indicator inset. */
+@media (max-width: 1023.98px) {
+  .footer-checkout { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
 }

@@ -167,3 +167,15 @@
   text-underline-offset: 3px;
 }
 .express-addemail .bn { font-size: .85em; opacity: .85; }
+
+/* ---- Room under the funnel footer -------------------------------------
+   This page pins its own bar (see above), and the funnel footer's last row is
+   Shipping / FAQ / Privacy / Terms — the four links a customer is most likely
+   to want BEFORE paying. Printing the bar on top of them is printing it on top
+   of exactly those. About 80px of bar and its air, plus the home-indicator inset. */
+@media (max-width: 1023.98px) {
+  .footer-checkout { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+}
+/* Declared here as well as in checkout.css, which this page also loads and
+   which sizes the gap for the checkout form's 45px pill. Later sheet wins, and
+   express's bar carries a total beside its button and is half as tall again. */

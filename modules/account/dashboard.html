@@ -85,7 +85,19 @@ try {
     } catch (e) { /* private mode, or nothing stored — the built-in theme stands. */ }
 
     try {
-      var c = localStorage.getItem('gr:card');
+      /* ?card= is a PREVIEW from the panel: already resolved, never stored,
+         and it outranks the mirror so the person previewing sees the card they
+         came to look at. Held to the same alphabet, because it is a URL. */
+      var cq = /[?&]card=([^&]*)/.exec(location.search);
+      if (cq) {
+        var cpv = decodeURIComponent(cq[1].replace(/[+]/g, ' ')).split(/[ ]+/), ckeep = [];
+        for (var k = 0; k < cpv.length; k++) {
+          if (/^[a-z]+:off$/.test(cpv[k])) ckeep.push(cpv[k]);
+        }
+        if (ckeep.length) document.documentElement.setAttribute('data-card', ckeep.join(' '));
+      }
+
+      var c = cq ? null : localStorage.getItem('gr:card');
       if (c) {
         var cp = JSON.parse(c);
         var dev = window.matchMedia('(max-width: 767.98px)').matches ? 'mobile' : 'desktop';
@@ -128,7 +140,7 @@ try {
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=f2d78669">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=3a7d16d2">
   <!-- The theme layer for this build. ONE theme, not seven: a theme sheet
        is inert without its [data-theme] on <html>, so linking them all
        meant every visitor downloading five themes they would never see,
@@ -546,7 +558,7 @@ try {
 </footer>
 
   <script type="module" src="../../shared/js/main.js?v=65e9eef8"></script>
-  <script type="module" src="../../modules/theme/theme.js?v=0de5cceb"></script>
+  <script type="module" src="../../modules/theme/theme.js?v=a2cf5ea2"></script>
   <script type="module" src="../../modules/account/account-page.js?v=b8863d35"></script>
   <script type="module" src="../../modules/mascot/mascot.js?v=ebde2fe4"></script>
 </body>
