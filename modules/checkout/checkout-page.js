@@ -438,12 +438,18 @@ async function paintSummary() {
       <img class="cart-line__thumb" style="width:48px;height:48px" src="${escapeHtml(l.image)}" alt=""><div><div class="cart-line__title">${escapeHtml(l.title)}</div><div class="cart-line__meta">${l.variant ? `${escapeHtml(l.variant)} · ` : ''}Qty ${l.qty}</div></div>
       <div class="cart-line__price">${formatBDT(l.price * l.qty)}</div>
     </div>`).join('');
-  /* What the closed row on a phone is labelled with. The line-item list is
-     hidden at that width, so this is the only place the basket is named: one
-     line is its own title, more than one is the first plus a count — a phone
-     row cannot hold two product titles, and the rest is one tap away. */
+  /* What the CLOSED row on a phone is labelled with. The line-item list is
+     hidden at that width until the panel is opened, so this is the only place
+     the basket is named: one line is its own title, more than one is the
+     first plus a count — a phone row cannot hold two product titles.
+
+     Open, the list above takes over and the head says the count instead; see
+     checkout.css, which does the swap. Both are written on every paint so
+     neither can be stale when the panel is toggled. */
+  const lines = cart.reduce((n, l) => n + l.qty, 0);
   setText('[data-summary-names]', cart[0].title);
   setText('[data-summary-more]', cart.length > 1 ? `+${cart.length - 1} more` : '');
+  setText('[data-summary-count]', `${lines} item${lines === 1 ? '' : 's'}`);
 
   const code = storage.get('cart-promo', null);
   const promo = code ? await validatePromo(code, subtotal()) : null;

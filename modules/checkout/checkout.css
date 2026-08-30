@@ -28,7 +28,8 @@
    column to print the heading and the whole line-item list properly. */
 .order-summary__peek,
 .order-summary__names,
-.order-summary__more { display: none; }
+.order-summary__more,
+.order-summary__count { display: none; }
 
 /* ---- Summary rows -----------------------------------------------------
    These rendered as "Subtotal৳ 4,785" — label and amount touching — because
@@ -176,10 +177,37 @@
 
   .order-summary__body { padding: 0 var(--space-4) var(--space-4); }
 
-  /* The line items collapse away. The totals are what a customer checks
-     repeatedly; the list of what is in the basket they already know, and it
-     is one tap away in the cart. */
-  .order-summary [data-summary-items] { display: none; }
+  /* ---- Open, the head stops naming the basket -------------------------
+     Closed, the row is the ONLY place the basket is named, so it carries the
+     first title and a count. Open, the line-item list below says all of it —
+     properly, one row per product, with the thumbnail, the variant and the
+     quantity. Leaving the head line in as well printed the first product's
+     name twice, one line above itself, which reads as a bug rather than as a
+     heading. The count takes its place: it is the one fact the list's own
+     rows do not state, and it keeps the row from collapsing to a lone
+     chevron. */
+  .order-summary[open] .order-summary__names,
+  .order-summary[open] .order-summary__more { display: none; }
+
+  .order-summary[open] .order-summary__count {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: var(--fs-14);
+    font-weight: var(--fw-medium);
+    color: var(--text-primary);
+  }
+
+  /* The list itself. It used to be display:none at this width on the theory
+     that a customer already knows what they put in the basket — but the panel
+     is a disclosure, and the whole point of opening one is to see what it was
+     hiding. Opened, it showed nothing that the closed row had not: two
+     totals and a name. The rows below are what it is for.
+
+     The thumbnails are 48px here rather than the shared 64 (set inline on the
+     line), so four items still fit inside the 280px scroller. */
+  .order-summary [data-summary-items] .cart-line:first-child { padding-top: 0; }
+  .order-summary [data-summary-items] .cart-line:last-child { border-bottom: 0; }
 
   .summary-row { padding: 3px 0; font-size: var(--fs-14); }
   .summary-row--total { font-size: var(--fs-16); padding-top: var(--space-3); }
