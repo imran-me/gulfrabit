@@ -13,6 +13,154 @@
            against it, so nothing here can ask for a shape the shop cannot
            actually render. -->
       <form data-layout-form>
+
+        <!-- ---- WHERE EACH SECTION SITS --------------------------------
+             Buttons, not drag-and-drop. A merchant reordering a shop from a
+             phone cannot drag anything precisely, and a keyboard cannot drag
+             at all — so the control that works everywhere is the only one
+             here rather than the fallback behind one that doesn't.
+
+             The numbers beside each name are drawn by a CSS counter, so they
+             are always right and there is nothing to renumber. What moves is
+             the <li>, which takes its own buttons with it: press Move up
+             twice and the same button is still under the cursor.
+
+             Two lists because the answer genuinely differs. A phone is a
+             single column a thumb travels down, so what sits third is roughly
+             what gets seen; a computer shows three shelves before the fold
+             and the question is a different one. -->
+        <h2 class="lay-h2">Where each section sits</h2>
+        <p class="admin__sub lay-lede">The hero is always first and is not listed — a hero that is not first is a banner in the middle of a shop.</p>
+
+        <div class="lay-order">
+          <div class="lay-order__col">
+            <h3 class="lay-order__head" id="ord-desktop-head">On computers <span class="lay-th__note">768px and wider</span></h3>
+            <ol class="lay-order__list" data-order-list="desktop" aria-labelledby="ord-desktop-head">
+              <li class="lay-order__item" data-order-item="trust">
+                <span class="lay-order__name">Trust strip</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Trust strip up, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Trust strip down, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="category">
+                <span class="lay-order__name">Shop by Category</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Shop by Category up, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Shop by Category down, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="premium">
+                <span class="lay-order__name">Premium Picks</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Premium Picks up, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Premium Picks down, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="bestseller">
+                <span class="lay-order__name">Best Sellers</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Best Sellers up, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Best Sellers down, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="brands">
+                <span class="lay-order__name">Trusted origins</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Trusted origins up, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Trusted origins down, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="new">
+                <span class="lay-order__name">New Arrivals</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move New Arrivals up, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move New Arrivals down, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="testimonials">
+                <span class="lay-order__name">Testimonials</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Testimonials up, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Testimonials down, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="news">
+                <span class="lay-order__name">Newsletter band</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Newsletter band up, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Newsletter band down, on computers"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+            </ol>
+          </div>
+          <div class="lay-order__col">
+            <h3 class="lay-order__head" id="ord-mobile-head">On phones <span class="lay-th__note">under 768px</span></h3>
+            <ol class="lay-order__list" data-order-list="mobile" aria-labelledby="ord-mobile-head">
+              <li class="lay-order__item" data-order-item="trust">
+                <span class="lay-order__name">Trust strip</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Trust strip up, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Trust strip down, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="category">
+                <span class="lay-order__name">Shop by Category</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Shop by Category up, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Shop by Category down, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="premium">
+                <span class="lay-order__name">Premium Picks</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Premium Picks up, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Premium Picks down, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="bestseller">
+                <span class="lay-order__name">Best Sellers</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Best Sellers up, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Best Sellers down, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="brands">
+                <span class="lay-order__name">Trusted origins</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Trusted origins up, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Trusted origins down, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="new">
+                <span class="lay-order__name">New Arrivals</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move New Arrivals up, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move New Arrivals down, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="testimonials">
+                <span class="lay-order__name">Testimonials</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Testimonials up, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Testimonials down, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+              <li class="lay-order__item" data-order-item="news">
+                <span class="lay-order__name">Newsletter band</span>
+                <span class="lay-order__moves">
+                  <button class="lay-move" type="button" data-order-move="up" aria-label="Move Newsletter band up, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 4.5 13 10H3z" fill="currentColor"/></svg></button>
+                  <button class="lay-move" type="button" data-order-move="down" aria-label="Move Newsletter band down, on phones"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M8 11.5 3 6h10z" fill="currentColor"/></svg></button>
+                </span>
+              </li>
+            </ol>
+          </div>
+        </div>
+        <!-- A move is a visual change with nothing to read, so it is said out
+             loud for anyone who cannot see it happen. -->
+        <p class="visually-hidden" role="status" data-order-status></p>
+
+        <h2 class="lay-h2">What shape each section wears</h2>
         <div class="atable-wrap">
           <table class="atable">
             <thead>
@@ -33,6 +181,7 @@
                   <select class="select-gr" id="lay-category-d" name="category.desktop">
                     <option value="grid">Grid — every tile at once</option>
                     <option value="loop">Moving loop — small tiles, right to left</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -41,6 +190,7 @@
                   <select class="select-gr" id="lay-category-m" name="category.mobile">
                     <option value="grid">Grid — every tile at once</option>
                     <option value="loop">Moving loop — small tiles, right to left</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -56,6 +206,7 @@
                   <select class="select-gr" id="lay-trust-d" name="trust.desktop">
                     <option value="static">Still — four claims across</option>
                     <option value="loop">Moving loop — chips, right to left</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -64,6 +215,7 @@
                   <select class="select-gr" id="lay-trust-m" name="trust.mobile">
                     <option value="static">Still — two by two</option>
                     <option value="loop">Moving loop — chips, right to left</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -80,6 +232,7 @@
                     <option value="march">Drifting shelf — moves on its own</option>
                     <option value="rail">Shelf — moves when pushed</option>
                     <option value="grid">Grid — stands still and wraps</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -89,6 +242,7 @@
                     <option value="march">Drifting shelf — moves on its own</option>
                     <option value="rail">Shelf — moves when pushed</option>
                     <option value="grid">Grid — stands still and wraps</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -105,6 +259,7 @@
                     <option value="grid">Grid — stands still and wraps</option>
                     <option value="rail">Shelf — moves when pushed</option>
                     <option value="march">Drifting shelf — moves on its own</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -114,6 +269,7 @@
                     <option value="grid">Grid — stands still and wraps</option>
                     <option value="rail">Shelf — moves when pushed</option>
                     <option value="march">Drifting shelf — moves on its own</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -130,6 +286,7 @@
                     <option value="march">Drifting shelf — moves on its own</option>
                     <option value="rail">Shelf — moves when pushed</option>
                     <option value="grid">Grid — stands still and wraps</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -139,6 +296,7 @@
                     <option value="march">Drifting shelf — moves on its own</option>
                     <option value="rail">Shelf — moves when pushed</option>
                     <option value="grid">Grid — stands still and wraps</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -154,6 +312,7 @@
                   <select class="select-gr" id="lay-brands-d" name="brands.desktop">
                     <option value="wall">Centred wall — wraps onto two lines</option>
                     <option value="loop">Moving loop — one line, right to left</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -162,6 +321,7 @@
                   <select class="select-gr" id="lay-brands-m" name="brands.mobile">
                     <option value="wall">Centred wall — wraps onto two lines</option>
                     <option value="loop">Moving loop — one line, right to left</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -178,6 +338,7 @@
                     <option value="slider">Slider — one quote, arrows to page</option>
                     <option value="grid">Grid — every quote at once</option>
                     <option value="loop">Moving loop — right to left</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -187,6 +348,7 @@
                     <option value="slider">Slider — one quote, arrows to page</option>
                     <option value="grid">Grid — every quote at once</option>
                     <option value="loop">Moving loop — right to left</option>
+                    <option value="off">Off — hide this section</option>
                   </select>
                   <span class="lay-swatch" data-lay-swatch aria-hidden="true"><span class="lay-swatch__track"><i></i><i></i><i></i><i></i><i></i><i></i></span></span>
                 </td>
@@ -216,7 +378,7 @@
             <strong>What is not on this screen.</strong>
             The <a href="/admin/hero">hero banners</a> have their own, where how long each one is held, how it becomes the next and whether it advances at all are already settings — a second place to arrange the hero would be a second answer to the same question.
             <br>
-            The newsletter band and the industry band have one honest arrangement each, so there is nothing to choose. When one of them grows a second, it appears here.
+            The newsletter band and the industry band have one honest arrangement each, so neither appears in the shape table below. When one of them grows a second, it will. The newsletter band can still be MOVED — where a section sits and what shape it wears are separate questions, and only the second one has run out of answers.
           </p>
         </div>
 

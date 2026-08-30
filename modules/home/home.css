@@ -248,6 +248,31 @@
  * readable, just not the grid. Keeping the phone behaviour a JavaScript-off
  * visitor has always had is worth that.
  */
+/* ---- OFF: the section is not on this device ----------------------------
+   The one shape that is not a shape. `off` is a style like the others (see
+   Modules\Theme\Models\HomeLayout for why it is not a separate flag), and it
+   resolves per device the same way, so a merchant can drop the trust strip on
+   phones and keep it on computers.
+
+   `display: none`, deliberately, and on the SECTION rather than on its inner
+   parts: a hidden section has to take its own padding, its border and its
+   background with it, or the page keeps a band of empty canvas where it used
+   to be and the next section starts a screen too low. Nothing here reserves
+   space — no grid row, no min-height — so what follows simply moves up.
+
+   The hook is `data-sec`, which every movable section carries.
+
+   marquee.js and the rail schedulers need nothing: home.js mounts a loop only
+   for `=== 'loop'` and a march only for `=== 'march'`, so `off` already falls
+   into the branch that tears both down. */
+html[data-lay~="category:off"]     [data-sec="category"],
+html[data-lay~="trust:off"]        [data-sec="trust"],
+html[data-lay~="premium:off"]      [data-sec="premium"],
+html[data-lay~="bestseller:off"]   [data-sec="bestseller"],
+html[data-lay~="new:off"]          [data-sec="new"],
+html[data-lay~="brands:off"]       [data-sec="brands"],
+html[data-lay~="testimonials:off"] [data-sec="testimonials"] { display: none; }
+
 html[data-lay~="trust:loop"] .trust-marquee,
 html.no-js .trust-marquee {
   --trust-icon: 20px;
@@ -743,10 +768,16 @@ html[data-lay~="category:loop"] .home-cat-grid {
 }
 html[data-lay~="category:loop"] .home-cat-grid .category-card {
   flex: 0 0 auto;
-  /* Wide enough for "Kitchen Appliances" on two lines at 12px, narrow enough
-     that a 390px phone shows three and the edge of a fourth — which is what
-     tells the visitor the row moves. */
-  width: 116px;
+  /* 70px, down from 116. Asked for as "40% smaller", and the whole tile
+     follows the width: the artwork is square, so the card loses 40% of its
+     height with it, and the type and the icon below are cut to match rather
+     than left at a size that would have "Kitchen Appliances" spilling out of
+     a tile two thirds the width it was set for.
+
+     What the width is FOR is unchanged: a 390px phone now shows five tiles and
+     the edge of a sixth, which is still what tells a visitor the row moves —
+     more of the catalogue per screen, which is the point of asking. */
+  width: 70px;
   min-height: 0;
   margin-inline-end: var(--space-3);
   padding: 0;
@@ -764,14 +795,22 @@ html[data-lay~="category:loop"] .home-cat-grid .category-card__media {
    control; the blurb is what the shop page is for. */
 html[data-lay~="category:loop"] .home-cat-grid .category-card__count { display: none; }
 html[data-lay~="category:loop"] .home-cat-grid .category-card__title {
-  padding: 9px 6px 11px;
+  /* Scaled with the tile: 12px on 70px reads as a caption crammed into a
+     thumbnail, and "Personal Care" broke to three lines. */
+  padding: 6px 3px 8px;
   text-align: center;
   color: var(--link);
-  font-size: 12px;
-  line-height: 1.3;
+  font-size: 10px;
+  line-height: 1.25;
   letter-spacing: -.01em;
+  /* Two lines is the tile's budget. A third made the row ragged, because one
+     long name set the height of every tile beside it. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-html[data-lay~="category:loop"] .home-cat-grid .category-card__icon { width: 30px; height: 30px; }
+html[data-lay~="category:loop"] .home-cat-grid .category-card__icon { width: 18px; height: 18px; }
 
 /* A travelling tile must not lift under the pointer: it moves out from under
    the cursor mid-transition and the hover latches on a tile that is no longer

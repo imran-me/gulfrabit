@@ -353,6 +353,12 @@
 .lay-swatch[data-shape="wall"] .lay-swatch__track i:nth-child(6) { flex-basis: 18px; }
 
 /* One card at a time, its neighbours just showing at the edges. */
+/* Off. An empty frame — the row is what the section is, so a section that is
+   not there is a frame with nothing in it. Dashed, so it reads as a gap on
+   purpose rather than as a swatch that failed to load. */
+.lay-swatch[data-shape="off"] { border-style: dashed; opacity: .6; }
+.lay-swatch[data-shape="off"] .lay-swatch__track i { display: none; }
+
 .lay-swatch[data-shape="slider"] .lay-swatch__track { justify-content: center; gap: 6px; }
 .lay-swatch[data-shape="slider"] .lay-swatch__track i { display: none; }
 .lay-swatch[data-shape="slider"] .lay-swatch__track i:nth-child(-n+3) { display: block; }
@@ -413,3 +419,113 @@
 @media (prefers-reduced-motion: reduce) {
   .lay-swatch .lay-swatch__track { animation: none !important; transform: none !important; }
 }
+
+/* ---- Where each section sits --------------------------------------------
+   Two ordered lists, one per device, side by side above the shape table. The
+   order is the coarser decision — what the page IS — and the shape is the
+   finer one, so it is read first and sits first. */
+.lay-h2 {
+  margin: var(--space-6) 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-20);
+  font-weight: var(--fw-semibold);
+}
+.lay-h2:first-child { margin-top: 0; }
+.lay-lede { margin: 0 0 var(--space-4); }
+
+.lay-order {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+/* One column under 720px, the same width the admin shell already folds at.
+   Two lists of eight side by side on a phone is sixteen rows of nothing but
+   truncated names. */
+@media (max-width: 720px) {
+  .lay-order { grid-template-columns: minmax(0, 1fr); }
+}
+
+.lay-order__col {
+  background: var(--surface-raised);
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+.lay-order__head {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-secondary);
+}
+.lay-order__head .lay-th__note { text-transform: none; }
+
+/* The position numbers are a COUNTER, not markup and not something the script
+   writes. A move is then one node moving and nothing to renumber — which is
+   also why a failed script cannot leave the list showing positions that are
+   not the positions. */
+.lay-order__list {
+  counter-reset: lay-pos;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.lay-order__item {
+  counter-increment: lay-pos;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-14);
+}
+.lay-order__item::before {
+  content: counter(lay-pos);
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--wash-hover);
+  color: var(--text-secondary);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+.lay-order__name { flex: 1; min-width: 0; }
+.lay-order__moves { flex: none; display: flex; gap: 4px; }
+
+/* 34px, not the 30px the row would allow. This is the only control on the
+   screen a merchant presses REPEATEDLY — moving a section from eighth to
+   second is six presses — and a target that is fractionally too small is a
+   target that misses on the sixth. */
+.lay-move {
+  width: 34px; height: 34px;
+  display: grid; place-items: center;
+  padding: 0;
+  background: var(--surface-raised);
+  border: 1px solid var(--gr-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) {
+  .lay-move:hover { background: var(--wash-hover); color: var(--text-primary); border-color: var(--gr-cyan); }
+}
+.lay-move:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
+
+/* Disabled rather than hidden: a button that vanishes at the end of the list
+   moves the button beside it under the cursor, and the next press does
+   something the merchant did not aim at. */
+.lay-move[disabled] { opacity: .32; cursor: default; }
