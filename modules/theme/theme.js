@@ -38,7 +38,7 @@
  */
 
 import { storage, session, KEYS } from '../../shared/js/core/storage.js';
-import { normalise as normaliseCard, applyCardParts, readMirror as readCardMirror, writeMirror as writeCardMirror } from './card-parts.js';
+import { normalise as normaliseCard, applyCardParts, readMirror as readCardMirror, writeMirror as writeCardMirror, readPreview as readCardPreview } from './card-parts.js';
 import { normalise as normaliseMiniCart, applyMiniCart, applyMirror as applyMiniCartMirror, writeMirror as writeMiniCartMirror } from './mini-cart.js';
 
 /** The only values that may ever reach the DOM. */
@@ -437,7 +437,7 @@ export async function syncTheme() {
        of the two and neither waits on the other, and mirrored on the same
        terms: only ever after the server has spoken. */
     const card = normaliseCard(body?.data?.card);
-    writeCardMirror(card);
+    if (readCardPreview() === null) writeCardMirror(card);
     applyCardParts(card);
 
     // And which controls the mini cart shows, on exactly the same terms.

@@ -205,7 +205,7 @@ export function productCardHTML(product, { eager = false } = {}) {
     <div class="product-card__body">
       ${brand ? `<span class="product-card__brand">${escapeHtml(brand)}${origin ? ` · ${escapeHtml(origin)}` : ''}</span>` : ''}
       <a href="${productURL(product)}"><h3 class="product-card__title">${escapeHtml(title)}</h3></a>
-      <div style="display:flex;align-items:center;gap:6px">${starsHTML(rating, reviewCount)}</div>
+      <div class="product-card__rating" style="display:flex;align-items:center;gap:6px">${starsHTML(rating, reviewCount)}</div>
       <div class="product-card__price-row">
         <span class="price product-card__price">${formatBDT(price)}</span>
         ${originalPrice && originalPrice > price ? `<span class="price price--strike">${formatBDT(originalPrice)}</span>` : ''}

@@ -249,7 +249,19 @@ def _card_bootstrap_js():
     Indented to sit inside the <script> in head().
     """
     return """try {
-      var c = localStorage.getItem('gr:card');
+      /* ?card= is a PREVIEW from the panel: already resolved, never stored,
+         and it outranks the mirror so the person previewing sees the card they
+         came to look at. Held to the same alphabet, because it is a URL. */
+      var cq = /[?&]card=([^&]*)/.exec(location.search);
+      if (cq) {
+        var cpv = decodeURIComponent(cq[1].replace(/[+]/g, ' ')).split(/[ ]+/), ckeep = [];
+        for (var k = 0; k < cpv.length; k++) {
+          if (/^[a-z]+:off$/.test(cpv[k])) ckeep.push(cpv[k]);
+        }
+        if (ckeep.length) document.documentElement.setAttribute('data-card', ckeep.join(' '));
+      }
+
+      var c = cq ? null : localStorage.getItem('gr:card');
       if (c) {
         var cp = JSON.parse(c);
         var dev = window.matchMedia('(max-width: 767.98px)').matches ? 'mobile' : 'desktop';
@@ -621,15 +633,23 @@ NO_MASCOT = {
 # Pages that get the funnel footer instead of the canonical one.
 #
 # A set rather than a seventh field on every PAGES tuple: this is a property of
-# one page in fifty, and the tuples are already six wide. Add a page here and it
-# loses the shop navigation printed under its action; take it out again and the
-# full footer is back with nothing else to undo.
+# three pages in fifty, and the tuples are already six wide. Add a page here and
+# it loses the shop navigation printed under its action; take it out again and
+# the full footer is back with nothing else to undo.
+#
+# The three are exactly the pages that pin their own bottom bar — the same list
+# the mobile tab bar excludes, for the same reason. Measured live at 375px, the
+# canonical footer was 1165px under the cart's Checkout button and 1165px under
+# express's, whose whole page is 434px: two and a half screens of ways to leave,
+# printed beneath the one button asking the customer to stay.
 #
 # The confirmation page is deliberately NOT here. The order is placed by then,
 # and "what else do you sell" is exactly the right question to put in front of
 # someone who has just bought something.
 MINIMAL_FOOTER = {
+    "modules/cart/cart.html",
     "modules/checkout/checkout.html",
+    "modules/checkout/express.html",
 }
 
 # Storefront pages that must carry <meta name="robots" content="noindex">.
@@ -743,6 +763,11 @@ ADMIN_PAGES = [
      "modules/theme/_fragments/layout.main.html",
      ["/modules/admin/admin.css", "/modules/theme/theme-admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/theme/layout-page.js"], True),
+
+    ("modules/theme/cards.html", "Product cards — GulfRabit Admin",
+     "modules/theme/_fragments/card.main.html",
+     ["/modules/admin/admin.css", "/modules/theme/theme-admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/theme/card-page.js"], True),
 
     ("modules/hero/hero.html", "Hero banners — GulfRabit Admin",
      "modules/hero/_fragments/hero.main.html",
@@ -1182,8 +1207,9 @@ def sync_index_theme():
               "page will flash the wrong theme when one is published")
 
     new, card_hits = re.subn(
+        # Anchored on the preview branch, which is now the block's first line.
         # \s already spans the newline, so the pattern needs no literal one.
-        r"try \{\s*var c = localStorage\.getItem\('gr:card'\);"
+        r"try \{\s*/\* \?card= is a PREVIEW"
         r".*?"
         r"catch \(e\) \{ /\* storage off[^}]*\}",
         lambda _m: _card_bootstrap_js(),

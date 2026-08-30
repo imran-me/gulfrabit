@@ -1,0 +1,116 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Product cards</h1>
+          <p class="admin__sub">What each product card shows — and it can show less on a phone than on a computer. This is every card in the shop: the home page, the shop, a category, search, deals and the wishlist all draw the same one.</p>
+        </div>
+      </div>
+
+      <!-- The parts and the words describing them are authored here rather than
+           fetched. They change when somebody changes the card, in the same
+           commit that adds the CSS to hide a new one. The server holds the same
+           list (Modules\Theme\Models\CardParts) and validates every save against
+           it, so this screen cannot offer a part the shop cannot hide. -->
+      <form data-card-form>
+        <div class="atable-wrap">
+          <table class="atable">
+            <thead>
+              <tr>
+                <th scope="col">Part of the card</th>
+                <th scope="col">On computers <span class="lay-th__note">768px and wider</span></th>
+                <th scope="col">On phones <span class="lay-th__note">under 768px</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" class="lay-row">
+                  Wishlist heart
+                  <span class="atable__sub">Saves a product for later. Switching it off empties nobody’s wishlist — the account page still lists and manages it.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="wishlist.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="wishlist.mobile" checked><span>Shown</span></label></td>
+              </tr>
+
+              <tr>
+                <th scope="row" class="lay-row">
+                  Quick-view eye
+                  <span class="atable__sub">Opens the product in a panel without leaving the list.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="quickview.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="quickview.mobile" checked><span>Shown</span></label></td>
+              </tr>
+
+              <tr>
+                <th scope="row" class="lay-row">
+                  Discount badge
+                  <span class="atable__sub">The −47% chip. The struck-through old price stays either way.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="discount.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="discount.mobile" checked><span>Shown</span></label></td>
+              </tr>
+
+              <tr>
+                <th scope="row" class="lay-row">
+                  Premium · New · B2B tags
+                  <span class="atable__sub">Not the stock badges. <strong>Sold out</strong>, <strong>Pre-order</strong> and <strong>Coming soon</strong> are always shown and cannot be switched off.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="tags.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="tags.mobile" checked><span>Shown</span></label></td>
+              </tr>
+
+              <tr>
+                <th scope="row" class="lay-row">
+                  Brand line
+                  <span class="atable__sub">The vendor and origin above the title — “GulfRabit Select · Jordan”.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="brand.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="brand.mobile" checked><span>Shown</span></label></td>
+              </tr>
+
+              <tr>
+                <th scope="row" class="lay-row">
+                  Rating stars
+                  <span class="atable__sub">Only ever on a product that has reviews; a product with none shows nothing here either way.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="rating.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="rating.mobile" checked><span>Shown</span></label></td>
+              </tr>
+
+              <tr>
+                <th scope="row" class="lay-row">
+                  “You save ৳ 350” line
+                  <span class="atable__sub">Already hidden on phones, where the badge and the old price have said it twice — so the phone switch has nothing to change today.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="saving.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="saving.mobile" checked><span>Shown</span></label></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="acard" style="margin-top:var(--space-5)">
+          <p class="admin__sub" style="margin:0">
+            <strong>One card, everyone.</strong> Publishing changes every product card for every visitor — there is no per-visitor setting.
+            <br>
+            <strong>What cannot be switched off, and why.</strong> The photograph, the title, the price, the size chips and the Add to Cart button. The first three are what a card is <em>for</em>, the chips are the control that decides which size goes in the basket, and the button is the sale. A switch that can empty a card of its purpose is a switch that will one day be left on by accident.
+            <br>
+            Switching a part off <strong>hides it, and changes nothing else</strong>. Prices, stock, wishlists and what is on which shelf are all somewhere else.
+          </p>
+        </div>
+
+        <!-- Shown only when there is no backend to publish to. -->
+        <div class="acard theme-offline" data-card-offline hidden>
+          <p class="admin__sub" style="margin:0">
+            <strong>No backend connected.</strong> The shop is serving the card that was built into its pages, and this screen cannot change that for visitors — a universal setting needs somewhere central to store it.
+          </p>
+        </div>
+
+        <div class="theme-actions">
+          <button class="btn-gr btn-primary-gr" type="submit" data-card-save>Publish to every visitor</button>
+          <!-- ?card= is a preview, not a setting: it lasts as long as the tab
+               and is never published. One link per column, because the two
+               columns are the whole point of this screen. -->
+          <a class="btn-gr btn-outline-gr" data-card-preview="desktop" href="/index.html" target="_blank" rel="noopener">Preview computers</a>
+          <a class="btn-gr btn-outline-gr" data-card-preview="mobile" href="/index.html" target="_blank" rel="noopener">Preview phones</a>
+          <span class="admin__sub" role="status" data-card-status></span>
+        </div>
+      </form>

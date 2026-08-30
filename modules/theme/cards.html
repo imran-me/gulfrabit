@@ -86,7 +86,7 @@ try {
 
     
   </script>
-  <title>Appearance — GulfRabit Admin</title>
+  <title>Product cards — GulfRabit Admin</title>
   <meta name="description" content="GulfRabit staff panel.">
   <meta name="theme-color" content="#0A0A0A">
   <meta name="author" content="GulfRabit">
@@ -95,11 +95,11 @@ try {
   <!-- Social / Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GulfRabit">
-  <meta property="og:title" content="Appearance — GulfRabit Admin">
+  <meta property="og:title" content="Product cards — GulfRabit Admin">
   <meta property="og:description" content="GulfRabit staff panel.">
   <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Appearance — GulfRabit Admin">
+  <meta name="twitter:title" content="Product cards — GulfRabit Admin">
   <meta name="twitter:description" content="GulfRabit staff panel.">
   <link rel="icon" href="../../favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
@@ -264,198 +264,118 @@ try {
 
 <div class="admin__head">
         <div>
-          <h1 class="admin__title">Appearance</h1>
-          <p class="admin__sub">How the storefront looks. Publishing takes effect for every visitor straight away — nothing is redeployed.</p>
+          <h1 class="admin__title">Product cards</h1>
+          <p class="admin__sub">What each product card shows — and it can show less on a phone than on a computer. This is every card in the shop: the home page, the shop, a category, search, deals and the wishlist all draw the same one.</p>
         </div>
       </div>
 
-      <!-- The two options are radio inputs inside labels, not buttons: a theme
-           is one choice from a fixed set, which is what a radio group IS. The
-           keyboard behaviour — arrow between options, space to choose — then
-           arrives correct rather than being rebuilt badly. -->
-      <form data-theme-form>
-        <fieldset class="theme-set">
-          <legend class="visually-hidden">Storefront theme</legend>
+      <!-- The parts and the words describing them are authored here rather than
+           fetched. They change when somebody changes the card, in the same
+           commit that adds the CSS to hide a new one. The server holds the same
+           list (Modules\Theme\Models\CardParts) and validates every save against
+           it, so this screen cannot offer a part the shop cannot hide. -->
+      <form data-card-form>
+        <div class="atable-wrap">
+          <table class="atable">
+            <thead>
+              <tr>
+                <th scope="col">Part of the card</th>
+                <th scope="col">On computers <span class="lay-th__note">768px and wider</span></th>
+                <th scope="col">On phones <span class="lay-th__note">under 768px</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" class="lay-row">
+                  Wishlist heart
+                  <span class="atable__sub">Saves a product for later. Switching it off empties nobody’s wishlist — the account page still lists and manages it.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="wishlist.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="wishlist.mobile" checked><span>Shown</span></label></td>
+              </tr>
 
-          <label class="theme-option">
-            <input type="radio" name="theme" value="classic" class="theme-option__input" checked>
-            <span class="theme-option__frame">
-              <!-- A drawn miniature, not a screenshot. A screenshot goes stale
-                   the first time anyone touches the storefront, and a stale
-                   preview of a theme is worse than none. These are painted
-                   from each theme's own colours, so they cannot drift. -->
-              <span class="theme-swatch theme-swatch--classic" aria-hidden="true">
-                <span class="theme-swatch__bar"></span>
-                <span class="theme-swatch__row"><i></i><i></i><i></i></span>
-                <span class="theme-swatch__cta"></span>
-              </span>
-              <span class="theme-option__body">
-                <span class="theme-option__name">Classic<span class="theme-option__flag" data-live-for="classic" hidden>Live</span></span>
-                <span class="theme-option__desc">The shop as it is today. White canvas, cyan and lime, quick and quiet.</span>
-              </span>
-            </span>
-          </label>
+              <tr>
+                <th scope="row" class="lay-row">
+                  Quick-view eye
+                  <span class="atable__sub">Opens the product in a panel without leaving the list.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="quickview.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="quickview.mobile" checked><span>Shown</span></label></td>
+              </tr>
 
-          <label class="theme-option">
-            <input type="radio" name="theme" value="luxe" class="theme-option__input">
-            <span class="theme-option__frame">
-              <span class="theme-swatch theme-swatch--luxe" aria-hidden="true">
-                <span class="theme-swatch__bar"></span>
-                <span class="theme-swatch__row"><i></i><i></i><i></i></span>
-                <span class="theme-swatch__cta"></span>
-              </span>
-              <span class="theme-option__body">
-                <span class="theme-option__name">Luxe<span class="theme-option__flag" data-live-for="luxe" hidden>Live</span></span>
-                <span class="theme-option__desc">Ivory canvas, gold trim, slower motion. The brand colours still carry every button.</span>
-              </span>
-            </span>
-          </label>
+              <tr>
+                <th scope="row" class="lay-row">
+                  Discount badge
+                  <span class="atable__sub">The −47% chip. The struck-through old price stays either way.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="discount.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="discount.mobile" checked><span>Shown</span></label></td>
+              </tr>
 
-          <label class="theme-option">
-            <input type="radio" name="theme" value="trio" class="theme-option__input">
-            <span class="theme-option__frame">
-              <span class="theme-swatch theme-swatch--trio" aria-hidden="true">
-                <span class="theme-swatch__bar"></span>
-                <span class="theme-swatch__row"><i></i><i></i><i></i></span>
-                <span class="theme-swatch__cta"></span>
-              </span>
-              <span class="theme-option__body">
-                <span class="theme-option__name">Trio<span class="theme-option__flag" data-live-for="trio" hidden>Live</span></span>
-                <span class="theme-option__desc">The logo worn loud. Cyan action, deep teal ink, lime spark — three colours, no gold, quick like Classic.</span>
-              </span>
-            </span>
-          </label>
+              <tr>
+                <th scope="row" class="lay-row">
+                  Premium · New · B2B tags
+                  <span class="atable__sub">Not the stock badges. <strong>Sold out</strong>, <strong>Pre-order</strong> and <strong>Coming soon</strong> are always shown and cannot be switched off.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="tags.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="tags.mobile" checked><span>Shown</span></label></td>
+              </tr>
 
-          <label class="theme-option">
-            <input type="radio" name="theme" value="noor" class="theme-option__input">
-            <span class="theme-option__frame">
-              <span class="theme-swatch theme-swatch--noor" aria-hidden="true">
-                <span class="theme-swatch__bar"></span>
-                <span class="theme-swatch__row"><i></i><i></i><i></i></span>
-                <span class="theme-swatch__cta"></span>
-              </span>
-              <span class="theme-option__body">
-                <span class="theme-option__name">Noor<span class="theme-option__flag" data-live-for="noor" hidden>Live</span></span>
-                <span class="theme-option__desc">নূর — the shop after dark. Deep water, gold light, every product a lit shop window. Fireflies included.</span>
-              </span>
-            </span>
-          </label>
+              <tr>
+                <th scope="row" class="lay-row">
+                  Brand line
+                  <span class="atable__sub">The vendor and origin above the title — “GulfRabit Select · Jordan”.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="brand.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="brand.mobile" checked><span>Shown</span></label></td>
+              </tr>
 
-          <label class="theme-option">
-            <input type="radio" name="theme" value="nakshi" class="theme-option__input">
-            <span class="theme-option__frame">
-              <span class="theme-swatch theme-swatch--nakshi" aria-hidden="true">
-                <span class="theme-swatch__bar"></span>
-                <span class="theme-swatch__row"><i></i><i></i><i></i></span>
-                <span class="theme-swatch__cta"></span>
-              </span>
-              <span class="theme-option__body">
-                <span class="theme-option__name">Nakshi<span class="theme-option__flag" data-live-for="nakshi" hidden>Live</span></span>
-                <span class="theme-option__desc">নকশি — the shop as a kantha. Undyed cotton, every border a running stitch, and the Sundarbans along the bottom: a tiger, a deer, a boat on the river, Dhaka on the skyline.</span>
-              </span>
-            </span>
-          </label>
+              <tr>
+                <th scope="row" class="lay-row">
+                  Rating stars
+                  <span class="atable__sub">Only ever on a product that has reviews; a product with none shows nothing here either way.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="rating.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="rating.mobile" checked><span>Shown</span></label></td>
+              </tr>
 
-          <label class="theme-option">
-            <input type="radio" name="theme" value="utsab" class="theme-option__input">
-            <span class="theme-option__frame">
-              <span class="theme-swatch theme-swatch--utsab" aria-hidden="true">
-                <span class="theme-swatch__bar"></span>
-                <span class="theme-swatch__row"><i></i><i></i><i></i></span>
-                <span class="theme-swatch__cta"></span>
-              </span>
-              <span class="theme-option__body">
-                <span class="theme-option__name">Utsab<span class="theme-option__flag" data-live-for="utsab" hidden>Live</span></span>
-                <span class="theme-option__desc">উৎসব — for the days the shop dresses up. A living generative background that never repeats itself, over solid cards that stay perfectly readable. Best kept for Eid, Boishakh and sales.</span>
-              </span>
-            </span>
-          </label>
-        </fieldset>
+              <tr>
+                <th scope="row" class="lay-row">
+                  “You save ৳ 350” line
+                  <span class="atable__sub">Already hidden on phones, where the badge and the old price have said it twice — so the phone switch has nothing to change today.</span>
+                </th>
+                <td><label class="card-tick"><input type="checkbox" name="saving.desktop" checked><span>Shown</span></label></td>
+                <td><label class="card-tick"><input type="checkbox" name="saving.mobile" checked><span>Shown</span></label></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <div class="acard" style="margin-top:var(--space-5)">
           <p class="admin__sub" style="margin:0">
-            <strong>One theme, everyone.</strong> Publishing changes the shop for every visitor — there is no per-visitor setting.
+            <strong>One card, everyone.</strong> Publishing changes every product card for every visitor — there is no per-visitor setting.
             <br>
-            Luxe adds movement — a drifting background, a sheen across cards and buttons, rules that draw in as sections arrive.
-            A visitor who has asked their device to <strong>reduce motion</strong> gets the colours and none of the movement, automatically.
+            <strong>What cannot be switched off, and why.</strong> The photograph, the title, the price, the size chips and the Add to Cart button. The first three are what a card is <em>for</em>, the chips are the control that decides which size goes in the basket, and the button is the sale. A switch that can empty a card of its purpose is a switch that will one day be left on by accident.
             <br>
-            No theme changes a price, a product or a page. Switching back is the same two clicks.
-            <br>
-            A theme is what the shop is <em>wearing</em>. How its home page is <em>arranged</em> — which sections move, which stand still, and differently on a phone than on a computer — is the <a href="../../admin/layout">Home layout</a> screen.
+            Switching a part off <strong>hides it, and changes nothing else</strong>. Prices, stock, wishlists and what is on which shelf are all somewhere else.
           </p>
         </div>
 
-        <!-- Shown only when there is no backend to publish to. It is not an
-             error — a static deployment is a supported way to run this shop —
-             but the merchant has to know that the button below cannot reach
-             their visitors, and what can. -->
-        <div class="acard theme-offline" data-theme-offline hidden>
+        <!-- Shown only when there is no backend to publish to. -->
+        <div class="acard theme-offline" data-card-offline hidden>
           <p class="admin__sub" style="margin:0">
-            <strong>No backend connected.</strong> The shop is serving the theme that was built into its pages, and this screen
-            cannot change that for visitors — a universal setting needs somewhere central to store it.
-            <br>
-            <strong>Preview</strong> still works, and it is safe: it only changes the shop in the tab it opens.
-            To change it for everyone on a static deployment, rebuild with
-            <code>python tools/assemble.py --theme luxe</code> and deploy.
+            <strong>No backend connected.</strong> The shop is serving the card that was built into its pages, and this screen cannot change that for visitors — a universal setting needs somewhere central to store it.
           </p>
         </div>
 
         <div class="theme-actions">
-          <button class="btn-gr btn-primary-gr" type="submit" data-theme-save>Publish to every visitor</button>
-          <!-- ?theme= is a preview, not a setting: it lasts as long as the tab
-               and is never stored as the published theme. The URL is shareable,
-               which is most of what asking someone "does this look right?"
-               needs. -->
-          <a class="btn-gr btn-outline-gr" data-theme-preview href="../../?theme=classic" target="_blank" rel="noopener">Preview in a new tab</a>
-          <span class="admin__sub" role="status" data-theme-status></span>
-        </div>
-      </form>
-
-      <!-- ---- Mini cart ---------------------------------------------------
-           Its own form, and its own Publish. It is not a theme: the theme is
-           one choice from a fixed set and this is a switch, they are saved to
-           different keys, and a merchant who hides a button should not have to
-           re-publish the shop's whole appearance to do it. Same screen, because
-           both answer "what does the shop show".
-      -->
-      <h2 class="h5" style="margin-top:var(--space-8)">Mini cart</h2>
-      <p class="admin__sub">
-        The cart that slides in from the right when something is added. Its footer offers two ways on:
-        <strong>View Cart</strong>, which opens the full cart page, and <strong>Checkout</strong>.
-      </p>
-
-      <form data-minicart-form>
-        <div class="acard">
-          <label class="aswitch" style="display:inline-flex">
-            <input type="checkbox" name="view_cart" checked data-minicart-part>
-            <span class="aswitch__track"></span>
-            <span>Show the <strong>View Cart</strong> button</span>
-          </label>
-          <p class="admin__sub" style="margin:var(--space-3) 0 0">
-            Switched off, the drawer offers Checkout alone — the shorter path, and the right one for a shop
-            where baskets are two or three lines and the cart page is a detour. The button is only
-            <em>hidden</em>: nothing is deleted, the cart page is still reachable from the header and the
-            footer, and turning this back on brings it straight back.
-            <br>
-            Checkout itself, the tick beside each line and the remove button cannot be switched off. The
-            first is the sale; the other two are how a shopper says what they are buying today and what they
-            are keeping for later.
-          </p>
-        </div>
-
-        <!-- Same message, same reason as the theme's above: a screen that
-             cannot reach visitors has to say so rather than look like it
-             worked. -->
-        <div class="acard theme-offline" data-minicart-offline hidden>
-          <p class="admin__sub" style="margin:0">
-            <strong>No backend connected.</strong> Every visitor sees the drawer as it ships — with the button —
-            and this switch cannot change that until there is somewhere central to store it.
-          </p>
-        </div>
-
-        <div class="theme-actions">
-          <button class="btn-gr btn-primary-gr" type="submit" data-minicart-save>Publish to every visitor</button>
-          <span class="admin__sub" role="status" data-minicart-status></span>
+          <button class="btn-gr btn-primary-gr" type="submit" data-card-save>Publish to every visitor</button>
+          <!-- ?card= is a preview, not a setting: it lasts as long as the tab
+               and is never published. One link per column, because the two
+               columns are the whole point of this screen. -->
+          <a class="btn-gr btn-outline-gr" data-card-preview="desktop" href="../../index.html" target="_blank" rel="noopener">Preview computers</a>
+          <a class="btn-gr btn-outline-gr" data-card-preview="mobile" href="../../index.html" target="_blank" rel="noopener">Preview phones</a>
+          <span class="admin__sub" role="status" data-card-status></span>
         </div>
       </form>
     </main>
@@ -474,6 +394,6 @@ try {
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=0451c724"></script>
-  <script type="module" src="../../modules/theme/theme-page.js?v=83b5d5e1"></script>
+  <script type="module" src="../../modules/theme/card-page.js?v=813735d0"></script>
 </body>
 </html>

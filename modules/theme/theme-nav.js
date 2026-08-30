@@ -40,3 +40,19 @@ registerScreen({
   order: 81,
   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="5" rx="1.2"/><rect x="3" y="12" width="7" height="8" rx="1.2"/><rect x="13" y="12" width="8" height="3.4" rx="1.2"/><path d="M13 18.6h8"/></svg>',
 });
+
+/*
+ * Order 82: after Home layout. The three Settings screens this module owns read
+ * outward — what the shop WEARS, how its home page is ARRANGED, and what a
+ * single card SHOWS — which is the order somebody looking for one of them
+ * scans in.
+ */
+registerScreen({
+  id: 'product-cards',
+  label: 'Product cards',
+  href: '/admin/cards',
+  area: 'content',
+  group: 'Settings',
+  order: 82,
+  icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="18" rx="1.5"/><rect x="13" y="3" width="8" height="10" rx="1.5"/><path d="M13 17h8M13 20.5h5"/></svg>',
+});

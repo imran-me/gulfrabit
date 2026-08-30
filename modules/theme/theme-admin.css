@@ -529,3 +529,30 @@
    moves the button beside it under the cursor, and the next press does
    something the merchant did not aim at. */
 .lay-move[disabled] { opacity: .32; cursor: default; }
+
+/* ---- Product cards screen ----------------------------------------------
+   A tick and the word "Shown", rather than a bare box. A column of unlabelled
+   checkboxes under a heading that says "On computers" leaves the merchant to
+   work out which way round it reads — ticked for shown, or ticked for hidden.
+   The word answers it once per control and costs a few pixels. */
+.card-tick {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  cursor: pointer;
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+  user-select: none;
+}
+.card-tick input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gr-cyan);
+  cursor: pointer;
+  flex: none;
+}
+/* Ticked reads as the ordinary state, because it is: everything ships shown. */
+.card-tick:has(input:checked) { color: var(--text-primary); font-weight: var(--fw-medium); }
+.card-tick:has(input:not(:checked)) span { text-decoration: line-through; opacity: .7; }
+.card-tick input:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
