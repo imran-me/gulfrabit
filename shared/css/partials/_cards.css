@@ -392,7 +392,14 @@
     transform: none;
   }
   .product-card__badges { gap: 4px; }
-  .badge-gr { padding: 2px 6px; font-size: 9px; letter-spacing: .03em; }
+  /* The badges' own size is set further down, scoped to this stack. It used to
+     be set here too, unscoped, and that rule never applied: the plain
+     `.badge-gr` block below ties with it on specificity and wins on being
+     later. It is gone rather than revived — the only `.badge-gr` outside a
+     product card is the sale chip in the quick-view modal, which sits beside a
+     price and has been rendering at the full 12px for its whole life. Making
+     it 9px on phones would be shipping a change to a modal nobody asked to
+     change, on the strength of a rule that had never rendered. */
 
   /* Pushed to the far end of the strip, away from the badges. */
   .product-card__actions { margin-left: auto; gap: 2px; }
@@ -574,3 +581,42 @@
   font-variant-numeric: tabular-nums;
 }
 .pdp-price .price-saving { margin-left: var(--space-2); }
+
+/* ---- Parts of a card the shop can switch off ---------------------------
+ *
+ * Chosen in the panel (Appearance -> Product cards), separately for phones and
+ * for computers, and stamped on <html> before the first paint of every
+ * storefront page:
+ *
+ *     <html data-card="wishlist:off quickview:off">
+ *
+ * ONLY WHAT IS OFF IS LISTED, so no attribute means the card this repository
+ * draws. A visitor with no JavaScript, a shop with no backend and a failed
+ * read all land in the same place: the whole card. There is no state in which
+ * a part disappears because something went wrong.
+ *
+ * WHAT IS NOT HERE, and must not be added: the title, the price, the size
+ * chips and the button. The first two are what a card is for, the chips are a
+ * control that decides what goes in the basket, and the button is the sale.
+ *
+ * The stock badges — Sold out, Pre-order, Coming soon — are deliberately NOT
+ * part of `tags`. They are the difference between a product a shopper can buy
+ * and one they cannot; hiding that is not a style choice.
+ *
+ * Nothing here hides a CONTAINER. On phones .product-card__labels reserves its
+ * row so two cards still line their titles up, and on desktop the badges and
+ * actions are absolutely positioned over the photograph and cost no layout at
+ * all. Emptying them is enough in both places.
+ */
+html[data-card~="wishlist:off"] .product-card [data-action="wishlist"],
+html[data-card~="quickview:off"] .product-card [data-action="quickview"] { display: none; }
+
+html[data-card~="discount:off"] .product-card .badge-sale { display: none; }
+
+html[data-card~="tags:off"] .product-card .badge-premium,
+html[data-card~="tags:off"] .product-card .badge-new,
+html[data-card~="tags:off"] .product-card .badge-origin { display: none; }
+
+html[data-card~="brand:off"] .product-card .product-card__brand { display: none; }
+html[data-card~="rating:off"] .product-card .product-card__rating { display: none; }
+html[data-card~="saving:off"] .product-card .price-saving { display: none; }
