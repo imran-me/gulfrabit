@@ -1,11 +1,20 @@
 /**
  * layout-page.js — the Home layout screen.
  *
- * Fourteen dropdowns and one publish. The screen itself is authored in
- * layout.main.html, because which sections exist and which shapes they can wear
- * are structural facts about the home page, not data — they change in the same
- * commit that adds the CSS for a new shape. This file only moves values in and
- * out of controls that already exist.
+ * Two lists, fourteen dropdowns and one publish. The screen itself is authored
+ * in layout.main.html, because which sections exist, what they are called and
+ * which shapes they can wear are structural facts about the home page, not
+ * data — they change in the same commit that adds the CSS for a new shape.
+ * This file only moves values in and out of controls that already exist, and
+ * moves list items past one another.
+ *
+ * THE ORDER IS READ OFF THE DOM, NOT HELD IN A VARIABLE
+ * -----------------------------------------------------
+ * The <li>s themselves ARE the order. There is no array here kept in step with
+ * what the merchant can see, because the two could disagree and then one of
+ * them would be publishing. Moving a section is one insertBefore; reading the
+ * order back is one map over the list. The position numbers are a CSS counter
+ * for the same reason — nothing to renumber means nothing to renumber wrong.
  *
  * PUBLISHING IS A SERVER ACTION OR IT IS NOTHING
  * ----------------------------------------------
@@ -24,15 +33,21 @@
 
 import { adminFetch, isBackendAbsent } from '/modules/admin/backend/api.js';
 
-/** Keep in step with Modules\Theme\Models\HomeLayout::SECTIONS. */
+/** Keep in step with Modules\Theme\Models\HomeLayout. */
 const DEFAULTS = {
-  category: { desktop: 'grid', mobile: 'grid' },
-  trust: { desktop: 'static', mobile: 'loop' },
-  premium: { desktop: 'march', mobile: 'march' },
-  bestseller: { desktop: 'grid', mobile: 'grid' },
-  new: { desktop: 'march', mobile: 'march' },
-  brands: { desktop: 'wall', mobile: 'wall' },
-  testimonials: { desktop: 'slider', mobile: 'slider' },
+  styles: {
+    category: { desktop: 'grid', mobile: 'grid' },
+    trust: { desktop: 'static', mobile: 'loop' },
+    premium: { desktop: 'march', mobile: 'march' },
+    bestseller: { desktop: 'grid', mobile: 'grid' },
+    new: { desktop: 'march', mobile: 'march' },
+    brands: { desktop: 'wall', mobile: 'wall' },
+    testimonials: { desktop: 'slider', mobile: 'slider' },
+  },
+  order: {
+    desktop: ['trust', 'category', 'premium', 'bestseller', 'brands', 'new', 'testimonials', 'news'],
+    mobile: ['trust', 'category', 'premium', 'bestseller', 'brands', 'new', 'testimonials', 'news'],
+  },
 };
 
 document.addEventListener('admin:ready', init);
@@ -69,13 +84,26 @@ async function init() {
     const chosen = read(form);
     form.querySelectorAll('[data-layout-preview]').forEach((link) => {
       const device = link.dataset.layoutPreview;
-      const tokens = Object.entries(chosen)
+      const tokens = Object.entries(chosen.styles)
         .map(([section, byDevice]) => `${section}:${byDevice[device]}`)
         .join(' ');
-      link.href = `/index.html?lay=${encodeURIComponent(tokens)}`;
+      const order = chosen.order[device].join(',');
+      link.href = `/index.html?lay=${encodeURIComponent(tokens)}&ord=${encodeURIComponent(order)}`;
     });
   };
   form.addEventListener('change', () => { syncPreviews(); paintSwatches(form); });
+
+  /* One listener on the form rather than sixteen on the buttons: the <li>s are
+     moved around underneath, and a listener bound to a node that moves is a
+     listener that has to be rebound. This one never does. */
+  form.addEventListener('click', (e) => {
+    const btn = e.target.closest?.('[data-order-move]');
+    if (!btn || btn.disabled) return;
+    move(form, btn);
+    syncPreviews();
+  });
+
+  form.querySelectorAll('[data-order-list]').forEach(refreshMoves);
   syncPreviews();
 
   form.addEventListener('submit', async (e) => {
@@ -131,12 +159,18 @@ function paintSwatches(form) {
  * sections to walk.
  */
 function read(form) {
-  const out = {};
+  const styles = {};
   form.querySelectorAll('select[name*="."]').forEach((select) => {
     const [section, device] = select.name.split('.');
-    (out[section] ??= {})[device] = select.value;
+    (styles[section] ??= {})[device] = select.value;
   });
-  return out;
+
+  const order = {};
+  form.querySelectorAll('[data-order-list]').forEach((list) => {
+    order[list.dataset.orderList] = [...list.children].map((li) => li.dataset.orderItem);
+  });
+
+  return { styles, order };
 }
 
 /**
@@ -149,9 +183,89 @@ function read(form) {
  */
 function fill(form, layout) {
   if (!layout) return;
+  const styles = layout.styles ?? layout;   // a record from before ordering existed
+
   form.querySelectorAll('select[name*="."]').forEach((select) => {
     const [section, device] = select.name.split('.');
-    const value = layout[section]?.[device];
+    const value = styles[section]?.[device];
     if (value && [...select.options].some((o) => o.value === value)) select.value = value;
+  });
+
+  form.querySelectorAll('[data-order-list]').forEach((list) => {
+    const wanted = layout.order?.[list.dataset.orderList];
+    if (Array.isArray(wanted)) fillOrder(list, wanted);
+    refreshMoves(list);
+  });
+}
+
+/**
+ * A list of section names, into a list of <li>s.
+ *
+ * Only names the list actually holds are placed, and each is placed at most
+ * once — so a value naming a section this build of the panel does not have
+ * cannot empty the list, and a value naming one twice cannot duplicate a row.
+ * Anything the value failed to mention keeps its place at the end, which is
+ * the same completion the server and the storefront both perform.
+ */
+function fillOrder(list, wanted) {
+  for (const name of wanted) {
+    const li = list.querySelector(`[data-order-item="${CSS.escape(name)}"]`);
+    if (li) list.appendChild(li);          // appendChild MOVES an existing node
+  }
+}
+
+/**
+ * One press: the section swaps places with its neighbour.
+ *
+ * Focus is the part worth care. The button moves with its own <li>, so it is
+ * still under the cursor and still focused afterwards — press Move up twice
+ * and both presses land where the merchant aimed. The exception is a section
+ * arriving at an end, where the button it was pressing becomes disabled and
+ * the browser would drop focus to the document; that case hands focus to the
+ * other arrow on the same row, which is the one that still does something.
+ */
+function move(form, btn) {
+  const li = btn.closest('[data-order-item]');
+  const list = li?.parentElement;
+  if (!list) return;
+
+  const up = btn.dataset.orderMove === 'up';
+  const neighbour = up ? li.previousElementSibling : li.nextElementSibling;
+  if (!neighbour) return;
+
+  if (up) list.insertBefore(li, neighbour);
+  else list.insertBefore(neighbour, li);
+
+  refreshMoves(list);
+
+  if (btn.disabled) li.querySelector(`[data-order-move="${up ? 'down' : 'up'}"]`)?.focus();
+  else btn.focus();
+
+  /* Said out loud, because to anyone not watching the list a press that
+     reorders eight rows produced no output at all. The position is read off
+     the DOM rather than counted here, for the same reason everything else on
+     this screen is. */
+  const status = form.querySelector('[data-order-status]');
+  if (status) {
+    const name = li.querySelector('.lay-order__name')?.textContent.trim() ?? 'Section';
+    const where = list.closest('.lay-order__col')?.querySelector('.lay-order__head')?.firstChild?.textContent.trim() ?? '';
+    const at = [...list.children].indexOf(li) + 1;
+    status.textContent = `${name} moved to position ${at} of ${list.children.length}. ${where}.`;
+  }
+}
+
+/**
+ * The first row cannot go up and the last cannot go down.
+ *
+ * Disabled rather than removed: a button that vanishes lets the one beside it
+ * slide under the cursor, and the next press does something nobody aimed at.
+ */
+function refreshMoves(list) {
+  const items = [...list.children];
+  items.forEach((li, i) => {
+    const up = li.querySelector('[data-order-move="up"]');
+    const down = li.querySelector('[data-order-move="down"]');
+    if (up) up.disabled = i === 0;
+    if (down) down.disabled = i === items.length - 1;
   });
 }
