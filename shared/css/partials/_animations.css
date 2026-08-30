@@ -69,7 +69,9 @@ html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0)
 .toast-gr.is-leaving { animation: gr-toast-out var(--dur-base) var(--ease-out) forwards; }
 .toast-gr--success { border-left-color: var(--gr-lime); }
 .toast-gr--error   { border-left-color: var(--gr-error); }
-.toast-gr__icon { flex-shrink: 0; width: 20px; height: 20px; }
+/* Both marks sit on the FIRST line, not the middle of a wrapped one: a tick
+   floating beside line two of a long product name reads as unrelated. */
+.toast-gr__icon { flex-shrink: 0; align-self: flex-start; width: 20px; height: 20px; }
 .toast-gr__msg { flex: 1 1 auto; min-width: 0; }
 /* Close affordance — sits flush with the padding so the box doesn't grow. */
 .toast-gr__close {
