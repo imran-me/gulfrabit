@@ -447,11 +447,124 @@
     padding: 0.55rem 1.6rem;
     font-size: var(--fs-16);
     border-radius: var(--radius-pill);
-    box-shadow: var(--shadow-lg);
+
+    /* ---- The surface ---------------------------------------------------
+       Three layers, painted in one background, so the pill reads as a lit
+       physical object rather than a coloured rectangle:
+
+         1. a soft highlight at the top edge, where a light above it would
+            catch — this is what stops a flat fill looking like a sticker;
+         2. the brand gradient, rotated to 120° so the lime end lands in the
+            bottom-right corner of a WIDE short pill instead of running off
+            the end of it, which is what 135° did at this aspect ratio and
+            why this button had been reading as flat cyan;
+         3. a deepened cyan underneath, so the bottom edge is the shadowed
+            side and the whole thing has a direction of light. */
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.28) 0%, rgba(255,255,255,0) 46%),
+      linear-gradient(120deg, var(--gr-cyan) 0%, #6FC4A8 58%, var(--gr-lime) 100%),
+      var(--gr-cyan-dark);
+    border: 0;
+
+    /* Two shadows doing two jobs. The tight one is contact — it is what sits
+       the pill ON the page. The wide tinted one is the glow that makes it the
+       brightest thing on a white screen, in the button's own cyan rather than
+       a neutral grey, because a grey shadow under a cyan button reads as dirt.
+       The inset hairline is the lit top edge again, at 1px. */
+    box-shadow:
+      0 1px 2px rgba(4, 34, 43, .18),
+      0 10px 24px -6px rgba(27, 180, 212, .45),
+      0 18px 46px -12px rgba(4, 34, 43, .28),
+      inset 0 1px 0 rgba(255, 255, 255, .34);
+
+    /* Ink, not black. #04222B is the project's deep teal — true black on a
+       cyan-to-lime gradient reads as a hole punched in it. */
+    color: #04222B;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .22);
+
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out);
+  }
+
+  /* ---- Letting the page end under it ---------------------------------
+     THE FIX FOR WHAT THIS LOOKED LIKE. A fixed pill floats over whatever
+     happens to be scrolled beneath it, and with nothing in between it landed
+     squarely on the District select and read as a button covering an input —
+     which is indistinguishable, at a glance, from a broken layout.
+
+     So the page fades out under it. The scrim is a pseudo-element rather than
+     new markup: the button already carries z-index 40 and therefore its own
+     stacking context, so a child at z-index -1 paints behind the pill and
+     still above the page. Nothing to add to the fragment, nothing to keep in
+     sync, and it cannot be left behind if the button is ever hidden.
+
+     Transparent at the top so there is no visible edge — a hard line across
+     the form would be a worse artefact than the one being fixed. */
+  [data-place-order]::after {
+    content: "";
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    height: calc(132px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(
+      to top,
+      var(--surface-page) 0%,
+      var(--surface-page) 34%,
+      color-mix(in srgb, var(--surface-page) 72%, transparent) 62%,
+      transparent 100%);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* Pressed. Down and in — the contact shadow tightens and the glow pulls
+     back, which is what actually happens to a real object pushed toward a
+     surface. Scale alone reads as a hover on a touch screen. */
+  [data-place-order]:active {
+    transform: translateY(1px) scale(.985);
+    box-shadow:
+      0 1px 1px rgba(4, 34, 43, .2),
+      0 4px 12px -4px rgba(27, 180, 212, .4),
+      inset 0 1px 0 rgba(255, 255, 255, .28);
+  }
+
+  /* While the order is in flight the glow is all that is left: no press
+     response, because there is nothing left to press. */
+  [data-place-order].is-placing {
+    transform: none;
+    box-shadow:
+      0 1px 2px rgba(4, 34, 43, .18),
+      0 10px 24px -6px rgba(27, 180, 212, .45);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-place-order] { transition: none; }
+    [data-place-order]:active { transform: none; }
   }
   /* The gloss is a second line here, so the negative margin that pulls it up
-     against the English on a normal button would drag it into the text above. */
-  [data-place-order] .btn-bn { margin-inline-start: 0; font-size: var(--fs-12); }
+     against the English on a normal button would drag it into the text above.
+     Held a touch further back than the .82 it wears elsewhere: on a bright
+     gradient two labels at similar weight compete, and the English carries
+     the amount. */
+  [data-place-order] .btn-bn {
+    margin-inline-start: 0;
+    margin-top: 2px;
+    font-size: var(--fs-12);
+    opacity: .74;
+    letter-spacing: .01em;
+  }
+
+  /* The amount, which is the reason this button says anything at all beyond
+     "Place Order". Tabular so it does not jog sideways as the total changes
+     with a promo or a district — a figure that shifts while somebody is
+     reading it is a figure they re-read. */
+  [data-place-order] .btn-amount {
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--fw-semibold);
+  }
+  /* The interpunct, quieter still. It is punctuation between two things that
+     are both already legible, not a third thing to look at. */
+  [data-place-order] .btn-amount::before { opacity: .42; margin: 0 .42em; }
   /* The working label takes the same two lines as the label it replaces, so
      the pill does not change height the moment it is pressed. */
   [data-place-order] .btn-placing { flex-direction: column; gap: 0; }

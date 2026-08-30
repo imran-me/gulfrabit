@@ -1140,6 +1140,45 @@ a:hover { color: var(--link-hover); }
 }
 .pdp-price .price-saving { margin-left: var(--space-2); }
 
+/* ---- Parts of a card the shop can switch off ---------------------------
+ *
+ * Chosen in the panel (Appearance -> Product cards), separately for phones and
+ * for computers, and stamped on <html> before the first paint of every
+ * storefront page:
+ *
+ *     <html data-card="wishlist:off quickview:off">
+ *
+ * ONLY WHAT IS OFF IS LISTED, so no attribute means the card this repository
+ * draws. A visitor with no JavaScript, a shop with no backend and a failed
+ * read all land in the same place: the whole card. There is no state in which
+ * a part disappears because something went wrong.
+ *
+ * WHAT IS NOT HERE, and must not be added: the title, the price, the size
+ * chips and the button. The first two are what a card is for, the chips are a
+ * control that decides what goes in the basket, and the button is the sale.
+ *
+ * The stock badges — Sold out, Pre-order, Coming soon — are deliberately NOT
+ * part of `tags`. They are the difference between a product a shopper can buy
+ * and one they cannot; hiding that is not a style choice.
+ *
+ * Nothing here hides a CONTAINER. On phones .product-card__labels reserves its
+ * row so two cards still line their titles up, and on desktop the badges and
+ * actions are absolutely positioned over the photograph and cost no layout at
+ * all. Emptying them is enough in both places.
+ */
+html[data-card~="wishlist:off"] .product-card [data-action="wishlist"],
+html[data-card~="quickview:off"] .product-card [data-action="quickview"] { display: none; }
+
+html[data-card~="discount:off"] .product-card .badge-sale { display: none; }
+
+html[data-card~="tags:off"] .product-card .badge-premium,
+html[data-card~="tags:off"] .product-card .badge-new,
+html[data-card~="tags:off"] .product-card .badge-origin { display: none; }
+
+html[data-card~="brand:off"] .product-card .product-card__brand { display: none; }
+html[data-card~="rating:off"] .product-card .product-card__rating { display: none; }
+html[data-card~="saving:off"] .product-card .price-saving { display: none; }
+
 /* ===== partials/_navigation.css ===== */
 /* =========================================================================
    GulfRabit · Navigation (header, mega-menu, mobile drawer, announcement bar)
@@ -2161,6 +2200,7 @@ html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0)
 }
 @media (max-width: 767px) { .toast-stack { left: 50%; right: auto; transform: translateX(-50%); bottom: var(--space-4); align-items: center; } }
 .toast-gr {
+  position: relative; overflow: hidden;
   display: flex; align-items: center; gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   background: var(--surface-sunken);
@@ -2194,6 +2234,19 @@ html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0)
 .toast-gr__close:hover { color: var(--text-primary); background: color-mix(in srgb, currentColor 12%, transparent); }
 .toast-gr__close:active { transform: scale(0.88); }
 .toast-gr__close:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
+/* Countdown — a hairline draining along the foot, paused while read. */
+.toast-gr__timer {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+  transform-origin: left center;
+  background: var(--gr-cyan);
+  opacity: 0.55;
+  animation: gr-toast-timer var(--toast-life, 3200ms) linear forwards;
+}
+.toast-gr--success .toast-gr__timer { background: var(--gr-lime); }
+.toast-gr--error   .toast-gr__timer { background: var(--gr-error); }
+.toast-gr.is-paused .toast-gr__timer { animation-play-state: paused; }
+.toast-gr.is-leaving .toast-gr__timer { animation-play-state: paused; opacity: 0; }
+@keyframes gr-toast-timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 @keyframes gr-toast-in  { to { transform: translateX(0); } }
 @keyframes gr-toast-out { to { transform: translateX(120%); opacity: 0; } }
 
@@ -2212,6 +2265,9 @@ html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0)
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
   [data-reveal] { opacity: 1; transform: none; }
+  /* The bar would snap empty in ~0ms and read as a bug; the JS countdown is
+     the real clock, so just drop the picture of it. */
+  .toast-gr__timer { display: none; }
 }
 
 /* ---- Images settle in, rather than popping -----------------------------
