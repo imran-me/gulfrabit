@@ -152,6 +152,44 @@ is deliberate and each carries a note: the site is deployable with no backend,
 so the client needs its own copy, and the pre-paint stamp cannot import a
 module. The server stays the authority wherever there is one.
 
+## The third setting: product cards
+
+The `Product cards` screen, `/admin/cards`. Seven parts of a product card, each
+switchable, separately for phones and for computers:
+
+| Part | What it is |
+|---|---|
+| `wishlist` | the heart |
+| `quickview` | the eye |
+| `discount` | the −47% chip |
+| `tags` | Premium / New / B2B — **never** the stock badges |
+| `brand` | the vendor line above the title |
+| `rating` | the stars |
+| `saving` | the "you save" line (already hidden on phones) |
+
+Unlike the home layout, a card is on **every page that lists anything**, so:
+
+- the answer rides on `GET /api/theme`, which every storefront page already
+  asks for — a second public read would be a second request on every page;
+- the pre-paint stamp lives in `head()` in `tools/assemble.py`, so every
+  generated page carries it, with `sync_index_theme()` keeping the
+  hand-authored `index.html` copy in step;
+- it is **not** stamped on admin pages, for the same reason the panel does not
+  follow the theme.
+
+Only what is OFF is listed, so absence is the whole card:
+
+```html
+<html data-card="wishlist:off quickview:off">
+```
+
+`?card=` previews it, the same way `?theme=` and `?lay=` do.
+
+**Not offered, and not to be added:** the title, the price, the size chips and
+the button. And the stock badges — Sold out, Pre-order, Coming soon — are not
+part of `tags`. `tools/card-drift.py` fails the build if a rule ever reaches
+for one, and if the five copies of the parts list disagree.
+
 ## Backend
 
 | Route | Auth | Notes |
@@ -162,6 +200,8 @@ module. The server stays the authority wherever there is one.
 | `GET /api/home-layout` | public | Same guarantee. A missing table means the shipped arrangement. |
 | `GET /api/admin/home-layout` | `admin:content` | The live layout and the vocabulary behind it. |
 | `PUT /api/admin/home-layout` | `admin:content` | Normalised rather than 422'd — see the controller. |
+| `GET /api/admin/product-card` | `admin:content` | The live card. |
+| `PUT /api/admin/product-card` | `admin:content` | Normalised, not 422'd. |
 
 `site_settings` is a general key/value table, not a `themes` table — the theme
 is the first shop-wide setting and will not be the last.

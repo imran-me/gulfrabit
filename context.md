@@ -875,6 +875,7 @@ python tools/htaccess-check.py
 python tools/module-deps.py
 python tools/header-drift.py
 python tools/layout-drift.py
+python tools/card-drift.py
 node   tools/loop-check.mjs      # needs Edge or Chrome; SKIPS cleanly without one
 python tools/hover-audit.py
 python tools/tailwind-inventory.py
@@ -904,6 +905,7 @@ cannot run is a check people learn to ignore.
 | `header-drift` | `index.html`'s hand-authored header falling behind the partial | the menu hooks updated 42 pages and missed the home page |
 | `loop-check` | a looping home section whose track is narrower than its frame | the trust strip swept a 705px hole through itself at 1440px, and the category tiles a 312px one — both invisible at the phone widths where looping already worked |
 | `layout-drift` | the home-layout vocabulary disagreeing across its four copies | the defaults live in PHP, in `home-layout.js`, in `index.html`'s pre-paint stamp and in the admin dropdowns; a bootstrap that disagrees paints one arrangement and swaps to another, on a first visit only |
+| `card-drift` | the product-card vocabulary disagreeing across its five copies, a switch with no rule to act on it, or a rule reaching for a stock badge | a checkbox the server does not know about is a control that silently does nothing |
 | `hover-audit` | `:hover` that moves or reveals, unguarded | **five** touch bugs from one cause, incl. every button staying lifted after a tap |
 | `tailwind-inventory` | a Tailwind class with no CDN to style it | fails the build; a missing class errors nowhere |
 | `link-check` | an internal link or asset resolving to nothing | 1,904 refs; `relativize()` rewrites paths per page depth |
