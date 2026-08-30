@@ -21,6 +21,10 @@ let unsub = null;
 let releaseTrap = null;  // focus-trap release fn while open
 
 const CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+/* The bin replaces the word "Remove", which was a third link of body text in a
+   line that already carries a title, a brand, a quantity stepper and a price.
+   The word is not lost — it is the button's accessible name, and its tooltip. */
+const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="18" height="18" aria-hidden="true"><path d="M4 7h16M10 4h4a1 1 0 0 1 1 1v2H9V5a1 1 0 0 1 1-1z"/><path d="M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7"/><path d="M10 11v6M14 11v6"/></svg>';
 const BAG   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="56" height="56"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>';
 
 function build() {
@@ -75,22 +79,49 @@ function render() {
     return;
   }
 
-  linesEl.innerHTML = cart.map((l) => `
-    <div class="cart-line" data-line-id="${l.id}" data-variant="${l.variant ?? ''}">
+  /* The tick decides what is bought; the bin decides what is kept. They are
+     deliberately at opposite ends of the line, because one of them is
+     reversible with a second click and the other is not. */
+  const picked = cart.filter(store.isLineSelected).length;
+
+  linesEl.innerHTML = `
+    <label class="cart-pick-all">
+      <input type="checkbox" class="cart-pick__box" data-pick-all
+             ${picked === cart.length ? 'checked' : ''}
+             ${picked && picked < cart.length ? 'data-some' : ''}>
+      <span>Select all</span>
+      <span class="cart-pick-all__count">${picked} of ${cart.length} selected</span>
+    </label>` + cart.map((l) => `
+    <div class="cart-line cart-line--pick" data-line-id="${l.id}" data-variant="${escapeAttr(l.variant ?? '')}">
+      <label class="cart-pick">
+        <input type="checkbox" class="cart-pick__box" data-pick ${store.isLineSelected(l) ? 'checked' : ''}>
+        <span class="visually-hidden">Include ${escapeHtml(l.title)} in this order</span>
+      </label>
       <picture>${imageSource(l.image, 'thumb')}
         <img class="cart-line__thumb" src="${escapeAttr(l.image)}" alt="${escapeAttr(l.title)}" loading="lazy">
       </picture>
       <div>
         <div class="cart-line__title">${escapeHtml(l.title)}</div>
-        <div class="cart-line__meta">${l.variant ? `<strong>${escapeHtml(l.variant)}</strong> · ` : ''}${l.brand ? escapeHtml(l.brand) + ' · ' : ''}Qty
+        <div class="cart-line__meta">${l.variant ? `<strong>${escapeHtml(l.variant)}</strong> · ` : ''}${l.brand ? escapeHtml(l.brand) + ' · ' : ''}<!--
+          --><span class="cart-line__qty">Qty
           <button class="cart-line__qty-dec" aria-label="Decrease quantity" style="background:none;border:0;color:inherit;cursor:pointer">−</button>
           <span class="tabular">${l.qty}</span>
-          <button class="cart-line__qty-inc" aria-label="Increase quantity" style="background:none;border:0;color:inherit;cursor:pointer">+</button>
+          <button class="cart-line__qty-inc" aria-label="Increase quantity" style="background:none;border:0;color:inherit;cursor:pointer">+</button></span>
         </div>
-        <button class="cart-line__remove" data-remove>Remove</button>
       </div>
-      <div class="cart-line__price">${formatBDT(l.price * l.qty)}</div>
+      <div class="cart-line__end">
+        <div class="cart-line__price">${formatBDT(l.price * l.qty)}</div>
+        <button class="cart-line__remove" data-remove type="button"
+                title="Remove" aria-label="Remove ${escapeAttr(l.title)} from the cart">${TRASH}</button>
+      </div>
     </div>`).join('');
+
+  /* Neither ticked nor unticked: some lines are in and some are out, and the
+     box says exactly that rather than claiming one of them. Set as a property
+     because there is no HTML attribute for it. */
+  const all = linesEl.querySelector('[data-pick-all]');
+  all.indeterminate = all.hasAttribute('data-some');
+  all.addEventListener('change', () => store.setAllSelected(all.checked));
 
   // Wire per-line controls.
   linesEl.querySelectorAll('.cart-line').forEach((row) => {
@@ -100,17 +131,35 @@ function render() {
     row.querySelector('.cart-line__qty-dec').addEventListener('click', () => store.updateQty(id, line.qty - 1, variant));
     row.querySelector('.cart-line__qty-inc').addEventListener('click', () => store.updateQty(id, line.qty + 1, variant));
     row.querySelector('[data-remove]').addEventListener('click', () => store.removeFromCart(id, variant));
+    row.querySelector('[data-pick]').addEventListener('change', (e) => store.setLineSelected(id, variant, e.target.checked));
   });
 
-  const subtotal = store.cartSubtotal();
+  /* What is being paid for, not what is being held. store.cartSubtotal() is
+     still the whole basket and is still what the badge counts — see the
+     selection block in core/state.js for why the two answers are kept apart. */
+  const subtotal = store.selectedSubtotal();
+  const partial = picked > 0 && picked < cart.length;
   footEl.innerHTML = `
     <div class="gift-progress" data-gift-progress hidden></div>
-    <div class="cart-summary-row"><span>Subtotal</span><span class="tabular">${formatBDT(subtotal)}</span></div>
+    <div class="cart-summary-row">
+      <span>Subtotal${partial ? ` <span class="cart-summary-row__note">${picked} of ${cart.length} items</span>` : ''}</span>
+      <span class="tabular">${formatBDT(subtotal)}</span>
+    </div>
     <div class="cart-summary-row"><span>Delivery</span><span>Calculated at checkout</span></div>
     <div class="flex gap-3 mt-4">
-      <a href="${siteURL('cart')}" class="btn-gr btn-outline-gr btn-block-gr">View Cart</a>
-      <a href="${siteURL('checkout')}" class="btn-gr btn-primary-gr btn-block-gr">Checkout</a>
-    </div>`;
+      <!-- Hidden, never removed, when the merchant switches it off in
+           Appearance > Mini cart. The state lives in one attribute on <html>
+           and the rule is in _modals-offcanvas.css, so there is no render here
+           that can disagree with it. -->
+      <a href="${siteURL('cart')}" class="btn-gr btn-outline-gr btn-block-gr" data-view-cart>View Cart</a>
+      ${picked
+        // A link cannot be disabled, and a Checkout that navigates to a page
+        // reading "your cart is empty" is a worse answer than a button that
+        // plainly cannot be pressed yet.
+        ? `<a href="${siteURL('checkout')}" class="btn-gr btn-primary-gr btn-block-gr">Checkout</a>`
+        : `<button type="button" class="btn-gr btn-primary-gr btn-block-gr" disabled>Checkout</button>`}
+    </div>
+    ${picked ? '' : '<p class="cart-drawer__hint">Tick an item to check it out. Nothing is removed by unticking.</p>'}`;
 
   // Not awaited: the drawer must open instantly. The gift block fills in a
   // beat later and is hidden until it has something to say.

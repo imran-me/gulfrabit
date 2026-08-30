@@ -52,10 +52,18 @@ const visibleSteps = () => steps.filter((s) => stageOf(Number(s.dataset.step)) =
 init();
 
 async function init() {
-  // Guard: empty cart → back to cart.
-  if (!store.getCart().length) {
-    document.querySelector('.checkout-layout').innerHTML =
-      `<div class="empty-state" style="grid-column:1/-1"><h2 class="empty-state__title">Your cart is empty</h2><p class="empty-state__text">Add something before checking out.</p><a class="btn-gr btn-primary-gr" href="${siteURL('')}">Start shopping</a></div>`;
+  /* Guard: nothing to buy → back out.
+     Nothing SELECTED, not an empty cart. A basket whose lines have all been
+     unticked has nothing to charge for, and the two states need different
+     words: one is "you have not chosen anything yet", the other is "you have
+     chosen not to buy any of this today", and only one of them is fixed by
+     going shopping. */
+  const chosen = store.getSelectedCart();
+  if (!chosen.length) {
+    const held = store.getCart().length > 0;
+    document.querySelector('.checkout-layout').innerHTML = held
+      ? `<div class="empty-state" style="grid-column:1/-1"><h2 class="empty-state__title">Nothing is selected</h2><p class="empty-state__text">Your cart still has items in it — tick the ones you want in this order.</p><a class="btn-gr btn-primary-gr" href="${siteURL('cart')}">Back to cart</a></div>`
+      : `<div class="empty-state" style="grid-column:1/-1"><h2 class="empty-state__title">Your cart is empty</h2><p class="empty-state__text">Add something before checking out.</p><a class="btn-gr btn-primary-gr" href="${siteURL('')}">Start shopping</a></div>`;
     document.querySelector('[data-stepper]')?.remove();
     return;
   }
@@ -81,7 +89,7 @@ async function init() {
 
   // After the empty-cart guard has returned, so an abandoned cart page does
   // not report a checkout that never started.
-  track('InitiateCheckout', cartPayload(store.getCart(), subtotal()));
+  track('InitiateCheckout', cartPayload(chosen, subtotal()));
 }
 
 /* ---- Stages ------------------------------------------------------------
@@ -428,11 +436,11 @@ function wireSummaryPanel() {
  * Re-validated on every paint against the LIVE subtotal, exactly as the cart
  * page does, so a basket that drops below a code's minimum spend loses the
  * discount here too instead of carrying a figure the server will refuse. */
-function subtotal() { return store.cartSubtotal(); }
+function subtotal() { return store.selectedSubtotal(); }
 function total() { return Math.max(0, subtotal() - discount) + deliveryCost; }
 
 async function paintSummary() {
-  const cart = store.getCart();
+  const cart = store.getSelectedCart();
   document.querySelector('[data-summary-items]').innerHTML = cart.map((l) => `
     <div class="cart-line" style="grid-template-columns:48px 1fr auto">
       <img class="cart-line__thumb" style="width:48px;height:48px" src="${escapeHtml(l.image)}" alt=""><div><div class="cart-line__title">${escapeHtml(l.title)}</div><div class="cart-line__meta">${l.variant ? `${escapeHtml(l.variant)} · ` : ''}Qty ${l.qty}</div></div>
@@ -447,7 +455,7 @@ async function paintSummary() {
      checkout.css, which does the swap. Both are written on every paint so
      neither can be stale when the panel is toggled. */
   const lines = cart.reduce((n, l) => n + l.qty, 0);
-  setText('[data-summary-names]', cart[0].title);
+  setText('[data-summary-names]', cart[0]?.title ?? '');
   setText('[data-summary-more]', cart.length > 1 ? `+${cart.length - 1} more` : '');
   setText('[data-summary-count]', `${lines} item${lines === 1 ? '' : 's'}`);
 
@@ -478,7 +486,7 @@ function paintReview() {
   setText('[data-review-address]', [g('fullName'), g('address'), g('area'), districtName, g('phone')].filter(Boolean).join(', '));
   setText('[data-review-delivery]', form.querySelector('[data-delivery]:checked')?.closest('.option-card').querySelector('.option-card__title').textContent || '');
   setText('[data-review-payment]', form.querySelector('[data-payment]:checked')?.closest('.option-card').querySelector('.option-card__title').textContent || '');
-  document.querySelector('[data-review-items]').innerHTML = store.getCart().map((l) =>
+  document.querySelector('[data-review-items]').innerHTML = store.getSelectedCart().map((l) =>
     `<div class="review-line"><span>${l.qty} × ${escapeHtml(l.title)}${l.variant ? ` (${escapeHtml(l.variant)})` : ''}</span><span class="tabular">${formatBDT(l.price * l.qty)}</span></div>`).join('')
     + (discount > 0
       ? `<div class="review-line"><span>Promo discount</span><span class="tabular">−${formatBDT(discount)}</span></div>`
@@ -523,7 +531,7 @@ async function placeOrder(e) {
   if (btn) { btn.disabled = true; btn.classList.add('is-placing'); }
 
   const g = (n) => form.querySelector(`[name="${n}"]`)?.value || '';
-  const cart = store.getCart();
+  const cart = store.getSelectedCart();
 
   // Before the redirect. `track` sends the server mirror with keepalive, so
   // the request survives the navigation — without it the browser cancels it
@@ -592,7 +600,11 @@ async function placeOrder(e) {
 
   persistOrderLocally(order);
 
-  store.clearCart();
+  /* Only what was ORDERED leaves. This was clearCart(), which was correct while
+     the whole basket was always the order — now a line the customer explicitly
+     held back for later would have been thrown away at the one moment they are
+     looking at a confirmation page instead of their cart. */
+  store.removeSelected();
   storage.remove('cart-promo');
 
   // bKash/Nagad orders detour through the gateway — but only when the order

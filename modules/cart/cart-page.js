@@ -32,6 +32,9 @@ if (storedPromo && typeof storedPromo !== 'string') storage.set('cart-promo', pr
 store.subscribe(store.EVENTS.CART, render);
 document.querySelector('[data-promo-apply]')?.addEventListener('click', applyPromo);
 document.querySelector('[data-promo-remove]')?.addEventListener('click', removePromo);
+// Bound once, on markup the page authors — the bar is not rebuilt by render(),
+// so binding inside it would stack a listener per repaint.
+document.querySelector('[data-cart-pick-all]')?.addEventListener('change', (e) => store.setAllSelected(e.target.checked));
 render();
 
 async function render() {
@@ -50,6 +53,7 @@ async function render() {
     itemsEl.innerHTML = cart.map(itemHTML).join('');
     wireItems(cart);
   }
+  paintPickBar(cart);
 
   // Saved-for-later
   if (saved.length) {
@@ -64,8 +68,13 @@ async function render() {
 }
 
 function itemHTML(l) {
+  const picked = store.isLineSelected(l);
   return `
-    <div class="cart-item" data-item="${l.id}" data-variant="${l.variant ?? ''}">
+    <div class="cart-item cart-item--pickable${picked ? '' : ' cart-item--held'}" data-item="${l.id}" data-variant="${escapeAttr(l.variant ?? '')}">
+      <label class="cart-item__pick">
+        <input type="checkbox" class="cart-pick__box" data-pick ${picked ? 'checked' : ''}>
+        <span class="visually-hidden">Include ${escapeHtml(l.title)} in this order</span>
+      </label>
       <a class="cart-item__media" href="${productURL(l)}"><img src="${escapeAttr(l.image)}" alt="${escapeAttr(l.title)}" loading="lazy"></a>
       <div>
         <a href="${productURL(l)}"><div class="cart-item__title">${escapeHtml(l.title)}</div></a>
@@ -121,7 +130,29 @@ function wireItems(cart) {
     row.querySelector('[data-qty-val]').addEventListener('change', (e) => store.updateQty(id, parseInt(e.target.value, 10) || step, variant));
     row.querySelector('[data-remove]').addEventListener('click', () => { store.removeFromCart(id, variant); toast.info('Removed from cart'); });
     row.querySelector('[data-save]').addEventListener('click', () => saveForLater(line));
+    row.querySelector('[data-pick]').addEventListener('change', (e) => store.setLineSelected(id, variant, e.target.checked));
   });
+}
+
+/**
+ * The Select all bar above the list.
+ *
+ * Indeterminate is set as a property because there is no attribute for it, and
+ * it is the honest state when some lines are in and some are out — a box that
+ * showed ticked or unticked there would be claiming something about lines it
+ * disagrees with.
+ */
+function paintPickBar(cart) {
+  const bar = document.querySelector('[data-cart-pick-bar]');
+  if (!bar) return;
+  bar.hidden = !cart.length;
+  if (!cart.length) return;
+
+  const picked = cart.filter(store.isLineSelected).length;
+  const box = bar.querySelector('[data-cart-pick-all]');
+  box.checked = picked === cart.length;
+  box.indeterminate = picked > 0 && picked < cart.length;
+  bar.querySelector('[data-cart-pick-count]').textContent = `${picked} of ${cart.length} selected`;
 }
 
 function wireSaved(saved) {
@@ -184,7 +215,7 @@ async function applyPromo() {
   const msg = document.querySelector('[data-promo-msg]');
   if (!code) return;
 
-  const result = await validatePromo(code, store.cartSubtotal());
+  const result = await validatePromo(code, store.selectedSubtotal());
 
   if (result.valid) {
     promoCode = code;
@@ -204,8 +235,12 @@ async function applyPromo() {
 }
 
 async function paintSummary(cart) {
-  const subtotal = store.cartSubtotal();
-  const count = store.cartCount();
+  /* The summary prices WHAT IS TICKED, not what is in the basket. The two are
+     the same until somebody unticks a line, and from that moment on only one
+     of them is the amount they will be asked to pay — the promo check, the
+     gift threshold and checkout itself all read the same figure. */
+  const subtotal = store.selectedSubtotal();
+  const count = store.selectedCount();
   // Recomputed every render, never stored: if the basket drops below the
   // minimum spend the discount disappears on its own, exactly as the server does.
   const result = promoCode ? await validatePromo(promoCode, subtotal) : null;
@@ -263,8 +298,37 @@ async function paintSummary(cart) {
   const delivery = subtotal === 0 ? '—' : `from ${formatBDT(DEFAULT_OPTION.cost)}`;
   setText('[data-summary-delivery]', delivery);
 
-  mobileCta.hidden = count === 0;
+  /* The sticky phone bar follows the BASKET, not the selection: it is the only
+     total a phone customer can see while scrolling, and hiding it the moment
+     every line is unticked would look like the cart had emptied itself. The
+     button inside it is disabled instead, exactly like the one in the panel. */
+  mobileCta.hidden = cart.length === 0;
+  setCheckoutEnabled(count > 0);
 }
+
+/**
+ * Both Checkout buttons — the one in the summary panel and the one in the
+ * sticky phone bar — on or off together.
+ *
+ * They are links, so this is aria-disabled plus a cancelled click rather than
+ * the `disabled` property, which anchors do not have. Cancelling matters: the
+ * styling alone would still navigate on Enter from the keyboard.
+ */
+function setCheckoutEnabled(on) {
+  document.querySelectorAll('[data-checkout-btn], .cart-mobile-cta .btn-gr').forEach((btn) => {
+    btn.setAttribute('aria-disabled', on ? 'false' : 'true');
+    btn.title = on ? '' : 'Tick at least one item to check out';
+  });
+}
+
+/* Bound once, at the document, because both buttons are authored markup and
+   this must hold however the summary is repainted. */
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest?.('[data-checkout-btn], .cart-mobile-cta .btn-gr');
+  if (!btn || btn.getAttribute('aria-disabled') !== 'true') return;
+  e.preventDefault();
+  toast.info('Tick at least one item to check out.');
+});
 
 function setText(sel, val) { const el = document.querySelector(sel); if (el) el.textContent = val; }
 function escapeHtml(str = '') { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }

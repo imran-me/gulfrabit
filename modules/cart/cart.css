@@ -13,6 +13,29 @@
   padding: var(--space-4) 0; border-bottom: 1px solid var(--border-hairline);
 }
 @media (min-width: 640px) { .cart-item { grid-template-columns: 120px minmax(0, 1fr) auto; align-items: center; } }
+
+/* ---- Choosing what to check out ---------------------------------------
+ * The same decision the mini cart offers, in the same words, because it is the
+ * same basket: tick what is being bought today, leave the rest in the list.
+ * The box itself is styled in _modals-offcanvas.css beside the drawer's.
+ *
+ * The extra column is on a modifier rather than on .cart-item, because the
+ * saved-for-later rows below the cart wear the same class and have no tick:
+ * widening the base rule pushed their thumbnail into a zero-width track.
+ */
+.cart-item--pickable { grid-template-columns: auto 96px minmax(0, 1fr); }
+@media (min-width: 640px) { .cart-item--pickable { grid-template-columns: auto 120px minmax(0, 1fr) auto; } }
+.cart-item__pick { display: flex; align-items: center; align-self: stretch; cursor: pointer; }
+.cart-pickbar {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-3) 0; border-bottom: 1px solid var(--border-hairline);
+  color: var(--text-secondary); cursor: pointer;
+}
+.cart-pickbar__count { margin-left: auto; font-size: var(--fs-14); color: var(--text-muted); }
+/* A line held back for later should not read as one that is being bought. Kept
+   to a fade — greying the title as well would make it look unavailable. */
+.cart-item--held .cart-item__media,
+.cart-item--held .cart-item__price { opacity: .5; }
 .cart-item__media { width: 100%; aspect-ratio: 1; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-hairline); background: var(--surface-sunken); }
 .cart-item__media img { width: 100%; height: 100%; object-fit: cover; }
 .cart-item__title { font-weight: var(--fw-medium); }

@@ -45,7 +45,13 @@
   outline: 2px solid var(--gr-cyan);
   outline-offset: 2px;
 }
-.btn-gr:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+/* aria-disabled alongside :disabled, because a link cannot carry the property.
+   The cart's Checkout is an <a> — it has to be, it is a navigation — and when
+   nothing is ticked it must look and behave as unavailable rather than land
+   someone on a checkout with nothing in it. The click is still cancelled in
+   JS; this is only what makes that visible before it is tried. */
+.btn-gr:disabled,
+.btn-gr[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 
 /* ---- Variants -------------------------------------------------------- */
 .btn-primary-gr {
