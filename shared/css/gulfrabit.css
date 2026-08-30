@@ -2084,6 +2084,10 @@ html[data-card~="saving:off"] .product-card .price-saving { display: none; }
 .cart-line__thumb { width: 64px; height: 64px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunken); }
 .cart-line__title { font-size: var(--fs-14); font-weight: var(--fw-medium); line-height: var(--lh-snug); }
 .cart-line__meta { font-size: var(--fs-12); color: var(--text-muted); }
+/* "Qty − 1 +" is one control and must break as one. The tick column narrowed
+   the text beside it by a checkbox's width, which was enough to leave the +
+   stranded on a line of its own under the − it belongs beside. */
+.cart-line__qty { white-space: nowrap; }
 .cart-line__price { font-variant-numeric: tabular-nums; font-weight: var(--fw-semibold); white-space: nowrap; }
 
 /* The price and the bin share the right-hand column: the price is the fact and
