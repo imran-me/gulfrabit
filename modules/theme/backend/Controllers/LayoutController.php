@@ -51,6 +51,9 @@ class LayoutController extends Controller
      * second copy of the list over the wire would invite the panel to render
      * from it, and then a shape could reach a screen before the stylesheet
      * that draws it. update() is what keeps the two honest.
+     *
+     * The order half is the same bargain. The panel authors the row of section
+     * names; what arrives is only which order they are in.
      */
     public function index(): JsonResponse
     {
@@ -64,6 +67,13 @@ class LayoutController extends Controller
      * Fourteen `in:` rules generated from the same constant would say the same
      * thing twice and drift; normalise() is already the function that decides
      * what a valid arrangement is, and it is the one the public read trusts.
+     *
+     * That covers the order too, and it has to: an order is not a field with a
+     * value but a list that must hold every movable section exactly once, and
+     * a `array` rule cannot say that. A short list is completed, a list with a
+     * name twice keeps the first, and a name the page does not have is
+     * dropped — so no save can produce a home page with a section missing or
+     * rendered twice, whatever was posted.
      *
      * The consequence worth stating: a malformed style silently becomes that
      * section's default instead of a 422. For a decoration chosen from a
@@ -93,7 +103,7 @@ class LayoutController extends Controller
      * normalise() runs on the way out as well as on the way in, because a row
      * edited straight into the database has been through neither.
      *
-     * @return array<string, array{desktop: string, mobile: string}>
+     * @return array{styles: array<string, array{desktop: string, mobile: string}>, order: array{desktop: list<string>, mobile: list<string>}}
      */
     private function current(): array
     {

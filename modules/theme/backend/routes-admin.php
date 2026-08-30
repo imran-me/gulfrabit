@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Modules\Theme\Controllers\CardController;
 use Modules\Theme\Controllers\LayoutController;
 use Modules\Theme\Controllers\ThemeController;
 
@@ -26,4 +27,8 @@ Route::prefix('admin')
         // sits behind the same capability rather than a new one.
         Route::get('/home-layout', [LayoutController::class, 'index'])->name('layout.index');
         Route::put('/home-layout', [LayoutController::class, 'update'])->name('layout.update');
+
+        // Product cards are on every page, so this one is not "home" anything.
+        Route::get('/product-card', [CardController::class, 'index'])->name('card.index');
+        Route::put('/product-card', [CardController::class, 'update'])->name('card.update');
     });

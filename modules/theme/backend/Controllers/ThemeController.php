@@ -7,6 +7,7 @@ namespace Modules\Theme\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Theme\Models\CardParts;
 use Modules\Theme\Models\SiteSetting;
 use Throwable;
 
@@ -35,7 +36,16 @@ class ThemeController extends Controller
      */
     public function show(): JsonResponse
     {
-        return response()->json(['data' => ['theme' => $this->current()]])
+        /* `card` rides along rather than getting an endpoint of its own. A
+           product card is on every page that lists anything, so a second
+           public read would be a second request on every page in the shop for
+           an answer that is cached, identical for everybody and about the same
+           thing: how the shop looks. `theme` stays exactly where it was, so
+           nothing that reads this response today notices. */
+        return response()->json(['data' => [
+            'theme' => $this->current(),
+            'card' => CardParts::published(),
+        ]])
             // Public, identical for everyone, and cheap to re-fetch. A minute
             // at the edge takes this off the origin almost entirely while
             // keeping a switch visible to visitors within the minute.
