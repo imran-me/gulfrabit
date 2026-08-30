@@ -302,6 +302,17 @@
   <style>#mobileNav.is-open{transform:translateX(0)!important}@media(min-width:992px){.d-lg-none{display:none!important}}</style>
 
   <!-- ============================ MAIN ============================ -->
+  <!-- Every section a merchant is allowed to move carries data-sec, and the
+       name it carries is the one Modules\Theme\Models\HomeLayout knows it by.
+       The attribute is the whole contract: the panel stores a list of these
+       names, and the bootstrap after </main> puts the sections in that order.
+
+       Two things here deliberately have no name. The <h1> is not a section,
+       and the hero is named but pinned — a hero that is not first is not a
+       hero, so HomeLayout keeps it out of the order and the bootstrap never
+       touches it. The dormant industry band below has no name at all: it
+       ships `hidden` and nothing unhides it, and offering a merchant a
+       control that moves something invisible is offering them a bug. -->
   <main id="main">
 
     <!-- The document's heading. Visually hidden because the hero carries the
@@ -329,7 +340,7 @@
                           to the rendered picture (they are 2.00, 1.50, 1.88
                           and 2.11 — no single box fits all four uncropped)
          Re-measure these if the artwork is ever re-exported. -->
-    <section class="hero" aria-label="Featured" aria-roledescription="carousel">
+    <section class="hero" data-sec="hero" aria-label="Featured" aria-roledescription="carousel">
       <div class="hero__viewport" data-hero>
         <article class="hero__slide is-active" data-hero-slide aria-roledescription="slide" aria-label="1 of 4"
                  style="--arn:2; --ar:1600/800">
@@ -377,7 +388,7 @@
     </section>
 
     <!-- ---- TRUST STRIP ---- -->
-    <section class="trust-band" aria-label="Why GulfRabit">
+    <section class="trust-band" data-sec="trust" aria-label="Why GulfRabit">
       <div class="gr-container trust-band__inner">
         <!-- On phones this is a single-row loop, and the panel can ask for the
              same on computers or for neither (Appearance -> Home layout; see
@@ -398,7 +409,7 @@
     </section>
 
     <!-- ---- SHOP BY CATEGORY ---- -->
-    <section class="section-gr home-cat" aria-labelledby="cat-head">
+    <section class="section-gr home-cat" data-sec="category" aria-labelledby="cat-head">
       <div class="gr-container">
         <div class="section-head">
           <div class="section-head__titles">
@@ -484,7 +495,7 @@
     </section>
 
     <!-- ---- PREMIUM PICKS (rendered by home.js) ---- -->
-    <section class="section-gr canvas-panel" aria-labelledby="premium-head">
+    <section class="section-gr canvas-panel" data-sec="premium" aria-labelledby="premium-head">
       <div class="gr-container">
         <div class="section-head">
           <div class="section-head__titles"><p class="overline">Curated for You</p><h2 id="premium-head">Premium Picks</h2></div>
@@ -505,7 +516,7 @@
     </section>
 
     <!-- ---- BEST SELLERS (rendered by home.js) ---- -->
-    <section class="section-gr" aria-labelledby="best-head">
+    <section class="section-gr" data-sec="bestseller" aria-labelledby="best-head">
       <div class="gr-container">
         <div class="section-head">
           <div class="section-head__titles"><p class="overline">Loved by customers</p><h2 id="best-head">Best Sellers</h2></div>
@@ -634,7 +645,7 @@
     </section>
 
     <!-- ---- FEATURED BRANDS ---- -->
-    <section class="section-gr section-gr--tight" aria-labelledby="brands-head">
+    <section class="section-gr section-gr--tight" data-sec="brands" aria-labelledby="brands-head">
       <div class="gr-container">
         <div style="text-align:center;margin-bottom:var(--space-4)">
           <p class="overline" id="brands-head">Trusted origins &amp; brands</p>
@@ -702,7 +713,7 @@
     </section>
 
     <!-- ---- NEW ARRIVALS (rendered by home.js) ---- -->
-    <section class="section-gr canvas-panel" aria-labelledby="new-head">
+    <section class="section-gr canvas-panel" data-sec="new" aria-labelledby="new-head">
       <div class="gr-container">
         <div class="section-head">
           <div class="section-head__titles"><p class="overline">Fresh imports</p><h2 id="new-head">New Arrivals</h2></div>
@@ -720,7 +731,7 @@
     </section>
 
     <!-- ---- TESTIMONIALS ---- -->
-    <section class="section-gr testimonials" aria-label="Testimonials">
+    <section class="section-gr testimonials" data-sec="testimonials" aria-label="Testimonials">
       <div class="gr-container">
         <div class="testi-viewport" data-testi-viewport>
         <div class="testi-track" data-testi-track>
@@ -754,7 +765,7 @@
     </section>
 
     <!-- ---- NEWSLETTER BAND ---- -->
-    <section class="section-gr" aria-labelledby="news-head">
+    <section class="section-gr" data-sec="news" aria-labelledby="news-head">
       <div class="gr-container">
         <div class="newsletter-band" data-reveal>
           <p class="overline" style="color:#04222b">Join GulfRabit</p>
