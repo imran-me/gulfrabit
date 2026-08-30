@@ -2177,6 +2177,23 @@ html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0)
 .toast-gr--success { border-left-color: var(--gr-lime); }
 .toast-gr--error   { border-left-color: var(--gr-error); }
 .toast-gr__icon { flex-shrink: 0; width: 20px; height: 20px; }
+.toast-gr__msg { flex: 1 1 auto; min-width: 0; }
+/* Close affordance — sits flush with the padding so the box doesn't grow. */
+.toast-gr__close {
+  flex-shrink: 0; align-self: flex-start;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; margin: -4px calc(var(--space-2) * -1) -4px 0;
+  padding: 0; border: 0; border-radius: var(--radius-pill);
+  background: transparent; color: var(--text-muted);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: color var(--dur-fast) var(--ease-out),
+              background-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.toast-gr__close svg { width: 14px; height: 14px; }
+.toast-gr__close:hover { color: var(--text-primary); background: color-mix(in srgb, currentColor 12%, transparent); }
+.toast-gr__close:active { transform: scale(0.88); }
+.toast-gr__close:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
 @keyframes gr-toast-in  { to { transform: translateX(0); } }
 @keyframes gr-toast-out { to { transform: translateX(120%); opacity: 0; } }
 

@@ -30,6 +30,9 @@ const ICONS = {
   info:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="toast-gr__icon"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
 };
 
+const CLOSE_ICON =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+
 /**
  * @param {string} message
  * @param {'success'|'error'|'info'} [type]
@@ -40,17 +43,29 @@ export function showToast(message, type = 'info', duration = 3200) {
   const el = document.createElement('div');
   el.className = `toast-gr toast-gr--${type}`;
   el.setAttribute('role', 'status');
-  el.innerHTML = `${ICONS[type] || ICONS.info}<span>${escapeHtml(message)}</span>`;
+  el.innerHTML =
+    `${ICONS[type] || ICONS.info}` +
+    `<span class="toast-gr__msg">${escapeHtml(message)}</span>` +
+    `<button type="button" class="toast-gr__close" aria-label="Dismiss">${CLOSE_ICON}</button>`;
   stack.appendChild(el);
 
+  let dismissed = false;
   const remove = () => {
+    if (dismissed) return;
+    dismissed = true;
+    clearTimeout(timer);
     el.classList.add('is-leaving');
     el.addEventListener('animationend', () => el.remove(), { once: true });
     // Safety net if animationend doesn't fire.
     setTimeout(() => el.remove(), 400);
   };
   const timer = setTimeout(remove, duration);
-  el.addEventListener('click', () => { clearTimeout(timer); remove(); });
+  el.addEventListener('click', remove);
+  // The button carries its own handler so keyboard Enter/Space reach it too.
+  el.querySelector('.toast-gr__close').addEventListener('click', (e) => {
+    e.stopPropagation();
+    remove();
+  });
 }
 
 function escapeHtml(str) {
