@@ -38,6 +38,8 @@
  */
 
 import { storage, session, KEYS } from '../../shared/js/core/storage.js';
+import { normalise as normaliseCard, applyCardParts, readMirror as readCardMirror, writeMirror as writeCardMirror } from './card-parts.js';
+import { normalise as normaliseMiniCart, applyMiniCart, applyMirror as applyMiniCartMirror, writeMirror as writeMiniCartMirror } from './mini-cart.js';
 
 /** The only values that may ever reach the DOM. */
 const THEMES = ['classic', 'luxe', 'trio', 'noor', 'nakshi', 'utsab'];
@@ -409,6 +411,12 @@ function previewTheme() {
  * awaits it.
  */
 export async function syncTheme() {
+  /* Before anything is asked for. The mini cart's controls are not on screen at
+     first paint, so the pre-paint bootstrap has no reason to know about them —
+     but the drawer can be opened before this fetch answers, and it must open
+     wearing the shop's published footer rather than the repository's. */
+  applyMiniCartMirror();
+
   const preview = previewTheme();
   if (preview) {
     // Deliberately does NOT touch the mirror. A preview must leave no trace
@@ -422,6 +430,21 @@ export async function syncTheme() {
     if (!res.ok) return currentTheme();
 
     const body = await res.json();
+
+    /* The same response carries which parts of a product card the shop shows —
+       see ThemeController::show() for why it rides along rather than having an
+       endpoint of its own. Applied before the theme because it is the cheaper
+       of the two and neither waits on the other, and mirrored on the same
+       terms: only ever after the server has spoken. */
+    const card = normaliseCard(body?.data?.card);
+    writeCardMirror(card);
+    applyCardParts(card);
+
+    // And which controls the mini cart shows, on exactly the same terms.
+    const miniCart = normaliseMiniCart(body?.data?.cart);
+    writeMiniCartMirror(miniCart);
+    applyMiniCart(miniCart);
+
     const name = body?.data?.theme ?? body?.theme;
     if (!THEMES.includes(name)) return currentTheme();
 
@@ -437,7 +460,11 @@ export async function syncTheme() {
 
     return applyTheme(name);
   } catch {
-    return currentTheme();   // offline, or no backend — 3 then 4 stand.
+    /* Offline, or no backend — 3 then 4 stand. The card keeps whatever the
+       pre-paint bootstrap stamped from the mirror, which is the last thing the
+       server actually said. */
+    applyCardParts(normaliseCard(readCardMirror()));
+    return currentTheme();
   }
 }
 

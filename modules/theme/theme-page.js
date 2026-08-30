@@ -1,8 +1,9 @@
 /**
  * theme-page.js — the Appearance screen.
  *
- * One radio group, one publish. Small enough that the interesting decisions
- * are all about telling the truth.
+ * One radio group, one publish, and — since the mini cart grew a switch — a
+ * second small form beside it that saves to its own key. Small enough that the
+ * interesting decisions are all about telling the truth.
  *
  * PUBLISHING IS A SERVER ACTION OR IT IS NOTHING
  * ----------------------------------------------
@@ -49,6 +50,7 @@ async function loadTheme() {
 }
 
 document.addEventListener('admin:ready', init);
+document.addEventListener('admin:ready', initMiniCart);
 
 async function init() {
   const form = document.querySelector('[data-theme-form]');
@@ -106,6 +108,76 @@ async function init() {
       });
       markLive(form, chosen);
       status.textContent = `${label(chosen)} is live. Every visitor sees it from their next page load.`;
+    } catch (err) {
+      status.textContent = isBackendAbsent(err)
+        ? 'Not published — there is no backend to publish to. Nothing changed for visitors.'
+        : `Couldn’t publish: ${err.message}`;
+    }
+
+    saveBtn.disabled = false;
+  });
+}
+
+/* ---- Mini cart ---------------------------------------------------------
+ *
+ * The second, independent half of this screen: which controls the slide-in
+ * cart shows. Separate form, separate key, separate Publish — a merchant
+ * hiding a button has no business re-publishing the theme, and the two saves
+ * must be able to fail independently.
+ *
+ * It reads and writes the same way the theme does, and for the same reasons:
+ * the server is the authority, nothing is mirrored into localStorage from
+ * here, and the form redraws from the RESPONSE so the screen shows what was
+ * actually stored rather than what was asked for.
+ *
+ * The switches are read from the markup — `[data-minicart-part]`, keyed by
+ * `name` — so adding a second one is one <label> and nothing here.
+ */
+async function initMiniCart() {
+  const form = document.querySelector('[data-minicart-form]');
+  if (!form) return;
+
+  const status = form.querySelector('[data-minicart-status]');
+  const saveBtn = form.querySelector('[data-minicart-save]');
+  const offline = form.querySelector('[data-minicart-offline]');
+  const parts = () => [...form.querySelectorAll('[data-minicart-part]')];
+
+  const fill = (cart) => {
+    if (!cart) return;
+    // A key the server did not send is left as the markup has it, which is
+    // "shown" — the same direction of fallback normalise() takes in PHP.
+    parts().forEach((box) => {
+      if (typeof cart[box.name] === 'boolean') box.checked = cart[box.name];
+    });
+  };
+  const read = () => Object.fromEntries(parts().map((box) => [box.name, box.checked]));
+
+  try {
+    const { data } = await adminFetch('/mini-cart');
+    fill(data?.cart);
+  } catch (err) {
+    if (isBackendAbsent(err)) {
+      offline.hidden = false;
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Publishing needs the backend';
+    } else {
+      status.textContent = `Couldn’t read the mini cart settings: ${err.message}`;
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    saveBtn.disabled = true;
+    status.textContent = 'Publishing…';
+
+    try {
+      const { data } = await adminFetch('/mini-cart', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart: read() }),
+      });
+      fill(data?.cart);
+      status.textContent = 'Published. Every visitor sees it from their next page load.';
     } catch (err) {
       status.textContent = isBackendAbsent(err)
         ? 'Not published — there is no backend to publish to. Nothing changed for visitors.'

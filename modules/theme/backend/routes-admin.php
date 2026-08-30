@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Theme\Controllers\CardController;
 use Modules\Theme\Controllers\LayoutController;
+use Modules\Theme\Controllers\MiniCartController;
 use Modules\Theme\Controllers\ThemeController;
 
 /*
@@ -31,4 +32,10 @@ Route::prefix('admin')
         // Product cards are on every page, so this one is not "home" anything.
         Route::get('/product-card', [CardController::class, 'index'])->name('card.index');
         Route::put('/product-card', [CardController::class, 'update'])->name('card.update');
+
+        // The slide-in mini cart. Same reasoning as the card above — it is on
+        // every page, not on one — and the same capability: this decides what
+        // the shop shows, never what it charges.
+        Route::get('/mini-cart', [MiniCartController::class, 'index'])->name('minicart.index');
+        Route::put('/mini-cart', [MiniCartController::class, 'update'])->name('minicart.update');
     });

@@ -146,3 +146,51 @@
           <span class="admin__sub" role="status" data-theme-status></span>
         </div>
       </form>
+
+      <!-- ---- Mini cart ---------------------------------------------------
+           Its own form, and its own Publish. It is not a theme: the theme is
+           one choice from a fixed set and this is a switch, they are saved to
+           different keys, and a merchant who hides a button should not have to
+           re-publish the shop's whole appearance to do it. Same screen, because
+           both answer "what does the shop show".
+      -->
+      <h2 class="h5" style="margin-top:var(--space-8)">Mini cart</h2>
+      <p class="admin__sub">
+        The cart that slides in from the right when something is added. Its footer offers two ways on:
+        <strong>View Cart</strong>, which opens the full cart page, and <strong>Checkout</strong>.
+      </p>
+
+      <form data-minicart-form>
+        <div class="acard">
+          <label class="aswitch" style="display:inline-flex">
+            <input type="checkbox" name="view_cart" checked data-minicart-part>
+            <span class="aswitch__track"></span>
+            <span>Show the <strong>View Cart</strong> button</span>
+          </label>
+          <p class="admin__sub" style="margin:var(--space-3) 0 0">
+            Switched off, the drawer offers Checkout alone — the shorter path, and the right one for a shop
+            where baskets are two or three lines and the cart page is a detour. The button is only
+            <em>hidden</em>: nothing is deleted, the cart page is still reachable from the header and the
+            footer, and turning this back on brings it straight back.
+            <br>
+            Checkout itself, the tick beside each line and the remove button cannot be switched off. The
+            first is the sale; the other two are how a shopper says what they are buying today and what they
+            are keeping for later.
+          </p>
+        </div>
+
+        <!-- Same message, same reason as the theme's above: a screen that
+             cannot reach visitors has to say so rather than look like it
+             worked. -->
+        <div class="acard theme-offline" data-minicart-offline hidden>
+          <p class="admin__sub" style="margin:0">
+            <strong>No backend connected.</strong> Every visitor sees the drawer as it ships — with the button —
+            and this switch cannot change that until there is somewhere central to store it.
+          </p>
+        </div>
+
+        <div class="theme-actions">
+          <button class="btn-gr btn-primary-gr" type="submit" data-minicart-save>Publish to every visitor</button>
+          <span class="admin__sub" role="status" data-minicart-status></span>
+        </div>
+      </form>

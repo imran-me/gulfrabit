@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Theme\Models\CardParts;
+use Modules\Theme\Models\MiniCart;
 use Modules\Theme\Models\SiteSetting;
 use Throwable;
 
@@ -45,6 +46,10 @@ class ThemeController extends Controller
         return response()->json(['data' => [
             'theme' => $this->current(),
             'card' => CardParts::published(),
+            /* And which controls the mini cart shows, for the same reason: the
+               drawer is built on every page in the shop. Two cached booleans'
+               worth of payload against one more round trip everywhere. */
+            'cart' => MiniCart::published(),
         ]])
             // Public, identical for everyone, and cheap to re-fetch. A minute
             // at the edge takes this off the origin almost entirely while
