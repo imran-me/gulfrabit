@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 """
-Catch the home-layout vocabulary drifting between its three copies.
+Catch the home-layout vocabulary drifting between its copies.
 
 WHY THIS EXISTS
 ---------------
-Which shape each home-page section can wear, and which shape it wears by
-default, is written down in three places, on purpose:
+Which shape each home-page section can wear, which shape it wears by default,
+and what order the sections come in are written down in several places, on
+purpose:
 
   1. modules/theme/backend/Models/HomeLayout.php   the server, and the authority
   2. modules/home/home-layout.js                   the client, for a shop that
                                                    is deployed with no backend
   3. the inline bootstrap in index.html            the pre-paint stamp, which
                                                    cannot import a module
+
+The ORDER is written down in those three and two more: the admin screen authors
+one <li> per section, and layout-page.js holds the order a shop with no backend
+falls back to. Five copies of one list.
 
 Each has a note saying the others exist. Notes do not fail a build.
 
@@ -29,6 +34,13 @@ not compare prose: the words a merchant reads live only in
 modules/theme/_fragments/layout.main.html. It does check that the screen offers
 an <option> for every allowed style and no others, because an option the server
 would refuse is a control that silently does nothing.
+
+For the order it checks that all five copies are the same list in the same
+sequence, and — because an order is a list of things that have to EXIST — that
+every movable name is a data-sec in index.html, and that the hero is named
+there but movable nowhere. A section a merchant can move to position one but
+that the page cannot find is a control that does nothing; a hero that can be
+moved is a hero that can stop being one.
 
 Usage:  python tools/layout-drift.py
         exit 1 on any disagreement
@@ -118,6 +130,86 @@ def from_screen():
     return out
 
 
+def movable_php():
+    """HomeLayout::MOVABLE -> [section]."""
+    src = read("modules/theme/backend/Models/HomeLayout.php")
+    body = src[src.index("public const MOVABLE = ["):]
+    return re.findall(r"'(\w+)'", body[:body.index("];")])
+
+
+def movable_module():
+    """MOVABLE in home-layout.js -> [section]."""
+    src = read("modules/home/home-layout.js")
+    body = src[src.index("export const MOVABLE = ["):]
+    return re.findall(r"'(\w+)'", body[:body.index("];")])
+
+
+def movable_bootstrap():
+    """The ORD list in the index.html reorder bootstrap -> [section]."""
+    line = re.search(r"var ORD = \[([^\]]*)\];", read("index.html"))
+    return re.findall(r"'(\w+)'", line.group(1)) if line else None
+
+
+def movable_fallback():
+    """layout-page.js DEFAULTS.order.desktop -> [section]."""
+    src = read("modules/theme/layout-page.js")
+    line = re.search(r"desktop: \[([^\]]*)\]", src)
+    return re.findall(r"'(\w+)'", line.group(1)) if line else None
+
+
+def movable_screen():
+    """The admin screen's two lists -> {device: [section]}."""
+    src = read("modules/theme/_fragments/layout.main.html")
+    out = {}
+    for block in re.finditer(
+        r'data-order-list="(?P<device>desktop|mobile)"(?P<body>.*?)</ol>', src, re.S
+    ):
+        out[block.group("device")] = re.findall(
+            r'data-order-item="(\w+)"', block.group("body"))
+    return out
+
+
+def named_in_markup():
+    """Every data-sec in index.html, in the order the page authors them."""
+    return re.findall(r'data-sec="(\w+)"', read("index.html"))
+
+
+def check_order(problems):
+    """The five copies of the movable list, and the markup they point at."""
+    php = movable_php()
+    if not php:
+        problems.append("could not read HomeLayout::MOVABLE — has it moved?")
+        return 0
+
+    copies = {
+        "home-layout.js": movable_module(),
+        "the index.html bootstrap": movable_bootstrap(),
+        "layout-page.js": movable_fallback(),
+    }
+    for device, names in movable_screen().items():
+        copies[f"the admin screen ({device})"] = names
+
+    for where, got in copies.items():
+        if got is None:
+            problems.append(f"the movable list is missing from {where}")
+        elif got != php:
+            problems.append(f"{where} orders {got}, PHP orders {php}")
+
+    named = named_in_markup()
+    for section in php:
+        if section not in named:
+            problems.append(
+                f"{section}: movable, but nothing in index.html carries data-sec=\"{section}\"")
+
+    # The hero is the one section named so it can be found and pinned.
+    if "hero" not in named:
+        problems.append("index.html no longer names the hero — it can no longer be pinned")
+    if "hero" in php:
+        problems.append("the hero is in MOVABLE — it is meant to be pinned first")
+
+    return len(php)
+
+
 def main():
     php = from_php()
     module = from_module()
@@ -165,16 +257,20 @@ def main():
                             f"{section}.{device}: the screen offers {values}, "
                             f"the server allows {list(styles)}")
 
+    movable = check_order(problems)
+
     if problems:
         print("  the home-layout vocabulary has drifted:")
         for line in problems:
             print(f"    {line}")
         print()
-        print("  All four must agree — see modules/theme/README.md.")
+        print("  Every copy must agree — see modules/theme/README.md.")
         return 1
 
-    print(f"  {len(php)} sections agree across PHP, home-layout.js, "
+    print(f"  {len(php)} section shapes agree across PHP, home-layout.js, "
           f"the index.html bootstrap and the admin screen")
+    print(f"  {movable} movable sections agree across all five copies, "
+          f"and every one of them is named in index.html")
     return 0
 
 
