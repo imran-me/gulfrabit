@@ -32,6 +32,10 @@ const ICONS = {
   info:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="toast-gr__icon"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
 };
 
+/* Three is what a 360px phone holds above the tab bar without the stack
+   becoming the page. Tapping Add to Cart six times is a normal thing to do. */
+const MAX_VISIBLE = 3;
+
 const CLOSE_ICON =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
 
@@ -99,6 +103,12 @@ export function showToast(message, type = 'info', duration = 3200) {
     e.stopPropagation();
     remove();
   });
+
+  // Published so the cap below can retire a toast it does not hold the
+  // closure for. Retiring runs the leave animation rather than yanking it.
+  el._grDismiss = remove;
+  const live = stack.querySelectorAll('.toast-gr:not(.is-leaving)');
+  for (let i = 0; i < live.length - MAX_VISIBLE; i++) live[i]._grDismiss();
 }
 
 function now() {

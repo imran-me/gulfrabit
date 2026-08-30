@@ -2744,6 +2744,16 @@ img.settle.is-settled {
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; min-height: 100vh; overflow-x: hidden; }
+/* 100vh on a phone is the viewport with the URL bar HIDDEN — the tallest it
+   can ever be, not the height it is right now. So a page shorter than the
+   screen still got a minimum height taller than the screen, and scrolled by
+   the height of the browser's own chrome with nothing under it to see. dvh is
+   the live value and is what this rule always meant.
+
+   Its own declaration, after the shorthand rather than inside it: a browser
+   that does not know dvh drops the line and keeps the vh above it, which is
+   the behaviour that was already shipping. */
+body { min-height: 100dvh; }
 
 img, picture, svg, video { max-width: 100%; display: block; }
 img { height: auto; }
