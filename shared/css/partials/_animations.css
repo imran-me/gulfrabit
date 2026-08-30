@@ -53,6 +53,7 @@ html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0)
 }
 @media (max-width: 767px) { .toast-stack { left: 50%; right: auto; transform: translateX(-50%); bottom: var(--space-4); align-items: center; } }
 .toast-gr {
+  position: relative; overflow: hidden;
   display: flex; align-items: center; gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   background: var(--surface-sunken);
@@ -86,6 +87,19 @@ html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0)
 .toast-gr__close:hover { color: var(--text-primary); background: color-mix(in srgb, currentColor 12%, transparent); }
 .toast-gr__close:active { transform: scale(0.88); }
 .toast-gr__close:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; }
+/* Countdown — a hairline draining along the foot, paused while read. */
+.toast-gr__timer {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+  transform-origin: left center;
+  background: var(--gr-cyan);
+  opacity: 0.55;
+  animation: gr-toast-timer var(--toast-life, 3200ms) linear forwards;
+}
+.toast-gr--success .toast-gr__timer { background: var(--gr-lime); }
+.toast-gr--error   .toast-gr__timer { background: var(--gr-error); }
+.toast-gr.is-paused .toast-gr__timer { animation-play-state: paused; }
+.toast-gr.is-leaving .toast-gr__timer { animation-play-state: paused; opacity: 0; }
+@keyframes gr-toast-timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 @keyframes gr-toast-in  { to { transform: translateX(0); } }
 @keyframes gr-toast-out { to { transform: translateX(120%); opacity: 0; } }
 
@@ -104,6 +118,9 @@ html:not(.no-js) [data-reveal].is-visible { opacity: 1; transform: translateY(0)
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
   [data-reveal] { opacity: 1; transform: none; }
+  /* The bar would snap empty in ~0ms and read as a bug; the JS countdown is
+     the real clock, so just drop the picture of it. */
+  .toast-gr__timer { display: none; }
 }
 
 /* ---- Images settle in, rather than popping -----------------------------

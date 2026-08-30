@@ -2,6 +2,8 @@
  * toast-notifications — small, non-blocking confirmations.
  * Bottom-right on desktop, bottom-centre on mobile (see _animations.css).
  * Auto-dismiss, stackable, accessible (role="status", aria-live polite).
+ * The countdown pauses while the toast is hovered or holds focus, so a long
+ * message is never yanked away mid-read.
  *
  * Usage:  import { toast } from '.../toast-notifications.js';
  *         toast.success('Added to cart');
@@ -43,13 +45,16 @@ export function showToast(message, type = 'info', duration = 3200) {
   const el = document.createElement('div');
   el.className = `toast-gr toast-gr--${type}`;
   el.setAttribute('role', 'status');
+  el.style.setProperty('--toast-life', `${duration}ms`);
   el.innerHTML =
     `${ICONS[type] || ICONS.info}` +
     `<span class="toast-gr__msg">${escapeHtml(message)}</span>` +
-    `<button type="button" class="toast-gr__close" aria-label="Dismiss">${CLOSE_ICON}</button>`;
+    `<button type="button" class="toast-gr__close" aria-label="Dismiss">${CLOSE_ICON}</button>` +
+    `<span class="toast-gr__timer" aria-hidden="true"></span>`;
   stack.appendChild(el);
 
   let dismissed = false;
+  let timer = 0;
   const remove = () => {
     if (dismissed) return;
     dismissed = true;
@@ -59,13 +64,45 @@ export function showToast(message, type = 'info', duration = 3200) {
     // Safety net if animationend doesn't fire.
     setTimeout(() => el.remove(), 400);
   };
-  const timer = setTimeout(remove, duration);
+
+  // The countdown is JS-owned so that prefers-reduced-motion — which flattens
+  // every animation to ~0ms — cannot dismiss the toast before it is read. The
+  // bar is only the picture of it.
+  let remaining = duration;
+  let startedAt = now();
+  const pause = () => {
+    if (dismissed || el.classList.contains('is-paused')) return;
+    clearTimeout(timer);
+    remaining -= now() - startedAt;
+    el.classList.add('is-paused');
+  };
+  const resume = () => {
+    if (dismissed || !el.classList.contains('is-paused')) return;
+    el.classList.remove('is-paused');
+    if (remaining <= 0) { remove(); return; }
+    startedAt = now();
+    timer = setTimeout(remove, remaining);
+  };
+  timer = setTimeout(remove, remaining);
+
+  // Hover-to-pause is a fine-pointer idea. A touch "enter" has no matching
+  // "leave" if the finger is lifted elsewhere, which would strand the toast
+  // paused forever — so touch is left to the tap-to-dismiss path below.
+  el.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'touch') pause(); });
+  el.addEventListener('pointerleave', resume);
+  el.addEventListener('pointercancel', resume);
+  el.addEventListener('focusin', pause);
+  el.addEventListener('focusout', resume);
   el.addEventListener('click', remove);
   // The button carries its own handler so keyboard Enter/Space reach it too.
   el.querySelector('.toast-gr__close').addEventListener('click', (e) => {
     e.stopPropagation();
     remove();
   });
+}
+
+function now() {
+  return typeof performance !== 'undefined' ? performance.now() : Date.now();
 }
 
 function escapeHtml(str) {

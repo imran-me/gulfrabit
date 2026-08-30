@@ -75,6 +75,20 @@ try {
         }
       }
     } catch (e) { /* private mode, or nothing stored — the built-in theme stands. */ }
+
+    try {
+      var c = localStorage.getItem('gr:card');
+      if (c) {
+        var cp = JSON.parse(c);
+        var dev = window.matchMedia('(max-width: 767.98px)').matches ? 'mobile' : 'desktop';
+        var off = [];
+        for (var i = 0; i < ["wishlist", "quickview", "discount", "tags", "brand", "rating", "saving"].length; i++) {
+          var part = ["wishlist", "quickview", "discount", "tags", "brand", "rating", "saving"][i];
+          if (cp[part] && cp[part][dev] === false) off.push(part + ':off');
+        }
+        if (off.length) document.documentElement.setAttribute('data-card', off.join(' '));
+      }
+    } catch (e) { /* storage off, or nothing mirrored — the whole card is shown. */ }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Cart — GulfRabit</title>
@@ -107,7 +121,7 @@ try {
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=3941824d">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=80ea35a1">
   <!-- The theme layer for this build. ONE theme, not seven: a theme sheet
        is inert without its [data-theme] on <html>, so linking them all
        meant every visitor downloading five themes they would never see,
@@ -115,7 +129,7 @@ try {
        different one before the first paint when the server has already
        told this visitor which theme is published. -->
   <link rel="stylesheet" href="../../modules/theme/theme-trio.css?v=dd326453">
-  <link rel="stylesheet" href="../../modules/cart/cart.css?v=0ef869fe">
+  <link rel="stylesheet" href="../../modules/cart/cart.css?v=01b5d47b">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -344,6 +358,16 @@ try {
     <div class="cart-layout" data-cart-layout>
       <!-- Line items -->
       <section aria-label="Cart items">
+        <!-- Only what is ticked is ordered, and unticking keeps the line where
+             it is — a basket here is half shopping list. Authored rather than
+             rendered so it holds its place while the list repaints; hidden
+             whenever the cart is empty. -->
+        <label class="cart-pickbar" data-cart-pick-bar hidden>
+          <input type="checkbox" class="cart-pick__box" data-cart-pick-all>
+          <span>Select all</span>
+          <span class="cart-pickbar__count" data-cart-pick-count></span>
+        </label>
+
         <div data-cart-items></div>
 
         <!-- Save for later -->
@@ -549,7 +573,7 @@ try {
 </footer>
 
   <script type="module" src="../../shared/js/main.js?v=65e9eef8"></script>
-  <script type="module" src="../../modules/theme/theme.js?v=174b6f6e"></script>
+  <script type="module" src="../../modules/theme/theme.js?v=e4ba293a"></script>
   <script type="module" src="../../modules/cart/cart-page.js?v=3317c85f"></script>
 </body>
 </html>

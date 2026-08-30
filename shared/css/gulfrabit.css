@@ -2079,10 +2079,60 @@ html[data-card~="saving:off"] .product-card .price-saving { display: none; }
 .cart-line__title { font-size: var(--fs-14); font-weight: var(--fw-medium); line-height: var(--lh-snug); }
 .cart-line__meta { font-size: var(--fs-12); color: var(--text-muted); }
 .cart-line__price { font-variant-numeric: tabular-nums; font-weight: var(--fw-semibold); white-space: nowrap; }
-.cart-line__remove { background: none; border: 0; color: var(--text-muted); cursor: pointer; font-size: var(--fs-12); }
-.cart-line__remove:hover { color: var(--gr-error); }
+
+/* The price and the bin share the right-hand column: the price is the fact and
+   the bin is the only thing anyone does to a line from the right of it, so
+   stacking them keeps the row three columns wide instead of four. */
+.cart-line__end { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: var(--space-2); }
+
+/* 36px, not the 18px glyph. This is the destructive control on a phone, one
+   thumb-width from a quantity stepper — the icon may be small but the thing
+   you are aiming at must not be. */
+.cart-line__remove {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; margin-right: -8px;
+  background: none; border: 0; border-radius: var(--radius-sm);
+  color: var(--text-muted); cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.cart-line__remove:hover { color: var(--gr-error); background: var(--wash-hover); }
+.cart-line__remove:focus-visible { outline: 2px solid var(--gr-cyan-dark); outline-offset: 2px; }
+
+/* ---- Choosing what to check out --------------------------------------- */
+/* A basket here is half shopping list. The tick is what lets someone buy three
+   of five things without deleting the other two — see the selection block in
+   shared/js/core/state.js. */
+.cart-line--pick { grid-template-columns: auto 64px 1fr auto; align-items: start; }
+.cart-pick { display: flex; align-items: center; min-height: 64px; padding-right: var(--space-1); cursor: pointer; }
+.cart-pick__box {
+  width: 20px; height: 20px; flex: none; cursor: pointer;
+  accent-color: var(--gr-cyan-dark);   /* the platform control, in our colour */
+}
+.cart-pick__box:focus-visible { outline: 2px solid var(--gr-cyan-dark); outline-offset: 2px; }
+
+.cart-pick-all {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: 0 0 var(--space-3); margin-bottom: var(--space-1);
+  border-bottom: 1px solid var(--border-hairline);
+  font-size: var(--fs-14); color: var(--text-secondary); cursor: pointer;
+}
+.cart-pick-all__count { margin-left: auto; font-size: var(--fs-12); color: var(--text-muted); }
+
+/* Said once, quietly, and only while nothing is ticked — the Checkout button
+   beside it is already disabled, so this only has to explain why. */
+.cart-drawer__hint { margin: var(--space-3) 0 0; font-size: var(--fs-12); color: var(--text-muted); text-align: center; }
+
+/* ---- Mini cart parts the merchant can switch off ----------------------
+ * Set from Appearance > Mini cart, stamped on <html> by modules/theme/
+ * mini-cart.js. The button stays in the markup and keeps working the moment
+ * it is switched back on — nothing here deletes it. display:none also takes
+ * it out of the tab order, so a hidden control cannot be reached by keyboard
+ * either.
+ */
+html[data-mini-cart~="view-cart:off"] .cart-drawer [data-view-cart] { display: none; }
 
 .cart-summary-row { display: flex; justify-content: space-between; font-size: var(--fs-14); color: var(--text-secondary); margin-bottom: var(--space-2); }
+.cart-summary-row__note { color: var(--text-muted); font-size: var(--fs-12); }
 .cart-summary-row--total { font-size: var(--fs-20); color: var(--text-primary); font-weight: var(--fw-semibold); padding-top: var(--space-3); border-top: 1px solid var(--border-hairline); margin-top: var(--space-3); }
 
 /* ---- Empty cart state ------------------------------------------------ */
