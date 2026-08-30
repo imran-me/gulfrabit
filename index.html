@@ -53,6 +53,20 @@
       }
     } catch (e) { /* private mode, or nothing stored — the built-in theme stands. */ }
 
+    try {
+      var c = localStorage.getItem('gr:card');
+      if (c) {
+        var cp = JSON.parse(c);
+        var dev = window.matchMedia('(max-width: 767.98px)').matches ? 'mobile' : 'desktop';
+        var off = [];
+        for (var i = 0; i < ["wishlist", "quickview", "discount", "tags", "brand", "rating", "saving"].length; i++) {
+          var part = ["wishlist", "quickview", "discount", "tags", "brand", "rating", "saving"][i];
+          if (cp[part] && cp[part][dev] === false) off.push(part + ':off');
+        }
+        if (off.length) document.documentElement.setAttribute('data-card', off.join(' '));
+      }
+    } catch (e) { /* storage off, or nothing mirrored — the whole card is shown. */ }
+
     /* HOME LAYOUT, BEFORE THE FIRST PAINT.
        The merchant arranges the home page's sections in the panel, separately
        for phones and for computers. Whatever is chosen is stamped here as ONE
@@ -93,7 +107,14 @@
 
       var gl = q ? null : localStorage.getItem('gr:home-layout');
       if (gl) {
-        var lay = JSON.parse(gl), dev = phone ? 'mobile' : 'desktop', out = [];
+        /* The record grew a second half when section ordering arrived, and the
+           shapes moved under `styles`. A mirror written before that IS the
+           shapes map — so a returning visitor's stored arrangement survives
+           the release instead of silently reverting to the shipped one for the
+           one visit it takes the server's answer to land. */
+        var stored = JSON.parse(gl);
+        var lay = (stored && stored.styles) ? stored.styles : stored,
+            dev = phone ? 'mobile' : 'desktop', out = [];
         for (var sec in lay) {
           if (!Object.prototype.hasOwnProperty.call(lay, sec)) continue;
           var st = lay[sec] && lay[sec][dev];
@@ -148,11 +169,11 @@
   <!-- Tailwind (Play CDN) + brand config -->
 
   <!-- GulfRabit design system (loads LAST so our tokens win) -->
-  <link rel="stylesheet" href="shared/css/gulfrabit.css?v=3941824d">
+  <link rel="stylesheet" href="shared/css/gulfrabit.css?v=2e67d52e">
   <link rel="stylesheet" href="modules/theme/theme-trio.css?v=dd326453">
   <!-- The Luxe layer: inert without [data-theme="luxe"] on <html>, so the
        default theme renders exactly as it did before this file existed. -->
-  <link rel="stylesheet" href="modules/home/home.css?v=8656fcc2">
+  <link rel="stylesheet" href="modules/home/home.css?v=11abd29a">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"WebSite","name":"GulfRabit","url":"https://gulfrabit.com","potentialAction":{"@type":"SearchAction","target":"https://gulfrabit.com/modules/catalog/search-results.html?q={search_term_string}","query-input":"required name=search_term_string"}}
   </script>
@@ -782,6 +803,80 @@
       </div>
     </section>
   </main>
+  <script>
+    /* ---- THE ORDER OF THE SECTIONS, BEFORE THE FIRST PAINT --------------
+       Twin of the data-lay bootstrap in <head>, and here rather than up there
+       for the only reason that matters: <main> does not exist yet up there.
+       This runs the instant the last section is parsed, before the parser has
+       reached the footer and before anything below the fold has been painted.
+
+       The hero never moves — HomeLayout pins it — so the largest image on the
+       page, the one the browser measures LCP against, is in its final place
+       from the first byte. Everything this can move is a shelf below it.
+
+       modules/home/home-layout.js does the same work again once it loads, from
+       the server's answer, and keeps it right across a resize. What this buys
+       is the first visit: without it a phone would paint the shipped order and
+       then shuffle it.
+
+       THE ORDER BELOW IS A THIRD COPY of the list in
+       Modules\Theme\Models\HomeLayout::MOVABLE and home-layout.js — there are
+       notes in both, and the same reason applies as for the shapes: "no stored
+       value" and "the stored value is the default" have to render the same. */
+    try {
+      var ORD = ['trust', 'category', 'premium', 'bestseller', 'brands', 'new', 'testimonials', 'news'];
+      var mainEl = document.getElementById('main');
+      var isPhone = window.matchMedia('(max-width: 767.98px)').matches;
+      var want = null;
+
+      /* A preview outranks everything and is never stored, exactly as in <head>.
+         ?lay= without ?ord= is still a preview — of the shipped order — because
+         a preview that borrowed half its answer from the merchant's own mirror
+         would not be a preview of anything a visitor is going to see. */
+      var qo = /[?&]ord=([^&]*)/.exec(location.search);
+      var qs = /[?&]lay=/.test(location.search);
+      if (qo) want = decodeURIComponent(qo[1].replace(/\+/g, ' ')).split(',');
+      else if (!qs) {
+        var raw = localStorage.getItem('gr:home-layout');
+        var lay = raw ? JSON.parse(raw) : null;
+        if (lay && lay.order) want = lay.order[isPhone ? 'mobile' : 'desktop'];
+      }
+
+      if (mainEl && want && want.length) {
+        /* Same contract as normaliseOrder() on both other copies: names the
+           page does not have are dropped, repeats are dropped, and whatever
+           the list failed to mention is appended where the markup puts it. A
+           hostile ?ord= cannot remove a section or render one twice. */
+        var seen = [], i, name;
+        for (i = 0; i < want.length; i++) {
+          name = String(want[i]).trim();
+          if (ORD.indexOf(name) >= 0 && seen.indexOf(name) < 0) seen.push(name);
+        }
+        for (i = 0; i < ORD.length; i++) if (seen.indexOf(ORD[i]) < 0) seen.push(ORD[i]);
+
+        var nodes = {}, present = [];
+        for (i = 0; i < mainEl.children.length; i++) {
+          var el = mainEl.children[i], sec = el.getAttribute('data-sec');
+          if (sec && ORD.indexOf(sec) >= 0) { nodes[sec] = el; present.push(sec); }
+        }
+
+        var wanted = [];
+        for (i = 0; i < seen.length; i++) if (nodes[seen[i]]) wanted.push(seen[i]);
+
+        if (wanted.length > 1 && wanted.join(' ') !== present.join(' ')) {
+          /* The marker holds the first movable section's place while the
+             sections are lifted out — without it, detaching them would lose
+             the position they need to be put back at. */
+          var marker = document.createComment('sections');
+          mainEl.insertBefore(marker, nodes[present[0]]);
+          var frag = document.createDocumentFragment();
+          for (i = 0; i < wanted.length; i++) frag.appendChild(nodes[wanted[i]]);
+          mainEl.insertBefore(frag, marker);
+          marker.parentNode.removeChild(marker);
+        }
+      }
+    } catch (e) { /* preview handled, storage off, or a corrupt mirror. */ }
+  </script>
 
   <!-- ============================ FOOTER ============================ -->
   <!-- (canonical source: shared/components/footer.html) -->
@@ -915,7 +1010,7 @@
 
   <!-- ============================ SCRIPTS ============================ -->
   <script type="module" src="shared/js/main.js?v=65e9eef8"></script>
-  <script type="module" src="modules/theme/theme.js?v=174b6f6e"></script>
+  <script type="module" src="modules/theme/theme.js?v=e4ba293a"></script>
   <script type="module" src="modules/home/home.js?v=d00c44e3"></script>
 </body>
 </html>

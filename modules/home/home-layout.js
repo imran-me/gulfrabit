@@ -7,8 +7,11 @@
  *
  * HOW IT REACHES THE PAGE
  * -----------------------
- * As one attribute on <html>, already resolved for the viewport in front of
- * you:
+ * There are two halves to it: the SHAPE each section wears, and the ORDER the
+ * sections come in. They arrive together, from one record and one request.
+ *
+ * The shape reaches the page as one attribute on <html>, already resolved for
+ * the viewport in front of you:
  *
  *     <html data-lay="category:loop trust:static premium:march …">
  *
@@ -17,12 +20,19 @@
  * rather than in CSS is what buys that: the alternative is writing every rule
  * twice, once under each breakpoint, and the second copy is the one that rots.
  *
+ * The order reaches the page as the page itself: the sections are moved. Not
+ * flex `order`, which would have been one line of CSS — a screen reader and
+ * the Tab key follow the DOM, so a page reordered that way READS in an order
+ * nobody chose while it LOOKS like the order somebody did. On the busiest URL
+ * in the shop that is not a trade worth making for a saved line.
+ *
  * The line between "phone" and "computer" is 768px — the same one the trust
  * band has always used, and the one the admin screen names out loud.
  *
  * PRIORITY, HIGHEST FIRST
  * -----------------------
- *   1. ?lay= in the URL — a PREVIEW. Never stored, never published, and it
+ *   1. ?lay= and ?ord= in the URL — a PREVIEW. Never stored, never published,
+ *      and it
  *      suppresses the server read entirely so the person previewing actually
  *      sees the thing they came to look at. This is how the panel's "Preview
  *      in a new tab" works, and the URL is shareable, which is most of what
@@ -49,38 +59,120 @@
 const MIRROR_KEY = 'gr:home-layout';
 const PHONE = '(max-width: 767.98px)';
 
-/** Keep in step with Modules\Theme\Models\HomeLayout::SECTIONS. */
+/** Keep in step with Modules\Theme\Models\HomeLayout::SECTIONS.
+ *  `off` means the section is not rendered on that device — a style like any
+ *  other, so it travels the same pipeline; see the PHP for the argument. */
 export const SECTIONS = {
-  category:     { styles: ['grid', 'loop'],          desktop: 'grid',   mobile: 'grid' },
-  trust:        { styles: ['static', 'loop'],        desktop: 'static', mobile: 'loop' },
-  premium:      { styles: ['march', 'rail', 'grid'], desktop: 'march',  mobile: 'march' },
-  bestseller:   { styles: ['grid', 'rail', 'march'], desktop: 'grid',   mobile: 'grid' },
-  new:          { styles: ['march', 'rail', 'grid'], desktop: 'march',  mobile: 'march' },
-  brands:       { styles: ['wall', 'loop'],          desktop: 'wall',   mobile: 'wall' },
-  testimonials: { styles: ['slider', 'grid', 'loop'],desktop: 'slider', mobile: 'slider' },
+  category:     { styles: ['grid', 'loop', 'off'],           desktop: 'grid',   mobile: 'grid' },
+  trust:        { styles: ['static', 'loop', 'off'],         desktop: 'static', mobile: 'loop' },
+  premium:      { styles: ['march', 'rail', 'grid', 'off'],  desktop: 'march',  mobile: 'march' },
+  bestseller:   { styles: ['grid', 'rail', 'march', 'off'],  desktop: 'grid',   mobile: 'grid' },
+  new:          { styles: ['march', 'rail', 'grid', 'off'],  desktop: 'march',  mobile: 'march' },
+  brands:       { styles: ['wall', 'loop', 'off'],           desktop: 'wall',   mobile: 'wall' },
+  testimonials: { styles: ['slider', 'grid', 'loop', 'off'], desktop: 'slider', mobile: 'slider' },
 };
 
-/** Anything → a complete, valid arrangement. Mirrors normalise() in PHP. */
+/**
+ * The sections a merchant may move, in the order index.html authors them.
+ * Keep in step with Modules\Theme\Models\HomeLayout::MOVABLE.
+ *
+ * Not SECTIONS' keys: `news` has no choice of shape but is a section a
+ * merchant may want higher, and `hero` has a shape but is pinned. The dormant
+ * industry band is in neither list — it ships hidden.
+ */
+export const MOVABLE = [
+  'trust', 'category', 'premium', 'bestseller', 'brands', 'new', 'testimonials', 'news',
+];
+
+/** Anything → a complete, valid order. Mirrors normaliseOrder() in PHP. */
+export function normaliseOrder(raw) {
+  const out = [];
+  for (const name of Array.isArray(raw) ? raw : []) {
+    if (MOVABLE.includes(name) && !out.includes(name)) out.push(name);
+  }
+  for (const name of MOVABLE) if (!out.includes(name)) out.push(name);
+  return out;
+}
+
+/**
+ * Anything → a complete, valid arrangement. Mirrors normalise() in PHP,
+ * including its reading of a record written before ordering existed: one
+ * carrying neither key IS the styles map, and gets the shipped order beside
+ * it — which is the order that release was rendering anyway.
+ */
 export function normalise(raw) {
   const src = (raw && typeof raw === 'object') ? raw : {};
-  const out = {};
+  const wrapped = 'styles' in src || 'order' in src;
+  const rawStyles = wrapped ? src.styles : src;
+  const rawOrder = (wrapped && src.order && typeof src.order === 'object') ? src.order : {};
+
+  const srcStyles = (rawStyles && typeof rawStyles === 'object') ? rawStyles : {};
+  const styles = {};
   for (const [key, spec] of Object.entries(SECTIONS)) {
-    const given = (src[key] && typeof src[key] === 'object') ? src[key] : {};
-    out[key] = {
+    const given = (srcStyles[key] && typeof srcStyles[key] === 'object') ? srcStyles[key] : {};
+    styles[key] = {
       desktop: spec.styles.includes(given.desktop) ? given.desktop : spec.desktop,
       mobile: spec.styles.includes(given.mobile) ? given.mobile : spec.mobile,
     };
   }
-  return out;
+
+  return {
+    styles,
+    order: {
+      desktop: normaliseOrder(rawOrder.desktop),
+      mobile: normaliseOrder(rawOrder.mobile),
+    },
+  };
 }
 
 /** The arrangement flattened to "what applies at this width". */
 function resolve(layout, phone) {
-  const out = {};
+  const shape = {};
   for (const key of Object.keys(SECTIONS)) {
-    out[key] = phone ? layout[key].mobile : layout[key].desktop;
+    shape[key] = phone ? layout.styles[key].mobile : layout.styles[key].desktop;
   }
-  return out;
+  return { shape, order: phone ? layout.order.mobile : layout.order.desktop };
+}
+
+/**
+ * Put the sections in the given order, by moving them.
+ *
+ * Only elements carrying data-sec move, and only those the order names. The
+ * <h1> and the hero above them are untouched, and so is anything unnamed that
+ * happened to sit between two movable sections — it ends up after all of
+ * them. Today that is only the dormant industry band, which ships hidden, so
+ * there is nothing to see; a visible section added there later must be given
+ * a name and a place in MOVABLE rather than left to be swept along.
+ *
+ * Returns without touching the DOM when the page is already in this order,
+ * which is the common case on every call after the first.
+ */
+export function applyOrder(order) {
+  const main = document.getElementById('main');
+  if (!main) return;
+
+  const nodes = new Map();
+  for (const el of main.children) {
+    const name = el.getAttribute?.('data-sec');
+    if (name && order.includes(name)) nodes.set(name, el);
+  }
+  if (nodes.size < 2) return;
+
+  const wanted = order.filter((name) => nodes.has(name));
+  const current = [...nodes.keys()];
+  if (wanted.join(' ') === current.join(' ')) return;
+
+  /* A marker holds the place of the first movable section while the sections
+     themselves are lifted out — without it, detaching them would lose the very
+     position they need to be put back at. */
+  const marker = document.createComment('sections');
+  main.insertBefore(marker, nodes.get(current[0]));
+
+  const frag = document.createDocumentFragment();
+  for (const name of wanted) frag.appendChild(nodes.get(name));
+
+  main.insertBefore(frag, marker);
+  marker.remove();
 }
 
 function tokens(resolved) {
@@ -88,12 +180,18 @@ function tokens(resolved) {
 }
 
 function stamp(resolved) {
-  document.documentElement.setAttribute('data-lay', tokens(resolved));
+  document.documentElement.setAttribute('data-lay', tokens(resolved.shape));
+}
+
+/** Both halves of a resolved arrangement onto the page. */
+function paint(resolved) {
+  applyOrder(resolved.order);
+  stamp(resolved);
 }
 
 /**
- * ?lay=category:loop+trust:static — a resolved arrangement, straight from the
- * panel's preview button.
+ * ?lay=category:loop+trust:static&ord=new,premium,… — a resolved arrangement,
+ * straight from the panel's preview button.
  *
  * Every token is checked against the vocabulary before it is used, for the
  * same reason the server checks it: this string is somebody else's URL and it
@@ -101,23 +199,30 @@ function stamp(resolved) {
  * parameter that survives with nothing in it is treated as no preview at all.
  */
 function readPreview() {
-  const raw = new URLSearchParams(location.search).get('lay');
-  if (!raw) return null;
+  const params = new URLSearchParams(location.search);
+  const rawShape = params.get('lay');
+  const rawOrder = params.get('ord');
+  if (!rawShape && !rawOrder) return null;
 
-  const out = {};
-  for (const token of raw.trim().split(/\s+/)) {
+  const shape = {};
+  for (const token of (rawShape || '').trim().split(/\s+/)) {
     const [section, style] = token.split(':');
-    if (SECTIONS[section]?.styles.includes(style)) out[section] = style;
+    if (SECTIONS[section]?.styles.includes(style)) shape[section] = style;
   }
-  if (!Object.keys(out).length) return null;
 
-  // Unnamed sections keep the shape the page is authored in, so a preview URL
-  // only has to carry what it is actually changing.
+  /* normaliseOrder is what makes ?ord= safe to be short: it completes the list
+     from the shipped order, so a preview URL only has to carry the move being
+     previewed. It is also what makes ?ord= safe to be hostile — a name the
+     page does not have cannot survive it. */
+  const order = normaliseOrder((rawOrder || '').split(',').map((n) => n.trim()));
+
+  // Unnamed sections keep the shape the page is authored in, for the same
+  // reason: a preview URL carries only what it is actually changing.
   const phone = matchMedia(PHONE).matches;
   for (const [key, spec] of Object.entries(SECTIONS)) {
-    out[key] ??= phone ? spec.mobile : spec.desktop;
+    shape[key] ??= phone ? spec.mobile : spec.desktop;
   }
-  return out;
+  return { shape, order };
 }
 
 /**
@@ -156,8 +261,8 @@ export function initHomeLayout(onChange) {
      afterwards, showing them an arrangement no visitor is seeing. */
   const preview = readPreview();
   if (preview) {
-    document.documentElement.setAttribute('data-lay', tokens(preview));
-    onChange(preview);
+    paint(preview);
+    onChange(preview.shape);
     return;
   }
 
@@ -170,8 +275,8 @@ export function initHomeLayout(onChange) {
     const key = JSON.stringify(resolved);
     if (key === last) return;
     last = key;
-    stamp(resolved);
-    onChange(resolved);
+    paint(resolved);
+    onChange(resolved.shape);
   };
 
   apply();
