@@ -204,8 +204,9 @@
      hiding. Opened, it showed nothing that the closed row had not: two
      totals and a name. The rows below are what it is for.
 
-     The thumbnails are 48px here rather than the shared 64 (set inline on the
-     line), so four items still fit inside the 280px scroller. */
+     The thumbnails are 48px rather than the shared 64 (set inline on the line
+     by paintSummary), which is what keeps a row near 70px and a basket of
+     three or four inside the 280px scroller before it has to scroll. */
   .order-summary [data-summary-items] .cart-line:first-child { padding-top: 0; }
   .order-summary [data-summary-items] .cart-line:last-child { border-bottom: 0; }
 
