@@ -2171,3 +2171,34 @@
 @media (prefers-reduced-motion: reduce) {
   .astperm__area { transition: none; }
 }
+
+/* ---- The waiting list, on the product editor --------------------------
+   People who pressed Notify me on a sold-out or upcoming product. Sits inside
+   the Arrival panel, because the arrival date is what they are waiting on. */
+.awaiting {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-hairline);
+}
+/* The number is the point, so it is the only thing here at full weight. */
+.awaiting__count { margin: 0; flex: 1 1 auto; font-size: var(--fs-14); }
+.awaiting__count strong { font-size: var(--fs-18); font-variant-numeric: tabular-nums; }
+
+/* On the products list: a quiet count beside the title. Gold, because this is
+   the project's colour for something scarce and wanted, and that is exactly
+   what a queue of people waiting on a product means. */
+.awaiting-chip {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: rgba(201, 162, 75, .16);
+  color: var(--gold-ink, #8A6B22);
+  font-size: var(--fs-12);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

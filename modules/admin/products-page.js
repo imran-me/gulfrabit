@@ -392,7 +392,16 @@ function paint({ data, meta }) {
                aria-label="Select ${escapeHtml(p.title)}">
       </td>
       <td class="atable__name">
-        <a href="/admin/products/edit?sku=${encodeURIComponent(p.sku)}">${escapeHtml(p.title)}</a>
+        <a href="/admin/products/edit?sku=${encodeURIComponent(p.sku)}">${escapeHtml(p.title)}</a>${
+          // People who pressed Notify me and have not been told. On the list
+          // because this is the only screen showing the whole catalogue at
+          // once, and demand is the reason to scan it — forty people waiting
+          // on one line is a buying decision, and it should not need opening
+          // every product to find.
+          p.waiting
+            ? `<span class="awaiting-chip" title="${p.waiting} waiting to be told this is back">${p.waiting} waiting</span>`
+            : ''
+        }
         <div class="atable__sub">${escapeHtml(p.sku)}${p.brand ? ` · ${escapeHtml(p.brand)}` : ''}</div>
       </td>
       <td class="atable__sub">${escapeHtml(p.category || '—')}${placement(p)}</td>

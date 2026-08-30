@@ -115,8 +115,8 @@ try {
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=f2d78669">
-  <link rel="stylesheet" href="../../modules/admin/admin.css?v=4f8ef8dc">
+  <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=3a7d16d2">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=d5fec296">
   <link rel="stylesheet" href="../../modules/media/media.css?v=8f8a1ab7">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
@@ -496,6 +496,20 @@ try {
                    controls, so the merchant reads the consequence rather than
                    inferring it from three inputs. -->
               <p class="admin__sub" style="margin:var(--space-3) 0 0" data-pe-arrival-says></p>
+
+              <!-- The waiting list, and the button that empties it.
+                   Shown only when somebody is actually waiting — a permanent
+                   "0 people waiting" is a row people stop seeing, and the
+                   whole value of this is that it catches the eye on the
+                   morning a shipment lands. Deliberately NOT automatic: see
+                   AdminStockAlertController for why a date passing must not
+                   text forty people about goods still in customs. -->
+              <div class="awaiting" data-pe-waiting hidden>
+                <p class="awaiting__count" data-pe-waiting-count></p>
+                <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-pe-notify>
+                  Tell them it is back
+                </button>
+              </div>
             </fieldset>
 
             <div class="arefund-form" style="border-top:0">
@@ -562,7 +576,7 @@ try {
   <script type="module" src="../../modules/marketing/marketing-nav.js?v=f2deaf14"></script>
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
-  <script type="module" src="../../modules/theme/theme-nav.js?v=f2aac306"></script>
-  <script type="module" src="../../modules/admin/product-edit-page.js?v=b7e81a52"></script>
+  <script type="module" src="../../modules/theme/theme-nav.js?v=0451c724"></script>
+  <script type="module" src="../../modules/admin/product-edit-page.js?v=5d9bc27b"></script>
 </body>
 </html>

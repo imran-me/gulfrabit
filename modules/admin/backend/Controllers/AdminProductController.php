@@ -109,6 +109,11 @@ class AdminProductController extends Controller
 
         $page = $query->paginate($data['perPage'] ?? 25);
 
+        /* One query for the whole page rather than one per row. Twenty-five
+           products meant twenty-five counts, which is how a list screen gets
+           slow on exactly the catalogue that is doing well. */
+        $waiting = $this->waitingFor(array_map(fn (Product $p): int => $p->id, $page->items()));
+
         return response()->json([
             'data' => array_map(fn (Product $p): array => [
                 'sku'        => $p->sku,
@@ -151,6 +156,48 @@ class AdminProductController extends Controller
         ]);
     }
 
+    /**
+     * How many people are waiting to be told this product is back.
+     *
+     * Schema::hasTable, because modules/catalog's stock_alerts migration may
+     * not have run on a deployment that is mid-upgrade — and a product editor
+     * that 500s over a count is a product editor nobody can use. The same
+     * courtesy the dashboard extends to every optional table.
+     */
+    /**
+     * The same count for a page of products, in one query.
+     *
+     * @param  array<int, int>  $productIds
+     * @return array<int, int>  product id => people waiting
+     */
+    private function waitingFor(array $productIds): array
+    {
+        if (! $productIds || ! Schema::hasTable('stock_alerts')) {
+            return [];
+        }
+
+        return DB::table('stock_alerts')
+            ->whereIn('product_id', $productIds)
+            ->whereNull('notified_at')
+            ->selectRaw('product_id, count(*) as n')
+            ->groupBy('product_id')
+            ->pluck('n', 'product_id')
+            ->map(fn ($n): int => (int) $n)
+            ->all();
+    }
+
+    private function waitingCount(int $productId): int
+    {
+        if (! Schema::hasTable('stock_alerts')) {
+            return 0;
+        }
+
+        return (int) DB::table('stock_alerts')
+            ->where('product_id', $productId)
+            ->whereNull('notified_at')
+            ->count();
+    }
+
     /** GET /api/admin/products/{sku} */
     public function show(string $sku): JsonResponse
     {
@@ -176,6 +223,10 @@ class AdminProductController extends Controller
                 'marginPct'    => $this->marginPercent($product),
                 'priceHistory' => $history,
                 'performance'  => $this->performance($product),
+                // People who pressed Notify me and have not been told yet.
+                // On the editor because that is where the arrival date is set,
+                // so the count is in front of whoever is about to change it.
+                'waiting'      => $this->waitingCount($product->id),
             ],
         ]);
     }

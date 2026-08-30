@@ -94,6 +94,35 @@ export function canDelete(area, session = state.session) {
  * @returns {Promise<boolean>}
  */
 export function confirmDelete({ title, body = '', confirm = 'Delete', undo } = {}) {
+  return confirmAction({
+    title,
+    body,
+    confirm,
+    // True for everything routed through confirmDelete, because every
+    // delete behind this helper is a soft one. Pass undo: '' to drop it.
+    note: undo === undefined ? 'It moves to the Deleted tab, where you can put it back.' : undo,
+    tone: 'danger',
+  });
+}
+
+/**
+ * The same dialog, for something that is not a delete.
+ *
+ * This file's own rule is that anything which genuinely cannot be undone must
+ * not borrow confirmDelete and its "you can put it back" reassurance. Texting
+ * two hundred customers is exactly that: irreversible, and not a deletion. So
+ * rather than lie in the dialog or hand-roll a second one somewhere else, the
+ * box is shared and the WORDS are the caller's.
+ *
+ * @param {object} o
+ * @param {string} o.title
+ * @param {string} [o.body]
+ * @param {string} [o.confirm]  button text
+ * @param {string} [o.note]     the quiet line under the body; omit for none
+ * @param {'danger'|'primary'} [o.tone]  what the confirm button looks like
+ * @returns {Promise<boolean>}
+ */
+export function confirmAction({ title, body = '', confirm = 'Continue', note = '', tone = 'primary' } = {}) {
   const dlg = ensureDialog();
 
   dlg.querySelector('[data-adel-title]').textContent = title;
@@ -102,16 +131,15 @@ export function confirmDelete({ title, body = '', confirm = 'Delete', undo } = {
   bodyEl.textContent = body;
   bodyEl.hidden = !body;
 
-  // The default reassurance is true for everything routed through here. A
-  // caller that hard-deletes must pass its own line — or, better, not use this.
-  const undoText = undo === undefined
-    ? 'It moves to the Deleted tab, where you can put it back.'
-    : undo;
   const undoEl = dlg.querySelector('[data-adel-undo]');
-  undoEl.textContent = undoText;
-  undoEl.hidden = !undoText;
+  undoEl.textContent = note;
+  undoEl.hidden = !note;
 
-  dlg.querySelector('[data-adel-confirm]').textContent = confirm;
+  const go = dlg.querySelector('[data-adel-confirm]');
+  go.textContent = confirm;
+  // Red is reserved for the irreversible and the destructive. A confirm that
+  // is neither should not be wearing the colour that means both.
+  go.className = `btn-gr ${tone === 'danger' ? 'btn-danger-gr' : 'btn-primary-gr'}`;
 
   return new Promise((resolve) => {
     // `close` rather than the buttons' own clicks: Escape and the backdrop

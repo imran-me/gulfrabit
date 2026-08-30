@@ -72,6 +72,8 @@ async function load() {
 
   // Delegated to the form, so the arrival panel re-reads itself whichever
   // of the three controls moved.
+  document.querySelector('[data-pe-notify]')?.addEventListener('click', (e) => notifyWaiting(e.currentTarget));
+
   document.querySelector('[data-pe-form]')
     ?.addEventListener('input', (e) => {
       if (e.target.closest('[data-pe-arrival]')) paintArrival(e.currentTarget);
@@ -117,6 +119,7 @@ function fill() {
   f.preorderEnabled.checked = !!product.preorderEnabled;
   f.preorderLimit.value = product.preorderLimit ?? '';
   paintArrival(f);
+  paintWaiting();
 
   // Placement: the four rail tags become checkboxes; anything else the
   // product carries is a merchant's own label and goes to the "other tags"
@@ -327,6 +330,80 @@ function paintArrival(f) {
   says.textContent = `Customers can pre-order it now and it ships on ${when}. `
     + (cap > 0 ? `Stops after ${cap}. ` : 'No limit on how many. ')
     + 'Pre-orders must be paid in advance — cash on delivery is not offered on them.';
+}
+
+/**
+ * The waiting list, and the one button that clears it.
+ *
+ * Hidden entirely when nobody is waiting. A permanent "0 people waiting" row
+ * is a row people stop reading, and the whole value of this is that it catches
+ * the eye on the morning a shipment actually lands.
+ */
+function paintWaiting() {
+  const box = document.querySelector('[data-pe-waiting]');
+  if (!box) return;
+
+  const n = product.waiting ?? 0;
+  box.hidden = n === 0;
+  if (!n) return;
+
+  const label = document.querySelector('[data-pe-waiting-count]');
+  label.innerHTML = `<strong>${n}</strong> ${n === 1 ? 'person is' : 'people are'} waiting to be told this is back.`;
+
+  /* The button is disabled while the product still cannot be bought, and says
+     why. The server refuses this too — texting someone to come and buy a thing
+     they will find they still cannot buy is the one failure that costs more
+     than sending nothing — but a button that explains itself before it is
+     pressed beats an error after. */
+  const btn = document.querySelector('[data-pe-notify]');
+  const buyable = product.orderable !== false;
+
+  btn.disabled = !buyable;
+  btn.title = buyable ? '' : 'It has to be on sale before anyone is told about it.';
+}
+
+async function notifyWaiting(btn) {
+  const n = product.waiting ?? 0;
+
+  /* Confirmed, and the count is in the question. This is the only control in
+     the panel that sends a text message to strangers, it costs money per
+     recipient, and there is no unsend — so the number goes in the sentence
+     rather than being left in a row above it. */
+  const { confirmAction } = await import('./admin-delete.js');
+  const ok = await confirmAction({
+    title: `Text ${n} ${n === 1 ? 'person' : 'people'}?`,
+    body: `They asked to be told when ${product.title} was available. Each message costs you `
+      + 'one SMS, and it cannot be taken back.',
+    confirm: `Send ${n} ${n === 1 ? 'message' : 'messages'}`,
+    // confirmAction, not confirmDelete: nothing is being deleted, and that
+    // helper's reassurance — "it moves to the Deleted tab" — would be a
+    // straight lie on the one control here that cannot be undone.
+    tone: 'primary',
+  });
+  if (!ok) return;
+
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  let payload;
+  try {
+    payload = await adminFetch(
+      `/products/${encodeURIComponent(sku())}/notify-waiting`, { method: 'POST' });
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = original;
+    return fail(err.message);
+  }
+
+  // Repainted from the server's own count, not by subtracting locally: a
+  // gateway that refused half the batch leaves those people still waiting,
+  // and only the server knows how many that was.
+  product.waiting = payload.data?.waiting ?? 0;
+  btn.textContent = original;
+  btn.disabled = false;
+  paintWaiting();
+  note(payload.message);
 }
 
 function fillAdLink() {

@@ -35,6 +35,15 @@ class CatalogServiceProvider extends ServiceProvider
                 ->middleware('api')
                 ->prefix('api')
                 ->group(__DIR__ . '/routes.php');
+
+            // The panel's one catalogue write — telling the people waiting on
+            // a product that it is back. A separate file on the `web` stack,
+            // because the panel authenticates with a session cookie and needs
+            // the session and CSRF middleware the `api` group above omits.
+            $this->app['router']
+                ->middleware('web')
+                ->prefix('api')
+                ->group(__DIR__ . '/admin-routes.php');
         });
     }
 }

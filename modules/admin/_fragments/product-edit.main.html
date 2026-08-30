@@ -232,6 +232,20 @@
                    controls, so the merchant reads the consequence rather than
                    inferring it from three inputs. -->
               <p class="admin__sub" style="margin:var(--space-3) 0 0" data-pe-arrival-says></p>
+
+              <!-- The waiting list, and the button that empties it.
+                   Shown only when somebody is actually waiting — a permanent
+                   "0 people waiting" is a row people stop seeing, and the
+                   whole value of this is that it catches the eye on the
+                   morning a shipment lands. Deliberately NOT automatic: see
+                   AdminStockAlertController for why a date passing must not
+                   text forty people about goods still in customs. -->
+              <div class="awaiting" data-pe-waiting hidden>
+                <p class="awaiting__count" data-pe-waiting-count></p>
+                <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-pe-notify>
+                  Tell them it is back
+                </button>
+              </div>
             </fieldset>
 
             <div class="arefund-form" style="border-top:0">
