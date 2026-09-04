@@ -119,13 +119,40 @@
   .slip {
     max-width: none;
     margin: 0;
-    padding: 6mm 4mm;
+    /* Thermal stickers leave unused stock below the current slip. Keep the
+       width and horizontal padding unchanged, but give the content more room
+       vertically and make it easier to read at the counter. */
+    padding: 8.4mm 4mm;
     border: 0;
     border-radius: 0;
+    font-size: 15.4pt;
+    line-height: 1.4;
     /* One order per sheet. A slip split across two pages is a slip whose
        address and whose amount are on different pieces of paper. */
     break-inside: avoid;
     break-after: page;
   }
+  .slip__head { gap: 8mm; padding-bottom: 4.2mm; }
+  .slip__brand strong { font-size: 23.8pt; }
+  .slip__brand span { font-size: 11.2pt; }
+  .slip__ref strong { font-size: 16.8pt; }
+  .slip__ref span { font-size: 11.2pt; }
+  .slip__to { margin: 7mm 0; }
+  .slip__to h2 { font-size: 10.5pt; margin-bottom: 2.1mm; }
+  .slip__to p { margin-bottom: 1.1mm; }
+  .slip__name, .slip__phone { font-size: 18.2pt; }
+  .slip__note { margin-top: 2.8mm; font-size: 12.6pt; }
+  .slip__items { margin: 5.6mm 0; font-size: 14pt; }
+  .slip__items th { font-size: 10.5pt; padding: 2.1mm 0; }
+  .slip__items td { padding: 2.1mm 0; }
+  .slip__variant { font-size: 11.9pt; }
+  .slip__items tfoot td { padding: 1.4mm 0; }
+  .slip__items tfoot tr:first-child td { padding-top: 3.5mm; }
+  .slip__total td { font-size: 16.1pt; padding-top: 2.8mm !important; }
+  .slip__collect { margin-top: 5.6mm; padding: 4.9mm 5.6mm; }
+  .slip__collect strong { font-size: 22.4pt; }
+  .slip__collect span { font-size: 11.9pt; margin-top: 1.4mm; }
+  .slip__foot { margin-top: 7mm; padding-top: 2.8mm; font-size: 10.5pt; }
+  .slip--broken h2 { font-size: 16.8pt; margin-bottom: 2.8mm; }
   .slip:last-child { break-after: auto; }
 }
