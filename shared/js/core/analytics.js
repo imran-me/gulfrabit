@@ -42,7 +42,24 @@ let capiDown = false;
 export function initAnalytics() {
   try {
     captureAttribution();
-    if (CONFIG.metaPixelId) loadPixel(CONFIG.metaPixelId);
+    if (!CONFIG.metaPixelId) return;
+    loadPixel(CONFIG.metaPixelId);
+
+    // PageView, explicitly. `fbq('init')` does NOT send one — Meta's own
+    // snippet carries it as a separate second line, and dropping that line is
+    // the single most common way a pixel install looks finished and reports
+    // nothing.
+    //
+    // It is not optional garnish. PageView is what Events Manager checks to
+    // say the pixel is live, what "people who visited your website" audiences
+    // are built from, and what a traffic campaign optimises against. Without
+    // it the first event a visitor can possibly generate is ViewContent on a
+    // product page, so anyone who lands and bounces is invisible.
+    //
+    // Routed through track() rather than a bare fbq call so it gets an
+    // event_id and is mirrored to the Conversions API like every other event
+    // — otherwise the server copy would double-count instead of deduplicate.
+    track('PageView');
   } catch (err) {
     console.warn('[analytics] init skipped', err);
   }
@@ -110,7 +127,15 @@ export function getAttribution() {
  */
 export function track(name, params = {}) {
   const eventId = newEventId();
-  const payload = { currency: CONFIG.currency, ...params };
+  // Currency rides along ONLY when there is a value for it to denominate.
+  // Events Manager raises a diagnostic for a currency with no value, and
+  // PageView — which has neither — would otherwise trip it on every page of
+  // the site. Every value-bearing caller goes through productPayload() or
+  // cartPayload(), both of which always set value, so this changes nothing
+  // for them.
+  const payload = params.value === undefined
+    ? { ...params }
+    : { currency: CONFIG.currency, ...params };
 
   try {
     if (ready && window.fbq) {

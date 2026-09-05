@@ -1906,6 +1906,53 @@ attributes on the home page dealt with first. Check in a real browser whether
 CSP `script-src` even applies to `application/ld+json` before starting — if it
 does not, the job is much smaller than it looks.
 
+### The Meta Pixel went live (2026-09-06)
+
+First ad campaign ("Sales | BD | Cold | Sept 2026", ৳500/day) needed tracking.
+Pixel id `1423900436303846` — the "GulfRabit Pixel" dataset on ad account
+3375856489152009 — set in `shared/js/core/site-config.js`.
+
+**Two things were wrong that would each have failed silently**, and both are
+the reason this is written down rather than being a one-line commit:
+
+1. **The CSP blocked the pixel outright.** `script-src` had been hardened to
+   `'self'` and nothing else on 2026-07-30, so `fbevents.js` was refused.
+   Nothing visible breaks — the site renders fine, and Events Manager simply
+   shows "no activity" while the ad account spends. Three entries were needed,
+   not one: `connect.facebook.net` in script-src, `www.facebook.com` in
+   img-src (the `/tr` beacon) and both in connect-src (the fetch transport and
+   the config request). The `.htaccess` comment block spells this out.
+
+2. **`PageView` was never sent.** `fbq('init')` does not send one — Meta's
+   snippet carries it as a separate line and it had been dropped. Everything
+   downstream of it worked, so the gap was invisible from the code: the funnel
+   events all fired correctly, but no PageView meant no "pixel is live" signal
+   in Events Manager, no website-visitor retargeting audience, and nothing for
+   a traffic campaign to optimise against. It now goes through `track()` like
+   every other event, so it carries an `event_id` and deduplicates.
+
+`track()` also stopped attaching `currency` to events with no `value` —
+Events Manager raises a diagnostic for that pairing, and PageView would have
+tripped it on every page of the site.
+
+**Verified by running, not reading** (`tools/` has no harness for this, so it
+was done with a throwaway node server): the real production CSP was parsed out
+of `.htaccess` and served with the real pages to headless Chrome. Result:
+`fbevents.js` loaded, requested `/signals/config/1423900436303846` — proving
+the id reached Meta — zero `securitypolicyviolation` events, and the mirrored
+POST to `/api/track` carried `{"event_name":"PageView","event_id":"f8e4812e-…",
+"custom_data":{}}`. Empty custom_data is the currency fix showing up.
+
+No rebuild was needed: `analytics.js` and `site-config.js` are reached only
+through `main.js`'s module graph, carry no `?v=` hash, and `.htaccess` serves
+un-hashed JS as `no-cache` — so they revalidate on the next page view.
+
+Still dormant: the Conversions API server half, which wants `META_CAPI_TOKEN`
+in the server `.env`. `/api/track` answers 204 until it is set and the browser
+pixel carries on alone. `.env.example` now documents all three META keys,
+including the warning to clear `META_TEST_EVENT_CODE` — left set, real
+customer conversions go to the test stream and never reach optimisation.
+
 ---
 
 ## 10. URLs ARE ROUTES (2026-08-13) — read before touching a link
@@ -1990,7 +2037,7 @@ half-working. **Do not "fix" them by inventing placeholder credentials.**
 | Item | State | What unblocks it |
 |---|---|---|
 | **Google Search Console** | Nothing set up. `sitemap.xml` is correct and current (38 routes). | Verify the domain, submit the sitemap. ACTION-REQUIRED §7b. |
-| **Meta Pixel + Conversions API** | Both halves written, both dormant. | Pixel id + CAPI token. ACTION-REQUIRED §6b. |
+| **Meta Conversions API** | Browser pixel is LIVE (2026-09-06). The server half is still dormant. | `META_CAPI_TOKEN` in the server `.env` — Events Manager → Settings → Generate access token. Pixel keeps working alone until then. |
 | **SMS to customers** | `modules/sms`, dormant. | bulksmsbd account, 3 `.env` keys. §6c. |
 | **bKash / Nagad** | `modules/payments`, dormant, sandbox by default. | Merchant onboarding. §6d. |
 | **301s from old `/modules/…` URLs** | Deliberately NOT added. | Old URLs work and canonicalise to the new ones, which is how Google consolidates. Redirects would mean mangling query strings for marginal gain — revisit only if Search Console shows the old URLs lingering. |

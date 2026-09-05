@@ -283,19 +283,39 @@ RedirectMatch 404 ^/(composer\.(json|lock)|artisan|phpunit\.xml|context\.md|BACK
     # Removing those three is now the ONLY thing between this policy and one
     # that stops injected script outright.
     #
-    # script-src IS 'self' AND NOTHING ELSE as of 2026-07-30. 'unsafe-eval'
-    # went with cdn.tailwindcss.com — a CSS compiler that ran in every
-    # visitor's browser before first paint to supply one utility class.
-    # cdn.jsdelivr.net went too: only Bootstrap's STYLESHEET is served from
-    # there, so it never belonged in the script list at all. The site now
-    # executes no third-party JavaScript.
+    # script-src was 'self' AND NOTHING ELSE from 2026-07-30 until the Meta
+    # Pixel arrived. 'unsafe-eval' went with cdn.tailwindcss.com — a CSS
+    # compiler that ran in every visitor's browser before first paint to
+    # supply one utility class. cdn.jsdelivr.net went too: only Bootstrap's
+    # STYLESHEET is served from there, so it never belonged in the script
+    # list at all.
+    #
+    # THE ONE THIRD-PARTY SCRIPT IS NOW THE META PIXEL, and it needs three
+    # entries, not one. Miss any and the failure is silent — the pixel loads,
+    # reports nothing, and Events Manager shows "No activity" while the ads
+    # keep spending:
+    #
+    #   script-src  connect.facebook.net   fbevents.js itself
+    #   img-src     www.facebook.com       the /tr?ev=... beacon, the classic
+    #                                      transport and still the fallback
+    #   connect-src www.facebook.com       the same beacon sent via fetch/
+    #               connect.facebook.net   sendBeacon by current fbevents, plus
+    #                                      the config it fetches on init
+    #
+    # Only these two hosts, never a wildcard *.facebook.com: the pixel needs
+    # no other subdomain, and the point of the policy is that a compromised
+    # dependency cannot reach for one.
+    #
+    # The pixel is inert until shared/js/core/site-config.js carries a pixel
+    # id, so these entries permit a script that is not requested at all on a
+    # shop that has not configured one.
     #
     # NOTE THE TWO FONTSHARE HOSTS. api.fontshare.com serves the @font-face
     # CSS; the font FILES come from cdn.fontshare.com. Listing only the first —
     # which is the one written in the page — blocks the display typeface on
     # every page, and the failure is a silent fallback to a system font rather
     # than an error anybody notices. Verified by fetching the stylesheet.
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com; font-src 'self' https://fonts.gstatic.com https://cdn.fontshare.com data:; img-src 'self' data: blob:; connect-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com; font-src 'self' https://fonts.gstatic.com https://cdn.fontshare.com data:; img-src 'self' data: blob: https://www.facebook.com; connect-src 'self' https://www.facebook.com https://connect.facebook.net; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests"
 </IfModule>
 
 Options -Indexes

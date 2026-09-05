@@ -16,9 +16,10 @@ export const CONFIG = {
    * Meta (Facebook) Pixel ID — the 15-16 digit number from Events Manager.
    * Leave empty and no pixel script is injected at all.
    *
-   * // TODO(merchant): paste the Pixel ID here before the first ad runs.
+   * Set 2026-09-06 for the first ad campaign. This is the dataset named
+   * "GulfRabit Pixel" in Events Manager, on ad account 3375856489152009.
    */
-  metaPixelId: '',
+  metaPixelId: '1423900436303846',
 
   /**
    * Where the browser mirrors each event for server-side forwarding.
