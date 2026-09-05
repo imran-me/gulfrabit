@@ -1088,8 +1088,12 @@ accounting P&L, which needs B5's cost prices to be more than a revenue report.
   (transparent) is now used site-wide; `gulfrabit-mark.png` is the square mark.
 - ~~Favicon square crop~~ **DONE** — `favicon.ico` + `favicon-32.png` +
   `apple-touch-icon.png` cropped from the rabbit mark.
-- **Product/hero imagery** still uses SVG placeholders — swap for real photography
-  (the one remaining branding follow-up; needs supplied assets).
+- ~~Product/hero imagery uses SVG placeholders~~ **DONE (Aug 2026)** — all 20
+  catalogue products carry real photography in `assets/images/products/`, as
+  1254px WebP plus generated `-card` (640px) and `-thumb` (128px) derivatives.
+  This entry sat here stale until 2026-09-06 and was read as "the shop shows
+  placeholders", which nearly delayed an ad launch. Check the files before
+  trusting a follow-up line in this section.
 - **Deployment paths (RESOLVED 2026-07-21):** paths are now **relative** and work
   at a domain root OR a project subpath (`user.github.io/gulfrabit/`). The
   assembler rewrites `/shared|/assets|/modules|url(/…)` per page depth; JS derives
@@ -1102,7 +1106,8 @@ accounting P&L, which needs B5's cost prices to be more than a revenue report.
   / localStorage. Replace with Laravel REST calls (`endpoints.md` per module).
 - **Payment gateway** at checkout is UI-only — `// TODO: connect to payment gateway`.
 - **Auth/session** mocked via localStorage — replace with JWT.
-- **Product imagery** uses placeholders — swap for real photography with vignette treatment.
+- ~~Product imagery uses placeholders~~ **DONE (Aug 2026)** — see above; this
+  was the same item listed twice.
 - **Barcodes are mock** — `data/products.json` carries synthetic EAN-13 codes that pass
   check-digit validation but are **not GS1-registered**. Replace with real supplier
   barcodes before launch (`_meta.barcodeNote` records this in the data file too).
