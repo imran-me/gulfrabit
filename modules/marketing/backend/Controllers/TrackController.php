@@ -10,6 +10,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Modules\Marketing\Models\TrackingEvent;
 use Throwable;
 
 /**
@@ -50,17 +51,14 @@ class TrackController extends Controller
 
     public function __invoke(Request $request): JsonResponse
     {
-        $pixelId = config('services.meta.pixel_id');
-        $token   = config('services.meta.capi_token');
-
-        // Not configured is a legitimate, permanent state — the shop before
-        // its first ad campaign. 204 tells analytics.js's circuit breaker to
-        // keep sending (the route exists), while nothing is forwarded. It
-        // becomes live by setting two .env keys, with no deploy.
-        if (! $pixelId || ! $token) {
-            return response()->json(null, 204);
-        }
-
+        // VALIDATION COMES FIRST NOW, AND SO DOES RECORDING.
+        //
+        // This used to open by reading the Meta credentials and returning 204
+        // when they were absent, so a shop without a Conversions API token
+        // never even parsed the event. That was correct while the only purpose
+        // of this endpoint was forwarding — and wrong the moment the shop
+        // wanted its own copy, because the shop that most needs to see its
+        // funnel is exactly the one that has not finished configuring Meta.
         $data = $request->validate([
             'event_name' => ['required', Rule::in([
                 'PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'Purchase',
@@ -68,10 +66,19 @@ class TrackController extends Controller
             'event_id'         => ['required', 'string', 'max:64'],
             'event_time'       => ['sometimes', 'nullable', 'integer'],
             'event_source_url' => ['sometimes', 'nullable', 'string', 'max:2048'],
+            'path'             => ['sometimes', 'nullable', 'string', 'max:512'],
+            'referrer'         => ['sometimes', 'nullable', 'string', 'max:2048'],
+            // Minted in the browser and opaque here on purpose: this endpoint
+            // must never be able to turn one into a person.
+            'visitor_id'       => ['sometimes', 'nullable', 'string', 'max:64'],
+            'session_id'       => ['sometimes', 'nullable', 'string', 'max:64'],
             'custom_data'      => ['sometimes', 'nullable', 'array'],
             'attribution'      => ['sometimes', 'nullable', 'array', 'max:10'],
             'attribution.*'    => ['string', 'max:255'],
         ]);
+
+        $pixelId = config('services.meta.pixel_id');
+        $token   = config('services.meta.capi_token');
 
         // Clamp, don't trust: the browser's clock sets event_time, and a phone
         // running fast would post an event from the future, which Meta refuses.
@@ -94,11 +101,27 @@ class TrackController extends Controller
             'test_event_code' => config('services.meta.test_event_code') ?: null,
         ]);
 
+        // Unconfigured is still a legitimate, permanent state — the shop before
+        // its first Conversions API token. The difference is that the event is
+        // now KEPT either way, and the row says which of the three things
+        // happened rather than leaving the merchant to guess whether the
+        // forwarder is off or broken.
+        if (! $pixelId || ! $token) {
+            $this->record($request, $data, $time, 'skipped');
+
+            // Still a 2xx: analytics.js treats any non-ok response as "this
+            // route does not exist" and stops calling for the rest of the page
+            // load, which would cost the shop its own copy too.
+            return response()->json(null, 204);
+        }
+
         // Synchronous with a short timeout rather than queued: this shared
         // host runs no queue worker, and the caller is a keepalive beacon the
         // customer never waits on — four slow seconds here cost nobody
         // anything visible. Failures are logged and swallowed; tracking must
         // never be the reason a shop misbehaves.
+        $status = 'sent';
+
         try {
             $response = Http::timeout(4)
                 ->post(
@@ -107,6 +130,7 @@ class TrackController extends Controller
                 );
 
             if ($response->failed()) {
+                $status = 'failed';
                 Log::warning('capi: Meta refused the event', [
                     'event'  => $data['event_name'],
                     'status' => $response->status(),
@@ -114,10 +138,88 @@ class TrackController extends Controller
                 ]);
             }
         } catch (Throwable $e) {
+            $status = 'failed';
             Log::warning('capi: Meta unreachable', ['error' => $e->getMessage()]);
         }
 
+        // After the attempt, so the row records what actually happened rather
+        // than what was intended. The forward is already wrapped, so nothing
+        // above can prevent this line from running.
+        $this->record($request, $data, $time, $status);
+
         return response()->json(['ok' => true], 202);
+    }
+
+    /**
+     * Keep the shop's own copy of the event.
+     *
+     * WHY THE SHOP KEEPS ITS OWN
+     * --------------------------
+     * Meta reports on the ad. It cannot report on the pages nobody converted
+     * on, because it never sees them — so "which step loses people" is a
+     * question only the shop can answer about itself, and only if it kept the
+     * events. It also means the answer to "is tracking working?" no longer
+     * depends on a third-party dashboard or a browser extension.
+     *
+     * NEVER THROWS.
+     * A tracking beacon must not be the reason a page misbehaves, and this
+     * runs on every page load of every visitor. A full disk, a missing table
+     * before the migration has run, a lock timeout — all of it is logged and
+     * swallowed. The event is already on its way to Meta by this point; losing
+     * the local copy is the cheapest possible failure here.
+     *
+     * @param array<string, mixed> $data
+     */
+    private function record(Request $request, array $data, int $time, string $capiStatus): void
+    {
+        try {
+            $custom = $data['custom_data'] ?? [];
+            $attr   = $data['attribution'] ?? [];
+
+            // Poisha, from whatever the browser called taka. Rounded, not
+            // truncated: a 460.00 that arrives as 459.999999 must not be
+            // recorded as 45999, and money is integer everywhere in this
+            // codebase for exactly this reason.
+            $value = isset($custom['value']) && is_numeric($custom['value'])
+                ? (int) round(((float) $custom['value']) * 100)
+                : null;
+
+            TrackingEvent::create([
+                'visitor_id'   => $data['visitor_id'] ?? null,
+                'session_id'   => $data['session_id'] ?? null,
+                'event_name'   => $data['event_name'],
+                'event_id'     => $data['event_id'] ?? null,
+                'value_poisha' => $value,
+                // Currency only where there is a value to denominate, matching
+                // what analytics.js sends and what Events Manager expects.
+                'currency'     => $value === null ? null : ($custom['currency'] ?? null),
+                'path'         => $data['path'] ?? null,
+                'source_url'   => $data['event_source_url'] ?? null,
+                'referrer'     => $data['referrer'] ?? null,
+                'content_ids'  => is_array($custom['content_ids'] ?? null) ? $custom['content_ids'] : null,
+                'content_name' => is_string($custom['content_name'] ?? null)
+                    ? mb_substr($custom['content_name'], 0, 255)
+                    : null,
+                'num_items'    => isset($custom['num_items']) && is_numeric($custom['num_items'])
+                    ? (int) $custom['num_items']
+                    : null,
+                'utm_source'   => $attr['utm_source'] ?? null,
+                'utm_medium'   => $attr['utm_medium'] ?? null,
+                'utm_campaign' => $attr['utm_campaign'] ?? null,
+                'utm_content'  => $attr['utm_content'] ?? null,
+                'attribution'  => $attr ?: null,
+                'capi_status'  => $capiStatus,
+                // The browser's clock, already clamped by the caller, so the
+                // dashboard and Meta agree about when something happened.
+                'created_at'   => date('Y-m-d H:i:s', $time),
+                'updated_at'   => date('Y-m-d H:i:s', $time),
+            ]);
+        } catch (Throwable $e) {
+            Log::warning('track: could not record the event locally', [
+                'event' => $data['event_name'] ?? '?',
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

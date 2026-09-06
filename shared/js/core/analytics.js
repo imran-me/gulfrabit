@@ -29,6 +29,59 @@ import { storage } from './storage.js';
 
 const ATTRIBUTION_KEY = 'attribution';
 
+/* ---- Anonymous identity ------------------------------------------------ */
+/* Two random ids, so the shop's own dashboard can answer "how many people
+ * came" and "where did they leave" — questions Meta cannot answer, because it
+ * never sees the pages nobody converted on.
+ *
+ * They identify NOTHING about the person: no name, no phone, no IP, no
+ * fingerprint. A cleared browser is a new visitor and a second device is a
+ * second visitor, so the count is an honest lower bound on people rather than
+ * a headcount. That is the right trade for a shop with no need to know who
+ * anyone is, and it is why these are minted here rather than derived from
+ * anything about the client.
+ */
+const VISITOR_KEY = 'visitor-id';
+const SESSION_KEY = 'session';
+
+/* 30 minutes idle ends a session — the window every analytics tool uses, so
+ * the numbers are comparable to anything the merchant reads elsewhere. Without
+ * it a returning shopper is one endless visit and every drop-off rate is
+ * wrong. */
+const SESSION_IDLE_MS = 30 * 60 * 1000;
+
+/** Stable for the life of this browser. */
+function visitorId() {
+  let id = storage.get(VISITOR_KEY, null);
+  if (!id) {
+    id = newEventId();
+    storage.set(VISITOR_KEY, id);
+  }
+  return id;
+}
+
+/**
+ * This visit. Rotates after SESSION_IDLE_MS of no events.
+ *
+ * `seenAt` is bumped on every call rather than only on the first, so a session
+ * ends 30 minutes after the last thing somebody did, not 30 minutes after they
+ * arrived — otherwise a long, engaged browse gets cut in half and reported as
+ * two visits that each abandoned.
+ */
+function sessionId() {
+  const now = Date.now();
+  const prev = storage.get(SESSION_KEY, null);
+
+  if (prev && prev.id && typeof prev.seenAt === 'number' && now - prev.seenAt < SESSION_IDLE_MS) {
+    storage.set(SESSION_KEY, { id: prev.id, seenAt: now });
+    return prev.id;
+  }
+
+  const id = newEventId();
+  storage.set(SESSION_KEY, { id, seenAt: now });
+  return id;
+}
+
 let ready = false;
 /** Set once the CAPI endpoint has failed; stops retrying for this page load. */
 let capiDown = false;
@@ -171,6 +224,16 @@ function mirrorToServer(name, params, eventId) {
     event_id: eventId,
     event_time: Math.floor(Date.now() / 1000),
     event_source_url: window.location.href,
+    // Path separately from the full URL: the shop's own footprint report
+    // groups by page, and grouping by a URL carrying a different utm string
+    // on every row groups nothing.
+    path: window.location.pathname,
+    // document.referrer is '' for a direct visit; send null rather than an
+    // empty string so "nobody sent them" and "we did not look" stay different
+    // answers in the report.
+    referrer: document.referrer || null,
+    visitor_id: visitorId(),
+    session_id: sessionId(),
     attribution: getAttribution(),
     custom_data: params,
   });

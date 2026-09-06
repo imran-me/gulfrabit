@@ -866,6 +866,11 @@ ADMIN_PAGES = [
      ["/modules/admin/admin.css", "/modules/highlights/highlights.css"],
      ["/modules/admin/admin-shell.js", "/modules/highlights/highlights-page.js"], True),
 
+    ("modules/marketing/analytics.html", "Tracking — GulfRabit Admin",
+     "modules/marketing/_fragments/analytics.main.html",
+     ["/modules/admin/admin.css", "/modules/marketing/analytics.css"],
+     ["/modules/admin/admin-shell.js", "/modules/marketing/analytics-page.js"], True),
+
     ("modules/marketing/campaigns.html", "Campaigns — GulfRabit Admin",
      "modules/marketing/_fragments/campaigns.main.html",
      ["/modules/admin/admin.css"],

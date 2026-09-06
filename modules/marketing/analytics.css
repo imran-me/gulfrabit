@@ -1,0 +1,156 @@
+/**
+ * analytics.css — the pixel dashboard's own pieces.
+ *
+ * Everything that is already a shared admin component (cards, tables, filters,
+ * error strip) is reused from admin.css. What is here is only what the funnel
+ * needs and nothing else had: a bar, a drop-off note, a footprint trail.
+ *
+ * COLOUR: THE FUNNEL IS ONE MEASURE, SO IT IS ONE HUE.
+ * The five stages are not five things competing for identity — they are one
+ * number narrowing. Giving each stage its own colour would be a categorical
+ * palette applied to non-categorical data: it invites the reader to compare
+ * stages as if they were rivals, when the only relationship that matters is
+ * "how much of the previous step survived". One hue, one meaning.
+ *
+ * Text never wears the bar's colour. Counts and labels stay on the ink tokens
+ * so they keep their contrast in both themes; the bar beside them carries the
+ * magnitude on its own.
+ */
+
+/* ---- Funnel ------------------------------------------------------------ */
+
+.fnl {
+  display: grid;
+  /* 2px between rows: the bars are a stack of related magnitudes and need a
+     surface gap to read as separate marks rather than one shape. */
+  gap: 2px;
+  margin-top: var(--space-4);
+}
+
+.fnl__row {
+  display: grid;
+  grid-template-columns: minmax(0, 11rem) 1fr minmax(0, 9rem);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.fnl__stage {
+  font-size: var(--fs-14);
+  font-weight: 600;
+  color: var(--text-primary);
+  /* minmax(0, …) on the track above and this here: a long stage name must
+     shrink rather than push the bar off the row. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* The track is the 100% reference, so every bar is read against the same
+   width. Without it each bar would be its own scale and the shape would lie. */
+.fnl__track {
+  position: relative;
+  height: 1.75rem;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+
+.fnl__bar {
+  height: 100%;
+  /* Anchored to the left edge — a bar that floats has no baseline and cannot
+     be compared to the one above it. 4px only on the leading end, so the data
+     end stays square against its own value. */
+  border-radius: 4px;
+  background: var(--gr-cyan-dark);
+  transition: width .45s cubic-bezier(.22, 1, .36, 1);
+  min-width: 2px;   /* a non-zero count must never render as nothing */
+}
+
+.fnl__count {
+  font-size: var(--fs-14);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.fnl__count b { font-weight: 700; }
+
+.fnl__pct {
+  display: block;
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Drop-off is the number the screen exists for, so it is allowed to be the one
+   coloured piece of text — and only when it is bad enough to act on. */
+.fnl__drop { color: var(--text-muted); }
+.fnl__drop--bad { color: var(--gr-error); font-weight: 600; }
+
+/* ---- Session footprint ------------------------------------------------- */
+
+.fp {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.fp__item {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 10rem) 1fr auto;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  font-size: var(--fs-13, var(--fs-14));
+}
+
+.fp__time { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.fp__ev { font-weight: 600; color: var(--text-primary); }
+.fp__path { color: var(--text-secondary); overflow-wrap: anywhere; }
+.fp__val { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+/* ---- Status chips ------------------------------------------------------ */
+/* Status colours are reserved for state and never reused as a series colour.
+   Each carries a word as well as a colour — the state must survive being
+   printed in grey or read by someone who cannot separate the hues. */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .4em;
+  padding: .15em .6em;
+  border-radius: 999px;
+  font-size: var(--fs-11);
+  font-weight: 600;
+  border: 1px solid var(--border-hairline);
+  color: var(--text-secondary);
+  background: var(--surface-sunken);
+}
+
+.chip::before {
+  content: "";
+  width: .5em;
+  height: .5em;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.chip--ok { color: var(--gr-success); }
+.chip--warn { color: var(--gr-warning); }
+.chip--bad { color: var(--gr-error); }
+
+.fnl__note {
+  margin-top: var(--space-4);
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .fnl__row { grid-template-columns: 1fr; gap: var(--space-1); }
+  .fnl__count { text-align: left; }
+  .fp__item { grid-template-columns: 1fr; }
+}

@@ -86,7 +86,7 @@ try {
 
     
   </script>
-  <title>Dashboard — GulfRabit Admin</title>
+  <title>Tracking — GulfRabit Admin</title>
   <meta name="description" content="GulfRabit staff panel.">
   <meta name="theme-color" content="#0A0A0A">
   <meta name="author" content="GulfRabit">
@@ -95,11 +95,11 @@ try {
   <!-- Social / Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GulfRabit">
-  <meta property="og:title" content="Dashboard — GulfRabit Admin">
+  <meta property="og:title" content="Tracking — GulfRabit Admin">
   <meta property="og:description" content="GulfRabit staff panel.">
   <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Dashboard — GulfRabit Admin">
+  <meta name="twitter:title" content="Tracking — GulfRabit Admin">
   <meta name="twitter:description" content="GulfRabit staff panel.">
   <link rel="icon" href="../../favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
@@ -117,6 +117,7 @@ try {
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=3a7d16d2">
   <link rel="stylesheet" href="../../modules/admin/admin.css?v=d5fec296">
+  <link rel="stylesheet" href="../../modules/marketing/analytics.css?v=86255f79">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -263,30 +264,150 @@ try {
 
 <div class="admin__head">
         <div>
-          <h1 class="admin__title">Dashboard</h1>
-          <p class="admin__sub" data-dash-sub>Loading today’s figures…</p>
+          <h1 class="admin__title">Tracking</h1>
+          <p class="admin__sub" data-an-sub>Where people came from, and where they left.</p>
+        </div>
+        <div style="display:flex;gap:var(--space-3);align-items:flex-end;flex-wrap:wrap">
+          <div class="afilters__field" style="max-width:170px">
+            <label for="an-days">Period</label>
+            <select class="select-gr" id="an-days" data-an-days>
+              <option value="1">Today</option>
+              <option value="7" selected>Last 7 days</option>
+              <option value="30">Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+          </div>
+          <!-- A real link, not a fetch: the browser's own download handles a
+               streamed file of any size, and the period rides the href so the
+               export always matches what is on screen. -->
+          <a class="btn-gr btn-gr--ghost" data-an-export href="#" download>Export CSV</a>
         </div>
       </div>
 
-      <!-- Filled from GET /api/admin/dashboard. The server decides which cards
-           this role may receive; the client only lays out what it is given, so
-           a warehouse account is never sent the revenue figure at all. -->
-      <div class="acards" data-dash-cards></div>
+      <p class="aerror" data-an-error hidden role="alert"></p>
 
-      <p class="admin__sub" data-dash-empty hidden>
-        No cards to show yet. Cards appear as modules are installed — orders,
-        inventory and accounting each contribute their own.
-      </p>
+      <div class="acards" data-an-cards hidden>
+        <div class="acard">
+          <span class="acard__n" data-an-visitors>—</span>
+          <span class="acard__l">Visitors</span>
+        </div>
+        <div class="acard">
+          <span class="acard__n" data-an-sessions>—</span>
+          <span class="acard__l">Visits</span>
+        </div>
+        <div class="acard">
+          <span class="acard__n" data-an-purchases>—</span>
+          <span class="acard__l">Purchases</span>
+        </div>
+        <div class="acard">
+          <span class="acard__n" data-an-revenue>—</span>
+          <span class="acard__l">Revenue tracked</span>
+        </div>
+      </div>
 
-      <!-- Setup check. Hidden entirely when everything passes: a permanent
-           green panel on the screen you see most is noise, and noise is what
-           stops a red one being noticed. It appears only when something is
-           actually wrong, and says what to do about it. -->
-      <section class="acard acard--danger" data-dash-health hidden
-               style="margin-top:var(--space-5)" aria-labelledby="dh-head">
-        <h2 class="h5" id="dh-head" style="margin:0 0 var(--space-2)">Something needs attention</h2>
-        <ul class="arefunds" data-dash-health-list role="list"></ul>
+      <!-- THE FUNNEL.
+           Counted in VISITS, not events: one shopper opening eight product
+           pages fires eight ViewContent events, and counted raw that single
+           person makes the middle of the funnel look eight times healthier
+           than it is. Each percentage is against the step above it, so one bad
+           screen shows up as one bad number instead of dragging every row
+           below it down with it. -->
+      <section style="margin-top:var(--space-6)">
+        <h2 class="admin__title" style="font-size:var(--fs-18,1.125rem)">Funnel</h2>
+        <p class="admin__sub">How many visits reached each step, and what share was lost at each one.</p>
+        <div class="fnl" data-an-funnel>
+          <p class="atable__empty">Loading…</p>
+        </div>
+        <p class="fnl__note">
+          Counted in visits, not events — a visit that views six products counts once.
+          Ad blockers stop some events, so these are a floor, not a headcount.
+        </p>
       </section>
+
+      <div style="display:grid;gap:var(--space-5);grid-template-columns:repeat(auto-fit,minmax(320px,1fr));margin-top:var(--space-6)">
+        <section>
+          <h2 class="admin__title" style="font-size:var(--fs-18,1.125rem)">Most visited pages</h2>
+          <div class="atable-wrap" style="margin-top:var(--space-3)">
+            <table class="atable">
+              <thead>
+                <tr>
+                  <th scope="col">Page</th>
+                  <th scope="col" class="atable__num">Visits</th>
+                  <th scope="col" class="atable__num">Views</th>
+                </tr>
+              </thead>
+              <tbody data-an-pages>
+                <tr><td colspan="3" class="atable__empty">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="admin__title" style="font-size:var(--fs-18,1.125rem)">Where they came from</h2>
+          <div class="atable-wrap" style="margin-top:var(--space-3)">
+            <table class="atable">
+              <thead>
+                <tr>
+                  <th scope="col">Campaign</th>
+                  <th scope="col" class="atable__num">Visits</th>
+                  <th scope="col" class="atable__num">Orders</th>
+                  <th scope="col" class="atable__num">Revenue</th>
+                </tr>
+              </thead>
+              <tbody data-an-campaigns>
+                <tr><td colspan="4" class="atable__empty">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <section style="margin-top:var(--space-6)">
+        <div class="admin__head" style="margin-bottom:var(--space-3)">
+          <div>
+            <h2 class="admin__title" style="font-size:var(--fs-18,1.125rem)">Recent visits</h2>
+            <p class="admin__sub">Open one to see every step that visit took.</p>
+          </div>
+        </div>
+        <div class="atable-wrap">
+          <table class="atable">
+            <thead>
+              <tr>
+                <th scope="col">Started</th>
+                <th scope="col">Came from</th>
+                <th scope="col" class="atable__num">Pages</th>
+                <th scope="col">Got as far as</th>
+                <th scope="col" class="atable__num">Value</th>
+                <th scope="col"><span class="sr-only">Footprint</span></th>
+              </tr>
+            </thead>
+            <tbody data-an-visits>
+              <tr><td colspan="6" class="atable__empty">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- The footprint opens in place under the table rather than in a modal:
+           it is a reading task, it can be long, and a dialog would trap it in a
+           scroll box the size of a phone. -->
+      <section data-an-fp-wrap hidden style="margin-top:var(--space-5)">
+        <div class="admin__head" style="margin-bottom:var(--space-3)">
+          <div>
+            <h2 class="admin__title" style="font-size:var(--fs-18,1.125rem)">Visit footprint</h2>
+            <p class="admin__sub" data-an-fp-sub>—</p>
+          </div>
+          <button type="button" class="btn-gr btn-gr--ghost" data-an-fp-close>Close</button>
+        </div>
+        <ol class="fp" data-an-fp></ol>
+      </section>
+
+      <p class="admin__sub" style="margin-top:var(--space-5)">
+        This is the shop's own copy of what the pixel fired, recorded server-side.
+        Meta reports on the ad; this reports on the pages the ad sent people to —
+        including the ones nobody bought from, which Meta never sees.
+      </p>
     </main>
   </div>
 
@@ -303,6 +424,6 @@ try {
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=0451c724"></script>
-  <script type="module" src="../../modules/admin/dashboard-page.js?v=038ee167"></script>
+  <script type="module" src="../../modules/marketing/analytics-page.js?v=6e381133"></script>
 </body>
 </html>
