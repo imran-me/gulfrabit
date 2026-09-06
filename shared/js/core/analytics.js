@@ -94,6 +94,22 @@ let capiDown = false;
  */
 export function initAnalytics() {
   try {
+    // THE PANEL IS NOT A SHOPPER.
+    //
+    // Admin pages load main.js like every other page, so staff opening the
+    // orders screen fired a PageView — into the same pixel the ads optimise
+    // against, and (since the events are now kept) into the top of the
+    // merchant's own funnel. Both readings are corrupted the same way: a shop
+    // whose team browses all day looks like it has plenty of visitors who
+    // never buy, and the drop-off from PageView to ViewContent is reported as
+    // worse than it is.
+    //
+    // Keyed on the shell container the assembler puts on every admin page and
+    // nowhere else, rather than on the URL: the panel is reachable both as
+    // /admin/... and as /modules/<x>/<page>.html, and a path test would miss
+    // half of it — silently, which is the whole problem with path tests.
+    if (document.querySelector('[data-admin-shell]')) return;
+
     captureAttribution();
     if (!CONFIG.metaPixelId) return;
     loadPixel(CONFIG.metaPixelId);

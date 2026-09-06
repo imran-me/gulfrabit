@@ -105,7 +105,7 @@
   padding: var(--space-2) var(--space-3);
   border-radius: 4px;
   background: var(--surface-sunken);
-  font-size: var(--fs-13, var(--fs-14));
+  font-size: var(--fs-14);
 }
 
 .fp__time { color: var(--text-muted); font-variant-numeric: tabular-nums; }
@@ -153,4 +153,129 @@
   .fnl__row { grid-template-columns: 1fr; gap: var(--space-1); }
   .fnl__count { text-align: left; }
   .fp__item { grid-template-columns: 1fr; }
+}
+
+/* ---- Daily trend ------------------------------------------------------- */
+/*
+ * ONE SERIES, ONE SCALE. Visits run to hundreds and orders to single digits;
+ * plotting both as bars would need a second y-axis, and a dual-axis chart lets
+ * the author decide what "crossing over" looks like by choosing the scales.
+ * So the bars are visits alone, and a day that produced an order is marked with
+ * a dot — secondary encoding, no second scale, nothing to misread.
+ */
+
+.trend {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;               /* the surface gap that keeps adjacent bars separate */
+  height: 6rem;
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);   /* room for the order dots above the tallest bar */
+}
+
+.trend__col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  position: relative;
+}
+
+.trend__bar {
+  width: 100%;
+  /* Rounded only at the data end, anchored to the baseline. A minimum height so
+     a day with one visit is still visibly different from a day with none. */
+  border-radius: 4px 4px 0 0;
+  background: var(--gr-cyan-dark);
+  min-height: 2px;
+}
+
+/* A day with nothing is drawn, not skipped — an omitted day silently closes the
+   gap and turns a real dip into a smooth line. */
+.trend__col--empty .trend__bar { background: var(--surface-sunken); }
+
+.trend__dot {
+  position: absolute;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gr-success);
+  /* A ring in the surface colour so the dot stays legible where it overlaps
+     the top of a tall bar. */
+  box-shadow: 0 0 0 2px var(--surface-raised, var(--surface-page));
+}
+
+.trend__axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+.trend__legend {
+  display: flex;
+  gap: var(--space-4);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+  align-items: center;
+}
+
+.trend__key {
+  display: inline-flex;
+  align-items: center;
+  gap: .4em;
+}
+
+.trend__key::before {
+  content: "";
+  width: .6em;
+  height: .6em;
+  border-radius: 2px;
+  background: var(--gr-cyan-dark);
+}
+
+.trend__key--orders::before {
+  border-radius: 50%;
+  background: var(--gr-success);
+}
+
+/* ---- Live toggle ------------------------------------------------------- */
+
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: .45em;
+  font-size: var(--fs-12);
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.live__dot {
+  width: .5em;
+  height: .5em;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.live input:checked ~ .live__dot {
+  background: var(--gr-success);
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .35; }
+}
+
+/* Motion is decoration here; the colour already says "on". */
+@media (prefers-reduced-motion: reduce) {
+  .live input:checked ~ .live__dot { animation: none; }
+  .fnl__bar, .trend__bar { transition: none; }
 }

@@ -18,6 +18,12 @@ const $ = (sel) => document.querySelector(sel);
 
 document.addEventListener('admin:ready', init);
 
+/** How many visits are on screen, so "load more" knows where to continue. */
+let shown = 0;
+/** The live-refresh timer, or null. Module-level so it can only ever be one. */
+let timer = null;
+const REFRESH_MS = 30000;
+
 function init() {
   const days = $('[data-an-days]');
   if (!days) return;
@@ -27,6 +33,15 @@ function init() {
 
   days.addEventListener('change', load);
   $('[data-an-fp-close]')?.addEventListener('click', closeFootprint);
+  $('[data-an-more]')?.addEventListener('click', () => loadVisits(period(), true));
+  $('[data-an-live]')?.addEventListener('change', (e) => setLive(e.target.checked));
+
+  // A hidden tab must not keep polling: it burns the merchant's data plan and
+  // the server's query budget to redraw something nobody is looking at.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopLive();
+    else if ($('[data-an-live]')?.checked) startLive();
+  });
 
   // One delegated listener rather than one per row: the table is repainted on
   // every period change, and per-row handlers would leak with each repaint.
@@ -40,6 +55,44 @@ function init() {
 
 function period() {
   return $('[data-an-days]').value;
+}
+
+/* ---- Live refresh ------------------------------------------------------ */
+
+function setLive(on) {
+  if (on) startLive();
+  else stopLive();
+}
+
+/**
+ * Poll rather than stream. A WebSocket would be the obvious answer and the
+ * wrong one here: this is shared hosting with no persistent process to hold a
+ * socket open, and the screen is read by one or two people at a time. Thirty
+ * seconds is under the attention span of somebody watching an ad go live and
+ * far above the rate at which these numbers meaningfully change.
+ */
+function startLive() {
+  stopLive();
+  timer = setInterval(() => {
+    // A refresh that closed the footprint someone was reading would be a bug
+    // wearing a feature's clothes, so only the summary is redrawn.
+    refreshSummary();
+  }, REFRESH_MS);
+}
+
+function stopLive() {
+  if (timer) clearInterval(timer);
+  timer = null;
+}
+
+async function refreshSummary() {
+  try {
+    const payload = await adminFetch(`/marketing/analytics?days=${encodeURIComponent(period())}`);
+    paint(payload.data);
+  } catch {
+    // Silent: a failed poll is not worth a red box over a screen that is
+    // already showing the last good numbers. The next tick tries again.
+  }
 }
 
 async function load() {
@@ -84,10 +137,55 @@ function paint(d) {
   setText('[data-an-sub]',
     `${num(d.events)} events from ${num(d.visitors)} visitor${d.visitors === 1 ? '' : 's'} in the last ${d.days} day${d.days === 1 ? '' : 's'}.`);
 
+  paintDaily(d.daily);
   paintFunnel(d.funnel);
   paintPages(d.topPages);
   paintCampaigns(d.campaigns);
   paintCapi(d.capi);
+}
+
+/**
+ * Visits per day.
+ *
+ * ONE SERIES. Visits run to hundreds and orders to single digits, so drawing
+ * both as bars needs two y-scales — and on a dual-axis chart the author picks
+ * where the lines cross by picking the scales, which makes the shape an opinion
+ * rather than a measurement. Orders are a dot instead: same axis, no second
+ * scale, and still visible at a glance.
+ *
+ * Bars are scaled against the busiest day, not a fixed ceiling, so a quiet week
+ * still has shape instead of five invisible stubs.
+ */
+function paintDaily(rows) {
+  const wrap = $('[data-an-trend-wrap]');
+  const host = $('[data-an-trend]');
+  if (!wrap || !host) return;
+
+  if (!rows?.length) { wrap.hidden = true; return; }
+  wrap.hidden = false;
+
+  const peak = Math.max(...rows.map((r) => r.sessions), 1);
+
+  host.innerHTML = rows.map((r) => {
+    const h = Math.round((r.sessions / peak) * 100);
+    // title, not a custom tooltip: it is keyboard- and screen-reader-reachable
+    // for free, and the exact number is a detail rather than the message.
+    const tip = `${r.day} · ${r.sessions} visit${r.sessions === 1 ? '' : 's'}` +
+      (r.purchases ? ` · ${r.purchases} order${r.purchases === 1 ? '' : 's'}` : '');
+    return `
+      <div class="trend__col${r.sessions ? '' : ' trend__col--empty'}" title="${escapeHtml(tip)}">
+        ${r.purchases ? '<span class="trend__dot"></span>' : ''}
+        <div class="trend__bar" style="height:${r.sessions ? Math.max(h, 3) : 2}%"></div>
+      </div>`;
+  }).join('');
+
+  setText('[data-an-trend-from]', shortDay(rows[0].day));
+  setText('[data-an-trend-to]', shortDay(rows[rows.length - 1].day));
+}
+
+function shortDay(d) {
+  const dt = new Date(`${d}T00:00:00`);
+  return Number.isNaN(+dt) ? d : dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
 function paintFunnel(rows) {
@@ -181,19 +279,47 @@ function paintCapi(c) {
   sub.insertAdjacentHTML('beforeend', ` ${chip}`);
 }
 
-async function loadVisits(days) {
+const PAGE = 50;
+
+/**
+ * Recent visits, appended a page at a time.
+ *
+ * `append` distinguishes "load more" from a fresh period, which matters for
+ * two reasons: the offset has to continue rather than restart, and the rows
+ * already on screen must not be thrown away and re-fetched just to add fifty
+ * more underneath them.
+ */
+async function loadVisits(days, append = false) {
   const body = $('[data-an-visits]');
+  const more = $('[data-an-more]');
+
+  if (!append) shown = 0;
+  if (more) { more.disabled = true; more.textContent = 'Loading…'; }
+
   let payload;
   try {
-    payload = await adminFetch(`/marketing/analytics/sessions?days=${encodeURIComponent(days)}&limit=50`);
+    payload = await adminFetch(
+      `/marketing/analytics/sessions?days=${encodeURIComponent(days)}&limit=${PAGE}&offset=${shown}`,
+    );
   } catch {
-    body.innerHTML = '<tr><td colspan="6" class="atable__empty">Could not load visits.</td></tr>';
+    if (!append) body.innerHTML = '<tr><td colspan="6" class="atable__empty">Could not load visits.</td></tr>';
+    if (more) { more.disabled = false; more.textContent = 'Load more visits'; }
     return;
   }
 
   const rows = payload.data ?? [];
-  body.innerHTML = rows.length
-    ? rows.map((s) => `
+  shown += rows.length;
+
+  // A full page back means there is probably another; a short page is the end.
+  // Cheaper than a COUNT over the whole table on every request, and the only
+  // cost of being wrong is one click that returns nothing.
+  if (more) {
+    more.hidden = rows.length < PAGE;
+    more.disabled = false;
+    more.textContent = 'Load more visits';
+  }
+
+  const html = rows.map((s) => `
         <tr>
           <td>${escapeHtml(when(s.started_at))}</td>
           <td>${escapeHtml(s.utm_campaign || s.utm_source || '(direct)')}</td>
@@ -201,8 +327,13 @@ async function loadVisits(days) {
           <td>${furthest(s)}</td>
           <td class="atable__num">${s.revenue_poisha ? `৳ ${num(Math.round(s.revenue_poisha / 100))}` : '—'}</td>
           <td><button type="button" class="btn-gr btn-gr--ghost" data-session="${escapeHtml(s.session_id)}">Footprint</button></td>
-        </tr>`).join('')
-    : '<tr><td colspan="6" class="atable__empty">No visits in this period.</td></tr>';
+        </tr>`).join('');
+
+  if (append) {
+    body.insertAdjacentHTML('beforeend', html);
+  } else {
+    body.innerHTML = html || '<tr><td colspan="6" class="atable__empty">No visits in this period.</td></tr>';
+  }
 }
 
 /**

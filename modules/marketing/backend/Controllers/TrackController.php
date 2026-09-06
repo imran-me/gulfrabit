@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Marketing\Controllers;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -172,6 +173,20 @@ class TrackController extends Controller
      */
     private function record(Request $request, array $data, int $time, string $capiStatus): void
     {
+        // A CRAWLER IS NOT A SHOPPER.
+        // Most bots never run JavaScript and so never reach this endpoint at
+        // all; the ones that do would be counted as visits, inflating the top
+        // of the funnel and making every drop-off below it look worse than it
+        // is. Dropped rather than flagged: a column every query has to remember
+        // to filter is a column half the queries will forget.
+        //
+        // Only the local copy is skipped. Meta runs its own filtering on the
+        // forwarded event, and second-guessing it here would mean this shop
+        // reporting a different number to Meta than Meta reports to itself.
+        if ($this->looksAutomated((string) $request->userAgent())) {
+            return;
+        }
+
         try {
             $custom = $data['custom_data'] ?? [];
             $attr   = $data['attribution'] ?? [];
@@ -214,12 +229,66 @@ class TrackController extends Controller
                 'created_at'   => date('Y-m-d H:i:s', $time),
                 'updated_at'   => date('Y-m-d H:i:s', $time),
             ]);
+        } catch (QueryException $e) {
+            // 23000 is the SQL state for a constraint violation, which here can
+            // only be the unique event_id: the same event arriving twice
+            // because keepalive retried it, or somebody double-tapped Place
+            // Order. The event is already recorded, so this is a success with
+            // an unusual shape - logging it as a warning would train the
+            // merchant's developer to ignore this log.
+            if (($e->errorInfo[0] ?? null) !== '23000') {
+                Log::warning('track: could not record the event locally', [
+                    'event' => $data['event_name'] ?? '?',
+                    'error' => $e->getMessage(),
+                ]);
+            }
         } catch (Throwable $e) {
             Log::warning('track: could not record the event locally', [
                 'event' => $data['event_name'] ?? '?',
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Whether this user agent is a robot rather than a person.
+     *
+     * A conservative list of substrings that are unambiguous. Nothing here
+     * matches a real browser, because the cost of a false positive is a real
+     * customer who is invisible in the merchant's own report - strictly worse
+     * than a crawler that slips through and is merely noise.
+     *
+     * HeadlessChrome is included, which means an automated check of this very
+     * site does not appear in its own dashboard. That is the correct answer:
+     * a smoke test is not a shopper either.
+     */
+    private function looksAutomated(string $agent): bool
+    {
+        if ($agent === '') {
+            // No user agent at all is a script, not a browser. Every real one
+            // sends it.
+            return true;
+        }
+
+        static $needles = [
+            'bot', 'crawler', 'spider', 'crawling',
+            'facebookexternalhit', 'facebookcatalog', 'meta-externalagent',
+            'googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider',
+            'yandex', 'sogou', 'exabot', 'ia_archiver', 'ahrefs', 'semrush',
+            'headlesschrome', 'phantomjs', 'puppeteer', 'playwright',
+            'python-requests', 'curl/', 'wget', 'go-http-client',
+            'lighthouse', 'pingdom', 'gtmetrix', 'uptimerobot',
+        ];
+
+        $agent = mb_strtolower($agent);
+
+        foreach ($needles as $needle) {
+            if (str_contains($agent, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

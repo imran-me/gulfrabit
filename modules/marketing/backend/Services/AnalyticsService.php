@@ -91,10 +91,53 @@ class AnalyticsService
             ),
             'purchases' => (clone $base)->where('event_name', 'Purchase')->count(),
             'funnel'    => $funnel,
+            'daily'     => $this->daily($days),
             'topPages'  => $this->topPages($days),
             'campaigns' => $this->campaigns($days),
             'capi'      => $this->capiHealth($days),
         ];
+    }
+
+    /**
+     * Visits and orders per day, oldest first.
+     *
+     * The one question the rest of this screen cannot answer: every other panel
+     * is a single window's total, so "is today better than yesterday?" - which
+     * is the question a merchant running an ad actually asks each morning - has
+     * nowhere to be read from.
+     *
+     * Days with no traffic are filled in as zero rather than omitted. A gap
+     * silently closed up makes a quiet Friday look like it never happened and
+     * turns a real dip into a smooth line.
+     */
+    private function daily(int $days): array
+    {
+        $rows = TrackingEvent::query()
+            ->inWindow($days)
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->orderBy(DB::raw('DATE(created_at)'))
+            ->get([
+                DB::raw('DATE(created_at) as day'),
+                DB::raw('COUNT(DISTINCT session_id) as sessions'),
+                DB::raw("SUM(CASE WHEN event_name = 'Purchase' THEN 1 ELSE 0 END) as purchases"),
+            ])
+            ->keyBy(fn ($r) => (string) $r->day);
+
+        $out = [];
+        // Inclusive of both ends: `days` is "the last N days" as a person means
+        // it, which includes today.
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $key = now()->subDays($i)->toDateString();
+            $row = $rows[$key] ?? null;
+
+            $out[] = [
+                'day'       => $key,
+                'sessions'  => (int) ($row->sessions ?? 0),
+                'purchases' => (int) ($row->purchases ?? 0),
+            ];
+        }
+
+        return $out;
     }
 
     /**

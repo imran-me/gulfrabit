@@ -17,6 +17,14 @@
                streamed file of any size, and the period rides the href so the
                export always matches what is on screen. -->
           <a class="btn-gr btn-gr--ghost" data-an-export href="#" download>Export CSV</a>
+          <!-- Opt-in, not on by default: a screen that reloads under someone
+               reading it is hostile, and this one is read as often as it is
+               watched. -->
+          <label class="live">
+            <input type="checkbox" data-an-live>
+            <span class="live__dot" aria-hidden="true"></span>
+            Live
+          </label>
         </div>
       </div>
 
@@ -41,6 +49,17 @@
         </div>
       </div>
 
+      <section style="margin-top:var(--space-6)" data-an-trend-wrap hidden>
+        <h2 class="admin__title" style="font-size:var(--fs-20)">Visits per day</h2>
+        <p class="admin__sub">Whether today is better than yesterday — the one thing a single total cannot tell you.</p>
+        <div class="trend" data-an-trend></div>
+        <div class="trend__axis"><span data-an-trend-from>—</span><span data-an-trend-to>—</span></div>
+        <div class="trend__legend">
+          <span class="trend__key">Visits</span>
+          <span class="trend__key trend__key--orders">Day with an order</span>
+        </div>
+      </section>
+
       <!-- THE FUNNEL.
            Counted in VISITS, not events: one shopper opening eight product
            pages fires eight ViewContent events, and counted raw that single
@@ -49,7 +68,7 @@
            screen shows up as one bad number instead of dragging every row
            below it down with it. -->
       <section style="margin-top:var(--space-6)">
-        <h2 class="admin__title" style="font-size:var(--fs-18,1.125rem)">Funnel</h2>
+        <h2 class="admin__title" style="font-size:var(--fs-20)">Funnel</h2>
         <p class="admin__sub">How many visits reached each step, and what share was lost at each one.</p>
         <div class="fnl" data-an-funnel>
           <p class="atable__empty">Loading…</p>
@@ -62,7 +81,7 @@
 
       <div style="display:grid;gap:var(--space-5);grid-template-columns:repeat(auto-fit,minmax(320px,1fr));margin-top:var(--space-6)">
         <section>
-          <h2 class="admin__title" style="font-size:var(--fs-18,1.125rem)">Most visited pages</h2>
+          <h2 class="admin__title" style="font-size:var(--fs-20)">Most visited pages</h2>
           <div class="atable-wrap" style="margin-top:var(--space-3)">
             <table class="atable">
               <thead>
@@ -80,7 +99,7 @@
         </section>
 
         <section>
-          <h2 class="admin__title" style="font-size:var(--fs-18,1.125rem)">Where they came from</h2>
+          <h2 class="admin__title" style="font-size:var(--fs-20)">Where they came from</h2>
           <div class="atable-wrap" style="margin-top:var(--space-3)">
             <table class="atable">
               <thead>
@@ -102,7 +121,7 @@
       <section style="margin-top:var(--space-6)">
         <div class="admin__head" style="margin-bottom:var(--space-3)">
           <div>
-            <h2 class="admin__title" style="font-size:var(--fs-18,1.125rem)">Recent visits</h2>
+            <h2 class="admin__title" style="font-size:var(--fs-20)">Recent visits</h2>
             <p class="admin__sub">Open one to see every step that visit took.</p>
           </div>
         </div>
@@ -123,6 +142,11 @@
             </tbody>
           </table>
         </div>
+        <div style="margin-top:var(--space-3);display:flex;justify-content:center">
+          <!-- The list used to stop silently at 50, which reads as "you have had
+               50 visits" rather than "this is the first 50". -->
+          <button type="button" class="btn-gr btn-gr--ghost" data-an-more hidden>Load more visits</button>
+        </div>
       </section>
 
       <!-- The footprint opens in place under the table rather than in a modal:
@@ -131,7 +155,7 @@
       <section data-an-fp-wrap hidden style="margin-top:var(--space-5)">
         <div class="admin__head" style="margin-bottom:var(--space-3)">
           <div>
-            <h2 class="admin__title" style="font-size:var(--fs-18,1.125rem)">Visit footprint</h2>
+            <h2 class="admin__title" style="font-size:var(--fs-20)">Visit footprint</h2>
             <p class="admin__sub" data-an-fp-sub>—</p>
           </div>
           <button type="button" class="btn-gr btn-gr--ghost" data-an-fp-close>Close</button>
