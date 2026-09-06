@@ -149,6 +149,20 @@ try {
        told this visitor which theme is published. -->
   <link rel="stylesheet" href="../../modules/theme/theme-trio.css?v=dd326453">
   <link rel="stylesheet" href="../../modules/checkout/checkout.css?v=6fafb4ab">
+  <!-- Meta Pixel - init ONLY. Every event is sent by
+       shared/js/core/analytics.js, which attaches an event_id so the browser
+       and Conversions API copies deduplicate. Do NOT add a PageView track
+       call here - it would double-count, and the duplicate could not be
+       merged. See meta_pixel_snippet() in tools/assemble.py. The id is read at build time from
+       shared/js/core/site-config.js - change it there, then rebuild. -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1423900436303846');
+  </script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>

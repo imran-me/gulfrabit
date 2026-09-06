@@ -335,6 +335,87 @@ def canonical_for(out):
     return ROUTES.get(out, "/" + out.lstrip("/"))
 
 
+def _meta_pixel_id():
+    """The pixel id, read out of site-config.js so there is ONE source of truth.
+
+    Typed in two places the copies drift, and the failure is silent in the
+    worst possible way: the page initialises one pixel while the events the
+    modules fire are attributed to another, and each looks correct alone.
+    """
+    try:
+        src = read("shared/js/core/site-config.js")
+    except OSError:
+        return ""
+    m = re.search(r"metaPixelId:\s*'([0-9]+)'", src)
+    return m.group(1) if m else ""
+
+
+# Written with a placeholder rather than an f-string on purpose: the snippet is
+# mostly JavaScript braces, and every one of them would need doubling inside an
+# f-string. One missed pair is a build that emits broken JS into 100 pages.
+_PIXEL_TEMPLATE = """  <!-- Meta Pixel - init ONLY. Every event is sent by
+       shared/js/core/analytics.js, which attaches an event_id so the browser
+       and Conversions API copies deduplicate. Do NOT add a PageView track
+       call here - it would double-count, and the duplicate could not be
+       merged. See meta_pixel_snippet() in tools/assemble.py. The id is read at build time from
+       shared/js/core/site-config.js - change it there, then rebuild. -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '__PIXEL_ID__');
+  </script>
+"""
+
+
+def meta_pixel_snippet():
+    """Meta's base pixel code, in <head>, with the PageView line REMOVED.
+
+    WHY THIS EXISTS WHEN analytics.js ALREADY LOADS THE PIXEL
+    ---------------------------------------------------------
+    It did, and it genuinely worked - Events Manager was receiving events. But
+    it only ran once main.js and its ~15 imports had downloaded and evaluated,
+    and three things follow from that, each of which costs real conversions:
+
+      - it fired LATE. Paid traffic bounces fast, and a visitor gone before the
+        module graph resolved was never counted at all.
+      - it fired CONDITIONALLY. One throwing import anywhere in main.js's graph
+        and the module never runs, so the pixel never loads. That is not
+        hypothetical: modules/mascot/mascot.js currently throws a
+        ReferenceError on every page load.
+      - NOTHING COULD SEE IT. Meta Pixel Helper and Events Manager's own
+        install check look for this snippet in the HTML source. A pixel
+        injected by a module reads to them as "no pixel found on this page",
+        which is indistinguishable from broken - and nobody should be asked to
+        spend on ads against a tracker they have no way to confirm.
+
+    WHY THE fbq('track','PageView') LINE IS DELETED
+    -----------------------------------------------
+    Meta's copy-paste snippet ends with it. Left in, every page would send TWO
+    PageViews: this one, and the one analytics.js sends through track(). Only
+    track()'s carries an event_id, and that id is the entire mechanism by which
+    the browser copy and the Conversions API copy are merged instead of counted
+    twice. So this block does `init` and stops. Every event still originates
+    from analytics.js, exactly as it did before.
+
+    analytics.js needs no change to cooperate: loadPixel() already opens with
+    `if (window.fbq) { ready = true; return; }` - finding a pixel somebody else
+    initialised is a case it was already written to handle.
+
+    There is no <noscript> beacon either. It cannot carry an event_id, so it is
+    the one piece of the standard snippet guaranteed to double-count with no
+    way to merge the pair afterwards.
+    """
+    pid = _meta_pixel_id()
+    # Same contract as site-config.js: unconfigured emits nothing at all,
+    # rather than a snippet that initialises the empty string.
+    if not pid:
+        return ""
+    return _PIXEL_TEMPLATE.replace("__PIXEL_ID__", pid)
+
+
 def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, canonical=None):
     """`luxe=False` for the admin panel — see scripts() for why the panel does
     not follow the storefront's theme. With no theme.js there to set the
@@ -359,6 +440,12 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, cano
     # A staff member hunting for the wishlist toggle in the product picker
     # because the shop has it switched off is the panel lying about itself.
     card_boot = _card_bootstrap_js() if luxe else ""
+
+    # Storefront only. Admin pages are a staff tool, and a PageView every time
+    # somebody opens the orders screen is noise in the dataset the ads
+    # optimise against. (They still load the pixel late via main.js today —
+    # worth removing separately, but not by making it fire sooner here.)
+    pixel = meta_pixel_snippet() if luxe else ""
 
     baked = theme_links(BUILD_THEME) if luxe else []
     luxe_link = (
@@ -465,7 +552,7 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, cano
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{asset('/shared/css/gulfrabit.css')}">
   {luxe_link}{extra}
-  <script type="application/ld+json">
+{pixel}  <script type="application/ld+json">
   {{"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"{SITE}","logo":"{SITE}/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}}
   </script>
 </head>
@@ -1108,6 +1195,43 @@ def bundle_css():
     return len(imports) + 1
 
 
+PIXEL_BEGIN = "<!-- GENERATED-PIXEL-BEGIN -->"
+PIXEL_END = "<!-- GENERATED-PIXEL-END -->"
+
+
+def sync_index_pixel():
+    """Put the pixel snippet into the hand-authored home page too.
+
+    index.html is the one page head() never builds, so it is the one page every
+    head-wide change misses - and it is the page most visitors and most ad
+    clicks land on. Exactly the same trap sync_index_theme() exists for; this
+    is the tracking half of it.
+
+    Delimited by markers and regenerated on every build, so changing the id in
+    site-config.js and rebuilding updates the home page with everything else,
+    rather than leaving it initialising last month's pixel.
+    """
+    html = read("index.html")
+    block = meta_pixel_snippet()
+    body = (PIXEL_BEGIN + "\n" + block + "  " + PIXEL_END) if block else (PIXEL_BEGIN + "\n  " + PIXEL_END)
+
+    if PIXEL_BEGIN in html and PIXEL_END in html:
+        start = html.index(PIXEL_BEGIN)
+        end = html.index(PIXEL_END) + len(PIXEL_END)
+        out = html[:start] + body + html[end:]
+    else:
+        # First run: place it inside <head>, immediately before </head> so it
+        # sits after the pre-paint theme blocks and cannot delay first paint.
+        if "</head>" not in html:
+            print("WARNING: index.html has no </head>; pixel NOT synced")
+            return
+        out = html.replace("</head>", "  " + body + "\n</head>", 1)
+
+    if out != html:
+        write("index.html", out)
+        print("synced the Meta Pixel into index.html")
+
+
 def sync_index_theme():
     """Keep the hand-authored home page's theming in step with the build.
 
@@ -1321,6 +1445,7 @@ if __name__ == "__main__":
     print(f"bundled {sheets} stylesheets -> shared/css/gulfrabit.css")
 
     sync_index_theme()
+    sync_index_pixel()
 
     for path in STOREFRONT_NOINDEX:
         if not any(p[0] == path for p in PAGES):
