@@ -33,15 +33,22 @@ class TrackingEvent extends Model
         'content_ids', 'content_name', 'num_items',
         'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'attribution',
         'capi_status',
+        // The visit's context - see the 2026_09_12 migration. Listed here or
+        // create() drops them without a word, which is how a column ends up
+        // existing, indexed and permanently empty.
+        'channel', 'landing_path', 'visit_type', 'referrer_host',
+        'device', 'os', 'browser',
+        'product_id', 'search_term', 'search_results',
     ];
 
     protected function casts(): array
     {
         return [
-            'content_ids'  => 'array',
-            'attribution'  => 'array',
-            'value_poisha' => 'integer',
-            'num_items'    => 'integer',
+            'content_ids'    => 'array',
+            'attribution'    => 'array',
+            'value_poisha'   => 'integer',
+            'num_items'      => 'integer',
+            'search_results' => 'integer',
         ];
     }
 

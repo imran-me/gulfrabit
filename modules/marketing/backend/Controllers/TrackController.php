@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Modules\Marketing\Models\TrackingEvent;
+use Modules\Marketing\Services\VisitContext;
 use Throwable;
 
 /**
@@ -216,6 +217,12 @@ class TrackController extends Controller
                 ? (int) round(((float) $custom['value']) * 100)
                 : null;
 
+            // Channel, landing page, device, product, search term - the
+            // columns every Tracking report groups by. Resolved apart from the
+            // row below because it reads the visit's earlier events, and it
+            // never throws: a failed lookup costs those fields, not the event.
+            $context = app(VisitContext::class)->resolve($request, $data);
+
             TrackingEvent::create([
                 'visitor_id'   => $data['visitor_id'] ?? null,
                 'session_id'   => $data['session_id'] ?? null,
@@ -245,7 +252,7 @@ class TrackController extends Controller
                 // dashboard and Meta agree about when something happened.
                 'created_at'   => date('Y-m-d H:i:s', $time),
                 'updated_at'   => date('Y-m-d H:i:s', $time),
-            ]);
+            ] + $context);
         } catch (QueryException $e) {
             // 23000 is the SQL state for a constraint violation, which here can
             // only be the unique event_id: the same event arriving twice
