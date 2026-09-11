@@ -24,6 +24,13 @@ class MarketingServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        // Every other module with a table says this; this one did not, so
+        // `migrate` — which only knows the paths providers hand it — never saw
+        // tracking_events. TrackController swallowed the missing table on
+        // every event by design, so the only symptom was a dashboard with
+        // nothing to read.
+        $this->loadMigrationsFrom(__DIR__ . '/Migrations');
+
         $this->app->booted(function (): void {
             $this->loadRoutes();
         });
