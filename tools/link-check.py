@@ -49,6 +49,44 @@ ID = re.compile(r'id="([^"]+)"')
 
 EXTERNAL = ("http://", "https://", "mailto:", "tel:", "javascript:", "//")
 
+def public_routes():
+    """The URL patterns .htaccess serves AS A PAGE, compiled.
+
+    A link to /deals or /product/some-slug points at no FILE and never will
+    -- the rewrite is what makes it resolve. Checking those against the
+    filesystem reported every one of them broken, so this check had failed
+    on every build since the readable URLs landed, which is the same as not
+    having it. The rewrite table is the authority, exactly as it is for the
+    canonical tags in assemble.py, so it is read rather than restated.
+
+    ONLY A RULE THAT REWRITES TO A FILE THAT EXISTS COUNTS. Three rules in
+    that file match every path there is: the HTTPS redirect `^(.*)$`, the
+    pass-through `^ -`, and any host redirect. The first version of this
+    function took every pattern, so any path at all "was a route" and the
+    check passed with a deliberately planted broken link on the page. A
+    redirect is not a page, `-` is not a file, and a target built from `$1`
+    cannot be checked here - the unconditional rule beside it can.
+    """
+    try:
+        conf = (ROOT / ".htaccess").read_text(encoding="utf-8")
+    except OSError:
+        return []
+    out = []
+    rule = re.compile(r"^\s*RewriteRule\s+(\S+)\s+(\S+)(?:\s+\[([^\]]*)\])?", re.M)
+    for pat, target, flags in rule.findall(conf):
+        # R redirects, F forbids, G is gone: an answer, not a page.
+        if re.search(r"(?:^|,)\s*[RFG](?:=|,|$)", flags or ""):
+            continue
+        page = target.split("?", 1)[0]
+        if page == "-" or "$" in page or "%" in page or not (ROOT / page).is_file():
+            continue
+        try:
+            out.append(re.compile(pat))
+        except re.error:
+            pass          # a rule this checker need not understand
+    return out
+
+
 
 def main() -> int:
     pages = [
@@ -56,6 +94,7 @@ def main() -> int:
         if not any(s in p.relative_to(ROOT).as_posix() for s in SKIP_DIRS)
     ]
 
+    routes = public_routes()
     broken = []
     anchors = []
     checked = 0
@@ -93,8 +132,19 @@ def main() -> int:
             else:
                 resolved = (page.parent / path).resolve()
 
-            if not resolved.exists():
-                broken.append(f"{rel}\n      -> {target}")
+            if resolved.exists():
+                continue
+            # Not a file -- but it may be a route Apache rewrites to one.
+            # Tested as the path from the site root, which is what Apache
+            # matches: the assembler writes `/admin` into a page two folders
+            # deep as `../../admin`, and that string matches no rule.
+            try:
+                probe = resolved.resolve().relative_to(ROOT).as_posix()
+            except ValueError:
+                probe = None      # climbed above the site root: broken
+            if probe is not None and any(r.match(probe) for r in routes):
+                continue
+            broken.append(f"{rel}\n      -> {target}")
 
     print(f"  {len(pages)} pages, {checked} internal references resolved\n")
 
