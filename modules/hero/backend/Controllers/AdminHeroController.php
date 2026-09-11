@@ -215,9 +215,12 @@ class AdminHeroController extends Controller
         // slide switched from "product" to "none" cannot keep a stale product
         // id that reappears if somebody switches it back.
         if ($request->has('linkType') || $request->has('linkValue')) {
+            // Parenthesised, and it must stay that way: PHP 8 refuses to
+            // compile `a ? b : c ?: d` at all, so without the brackets this
+            // whole controller - every Hero banners request - is a fatal.
             $out['link_value'] = $request->input('linkType') === 'none'
                 ? null
-                : trim((string) $request->input('linkValue')) ?: null;
+                : (trim((string) $request->input('linkValue')) ?: null);
         }
 
         return $out;
