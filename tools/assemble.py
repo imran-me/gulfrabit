@@ -350,31 +350,34 @@ def _meta_pixel_id():
     return m.group(1) if m else ""
 
 
-# Written with a placeholder rather than an f-string on purpose: the snippet is
-# mostly JavaScript braces, and every one of them would need doubling inside an
-# f-string. One missed pair is a build that emits broken JS into 100 pages.
-_PIXEL_TEMPLATE = """  <!-- Meta Pixel - base code, including the one PageView. Every OTHER event
-       is sent by shared/js/core/analytics.js, which attaches an event_id so
-       the browser and Conversions API copies deduplicate. PageView carries one
-       too, minted below: analytics.js reads it off window and mirrors THAT id
-       to the server rather than sending a second PageView, so there is still
-       exactly one. See meta_pixel_snippet() in tools/assemble.py. The id is read at build time from
-       shared/js/core/site-config.js - change it there, then rebuild. -->
-  <script>
-    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-    document,'script','https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '__PIXEL_ID__');
-    window.__grPageViewId = 'pv-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
-    fbq('track', 'PageView', {}, { eventID: window.__grPageViewId });
-  </script>
-"""
+# The block every storefront page carries in <head>, between these markers.
+#
+# TWO WRITERS, ONE FORMAT. This build writes it from site-config.js, and the
+# server rewrites it in place whenever the id changes in Admin > Pixel setup
+# and after every deploy (modules/marketing/backend/Services/PixelStamp.php).
+# Both read the snippet from PIXEL_TEMPLATE and must produce the SAME BYTES
+# for the same id: a server stamp of the id the build already wrote is then a
+# no-op, and "N pages changed" in the panel means something. The contract:
+#
+#   BEGIN + "\n" + inner + "  " + END
+#   inner = the template with __PIXEL_ID__ replaced          (pixel on)
+#         = the template's FIRST LINE with an empty id + "\n" (pixel off)
+#
+# The first line is <meta name="gr-meta-pixel" content="...">, which is how
+# analytics.js tells "switched off in the panel" apart from "a page built
+# before the block existed". Change the markers or the shape here and in
+# PixelStamp together, or the server stops finding the block it rewrites.
+PIXEL_BEGIN = "<!-- GENERATED-PIXEL-BEGIN -->"
+PIXEL_END = "<!-- GENERATED-PIXEL-END -->"
+PIXEL_TEMPLATE = "shared/components/meta-pixel.html"
 
 
-def meta_pixel_snippet():
-    """Meta's base pixel code, in <head>, PageView included.
+def meta_pixel_block(pid=None):
+    """Meta's base pixel code, in <head>, PageView included, markers and all.
+
+    `pid` defaults to the build's own id from site-config.js; "" is the pixel
+    switched off, which still writes the markers and the meta line so the
+    server has somewhere to put one later.
 
     WHY THIS EXISTS WHEN analytics.js ALREADY LOADS THE PIXEL
     ---------------------------------------------------------
@@ -431,12 +434,20 @@ def meta_pixel_snippet():
     the one piece of the standard snippet guaranteed to double-count with no
     way to merge the pair afterwards.
     """
-    pid = _meta_pixel_id()
-    # Same contract as site-config.js: unconfigured emits nothing at all,
-    # rather than a snippet that initialises the empty string.
+    if pid is None:
+        pid = _meta_pixel_id()
+    # Digits or nothing: this lands inside a <script> and an attribute on every
+    # storefront page. _meta_pixel_id() already guarantees it; a caller passing
+    # its own must not be the way something else gets in.
+    if not re.fullmatch(r"[0-9]*", pid):
+        raise ValueError(f"not a pixel id: {pid!r}")
+    inner = read(PIXEL_TEMPLATE).replace("__PIXEL_ID__", pid)
     if not pid:
-        return ""
-    return _PIXEL_TEMPLATE.replace("__PIXEL_ID__", pid)
+        # Switched off is NOT an empty block: the meta line saying so is what
+        # stops analytics.js falling back to site-config.js and loading the
+        # pixel anyway.
+        inner = inner.split("\n", 1)[0] + "\n"
+    return PIXEL_BEGIN + "\n" + inner + "  " + PIXEL_END
 
 
 def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, canonical=None):
@@ -468,7 +479,7 @@ def head(title, desc, css_links, theme="#0A0A0A", cms_page=None, luxe=True, cano
     # somebody opens the orders screen is noise in the dataset the ads
     # optimise against. (They still load the pixel late via main.js today —
     # worth removing separately, but not by making it fire sooner here.)
-    pixel = meta_pixel_snippet() if luxe else ""
+    pixel = ("  " + meta_pixel_block() + "\n") if luxe else ""
 
     baked = theme_links(BUILD_THEME) if luxe else []
     luxe_link = (
@@ -1223,10 +1234,6 @@ def bundle_css():
     return len(imports) + 1
 
 
-PIXEL_BEGIN = "<!-- GENERATED-PIXEL-BEGIN -->"
-PIXEL_END = "<!-- GENERATED-PIXEL-END -->"
-
-
 def sync_index_pixel():
     """Put the pixel snippet into the hand-authored home page too.
 
@@ -1237,11 +1244,11 @@ def sync_index_pixel():
 
     Delimited by markers and regenerated on every build, so changing the id in
     site-config.js and rebuilding updates the home page with everything else,
-    rather than leaving it initialising last month's pixel.
+    rather than leaving it initialising last month's pixel. The same markers
+    are what the server rewrites when the id is changed in the panel.
     """
     html = read("index.html")
-    block = meta_pixel_snippet()
-    body = (PIXEL_BEGIN + "\n" + block + "  " + PIXEL_END) if block else (PIXEL_BEGIN + "\n  " + PIXEL_END)
+    body = meta_pixel_block()
 
     if PIXEL_BEGIN in html and PIXEL_END in html:
         start = html.index(PIXEL_BEGIN)

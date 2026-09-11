@@ -200,13 +200,15 @@
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo.png","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
   <!-- GENERATED-PIXEL-BEGIN -->
-  <!-- Meta Pixel - base code, including the one PageView. Every OTHER event
-       is sent by shared/js/core/analytics.js, which attaches an event_id so
-       the browser and Conversions API copies deduplicate. PageView carries one
-       too, minted below: analytics.js reads it off window and mirrors THAT id
-       to the server rather than sending a second PageView, so there is still
-       exactly one. See meta_pixel_snippet() in tools/assemble.py. The id is read at build time from
-       shared/js/core/site-config.js - change it there, then rebuild. -->
+  <meta name="gr-meta-pixel" content="1423900436303846">
+  <!-- Meta Pixel - base code, including the one PageView. The id is set in
+       Admin > Pixel setup: the server rewrites everything between the
+       GENERATED-PIXEL markers when it changes and after every deploy, and the
+       build fills it from shared/js/core/site-config.js until then. The meta
+       line above is the whole block when the pixel is switched off. Every
+       OTHER event comes from shared/js/core/analytics.js with an event_id;
+       PageView mints its own below, and analytics.js mirrors that same id to
+       the Conversions API instead of sending a second one. -->
   <script>
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
     n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;

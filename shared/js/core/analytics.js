@@ -111,8 +111,9 @@ export function initAnalytics() {
     if (document.querySelector('[data-admin-shell]')) return;
 
     captureAttribution();
-    if (!CONFIG.metaPixelId) return;
-    loadPixel(CONFIG.metaPixelId);
+    const pixelId = pagePixelId();
+    if (!pixelId) return;
+    loadPixel(pixelId);
 
     // PageView is sent by the base-code snippet in <head>, not from here.
     // It has to be IN THE HTML: Events Manager's install check and the Event
@@ -138,6 +139,23 @@ export function initAnalytics() {
   } catch (err) {
     console.warn('[analytics] init skipped', err);
   }
+}
+
+/**
+ * The pixel this page carries, or '' for none.
+ *
+ * The block in <head> says so on its first line, <meta name="gr-meta-pixel">,
+ * and that is the answer whenever it is there: the server rewrites that block
+ * when the id is changed in Admin > Pixel setup, so it can be newer than
+ * site-config.js — and an EMPTY value means the panel switched the pixel off.
+ * Falling back to site-config.js in that case would load the pixel the
+ * merchant had just turned off.
+ *
+ * Only a page with no block at all (one built before it existed) falls back.
+ */
+function pagePixelId() {
+  const declared = document.querySelector('meta[name="gr-meta-pixel"]');
+  return declared ? declared.content.trim() : CONFIG.metaPixelId;
 }
 
 /** Meta's standard snippet, minus the <noscript> pixel (it cannot dedupe). */
