@@ -353,11 +353,12 @@ def _meta_pixel_id():
 # Written with a placeholder rather than an f-string on purpose: the snippet is
 # mostly JavaScript braces, and every one of them would need doubling inside an
 # f-string. One missed pair is a build that emits broken JS into 100 pages.
-_PIXEL_TEMPLATE = """  <!-- Meta Pixel - init ONLY. Every event is sent by
-       shared/js/core/analytics.js, which attaches an event_id so the browser
-       and Conversions API copies deduplicate. Do NOT add a PageView track
-       call here - it would double-count, and the duplicate could not be
-       merged. See meta_pixel_snippet() in tools/assemble.py. The id is read at build time from
+_PIXEL_TEMPLATE = """  <!-- Meta Pixel - base code, including the one PageView. Every OTHER event
+       is sent by shared/js/core/analytics.js, which attaches an event_id so
+       the browser and Conversions API copies deduplicate. PageView carries one
+       too, minted below: analytics.js reads it off window and mirrors THAT id
+       to the server rather than sending a second PageView, so there is still
+       exactly one. See meta_pixel_snippet() in tools/assemble.py. The id is read at build time from
        shared/js/core/site-config.js - change it there, then rebuild. -->
   <script>
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -366,12 +367,14 @@ _PIXEL_TEMPLATE = """  <!-- Meta Pixel - init ONLY. Every event is sent by
     t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
     document,'script','https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', '__PIXEL_ID__');
+    window.__grPageViewId = 'pv-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+    fbq('track', 'PageView', {}, { eventID: window.__grPageViewId });
   </script>
 """
 
 
 def meta_pixel_snippet():
-    """Meta's base pixel code, in <head>, with the PageView line REMOVED.
+    """Meta's base pixel code, in <head>, PageView included.
 
     WHY THIS EXISTS WHEN analytics.js ALREADY LOADS THE PIXEL
     ---------------------------------------------------------
@@ -391,18 +394,38 @@ def meta_pixel_snippet():
         which is indistinguishable from broken - and nobody should be asked to
         spend on ads against a tracker they have no way to confirm.
 
-    WHY THE fbq('track','PageView') LINE IS DELETED
-    -----------------------------------------------
-    Meta's copy-paste snippet ends with it. Left in, every page would send TWO
-    PageViews: this one, and the one analytics.js sends through track(). Only
-    track()'s carries an event_id, and that id is the entire mechanism by which
-    the browser copy and the Conversions API copy are merged instead of counted
-    twice. So this block does `init` and stops. Every event still originates
-    from analytics.js, exactly as it did before.
+    WHY THE fbq('track','PageView') LINE IS BACK
+    --------------------------------------------
+    It was deleted here once, to stop this block and analytics.js each sending
+    their own PageView. Only analytics.js's carried an event_id, and that id is
+    the entire mechanism by which the browser copy and the Conversions API copy
+    are merged instead of counted twice - so the copy with the id was the one
+    worth keeping.
 
-    analytics.js needs no change to cooperate: loadPixel() already opens with
-    `if (window.fbq) { ready = true; return; }` - finding a pixel somebody else
-    initialised is a case it was already written to handle.
+    That reasoning was right about the double count and wrong about which copy
+    to keep, because a PageView that exists only after the module graph
+    resolves is a PageView nothing can verify:
+
+      - Events Manager's install check and the Event Setup Tool scan the HTML
+        for Meta's canonical snippet - `init` FOLLOWED BY `track('PageView')`.
+        An `init` on its own reads as a half-finished install, which is what
+        "a pixel wasn't detected on this website" actually means.
+      - Their runtime check runs headless, and fbevents.js sends no beacon at
+        all under headless Chrome. Verified: same result on a bare page with
+        no CSP. So the runtime path cannot see it either.
+
+    Both of Meta's detection routes therefore failed on a pixel that was
+    working perfectly for real visitors.
+
+    The dedup argument survives intact: the id is minted HERE, on the line
+    above the track call, and parked on window.__grPageViewId. analytics.js
+    reads it and mirrors that same id to the Conversions API instead of
+    sending its own PageView. One PageView, one id, still merged - and now
+    it also fires before the module graph, so a visitor who bounces early and
+    a page whose JS throws are both still counted.
+
+    analytics.js falls back to sending PageView itself when the marker is
+    absent, so a page built without this snippet keeps the old behaviour.
 
     There is no <noscript> beacon either. It cannot carry an event_id, so it is
     the one piece of the standard snippet guaranteed to double-count with no

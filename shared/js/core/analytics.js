@@ -114,21 +114,27 @@ export function initAnalytics() {
     if (!CONFIG.metaPixelId) return;
     loadPixel(CONFIG.metaPixelId);
 
-    // PageView, explicitly. `fbq('init')` does NOT send one — Meta's own
-    // snippet carries it as a separate second line, and dropping that line is
-    // the single most common way a pixel install looks finished and reports
-    // nothing.
+    // PageView is sent by the base-code snippet in <head>, not from here.
+    // It has to be IN THE HTML: Events Manager's install check and the Event
+    // Setup Tool scan the source for `init` followed by `track('PageView')`,
+    // and their runtime check runs headless, where fbevents.js sends no
+    // beacon at all. A PageView that only exists once this module has
+    // resolved is invisible to both — which is what "a pixel wasn't detected
+    // on this website" means. Firing it up there also catches the visitor who
+    // bounces before the module graph finishes.
     //
-    // It is not optional garnish. PageView is what Events Manager checks to
-    // say the pixel is live, what "people who visited your website" audiences
-    // are built from, and what a traffic campaign optimises against. Without
-    // it the first event a visitor can possibly generate is ViewContent on a
-    // product page, so anyone who lands and bounces is invisible.
-    //
-    // Routed through track() rather than a bare fbq call so it gets an
-    // event_id and is mirrored to the Conversions API like every other event
-    // — otherwise the server copy would double-count instead of deduplicate.
-    track('PageView');
+    // What is left for this file is the SERVER half, reusing the id the
+    // snippet minted. The same id on both copies is the whole dedup
+    // mechanism; sending our own PageView here would be the double count the
+    // snippet was written to avoid.
+    const inlineId = window.__grPageViewId;
+    if (inlineId) {
+      mirrorToServer('PageView', {}, inlineId);
+    } else {
+      // No snippet on this page — an admin page, or a build predating it.
+      // Fall back to the old behaviour rather than lose the event.
+      track('PageView');
+    }
   } catch (err) {
     console.warn('[analytics] init skipped', err);
   }
