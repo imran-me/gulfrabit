@@ -45,6 +45,8 @@
   display: flex; justify-content: space-between; align-items: flex-start; gap: 8mm;
   padding-bottom: 3mm; border-bottom: 1.5pt solid #000;
 }
+.slip__brand { display: flex; align-items: center; gap: 3mm; }
+.slip__logo { width: 12mm; height: 12mm; object-fit: contain; filter: grayscale(1) contrast(2); }
 .slip__brand strong { display: block; font-family: var(--font-display); font-size: 17pt; line-height: 1.1; }
 .slip__brand span { font-size: 8pt; letter-spacing: .04em; }
 .slip__ref { text-align: right; }
@@ -117,41 +119,43 @@
   @page { size: A4; margin: 8mm; }
 
   .slip {
-    max-width: none;
-    margin: 0;
+    max-width: none; /* Let the printer use its existing full label width. */
+    margin: 0; /* No outer gap around the printed label. */
     /* Keep the established thermal width, but use the label's unused length
        for larger, more readable print. */
-    padding: 8.4mm 4mm;
-    border: 0;
-    border-radius: 0;
-    font-size: 15.4pt;
-    line-height: 1.4;
+    padding: 8.4mm 4mm; /* Space above/below and beside the whole slip. */
+    border: 0; /* Do not print a border around the label edge. */
+    border-radius: 0; /* Printed labels have square edges. */
+    font-size: 15.4pt; /* Default text, e.g. "Cumilla, xyz" delivery address. */
+    line-height: 1.4; /* Line spacing for default text such as "Cumilla, xyz". */
     /* One order per sheet. A slip split across two pages is a slip whose
        address and whose amount are on different pieces of paper. */
-    break-inside: avoid;
-    break-after: page;
+    break-inside: avoid; /* Keep one order together on a single label. */
+    break-after: page; /* Start the next order on the next label. */
   }
-  .slip__head { gap: 8mm; padding-bottom: 4.2mm; }
-  .slip__brand strong { font-size: 23.8pt; }
-  .slip__brand span { font-size: 11.2pt; }
-  .slip__ref strong { font-size: 16.8pt; }
-  .slip__ref span { font-size: 11.2pt; }
-  .slip__to { margin: 7mm 0; }
-  .slip__to h2 { font-size: 10.5pt; margin-bottom: 2.1mm; }
-  .slip__to p { margin-bottom: 1.1mm; }
-  .slip__name, .slip__phone { font-size: 18.2pt; }
-  .slip__note { margin-top: 2.8mm; font-size: 12.6pt; }
-  .slip__items { margin: 5.6mm 0; font-size: 14pt; }
-  .slip__items th { font-size: 10.5pt; padding: 2.1mm 0; }
-  .slip__items td { padding: 2.1mm 0; }
-  .slip__variant { font-size: 11.9pt; }
-  .slip__items tfoot td { padding: 1.4mm 0; }
-  .slip__items tfoot tr:first-child td { padding-top: 3.5mm; }
-  .slip__total td { font-size: 16.1pt; padding-top: 2.8mm !important; }
-  .slip__collect { margin-top: 5.6mm; padding: 4.9mm 5.6mm; }
-  .slip__collect strong { font-size: 22.4pt; }
-  .slip__collect span { font-size: 11.9pt; margin-top: 1.4mm; }
-  .slip__foot { margin-top: 7mm; padding-top: 2.8mm; font-size: 10.5pt; }
-  .slip--broken h2 { font-size: 16.8pt; margin-bottom: 2.8mm; }
-  .slip:last-child { break-after: auto; }
+  .slip__head { gap: 8mm; padding-bottom: 4.2mm; } /* Space between the logo/"GulfRabit" block and "GR-2026-...". */
+  .slip__brand { gap: 4.2mm; } /* Space between the black-and-white rabbit mark and "GulfRabit". */
+  .slip__logo { width: 16.8mm; height: 16.8mm; } /* Black-and-white GulfRabit rabbit mark. */
+  .slip__brand strong { font-size: 23.8pt; } /* Exact text: "GulfRabit". */
+  .slip__brand span { font-size: 11.2pt; } /* Exact text: "Premium imports · gulfrabit.com". */
+  .slip__ref strong { font-size: 16.8pt; } /* Exact text: order number, e.g. "GR-2026-UC1.409". */
+  .slip__ref span { font-size: 11.2pt; } /* Exact text: order date, e.g. "4 Sep 2026". */
+  .slip__to { margin: 7mm 0; } /* Space around the block beginning with "DELIVER TO". */
+  .slip__to h2 { font-size: 10.5pt; margin-bottom: 2.1mm; } /* Exact text: "DELIVER TO". */
+  .slip__to p { margin-bottom: 1.1mm; } /* Gap between text such as the customer's name, phone and address. */
+  .slip__name, .slip__phone { font-size: 18.2pt; } /* Exact text: customer name and phone, e.g. "Rahim Uddin" and "01XXX-XXXXXX". */
+  .slip__note { margin-top: 2.8mm; font-size: 12.6pt; } /* Exact text: "Note: ..." when an order has a delivery note. */
+  .slip__items { margin: 5.6mm 0; font-size: 14pt; } /* Exact text: product titles, quantities, and prices, e.g. "Fire-ic Iced Coffee, Remove" and "৳ 593". */
+  .slip__items th { font-size: 10.5pt; padding: 2.1mm 0; } /* Exact text: "ITEM", "QTY", and "PRICE". */
+  .slip__items td { padding: 2.1mm 0; } /* Spacing around each product line, e.g. "Choco Mint Flavour Tea". */
+  .slip__variant { font-size: 11.9pt; } /* Exact text: a variant below a product name, e.g. "500 g". */
+  .slip__items tfoot td { padding: 1.4mm 0; } /* Spacing around "Subtotal", "Discount", "Delivery", and "Total". */
+  .slip__items tfoot tr:first-child td { padding-top: 3.5mm; } /* Extra gap before the "Subtotal" line. */
+  .slip__total td { font-size: 16.1pt; padding-top: 2.8mm !important; } /* Exact text: final "Total" and its amount, e.g. "৳ 1,639". */
+  .slip__collect { margin-top: 5.6mm; padding: 4.9mm 5.6mm; } /* Box surrounding "COLLECT ৳ 1,639". */
+  .slip__collect strong { font-size: 22.4pt; } /* Exact text: "COLLECT ৳ 1,639" or "PAID IN ADVANCE". */
+  .slip__collect span { font-size: 11.9pt; margin-top: 1.4mm; } /* Exact text: "Cash on delivery · COD" or "Collect nothing at the door". */
+  .slip__foot { margin-top: 7mm; padding-top: 2.8mm; font-size: 10.5pt; } /* Exact text: "7-day returns on unopened non-perishables · gulfrabit.com" and the order number. */
+  .slip--broken h2 { font-size: 16.8pt; margin-bottom: 2.8mm; } /* Exact text: the failed order number, e.g. "GR-2026-UC1.409". */
+  .slip:last-child { break-after: auto; } /* Do not feed a blank label after the final order. */
 }

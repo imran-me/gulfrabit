@@ -91,8 +91,11 @@ function slip(o) {
     <article class="slip">
       <header class="slip__head">
         <div class="slip__brand">
-          <strong>GulfRabit</strong>
-          <span>Premium imports · gulfrabit.com</span>
+          <img class="slip__logo" src="/assets/logo/gulfrabit-mark-120.png" alt="">
+          <div>
+            <strong>GulfRabit</strong>
+            <span>Premium imports · gulfrabit.com</span>
+          </div>
         </div>
         <div class="slip__ref">
           <strong>${escapeHtml(o.orderNumber)}</strong>
