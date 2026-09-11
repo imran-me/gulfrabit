@@ -1958,6 +1958,110 @@ pixel carries on alone. `.env.example` now documents all three META keys,
 including the warning to clear `META_TEST_EVENT_CODE` — left set, real
 customer conversions go to the test stream and never reach optimisation.
 
+### What pandavaly.com does, and what is worth taking (2026-09-06)
+
+Read their source while the pixel work was still fresh. Same shape of business
+— Bangladeshi COD shop, Bengali storefront, similar catalogue — running three
+tags where we run one. Written down because two of their ideas are better than
+ours, and most of the rest is a catalogue of ways to look instrumented while
+measuring nothing.
+
+**Their stack:** GTM `GTM-BH9RVQL`, GA4 `G-MJR6Q3DMQ9` loaded directly through
+`gtag.js`, Meta pixel `768688496337678`. All three in `<head>`, with
+`<noscript>` fallbacks for GTM and Meta. On top sits `window.goeTrack(event,
+payload)` — one call fans out to all three.
+
+**Take 1 — a canonical event vocabulary, not Meta's.** `goeTrack` accepts
+site-level names (`view_item`, `add_to_cart`, `begin_checkout`) and maps each
+to whatever every platform calls it. Ours does not: `track('Purchase')` at the
+call site bakes Meta's vocabulary into every page that fires an event. That
+costs nothing while Meta is the only target and costs a sweep of every call
+site the day a second one is added. The mapping table is the cheap half of the
+fix and the reason to do it before it is needed.
+
+**Take 2 — `og:image` dimensions and alt.** They declare `og:image:width` 1200,
+`og:image:height` 630, `og:image:secure_url` and `og:image:alt` on every page.
+`index.html` declares the URL alone. Facebook sizes a link preview from
+whatever it guesses on the first scrape, and the first scrape is the one it
+caches — which matters right now, with an ad campaign already spending.
+
+**Take 3 — two events we do not fire at all.** `AddToWishlist` and `Search`.
+Both features exist here (`modules/account/wishlist.html`, the search-results
+page) and neither is instrumented. Wishlist adds are among the strongest
+retargeting audiences a COD shop has, and `Search` is a Meta standard event.
+
+**Take 4 — the GA4 ecommerce reset, if GA4 is ever added.** GA4 merges
+successive `ecommerce` objects, so `dataLayer.push({ ecommerce: null })` has to
+precede each real push or the previous event's items leak into the next one.
+Their code does it and says why. Nothing to do today — a trap to have read
+before starting.
+
+**Do not copy:**
+
+- **The `<noscript>` pixel.** They serve
+  `<img src="facebook.com/tr?…&ev=PageView&noscript=1">`. `analytics.js` omits
+  it deliberately: a noscript beacon carries no `event_id`, so it cannot
+  deduplicate against the CAPI copy and simply double-counts. Confirmation of
+  the existing comment, not a change to make.
+- **GA4 installed twice.** `gtag.js` loads directly *and* GTM is present. If a
+  GA4 tag also sits in that container, every session is counted twice.
+- **A layer wired to nothing.** `begin_checkout`, `purchase` and `search` are
+  defined in their events map and have **zero call sites** on every page
+  reachable as a guest — home, shop, cart, checkout, product. Their own
+  homepage is a landing page with a full COD order form posting to `/order`,
+  and it fires nothing but `PageView`. (Their receipt page sits behind that
+  POST, so a `purchase` call there could not be ruled out from outside; the
+  landing-page template that renders it contains no `goeTrack` calls.) The
+  layer is good and the wiring stopped after `add_to_cart` — exactly the
+  failure the §7g checks exist to catch, a tracking file that reads as
+  finished and reports no conversions.
+
+**Their SEO, so nobody re-reads their source hoping for more.** Correct:
+canonical everywhere, full OG/Twitter sets, `Product` JSON-LD with
+offers/price/availability/sku/brand, a `robots.txt` that walls off `/admin/`,
+`/cart`, `/checkout`, `/buyer/`, and a 34-URL sitemap carrying
+`lastmod`/`changefreq`/`priority`. Weaker than ours: the homepage `<title>` is
+"Panda valy" and its description "online shopping center", the homepage has no
+`<h1>` at all, there is no `Organization` or `WebSite` schema (we have both
+plus `SearchAction`), no `AggregateRating` despite star reviews rendering on
+the page, product descriptions are raw catalogue copy truncated mid-word, and
+`robots.txt` points at a non-www sitemap while every canonical is www.
+
+### Four standard events beside the funnel (2026-09-11)
+
+Checked against Meta's standard-events specification. The funnel was already
+right — `Purchase` carries the required `currency` and `value`, and
+`ViewContent`/`AddToCart`/`Purchase` carry `contents` and `content_ids`, so
+catalogue ads can match — but four standard events had no call site at all.
+Written on 6 September and shipped on the 11th, once the server could take
+them.
+
+| Event | Fired from | Rule |
+|---|---|---|
+| `AddToWishlist` | `toggleWishlist()` in `shared/js/core/state.js` | ADD only. A toggle firing on both would report two intents for one customer changing their mind. It lives there for the reason `AddToCart` does — every route into the wishlist ends up in that function. |
+| `Search` | `modules/catalog/search-page.js` | Once per query, BEFORE the empty-results return — a search that found nothing is the most valuable row in that report. Carries `search_string` and up to ten `content_ids`, and no `value`, so `track()` attaches no `currency`. |
+| `CompleteRegistration` | the register handler in `modules/auth/auth-page.js` | Not in `signIn()`, which is also the login path — every returning customer would count as a sign-up. Fired before `signIn()`, whose redirect can cancel the beacon. |
+| `Contact` | `modules/content/contact-page.js` | On passed validation, because there is no backend for the form yet. **Move it below the response when `POST /contact` lands**, or a send that failed server-side still counts as a lead. |
+
+`InitiateCheckout` from the express page now sends `num_items` too, matching
+`cartPayload()` from the normal checkout; the two funnels were reporting one
+step in two shapes.
+
+**The server has to be told, and nothing says so when it is not.**
+`TrackController` validates `event_name` against a list, and these four were
+not on it. The mirror sends no `Accept: application/json`, so Laravel answers
+a validation failure with a redirect; `fetch` follows it, gets the storefront
+page, and reports success. The events would simply have been missing from
+Meta's server copy and from the Tracking screen, with no error anywhere. The
+list is now `TrackController::EVENTS`, with a comment saying exactly this —
+**add to it whenever the browser learns a new event.** `search_string` joined
+the forwarded `custom_data` keys.
+
+They are not funnel steps (`TrackingEvent::FUNNEL` is unchanged), so they
+appear only in a visit's footprint on the Tracking screen, labelled in the
+shopkeeper's words: *Saved to wishlist*, *Searched*, *Created an account*,
+*Sent a message*.
+
 ---
 
 ## 10. URLs ARE ROUTES (2026-08-13) — read before touching a link

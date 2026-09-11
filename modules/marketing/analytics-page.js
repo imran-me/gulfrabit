@@ -229,6 +229,11 @@ function label(stage) {
     AddToCart: 'Added to cart',
     InitiateCheckout: 'Started checkout',
     Purchase: 'Ordered',
+    // Not funnel steps — they only ever appear in a visit's footprint.
+    AddToWishlist: 'Saved to wishlist',
+    Search: 'Searched',
+    CompleteRegistration: 'Created an account',
+    Contact: 'Sent a message',
   }[stage] ?? stage;
 }
 

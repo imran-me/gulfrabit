@@ -9,6 +9,7 @@ import { renderProductGrid } from '../../shared/js/components/product-card.js';
 import { renderProductSkeletons } from '../../shared/js/components/skeleton-loader.js';
 import { initFilters } from '../../shared/js/components/filters-sidebar.js';
 import { getParam } from '../../shared/js/core/router-helpers.js';
+import { track } from '../../shared/js/core/analytics.js';
 
 const grid = document.querySelector('[data-product-grid]');
 const countEl = document.querySelector('[data-result-count]');
@@ -34,6 +35,28 @@ async function init() {
 
   renderProductSkeletons(grid, 8);
   base = await searchProducts(q);
+
+  // BEFORE the empty-results return, deliberately. A search that found nothing
+  // is the most valuable one in the dataset: it is a customer who wanted
+  // something this shop does not stock or does not name the way they do, and
+  // dropping those events leaves the report showing only searches that already
+  // worked.
+  //
+  // Fired once per query, here rather than in render(), because render() runs
+  // again on every filter and sort change and each of those would be counted
+  // as a fresh search.
+  //
+  // content_ids alongside search_string is what Meta needs to build a
+  // catalogue audience from a search; the ids are capped because the whole
+  // result set on a broad query is a large array to put in a beacon. No value
+  // is sent: a search has no monetary amount, and track() attaches currency
+  // only where there is a value to denominate, which keeps this event clear of
+  // the Events Manager diagnostic for a currency standing on its own.
+  track('Search', {
+    search_string: q,
+    content_type: 'product',
+    content_ids: base.slice(0, 10).map((p) => String(p.id)),
+  });
 
   if (!base.length) { grid.innerHTML = ''; countEl.textContent = '0 results'; emptyEl.hidden = false; return; }
 

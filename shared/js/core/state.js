@@ -184,13 +184,29 @@ export function getWishlist() { return wishlist.slice(); }
 export function isWishlisted(id) { return wishlist.some((w) => w.id === id); }
 
 export function toggleWishlist(product) {
-  if (isWishlisted(product.id)) {
-    wishlist = wishlist.filter((w) => w.id !== product.id);
-  } else {
+  const adding = !isWishlisted(product.id);
+  if (adding) {
     wishlist.push({ id: product.id, title: product.title, brand: product.brand ?? '', price: product.price, image: product.image });
+  } else {
+    wishlist = wishlist.filter((w) => w.id !== product.id);
   }
   storage.set(KEYS.WISHLIST, wishlist);
   emit(EVENTS.WISHLIST);
+
+  // ADD only. A removal is not an AddToWishlist, and a toggle that fired on
+  // both would report two intents for a customer who changed their mind --
+  // inflating the audience this event exists to build.
+  //
+  // Fired here for the same reason AddToCart is: every route into the wishlist
+  // (product card heart, PDP, quick view, the standalone toggle buttons) ends
+  // up in this function.
+  //
+  // Meta lists content_ids/contents/currency/value as optional on this event,
+  // but they are what makes the resulting audience usable for a catalogue ad:
+  // without them Meta knows somebody saved something, not what. productPayload
+  // supplies all four.
+  if (adding) track('AddToWishlist', productPayload(product, 1));
+
   return isWishlisted(product.id);
 }
 

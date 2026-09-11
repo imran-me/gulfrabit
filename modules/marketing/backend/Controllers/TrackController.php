@@ -44,10 +44,29 @@ class TrackController extends Controller
     /** Meta rejects events older than 7 days; a skewed client clock must not cost the event. */
     private const MAX_AGE_SECONDS = 7 * 86400;
 
+    /**
+     * The events this endpoint accepts: the funnel, plus the four standard
+     * events that sit beside it. Anything else is refused at validation.
+     *
+     * Kept in step with what the browser fires. An event the browser sends and
+     * this list lacks is not a loud failure — the mirror has no Accept header,
+     * so Laravel answers the validation error with a redirect, fetch follows
+     * it, and the beacon reports success. The event is simply gone from Meta's
+     * server copy and from the shop's own dashboard, which is how four events
+     * were once added to the storefront and silently dropped here.
+     */
+    private const EVENTS = [
+        'PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'Purchase',
+        'AddToWishlist', 'Search', 'CompleteRegistration', 'Contact',
+    ];
+
     /** The only custom_data keys forwarded. Everything else is dropped unread. */
     private const CUSTOM_DATA_KEYS = [
         'value', 'currency', 'content_ids', 'content_name', 'content_type',
         'contents', 'num_items',
+        // Search's own field: what the customer typed, which is the one thing
+        // that makes the event worth having.
+        'search_string',
     ];
 
     public function __invoke(Request $request): JsonResponse
@@ -61,9 +80,7 @@ class TrackController extends Controller
         // wanted its own copy, because the shop that most needs to see its
         // funnel is exactly the one that has not finished configuring Meta.
         $data = $request->validate([
-            'event_name' => ['required', Rule::in([
-                'PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'Purchase',
-            ])],
+            'event_name' => ['required', Rule::in(self::EVENTS)],
             'event_id'         => ['required', 'string', 'max:64'],
             'event_time'       => ['sometimes', 'nullable', 'integer'],
             'event_source_url' => ['sometimes', 'nullable', 'string', 'max:2048'],

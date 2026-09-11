@@ -14,6 +14,7 @@ import { mergeGuestWishlist } from '../account/backend/api.js';
 import { mergeGuestCart } from '../cart/backend/api.js';
 import { validateForm, attachLiveValidation } from '../../shared/js/utils/validate-form.js';
 import { toast } from '../../shared/js/components/toast-notifications.js';
+import { track } from '../../shared/js/core/analytics.js';
 
 const form = document.querySelector('[data-auth-form]');
 if (form) init();
@@ -45,6 +46,12 @@ const handlers = {
   async register() {
     const { valid, values } = validateForm(form);
     if (!valid) { if (!form.querySelector('[name="terms"]').checked) toast.error('Please accept the terms.'); return; }
+    // Meta's standard event for a completed sign-up. Fired HERE and not in
+    // signIn(), which is also the login path — counting every returning
+    // customer as a new registration would inflate the single number a
+    // sign-up campaign optimises against. Fired BEFORE signIn() too, because
+    // signIn() redirects on a timer and a navigation can cancel the beacon.
+    track('CompleteRegistration');
     // Mock: accept any new account (no server to persist to).
     await signIn({ id: 'u-new', name: values.name, email: values.email, phone: values.phone, tier: 'standard', addresses: [] });
   },

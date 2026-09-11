@@ -88,7 +88,10 @@ async function init() {
   // Arriving here IS starting a checkout — there is no earlier step to fire it
   // from, which is the whole point of the page. Meta optimises delivery on
   // this event long before there are enough purchases to learn from.
-  track('InitiateCheckout', productPayload(product, qty));
+  // num_items to match what cartPayload() sends from the normal checkout.
+  // Meta lists it on InitiateCheckout, and without it the express funnel and
+  // the cart funnel report the same step with different shapes.
+  track('InitiateCheckout', { ...productPayload(product, qty), num_items: qty });
 }
 
 /* ---- The item --------------------------------------------------------- */
