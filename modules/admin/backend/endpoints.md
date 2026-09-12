@@ -115,6 +115,15 @@ given and prints "+N" from `lineCount`, so the cap has exactly one home.
 `null` whenever the product had no photograph. It is never a promise that the
 file is still on disk — the panel falls back to a lettered tile either way.
 
+Two more fields exist on the row for the same reason — they were on the order
+and the list was not asking:
+
+- **`area`** — the thana under the district. A rider is not dispatched to
+  "Dhaka"; the useful half of the address is the neighbourhood.
+- **`promoCode`** — `null` on most orders, which is the point. A row carrying a
+  code is a row whose total has an explanation, and a merchant scanning a page
+  of totals should not have to open one to find out.
+
 ### `GET /api/admin/orders/{order}`
 
 Items carry the full snapshot, which now includes the two display columns

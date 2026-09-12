@@ -487,6 +487,12 @@ class AdminOrderController extends Controller
             'customerName'  => $o->customer_name,
             'customerPhone' => $o->customer_phone,
             'district'      => $o->district_name,
+
+            /* The neighbourhood, under the district. A rider is not dispatched
+               to "Dhaka" — the useful half of the address is the thana, and it
+               is the half that decides which of them takes the parcel. Already
+               on the order; the list simply never asked for it. */
+            'area'          => $o->area,
             'status'        => $o->status,
             'paymentStatus' => $o->payment_status,
             'paymentMethod' => $o->payment_method,
@@ -507,6 +513,13 @@ class AdminOrderController extends Controller
                 'image' => $i->image,
             ])->values()->all(),
             'totalTaka'     => intdiv($o->total_poisha, 100),
+
+            /* Why this total is lower than the items add up to. Null on most
+               orders, which is the point: a row carrying a code is a row where
+               the number has an explanation, and a merchant scanning a page of
+               totals should not have to open one to find out. */
+            'promoCode'     => $o->promo_code,
+
             'placedAt'      => $o->placed_at?->toIso8601String(),
             // Null for a live order. The row draws itself struck through when
             // this is set, so a screenshot of the Deleted tab can never be
