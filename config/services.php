@@ -15,17 +15,28 @@
  */
 return [
 
+    /*
+     * Meta Pixel / Conversions API (modules/marketing) — THE FALLBACK.
+     *
+     * Admin → Pixel setup is where these are set. Once anything is saved
+     * there, the panel is the authority for all three keys and nothing below
+     * is read; until then these are, exactly as before. Read them through
+     * Modules\Marketing\Services\MetaPixelSettings, never with config()
+     * directly, or a panel save is silently ignored.
+     */
     'meta' => [
-        // The same pixel id as shared/js/core/site-config.js — public by design.
+        // Public by design. Should match the id in the pages — the panel's,
+        // or shared/js/core/site-config.js's until the panel has one.
         'pixel_id' => env('META_PIXEL_ID'),
 
         // The Conversions API access token from Events Manager → Settings.
-        // SECRET. Lives in .env on the server and nowhere else — never in
-        // site-config.js, never in this repo.
+        // SECRET. In .env on the server or encrypted in the panel's row, and
+        // nowhere else — never in site-config.js, never in this repo.
         'capi_token' => env('META_CAPI_TOKEN'),
 
         // Optional. Set while testing so events appear in Events Manager's
-        // Test Events tab; clear it for real traffic.
+        // Test Events tab; clear it for real traffic. Unlike a code saved in
+        // the panel, one set here never switches itself off.
         'test_event_code' => env('META_TEST_EVENT_CODE'),
     ],
 

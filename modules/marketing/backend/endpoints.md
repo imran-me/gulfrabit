@@ -7,6 +7,12 @@ Owned by `modules/marketing`. Base path `/api/track`, mounted by
 |---|---|
 | **authored** | `POST /track` |
 | **authored** | `GET /admin/marketing/campaigns` (admin, admin:orders) |
+| **authored** | `GET /admin/marketing/analytics` and three below it (admin, admin:orders) |
+| **authored** | `GET /admin/marketing/pixel` (admin, admin:settings) |
+| **authored** | `PUT /admin/marketing/pixel` (admin, admin:settings.edit) |
+| **authored** | `POST /admin/marketing/pixel/test` (admin, admin:settings.edit, 10/min) |
+| **authored** | `POST /admin/marketing/pixel/test-mode` (admin, admin:settings.edit) |
+| **authored** | `POST /admin/marketing/pixel/stamp` (admin, admin:settings.edit) |
 
 ## POST /track
 
@@ -23,13 +29,17 @@ The browser event mirror. Body, all from `shared/js/core/analytics.js`:
 }
 ```
 
-- `event_name` is a closed set: PageView, ViewContent, AddToCart,
-  InitiateCheckout, Purchase. Anything else is 422.
+- `event_name` is a closed set, `TrackController::EVENTS`: PageView,
+  ViewContent, AddToCart, InitiateCheckout, Purchase, AddToWishlist, Search,
+  CompleteRegistration, Contact. Anything else is 422.
 - `custom_data` is whitelisted before forwarding (value, currency,
-  content_ids, content_name, content_type, contents, num_items) — this
-  endpoint is not a relay.
-- Responses: `204` not configured · `202` accepted (whether Meta answered or
-  not — failures are logged, never surfaced) · `422` malformed · `429`
+  content_ids, content_name, content_type, contents, num_items,
+  search_string) — this endpoint is not a relay.
+- The keys come from `MetaPixelSettings::forTracking()`: the ones saved in
+  Admin → Pixel setup, or `.env` until anything is saved there.
+- Responses: `204` not configured (no pixel id or no token in force) · `202`
+  accepted (whether Meta answered or not — failures are logged and the latest
+  is shown on Pixel setup, never to the visitor) · `422` malformed · `429`
   throttled.
 - The forwarded event carries `user_data` built server-side: client IP, user
   agent, `_fbp`/`_fbc` cookies, with `_fbc` reconstructed from a first-touch
@@ -137,3 +147,123 @@ does not have. Sessions rotate after 30 minutes idle.
   sessions with a single PageView and no referrer if you go looking.
 - **No cross-device stitching**, and no plan for it — that needs identity this
   deliberately does not collect.
+
+---
+
+## Pixel setup
+
+The three Meta keys, edited in the panel instead of `.env`. The why — the
+precedence rule, the page stamp, the one-hour test code — is in the module
+README; this is the contract.
+
+All five routes are JSON under `/api/admin`, session cookie + CSRF, `web`
+middleware like the rest of the panel. Reading needs `admin:settings`; every
+write needs `admin:settings.edit`. Owners hold both by default and nobody else
+does: the screen holds a secret, and a save rewrites every storefront page.
+
+**The token never comes back.** Every response carries a preview — the first
+six and last four characters — and its length, never the value. The browser
+that pasted it is the last place it appears in full.
+
+### `GET /api/admin/marketing/pixel`
+
+What is in force, where it came from, and whether it is working.
+
+```json
+{ "data": {
+  "source": "panel",
+  "pixelId": "1423900436303846",
+  "accessToken": { "set": true, "preview": "EAAGxx…9fQz", "length": 184 },
+  "testEventCode": "TEST12345",
+  "testMode": { "active": true, "until": "2026-09-11T18:05:00+06:00", "minutes": 60, "alwaysOn": false },
+  "updatedBy": "Imran",
+  "updatedAt": "2026-09-11T17:05:00+06:00",
+  "problem": null,
+  "pages": { "total": 27, "matching": 27, "ids": { "1423900436303846": 27 } },
+  "forwarding": { "available": true, "hours": 24, "sent": 212, "failed": 0, "skipped": 3,
+                  "lastSentAt": "2026-09-11T17:04:12+06:00", "lastFailure": null }
+} }
+```
+
+- `source` is `panel` once anything has been saved there, else `env`, else
+  `none`. It names the source of **all three** keys — they are never mixed.
+- `problem` is a sentence for the owner, or null. It is set when a saved row
+  can no longer be decrypted (`APP_KEY` changed) or the database could not be
+  read; `source` then reports `env`, because that is what the server is
+  actually using, and saving again repairs the first case.
+- `testMode.active` is false once the hour has passed, even though the code
+  is still stored, and `until` is null whenever it is not active.
+  `alwaysOn: true` means the code comes from `.env`, which has no clock — the
+  screen flags it.
+- `pages` counts storefront pages by the id their block carries; `""` counts
+  pages with the pixel switched off. `matching` is how many carry the id in
+  force (or `""` when there is none). Anything else in `ids` means the pages
+  disagree and want re-stamping.
+- `forwarding` is the last 24 hours of `tracking_events.capi_status`, plus the
+  last refusal from Meta in plain words (`{message, at}`, kept 7 days in the
+  cache). `available: false` means the table is not there yet and the zeros
+  mean "unknown", not "nothing".
+
+### `PUT /api/admin/marketing/pixel`
+
+```json
+{ "pixelId": "1423900436303846", "accessToken": "", "removeAccessToken": false,
+  "testEventCode": "TEST12345" }
+```
+
+- `accessToken: ""` keeps the saved token. The form never holds the real one,
+  so an empty box has to mean "unchanged" — otherwise every save that touched
+  only the pixel id would wipe the token. Removing it is its own flag,
+  `removeAccessToken: true`, so it cannot happen by accident; sending a new
+  token and the flag together is a 422.
+- `pixelId` is digits or empty; empty switches the pixel off. `pixelId` and
+  `testEventCode` must be present (empty is an answer, missing is not).
+- Normalised before validation: spaces removed from all three, and a test code
+  copied with its `test_event_code:` label is stripped and upper-cased.
+- The first save makes the panel the authority for all three keys, including
+  any left blank.
+- A new or changed test code starts its hour; saving the same code again keeps
+  its clock, even one that has run out.
+- The pixel in force is written into every storefront page before the response
+  returns.
+
+**200** → `{ data: <same as GET>, meta: { stamp: { pages, changed, failed } } }`,
+where `failed` maps a page's path to the reason it could not be written.
+**422** → `{ message, errors: { pixelId?, accessToken?, testEventCode? } }`,
+each a sentence that names where the right value is found. **500** → the
+database refused the write (usually a deploy whose migration has not run yet).
+
+### `POST /api/admin/marketing/pixel/test`
+
+No body. The server sends one `PageView` to
+`graph.facebook.com/v21.0/{pixel}/events` with the SAVED token and test code;
+it appears in Events Manager → Test events, marked as a Server event. It does
+not need test mode to be running — the code rides on this one event either way.
+
+**200** → `{ data: { eventsReceived, fbtraceId, testEventCode, eventName, sentAt } }`.
+**422** → `{ message }` when a key is missing (all three are needed: without a
+test code the event would count as a real visit) or Meta refused, with Meta's
+answer explained in plain words and its `code`. **502** → Meta could not be
+reached. **429** → pressed more than 10 times a minute; every press is a real
+call to Meta on the shop's token.
+
+### `POST /api/admin/marketing/pixel/test-mode`
+
+```json
+{ "on": true }
+```
+
+`on: true` starts another hour for the saved test code; `on: false` stops it
+now. **200** → `{ data: <same as GET> }`. **422** → `{ message }` when nothing
+is saved in the panel, when the code comes from `.env`, or when there is no
+saved code to turn on.
+
+### `POST /api/admin/marketing/pixel/stamp`
+
+No body. Writes the block for the id in force into every storefront page
+again — the same thing the save and `php artisan marketing:pixel-stamp` do.
+For when `pages.ids` shows the pages disagreeing: a restore from backup, a
+file edited by hand, a deploy whose own stamp failed. Only pages whose bytes
+change are rewritten, so pressing it twice changes nothing the second time.
+**200** → `{ data, meta: { stamp } }` as for `PUT`. **422** → `{ message }` when
+nothing is saved in the panel — `.env` alone never rewrites the pages.

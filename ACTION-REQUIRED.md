@@ -1,6 +1,6 @@
 # Things only you can do
 
-Last updated 2026-08-13.
+Last updated 2026-09-11.
 
 Everything here needs a human with hPanel access, an account, or a decision.
 Nothing on this list can be done from the code.
@@ -139,30 +139,38 @@ until you are taking orders.
 
 ---
 
-## 6b. Meta ads — two .env keys and one paste — 5 minutes
+## 6b. Meta ads — three pastes in the panel — 5 minutes
 
-The tracking is built on both sides and ships switched off. Turning it on:
+The browser pixel has been live since 6 September. The server copy of each
+event — the Conversions API — is built and waits only for an access token.
+It all goes in the panel now; no `.env`, no push.
 
 1. **Events Manager → your pixel → Settings → Conversions API → Generate
-   access token.** In hPanel, add to `.env`:
+   access token.** Copy it.
+2. **Admin → Pixel setup** (owners only by default). Paste the **Pixel ID**
+   (the 15–16 digit number), the **access token**, and — while you are
+   testing — the **test event code** from Events Manager → Test events.
+   **Save.**
+3. Open **Events Manager → Test events**, then press **Send test event** on
+   the Pixel setup screen. A PageView marked **Server** should appear within
+   seconds. If it does not, the screen shows what Meta said.
 
-   ```
-   META_PIXEL_ID=<the 15-16 digit pixel id>
-   META_CAPI_TOKEN=<the token — this file is the ONLY place it goes>
-   ```
+The test code switches itself off an hour after you save it, so a forgotten
+one cannot send real orders to the test stream. There is nothing to clear.
 
-   Then `php artisan config:cache` (or just wait for the next deploy, which
-   runs it).
+When it is done, every ad click, checkout and purchase reports to Meta twice
+(browser + server) and deduplicates — which is what lets Meta optimise for
+buyers instead of clickers. Each order also records which campaign sold it,
+visible on the order screen in the panel.
 
-2. **Paste the same pixel id** into the `metaPixelId` field of
-   `shared/js/core/site-config.js` and push.
+If you ever switch to a **different pixel**, also put the new id in
+`metaPixelId` in `shared/js/core/site-config.js` and push. Every deploy puts
+the built pages back for a few seconds before the panel's pixel is written
+into them again; with the two equal, those seconds change nothing.
 
-Until both are done: no tracking script loads, nothing is sent anywhere, and
-the shop behaves exactly as it does today. When both are done, every ad
-click, checkout and purchase reports to Meta twice (browser + server) and
-deduplicates — which is what lets Meta optimise for buyers instead of
-clickers. Each order also records which campaign sold it, visible on the
-order screen in the panel.
+`.env` still works as the fallback (`META_PIXEL_ID`, `META_CAPI_TOKEN`,
+`META_TEST_EVENT_CODE`) — but only until the panel has something saved, after
+which the panel wins for all three.
 
 ---
 

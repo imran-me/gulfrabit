@@ -910,6 +910,13 @@ ADMIN_PAGES = [
      ["/modules/admin/admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/marketing/campaigns-page.js"], True),
 
+    # The three Meta keys. Behind admin:settings (owners by default), because
+    # it holds a secret and changes what every storefront page sends to Meta.
+    ("modules/marketing/pixel.html", "Pixel setup — GulfRabit Admin",
+     "modules/marketing/_fragments/pixel.main.html",
+     ["/modules/admin/admin.css", "/modules/marketing/pixel.css"],
+     ["/modules/admin/admin-shell.js", "/modules/marketing/pixel-page.js"], True),
+
     ("modules/reviews/reviews.html", "Reviews — GulfRabit Admin",
      "modules/reviews/_fragments/reviews.main.html",
      ["/modules/admin/admin.css", "/modules/reviews/reviews-admin.css"],

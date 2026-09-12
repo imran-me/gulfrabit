@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Marketing\Controllers\AdminAnalyticsController;
 use Modules\Marketing\Controllers\AdminCampaignController;
+use Modules\Marketing\Controllers\AdminPixelController;
 
 /*
  * Admin routes, mounted under `web` by MarketingServiceProvider — the
@@ -46,6 +47,40 @@ Route::get('admin/marketing/analytics/sessions/{session}', [AdminAnalyticsContro
     ->name('marketing.analytics.footprint');
 
 /*
+ * The Tracking screen's tabs, one route each, so a tab's queries run only when
+ * somebody opens it. Every one reads the same query string - period, from/to,
+ * channel, device, campaign - through TrackerFilter, so every tab is about the
+ * same visits as the headline above it.
+ */
+Route::get('admin/marketing/analytics/insights', [AdminAnalyticsController::class, 'insights'])
+    ->middleware(['admin', 'admin:orders'])
+    ->name('marketing.analytics.insights');
+
+Route::get('admin/marketing/analytics/live', [AdminAnalyticsController::class, 'live'])
+    ->middleware(['admin', 'admin:orders'])
+    ->name('marketing.analytics.live');
+
+Route::get('admin/marketing/analytics/sources', [AdminAnalyticsController::class, 'sources'])
+    ->middleware(['admin', 'admin:orders'])
+    ->name('marketing.analytics.sources');
+
+Route::get('admin/marketing/analytics/audience', [AdminAnalyticsController::class, 'audience'])
+    ->middleware(['admin', 'admin:orders'])
+    ->name('marketing.analytics.audience');
+
+Route::get('admin/marketing/analytics/products', [AdminAnalyticsController::class, 'products'])
+    ->middleware(['admin', 'admin:orders'])
+    ->name('marketing.analytics.products');
+
+Route::get('admin/marketing/analytics/search', [AdminAnalyticsController::class, 'search'])
+    ->middleware(['admin', 'admin:orders'])
+    ->name('marketing.analytics.search');
+
+Route::get('admin/marketing/analytics/checkout', [AdminAnalyticsController::class, 'checkout'])
+    ->middleware(['admin', 'admin:orders'])
+    ->name('marketing.analytics.checkout');
+
+/*
  * Export is a separate route rather than ?format=csv on the index: it streams a
  * file instead of returning JSON, and a single endpoint that sometimes does
  * both is how a caller ends up parsing a CSV as JSON.
@@ -53,3 +88,35 @@ Route::get('admin/marketing/analytics/sessions/{session}', [AdminAnalyticsContro
 Route::get('admin/marketing/analytics/export', [AdminAnalyticsController::class, 'export'])
     ->middleware(['admin', 'admin:orders'])
     ->name('marketing.analytics.export');
+
+/*
+ * Pixel setup - the three Meta keys, edited in the panel instead of .env.
+ *
+ * Settings, not orders: this screen holds a secret (the Conversions API token)
+ * and a save rewrites every storefront page, so reading it needs settings.view
+ * and every write needs settings.edit - a narrower pair than the dashboards
+ * above, which only ever read.
+ *
+ * The test route is throttled on top: every press is a real call to Meta on
+ * the shop's own token, and ten a minute is more than anyone checking a setup
+ * will ever need.
+ */
+Route::get('admin/marketing/pixel', [AdminPixelController::class, 'show'])
+    ->middleware(['admin', 'admin:settings'])
+    ->name('marketing.pixel.show');
+
+Route::put('admin/marketing/pixel', [AdminPixelController::class, 'update'])
+    ->middleware(['admin', 'admin:settings.edit'])
+    ->name('marketing.pixel.update');
+
+Route::post('admin/marketing/pixel/test', [AdminPixelController::class, 'test'])
+    ->middleware(['admin', 'admin:settings.edit', 'throttle:10,1'])
+    ->name('marketing.pixel.test');
+
+Route::post('admin/marketing/pixel/test-mode', [AdminPixelController::class, 'testMode'])
+    ->middleware(['admin', 'admin:settings.edit'])
+    ->name('marketing.pixel.test-mode');
+
+Route::post('admin/marketing/pixel/stamp', [AdminPixelController::class, 'stamp'])
+    ->middleware(['admin', 'admin:settings.edit'])
+    ->name('marketing.pixel.stamp');

@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Modules\Marketing;
 
 use Illuminate\Support\ServiceProvider;
+use Modules\Marketing\Console\StampPixel;
+use Modules\Marketing\Services\MetaPixelSettings;
+use Modules\Marketing\Services\PixelStamp;
 
 /**
  * The module's single wiring point.
@@ -22,6 +25,21 @@ use Illuminate\Support\ServiceProvider;
  */
 class MarketingServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        // PixelStamp is plain PHP with no container awareness of its own — it
+        // is told where the site is, which is what lets it be tested against a
+        // copy of the pages. The site root is the Laravel root: index.html and
+        // modules/ sit beside artisan.
+        $this->app->singleton(PixelStamp::class, fn (): PixelStamp => new PixelStamp(base_path()));
+
+        // Scoped rather than a plain singleton: identical within one request or
+        // one artisan run, but forgotten between the requests or jobs of a
+        // long-lived worker, so its memoised answer can never outlive a save
+        // made somewhere else.
+        $this->app->scoped(MetaPixelSettings::class);
+    }
+
     public function boot(): void
     {
         // Every other module with a table says this; this one did not, so
@@ -30,6 +48,12 @@ class MarketingServiceProvider extends ServiceProvider
         // every event by design, so the only symptom was a dashboard with
         // nothing to read.
         $this->loadMigrationsFrom(__DIR__ . '/Migrations');
+
+        // Console only, so the command does not exist on a web request.
+        // deploy.sh runs it after every `git reset --hard`.
+        if ($this->app->runningInConsole()) {
+            $this->commands([StampPixel::class]);
+        }
 
         $this->app->booted(function (): void {
             $this->loadRoutes();

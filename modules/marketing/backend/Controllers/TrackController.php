@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Modules\Marketing\Models\TrackingEvent;
+use Modules\Marketing\Services\MetaPixelSettings;
 use Modules\Marketing\Services\VisitContext;
 use Throwable;
 
@@ -36,11 +37,19 @@ use Throwable;
  * are forwarded, so this cannot be used to relay arbitrary payloads to a
  * third party under the shop's name. And never a reason a page breaks: the
  * response is 202 whether Meta answered or not; failures go to the log,
- * where a merchant's developer can see them, not to the customer.
+ * where a merchant's developer can see them, and — explained in plain words —
+ * to Admin → Pixel setup, where the merchant can. Never to the customer.
+ *
+ * WHICH KEYS
+ * ----------
+ * Whatever MetaPixelSettings says is in force: the keys saved in Admin →
+ * Pixel setup, or META_* in .env until anything is saved there. Never
+ * config('services.meta.*') directly — that would silently ignore the panel.
  */
 class TrackController extends Controller
 {
-    private const GRAPH_VERSION = 'v21.0';
+    /** Public so the panel's "Send test event" speaks the same API version. */
+    public const GRAPH_VERSION = 'v21.0';
 
     /** Meta rejects events older than 7 days; a skewed client clock must not cost the event. */
     private const MAX_AGE_SECONDS = 7 * 86400;
@@ -70,6 +79,10 @@ class TrackController extends Controller
         'search_string',
     ];
 
+    public function __construct(private readonly MetaPixelSettings $settings)
+    {
+    }
+
     public function __invoke(Request $request): JsonResponse
     {
         // VALIDATION COMES FIRST NOW, AND SO DOES RECORDING.
@@ -96,8 +109,11 @@ class TrackController extends Controller
             'attribution.*'    => ['string', 'max:255'],
         ]);
 
-        $pixelId = config('services.meta.pixel_id');
-        $token   = config('services.meta.capi_token');
+        // The panel's keys, or .env's until the panel has any — and the test
+        // code only while its hour is running. See MetaPixelSettings.
+        $meta    = $this->settings->forTracking();
+        $pixelId = $meta['pixelId'];
+        $token   = $meta['accessToken'];
 
         // Clamp, don't trust: the browser's clock sets event_time, and a phone
         // running fast would post an event from the future, which Meta refuses.
@@ -117,14 +133,15 @@ class TrackController extends Controller
 
         $payload = array_filter([
             'data'            => [$event],
-            'test_event_code' => config('services.meta.test_event_code') ?: null,
+            'test_event_code' => $meta['testEventCode'],
         ]);
 
         // Unconfigured is still a legitimate, permanent state — the shop before
-        // its first Conversions API token. The difference is that the event is
-        // now KEPT either way, and the row says which of the three things
-        // happened rather than leaving the merchant to guess whether the
-        // forwarder is off or broken.
+        // its first Conversions API token — and this answers 204 until the keys
+        // are saved in Admin → Pixel setup (or META_* in .env). The difference
+        // is that the event is now KEPT either way, and the row says which of
+        // the three things happened rather than leaving the merchant to guess
+        // whether the forwarder is off or broken.
         if (! $pixelId || ! $token) {
             $this->record($request, $data, $time, 'skipped');
 
@@ -155,10 +172,21 @@ class TrackController extends Controller
                     'status' => $response->status(),
                     'body'   => mb_substr($response->body(), 0, 500),
                 ]);
+
+                // The same refusal, explained, for Admin → Pixel setup — the
+                // log is where a developer looks; the panel is where the
+                // merchant does. noteFailure() never throws.
+                $error = $response->json('error');
+                $this->settings->noteFailure(
+                    $response->status(),
+                    is_array($error) && is_numeric($error['code'] ?? null) ? (int) $error['code'] : null,
+                    is_array($error) && is_string($error['message'] ?? null) ? $error['message'] : null,
+                );
             }
         } catch (Throwable $e) {
             $status = 'failed';
             Log::warning('capi: Meta unreachable', ['error' => $e->getMessage()]);
+            $this->settings->noteFailure(0, null, null);
         }
 
         // After the attempt, so the row records what actually happened rather

@@ -3,7 +3,8 @@
  * "this shop's accounts". Everything here is safe to commit: an ad platform's
  * pixel id is public by design (it ships in the page to every visitor). The
  * matching ACCESS TOKEN is not, and must never appear in this file — it lives
- * in the server's .env and is used only by the Conversions API forwarder.
+ * on the server (Admin > Pixel setup, or .env) and is used only by the
+ * Conversions API forwarder.
  *
  * Empty values mean "not configured", and every consumer is required to no-op
  * rather than guess. That is deliberate: a half-configured tracker that fires
@@ -14,7 +15,18 @@
 export const CONFIG = {
   /**
    * Meta (Facebook) Pixel ID — the 15-16 digit number from Events Manager.
-   * Leave empty and no pixel script is injected at all.
+   *
+   * THE BUILD-TIME DEFAULT, not the live setting. tools/assemble.py reads it
+   * from here and writes it into the pixel block in every storefront page's
+   * <head>. On the server, the id saved in Admin > Pixel setup is written
+   * over it after every save and every deploy — and since each deploy's
+   * `git reset --hard` puts the built pages back for a few seconds before
+   * that happens, KEEP THIS EQUAL TO THE PANEL'S ID, or visitors in those
+   * seconds report to a different pixel.
+   *
+   * At runtime analytics.js believes the page's own block first; this value
+   * is used only by a page built without one. Leave it empty and the build
+   * writes the block switched off.
    *
    * Set 2026-09-06 for the first ad campaign. This is the dataset named
    * "GulfRabit Pixel" in Events Manager, on ad account 3375856489152009.
@@ -28,8 +40,9 @@ export const CONFIG = {
    * prevention, ad blockers and in-app browsers; the Conversions API exists to
    * recover them. Both sides send the same event_id and Meta deduplicates.
    *
-   * The route is modules/marketing (TrackController). It answers 204 until
-   * META_PIXEL_ID and META_CAPI_TOKEN are set in the server's .env — the
+   * The route is modules/marketing (TrackController). It answers 204 until a
+   * pixel id and an access token are in force on the server — saved in
+   * Admin > Pixel setup, or in .env until the panel has something saved. The
    * token lives there and ONLY there. On a static host the fetch 404s once
    * and the circuit breaker stops calling; the pixel works alone.
    */

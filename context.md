@@ -2062,6 +2062,85 @@ appear only in a visit's footprint on the Tracking screen, labelled in the
 shopkeeper's words: *Saved to wishlist*, *Searched*, *Created an account*,
 *Sent a message*.
 
+### Admin → Pixel setup: the three Meta keys (2026-09-11)
+
+The Conversions API had sat dormant since the 6th because turning it on meant
+editing `.env` on the server — through File Manager, since SSH is blocked from
+the owner's network and Hostinger's WAF refuses a file named `.env` (§7b) —
+then a config cache rebuild. Changing the pixel itself meant editing
+site-config.js, rebuilding and pushing. Neither is a job the owner can do from
+the panel, so neither got done. **Admin → Pixel setup**
+(`/admin/pixel`, sidebar group Settings) now takes all three keys — Pixel ID,
+Conversions API access token, test event code — behind the `settings`
+permission (`admin:settings` to open, `admin:settings.edit` to change; owners
+only by default). The full account is in `modules/marketing/README.md`; the
+decisions worth keeping are these.
+
+**Stored encrypted, shown as a preview.** Table `marketing_settings`
+(module-owned key/value), row `meta_pixel`, `encrypted:array` like courier
+credentials. The token never goes back to the browser in full — first six and
+last four characters and its length, enough to tell which token is saved.
+
+**The panel wins for all three keys or for none.** Once anything is saved
+there, `.env` is not read. Until then the server falls back to
+`META_PIXEL_ID` / `META_CAPI_TOKEN` / `META_TEST_EVENT_CODE` exactly as
+before. Mixing per key was rejected: blanking the token in the panel to switch
+the Conversions API off would have brought back whatever stale token `.env`
+still held. A row that can no longer be decrypted (`APP_KEY` changed) is
+reported on the screen and the server falls back to `.env`.
+`MetaPixelSettings::forTracking()` is the one reader; `TrackController` goes
+through it.
+
+**The id stays in the HTML, so the server rewrites the HTML.** Fetching the id
+at runtime would be simpler and would undo the reason the snippet went into
+`<head>` on the 6th: Events Manager's install check and the Event Setup Tool
+read the page source for `init` followed by `track('PageView')`, and a pixel
+injected afterwards reads as "no pixel detected". So every storefront page
+carries a managed block between `<!-- GENERATED-PIXEL-BEGIN -->` and
+`<!-- GENERATED-PIXEL-END -->`, first line `<meta name="gr-meta-pixel"
+content="ID">`, then Meta's snippet. **Two writers, one template**
+(`shared/components/meta-pixel.html`): the build fills it from
+`site-config.js`, and a save in the panel rewrites it in every storefront page
+on the server (`PixelStamp` — atomic writes, only pages whose bytes change;
+admin pages carry no block). Change the markers or the shape in
+`tools/assemble.py` and `PixelStamp` together, or the server stops finding the
+block.
+
+**Off means an empty meta line, not a missing block.** Switched off, the block
+keeps only `<meta name="gr-meta-pixel" content="">`. `analytics.js` now reads
+that line first (`pagePixelId()`), so the panel's "off" is not overridden by
+the id in site-config.js. Only a page with no block at all falls back to it.
+
+**Every deploy undoes the stamp, so every deploy re-applies it.** `deploy.sh`
+does `git reset --hard`, which puts the committed pages back with the build's
+id. New step 4b runs `php artisan marketing:pixel-stamp` straight after the
+migrations; it does nothing when nothing is saved in the panel, and a failure
+is loud but not fatal. `--check` reports what the pages carry. **Keep
+`metaPixelId` in site-config.js equal to the panel's id** — it is what visitors
+get for the few seconds between the reset and the stamp.
+
+**A test event code lasts an hour.** A code left set sends real conversions to
+Test events, where ads never learn from them — and nothing about the shop
+looks wrong while it happens. A code saved in the panel is used for 60 minutes
+after the save (or after **Turn on for 1 hour**) and then ignored. A code from
+`.env` keeps the old always-on behaviour and the screen flags it.
+
+**Send test event** has the server post one PageView to
+`graph.facebook.com/v21.0/{pixel}/events` with the saved token and test code;
+it shows in Test events marked Server. It refuses without all three keys,
+because without a test code it would count as a real visit. Throttled 10/min.
+
+The screen also shows the last 24 h of `capi_status` (sent / failed / skipped),
+Meta's last refusal in plain words (cached 7 days — until now it lived only in
+`laravel.log`), how many pages carry which pixel with a button to write it
+into every page again, and a live check of the home page as visitors get it,
+through the CDN.
+
+**Deleting `modules/marketing/`** leaves the pages with whatever pixel was last
+written into them until the next deploy resets them to the build's id.
+`/api/track` 404s once per page and the circuit breaker stops calling, as
+before; `marketing_settings` stays behind like every module's tables.
+
 ---
 
 ## 10. URLs ARE ROUTES (2026-08-13) — read before touching a link
@@ -2146,7 +2225,7 @@ half-working. **Do not "fix" them by inventing placeholder credentials.**
 | Item | State | What unblocks it |
 |---|---|---|
 | **Google Search Console** | Nothing set up. `sitemap.xml` is correct and current (38 routes). | Verify the domain, submit the sitemap. ACTION-REQUIRED §7b. |
-| **Meta Conversions API** | Browser pixel is LIVE (2026-09-06). The server half is still dormant. | `META_CAPI_TOKEN` in the server `.env` — Events Manager → Settings → Generate access token. Pixel keeps working alone until then. |
+| **Meta Conversions API** | Browser pixel is LIVE (2026-09-06). The server half is dormant until an access token is in force. | Paste the token (Events Manager → Settings → Generate access token) into **Admin → Pixel setup** and press Send test event — ACTION-REQUIRED §6b. `.env` is only the fallback until the panel has something saved. Pixel keeps working alone until then. |
 | **SMS to customers** | `modules/sms`, dormant. | bulksmsbd account, 3 `.env` keys. §6c. |
 | **bKash / Nagad** | `modules/payments`, dormant, sandbox by default. | Merchant onboarding. §6d. |
 | **301s from old `/modules/…` URLs** | Deliberately NOT added. | Old URLs work and canonicalise to the new ones, which is how Google consolidates. Redirects would mean mangling query strings for marginal gain — revisit only if Search Console shows the old URLs lingering. |

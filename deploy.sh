@@ -77,6 +77,20 @@ if ! php artisan migrate --force; then
     say "!!! Read the error above. The admin dashboard will list what is missing."
 fi
 
+# ---- 4b. The pixel chosen in the admin panel ------------------------------
+# Every storefront page carries the Meta pixel id in its HTML, and Admin →
+# Pixel setup rewrites that block on this server when the id is saved. The
+# `reset --hard` in step 2 has just put the committed pages back, carrying
+# the id they were built with — so a pixel changed in the panel would quietly
+# revert on every deploy. This writes the panel's pixel into them again.
+#
+# After the migrations, because it reads the panel's row out of the database.
+# It changes nothing when nothing is saved in the panel, and only rewrites a
+# page whose bytes differ. A failure is loud but not fatal: the pages still
+# carry a working pixel, just the build's rather than the panel's.
+say "Writing the Meta pixel into the pages"
+php artisan marketing:pixel-stamp || say "!!! marketing:pixel-stamp failed — pages carry the pixel id they were built with."
+
 # ---- 5. Caches ------------------------------------------------------------
 # Rebuilt AFTER the code lands, never before, or they would cache the previous
 # release's config and routes.

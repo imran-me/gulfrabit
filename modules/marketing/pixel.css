@@ -1,0 +1,598 @@
+/**
+ * pixel.css — the Pixel setup screen's own pieces.
+ *
+ * Everything that is already a shared admin component (cards, the error strip,
+ * buttons, inputs, checkboxes) is reused from admin.css and the storefront
+ * partials. What is here is what a settings form with a secret in it needed
+ * and nothing else had: numbered key cards, a "where to find it" trail, a
+ * status strip, and the lines that report what a button just did.
+ *
+ * ONE SET OF TONES, SPOKEN THE SAME WAY EVERYWHERE.
+ * Every coloured thing on this screen takes its colour from a data-tone on
+ * itself — ok, bad, warn, info, off, wait — so a green edge on the status
+ * strip and a green line after a save cannot drift into two greens. Colour is
+ * always the second voice: each tone sits beside a word that already says it,
+ * and text is set in the ink cut of the colour, never the raw brand hue — raw
+ * lime is 1.9:1 on white and raw red is 3.9:1, neither of which is a sentence
+ * anybody should be asked to read.
+ */
+
+.px {
+  /* The error ink the tokens do not have: the brand red, taken far enough
+     towards the text colour to pass 4.5:1 at 14px. */
+  --px-error-ink: color-mix(in srgb, var(--gr-error) 72%, var(--text-primary));
+  display: grid;
+  gap: var(--space-5);
+  max-width: 56rem;
+  min-width: 0;
+}
+
+.px [data-tone="ok"]   { --tone: var(--gr-success);   --tone-ink: var(--lime-ink);       --tone-wash: color-mix(in srgb, var(--gr-success) 13%, var(--surface-raised)); }
+.px [data-tone="bad"]  { --tone: var(--gr-error);     --tone-ink: var(--px-error-ink);   --tone-wash: color-mix(in srgb, var(--gr-error) 7%, var(--surface-raised)); }
+.px [data-tone="warn"] { --tone: var(--gr-warning);   --tone-ink: var(--gold-ink);       --tone-wash: color-mix(in srgb, var(--gr-warning) 13%, var(--surface-raised)); }
+.px [data-tone="info"] { --tone: var(--gr-cyan-dark); --tone-ink: var(--link);           --tone-wash: color-mix(in srgb, var(--gr-cyan) 8%, var(--surface-raised)); }
+.px [data-tone="off"]  { --tone: var(--text-muted);   --tone-ink: var(--text-secondary); --tone-wash: var(--surface-sunken); }
+.px [data-tone="wait"] { --tone: var(--border-input); --tone-ink: var(--text-secondary); --tone-wash: var(--surface-sunken); }
+
+/* Inline code: ids, previews, the test code. Monospace because every one of
+   these is compared character by character against what Meta shows, and in a
+   proportional face 1 and l, 0 and O are the same shape. */
+.px code,
+.px-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .9em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-hairline);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+/* ---- Notices ------------------------------------------------------------ */
+
+.px-note {
+  margin: 0;
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-left-width: 3px;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+}
+.px-note p { margin: 0; }
+.px-note strong { color: var(--text-primary); }
+.px-note--tight { padding: var(--space-3) var(--space-4); }
+
+/* Amber, not red, for "no backend": a static copy of the shop is a supported
+   way to run it, and red would tell the owner something is broken. */
+.px-note--warn {
+  border-color: color-mix(in srgb, var(--gr-warning) 55%, var(--border-hairline));
+  border-left-color: var(--gr-warning);
+  background: color-mix(in srgb, var(--gr-warning) 8%, var(--surface-raised));
+}
+.px-note--bad {
+  border-color: color-mix(in srgb, var(--gr-error) 35%, var(--border-hairline));
+  border-left-color: var(--gr-error);
+  background: color-mix(in srgb, var(--gr-error) 6%, var(--surface-raised));
+}
+.px-note--bad strong { color: var(--px-error-ink); }
+.px-note--info {
+  border-left-color: var(--gr-cyan-dark);
+  background: color-mix(in srgb, var(--gr-cyan) 7%, var(--surface-raised));
+}
+.px-note--quiet {
+  border-left-color: var(--text-muted);
+  background: var(--surface-sunken);
+}
+
+/* ---- The status strip --------------------------------------------------- */
+
+.px-strip {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-3);
+}
+
+.px-fact {
+  --tone: var(--border-input);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: var(--space-4);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  /* The tone on the top edge: seen from across the room, read up close. */
+  border-top: 3px solid var(--tone);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 3px rgba(16, 32, 44, .05);
+}
+
+.px-fact__label {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.px-fact__word {
+  display: flex;
+  align-items: center;
+  gap: .45em;
+  font-family: var(--font-display);
+  font-size: var(--fs-20);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
+  color: var(--text-primary);
+}
+.px-fact__word::before {
+  content: "";
+  flex: none;
+  width: .5em;
+  height: .5em;
+  border-radius: 50%;
+  background: var(--tone);
+}
+
+.px-fact__line {
+  font-size: var(--fs-14);
+  line-height: var(--lh-snug);
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+/* ---- Headings ----------------------------------------------------------- */
+
+/* The storefront's h2 is a 39px section title. On a tool it is a label for a
+   block of work, at the size the other admin screens use for the same job. */
+.px-h2 {
+  margin: 0;
+  font-size: var(--fs-20);
+  letter-spacing: -0.01em;
+}
+
+.px-h3 {
+  font-family: var(--font-body);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0;
+  color: var(--text-primary);
+}
+
+.px-lede {
+  margin: var(--space-1) 0 0;
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+}
+
+/* ---- The form and its three keys --------------------------------------- */
+
+.px-form { min-width: 0; }
+
+.px-fields {
+  min-width: 0;          /* a fieldset's default min-content would hold the page wide */
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.px-keys {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.px-key {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-5);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 3px rgba(16, 32, 44, .05);
+}
+/* The grid gap is the rhythm inside a card; the typography's p + p margin
+   would add a second one on top between the text lines. */
+.px-key > p { margin: 0; }
+
+.px-key__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+
+/* The step number in the house's gold, the same hand as the masthead rule
+   and the sidebar's current-page mark. */
+.px-key__n {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--gr-gold-accent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--gr-gold-accent) 9%, var(--surface-raised));
+  color: var(--gold-ink);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.px-key__title {
+  /* A small basis, so the tag keeps its place on the title's row at 360px and
+     a long title wraps inside its own box instead of pushing the tag down. */
+  flex: 1 1 8rem;
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0;
+  line-height: var(--lh-snug);
+}
+.px-key__title label { cursor: pointer; }
+
+.px-tag {
+  flex: none;
+  padding: 2px var(--space-2);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.px-tag--secret {
+  border-color: color-mix(in srgb, var(--gr-gold-accent) 55%, var(--border-hairline));
+  background: color-mix(in srgb, var(--gr-gold-accent) 9%, var(--surface-raised));
+  color: var(--gold-ink);
+}
+
+.px-key__what {
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+}
+
+/* "Where to find it" as the trail of Meta's own menu items, each one a chip,
+   so the owner can match them one by one against the screen they are on. */
+.px-where {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+}
+.px-where__lead { font-weight: var(--fw-semibold); color: var(--text-primary); margin-right: 2px; }
+.px-crumb {
+  padding: 1px var(--space-2);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+}
+.px-crumb__sep { color: var(--text-muted); }
+.px-where__tail { flex-basis: 100%; }
+
+/* ---- Inputs ------------------------------------------------------------- */
+
+.px-input { max-width: 34rem; }
+.px-input--mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .02em;
+}
+/* The VALUE is monospace, for comparing against Meta character by character;
+   the placeholder is an instruction, and in monospace it ran out of box on a
+   phone halfway through the sentence. */
+.px-input--mono::placeholder { font-family: var(--font-body); letter-spacing: 0; }
+.px-input[aria-invalid="true"] {
+  border-color: var(--gr-error);
+  box-shadow: 0 0 0 3px rgba(229, 72, 77, .14);
+}
+/* Locked, but still legible: a view-only session is here to READ these, and
+   the browser's default for a disabled box is grey on grey. Dashed, the way
+   the panel marks a place that is not yours to fill. */
+.px-input:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+  border-style: dashed;
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  -webkit-text-fill-color: var(--text-secondary);
+}
+
+.px-secret {
+  display: flex;
+  gap: var(--space-2);
+  max-width: 34rem;
+}
+.px-secret .px-input { flex: 1 1 auto; min-width: 0; max-width: none; }
+/* The same height as the box beside it, so the pair reads as one control. */
+.px-reveal { flex: none; min-width: 5rem; padding-inline: var(--space-4); font-size: var(--fs-14); }
+
+.px-err {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+  color: var(--px-error-ink);
+}
+
+.px-hint {
+  font-size: var(--fs-14);
+  color: var(--text-muted);
+}
+/* The Pixel ID box has just been emptied over a saved id: the background
+   sentence about switching off becomes the one to read. */
+.px-hint[data-tone] {
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--tone);
+  border-radius: var(--radius-sm);
+  background: var(--tone-wash);
+  color: var(--tone-ink);
+  font-weight: var(--fw-medium);
+}
+
+/* What is saved, never the thing itself. The lock says "kept encrypted" to
+   someone who has not read the sentence yet. */
+.px-saved {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px var(--space-2);
+  align-items: baseline;
+  padding: var(--space-3) var(--space-4);
+  overflow-wrap: anywhere;
+  border: 1px dashed var(--border-hairline);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+}
+.px-saved::before {
+  content: "";
+  grid-row: span 2;
+  align-self: start;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  background: var(--text-muted);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.px-saved[data-set] {
+  border-style: solid;
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+}
+.px-saved[data-set]::before { background: var(--gold-ink); }
+/* Two lines, each ONE grid item: as bare text beside a <code>, every run
+   became its own cell and the preview landed in a column of its own. */
+.px-saved__what { grid-column: 2; }
+.px-saved__who {
+  grid-column: 2;
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+}
+
+.px-remove { font-size: var(--fs-14); }
+
+/* The first-visit guard under the Pixel ID box. */
+.px-suggest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--gr-warning) 55%, var(--border-hairline));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--gr-warning) 8%, var(--surface-raised));
+  font-size: var(--fs-14);
+  color: var(--text-primary);
+}
+.px-suggest p { flex: 1 1 18rem; margin: 0; }
+
+.px-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+/* Nothing left in the row on a view-only session. */
+.px-actions:not(:has(> :not([hidden]))) { display: none; }
+
+/* ---- What a button just did -------------------------------------------- */
+
+/* A line that reports, sitting where the eye already is after the press.
+   Empty takes no room; with a tone it becomes a small box, so "Saved." and
+   "Not saved." are told apart by more than their first three letters. */
+.px-said,
+.px-line {
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+}
+.px-said:empty { display: none; }
+.px-form > .px-said { margin-top: var(--space-3); }
+.px-said[data-tone],
+.px-line[data-tone] {
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--tone);
+  border-radius: var(--radius-sm);
+  background: var(--tone-wash);
+  color: var(--tone-ink);
+}
+.px-said[data-tone="wait"],
+.px-line[data-tone="wait"] { color: var(--text-secondary); }
+.px-said p { margin: 0; }
+.px-said p + p,
+.px-said p + ul,
+.px-said ul + p { margin-top: var(--space-2); }
+.px-said__ref { font-size: var(--fs-12); color: var(--text-secondary); }
+.px-said:focus { outline: none; }
+
+.px-fails {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--text-primary);
+}
+.px-fails li + li { margin-top: 2px; }
+
+/* ---- The two cards below the form -------------------------------------- */
+
+.px-card { min-width: 0; }
+.px-card > * { margin: 0; }
+.px-card > * + * { margin-top: var(--space-3); }
+.px-card > [data-px-send-block] > * { margin: 0; }
+.px-card > [data-px-send-block] > * + * { margin-top: var(--space-3); }
+
+/* Each part of a card is a question of its own, so each starts on a rule —
+   except the first, which a rule would only cut off from the card's title. */
+.px-card .px-h3 {
+  margin: var(--space-5) 0 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-hairline);
+}
+.px-card > .px-h2 + .px-h3 {
+  margin-top: var(--space-4);
+  padding-top: 0;
+  border-top: 0;
+}
+.px-mode > * + * { margin-top: var(--space-3); }
+.px-mode > .px-h3 { margin-top: var(--space-5); }
+
+.px-steps {
+  list-style: none;
+  counter-reset: px-step;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+/* Positioned, not a grid: each step is a sentence with a <strong> and an <em>
+   inside it, and as grid items every run of text became its own cell. */
+.px-steps li {
+  counter-increment: px-step;
+  position: relative;
+  min-height: 24px;
+  padding: 2px 0 0 36px;
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+}
+.px-steps li::before {
+  content: counter(px-step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-hairline);
+  border-radius: 50%;
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+.px-steps strong { color: var(--text-primary); }
+
+.px-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+/* Why Send test event is not available yet — said beside it rather than left
+   for somebody to discover by pressing a button that does nothing. */
+.px-why {
+  font-size: var(--fs-14);
+  color: var(--gold-ink);
+  font-weight: var(--fw-medium);
+}
+
+.px-aside {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+}
+.px-aside strong { color: var(--text-primary); }
+
+.px-mode__line { font-size: var(--fs-14); color: var(--text-secondary); }
+.px-mode__line strong { color: var(--text-primary); }
+
+/* Three counts as three small tiles: the one that matters, failures, is the
+   only one that ever changes colour. */
+.px-nums {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.px-num {
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+}
+.px-num dt {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--text-muted);
+}
+.px-num dd {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-25);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.px-num[data-tone="bad"] { background: var(--tone-wash); box-shadow: inset 3px 0 0 var(--tone); }
+.px-num[data-tone="bad"] dd { color: var(--tone-ink); }
+
+.px-ids {
+  padding-left: 1.2em;
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+}
+.px-ids li + li { margin-top: 2px; }
+
+/* ---- Phones ------------------------------------------------------------- */
+
+@media (max-width: 640px) {
+  .px { gap: var(--space-4); }
+  .px-key { padding: var(--space-4); }
+  .px-note { padding: var(--space-3) var(--space-4); }
+  /* The save and the test are the buttons on this page that matter, and on a
+     phone they are the width of the thumb's reach rather than of their words
+     — two stacked buttons of two different widths read as an accident. */
+  .px-actions .btn-gr,
+  .px-row--main .btn-gr { flex: 1 1 100%; }
+  /* Three tiles side by side at 360px are three columns of broken words; as
+     rows, each label keeps its line and each number its place on the right. */
+  .px-nums { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+  .px-num {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .px-num dd { margin: 0; font-size: var(--fs-20); }
+}

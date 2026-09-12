@@ -110,6 +110,7 @@
     RewriteRule ^admin/couriers/?$ modules/courier/couriers.html [L,QSA]
     RewriteRule ^admin/tracking/?$ modules/marketing/analytics.html [L,QSA]
     RewriteRule ^admin/campaigns/?$ modules/marketing/campaigns.html [L,QSA]
+    RewriteRule ^admin/pixel/?$ modules/marketing/pixel.html [L,QSA]
     RewriteRule ^admin/media/?$ modules/media/library.html [L,QSA]
     RewriteRule ^admin/reviews/?$ modules/reviews/reviews.html [L,QSA]
     RewriteRule ^admin/appearance/?$ modules/theme/appearance.html [L,QSA]
