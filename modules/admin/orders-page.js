@@ -196,12 +196,14 @@ async function load() {
   if (page > 1) qs.set('page', String(page));
   history.replaceState(null, '', qs.toString() ? `?${qs}` : location.pathname);
 
-  body.innerHTML = `<tr><td colspan="${columnCount()}" class="atable__empty">Loading…</td></tr>`;
+  body.innerHTML = skeleton();
+  body.closest('table')?.setAttribute('aria-busy', 'true');
 
   let payload;
   try {
     payload = await adminFetch(`/orders?${new URLSearchParams({ ...filters, page: String(page) })}`);
   } catch (err) {
+    body.closest('table')?.removeAttribute('aria-busy');
     body.innerHTML = `<tr><td colspan="${columnCount()}" class="atable__empty">${
       err.status === 404 || !err.status
         ? 'No backend connected yet — orders appear once the API is live.'
@@ -215,8 +217,59 @@ async function load() {
   paint(payload);
 }
 
+/**
+ * The shape of the answer, while the answer is on its way.
+ *
+ * A centred "Loading…" in one merged cell collapses the table to a single line
+ * and then throws twenty-five rows back at it, so every filter click is a jump
+ * — and on this screen a filter click is most clicks. The skeleton holds the
+ * table's own shape, so what arrives replaces something the same size.
+ *
+ * The bars are per column and deliberately uneven: a grid of identical
+ * rectangles reads as a broken table, while lines of different lengths read as
+ * writing that has not arrived yet.
+ *
+ * `aria-hidden` on the rows and `aria-busy` on the table: a screen reader is
+ * told the table is loading once, rather than read six rows of decorative
+ * rectangles. Shimmer comes from the shared `.skeleton`, which already stops
+ * itself under prefers-reduced-motion.
+ */
+const SKELETON_CELLS = [
+  [],                        // the checkbox column
+  ['62%', '86%', '54%'],     // order · when · how long ago
+  ['78%', '58%'],            // name · phone
+  ['64%', '44%'],            // district · thana
+  ['thumbs', '92%', '50%'],  // pictures · names · tally
+  ['58%'],                   // total
+  ['pill', '66%'],           // payment · method
+  ['pill', 'track'],         // stage · pipeline
+  ['btn'],                   // the next step
+];
+
+function skeleton(rowCount = 6) {
+  const cols = columnCount();
+
+  const cell = (parts) => `<td>${parts.map((w) => {
+    if (w === 'thumbs') return '<span class="askel__thumbs"><i class="skeleton"></i><i class="skeleton"></i><i class="skeleton"></i></span>';
+    if (w === 'pill') return '<span class="skeleton askel__pill"></span>';
+    if (w === 'track') return '<span class="skeleton askel__track"></span>';
+    if (w === 'btn') return '<span class="skeleton askel__btn"></span>';
+    return `<span class="skeleton askel__bar" style="width:${w}"></span>`;
+  }).join('')}</td>`;
+
+  // Padded rather than assumed: the patterns above are written for this table,
+  // and a column added to it should get a plain bar rather than no cell at all,
+  // which would leave the skeleton one column narrower than the header.
+  const row = `<tr class="askel" aria-hidden="true">${
+    Array.from({ length: cols }, (_, i) => cell(SKELETON_CELLS[i] ?? ['70%'])).join('')
+  }</tr>`;
+
+  return row.repeat(rowCount);
+}
+
 function paint({ data, meta }) {
   const body = document.querySelector('[data-orders-body]');
+  body.closest('table')?.removeAttribute('aria-busy');
   const count = document.querySelector('[data-orders-count]');
 
   paintTabs(meta.counts || {});
@@ -250,8 +303,13 @@ function paint({ data, meta }) {
   // selection without asking the server again.
   rows = data;
 
-  body.innerHTML = data.map((o) => `
-    <tr class="${o.deletedAt ? 'is-deleted' : ''}">
+  body.innerHTML = data.map((o) => {
+    // Once per row. It reads the clock and it is asked for by both the row's
+    // class and the age line inside it.
+    const wait = waitLevel(o);
+
+    return `
+    <tr class="${[o.deletedAt ? 'is-deleted' : '', wait && `is-${wait}`].filter(Boolean).join(' ')}">
       <td class="atable__pick">
         <input type="checkbox" data-pick="${escapeHtml(o.orderNumber)}"
                ${selected.has(o.orderNumber) ? 'checked' : ''}
@@ -260,7 +318,8 @@ function paint({ data, meta }) {
       <td class="atable__ref">
         <a href="/admin/order?no=${encodeURIComponent(o.orderNumber)}">${escapeHtml(o.orderNumber)}</a>
         <div class="atable__sub">${formatWhen(o.placedAt)}</div>
-        <div class="atable__sub">${escapeHtml(howLongAgo(o.placedAt))}</div>
+        <div class="atable__sub aage${wait ? ` aage--${wait}` : ''}">${
+          escapeHtml(howLongAgo(o.placedAt))}</div>
       </td>
       <td class="atable__name">
         <div>${escapeHtml(o.customerName)}</div>
@@ -279,9 +338,10 @@ function paint({ data, meta }) {
         ${pill(o.paymentStatus, paymentTone(o.paymentStatus))}
         <div class="atable__sub">${escapeHtml(payMethod(o.paymentMethod))}</div>
       </td>
-      <td>${pill(stageLabel(o.status), stageTone(o.status), true)}${preorderNote(o)}</td>
+      <td>${pill(stageLabel(o.status), stageTone(o.status), true)}${stageTrack(o)}${preorderNote(o)}</td>
       <td>${rowAction(o)}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   paintBulk();
 
@@ -418,6 +478,74 @@ function payMethod(key) {
  */
 function columnCount() {
   return document.querySelectorAll('.atable thead th').length || 1;
+}
+
+/**
+ * The pipeline, as six steps, under the stage pill.
+ *
+ * The pill says where an order IS. It does not say how far that is — "Packing"
+ * and "With courier" are the same shape and the same size, and a page of them
+ * reads as a page of labels rather than as work in progress. The track turns
+ * the same fact into a distance, which is the form the question actually takes:
+ * this one is nearly out of the door, that one has not been called yet.
+ *
+ * ENDINGS ARE NOT ON THE TRACK. Cancelled, returned and spam are not late
+ * stages of a delivery — they are the delivery not happening, and drawing them
+ * as five-sixths of a journey would say the opposite of what they mean. They
+ * get the pill alone, in its own tone.
+ *
+ * aria-hidden, because it encodes nothing the pill beside it has not already
+ * said in words. A screen reader should hear "Packing", not "Packing" followed
+ * by six list items.
+ */
+const PIPELINE = ['placed', 'confirmed', 'packed', 'ready_for_courier', 'shipped', 'delivered'];
+
+function stageTrack(o) {
+  const at = PIPELINE.indexOf(o.status);
+  if (at < 0) return '';
+
+  // Delivered is not "the last step in progress", it is the thing being over.
+  // The whole track turns, so a finished order reads as finished at a glance
+  // rather than as five of one colour and one of another.
+  const done = o.status === 'delivered' ? ' is-complete' : '';
+
+  return `<span class="atrack${done}" aria-hidden="true">${
+    PIPELINE.map((_, i) =>
+      `<i class="atrack__step${i <= at ? ' is-done' : ''}"></i>`).join('')
+  }</span>`;
+}
+
+/**
+ * Has this order been waiting too long — and is that our fault?
+ *
+ * The clock runs from placement, which is the only timestamp the list has, and
+ * it is the right one anyway: an order placed four days ago that has not been
+ * delivered is a problem whichever stage it is parked in.
+ *
+ * THREE THINGS ARE DELIBERATELY NOT LATE
+ *   - anything off the pipeline. Delivered is finished; cancelled, returned and
+ *     spam are not waiting on anyone
+ *   - a deleted order. It is not on the floor
+ *   - a pre-order whose shipment has not landed yet. It is waiting on a
+ *     supplier, exactly as planned, and colouring it as neglected is how the
+ *     genuinely stuck orders get lost among the ones that are merely early.
+ *     Once the date passes, `preorderDue` flips and it joins the queue like
+ *     anything else — at that point it IS actionable
+ *
+ * Two bands, not five. This has to be readable down a column of twenty-five at
+ * a glance, and a gradient of severity is something you stop to decode.
+ */
+function waitLevel(o) {
+  if (o.deletedAt) return '';
+  if (!PIPELINE.includes(o.status) || o.status === 'delivered') return '';
+  if (o.shipsOn && !o.preorderDue) return '';
+  if (!o.placedAt) return '';
+
+  const hours = (Date.now() - new Date(o.placedAt).getTime()) / 3600000;
+
+  if (hours >= 72) return 'late';
+  if (hours >= 24) return 'slow';
+  return '';
 }
 
 /**

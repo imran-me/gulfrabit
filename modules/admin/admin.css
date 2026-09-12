@@ -2475,3 +2475,84 @@
 @media (min-width: 1024px) {
   .aorder .acard--wide { grid-column: span 2; }
 }
+
+/* ---- The pipeline, as a distance -------------------------------------
+   Six steps under the stage pill. The pill says where an order is; this says
+   how far that is, which is the form the question actually takes when you are
+   looking down a column of twenty-five of them.
+
+   Endings are not drawn at all (see stageTrack in orders-page.js) — cancelled
+   is not five-sixths of a delivery. */
+.atrack {
+  display: flex;
+  gap: 3px;
+  margin-top: 6px;
+  /* Bounded so a wide Status column does not stretch the track into a ruler.
+     It is a glyph, not a meter. */
+  max-width: 92px;
+}
+.atrack__step {
+  flex: 1 1 auto;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border-hairline);
+  /* Steps fill left to right as the order advances, and the transition is what
+     makes a bulk move read as progress rather than as a repaint. */
+  transition: background var(--dur-base) var(--ease-out);
+}
+.atrack__step.is-done { background: var(--gr-cyan); }
+
+/* A delivered order turns the whole track green — it is not "the sixth step is
+   happening", it is the thing being over. Same green as `.apill--ok` carries,
+   so "finished" is one colour across this panel and not two. */
+.atrack.is-complete .atrack__step.is-done { background: #2EA043; }
+
+/* ---- How long it has been waiting -------------------------------------
+   Two bands, not five: this is read at a glance down a column, and a gradient
+   of severity is something you stop to decode. The word is always there —
+   "4 days ago" — so the colour reinforces and never carries the meaning. */
+.aage--slow { color: var(--gr-gold-accent); font-weight: var(--fw-semibold); }
+.aage--late { color: var(--gr-error); font-weight: var(--fw-semibold); }
+
+/* And on the row itself, for the ones that are genuinely overdue. An inset
+   shadow rather than a border: a border on a collapsed table shifts every cell
+   beside it by its own width, and the row would jump as the clock crossed
+   seventy-two hours. */
+.atable tbody tr.is-late td:first-child { box-shadow: inset 3px 0 0 var(--gr-error); }
+.atable tbody tr.is-slow td:first-child { box-shadow: inset 3px 0 0 var(--gr-gold-accent); }
+
+/* A deleted order is off the floor and cannot be late. Its row is struck
+   through already, and an overdue stripe on it would be asking someone to
+   chase an order that is not there. */
+.atable tbody tr.is-deleted td:first-child { box-shadow: none; }
+
+/* ---- The table's own shape, while it loads ----------------------------
+   Built by skeleton() in orders-page.js on top of the shared `.skeleton`
+   shimmer, which already stops itself under prefers-reduced-motion. */
+.askel td { vertical-align: top; }
+.askel__bar {
+  display: block;
+  height: 9px;
+  margin-bottom: 7px;
+  border-radius: 3px;
+}
+.askel__bar:last-child { margin-bottom: 0; }
+.askel__pill { display: block; width: 68px; height: 20px; border-radius: 999px; margin-bottom: 7px; }
+.askel__track { display: block; width: 92px; height: 3px; border-radius: 2px; }
+.askel__btn { display: block; width: 92px; height: 30px; border-radius: var(--radius-sm); }
+
+.askel__thumbs { display: flex; padding-left: 2px; margin-bottom: var(--space-2); }
+.askel__thumbs i {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 2px var(--surface-raised);
+}
+/* Overlapped exactly as the real stack is, so the row that replaces this one
+   does not appear to shuffle its pictures on arrival. */
+.askel__thumbs i + i { margin-left: -10px; }
+
+/* The rows are placeholders, not data. Nothing here should look clickable or
+   respond to a pointer that is only passing over it. */
+.atable tbody tr.askel:hover { background: var(--surface-raised); }
+.askel { pointer-events: none; }
