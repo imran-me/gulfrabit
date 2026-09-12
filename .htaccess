@@ -167,7 +167,17 @@ RedirectMatch 404 ^/(composer\.(json|lock)|artisan|phpunit\.xml|context\.md|BACK
     Require all denied
 </FilesMatch>
 
-<FilesMatch "\.(md|lock|sql|ini|yml|yaml|log)$">
+# `sh` was missing, and the six scripts in the repo root are the reason it is
+# here now: deploy.sh, doctor.sh, migrate.sh, setup.sh, reset-db.sh and
+# seed-catalog.sh all downloaded as plain text. Apache never RAN them — it has
+# no handler for .sh — and their contents are public on GitHub anyway, so
+# nothing leaked that was not already published. They still have no business
+# being served: they name the server's paths and its recovery procedures, and
+# the list beside them (md, sql, ini, log) exists for exactly that reason.
+# `py` and `patch` join for the same reason: tools/ is already 404'd as a
+# directory, but a script or a saved diff left anywhere else should not be a
+# URL.
+<FilesMatch "\.(md|lock|sql|ini|yml|yaml|log|sh|py|patch)$">
     Require all denied
 </FilesMatch>
 
