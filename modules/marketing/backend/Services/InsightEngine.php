@@ -119,10 +119,40 @@ final class InsightEngine
 
         $total = max(1, $capi['sent'] + $capi['failed']);
         $pct   = $this->pct($capi['failed'] / $total * 100);
+        $one   = $capi['failed'] === 1;
+        $none  = $capi['sent'] < 1;
 
-        return [$this->make('capi', 'bad', 'Meta is refusing the server copy of your events',
-            "{$capi['failed']} events ({$pct}% of those sent) were rejected by the Conversions API. The browser pixel still works, but ad optimisation loses what it would have recovered - the access token is the usual cause.",
-            null, (string) $capi['failed'], '/admin/pixel')];
+        // THE RATE IS THE DIAGNOSIS, and one guess for every rate was wrong.
+        // A token Meta will not accept is refused on EVERY event, so naming it
+        // while 288 of 289 got through sends the merchant off to regenerate a
+        // token that was working - which is what this said on 2026-09-12, in
+        // red, over a single malformed event. A few refusals among accepted
+        // ones is the opposite story: the keys are fine and those particular
+        // events were not. Either way Meta's own words for the last one are on
+        // Pixel setup, which is what this links to.
+        $body = $none
+            ? 'Nothing is reaching Meta\'s server copy: all ' . $capi['failed'] . ' '
+                . ($one ? 'event was' : 'events were') . ' refused. The browser pixel still works, so '
+                . 'visits are counted, but ad optimisation loses what the server copy recovers. The '
+                . 'access token or the Pixel ID is almost certainly wrong or expired - Send test event '
+                . 'on Pixel setup answers which, in Meta\'s own words.'
+            : ($one ? '1 event' : $capi['failed'] . ' events') . " ({$pct}% of those sent) "
+                . ($one ? 'was' : 'were') . ' refused, and the rest reached Meta - so the keys '
+                . 'themselves are working. Pixel setup shows Meta\'s reason for the last refusal.';
+
+        return [$this->make(
+            'capi',
+            // Red is for something that is broken. A minority of refusals with
+            // the rest getting through is worth looking at, not an emergency.
+            $none ? 'bad' : 'warn',
+            $none
+                ? 'Meta is refusing the server copy of your events'
+                : 'Meta refused ' . ($one ? 'one event' : 'some events') . ' the server sent',
+            $body,
+            null,
+            (string) $capi['failed'],
+            '/admin/pixel',
+        )];
     }
 
     /* ---- Period against period ------------------------------------------- */
