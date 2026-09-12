@@ -93,6 +93,50 @@ bar has to know about the tabs you are not standing on. One `GROUP BY`, not nine
 round trips. `q` searches order number, phone and name only; a wildcard across
 every column would turn the box into a way to trawl customer records.
 
+Each row carries three figures about its contents, and they are three different
+questions:
+
+```json
+"itemCount": 5,
+"lineCount": 2,
+"itemPreview": [ { "title": "Ajwa Dates — Madinah Select",
+                   "image": "/assets/images/products/gr-1101.jpg" },
+                 { "title": "Zamzam Water 500ml", "image": null } ]
+```
+
+`itemCount` is **units** — five things go in the box. `lineCount` is **distinct
+products** — two of them. `itemPreview` is the first few lines, for the
+thumbnails on the row, and it is **capped on the server**
+(`AdminOrderController::ROW_THUMBS`) so a forty-line wholesale order cannot turn
+a page of twenty-five rows into a large payload. The row draws whatever it is
+given and prints "+N" from `lineCount`, so the cap has exactly one home.
+
+`image` is the path snapshotted onto the order line at checkout, and it is
+`null` whenever the product had no photograph. It is never a promise that the
+file is still on disk — the panel falls back to a lettered tile either way.
+
+### `GET /api/admin/orders/{order}`
+
+Items carry the full snapshot, which now includes the two display columns
+`order_items` has always stored and this endpoint never sent:
+
+```json
+{ "sku": "GR-1101", "title": "Ajwa Dates — Madinah Select",
+  "brand": "GulfRabit Select", "image": "/assets/images/products/gr-1101.jpg",
+  "variant": null, "qty": 2, "unitTaka": 1450, "lineTaka": 2900,
+  "productExists": true }
+```
+
+`title`, `brand` and `image` are the **snapshot**: what was bought, as it was
+then. Renaming or re-shooting the product does not rewrite a past order.
+
+`productExists` is the one field here that reads through to today — it is
+`order_items.product_id !== null`, and it answers only "can this line still be
+opened in the product editor?". The panel links the title when it is true and
+prints plain text when it is false, so an order containing a product that was
+removed does not offer a dead link. The product's numeric id stays on the
+server: public keys in this project are skus and slugs.
+
 ### `POST /api/admin/orders/{order}/transition`
 
 ```json

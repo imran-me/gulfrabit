@@ -30,6 +30,16 @@ use RuntimeException;
  */
 class AdminOrderController extends Controller
 {
+    /**
+     * How many product thumbnails a row on the order list carries.
+     *
+     * Three, because the point of the pictures is recognition — "that is the
+     * dates order" — and a fourth does not help anyone recognise anything. The
+     * row prints "+N" for whatever is past this, so the number is the server's
+     * to change alone.
+     */
+    private const ROW_THUMBS = 3;
+
     public function __construct(
         private readonly OrderFulfilmentService $fulfilment,
     ) {
@@ -61,8 +71,12 @@ class AdminOrderController extends Controller
             'deleted'       => ['sometimes', 'boolean'],
         ]);
 
+        /* `image` joins the three columns the list already pulled. It is the
+           thumbnail on the row, and it costs one more string per line on a
+           relation that was being loaded anyway — no extra query, and the
+           column is on the order line itself, so no reach into products. */
         $query = $this->filtered($data)
-            ->with('items:id,order_id,title,qty')
+            ->with('items:id,order_id,title,qty,image')
             ->latest('placed_at');
 
         if (isset($data['status'])) {
@@ -212,13 +226,31 @@ class AdminOrderController extends Controller
                     'notes'    => $order->delivery_notes,
                     'chargeTaka' => intdiv($order->delivery_charge_poisha, 100),
                 ],
+                /* The picture, the brand and whether the product is still
+                   there, alongside the figures.
+
+                   All three come off the SNAPSHOT, not off the product — a
+                   line that was bought as "Ajwa Dates — Madinah Select" with
+                   that photograph keeps both, whatever the catalogue has been
+                   renamed or re-shot to since. That is the whole reason
+                   order_items carries its own `image` and `brand` columns; the
+                   panel simply never asked for them.
+
+                   `productExists` is the one field that DOES read through, and
+                   deliberately: it answers "can this line still be opened in
+                   the product editor?", which is a question about today. The
+                   product id itself stays on the server — public keys in this
+                   project are skus and slugs, never auto-increment ids. */
                 'items' => $order->items->map(fn ($i): array => [
                     'sku'       => $i->sku,
                     'title'     => $i->title,
+                    'brand'     => $i->brand,
+                    'image'     => $i->image,
                     'variant'   => $i->variant,
                     'qty'       => $i->qty,
                     'unitTaka'  => intdiv($i->unit_price_poisha, 100),
                     'lineTaka'  => intdiv($i->line_total_poisha, 100),
+                    'productExists' => $i->product_id !== null,
                 ])->all(),
 
                 'totals' => [
@@ -459,6 +491,21 @@ class AdminOrderController extends Controller
             'paymentStatus' => $o->payment_status,
             'paymentMethod' => $o->payment_method,
             'itemCount'     => $o->items->sum('qty'),
+
+            /* What is actually IN the order, as pictures.
+
+               `itemCount` above is the number of units and stays exactly what
+               it was. These two are new and separate: `lineCount` is how many
+               distinct products, and `itemPreview` is the first few of them —
+               capped HERE, on the server, so a forty-line wholesale order
+               cannot turn a page of twenty-five rows into a large payload. The
+               row draws what it is given and says "+N" for the rest, so the
+               cap lives in one place and the list cannot disagree with it. */
+            'lineCount'     => $o->items->count(),
+            'itemPreview'   => $o->items->take(self::ROW_THUMBS)->map(fn ($i): array => [
+                'title' => $i->title,
+                'image' => $i->image,
+            ])->values()->all(),
             'totalTaka'     => intdiv($o->total_poisha, 100),
             'placedAt'      => $o->placed_at?->toIso8601String(),
             // Null for a live order. The row draws itself struck through when
