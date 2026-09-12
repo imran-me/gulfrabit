@@ -668,7 +668,15 @@ edit in VS Code  →  git push  →  live within ~1 minute
 
 A cron job on the server runs `deploy.sh` every minute. It fetches, resets to
 `origin/main`, runs Composer only when the lock changed, applies **migrations**,
-and rebuilds caches. It exits in milliseconds when nothing moved.
+writes the panel's pixel into the pages, and rebuilds caches. It exits in
+milliseconds when nothing moved **and the caches match the commit** — the
+second half was added on 2026-09-12, after a run landed the code and never
+reached the cache rebuild: Laravel went on serving the previous release's
+routes, so a screen that had just shipped answered 404 from its own API, and
+every later run exited at the "nothing new" check without noticing. The caches
+are checked now (neither aborts the script) and `storage/framework/deploy-stamp`
+is written only when both were rebuilt, so a cache failure retries every minute
+until it succeeds. A failed migration still reports and does not retry.
 
 **Hostinger's hPanel → GIT "Redeploy" button is NOT used** — it has no webhook
 and cannot run migrations. The cron replaces it entirely.

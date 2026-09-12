@@ -33,8 +33,31 @@ git fetch origin main --quiet
 LOCAL=$(git rev-parse HEAD)
 REMOTE=$(git rev-parse origin/main)
 
-if [ "$LOCAL" = "$REMOTE" ]; then
+# THE CODE CAN BE NEW WITH THE CACHES STILL OLD, AND THIS USED TO HIDE IT.
+# Laravel serves ROUTES AND CONFIG FROM bootstrap/cache, and only step 5
+# rebuilds them. A run that lands the code and then dies before step 5 — an
+# aborted cron, a `set -e` exit from a step above it, a PHP fatal — leaves the
+# files on disk from the new release and the routes from the old one. Every
+# later run then saw HEAD == origin/main and exited here, so the site stayed
+# on the old routes until somebody happened to push again: a new admin screen
+# answering 404 from its own API, with nothing in the log after "Code
+# updated".
+#
+# The stamp is written in step 5 and only when BOTH caches were rebuilt, so
+# "nothing new" now also has to mean "the caches match this commit". A
+# migration or an image copy that fails does NOT retry on a loop — those are
+# reported and left alone, exactly as before — because rebuilding the config
+# cache takes the site down for a fraction of a second and doing that every
+# minute over something that will not fix itself is its own outage.
+STAMP="storage/framework/deploy-stamp"
+CACHED=$(cat "$STAMP" 2>/dev/null || true)
+
+if [ "$LOCAL" = "$REMOTE" ] && [ "$CACHED" = "$REMOTE" ]; then
     exit 0            # nothing to do, and nothing logged — cron runs constantly
+fi
+
+if [ "$LOCAL" = "$REMOTE" ]; then
+    say "Code is current but the caches are not — rebuilding them"
 fi
 
 say "Deploying ${LOCAL:0:7} -> ${REMOTE:0:7}"
@@ -94,13 +117,30 @@ php artisan marketing:pixel-stamp || say "!!! marketing:pixel-stamp failed — p
 # ---- 5. Caches ------------------------------------------------------------
 # Rebuilt AFTER the code lands, never before, or they would cache the previous
 # release's config and routes.
+#
+# Both are CHECKED and neither aborts the script. They used to run bare under
+# `set -e`, so a failure in the first took the second, the image copies and the
+# stamp file with it — silently, since --quiet, and the site carried on serving
+# the previous release's routes. A route cache that is not rebuilt is the
+# failure that hides best: nothing 500s, the new endpoints simply answer 404 as
+# though they had never been written.
 say "Rebuilding caches"
-php artisan config:cache --quiet
-php artisan route:cache --quiet
+CACHES_OK=1
+php artisan config:cache --quiet || { say "!!! config:cache FAILED — the app is reading .env directly, which is slower but correct."; CACHES_OK=0; }
+php artisan route:cache --quiet || { say "!!! route:cache FAILED — routes added in this release answer 404 until this succeeds."; CACHES_OK=0; }
 # view:cache is deliberately absent. GulfRabit renders no Blade templates —
 # the storefront is static HTML built by tools/assemble.py and Laravel serves
 # JSON only. There is no resources/views directory to compile, and calling it
 # fails the whole step for nothing.
+
+# The stamp step 1 reads. Written only when both caches were rebuilt, so a
+# failure here is retried next minute instead of being exited past.
+if [ "$CACHES_OK" = 1 ]; then
+    mkdir -p "$(dirname "$STAMP")"
+    echo "$REMOTE" > "$STAMP"
+else
+    say "!!! Caches are behind the code. Every run from now retries until they are not."
+fi
 
 # ---- 6. Image copies ------------------------------------------------------
 # The storefront derives a thumbnail's URL from the master's path rather than
