@@ -49,9 +49,14 @@ export function paintInsights(host, list) {
 
   host.innerHTML = list.map((i) => {
     const tone = TONES[i.tone] ?? TONES.info;
-    const go = i.tab && TAB_WORDS[i.tab]
-      ? `<button type="button" class="tlink" data-goto-tab="${escapeHtml(i.tab)}">${TAB_WORDS[i.tab]} <span aria-hidden="true">→</span></button>`
-      : '';
+    // A finding the merchant cannot act on from here is half a finding: it
+    // links either to the tab holding the detail, or to the screen that fixes
+    // it — Pixel setup, when the Conversions API is the thing that is wrong.
+    const go = i.href
+      ? `<a class="tlink" href="${escapeHtml(i.href)}">Open Pixel setup <span aria-hidden="true">→</span></a>`
+      : i.tab && TAB_WORDS[i.tab]
+        ? `<button type="button" class="tlink" data-goto-tab="${escapeHtml(i.tab)}">${TAB_WORDS[i.tab]} <span aria-hidden="true">→</span></button>`
+        : '';
     return `
       <article class="tinsight tinsight--${escapeHtml(i.tone)}">
         <div class="tinsight__top">

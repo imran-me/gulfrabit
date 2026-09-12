@@ -121,8 +121,8 @@ final class InsightEngine
         $pct   = $this->pct($capi['failed'] / $total * 100);
 
         return [$this->make('capi', 'bad', 'Meta is refusing the server copy of your events',
-            "{$capi['failed']} events ({$pct}% of those sent) were rejected by the Conversions API. The browser pixel still works, but ad optimisation loses what it would have recovered - check the access token in Pixel setup.",
-            null, (string) $capi['failed'])];
+            "{$capi['failed']} events ({$pct}% of those sent) were rejected by the Conversions API. The browser pixel still works, but ad optimisation loses what it would have recovered - the access token is the usual cause.",
+            null, (string) $capi['failed'], '/admin/pixel')];
     }
 
     /* ---- Period against period ------------------------------------------- */
@@ -558,10 +558,16 @@ final class InsightEngine
 
     /* ---- Wording --------------------------------------------------------- */
 
-    /** @return array<string, string|null> */
-    private function make(string $id, string $tone, string $title, string $body, ?string $tab, ?string $figure): array
+    /**
+     * A finding. `tab` names a tab of this screen; `href` a screen elsewhere in
+     * the panel - a finding the merchant cannot act on from here is half a
+     * finding, and "check the access token" is two clicks away in Pixel setup.
+     *
+     * @return array<string, string|null>
+     */
+    private function make(string $id, string $tone, string $title, string $body, ?string $tab, ?string $figure, ?string $href = null): array
     {
-        return compact('id', 'tone', 'title', 'body', 'tab', 'figure');
+        return compact('id', 'tone', 'title', 'body', 'tab', 'figure', 'href');
     }
 
     /** Whole numbers from 10 up; one decimal below, where it carries meaning. */
