@@ -2228,9 +2228,6 @@
      product name beside it. */
   line-height: 0;
 }
-.athumb--sm { --_athumb: 32px; }
-.athumb--lg { --_athumb: 64px; }
-
 .athumb img {
   width: 100%;
   height: 100%;

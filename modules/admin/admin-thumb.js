@@ -69,19 +69,26 @@ function initial(title) {
  * deployment where the tiers were never cut, renders exactly what it would
  * have rendered before.
  *
+ * ONE SIZE KNOB, SET BY WHATEVER IS AROUND IT. There is no size argument and
+ * no `--sm`/`--lg` modifier: `.athumb` carries `--_athumb`, and the context
+ * overrides it — 28px inside a stack on a list row, 32px once the order screen
+ * is a stack of cards on a phone, 44px otherwise. A modifier class passed in
+ * from here would be a second opinion about the same number, and the context
+ * rule wins on specificity, so the one that lost would be the one written at
+ * the call site — visible in the markup, doing nothing.
+ *
  * @param {string|null|undefined} image  the snapshotted path, or nothing
  * @param {string} title                 the product name, for the fallback letter
- * @param {'sm'|'lg'|''} size
  */
-export function thumb(image, title, size = '') {
+export function thumb(image, title) {
   watchForBroken();
 
-  const cls = `athumb${size ? ` athumb--${size}` : ''}`;
   const letter = escapeHtml(initial(title));
 
-  // Carried on the element so the error handler below can build the tile
-  // without having to find its way back to the order line that produced it.
-  const attrs = `class="${cls}" data-athumb-letter="${letter}" aria-hidden="true"`;
+  // The letter is carried on the element so the error handler below can build
+  // the tile without having to find its way back to the order line that
+  // produced it.
+  const attrs = `class="athumb" data-athumb-letter="${letter}" aria-hidden="true"`;
 
   if (!image) {
     return `<span ${attrs} data-athumb-blank><span class="athumb__letter">${letter}</span></span>`;
@@ -123,7 +130,7 @@ export function thumbStack(items, lineCount = 0) {
   const label = names.join(', ') + (more ? `, and ${more} more` : '');
 
   return `<span class="athumbs" role="img" aria-label="${escapeHtml(label)}">${
-    list.map((i) => thumb(i.image, i.title, 'sm')).join('')
+    list.map((i) => thumb(i.image, i.title)).join('')
   }${more ? `<span class="athumbs__more">+${more}</span>` : ''}</span>`;
 }
 
