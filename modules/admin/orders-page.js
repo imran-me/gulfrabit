@@ -196,13 +196,13 @@ async function load() {
   if (page > 1) qs.set('page', String(page));
   history.replaceState(null, '', qs.toString() ? `?${qs}` : location.pathname);
 
-  body.innerHTML = `<tr><td colspan="10" class="atable__empty">Loading…</td></tr>`;
+  body.innerHTML = `<tr><td colspan="${columnCount()}" class="atable__empty">Loading…</td></tr>`;
 
   let payload;
   try {
     payload = await adminFetch(`/orders?${new URLSearchParams({ ...filters, page: String(page) })}`);
   } catch (err) {
-    body.innerHTML = `<tr><td colspan="10" class="atable__empty">${
+    body.innerHTML = `<tr><td colspan="${columnCount()}" class="atable__empty">${
       err.status === 404 || !err.status
         ? 'No backend connected yet — orders appear once the API is live.'
         : escapeHtml(err.message)
@@ -235,7 +235,7 @@ function paint({ data, meta }) {
     // an empty Placed tab look like a broken screen when it means every order
     // has been called.
     const inTrash = !!document.querySelector('[data-orders-filters]').deleted.value;
-    body.innerHTML = `<tr><td colspan="10" class="atable__empty">${
+    body.innerHTML = `<tr><td colspan="${columnCount()}" class="atable__empty">${
       inTrash
         ? 'Nothing has been deleted. Orders you delete land here, and can be put back.'
         : stage
@@ -257,17 +257,29 @@ function paint({ data, meta }) {
                ${selected.has(o.orderNumber) ? 'checked' : ''}
                aria-label="Select ${escapeHtml(o.orderNumber)}">
       </td>
-      <td class="atable__ref"><a href="/admin/order?no=${encodeURIComponent(o.orderNumber)}">${escapeHtml(o.orderNumber)}</a></td>
+      <td class="atable__ref">
+        <a href="/admin/order?no=${encodeURIComponent(o.orderNumber)}">${escapeHtml(o.orderNumber)}</a>
+        <div class="atable__sub">${formatWhen(o.placedAt)}</div>
+        <div class="atable__sub">${escapeHtml(howLongAgo(o.placedAt))}</div>
+      </td>
       <td class="atable__name">
         <div>${escapeHtml(o.customerName)}</div>
         <div class="atable__sub">${escapeHtml(o.customerPhone)}</div>
       </td>
-      <td>${escapeHtml(o.district || '—')}</td>
+      <td class="aplace">
+        <div>${escapeHtml(o.district || '—')}</div>
+        ${o.area ? `<div class="atable__sub">${escapeHtml(o.area)}</div>` : ''}
+      </td>
       ${itemsCell(o)}
-      <td class="atable__num">৳ ${Number(o.totalTaka).toLocaleString('en-BD')}</td>
-      <td>${pill(o.paymentStatus, paymentTone(o.paymentStatus))}</td>
+      <td class="atable__num">
+        ৳ ${Number(o.totalTaka).toLocaleString('en-BD')}
+        ${o.promoCode ? `<div class="atable__sub">${escapeHtml(o.promoCode)}</div>` : ''}
+      </td>
+      <td>
+        ${pill(o.paymentStatus, paymentTone(o.paymentStatus))}
+        <div class="atable__sub">${escapeHtml(payMethod(o.paymentMethod))}</div>
+      </td>
       <td>${pill(stageLabel(o.status), stageTone(o.status), true)}${preorderNote(o)}</td>
-      <td class="atable__sub">${formatWhen(o.placedAt)}</td>
       <td>${rowAction(o)}</td>
     </tr>`).join('');
 
@@ -302,8 +314,110 @@ function itemsCell(o) {
 
   if (!stack) return `<td class="atable__num">${o.itemCount}</td>`;
 
-  return `<td class="atable__items">${stack}<div class="atable__sub">${
-    o.itemCount} item${o.itemCount === 1 ? '' : 's'}</div></td>`;
+  return `<td class="atable__items">${stack}${itemNames(o)}
+    <div class="atable__sub aitems__count">${itemTally(o)}</div></td>`;
+}
+
+/**
+ * The products, written out, under their pictures.
+ *
+ * The pictures answer "which order is this" in a glance and stop there — two
+ * jars of dark glass are two jars of dark glass at 28px. The names answer
+ * "which dates, which honey", which is the question asked the moment the glance
+ * lands on the right row, and answering it here is the difference between
+ * working the list and opening every order on it.
+ *
+ * Clamped to two lines rather than truncated at a character count: a clamp
+ * breaks between words and fills the width it is given, so a row with two short
+ * names shows both in full and a row with three long ones ends mid-phrase with
+ * an ellipsis the browser places. The full list is on the stack's aria-label
+ * either way, so nothing here is the only copy of anything.
+ *
+ * No "and 3 more" — the "+3" tile in the stack above already says it, and
+ * saying it twice in two styles reads as two different facts.
+ */
+function itemNames(o) {
+  const names = (o.itemPreview || [])
+    .map((i) => String(i.title || '').trim())
+    .filter(Boolean);
+
+  if (!names.length) return '';
+
+  return `<p class="aitems__names">${escapeHtml(names.join(', '))}</p>`;
+}
+
+/**
+ * "14 items · 6 products", or just "3 items" when those are the same number.
+ *
+ * Units and lines are genuinely different questions — how much goes in the box,
+ * and how many different things to pick — and an order of fourteen units across
+ * six products is a different morning from fourteen units of one. But printing
+ * "3 items · 3 products" on the many orders where every line is a single unit
+ * is two numbers that never disagree, which teaches people to read neither.
+ */
+function itemTally(o) {
+  const units = Number(o.itemCount) || 0;
+  const lines = Number(o.lineCount) || 0;
+  const u = `${units.toLocaleString('en-BD')} item${units === 1 ? '' : 's'}`;
+
+  if (!lines || lines === units) return u;
+  return `${u} · ${lines.toLocaleString('en-BD')} product${lines === 1 ? '' : 's'}`;
+}
+
+/**
+ * "3 days ago", under the timestamp.
+ *
+ * The stage tabs are a queue, and the only question anybody asks standing in
+ * one is how long something has been waiting. A date answers that by
+ * subtraction, every time, for every row on the page — and subtraction done
+ * twenty-five times by eye is how an order that has sat for a week goes
+ * unnoticed among orders that arrived this morning.
+ *
+ * Deliberately coarse. "2 days" and "2 days and 4 hours" lead to the same
+ * decision, and the second one is harder to read at a glance.
+ */
+function howLongAgo(iso) {
+  if (!iso) return '';
+
+  const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+
+  // A clock that is a minute fast on the server should not produce "in 1
+  // minute" on an order that was just placed.
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins} minute${mins === 1 ? '' : 's'} ago`;
+
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+
+  const days = Math.round(hours / 24);
+  if (days < 31) return `${days} day${days === 1 ? '' : 's'} ago`;
+
+  const months = Math.round(days / 30);
+  return `${months} month${months === 1 ? '' : 's'} ago`;
+}
+
+/** How they are paying, spelled out. The stored value is a key, not a word. */
+const PAY_METHODS = {
+  cod: 'Cash on delivery',
+  bkash: 'bKash',
+  nagad: 'Nagad',
+  card: 'Card',
+};
+
+function payMethod(key) {
+  return PAY_METHODS[key] || key || '—';
+}
+
+/**
+ * How many columns this table has, read from its own header.
+ *
+ * The three "Loading…" and "nothing here" rows have to span the table, and the
+ * number was written out four times — so merging two columns meant finding all
+ * four, and the one that was missed would have shown a message in a cell one
+ * column short of the width, under a header it no longer matched.
+ */
+function columnCount() {
+  return document.querySelectorAll('.atable thead th').length || 1;
 }
 
 /**

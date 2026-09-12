@@ -64,21 +64,28 @@
               <th scope="col" class="atable__pick">
                 <input type="checkbox" data-select-all aria-label="Select every order on this page">
               </th>
+              <!-- Order and Placed are one column. They answer the same
+                   question — which order, and how long has it been sitting —
+                   and splitting them cost 90px on the widest table in the
+                   panel while putting two facts about one order at opposite
+                   ends of the row. -->
               <th scope="col">Order</th>
               <th scope="col">Customer</th>
-              <th scope="col">District</th>
+              <!-- Not "District". The district is the half of a Bangladeshi
+                   address that decides nothing; the thana under it is the half
+                   that decides who drives. -->
+              <th scope="col">Deliver to</th>
               <th scope="col">Items</th>
               <th scope="col">Total</th>
               <th scope="col">Payment</th>
               <th scope="col">Status</th>
-              <th scope="col">Placed</th>
               <!-- The next step, on the row. Working twenty orders through a
                    stage should not mean opening twenty pages. -->
               <th scope="col"><span class="visually-hidden">Move to next stage</span></th>
             </tr>
           </thead>
           <tbody data-orders-body>
-            <tr><td colspan="10" class="atable__empty">Loading orders…</td></tr>
+            <tr><td colspan="9" class="atable__empty">Loading orders…</td></tr>
           </tbody>
         </table>
       </div>

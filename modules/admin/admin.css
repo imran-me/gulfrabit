@@ -2261,7 +2261,7 @@
      cannot drift apart. 28px rather than 32: this column is competing for the
      width of a ten-column table, and the measurement that decided it is in the
      commit message. */
-  --_stack: 28px;
+  --_stack: 34px;
   display: inline-flex;
   align-items: center;
   /* The ring hangs outside the box; without this the first thumbnail's ring is
@@ -2279,7 +2279,7 @@
    and 16px of a dark product photograph beside another dark product
    photograph is one blob, not two things you can tell apart — which is the
    entire job the pictures are here to do. 20px is the least that reads. */
-.athumbs .athumb + .athumb { margin-left: -8px; }
+.athumbs .athumb + .athumb { margin-left: -10px; }
 
 /* Later thumbnails sit ON TOP of earlier ones, so the stack reads front-to-back
    in the order the products were bought. Without this the DOM order wins and
@@ -2333,11 +2333,38 @@
   white-space: nowrap;
 }
 
-/* The Items cell holds the stack and the unit count, stacked. The count keeps
-   its old meaning exactly — units, not lines — so the two numbers on this
-   screen never have to be told apart. */
-.atable__items { white-space: nowrap; }
-.atable__items .atable__sub { margin-top: 2px; }
+/* The Items cell: pictures, then the names under them, then the tally.
+   The cell WRAPS — that is the whole point of the names — so the two things
+   that must not wrap say so themselves rather than the cell forbidding it for
+   everything inside. */
+.atable__items { min-width: 11rem; }
+.atable__items .atable__sub { margin-top: 3px; }
+.aitems__count { white-space: nowrap; }
+
+/* The products, written out. Two lines, clamped.
+   A clamp rather than a character count: it breaks between words, fills the
+   width it is given, and puts the ellipsis where the text actually runs out —
+   so two short names show whole and three long ones end mid-phrase instead of
+   every row ending at the same arbitrary letter.
+   max-width bounds what the column may demand of a nine-column table; without
+   it one order of long names widens this column for all twenty-five rows. */
+.aitems__names {
+  margin: var(--space-2) 0 0;
+  max-width: 15rem;
+  font-size: var(--fs-12);
+  line-height: var(--lh-snug);
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* District over thana. The district is the bigger word and the thana is the
+   one that decides the round, so they are given equal weight and the reading
+   order does the ranking. */
+.aplace .atable__sub { margin-top: 2px; }
 
 /* ---- One line of an order, on the order screen ------------------------
    Picture, then name, then the two things a person packing needs and this
@@ -2389,6 +2416,28 @@
   padding-left: var(--space-3);
   padding-right: var(--space-3);
 }
+
+/* Taller rows, deliberately. Each cell on this list now holds two or three
+   lines — the order and how long it has waited, the district and the thana,
+   the products and what they add up to — and a row of stacked text set at the
+   spacing of a row of single values reads as a wall. The horizontal 4px came
+   off the columns; this puts it back between them. */
+.atable--dense tbody td {
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-4);
+}
+
+/* Stacked secondary lines need leading of their own. At the table's own
+   line-height two of them touch, and a phone number sitting hard against the
+   name above it reads as one wrapped string rather than two facts. */
+.atable--dense .atable__sub { line-height: var(--lh-snug); }
+
+/* And the reverse for a value that wraps within itself. A customer name is
+   prose — "Fatema Begum" over two lines is correct, and long Bangladeshi names
+   will wrap at any width this column can be given — but set at the table's
+   looser line-height the two halves drift apart and read as a name above a
+   second field. Snug closes them back into one name. */
+.atable--dense .atable__name { line-height: var(--lh-snug); }
 
 /* ---- The order line, once the table is a stack of cards ----------------
    Under 720px every table in the panel becomes one card per row, and the item
