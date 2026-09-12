@@ -48,6 +48,7 @@
       "Modules\\Payments\\": "modules/payments/backend/",
       "Modules\\Sms\\": "modules/sms/backend/",
       "Modules\\Reviews\\": "modules/reviews/backend/",
+      "Modules\\Risk\\": "modules/risk/backend/",
       "Modules\\Theme\\": "modules/theme/backend/"
     }
   },

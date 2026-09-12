@@ -1,0 +1,95 @@
+      <div class="admin__head">
+        <div>
+          <h1 class="admin__title">Delivery risk</h1>
+          <p class="admin__sub" data-rk-sub>Whether a number's parcels come back — from this shop's own record, and nobody else's.</p>
+        </div>
+        <div class="afilters__field rkperiod">
+          <label for="rk-days">Looking back</label>
+          <select class="select-gr" id="rk-days" data-rk-days>
+            <option value="30">30 days</option>
+            <option value="90" selected>90 days</option>
+            <option value="180">6 months</option>
+            <option value="365">1 year</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="aerror" data-rk-error hidden role="alert"></p>
+
+      <!-- THE LOOKUP IS FIRST because it is the thing done most: a number is
+           pasted in from an order that is about to be packed, and the answer
+           decides whether it goes out today or gets a phone call first.
+           A visitor's whole history, not a score from anywhere else. -->
+      <section class="acard rklookup" aria-labelledby="rk-check-h">
+        <h2 class="rktitle" id="rk-check-h">Check a number before you dispatch</h2>
+        <p class="rknote">
+          Paste the phone number from the order. This reads only this shop's own orders —
+          no outside service is called, and nothing about your customers leaves the server.
+        </p>
+
+        <form class="rkform" data-rk-form>
+          <div class="afilters__field rkform__field">
+            <label for="rk-phone">Phone number</label>
+            <input class="input-gr" id="rk-phone" data-rk-phone type="tel" inputmode="numeric"
+                   autocomplete="off" placeholder="01712345678">
+          </div>
+          <div class="afilters__actions">
+            <button type="submit" class="btn-gr" data-rk-check>Check</button>
+          </div>
+        </form>
+
+        <div data-rk-result hidden></div>
+      </section>
+
+      <div class="rkgrid">
+        <section class="acard" aria-labelledby="rk-shop-h">
+          <h2 class="rktitle" id="rk-shop-h">How the shop is doing</h2>
+          <p class="rknote">Of the parcels that have been decided — delivered, returned, cancelled or
+            marked fake. Orders still with the courier are not counted either way.</p>
+          <div data-rk-shop><p class="rkempty">Reading…</p></div>
+        </section>
+
+        <section class="acard" aria-labelledby="rk-districts-h">
+          <h2 class="rktitle" id="rk-districts-h">Where parcels come back</h2>
+          <p class="rknote">Worst first, and only districts with at least three decided parcels —
+            one refusal out of one order is a refusal, not a bad district.</p>
+          <div data-rk-districts><p class="rkempty">Reading…</p></div>
+        </section>
+      </div>
+
+      <section class="acard" aria-labelledby="rk-watch-h">
+        <h2 class="rktitle" id="rk-watch-h">Numbers worth knowing about</h2>
+        <p class="rknote">
+          Ranked by parcels lost, not by percentage: one customer who refused four costs four times
+          what one who refused their only order did. Nobody is blocked — this is a list to call
+          before dispatch, or to ask for the delivery charge in advance.
+        </p>
+        <div class="atable-wrap rktable">
+          <table class="atable">
+            <thead>
+              <tr>
+                <th scope="col">Phone</th>
+                <th scope="col">Name</th>
+                <th scope="col">Record</th>
+                <th scope="col" class="atable__num">Orders</th>
+                <th scope="col" class="atable__num">Accepted</th>
+                <th scope="col" class="atable__num">Came back</th>
+                <th scope="col" class="atable__num">Value lost</th>
+                <th scope="col">Districts</th>
+                <th scope="col">Last order</th>
+                <th scope="col"><span class="sr-only">Check</span></th>
+              </tr>
+            </thead>
+            <tbody data-rk-watch>
+              <tr><td colspan="10" class="atable__empty">Reading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="rkfoot">
+        Every number here comes from this shop's own orders. No outside fraud service is called and
+        nothing is sent anywhere — which also means a customer who is new to you is simply new, not
+        safe. Cancelled orders are counted alongside returns because the parcel cost the same either
+        way; open one to see which it was.
+      </p>

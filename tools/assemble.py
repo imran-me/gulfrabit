@@ -801,6 +801,7 @@ ADMIN_NAV = [
     "/modules/hero/hero-nav.js",
     "/modules/highlights/highlights-nav.js",
     "/modules/marketing/marketing-nav.js",
+    "/modules/risk/risk-nav.js",
     "/modules/accounting/accounting-nav.js",
     "/modules/b2b/b2b-nav.js",
     "/modules/theme/theme-nav.js",
@@ -916,6 +917,11 @@ ADMIN_PAGES = [
      "modules/marketing/_fragments/pixel.main.html",
      ["/modules/admin/admin.css", "/modules/marketing/pixel.css"],
      ["/modules/admin/admin-shell.js", "/modules/marketing/pixel-page.js"], True),
+
+    ("modules/risk/risk.html", "Delivery risk — GulfRabit Admin",
+     "modules/risk/_fragments/risk.main.html",
+     ["/modules/admin/admin.css", "/modules/risk/risk.css"],
+     ["/modules/admin/admin-shell.js", "/modules/risk/risk-page.js"], True),
 
     ("modules/reviews/reviews.html", "Reviews — GulfRabit Admin",
      "modules/reviews/_fragments/reviews.main.html",
