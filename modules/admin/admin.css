@@ -2202,3 +2202,230 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+/* ---- Product thumbnails on the order screens ---------------------------
+   Rendered by admin-thumb.js, which serves the 128px `-thumb.webp` tier and
+   falls back to the lettered tile below whenever a file is missing or does not
+   load. Two sizes, because two jobs: 32px on a list row is recognition — "that
+   is the dates order" — and 44px on the order itself is verification, read
+   while somebody packs the box.
+
+   Fixed width AND height on the box, with object-fit on the picture inside it.
+   Order photography is not all one shape, and a row whose height depends on
+   whether the product was shot square is a list that ripples as it loads. */
+.athumb {
+  --_athumb: 44px;
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: var(--_athumb);
+  height: var(--_athumb);
+  overflow: hidden;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  /* The picture is the point; the box around it should not compete with the
+     product name beside it. */
+  line-height: 0;
+}
+.athumb--sm { --_athumb: 32px; }
+.athumb--lg { --_athumb: 64px; }
+
+.athumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* No photograph, or one that did not load. A designed tile carrying the
+   product's first letter, not an empty well and never a broken glyph: the
+   letter differs per line, so three unphotographed products still read as
+   three different things. */
+.athumb[data-athumb-blank] {
+  border-style: dashed;
+  color: var(--text-muted);
+}
+.athumb__letter {
+  font-size: calc(var(--_athumb) * .42);
+  font-weight: 600;
+  line-height: 1;
+  font-family: var(--font-display, inherit);
+  user-select: none;
+}
+
+/* ---- The stack, on an order list row ----------------------------------
+   Overlapped rather than spaced: three pictures in the width of two, and the
+   overlap itself says "these belong to one order". Each carries a ring in the
+   table's own background so the one behind cannot be mistaken for part of the
+   one in front. */
+.athumbs {
+  /* One size for the stack and for the "+N" tile that closes it, so the two
+     cannot drift apart. 28px rather than 32: this column is competing for the
+     width of a ten-column table, and the measurement that decided it is in the
+     commit message. */
+  --_stack: 28px;
+  display: inline-flex;
+  align-items: center;
+  /* The ring hangs outside the box; without this the first thumbnail's ring is
+     clipped by the cell padding on a narrow column. */
+  padding-left: 2px;
+}
+.athumbs .athumb {
+  --_athumb: var(--_stack);
+  position: relative;
+  box-shadow: 0 0 0 2px var(--surface-raised);
+  transition: transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+/* -8, not the -12 this started at. The covered tile showed 16px of itself,
+   and 16px of a dark product photograph beside another dark product
+   photograph is one blob, not two things you can tell apart — which is the
+   entire job the pictures are here to do. 20px is the least that reads. */
+.athumbs .athumb + .athumb { margin-left: -8px; }
+
+/* Later thumbnails sit ON TOP of earlier ones, so the stack reads front-to-back
+   in the order the products were bought. Without this the DOM order wins and
+   the overlap runs the other way, which looks like a mistake. */
+.athumbs .athumb:nth-child(2) { z-index: 1; }
+.athumbs .athumb:nth-child(3) { z-index: 2; }
+
+/* Lift the one under the pointer clear of its neighbours. A transform, so
+   nothing in the row moves — `.atable-wrap` scrolls, and a hover that changed
+   layout inside it would shift the columns beside it. 1.3 on a 32px box stays
+   inside the row's own padding, so it cannot be clipped by that scroller
+   either. Guarded, because a tablet keeps :hover until the next tap. */
+@media (hover: hover) {
+  .athumbs .athumb:hover {
+    transform: scale(1.3);
+    z-index: 3;
+    box-shadow: 0 0 0 2px var(--surface-raised), var(--shadow-sm);
+  }
+}
+
+/* "+37" — the products past the three the server previews.
+   The last tile in the stack rather than a number set beside it. Two reasons,
+   and the second is why it changed: it reads as "and more of these", which is
+   what it means; and set as loose text it cost this column 34px in a table
+   that was already 25px wider than the space it had. Overlapping it into the
+   stack is the same fact in half the width.
+   min-width rather than width, so "+137" grows the tile instead of spilling
+   out of it. */
+.athumbs__more {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 3;
+  display: inline-grid;
+  place-items: center;
+  /* Hugs its number instead of holding a square: "+3" has no business being
+     as wide as a photograph, and the width it gives back is what pays for the
+     looser overlap above. min-width keeps a single digit from looking pinched
+     and lets "+137" grow rather than spill. */
+  min-width: 22px;
+  height: var(--_stack);
+  padding: 0 4px;
+  margin-left: -8px;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  box-shadow: 0 0 0 2px var(--surface-raised);
+  font-size: var(--fs-12);
+  line-height: 1;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The Items cell holds the stack and the unit count, stacked. The count keeps
+   its old meaning exactly — units, not lines — so the two numbers on this
+   screen never have to be told apart. */
+.atable__items { white-space: nowrap; }
+.atable__items .atable__sub { margin-top: 2px; }
+
+/* ---- One line of an order, on the order screen ------------------------
+   Picture, then name, then the two things a person packing needs and this
+   screen never showed: who made it, and what to look for on the shelf. */
+.aitem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+/* min-width:0 or a long product name refuses to wrap and pushes the money
+   columns off the card. */
+.aitem__ident { min-width: 0; }
+.aitem__title { font-weight: 500; }
+
+/* The SKU is the thing read off a shelf label, so it is set in the face that
+   cannot confuse a 0 with an O. */
+.aitem__sku {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--fs-12);
+}
+
+/* A deleted order's pictures are dimmed with the rest of its row. The row is
+   already struck through; a full-colour photograph on it would be the one
+   thing on the line still claiming to be live stock. */
+.atable tr.is-deleted .athumb { opacity: .45; }
+
+/* An order number is an identifier, and an identifier broken across two lines
+   is one a person has to reassemble before they can read it back down a phone.
+   "GR-8A21K3" was wrapping at its hyphen on every row of the list. */
+.atable__ref { white-space: nowrap; }
+
+/* ---- The dense table ---------------------------------------------------
+   Ten columns, and the order list is the only screen carrying that many. At
+   1440px — the width most of this panel is worked at — its columns wanted
+   1135px of a 1106px frame, so the browser took the difference out of the two
+   columns that compress: customer names broke across two lines and every
+   stage button broke across three.
+
+   16px of padding on each side of ten columns is 320px of the table spent on
+   air. Taking it to 12 gives 80px back, which is the overflow and the wrapping
+   together, with room left over.
+
+   A modifier rather than a change to `.atable`, because the other nine tables
+   in the panel are six and seven columns and do not have this problem — and a
+   padding change applied to all of them is a redesign of the whole panel
+   arriving as a side effect of a thumbnail. */
+.atable--dense th,
+.atable--dense td {
+  padding-left: var(--space-3);
+  padding-right: var(--space-3);
+}
+
+/* ---- The order line, once the table is a stack of cards ----------------
+   Under 720px every table in the panel becomes one card per row, and the item
+   cell becomes a 7.5rem label beside its value. Measured on a 390px phone, the
+   44px picture and its gap pushed the page 38px wider than the screen — a
+   sideways scroll on the screen most likely to be read one-handed, standing at
+   a shelf.
+
+   Three fixes for one number, because the width came from three places: the
+   picture is smaller here, the text column is allowed to shrink below the
+   longest word in a product name, and `.aitem` itself may shrink — a flex
+   container defaults to min-content, so the child's min-width:0 alone was not
+   enough to let the pair narrow. */
+@media (max-width: 720px) {
+  .aitem { min-width: 0; gap: var(--space-2); }
+  .aitem .athumb { --_athumb: 32px; }
+  /* A product name is a phrase, not a token, so this almost never fires — but
+     "Deluxe-Presentation-Gift-Box" is one word to a browser, and one word that
+     does not fit is a scrollbar across the whole screen. */
+  .aitem__ident { overflow-wrap: anywhere; }
+}
+
+/* ---- The Items card gets two columns ----------------------------------
+   `.aorder` is auto-fit minmax(320px, 1fr), so every card on the order screen
+   is given the same width. That is right for the five cards holding
+   label-and-value pairs, and wrong for the one holding a four-column table of
+   money: at 1440px the Items card was 360px wide and its table wanted 501,
+   so Unit and Line — what each thing cost and what the line came to — sat
+   outside the card and had to be scrolled into view. On the screen where an
+   order is checked before it is packed.
+
+   Guarded at 1024px, below which `.aorder` is a single column. `span 2` in a
+   one-column grid does not fill the row — it CREATES a second column, and the
+   card would hang off the side of the page. */
+@media (min-width: 1024px) {
+  .aorder .acard--wide { grid-column: span 2; }
+}

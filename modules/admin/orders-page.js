@@ -20,6 +20,7 @@
 import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
 import { canDelete, confirmDelete, toast } from './admin-delete.js';
+import { thumbStack } from './admin-thumb.js';
 import { STAGES, TRANSITION_LABELS, NEEDS_REASON, stageLabel, stageTone } from './order-stages.js';
 
 /* `deleted` is a filter like any other so it lives in the URL with the rest:
@@ -256,13 +257,13 @@ function paint({ data, meta }) {
                ${selected.has(o.orderNumber) ? 'checked' : ''}
                aria-label="Select ${escapeHtml(o.orderNumber)}">
       </td>
-      <td><a href="/admin/order?no=${encodeURIComponent(o.orderNumber)}">${escapeHtml(o.orderNumber)}</a></td>
+      <td class="atable__ref"><a href="/admin/order?no=${encodeURIComponent(o.orderNumber)}">${escapeHtml(o.orderNumber)}</a></td>
       <td class="atable__name">
         <div>${escapeHtml(o.customerName)}</div>
         <div class="atable__sub">${escapeHtml(o.customerPhone)}</div>
       </td>
       <td>${escapeHtml(o.district || '—')}</td>
-      <td class="atable__num">${o.itemCount}</td>
+      ${itemsCell(o)}
       <td class="atable__num">৳ ${Number(o.totalTaka).toLocaleString('en-BD')}</td>
       <td>${pill(o.paymentStatus, paymentTone(o.paymentStatus))}</td>
       <td>${pill(stageLabel(o.status), stageTone(o.status), true)}${preorderNote(o)}</td>
@@ -277,6 +278,32 @@ function paint({ data, meta }) {
   document.querySelector('[data-page-label]').textContent = `Page ${meta.currentPage} of ${meta.lastPage}`;
   document.querySelector('[data-page-prev]').disabled = meta.currentPage <= 1;
   document.querySelector('[data-page-next]').disabled = meta.currentPage >= meta.lastPage;
+}
+
+/**
+ * What is in this order — as pictures first, and the count under them.
+ *
+ * A shop that sells dates, honey, oud and prayer mats does not recognise an
+ * order by the number 5. It recognises it by the jar. The pictures are the
+ * fastest read on the row, so they go where the eye lands and the count keeps
+ * its place underneath.
+ *
+ * `itemCount` is unchanged and still means UNITS — five things go in the box.
+ * The stack draws one tile per distinct product and says "+N" for the rest, so
+ * the two numbers on this cell never have to be told apart.
+ *
+ * Returns the whole <td>, not its contents, so that an order with no preview
+ * gets back precisely the cell this list has always drawn — a right-aligned
+ * number in `.atable__num`. That is the path taken by an older backend, and by
+ * the minute of a deploy in which this file has landed and the PHP has not.
+ */
+function itemsCell(o) {
+  const stack = thumbStack(o.itemPreview, o.lineCount);
+
+  if (!stack) return `<td class="atable__num">${o.itemCount}</td>`;
+
+  return `<td class="atable__items">${stack}<div class="atable__sub">${
+    o.itemCount} item${o.itemCount === 1 ? '' : 's'}</div></td>`;
 }
 
 /**

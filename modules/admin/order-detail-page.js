@@ -24,6 +24,7 @@
 import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
 import { canDelete, confirmDelete, toast } from './admin-delete.js';
+import { thumb } from './admin-thumb.js';
 import { TRANSITION_LABELS, NEEDS_REASON, stageLabel } from './order-stages.js';
 
 let order = null;
@@ -105,10 +106,59 @@ function paintHeader() {
   }
 }
 
+/**
+ * One purchased line: the photograph, the name, and the two facts a person
+ * packing the box needs that this screen has never shown.
+ *
+ * EVERYTHING HERE EXCEPT THE LINK IS THE SNAPSHOT
+ * ----------------------------------------------
+ * `title`, `brand` and `image` are what was bought, as it was on the day. The
+ * catalogue may have renamed the product, re-shot it, or dropped it entirely;
+ * an order is a historical record and none of that may rewrite it. Those three
+ * columns have been on `order_items` since the table was created for exactly
+ * this reason — the panel simply never asked the API for two of them.
+ *
+ * The link is the one part that is about today, which is why it is drawn from
+ * `productExists` rather than from the sku alone. A sku is snapshotted and
+ * survives the product; linking on it would put a dead link on the line of
+ * every order containing something the shop has since removed — and the person
+ * clicking it is mid-pack, not in the mood to debug a 404.
+ *
+ * `productExists` is absent from an older payload, which reads as false and
+ * gives plain text. The same is true of `image`: no photograph and a stale
+ * backend both land on the lettered tile, which is a designed state either way.
+ */
+function itemIdent(i) {
+  const name = escapeHtml(i.title);
+
+  // 'unknown' is the sentinel OrderService writes when the product had already
+  // been deleted at checkout, not a sku anybody can read off a shelf label.
+  const sku = i.sku && i.sku !== 'unknown' ? i.sku : null;
+
+  const meta = [
+    i.brand ? escapeHtml(i.brand) : null,
+    sku ? `<span class="aitem__sku">${escapeHtml(sku)}</span>` : null,
+  ].filter(Boolean).join(' · ');
+
+  return `
+    <div class="aitem">
+      ${thumb(i.image, i.title)}
+      <div class="aitem__ident">
+        <div class="aitem__title">${
+          i.productExists && sku
+            ? `<a href="/admin/products/edit?sku=${encodeURIComponent(sku)}">${name}</a>`
+            : name
+        }</div>
+        ${meta ? `<div class="atable__sub">${meta}</div>` : ''}
+        ${i.variant ? `<div class="atable__sub">${escapeHtml(i.variant)}</div>` : ''}
+      </div>
+    </div>`;
+}
+
 function paintItems() {
   document.querySelector('[data-order-items]').innerHTML = order.items.map((i) => `
     <tr>
-      <td>${escapeHtml(i.title)}${i.variant ? `<div class="atable__sub">${escapeHtml(i.variant)}</div>` : ''}</td>
+      <td>${itemIdent(i)}</td>
       <td class="atable__num">${i.qty}</td>
       <td class="atable__num">৳ ${money(i.unitTaka)}</td>
       <td class="atable__num">৳ ${money(i.lineTaka)}</td>
