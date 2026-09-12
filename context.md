@@ -2151,6 +2151,83 @@ before; `marketing_settings` stays behind like every module's tables.
 
 ---
 
+### The Tracking screen, rebuilt (2026-09-12)
+
+The pixel dashboard shipped on 11 September could say "503 visits, 11 orders".
+It could not say **which** 503 — and every question a shop running Facebook ads
+asks the morning after is a question about which.
+
+**What the events were missing.** Each row knew its event, its path and its
+first-touch utm tags. It did not know how that visit arrived, what it arrived
+on, or which product it was about. Three columns' worth of facts were in every
+request and were being thrown away: the user agent, the referrer and the
+landing URL. They are now read into coarse buckets — channel, landing page,
+new-or-returning, device, OS, browser, product id, search term — and the agent
+itself is still dropped, because a full agent string is half of a fingerprint
+and this module has promised since its first migration that it keeps none.
+
+**A visit has ONE channel**, decided by its first event and copied onto every
+later one. The alternative — deciding per event — files the second page of
+every Facebook visit under "Direct", because its referrer is our own home page.
+Copying costs one indexed lookup per event and turns every report into a plain
+`where channel = ?`.
+
+**Facebook strips the referrer, so everyone else's dashboard says "Direct".**
+When a link opens inside the Facebook, Messenger, Instagram or TikTok app,
+there is often no referrer at all. The in-app browser is read out of the user
+agent instead, which is how this shop's social traffic stops hiding inside
+Direct — the single biggest correction on the screen for a Bangladeshi shop,
+where most visits arrive from inside an app.
+
+**Cash on delivery is why the order tables exist.** Meta counts a Purchase when
+"Place order" is pressed; the shop is paid when the rider hands the parcel
+over, and between the two sit the unanswered phone call, the parcel refused at
+the door and the order placed for fun. Every tracked purchase is matched to its
+real order through the `pixel_event_id` the checkout already stores, so the
+screen can report delivered revenue against placed revenue, per channel. A
+campaign whose orders cancel looks identical to a good one until the parcels
+come back.
+
+**Eight tabs over one filter row** — Overview, Live, Sources, Audience,
+Products, Search, Checkout, Visits — with the slice (period, channel, device,
+campaign) in the URL and sent unchanged to every endpoint, which is what keeps
+the headline and each tab describing the same visits. One endpoint per tab, so
+opening the screen does not compute the product report.
+
+**Findings before figures.** `InsightEngine` writes the sentences a merchant
+acts on — "checkout breaks down inside the Facebook app", "৳ 38,400 left at
+checkout", "this product is opened forty times and never added", "40% of that
+channel's orders were cancelled or returned" — each with a minimum sample under
+it. Three visits converting "0%" is noise with a percentage sign, and one false
+alarm costs the whole panel its reader.
+
+**Charts.** One hue for magnitude, everywhere: the funnel, every ranked bar,
+the trend and the heatmap are the same measure at different sizes. Status
+colours are reserved for delivered / cancelled / returned and always carry
+their word as well, so the bars read in greyscale. Never two y-axes — visits
+and orders differ by two orders of magnitude, and a second scale lets whoever
+picks it decide where the lines cross, so the measure is a switch instead.
+Every chart has a text route to its numbers: the trend has a table view, the
+heatmap's cells carry theirs for the keyboard and for screen readers.
+
+**Verified the only way it could be here.** PHP does not run on this machine,
+so the screen was driven in headless Edge against a mock answering every
+endpoint in the exact shape the services return — which checks the contract
+from both ends at once. At 1440 and 390: no console errors, no sideways
+scroll, hover and keyboard both drive the chart. Three defects that no static
+reading would have caught were found and fixed that way: a sparkline painted
+over the comparison text in every tile, sub-lines running into the line above
+them in four tables, and the tooltip's line keys resolving to nothing because
+its custom properties were declared on the panel while it renders on `<body>`.
+
+**What the week before 12 September looks like.** The backfill recovers
+channel, landing page, visit type and product for every event since the pixel
+went live. Device, browser and search terms it cannot: they were never stored.
+Those rows read "Unknown", and the Audience tab says so rather than implying
+the shop had no phone visitors that week.
+
+---
+
 ## 10. URLs ARE ROUTES (2026-08-13) — read before touching a link
 
 Every page on the site answers at a readable route. There is no `.html` and no

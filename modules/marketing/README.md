@@ -18,7 +18,14 @@ blocker can do.
 |---|---|
 | `backend/routes.php` | `POST /api/track`, throttled 120/min/IP |
 | `backend/Controllers/TrackController.php` | validate → record → whitelist → forward to Meta, never fail the page |
-| `analytics.html` + `analytics-page.js` | the Tracking screen — the shop's own funnel, off `tracking_events` |
+| `analytics.html` + `analytics-page.js` + `tracker/` | the Tracking screen — eight tabs over one filter row, off `tracking_events` |
+| `backend/Services/TrackerFilter.php` | the slice every report reads: a period, the period compared with, one channel / device / campaign — and the one definition of a visit |
+| `backend/Services/AnalyticsService.php` | the headline, the chart, the funnel, the live view, one visit's trail |
+| `backend/Services/TrackerReports.php` | channels, campaigns, ads, landing pages, devices, browsers, hours, products, searches, abandoned checkouts |
+| `backend/Services/OrderOutcomes.php` | each tracked purchase matched to its order — delivered, returned, cancelled, never placed |
+| `backend/Services/InsightEngine.php` | the same numbers as sentences, each with a floor under it |
+| `backend/Services/TrafficClassifier.php` | user agent + referrer + landing URL → channel, device, browser |
+| `backend/Services/VisitContext.php` | pins a visit's channel, landing page and new-or-returning to its first event |
 | `campaigns.html` + `campaigns-page.js` | the Campaigns screen — what each ad sold, per period |
 | `backend/Controllers/AdminCampaignController.php` | the grouping behind it, off orders.ad_source |
 | `pixel.html` + `pixel-page.js` + `pixel.css` | the Pixel setup screen — the three Meta keys |

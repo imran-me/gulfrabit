@@ -60,82 +60,146 @@ junk, and averaging that away is how junk keeps getting bought. Meta:
 
 ---
 
-## The pixel dashboard
+## The Tracking screen
 
 The shop's own copy of its funnel. Meta reports on the ad; these report on the
 pages the ad sent people to — **including the ones nobody bought from, which
-Meta never sees**.
+Meta never sees** — and on what became of the orders after Meta counted them.
 
-Every event the browser mirrors to `POST /api/track` is now stored in
-`tracking_events` before (or instead of) being forwarded to Meta. Storing is
-wrapped and never throws: a tracking beacon must not be why a page misbehaves.
+Every event the browser mirrors to `POST /api/track` is stored in
+`tracking_events` before (or instead of) being forwarded to Meta, with the
+visit's channel, landing page, device and browser attached. Storing is wrapped
+and never throws: a tracking beacon must not be why a page misbehaves.
 
-All four routes sit behind `admin` + `admin:orders` — the same capability as the
+Every route sits behind `admin` + `admin:orders` — the same capability as the
 orders screen, because this is the same revenue seen from the visitor's side.
 
-### `GET /api/admin/marketing/analytics?days=1|7|30|90`
+### The slice — the same query string for every endpoint
 
-Headline numbers, the funnel, top pages, campaigns, Conversions API health.
+| Parameter | Values |
+|---|---|
+| `period` | `today` · `yesterday` · `7d` · `30d` · `90d` · `month` · `last_month` · `custom` |
+| `from`, `to` | `Y-m-d`, both inclusive, only with `period=custom`; 366 days maximum |
+| `channel` | one key of `TrafficClassifier::CHANNELS` |
+| `device` | `mobile` · `tablet` · `desktop` · `unknown` |
+| `campaign` | a `utm_campaign` value, or `(none)` for visits that carried no tag |
 
-```json
-{ "data": {
-  "days": 7, "events": 1840, "visitors": 412, "sessions": 503,
-  "purchases": 11, "revenueTaka": 8420,
-  "funnel": [
-    { "stage": "PageView",         "sessions": 503, "dropOffPct": null, "ofTopPct": 100 },
-    { "stage": "ViewContent",      "sessions": 214, "dropOffPct": 57,   "ofTopPct": 43 },
-    { "stage": "AddToCart",        "sessions": 63,  "dropOffPct": 71,   "ofTopPct": 13 },
-    { "stage": "InitiateCheckout", "sessions": 28,  "dropOffPct": 56,   "ofTopPct": 6 },
-    { "stage": "Purchase",         "sessions": 11,  "dropOffPct": 61,   "ofTopPct": 2 }
-  ],
-  "topPages":  [{ "path": "/buy", "sessions": 190, "views": 240 }],
-  "campaigns": [{ "utm_campaign": "sales-bd-cold-sept2026", "utm_source": "facebook",
-                  "sessions": 320, "purchases": 9, "revenue_poisha": 690000 }],
-  "capi": { "sent": 0, "failed": 0, "skipped": 1840 }
-} }
-```
+Anything unrecognised falls back to `7d` with no segment rather than erroring:
+these are reports opened from a bookmark, and a 422 in place of a dashboard
+helps nobody. `?days=1|7|30|90` still works — it is what the old screen sent.
 
-**Stages count DISTINCT SESSIONS, never events.** One shopper opening eight
-product pages fires eight `ViewContent` events; counted raw, that person alone
-makes the middle of the funnel look eight times healthier than it is. `dropOffPct`
-is against the **previous** stage, so one bad screen shows as one bad number
-rather than dragging every row beneath it down.
+**The comparison period is like for like.** Each preset shifts its whole window
+back by its own length, so "today" is set against yesterday UP TO THIS HOUR.
+Against a full yesterday, a screen checked at 11 am would report a collapse
+every morning.
 
-`dropOffPct` is `null` for the first stage and whenever the previous stage saw
-nobody — "no one got here to drop out" is a different fact from "everybody
-dropped out", and showing 100% for the first sends the merchant to fix a screen
-that works.
+**Visits, never events.** A shopper who opens eight product pages fires eight
+`ViewContent` events; counted raw, that one person makes the middle of the
+funnel look eight times healthier than it is. Every stage, rate and breakdown
+counts DISTINCT SESSIONS. The definition lives in `TrackerFilter::sessionFacts()`
+and every report groups it, which is what keeps the headline conversion rate and
+the channel table's conversions in agreement.
 
-### `GET /api/admin/marketing/analytics/sessions?days=&limit=&offset=`
+### `GET /api/admin/marketing/analytics`
 
-Recent visits, newest first: when it started, what brought it, how many pages,
-and the furthest step it reached.
+The headline. `filter` (the slice as resolved, with the comparison's dates),
+`labels` (every key's word, so the browser keeps no second copy), `options` (the
+campaigns and channels the dropdowns offer), `kpis` (thirteen figures, each
+`{value, prev}`), `series` (per hour or per day, each point carrying its
+comparison), `funnel`, `topPages`, `channels`, `capi`, and `health` — the last
+NOT filtered, because a segment with no traffic must not read as "the pixel is
+down".
+
+### `GET /api/admin/marketing/analytics/insights`
+
+The same numbers as sentences: `{ insights: [{ id, tone, title, body, tab,
+figure }] }`, worst first, at most eight. Fetched separately so the overview
+paints without waiting for it. Every rule has a minimum sample — see
+`InsightEngine`, where the thresholds are written down.
+
+### `GET /api/admin/marketing/analytics/live`
+
+Who is on the shop now: `active` (visits with an event in the last five
+minutes), `inCheckout`, `withCart`, `perMinute` for the last half hour,
+`visitors` with what each is looking at and how far it has got, `feed` (the last
+hour's events, newest first) and `today`. The period is ignored — now is now —
+but the segment applies.
+
+### `GET /api/admin/marketing/analytics/sources`
+
+`channels`, `campaigns`, `ads` (by `utm_content`), `landings`, `referrers`, and
+`outcomes`: each channel's orders by what happened to them. Channel is how the
+visit ARRIVED; campaign is the ad that FIRST brought the visitor, kept for as
+long as the browser keeps it. The same visit can be Direct in one table and an
+ad's in the other, and both are right.
+
+### `GET /api/admin/marketing/analytics/audience`
+
+`devices`, `os`, `browsers` (an app's built-in browser is named as itself),
+`visitTypes`, `heatmap` (`WEEKDAY()` 0–6 × hour 0–23, in the shop's own time
+zone) and `geo` — orders by district, and the Dhaka/outside split that decides a
+delivery charge. `geo.source` says whether it counted every order or only the
+tracked ones, which it must when a segment is on.
+
+### `GET /api/admin/marketing/analytics/products?sort=`
+
+Per product: `views`, `wishlist`, `carts`, `orders`, the two rates, and what the
+catalogue says about it now — title, photo, price, stock. `flags` names the
+patterns worth acting on: `look-not-add`, `cart-not-buy`, `oos-demand`, `star`.
+`sort` is one of `views|carts|orders|wishlist|cart_rate|order_rate`.
+
+Purchases carry every product in the cart, so they are counted in PHP rather
+than unpacked from JSON in SQL — portably unnesting a JSON array across MySQL
+and MariaDB is not worth what it would cost to maintain.
+
+### `GET /api/admin/marketing/analytics/search`
+
+`terms`, `empty` (the searches that found nothing — a stock list written by
+customers), and `totals`, including what searchers convert at against everyone
+else.
+
+### `GET /api/admin/marketing/analytics/checkout`
+
+`abandoned` (count, value, and the newest hundred with what was in each cart),
+`steps`, `completion` by browser and by device, `orders` — the reconciliation
+between tracked purchases and real orders — and `unmatched`, the purchases with
+no order behind them.
+
+### `GET /api/admin/marketing/analytics/sessions?outcome=&limit=&offset=`
+
+Visits, newest first, one row each. `outcome` narrows to `ordered`, `checkout`,
+`cart`, `browsed` or `bounced`.
 
 ### `GET /api/admin/marketing/analytics/sessions/{session}`
 
-One visit's footprint — every event it fired, in order, capped at 500.
+One visit: `session` (channel, device, landing, referrer, campaign, duration),
+`events` in order, and `orders` — the order it produced, with what has happened
+to it since.
 
 The `{session}` is an opaque random id minted in the browser, not a database
 key: there is nothing to enumerate towards, and it identifies a **visit**, not a
 person.
 
-### `GET /api/admin/marketing/analytics/export?days=`
+### `GET /api/admin/marketing/analytics/export`
 
-The **raw** events as streamed CSV, UTF-8 with a BOM so Excel renders Bengali
-and `৳` instead of mojibake. Raw rather than aggregated on purpose: an export
-exists to take the data somewhere this screen cannot follow, and a pre-summarised
-file can only answer the questions the screen already answers.
+The **raw** events of the slice as streamed CSV, UTF-8 with a BOM so Excel
+renders Bengali and the taka sign instead of mojibake. Raw rather than
+aggregated on purpose: an export exists to take the data somewhere this screen
+cannot follow, and a pre-summarised file can only answer the questions the
+screen already answers.
 
-Money is `value_taka` in the file and `value_poisha` in the table — the same
+Money is `value_taka` in the file and `value_poisha` in the database — the same
 rule as everywhere else.
 
 ### Privacy
 
 `visitor_id` and `session_id` are random ids in `localStorage`. No name, phone,
-IP or fingerprint is stored. A cleared browser is a new visitor and a second
-device is a second visitor, so **visitors is an honest lower bound on people,
-not a headcount** — and the screen says so rather than implying precision it
-does not have. Sessions rotate after 30 minutes idle.
+IP or fingerprint is stored. The user agent is READ — to say "phone", "Android",
+"Facebook app" — and then dropped; a full agent string is half of a
+fingerprint. A cleared browser is a new visitor and a second device is a second
+visitor, so **visitors is an honest lower bound on people, not a headcount** —
+and the screen says so rather than implying precision it does not have. Sessions
+rotate after 30 minutes idle.
 
 ### Not built
 
@@ -143,10 +207,17 @@ does not have. Sessions rotate after 30 minutes idle.
   `delete from tracking_events where created_at < ?` cheap when the merchant
   wants it. Deleting a merchant's data on a schedule nobody asked for is worse
   than a large table.
-- **No bot filtering.** Crawler traffic is counted as visits. It shows up as
-  sessions with a single PageView and no referrer if you go looking.
 - **No cross-device stitching**, and no plan for it — that needs identity this
   deliberately does not collect.
+- **No abandoned-cart calling list.** A visit that did not order left no name or
+  phone number here, and this module will not start collecting one. What the
+  Checkout tab says instead — the cart, the device, the ad that brought it — is
+  usually the more useful sentence anyway.
+
+Obvious crawlers ARE dropped before an event is recorded, by user agent
+(`TrackController::looksAutomated`), so they do not inflate the top of the
+funnel. The list is conservative: a real customer missing from the merchant's
+own report is worse than a crawler counted as one.
 
 ---
 
