@@ -2286,6 +2286,71 @@ No automatic budget changes: this reports, it does not touch the ad account.
 
 ---
 
+### Delivery risk: does this number's parcel come back? (2026-09-12)
+
+`modules/risk` — a new module, and the smallest kind: it owns no tables, writes
+nothing, and reads `orders` to answer one question at the moment it is worth
+asking. Deleting the folder removes a screen and leaves no trace on anybody's
+order.
+
+**Why a COD shop needs it and a card shop does not.** Cash on delivery means
+the shop pays to send a parcel before anyone has paid for it. A refusal costs
+the courier fee both ways plus the packing, and costs the customer nothing —
+so a number that refuses once refuses again. Every established shop in
+Bangladesh keeps this list. Most keep it in somebody's head, and it leaves
+when they do.
+
+The evidence was already in the database: `orders.status` records delivered,
+returned, cancelled and spam against a phone number the checkout normalises to
+one form. Nothing new is collected; the same rows are asked a different
+question.
+
+**Only decided parcels count toward a rate.** Delivered, returned, cancelled,
+spam. An order still with the courier is not evidence either way, so it is
+excluded from every percentage and reported separately as "on the way now" —
+and three of those with nothing delivered is its own reason to call, which is
+the one pattern a rate would have missed entirely.
+
+**Ranked by parcels lost, not by percentage.** One customer who refused four
+costs four times what one who refused their only order did. A rate alone puts
+the second at the top of the list, which is how a watchlist becomes noise.
+
+**Three things it deliberately is not.**
+
+1. **Not a blacklist.** Nothing is blocked, nobody is banned, and the
+   storefront never sees any of it. The output is a sentence for the person
+   deciding whether to send a parcel today — call first, or ask for the
+   delivery charge in advance — with the reason printed beside it so a human
+   can disagree.
+2. **Not a shared fraud service.** No outside API is called and nothing leaves
+   the server. This is what happened between THIS shop and this customer,
+   which is the only evidence it can stand behind. It also means a customer
+   who is new to you is simply new, not safe, and the screen says so.
+3. **Not colour alone.** Every band is a word first — "Call before dispatch",
+   "Ask for payment first" — so it reads the same in greyscale, in a
+   screenshot pasted into a chat, and to somebody who cannot separate red from
+   green. A judgement about a person's history is the last place a colour
+   should be doing the deciding.
+
+**A concurrency lesson, recorded because it will happen again.** The nav entry
+for this screen was added to `tools/assemble.py` while the other session was
+working; their next rebuild swept `risk-nav.js` into every admin page and they
+committed and pushed those pages — so production briefly asked for a file that
+had not been committed yet. Nothing broke (a missing module script is one
+console error, not a broken panel), but the rule it proves is: **the page that
+references a new asset and the asset itself belong in the same push**, and in
+a shared working tree that means committing the module the moment its nav line
+exists.
+
+**And a hash trap, avoided twice.** Built pages carry `?v=<md5>` of every asset
+they link, and `.htaccess` serves those URLs `immutable`. While the other
+session had uncommitted CSS, a page built here would have pinned today's bytes
+to tomorrow's hash in every browser that loaded it first. Both times the fix
+was the same: build the page in a throwaway `git worktree` at HEAD, copy back
+only the page, and let their own rebuild carry their CSS when it lands.
+
+---
+
 ## 10. URLs ARE ROUTES (2026-08-13) — read before touching a link
 
 Every page on the site answers at a readable route. There is no `.html` and no
