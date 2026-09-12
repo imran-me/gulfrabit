@@ -7,16 +7,26 @@ namespace Modules\Marketing\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Marketing\Models\TrackingEvent;
 use Modules\Marketing\Services\AnalyticsService;
+use Modules\Marketing\Services\InsightEngine;
+use Modules\Marketing\Services\TrackerFilter;
+use Modules\Marketing\Services\TrackerReports;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * The pixel dashboard: how many people came, and where they left.
+ * The Tracking screen: who came, from where, on what, and where they left.
  *
- * HTTP shaping only - every number is computed in AnalyticsService, so the
- * funnel is defined in one place rather than drifting between the screen, the
- * export and whatever asks next.
+ * HTTP shaping only. Every number is computed in the services, against one
+ * TrackerFilter built from the query string - so the headline, the chart and
+ * every tab read the same slice of visits, and the export is that same slice
+ * as raw rows.
+ *
+ * ONE ENDPOINT PER TAB
+ * --------------------
+ * The overview paints first; each tab fetches when it is opened. A single
+ * endpoint returning everything would make the merchant wait for the product
+ * report to open the page, and would run the whole screen's queries every
+ * time the live view ticks.
  *
  * Behind the same capability as the orders screen. This data describes the
  * shop's revenue from a different angle, and anyone trusted with one is
@@ -24,42 +34,89 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class AdminAnalyticsController extends Controller
 {
-    public function __construct(private readonly AnalyticsService $analytics)
-    {
+    public function __construct(
+        private readonly AnalyticsService $analytics,
+        private readonly TrackerReports $reports,
+        private readonly InsightEngine $insights,
+    ) {
     }
 
-    /** Headline numbers, the funnel, top pages, campaigns, CAPI health. */
+    /** Headline numbers against the comparison period, the chart, the funnel. */
     public function index(Request $request): JsonResponse
     {
-        return response()->json(['data' => $this->analytics->summary($this->days($request))]);
+        return $this->json($this->analytics->overview(TrackerFilter::fromRequest($request)));
     }
 
-    /** Recent visits, one row each. */
+    /** What the numbers mean, in sentences. Fetched after the overview paints. */
+    public function insights(Request $request): JsonResponse
+    {
+        return $this->json(['insights' => $this->insights->for(TrackerFilter::fromRequest($request))]);
+    }
+
+    /** Who is on the shop now, and the last hour as it happened. */
+    public function live(Request $request): JsonResponse
+    {
+        return $this->json($this->analytics->live(TrackerFilter::fromRequest($request)));
+    }
+
+    public function sources(Request $request): JsonResponse
+    {
+        return $this->json($this->reports->sources(TrackerFilter::fromRequest($request)));
+    }
+
+    public function audience(Request $request): JsonResponse
+    {
+        return $this->json($this->reports->audience(TrackerFilter::fromRequest($request)));
+    }
+
+    public function products(Request $request): JsonResponse
+    {
+        $sort = (string) $request->query('sort', 'views');
+
+        return $this->json($this->reports->products(TrackerFilter::fromRequest($request), $sort));
+    }
+
+    public function search(Request $request): JsonResponse
+    {
+        return $this->json($this->reports->search(TrackerFilter::fromRequest($request)));
+    }
+
+    public function checkout(Request $request): JsonResponse
+    {
+        return $this->json($this->reports->checkout(TrackerFilter::fromRequest($request)));
+    }
+
+    /** Visits, one row each, newest first - optionally only those that ended one way. */
     public function sessions(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'days'   => ['sometimes', 'integer', 'in:1,7,30,90'],
-            'limit'  => ['sometimes', 'integer', 'between:1,200'],
-            'offset' => ['sometimes', 'integer', 'min:0'],
+            'limit'   => ['sometimes', 'integer', 'between:1,200'],
+            'offset'  => ['sometimes', 'integer', 'min:0'],
+            'outcome' => ['sometimes', 'nullable', 'in:' . implode(',', AnalyticsService::OUTCOMES)],
         ]);
 
-        return response()->json([
-            'data' => $this->analytics->sessions(
-                $this->days($request),
-                (int) ($data['limit'] ?? 50),
-                (int) ($data['offset'] ?? 0),
-            ),
-        ]);
-    }
-
-    /** One visit's footprint, in order. */
-    public function footprint(string $session): JsonResponse
-    {
-        return response()->json(['data' => $this->analytics->footprint($session)]);
+        return $this->json($this->analytics->sessions(
+            TrackerFilter::fromRequest($request),
+            $data['outcome'] ?? null,
+            (int) ($data['limit'] ?? 50),
+            (int) ($data['offset'] ?? 0),
+        ));
     }
 
     /**
-     * The raw events as CSV.
+     * One visit's footprint, in order, with the order it produced.
+     *
+     * The {session} is an opaque random id minted in the browser, not a
+     * database key: there is nothing to enumerate towards, and it identifies a
+     * visit rather than a person.
+     */
+    public function footprint(string $session): JsonResponse
+    {
+        return $this->json($this->analytics->footprint(mb_substr($session, 0, 64)));
+    }
+
+    /**
+     * The raw events of the slice, as CSV.
      *
      * Streamed, not built in memory: a busy month is hundreds of thousands of
      * rows, and a merchant who asks for "everything" on a shared host should
@@ -72,10 +129,11 @@ class AdminAnalyticsController extends Controller
      */
     public function export(Request $request): StreamedResponse
     {
-        $days = $this->days($request);
-        $name = sprintf('gulfrabit-events-%dd-%s.csv', $days, now()->format('Y-m-d'));
+        $f     = TrackerFilter::fromRequest($request);
+        $slice = $f->toArray();
+        $name  = sprintf('gulfrabit-events-%s-to-%s.csv', $slice['from'], $slice['to']);
 
-        return response()->streamDownload(function () use ($days): void {
+        return response()->streamDownload(function () use ($f): void {
             $out = fopen('php://output', 'wb');
 
             // A BOM, so Excel opens Bengali content and the taka sign as UTF-8
@@ -85,13 +143,14 @@ class AdminAnalyticsController extends Controller
 
             fputcsv($out, [
                 'timestamp', 'event', 'visitor_id', 'session_id', 'path',
-                'value_taka', 'currency', 'content_name', 'num_items',
+                'value_taka', 'currency', 'content_name', 'product_id', 'num_items',
+                'search_term', 'search_results',
+                'channel', 'landing_path', 'visit_type', 'device', 'os', 'browser', 'referrer_host',
                 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content',
                 'referrer', 'capi_status', 'event_id',
             ]);
 
-            TrackingEvent::query()
-                ->inWindow($days)
+            $f->events()
                 ->orderBy('id')
                 // chunkById, not chunk: an offset walk over a table still being
                 // written to skips rows as new ones shift the pages under it.
@@ -109,7 +168,17 @@ class AdminAnalyticsController extends Controller
                             $e->valueTaka(),
                             $e->currency,
                             $e->content_name,
+                            $e->product_id,
                             $e->num_items,
+                            $e->search_term,
+                            $e->search_results,
+                            $e->channel,
+                            $e->landing_path,
+                            $e->visit_type,
+                            $e->device,
+                            $e->os,
+                            $e->browser,
+                            $e->referrer_host,
                             $e->utm_source,
                             $e->utm_medium,
                             $e->utm_campaign,
@@ -125,16 +194,8 @@ class AdminAnalyticsController extends Controller
         }, $name, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
-    /**
-     * The window, clamped to a known set.
-     *
-     * A closed set rather than a free integer: an unbounded ?days= is an
-     * invitation to full-table scan the busiest table in the shop from a URL.
-     */
-    private function days(Request $request): int
+    private function json(array $data): JsonResponse
     {
-        $days = (int) $request->query('days', 7);
-
-        return in_array($days, [1, 7, 30, 90], true) ? $days : 7;
+        return response()->json(['data' => $data]);
     }
 }

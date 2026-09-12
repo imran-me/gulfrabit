@@ -4,200 +4,346 @@ declare(strict_types=1);
 
 namespace Modules\Marketing\Services;
 
-use Illuminate\Support\Collection;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\Marketing\Models\TrackingEvent;
 
 /**
- * The shop's own funnel, computed from its own events.
+ * The Tracking screen's headline half: the numbers, the chart, the funnel,
+ * who is on the shop right now, and any one visit step by step.
  *
- * WHY THE COUNTS ARE SESSIONS, NOT EVENTS
- * ---------------------------------------
- * The single most important decision in this file. A shopper who opens eight
- * product pages fires eight ViewContent events; counted raw, that one person
- * makes the ViewContent step look eight times healthier than it is, and a
- * funnel whose middle is inflated tells the merchant to fix the wrong screen.
+ * The breakdowns - channels, devices, products, searches, checkout - live in
+ * TrackerReports; what the numbers mean in words lives in InsightEngine. All
+ * three read the same TrackerFilter, so every panel is about the same visits.
  *
- * Every stage is therefore DISTINCT SESSIONS that reached it. "How many visits
- * got this far" is the question a drop-off rate is actually asking, and it is
- * the only counting that makes the percentages between stages mean anything.
- *
- * WHY DROP-OFF IS AGAINST THE PREVIOUS STAGE
- * ------------------------------------------
- * Each rate divides by the step before it, not by the top. Divided by the top,
- * every number below ViewContent reads like a catastrophe and they all move
- * together, so nothing stands out. Against the previous step, one bad screen
- * shows up as one bad number - which is the whole point of looking.
+ * WHY THE COUNTS ARE VISITS, NOT EVENTS
+ * ------------------------------------
+ * The single most important decision here. A shopper who opens eight product
+ * pages fires eight ViewContent events; counted raw, that one person makes the
+ * "opened a product" step look eight times healthier than it is, and a funnel
+ * whose middle is inflated tells the merchant to fix the wrong screen. Every
+ * stage and every rate is therefore DISTINCT VISITS.
  *
  * A LOWER BOUND, HONESTLY
  * -----------------------
- * Sessions come from localStorage ids, so a cleared browser or a second device
- * is a second visitor. Ad blockers stop some events entirely. These numbers are
- * a floor, not a census, and the dashboard says so rather than implying a
- * precision it does not have.
+ * Visitors are localStorage ids: a cleared browser or a second device is a
+ * second visitor, and ad blockers stop some events entirely. These numbers are
+ * a floor, not a census, and the screen says so.
  */
-class AnalyticsService
+final class AnalyticsService
 {
-    /** The headline numbers, the funnel, and what people looked at. */
-    public function summary(int $days): array
+    /** A visitor counts as "on the shop now" for this long after their last action. */
+    public const ACTIVE_MINUTES = 5;
+
+    public function __construct(private readonly OrderOutcomes $outcomes)
     {
-        $base = TrackingEvent::query()->inWindow($days);
+    }
 
-        $totals = (clone $base)
-            ->selectRaw('COUNT(*) as events')
-            ->selectRaw('COUNT(DISTINCT visitor_id) as visitors')
-            ->selectRaw('COUNT(DISTINCT session_id) as sessions')
-            ->first();
+    /* ---- Overview -------------------------------------------------------- */
 
-        // Sessions per stage, in one pass rather than five queries.
-        $perStage = (clone $base)
-            ->whereIn('event_name', TrackingEvent::FUNNEL)
-            ->groupBy('event_name')
-            ->pluck(DB::raw('COUNT(DISTINCT session_id)'), 'event_name');
-
-        $funnel = [];
-        $previous = null;
-        foreach (TrackingEvent::FUNNEL as $stage) {
-            $count = (int) ($perStage[$stage] ?? 0);
-
-            $funnel[] = [
-                'stage'    => $stage,
-                'sessions' => $count,
-                // Null, not zero, for the first stage and for any stage whose
-                // predecessor saw nobody: "no one got here to drop out" is not
-                // the same fact as "everybody dropped out", and a 100% shown
-                // for the former sends the merchant chasing a screen that is
-                // working fine.
-                'dropOffPct' => ($previous === null || $previous === 0)
-                    ? null
-                    : (int) round((1 - $count / $previous) * 100),
-                'ofTopPct' => null,   // filled below, once the top is known
-            ];
-            $previous = $count;
-        }
-
-        $top = $funnel[0]['sessions'] ?? 0;
-        foreach ($funnel as $i => $row) {
-            $funnel[$i]['ofTopPct'] = $top > 0 ? (int) round($row['sessions'] / $top * 100) : null;
-        }
+    /** The headline numbers against the comparison period, the chart and the funnel. */
+    public function overview(TrackerFilter $f): array
+    {
+        $cur  = $this->totals($f, false);
+        $prev = $this->totals($f, true);
 
         return [
-            'days'     => $days,
-            'events'   => (int) ($totals->events ?? 0),
-            'visitors' => (int) ($totals->visitors ?? 0),
-            'sessions' => (int) ($totals->sessions ?? 0),
-            'revenueTaka' => (int) round(
-                (clone $base)->where('event_name', 'Purchase')->sum('value_poisha') / 100
-            ),
-            'purchases' => (clone $base)->where('event_name', 'Purchase')->count(),
-            'funnel'    => $funnel,
-            'daily'     => $this->daily($days),
-            'topPages'  => $this->topPages($days),
-            'campaigns' => $this->campaigns($days),
-            'capi'      => $this->capiHealth($days),
+            'filter'   => $f->toArray(),
+            'labels'   => self::labels(),
+            'options'  => $this->options($f),
+            'kpis'     => $this->kpis($cur, $prev),
+            'series'   => $this->series($f),
+            'funnel'   => $this->funnel($f),
+            'topPages' => $this->topPages($f),
+            'channels' => $this->channelMix($f),
+            'capi'     => $this->capi($f),
+            'health'   => $this->health(),
+            'events'   => (int) $f->events()->count(),
         ];
     }
 
     /**
-     * Visits and orders per day, oldest first.
-     *
-     * The one question the rest of this screen cannot answer: every other panel
-     * is a single window's total, so "is today better than yesterday?" - which
-     * is the question a merchant running an ad actually asks each morning - has
-     * nowhere to be read from.
-     *
-     * Days with no traffic are filled in as zero rather than omitted. A gap
-     * silently closed up makes a quiet Friday look like it never happened and
-     * turns a real dip into a smooth line.
+     * The overview without its chart, pages and dropdown options - what the
+     * insight engine reads. A separate method so the insights request does
+     * not pay for a chart nobody will draw from it.
      */
-    private function daily(int $days): array
+    public function headline(TrackerFilter $f): array
     {
-        $rows = TrackingEvent::query()
-            ->inWindow($days)
-            ->groupBy(DB::raw('DATE(created_at)'))
-            ->orderBy(DB::raw('DATE(created_at)'))
-            ->get([
-                DB::raw('DATE(created_at) as day'),
-                DB::raw('COUNT(DISTINCT session_id) as sessions'),
-                DB::raw("SUM(CASE WHEN event_name = 'Purchase' THEN 1 ELSE 0 END) as purchases"),
-            ])
-            ->keyBy(fn ($r) => (string) $r->day);
+        return [
+            'kpis'   => $this->kpis($this->totals($f, false), $this->totals($f, true)),
+            'funnel' => $this->funnel($f),
+            'capi'   => $this->capi($f),
+            'health' => $this->health(),
+        ];
+    }
 
-        $out = [];
-        // Inclusive of both ends: `days` is "the last N days" as a person means
-        // it, which includes today.
-        for ($i = $days - 1; $i >= 0; $i--) {
-            $key = now()->subDays($i)->toDateString();
-            $row = $rows[$key] ?? null;
+    /**
+     * Every word the screen puts beside a key. Shipped with the data so the
+     * browser never keeps a second copy that drifts from this one.
+     */
+    public static function labels(): array
+    {
+        return [
+            'channels' => TrafficClassifier::CHANNELS,
+            'devices'  => TrafficClassifier::DEVICES,
+            'os'       => TrafficClassifier::OS,
+            'browsers' => TrafficClassifier::BROWSERS,
+            'inApp'    => TrafficClassifier::IN_APP,
+            'periods'  => TrackerFilter::PERIODS,
+        ];
+    }
 
-            $out[] = [
-                'day'       => $key,
-                'sessions'  => (int) ($row->sessions ?? 0),
-                'purchases' => (int) ($row->purchases ?? 0),
+    /**
+     * Visit-level totals for one period.
+     *
+     * Read off the per-visit facts rather than the raw events, so "left after
+     * one page", "reached checkout" and "ordered" are all counted the same
+     * way: once per visit.
+     */
+    private function totals(TrackerFilter $f, bool $previous): object
+    {
+        $row = DB::query()
+            ->fromSub($f->sessionFacts($previous), 's')
+            ->selectRaw(implode(', ', [
+                'COUNT(*) as sessions',
+                'COUNT(DISTINCT visitor_id) as visitors',
+                "COUNT(DISTINCT CASE WHEN visit_type = 'new' THEN visitor_id END) as new_visitors",
+                'SUM(purchased) as converted',
+                'SUM(purchases) as orders',
+                'SUM(revenue_poisha) as revenue_poisha',
+                'SUM(CASE WHEN pages <= 1 AND actions = 0 THEN 1 ELSE 0 END) as bounced',
+                'SUM(pages) as pages',
+                'SUM(carted) as carted',
+                'SUM(checkout) as checkouts',
+                'SUM(CASE WHEN checkout = 1 AND purchased = 0 THEN 1 ELSE 0 END) as abandoned',
+                'SUM(CASE WHEN checkout = 1 AND purchased = 0 THEN COALESCE(checkout_poisha, 0) ELSE 0 END) as abandoned_poisha',
+                'SUM(CASE WHEN events > 1 THEN TIMESTAMPDIFF(SECOND, started_at, ended_at) ELSE 0 END) as engaged_seconds',
+                'SUM(CASE WHEN events > 1 THEN 1 ELSE 0 END) as engaged',
+            ]))
+            ->first();
+
+        $n = static fn (string $k): int => (int) ($row->{$k} ?? 0);
+
+        return (object) [
+            'sessions'        => $n('sessions'),
+            'visitors'        => $n('visitors'),
+            'newVisitors'     => $n('new_visitors'),
+            'converted'       => $n('converted'),
+            'orders'          => $n('orders'),
+            'revenuePoisha'   => $n('revenue_poisha'),
+            'bounced'         => $n('bounced'),
+            'pages'           => $n('pages'),
+            'carted'          => $n('carted'),
+            'checkouts'       => $n('checkouts'),
+            'abandoned'       => $n('abandoned'),
+            'abandonedPoisha' => $n('abandoned_poisha'),
+            'engagedSeconds'  => $n('engaged_seconds'),
+            'engaged'         => $n('engaged'),
+        ];
+    }
+
+    /**
+     * The headline tiles, each as {value, prev}. Rates are null - not zero -
+     * when there was nothing to divide by: "no visits" is not "0% converted".
+     */
+    private function kpis(object $c, object $p): array
+    {
+        $pair = static fn ($now, $before): array => ['value' => $now, 'prev' => $before];
+        $pct  = static fn (int $a, int $b): ?float => $b > 0 ? round($a / $b * 100, 2) : null;
+        $avg  = static fn (int $a, int $b, int $dp = 0): ?float => $b > 0 ? round($a / $b, $dp) : null;
+
+        return [
+            'visitors'      => $pair($c->visitors, $p->visitors),
+            'newVisitors'   => $pair($c->newVisitors, $p->newVisitors),
+            'sessions'      => $pair($c->sessions, $p->sessions),
+            'orders'        => $pair($c->orders, $p->orders),
+            'revenueTaka'   => $pair(intdiv($c->revenuePoisha, 100), intdiv($p->revenuePoisha, 100)),
+            'conversionPct' => $pair($pct($c->converted, $c->sessions), $pct($p->converted, $p->sessions)),
+            'aovTaka'       => $pair($avg(intdiv($c->revenuePoisha, 100), $c->orders), $avg(intdiv($p->revenuePoisha, 100), $p->orders)),
+            'bouncePct'     => $pair($pct($c->bounced, $c->sessions), $pct($p->bounced, $p->sessions)),
+            'pagesPerVisit' => $pair($avg($c->pages, $c->sessions, 1), $avg($p->pages, $p->sessions, 1)),
+            'avgSeconds'    => $pair($avg($c->engagedSeconds, $c->engaged), $avg($p->engagedSeconds, $p->engaged)),
+            'cartPct'       => $pair($pct($c->carted, $c->sessions), $pct($p->carted, $p->sessions)),
+            'abandoned'     => $pair($c->abandoned, $p->abandoned),
+            'abandonedTaka' => $pair(intdiv($c->abandonedPoisha, 100), intdiv($p->abandonedPoisha, 100)),
+        ];
+    }
+
+    /**
+     * Visits, visitors, orders and revenue per hour or day, with the matching
+     * point of the comparison period beside each one.
+     *
+     * Hours when the window is two days or less - a single day drawn as one
+     * bar says nothing; drawn as 24 it says when people shop.
+     */
+    private function series(TrackerFilter $f): array
+    {
+        $cur  = $this->bucketRows($f, $f->start, $f->end);
+        $prev = $this->bucketRows($f, $f->prevStart, $f->prevSpanEnd());
+
+        $now      = CarbonImmutable::now();
+        $curKeys  = $f->buckets(false);
+        $prevKeys = $f->buckets(true);
+        $points   = [];
+
+        foreach ($curKeys as $i => $b) {
+            // A bucket that has not started yet is null, not zero - drawn as
+            // nothing rather than as a dive to the axis at 3 pm.
+            $future = $b['at']->greaterThan($now);
+            $row    = $cur[$b['key']] ?? null;
+            $pk     = $prevKeys[$i]['key'] ?? null;
+            $pRow   = $pk !== null ? ($prev[$pk] ?? null) : null;
+
+            $points[] = [
+                't'           => $b['key'],
+                'sessions'    => $future ? null : (int) ($row->sessions ?? 0),
+                'visitors'    => $future ? null : (int) ($row->visitors ?? 0),
+                'orders'      => $future ? null : (int) ($row->orders ?? 0),
+                'revenueTaka' => $future ? null : intdiv((int) ($row->revenue_poisha ?? 0), 100),
+                'prev'        => $pk === null ? null : [
+                    't'           => $pk,
+                    'sessions'    => (int) ($pRow->sessions ?? 0),
+                    'visitors'    => (int) ($pRow->visitors ?? 0),
+                    'orders'      => (int) ($pRow->orders ?? 0),
+                    'revenueTaka' => intdiv((int) ($pRow->revenue_poisha ?? 0), 100),
+                ],
             ];
         }
 
-        return $out;
+        return ['bucket' => $f->bucket, 'points' => $points];
+    }
+
+    /** @return array<string, object> keyed by bucket */
+    private function bucketRows(TrackerFilter $f, CarbonImmutable $from, CarbonImmutable $to): array
+    {
+        $expr = $f->bucketExpression();
+
+        return $f->between($from, $to)
+            ->toBase()
+            ->selectRaw($expr . ' as bucket')
+            ->selectRaw('COUNT(DISTINCT session_id) as sessions')
+            ->selectRaw('COUNT(DISTINCT visitor_id) as visitors')
+            ->selectRaw("SUM(CASE WHEN event_name = 'Purchase' THEN 1 ELSE 0 END) as orders")
+            ->selectRaw("SUM(CASE WHEN event_name = 'Purchase' THEN COALESCE(value_poisha, 0) ELSE 0 END) as revenue_poisha")
+            ->groupBy(DB::raw($expr))
+            ->get()
+            ->keyBy(fn ($r): string => (string) $r->bucket)
+            ->all();
     }
 
     /**
-     * Where people actually went.
+     * Visits reaching each step, the share lost at each, and the same count
+     * for the comparison period.
      *
-     * Ranked by SESSIONS, not hits, for the same reason the funnel is: one
-     * person refreshing a page is not a popular page.
+     * Drop-off is against the PREVIOUS step, so one bad screen shows as one bad
+     * number instead of dragging every row beneath it down with it. It is null
+     * for the first step and wherever the step before saw nobody - "no one got
+     * here to drop out" is a different fact from "everybody dropped out".
+     *
+     * A step can see MORE visits than the one above it: express checkout goes
+     * from a product straight to checkout without a cart. The browser shows
+     * that as people skipping the step rather than as a negative loss.
      */
-    private function topPages(int $days, int $limit = 12): Collection
+    private function funnel(TrackerFilter $f): array
     {
-        return TrackingEvent::query()
-            ->inWindow($days)
+        $cur  = $this->stageCounts($f, false);
+        $prev = $this->stageCounts($f, true);
+
+        $rows     = [];
+        $previous = null;
+
+        foreach (TrackingEvent::FUNNEL as $stage) {
+            $count = (int) ($cur[$stage] ?? 0);
+
+            $rows[] = [
+                'stage'        => $stage,
+                'sessions'     => $count,
+                'prevSessions' => (int) ($prev[$stage] ?? 0),
+                'dropOffPct'   => ($previous === null || $previous === 0)
+                    ? null
+                    : (int) round((1 - $count / $previous) * 100),
+                'ofTopPct'     => null,
+            ];
+            $previous = $count;
+        }
+
+        $top = $rows[0]['sessions'] ?? 0;
+        foreach ($rows as $i => $row) {
+            $rows[$i]['ofTopPct'] = $top > 0 ? round($row['sessions'] / $top * 100, 1) : null;
+        }
+
+        return $rows;
+    }
+
+    /** @return array<string, int> visits per funnel event */
+    private function stageCounts(TrackerFilter $f, bool $previous): array
+    {
+        return $f->events($previous)
+            ->toBase()
+            ->whereIn('event_name', TrackingEvent::FUNNEL)
+            ->groupBy('event_name')
+            ->selectRaw('event_name, COUNT(DISTINCT session_id) as sessions')
+            ->get()
+            ->mapWithKeys(fn ($r): array => [(string) $r->event_name => (int) $r->sessions])
+            ->all();
+    }
+
+    /** Where people actually went, ranked by visits - one person refreshing is not a popular page. */
+    private function topPages(TrackerFilter $f, int $limit = 10): array
+    {
+        return $f->events()
+            ->toBase()
             ->whereNotNull('path')
             ->groupBy('path')
-            ->orderByDesc(DB::raw('COUNT(DISTINCT session_id)'))
+            ->selectRaw('path')
+            ->selectRaw('COUNT(DISTINCT session_id) as sessions')
+            ->selectRaw("SUM(CASE WHEN event_name = 'PageView' THEN 1 ELSE 0 END) as views")
+            ->orderByDesc('sessions')
             ->limit($limit)
-            ->get([
-                'path',
-                DB::raw('COUNT(DISTINCT session_id) as sessions'),
-                DB::raw('COUNT(*) as views'),
-            ]);
+            ->get()
+            ->map(fn ($r): array => [
+                'path'     => (string) $r->path,
+                'sessions' => (int) $r->sessions,
+                'views'    => (int) $r->views,
+            ])
+            ->all();
+    }
+
+    /** The overview's channel strip: visits and orders per channel. */
+    private function channelMix(TrackerFilter $f, int $limit = 8): array
+    {
+        return DB::query()
+            ->fromSub($f->sessionFacts(), 's')
+            ->groupBy('channel')
+            ->selectRaw('channel')
+            ->selectRaw('COUNT(*) as sessions')
+            ->selectRaw('SUM(purchased) as converted')
+            ->selectRaw('SUM(revenue_poisha) as revenue_poisha')
+            ->orderByDesc('sessions')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($r): array => [
+                'channel'     => $r->channel ?? 'unknown',
+                'sessions'    => (int) $r->sessions,
+                'converted'   => (int) $r->converted,
+                'revenueTaka' => intdiv((int) $r->revenue_poisha, 100),
+            ])
+            ->all();
     }
 
     /**
-     * Which ad brought them, from the FIRST-touch utm captured on landing.
-     *
-     * '(direct)' rather than null in the label: a blank row in a report reads
-     * as a bug, and "nobody paid for these" is a real and useful category -
-     * it is the organic baseline every paid number should be judged against.
+     * Whether the server copy is reaching Meta. Skipped (no token - the
+     * shipped state, not a fault) is kept apart from failed (Meta refused), or
+     * a merchant cannot tell a setting they have not made from a thing broken.
      */
-    private function campaigns(int $days, int $limit = 10): Collection
+    private function capi(TrackerFilter $f): array
     {
-        return TrackingEvent::query()
-            ->inWindow($days)
-            ->groupBy('utm_campaign', 'utm_source')
-            ->orderByDesc(DB::raw('COUNT(DISTINCT session_id)'))
-            ->limit($limit)
-            ->get([
-                'utm_campaign',
-                'utm_source',
-                DB::raw('COUNT(DISTINCT session_id) as sessions'),
-                DB::raw("SUM(CASE WHEN event_name = 'Purchase' THEN 1 ELSE 0 END) as purchases"),
-                DB::raw("SUM(CASE WHEN event_name = 'Purchase' THEN value_poisha ELSE 0 END) as revenue_poisha"),
-            ]);
-    }
-
-    /**
-     * Whether the server copy is reaching Meta.
-     *
-     * Three states kept apart on purpose: skipped means no token is configured
-     * (the shipped state, not a fault), failed means Meta refused or was
-     * unreachable. Collapsed into one "not sent" number, a merchant cannot tell
-     * a setting they have not made from a thing that is broken.
-     */
-    private function capiHealth(int $days): array
-    {
-        $rows = TrackingEvent::query()
-            ->inWindow($days)
+        $rows = $f->events()
+            ->toBase()
             ->groupBy('capi_status')
-            ->pluck(DB::raw('COUNT(*)'), 'capi_status');
+            ->selectRaw('capi_status, COUNT(*) as n')
+            ->get()
+            ->mapWithKeys(fn ($r): array => [(string) $r->capi_status => (int) $r->n]);
 
         return [
             'sent'    => (int) ($rows['sent'] ?? 0),
@@ -207,46 +353,370 @@ class AnalyticsService
     }
 
     /**
-     * Recent visits, newest first, one row each.
-     *
-     * The outcome column is what makes this worth reading: a list of session
-     * ids is noise, but "this visit ended at checkout without buying" is a
-     * question worth opening.
+     * Is the tracking itself alive? Deliberately NOT filtered: a segment with
+     * no traffic must not read as "the pixel is down".
      */
-    public function sessions(int $days, int $limit, int $offset): Collection
+    private function health(): array
     {
-        return TrackingEvent::query()
-            ->inWindow($days)
-            ->whereNotNull('session_id')
-            ->groupBy('session_id')
-            ->orderByDesc(DB::raw('MAX(created_at)'))
-            ->limit($limit)
-            ->offset($offset)
-            ->get([
-                'session_id',
-                DB::raw('MIN(created_at) as started_at'),
-                DB::raw('MAX(created_at) as ended_at'),
-                DB::raw('COUNT(*) as events'),
-                DB::raw('COUNT(DISTINCT path) as pages'),
-                DB::raw('MAX(utm_campaign) as utm_campaign'),
-                DB::raw('MAX(utm_source) as utm_source'),
-                DB::raw("MAX(CASE WHEN event_name = 'Purchase' THEN 1 ELSE 0 END) as purchased"),
-                DB::raw("MAX(CASE WHEN event_name = 'InitiateCheckout' THEN 1 ELSE 0 END) as reached_checkout"),
-                DB::raw("MAX(CASE WHEN event_name = 'AddToCart' THEN 1 ELSE 0 END) as added_to_cart"),
-                DB::raw("SUM(CASE WHEN event_name = 'Purchase' THEN value_poisha ELSE 0 END) as revenue_poisha"),
-            ]);
+        $last  = TrackingEvent::query()->max('created_at');
+        $since = CarbonImmutable::now()->subDay();
+
+        $byEvent = TrackingEvent::query()
+            ->toBase()
+            ->where('created_at', '>=', $since)
+            ->groupBy('event_name')
+            ->selectRaw('event_name, COUNT(*) as n')
+            ->get()
+            ->mapWithKeys(fn ($r): array => [(string) $r->event_name => (int) $r->n])
+            ->all();
+
+        $capi = TrackingEvent::query()
+            ->toBase()
+            ->where('created_at', '>=', $since)
+            ->groupBy('capi_status')
+            ->selectRaw('capi_status, COUNT(*) as n')
+            ->get()
+            ->mapWithKeys(fn ($r): array => [(string) $r->capi_status => (int) $r->n])
+            ->all();
+
+        $lastAt = $last ? CarbonImmutable::parse((string) $last) : null;
+
+        return [
+            'lastEventAt'         => $lastAt?->toDateTimeString(),
+            'lastEventAgoSeconds' => $lastAt ? max(0, CarbonImmutable::now()->getTimestamp() - $lastAt->getTimestamp()) : null,
+            'events24h'           => array_sum($byEvent),
+            'byEvent24h'          => $byEvent,
+            'capi24h'             => [
+                'sent'    => (int) ($capi['sent'] ?? 0),
+                'failed'  => (int) ($capi['failed'] ?? 0),
+                'skipped' => (int) ($capi['skipped'] ?? 0),
+            ],
+        ];
     }
 
-    /** One visit's footprint: every event it fired, in the order it happened. */
-    public function footprint(string $sessionId): Collection
+    /**
+     * What the filter dropdowns offer: every campaign seen in the last 90 days
+     * and every channel seen in the period. NOT narrowed by the current
+     * segment - choosing one campaign must not make the others disappear from
+     * the list you would choose the next one from.
+     */
+    private function options(TrackerFilter $f): array
     {
-        return TrackingEvent::query()
+        $campaigns = TrackingEvent::query()
+            ->toBase()
+            ->where('created_at', '>=', CarbonImmutable::now()->subDays(90))
+            ->whereNotNull('utm_campaign')
+            ->groupBy('utm_campaign')
+            ->selectRaw('utm_campaign, COUNT(DISTINCT session_id) as sessions')
+            ->orderByDesc('sessions')
+            ->limit(60)
+            // get() first: pluck() on the builder replaces the select list, and
+            // the ORDER BY above names a column that would no longer exist.
+            ->get()
+            ->map(fn ($r): string => (string) $r->utm_campaign)
+            ->all();
+
+        $channels = TrackingEvent::query()
+            ->toBase()
+            ->where('created_at', '>=', $f->start)
+            ->where('created_at', '<', $f->end)
+            ->whereNotNull('channel')
+            ->distinct()
+            ->pluck('channel')
+            ->map(fn ($c): string => (string) $c)
+            ->all();
+
+        return ['campaigns' => $campaigns, 'channels' => $channels];
+    }
+
+    /* ---- Live ------------------------------------------------------------ */
+
+    /**
+     * Who is on the shop right now, what they are looking at, and the last
+     * hour's events as they arrived.
+     *
+     * "Now" is the last five minutes - the storefront sends no heartbeat, so a
+     * visitor reading one page for ten minutes has, as far as the server can
+     * tell, left. Five is short enough to mean "now" and long enough that a
+     * shopper comparing two products does not flicker out between them.
+     *
+     * The period filter does not apply - now is now - but the segment does,
+     * so "Meta ads, phones" shows only those visitors.
+     */
+    public function live(TrackerFilter $f): array
+    {
+        $now    = CarbonImmutable::now();
+        $active = $now->subMinutes(self::ACTIVE_MINUTES);
+
+        $sessions = $f->between($now->subHours(3), $now->addMinute())
+            ->toBase()
+            ->whereNotNull('session_id')
+            ->groupBy('session_id')
+            ->havingRaw('MAX(created_at) >= ?', [$active->toDateTimeString()])
+            ->select([
+                'session_id',
+                DB::raw('MAX(channel) as channel'),
+                DB::raw('MAX(device) as device'),
+                DB::raw('MAX(os) as os'),
+                DB::raw('MAX(browser) as browser'),
+                DB::raw('MAX(visit_type) as visit_type'),
+                DB::raw('MAX(landing_path) as landing_path'),
+                DB::raw('MAX(utm_campaign) as utm_campaign'),
+                DB::raw('MIN(created_at) as started_at'),
+                DB::raw('MAX(created_at) as last_at'),
+                DB::raw('MAX(id) as last_id'),
+                DB::raw('COUNT(DISTINCT path) as pages'),
+                DB::raw("MAX(CASE WHEN event_name = 'ViewContent' THEN 1 ELSE 0 END) as viewed"),
+                DB::raw("MAX(CASE WHEN event_name = 'AddToCart' THEN 1 ELSE 0 END) as carted"),
+                DB::raw("MAX(CASE WHEN event_name = 'InitiateCheckout' THEN 1 ELSE 0 END) as checkout"),
+                DB::raw("MAX(CASE WHEN event_name = 'Purchase' THEN 1 ELSE 0 END) as purchased"),
+                DB::raw("MAX(CASE WHEN event_name IN ('AddToCart', 'InitiateCheckout') THEN value_poisha ELSE NULL END) as cart_poisha"),
+            ])
+            ->orderByDesc(DB::raw('MAX(created_at)'))
+            ->get();
+
+        $last = TrackingEvent::query()
+            ->whereIn('id', $sessions->pluck('last_id')->all())
+            ->get(['id', 'event_name', 'path', 'content_name', 'search_term'])
+            ->keyBy('id');
+
+        $visitors = $sessions->take(60)->map(function ($s) use ($last, $now): array {
+            $e = $last[$s->last_id] ?? null;
+
+            return [
+                'session_id'    => (string) $s->session_id,
+                'channel'       => $s->channel,
+                'device'        => $s->device,
+                'os'            => $s->os,
+                'browser'       => $s->browser,
+                'visit_type'    => $s->visit_type,
+                'landing_path'  => $s->landing_path,
+                'campaign'      => $s->utm_campaign,
+                'current_path'  => $e?->path,
+                'current_title' => $e?->content_name ?? ($e?->search_term !== null ? '“' . $e->search_term . '”' : null),
+                'last_event'    => $e?->event_name,
+                'pages'         => (int) $s->pages,
+                'seconds'       => max(0, CarbonImmutable::parse((string) $s->last_at)->getTimestamp() - CarbonImmutable::parse((string) $s->started_at)->getTimestamp()),
+                'idleSeconds'   => max(0, $now->getTimestamp() - CarbonImmutable::parse((string) $s->last_at)->getTimestamp()),
+                'stage'         => self::stage($s),
+                'cartTaka'      => $s->cart_poisha !== null ? intdiv((int) $s->cart_poisha, 100) : null,
+            ];
+        })->values()->all();
+
+        return [
+            'now'           => $now->toDateTimeString(),
+            'activeMinutes' => self::ACTIVE_MINUTES,
+            'active'        => $sessions->count(),
+            'inCheckout'    => $sessions->filter(fn ($s): bool => (int) $s->checkout === 1 && (int) $s->purchased === 0)->count(),
+            'withCart'      => $sessions->filter(fn ($s): bool => (int) $s->carted === 1 && (int) $s->checkout === 0)->count(),
+            'ordered'       => $sessions->filter(fn ($s): bool => (int) $s->purchased === 1)->count(),
+            'perMinute'     => $this->perMinute($f, $now),
+            'visitors'      => $visitors,
+            'feed'          => $this->feed($f, $now),
+            'today'         => $this->today($f, $now),
+            'labels'        => self::labels(),
+        ];
+    }
+
+    /** How far a visit has got, as one word. Read from the deepest step down. */
+    public static function stage(object $s): string
+    {
+        return match (true) {
+            (int) ($s->purchased ?? 0) === 1 => 'ordered',
+            (int) ($s->checkout ?? 0) === 1  => 'checkout',
+            (int) ($s->carted ?? 0) === 1    => 'cart',
+            (int) ($s->viewed ?? 0) === 1    => 'product',
+            default                          => 'browsing',
+        };
+    }
+
+    /** Visits active in each of the last 30 minutes, oldest first, gaps as zero. */
+    private function perMinute(TrackerFilter $f, CarbonImmutable $now): array
+    {
+        $from = $now->subMinutes(29)->startOfMinute();
+        $expr = "DATE_FORMAT(created_at, '%Y-%m-%d %H:%i')";
+
+        $rows = $f->between($from, $now->addMinute())
+            ->toBase()
+            ->selectRaw($expr . ' as m')
+            ->selectRaw('COUNT(DISTINCT session_id) as sessions')
+            ->selectRaw('COUNT(*) as events')
+            ->groupBy(DB::raw($expr))
+            ->get()
+            ->keyBy(fn ($r): string => (string) $r->m);
+
+        $out = [];
+        for ($i = 0; $i < 30; $i++) {
+            $at    = $from->addMinutes($i);
+            $row   = $rows[$at->format('Y-m-d H:i')] ?? null;
+            $out[] = [
+                't'        => $at->format('H:i'),
+                'sessions' => (int) ($row->sessions ?? 0),
+                'events'   => (int) ($row->events ?? 0),
+            ];
+        }
+
+        return $out;
+    }
+
+    /** The last hour's events, newest first - the live feed. */
+    private function feed(TrackerFilter $f, CarbonImmutable $now, int $limit = 40): array
+    {
+        return $f->between($now->subHour(), $now->addMinute())
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get(['id', 'event_name', 'path', 'content_name', 'value_poisha', 'search_term',
+                   'search_results', 'channel', 'device', 'browser', 'session_id', 'created_at'])
+            ->map(fn (TrackingEvent $e): array => [
+                'id'            => $e->id,
+                'event_name'    => $e->event_name,
+                'path'          => $e->path,
+                'content_name'  => $e->content_name,
+                'valueTaka'     => $e->valueTaka() !== null ? (int) round($e->valueTaka()) : null,
+                'search_term'   => $e->search_term,
+                'searchResults' => $e->search_results,
+                'channel'       => $e->channel,
+                'device'        => $e->device,
+                'browser'       => $e->browser,
+                'session_id'    => $e->session_id,
+                'at'            => $e->created_at?->toDateTimeString(),
+                'agoSeconds'    => $e->created_at ? max(0, $now->getTimestamp() - $e->created_at->getTimestamp()) : null,
+            ])
+            ->all();
+    }
+
+    /** Today so far, for the strip above the live view. */
+    private function today(TrackerFilter $f, CarbonImmutable $now): array
+    {
+        $row = $f->between($now->startOfDay(), $now->addMinute())
+            ->toBase()
+            ->selectRaw('COUNT(DISTINCT session_id) as sessions')
+            ->selectRaw("SUM(CASE WHEN event_name = 'Purchase' THEN 1 ELSE 0 END) as orders")
+            ->selectRaw("SUM(CASE WHEN event_name = 'Purchase' THEN COALESCE(value_poisha, 0) ELSE 0 END) as revenue_poisha")
+            ->first();
+
+        return [
+            'sessions'    => (int) ($row->sessions ?? 0),
+            'orders'      => (int) ($row->orders ?? 0),
+            'revenueTaka' => intdiv((int) ($row->revenue_poisha ?? 0), 100),
+        ];
+    }
+
+    /* ---- Visits ---------------------------------------------------------- */
+
+    /** Outcomes the visit list can be narrowed to, in the words the screen uses. */
+    public const OUTCOMES = ['ordered', 'checkout', 'cart', 'browsed', 'bounced'];
+
+    /**
+     * Visits in the slice, newest first, one row each - optionally only those
+     * that ended one way.
+     */
+    public function sessions(TrackerFilter $f, ?string $outcome, int $limit, int $offset): array
+    {
+        $q = DB::query()->fromSub($f->sessionFacts(), 's');
+
+        match ($outcome) {
+            'ordered'  => $q->where('purchased', 1),
+            'checkout' => $q->where('checkout', 1)->where('purchased', 0),
+            'cart'     => $q->where('carted', 1)->where('checkout', 0)->where('purchased', 0),
+            'browsed'  => $q->where('carted', 0)->where('checkout', 0)->where('purchased', 0),
+            'bounced'  => $q->where('pages', '<=', 1)->where('actions', 0),
+            default    => null,
+        };
+
+        return $q->orderByDesc('ended_at')
+            ->limit($limit)
+            ->offset($offset)
+            ->get()
+            ->map(fn ($s): array => [
+                'session_id'   => (string) $s->session_id,
+                'started_at'   => (string) $s->started_at,
+                'ended_at'     => (string) $s->ended_at,
+                'seconds'      => max(0, CarbonImmutable::parse((string) $s->ended_at)->getTimestamp() - CarbonImmutable::parse((string) $s->started_at)->getTimestamp()),
+                'channel'      => $s->channel,
+                'device'       => $s->device,
+                'browser'      => $s->browser,
+                'os'           => $s->os,
+                'visit_type'   => $s->visit_type,
+                'landing_path' => $s->landing_path,
+                'utm_campaign' => $s->utm_campaign,
+                'pages'        => (int) $s->pages,
+                'events'       => (int) $s->events,
+                'stage'        => self::stage($s),
+                'revenueTaka'  => intdiv((int) $s->revenue_poisha, 100),
+                'checkoutTaka' => $s->checkout_poisha !== null ? intdiv((int) $s->checkout_poisha, 100) : null,
+            ])
+            ->all();
+    }
+
+    /**
+     * One visit, step by step - and, when it ended in an order, the order,
+     * with what happened to it since.
+     */
+    public function footprint(string $sessionId): array
+    {
+        $events = TrackingEvent::query()
             ->where('session_id', $sessionId)
             ->orderBy('created_at')
+            ->orderBy('id')
             ->limit(500)
-            ->get([
-                'id', 'event_name', 'path', 'content_name',
-                'value_poisha', 'currency', 'referrer', 'capi_status', 'created_at',
-            ]);
+            ->get(['id', 'event_id', 'event_name', 'path', 'content_name', 'value_poisha', 'currency',
+                   'referrer', 'referrer_host', 'search_term', 'search_results', 'num_items',
+                   'channel', 'device', 'os', 'browser', 'landing_path', 'visit_type',
+                   'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'capi_status', 'created_at']);
+
+        $first = $events->first();
+        $lastE = $events->last();
+
+        $orders = $this->outcomes->byEventId(
+            $events->where('event_name', 'Purchase')->pluck('event_id')->filter()->values()->all(),
+        );
+
+        return [
+            'session' => $first === null ? null : [
+                'session_id'    => $sessionId,
+                'channel'       => $first->channel,
+                'device'        => $first->device,
+                'os'            => $first->os,
+                'browser'       => $first->browser,
+                'visit_type'    => $first->visit_type,
+                'landing_path'  => $first->landing_path ?? $first->path,
+                'referrer_host' => $events->pluck('referrer_host')->filter()->first(),
+                'utm_source'    => $first->utm_source,
+                'utm_medium'    => $first->utm_medium,
+                'utm_campaign'  => $first->utm_campaign,
+                'utm_content'   => $first->utm_content,
+                'started_at'    => $first->created_at?->toDateTimeString(),
+                'ended_at'      => $lastE?->created_at?->toDateTimeString(),
+                'seconds'       => ($first->created_at && $lastE?->created_at)
+                    ? max(0, $lastE->created_at->getTimestamp() - $first->created_at->getTimestamp())
+                    : 0,
+                'pages'         => $events->pluck('path')->filter()->unique()->count(),
+            ],
+            'events' => $events->map(fn (TrackingEvent $e): array => [
+                'id'            => $e->id,
+                'event_name'    => $e->event_name,
+                'path'          => $e->path,
+                'content_name'  => $e->content_name,
+                'valueTaka'     => $e->valueTaka() !== null ? (int) round($e->valueTaka()) : null,
+                'search_term'   => $e->search_term,
+                'searchResults' => $e->search_results,
+                'num_items'     => $e->num_items,
+                'capi_status'   => $e->capi_status,
+                'at'            => $e->created_at?->toDateTimeString(),
+                'order'         => $e->event_name === 'Purchase' && $e->event_id !== null && isset($orders[$e->event_id])
+                    ? $orders[$e->event_id]->order_number
+                    : null,
+            ])->all(),
+            'orders' => array_values(array_map(fn ($o): array => [
+                'orderNumber'   => $o->order_number,
+                'status'        => $o->status,
+                'outcome'       => OrderOutcomes::bucket($o->status),
+                'totalTaka'     => intdiv((int) $o->total_poisha, 100),
+                'district'      => $o->district_name,
+                'paymentMethod' => $o->payment_method,
+                'placedAt'      => $o->created_at?->toDateTimeString(),
+            ], $orders)),
+        ];
     }
 }
