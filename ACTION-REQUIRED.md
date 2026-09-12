@@ -141,9 +141,12 @@ until you are taking orders.
 
 ## 6b. Meta ads — three pastes in the panel — 5 minutes
 
-The browser pixel has been live since 6 September. The server copy of each
-event — the Conversions API — is built and waits only for an access token.
-It all goes in the panel now; no `.env`, no push.
+The browser pixel has been live since 6 September, and the server copy of each
+event is going out too: a token is already set in the server's `.env`, which
+is why `POST /api/track` answers `202` rather than `204`. So this is no longer
+a setup job — it is a **check**, and moving the keys into the panel so the next
+change does not need File Manager. It all goes in the panel now; no `.env`, no
+push.
 
 1. **Events Manager → your pixel → Settings → Conversions API → Generate
    access token.** Copy it.

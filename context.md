@@ -2310,7 +2310,7 @@ half-working. **Do not "fix" them by inventing placeholder credentials.**
 | Item | State | What unblocks it |
 |---|---|---|
 | **Google Search Console** | Nothing set up. `sitemap.xml` is correct and current (38 routes). | Verify the domain, submit the sitemap. ACTION-REQUIRED §7b. |
-| **Meta Conversions API** | Browser pixel is LIVE (2026-09-06). The server half is dormant until an access token is in force. | Paste the token (Events Manager → Settings → Generate access token) into **Admin → Pixel setup** and press Send test event — ACTION-REQUIRED §6b. `.env` is only the fallback until the panel has something saved. Pixel keeps working alone until then. |
+| **Meta Conversions API** | **Both halves are live.** Browser pixel since 2026-09-06; the server half forwards too — `POST /api/track` answered `202` on 2026-09-12, and TrackController only returns that after forwarding, so a pixel id AND a token are in force from the server's `.env`. | Nothing is blocked. What is NOT proved from outside is that Meta ACCEPTS them: open **Admin → Pixel setup**, read the last-24-hours line (sent / failed, and Meta's last refusal in plain words), and press **Send test event** with Events Manager → Test events open. Saving the keys there takes over from `.env` — see ACTION-REQUIRED §6b. |
 | **SMS to customers** | `modules/sms`, dormant. | bulksmsbd account, 3 `.env` keys. §6c. |
 | **bKash / Nagad** | `modules/payments`, dormant, sandbox by default. | Merchant onboarding. §6d. |
 | **301s from old `/modules/…` URLs** | Deliberately NOT added. | Old URLs work and canonicalise to the new ones, which is how Google consolidates. Redirects would mean mangling query strings for marginal gain — revisit only if Search Console shows the old URLs lingering. |
