@@ -221,6 +221,90 @@ own report is worse than a crawler counted as one.
 
 ---
 
+## Ad spend
+
+What the campaigns cost, so the panel can divide revenue by it. Read from
+Meta's Marketing API into `campaign_spend`, one row per campaign per day —
+the shape Meta reports and the only one that can answer any window afterwards.
+
+**Why the shop keeps a number Meta already has.** Meta counts a Purchase when
+"Place order" is pressed. In a cash-on-delivery shop that is a promise, and
+Meta will never learn which promises were kept. `orders.status` does. With the
+spend beside it, the Campaigns screen reports what a DELIVERED order cost —
+the figure Ads Manager cannot compute for a COD shop.
+
+Reading is `admin:orders`, the same capability as the revenue it is divided
+into. Changing where the money is read from is `admin:settings.edit`: it is a
+credential, and an exchange rate that is wrong rewrites every cost-per-order
+on the screen.
+
+### `GET /api/admin/marketing/ad-spend?days=7|30|90|365`
+
+`settings` (never the token itself — only whether there is one and where it
+came from), `rows` for the window, and `byCampaign`, the same spend keyed by
+the utm_campaign it belongs to.
+
+### `PUT /api/admin/marketing/ad-spend`
+
+`{ accountId, token?, removeToken?, takaPerUnit? }`. The account id is stored
+digits-only, so `act_123` and `123` are the same account said two ways. The
+token is optional: without one the Conversions API token is used, which may or
+may not carry `ads_read`.
+
+### `POST /api/admin/marketing/ad-spend/sync`
+
+Pulls `act_<id>/insights` at campaign level with `time_increment=1` for the
+last `days` days and writes over what it finds — Meta revises a day's spend for
+a day or two, and the unique key on campaign and date makes re-reading free.
+
+**200 either way.** A refusal from Meta is an ANSWER this screen shows in
+words: `{ ok: false, message }` naming the permission or the key that has to
+change. A sync that answered 500 would put the one sentence the merchant needs
+into the browser's console.
+
+It **refuses rather than guess**: an account billing in something other than
+taka with no rate set stops with that sentence rather than adding dollars to
+taka.
+
+### `POST /api/admin/marketing/ad-spend/rows`
+
+`{ campaign, spendDate, taka }` — money Meta cannot see: a boosted post, an ad
+from another account, an influencer paid in cash. Stored with `source=manual`,
+and **a sync never overwrites a manual row**: it is somebody's record of money
+that has no other record.
+
+### `DELETE /api/admin/marketing/ad-spend/rows/{id}`
+
+Manual rows only. A row that came from Meta is re-created by the next sync, so
+deleting it would be a lie that lasts a day.
+
+### `POST /api/admin/marketing/ad-spend/map`
+
+`{ map: { "<meta campaign id>": "<utm_campaign>" } }`.
+
+The join everything rests on: Meta knows a campaign by its NAME, the shop knows
+it by the utm_campaign on the ad's link. The two are compared with both
+flattened to lowercase dashes — "Sales BD — Cold (Sept 2026)" matches
+`sales-bd-cold-sept-2026` — and where that is not enough this map wins.
+
+Spend that still matches nothing is reported as its own row rather than
+dropped. An ad running without utm tags is real, common, and invisible
+everywhere else; the row is how the merchant finds out.
+
+### `php artisan marketing:ad-spend-sync --days=7`
+
+The same pull, for cron. Once a day is plenty.
+
+### What `GET /admin/marketing/campaigns` gained
+
+Each row now carries `spendTaka`, `delivered`, `returned`, `deliveredTaka`,
+`costPerOrder`, `costPerDelivered`, `roas` and `roasDelivered`, plus
+`spendOnly` for a campaign that spent and sold nothing. `meta` gains
+`spendTaka`, `deliveredTaka`, `adDeliveredTaka`, both blended returns, and the
+ad-spend settings so the screen can say what is missing.
+
+---
+
 ## Pixel setup
 
 The three Meta keys, edited in the panel instead of `.env`. The why — the

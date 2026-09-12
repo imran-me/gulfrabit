@@ -177,6 +177,50 @@ which the panel wins for all three.
 
 ---
 
+## 6b-2. Ad spend, so the panel can say what an order cost — 3 minutes
+
+Meta counts a Purchase the moment **Place order** is pressed. For a
+cash-on-delivery shop that is a promise, not a sale — the phone goes
+unanswered, the parcel is refused, the order was placed for fun. So every
+return-on-spend figure in Ads Manager is measured against money that partly
+never arrives, and Meta has no way to know which part.
+
+The panel does know: the orders screen says what was delivered. Give it the
+spend and **Admin → Campaigns** reports what a *delivered* order cost, per
+campaign — which no ad platform can tell you.
+
+1. **Admin → Campaigns → Ad spend → Where the spend is read from.** Paste the
+   **ad account id** — the number beside your ad account in Ads Manager, e.g.
+   `3375856489152009`. **Save**, then press **Sync from Meta**.
+
+2. If the sync says the token is not allowed to read the account, it needs the
+   **`ads_read`** permission, which a Conversions API token usually does not
+   carry. **Business Settings → Users → System users → Add** (or an existing
+   one) → **Generate new token** → pick the app → tick **`ads_read`** → copy
+   it into the same panel and sync again. Nothing else needs that token.
+
+3. **Optional, one line of cron**, so a week nobody opened the screen still has
+   its spend recorded:
+
+   ```
+   0 4 * * * cd /home/u239665931/domains/gulfrabit.com/public_html && php artisan marketing:ad-spend-sync >/dev/null 2>&1
+   ```
+
+**If the ad account bills in dollars** rather than taka, the sync stops and
+says so, and a "taka per USD" box appears. Fill it in and sync again — it will
+not add dollars to taka on its own.
+
+**Spend Meta cannot see** — a boosted post, an influencer paid in cash, an ad
+from another account — is typed in on the same screen and is never overwritten
+by a sync.
+
+**If a campaign's spend shows as its own row** marked *no orders matched*, the
+ad's link is missing its utm tags, or the tag is spelled differently from the
+Meta campaign name. Type the tag beside it under *Spend with no campaign to
+match* and the two are tied together for good.
+
+---
+
 ## 6c. SMS to customers — one account, three .env keys
 
 The code is built and dormant (modules/sms). When an order is marked

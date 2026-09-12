@@ -27,7 +27,10 @@ blocker can do.
 | `backend/Services/TrafficClassifier.php` | user agent + referrer + landing URL → channel, device, browser |
 | `backend/Services/VisitContext.php` | pins a visit's channel, landing page and new-or-returning to its first event |
 | `campaigns.html` + `campaigns-page.js` | the Campaigns screen — what each ad sold, per period |
-| `backend/Controllers/AdminCampaignController.php` | the grouping behind it, off orders.ad_source |
+| `backend/Controllers/AdminCampaignController.php` | the grouping behind it, off orders.ad_source — with spend, cost per delivered order and both returns on spend |
+| `backend/Services/MetaAdSpend.php` | reads spend per campaign per day from Meta's Marketing API; refuses rather than add dollars to taka |
+| `backend/Services/AdSpendSettings.php` | the ad account, the optional ads_read token, the rate, and the campaign→utm map |
+| `php artisan marketing:ad-spend-sync` | the same pull, for a daily cron |
 | `pixel.html` + `pixel-page.js` + `pixel.css` | the Pixel setup screen — the three Meta keys |
 | `backend/Services/MetaPixelSettings.php` | which keys are in force: the panel's row, or `.env` until there is one |
 | `backend/Services/PixelStamp.php` | writes the pixel block into every storefront page on the server |

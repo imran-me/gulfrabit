@@ -2228,6 +2228,64 @@ the shop had no phone visitors that week.
 
 ---
 
+### What a delivered order costs (2026-09-12)
+
+The Campaigns screen said, in a comment, that ad spend deliberately stays in
+Ads Manager: pulling it is an integration for a number Meta already shows you.
+That was right while the shop could only count orders. It stopped being right
+the day the Tracking screen could follow a tracked purchase through to
+**delivery**.
+
+**The reason it matters here and not in most shops.** Meta counts a Purchase
+when "Place order" is pressed. In a cash-on-delivery shop that is a promise:
+the phone goes unanswered, the parcel is refused at the door, the order was
+placed for fun. Meta cannot know which — it never hears from the rider — so
+every return-on-spend figure in Ads Manager is computed against revenue that
+partly never arrives. `orders.status` knows. Put the spend beside it and the
+screen answers what no ad platform can for a COD shop: what a DELIVERED order
+cost, and which campaign is buying cancellations at full price.
+
+**Where the spend comes from.** `act_<id>/insights` at campaign level with
+`time_increment=1` — one campaign, one day, one figure, which is exactly the
+row `campaign_spend` stores. A sync re-reads the last week and writes over what
+it finds, because Meta revises a day's spend for a day or two afterwards and
+the unique key on (campaign, date) makes that free. Button on the screen,
+`php artisan marketing:ad-spend-sync` for cron.
+
+**Three decisions worth keeping.**
+
+1. **It refuses rather than guess.** An ad account billing in dollars with no
+   taka rate set stops the sync with that sentence. Adding dollars to taka
+   because a number was missing is the one outcome worse than no report.
+2. **A manual row survives a sync.** Money typed in by hand — a boosted post,
+   an influencer paid in cash — is the only record of that spend, and a sync
+   that silently replaced it would delete it.
+3. **Unmatched spend gets its own row**, marked *no orders matched*, rather
+   than being dropped. Meta knows a campaign by its NAME and the shop knows it
+   by the `utm_campaign` on the link; the two are compared flattened to
+   lowercase dashes, and where that is not enough the merchant ties them
+   together once. An ad running with no utm tags at all is common, costs real
+   money, and is invisible in every other report.
+
+**The token is usually the wrong one, and the screen says so.** Reading spend
+needs `ads_read`, which a Conversions API token from Events Manager generally
+does not carry. So the ads token is optional, the Conversions API one is tried
+first, and Meta's refusal is translated into the sentence that names the
+permission — "sync failed" would send nobody to Business Settings.
+
+**A build trap, avoided on purpose.** `admin.css` had an uncommitted change in
+the working tree while this shipped, so `campaigns.html` was built in a clean
+worktree at HEAD instead. A page stamped with the hash of an unreleased
+stylesheet pins that URL — served `immutable` — to today's bytes in every
+browser that loads it before the CSS lands. That is the 2026-08-30 bug in
+reverse, and it is invisible until somebody's panel looks wrong for a year.
+
+**Not done.** No cost of goods, so nothing here is profit — "back per taka" is
+revenue against spend, and the margin is still the merchant's own arithmetic.
+No automatic budget changes: this reports, it does not touch the ad account.
+
+---
+
 ## 10. URLs ARE ROUTES (2026-08-13) — read before touching a link
 
 Every page on the site answers at a readable route. There is no `.html` and no
