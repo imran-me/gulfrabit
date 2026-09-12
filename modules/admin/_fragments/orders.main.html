@@ -76,8 +76,11 @@
                    that decides who drives. -->
               <th scope="col">Deliver to</th>
               <th scope="col">Items</th>
+              <!-- Total and Payment are one column. What the order comes to,
+                   what has happened to that money, and how it is being paid are
+                   one subject, and three of the nine columns were spending
+                   their width on padding rather than on content. -->
               <th scope="col">Total</th>
-              <th scope="col">Payment</th>
               <th scope="col">Status</th>
               <!-- The next step, on the row. Working twenty orders through a
                    stage should not mean opening twenty pages. -->
@@ -85,7 +88,7 @@
             </tr>
           </thead>
           <tbody data-orders-body>
-            <tr><td colspan="9" class="atable__empty">Loading orders…</td></tr>
+            <tr><td colspan="8" class="atable__empty">Loading orders…</td></tr>
           </tbody>
         </table>
       </div>

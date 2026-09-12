@@ -116,7 +116,7 @@ try {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cinzel:wght@600;700&family=Noto+Kufi+Arabic:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=3a7d16d2">
-  <link rel="stylesheet" href="../../modules/admin/admin.css?v=17b10d83">
+  <link rel="stylesheet" href="../../modules/admin/admin.css?v=39efc10f">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -339,8 +339,11 @@ try {
                    that decides who drives. -->
               <th scope="col">Deliver to</th>
               <th scope="col">Items</th>
+              <!-- Total and Payment are one column. What the order comes to,
+                   what has happened to that money, and how it is being paid are
+                   one subject, and three of the nine columns were spending
+                   their width on padding rather than on content. -->
               <th scope="col">Total</th>
-              <th scope="col">Payment</th>
               <th scope="col">Status</th>
               <!-- The next step, on the row. Working twenty orders through a
                    stage should not mean opening twenty pages. -->
@@ -348,7 +351,7 @@ try {
             </tr>
           </thead>
           <tbody data-orders-body>
-            <tr><td colspan="9" class="atable__empty">Loading orders…</td></tr>
+            <tr><td colspan="8" class="atable__empty">Loading orders…</td></tr>
           </tbody>
         </table>
       </div>
@@ -375,6 +378,6 @@ try {
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=0451c724"></script>
-  <script type="module" src="../../modules/admin/orders-page.js?v=17ac3126"></script>
+  <script type="module" src="../../modules/admin/orders-page.js?v=390d6250"></script>
 </body>
 </html>

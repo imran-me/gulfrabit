@@ -240,8 +240,7 @@ const SKELETON_CELLS = [
   ['78%', '58%'],            // name · phone
   ['64%', '44%'],            // district · thana
   ['thumbs', '92%', '50%'],  // pictures · names · tally
-  ['58%'],                   // total
-  ['pill', '66%'],           // payment · method
+  ['58%', 'pill'],           // total · how it is paid
   ['pill', 'track'],         // stage · pipeline
   ['btn'],                   // the next step
 ];
@@ -327,16 +326,14 @@ function paint({ data, meta }) {
       </td>
       <td class="aplace">
         <div>${escapeHtml(o.district || '—')}</div>
-        ${o.area ? `<div class="atable__sub">${escapeHtml(o.area)}</div>` : ''}
+        ${sameWord(o.area, o.district) ? '' : `<div class="atable__sub">${escapeHtml(o.area)}</div>`}
       </td>
       ${itemsCell(o)}
-      <td class="atable__num">
-        ৳ ${Number(o.totalTaka).toLocaleString('en-BD')}
-        ${o.promoCode ? `<div class="atable__sub">${escapeHtml(o.promoCode)}</div>` : ''}
-      </td>
-      <td>
-        ${pill(o.paymentStatus, paymentTone(o.paymentStatus))}
-        <div class="atable__sub">${escapeHtml(payMethod(o.paymentMethod))}</div>
+      <td class="amoney">
+        <div class="amoney__sum">৳ ${Number(o.totalTaka).toLocaleString('en-BD')}</div>
+        <div class="amoney__how">${pill(o.paymentStatus, paymentTone(o.paymentStatus))}<span
+          class="atable__sub">${escapeHtml(payMethod(o.paymentMethod))}</span></div>
+        ${o.promoCode ? `<div class="atable__sub amoney__promo">${escapeHtml(o.promoCode)}</div>` : ''}
       </td>
       <td>${pill(stageLabel(o.status), stageTone(o.status), true)}${stageTrack(o)}${preorderNote(o)}</td>
       <td>${rowAction(o)}</td>
@@ -374,8 +371,8 @@ function itemsCell(o) {
 
   if (!stack) return `<td class="atable__num">${o.itemCount}</td>`;
 
-  return `<td class="atable__items">${stack}${itemNames(o)}
-    <div class="atable__sub aitems__count">${itemTally(o)}</div></td>`;
+  return `<td class="atable__items"><div class="aitems">${stack}<div class="aitems__text">${
+    itemNames(o)}<div class="atable__sub aitems__count">${itemTally(o)}</div></div></div></td>`;
 }
 
 /**
@@ -454,6 +451,23 @@ function howLongAgo(iso) {
 
   const months = Math.round(days / 30);
   return `${months} month${months === 1 ? '' : 's'} ago`;
+}
+
+/**
+ * Is the thana just the district said twice?
+ *
+ * Plenty of Dhaka addresses are typed with the city in both boxes, and a cell
+ * reading "Dhaka" over "Dhaka" looks like the screen is broken rather than like
+ * the address is thin. Compared case- and space-insensitively because the two
+ * fields are typed by different people at different times — one at checkout,
+ * one from a dropdown — and "dhaka " is the same place as "Dhaka".
+ *
+ * Also true when there is no area at all, which is the same outcome: print one
+ * line, not two.
+ */
+function sameWord(a, b) {
+  const norm = (v) => String(v || '').trim().toLowerCase();
+  return !norm(a) || norm(a) === norm(b);
 }
 
 /** How they are paying, spelled out. The stored value is a key, not a word. */

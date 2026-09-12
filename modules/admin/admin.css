@@ -763,6 +763,19 @@
   overflow-y: hidden;
   scrollbar-width: thin;
 }
+/* The page's scrollbar style is sized for a content pane, and on this strip —
+   which overflows by a tab or two — it draws a near-full-width bar in the
+   page's accent colour directly under the tabs, louder than the tabs. Thin and
+   faint here: it marks that there is more to the right without competing with
+   what it is scrolling. */
+.atabs::-webkit-scrollbar { height: 4px; }
+.atabs::-webkit-scrollbar-track { background: transparent; }
+.atabs::-webkit-scrollbar-thumb {
+  background: var(--gr-border);
+  border: 0;
+  border-radius: var(--radius-pill);
+}
+.atabs::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 .atab {
   display: inline-flex;
   align-items: center;
@@ -2338,8 +2351,34 @@
    that must not wrap say so themselves rather than the cell forbidding it for
    everything inside. */
 .atable__items { min-width: 11rem; }
-.atable__items .atable__sub { margin-top: 3px; }
-.aitems__count { white-space: nowrap; }
+/* Wraps. "9 items · 3 products" held on one line overflowed the cell into the
+   money column at 1440, which is the width a laptop gives this screen — and a
+   tally that runs under the total beside it is worse than one on two lines. */
+.aitems__count { margin-top: 3px; }
+
+/* The picture BESIDE the words, not above them.
+
+   Stacked, this cell was a 34px photograph, then the names, then the tally —
+   three bands of it — while Order, Customer, Total and Payment each sat in one
+   or two lines at the top of the row. The row took its height from this column
+   and every other column got a hole underneath it. Most orders in this shop are
+   a single product, so the stacked version spent ninety vertical pixels saying
+   what fits on one line.
+
+   Side by side, the first line of the product name sits on the same baseline as
+   the customer's name and the total — which is the alignment that was missing.
+
+   It WRAPS rather than squeezing: `flex-basis: 8rem` on the text means that
+   when the stack is three pictures and a "+37" tile, the words drop to their
+   own line instead of being crushed into a column too narrow to read. One rule
+   covers the common order and the wholesale one. */
+.aitems {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2) 10px;
+}
+.aitems__text { flex: 1 1 5rem; min-width: 0; }
 
 /* The products, written out. Two lines, clamped.
    A clamp rather than a character count: it breaks between words, fills the
@@ -2349,7 +2388,7 @@
    max-width bounds what the column may demand of a nine-column table; without
    it one order of long names widens this column for all twenty-five rows. */
 .aitems__names {
-  margin: var(--space-2) 0 0;
+  margin: 0;
   max-width: 15rem;
   font-size: var(--fs-12);
   line-height: var(--lh-snug);
@@ -2556,3 +2595,37 @@
    respond to a pointer that is only passing over it. */
 .atable tbody tr.askel:hover { background: var(--surface-raised); }
 .askel { pointer-events: none; }
+
+/* ---- Money, and what has happened to it -------------------------------
+   One column, because what the order comes to, whether that money has arrived,
+   and how it is being paid are one subject — and as three columns they spent
+   most of their width on padding. "৳ 10,150 / Pending · Cash on delivery /
+   RAMADAN10" reads as a sentence about this order's money; the same facts in
+   three columns read as three unrelated lookups. */
+.amoney { white-space: nowrap; }
+.amoney__sum {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-semibold);
+  /* A shade larger than the row. On a list worked by a shop, the total is the
+     number the eye goes to, and it was set at the same weight as the district. */
+  font-size: var(--fs-16);
+}
+/* Pill and method on one line: the pill is a shape and the method is a word,
+   and stacked they made a three-line cell out of one fact. */
+.amoney__how {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: 4px;
+}
+/* The method wraps under the pill only when it genuinely cannot fit, which on
+   this shop means "Cash on delivery" in a narrow window. */
+.amoney__how .atable__sub { white-space: normal; }
+
+/* Gold, the project's colour for something scarce — a code is the one line here
+   that explains why the number above it is lower than the items add up to. */
+.amoney__promo {
+  margin-top: 3px;
+  color: var(--gold-ink);
+  font-variant-numeric: tabular-nums;
+}
