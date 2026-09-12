@@ -1,11 +1,11 @@
       <div class="admin__head">
         <div>
           <h1 class="admin__title">Campaigns</h1>
-          <p class="admin__sub" data-cg-sub>What each ad sold, next to the organic baseline.</p>
+          <p class="admin__sub" data-cg-sub>What each ad cost, what it sold, and what was actually delivered.</p>
         </div>
         <!-- Range as a select, not tabs: four options, one decision, and it
              reads at a glance which window the whole screen is showing. -->
-        <div class="afilters__field" style="max-width:180px">
+        <div class="afilters__field cgperiod">
           <label for="cg-days">Period</label>
           <select class="select-gr" id="cg-days" data-cg-days>
             <option value="7">Last 7 days</option>
@@ -18,56 +18,179 @@
 
       <p class="aerror" data-cg-error hidden role="alert"></p>
 
-      <!-- The three numbers a budget decision needs: how much selling the ads
-           did, how much of all selling that is, and how many orders it took. -->
+      <!-- The numbers a budget decision needs, and the one that decides it:
+           what was spent, and what came back from the parcels that were
+           actually delivered. -->
       <div class="acards" data-cg-cards hidden>
+        <div class="acard">
+          <span class="acard__n" data-cg-spend>—</span>
+          <span class="acard__l">Ad spend</span>
+        </div>
         <div class="acard">
           <span class="acard__n" data-cg-ad-revenue>—</span>
           <span class="acard__l">Revenue from ads</span>
         </div>
-        <div class="acard">
-          <span class="acard__n" data-cg-ad-share>—</span>
-          <span class="acard__l">Share of all revenue</span>
+        <div class="acard acard--action">
+          <span class="acard__n" data-cg-roas-delivered>—</span>
+          <span class="acard__l">Back per taka spent, delivered</span>
         </div>
         <div class="acard">
           <span class="acard__n" data-cg-ad-orders>—</span>
           <span class="acard__l">Orders from ads</span>
         </div>
+        <div class="acard">
+          <span class="acard__n" data-cg-ad-share>—</span>
+          <span class="acard__l">Share of all revenue</span>
+        </div>
       </div>
 
-      <div class="atable-wrap" style="margin-top:var(--space-5)">
+      <div class="atable-wrap cgtable">
         <table class="atable">
           <thead>
             <tr>
               <th scope="col">Campaign</th>
-              <th scope="col">Source</th>
+              <th scope="col" class="atable__num">Spend</th>
+              <th scope="col" class="atable__num">Back per taka</th>
+              <th scope="col" class="atable__num">Cost per delivered</th>
+              <th scope="col" class="atable__num">Delivered value</th>
               <th scope="col" class="atable__num">Orders</th>
+              <th scope="col" class="atable__num">Delivered</th>
               <th scope="col" class="atable__num">Cancelled</th>
+              <th scope="col" class="atable__num">Returned</th>
               <th scope="col" class="atable__num">Revenue</th>
+              <th scope="col" class="atable__num">Cost per order</th>
               <th scope="col">Last order</th>
             </tr>
           </thead>
           <tbody data-cg-body>
-            <tr><td colspan="6" class="atable__empty">Loading campaigns…</td></tr>
+            <tr><td colspan="12" class="atable__empty">Loading campaigns…</td></tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Spend lives in Meta on purpose — see the module README. Saying so
-           here stops the next person hunting for a column that was never
-           meant to exist. -->
-      <p class="admin__sub" style="margin-top:var(--space-4)">
-        Ad <em>spend</em> stays in Meta Ads Manager; this screen shows what each campaign
-        <em>sold</em>. Put the two side by side and the budget writes itself.
+      <p class="cgset__note">
+        <strong>Back per taka</strong> is delivered value divided by spend — the only version of
+        return on spend that counts money the shop has actually been paid. Meta's own figure
+        counts every order the moment it is placed, including the ones that come back.
+        For the visits behind these orders — which ad creative they came from, what they looked
+        at and where they left — see <a href="/admin/tracking?tab=sources">Tracking → Sources</a>.
       </p>
 
-      <!-- This screen counts ORDERS, by the ad that recruited the customer.
-           Tracking counts VISITS, by how each one arrived, and follows them
-           through to delivery. The two answer different halves of the same
-           question and neither replaces the other, so each says where the
-           other lives. -->
-      <p class="admin__sub" style="margin-top:var(--space-3)">
-        For the visits behind these orders — which ad creative they came from, what they
-        looked at, where they left, and what became of each order afterwards — see
-        <a href="/admin/tracking?tab=sources">Tracking → Sources</a>.
-      </p>
+      <!-- WHERE THE SPEND COMES FROM.
+           Below the report on purpose: it is set up once and then read every
+           day, so the numbers come first and the plumbing sits underneath. -->
+      <section class="acard cgset" aria-labelledby="cg-spend-h">
+        <div class="cgset__head">
+          <div>
+            <h2 class="cgset__title" id="cg-spend-h">Ad spend</h2>
+            <p class="cgstatus" data-cg-spend-status>Checking…</p>
+          </div>
+          <div class="afilters__actions">
+            <button type="button" class="btn-gr btn-gr--ghost" data-cg-sync>Sync from Meta</button>
+          </div>
+        </div>
+
+        <p class="cgmsg" data-cg-sync-msg hidden role="status"></p>
+
+        <details class="cgpane" data-cg-setup>
+          <summary>Where the spend is read from</summary>
+          <div class="cgpane__body">
+            <div class="afilters">
+              <div class="afilters__field">
+                <label for="cg-account">Ad account id</label>
+                <input class="input-gr" id="cg-account" data-cg-account inputmode="numeric"
+                       placeholder="3375856489152009" autocomplete="off">
+              </div>
+              <div class="afilters__field afilters__field--wide">
+                <label for="cg-token">Access token with ads_read
+                  <span class="cgset__field-note">Optional — the Conversions API token is tried first</span>
+                </label>
+                <input class="input-gr" id="cg-token" data-cg-token type="password" autocomplete="off"
+                       placeholder="leave blank to keep the saved one">
+              </div>
+              <div class="afilters__field" data-cg-rate-field hidden>
+                <label for="cg-rate">Taka per <span data-cg-currency>unit</span></label>
+                <input class="input-gr" id="cg-rate" data-cg-rate inputmode="decimal" placeholder="120">
+              </div>
+              <div class="afilters__actions">
+                <button type="button" class="btn-gr" data-cg-save>Save</button>
+              </div>
+            </div>
+
+            <label class="live">
+              <input type="checkbox" data-cg-remove-token>
+              <span class="live__dot" aria-hidden="true"></span>
+              Remove the token saved here and use the Conversions API one
+            </label>
+
+            <p class="cgset__note">
+              The account id is the number beside your ad account in Ads Manager. Reading spend
+              needs the <code>ads_read</code> permission, which a Conversions API token often does
+              not carry — if the sync says so, generate a System User token in Business Settings
+              and save it here. It is stored encrypted and never shown again.
+            </p>
+            <p class="cgset__note">
+              To keep it current without pressing anything, add one line to cron on the server:
+              <code>0 4 * * * cd &lt;app&gt; &amp;&amp; php artisan marketing:ad-spend-sync</code>
+            </p>
+          </div>
+        </details>
+
+        <details class="cgpane" data-cg-manual>
+          <summary>Spend Meta cannot see</summary>
+          <div class="cgpane__body">
+            <p class="cgset__note">
+              A boosted post from the page, an influencer paid in cash, an ad from another
+              account. Typed rows are kept exactly as entered, and a sync never overwrites them.
+            </p>
+            <div class="afilters">
+              <div class="afilters__field">
+                <label for="cg-m-campaign">Campaign</label>
+                <input class="input-gr" id="cg-m-campaign" data-cg-m-campaign placeholder="eid-offer-2026" autocomplete="off">
+              </div>
+              <div class="afilters__field">
+                <label for="cg-m-date">Date</label>
+                <input class="input-gr" id="cg-m-date" data-cg-m-date type="date">
+              </div>
+              <div class="afilters__field">
+                <label for="cg-m-taka">Spent (৳)</label>
+                <input class="input-gr" id="cg-m-taka" data-cg-m-taka inputmode="decimal" placeholder="1500">
+              </div>
+              <div class="afilters__actions">
+                <button type="button" class="btn-gr" data-cg-m-add>Add</button>
+              </div>
+            </div>
+
+            <div class="atable-wrap cgtable">
+              <table class="atable atable--tight">
+                <thead>
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Campaign</th>
+                    <th scope="col" class="atable__num">Spent</th>
+                    <th scope="col">Where from</th>
+                    <th scope="col"><span class="sr-only">Remove</span></th>
+                  </tr>
+                </thead>
+                <tbody data-cg-rows>
+                  <tr><td colspan="5" class="atable__empty">Nothing recorded for this period.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </details>
+
+        <!-- The join that decides every number above: Meta knows a campaign by
+             its name, the shop knows it by the utm_campaign on the link. Where
+             the two do not match on their own, this is where they are tied
+             together — and until they are, the spend shows as its own row. -->
+        <div data-cg-unmatched hidden>
+          <h3 class="cgsub-title" id="cg-unmatched-h">Spend with no campaign to match</h3>
+          <p class="cgset__note">
+            These campaigns spent money in this period and no order carried their utm tag.
+            Either the ad's link is missing its tags, or the tag is spelled differently — type
+            the tag here to tie them together.
+          </p>
+          <div class="cgmap" data-cg-map></div>
+        </div>
+      </section>

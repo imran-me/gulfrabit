@@ -1,0 +1,132 @@
+/**
+ * campaigns.css — the Campaigns screen's own pieces.
+ *
+ * Almost everything here is already a shared admin component: the cards, the
+ * table, the filter row. What this file adds is the setup that sits UNDER the
+ * report — where the spend is read from, the rows typed by hand, the campaigns
+ * whose names do not match their utm tags.
+ *
+ * That ordering is the design: the numbers are read every morning and the
+ * plumbing is set once, so the plumbing folds away behind a summary and the
+ * report keeps the top of the screen.
+ */
+
+/* ---- The report -------------------------------------------------------- */
+
+/* Four options and one decision: the control does not need the width of a
+   search box. */
+.cgperiod { max-width: 180px; }
+
+.cgtable { margin-top: var(--space-5); }
+
+/* ---- The setup section ------------------------------------------------- */
+
+.cgset { margin-top: var(--space-6); }
+
+.cgsub-title { margin: var(--space-5) 0 0; font-size: var(--fs-16); line-height: var(--lh-tight); }
+
+/* The switch and the note under it are a paragraph apart, not a line. */
+.cgpane__body .live { margin-top: var(--space-3); }
+
+/* A plain admin__head would go sticky here — it is styled for the top of a
+   screen. This is the same shape, standing still, inside a card. */
+.cgset__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.cgset__title { margin: 0; font-size: var(--fs-20); line-height: var(--lh-tight); }
+
+.cgset__note { margin: var(--space-3) 0 0; color: var(--text-secondary); font-size: var(--fs-14); max-width: 74ch; }
+.cgset__note code {
+  padding: .1em .4em;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  font-size: .92em;
+}
+
+/* Folded away, because it is set once and read never. The marker stays the
+   browser's own: a disclosure that does not look like a disclosure is a
+   disclosure nobody opens. */
+.cgpane { margin-top: var(--space-4); border-top: 1px solid var(--border-hairline); padding-top: var(--space-4); }
+.cgpane > summary {
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-14);
+  color: var(--text-primary);
+}
+.cgpane > summary:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; border-radius: var(--radius-sm); }
+.cgpane__body { margin-top: var(--space-4); }
+
+.cgset__field-note { display: block; font-weight: var(--fw-regular); color: var(--text-muted); font-size: var(--fs-11); }
+
+/* ---- Status ------------------------------------------------------------ */
+
+.cgstatus {
+  margin: 0;
+  font-size: var(--fs-14);
+  color: var(--text-secondary);
+}
+
+/* A sync's answer — including Meta's refusals, which are the answer most
+   worth reading and are shown in words rather than in a console. */
+.cgmsg {
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+}
+.cgmsg--ok { background: rgba(46, 160, 67, .10); color: #1a7f37; }
+.cgmsg--bad { background: rgba(200, 30, 30, .08); color: var(--gr-error); }
+
+/* ---- Rows that need tying to a campaign -------------------------------- */
+
+.cgmap { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
+
+.cgmap__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-sm);
+}
+
+.cgmap__name { font-weight: var(--fw-semibold); min-width: 0; overflow-wrap: anywhere; }
+.cgmap__spend { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.cgmap__row .input-gr { max-width: 18rem; }
+
+/* ---- Table extras ------------------------------------------------------ */
+
+/* Campaign tags are long and hyphenated, and a column narrow enough to break
+   "sales-bd-cold-sept2026" across three lines makes every row three lines
+   tall. The table already scrolls sideways; the name gets the room instead. */
+.cgtable .atable td:first-child,
+.cgtable .atable th:first-child { min-width: 13rem; }
+
+.cgtable__key { font-weight: var(--fw-bold); }
+
+/* The small print under a figure belongs UNDER it: "৳ 0.42" and "৳ 0.95
+   placed" on one line reads as one number said twice. */
+.cgtable .atable__sub { display: block; }
+
+/* Spend with no orders behind it: not an error, but the row the merchant is
+   most likely to want to act on, so it is marked rather than left to be
+   noticed. */
+.cgrow--spend-only td:first-child::after {
+  content: "no orders matched";
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  color: var(--gr-error);
+}
+
+.cgmuted { color: var(--text-muted); }

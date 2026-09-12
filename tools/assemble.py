@@ -907,7 +907,7 @@ ADMIN_PAGES = [
 
     ("modules/marketing/campaigns.html", "Campaigns — GulfRabit Admin",
      "modules/marketing/_fragments/campaigns.main.html",
-     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin.css", "/modules/marketing/campaigns.css"],
      ["/modules/admin/admin-shell.js", "/modules/marketing/campaigns-page.js"], True),
 
     # The three Meta keys. Behind admin:settings (owners by default), because
