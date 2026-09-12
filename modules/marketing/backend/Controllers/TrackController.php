@@ -125,7 +125,7 @@ class TrackController extends Controller
             'event_name'       => $data['event_name'],
             'event_time'       => $time,
             'event_id'         => $data['event_id'],
-            'event_source_url' => $data['event_source_url'] ?? null,
+            'event_source_url' => $this->sourceUrl($request, $data),
             'action_source'    => 'website',
             'user_data'        => $this->userData($request, $data['attribution'] ?? null, $time),
             'custom_data'      => $this->customData($data['custom_data'] ?? null),
@@ -341,6 +341,46 @@ class TrackController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * The page the event happened on — NEVER absent.
+     *
+     * `action_source: website` makes event_source_url REQUIRED, and this used
+     * to pass through whatever the browser sent, with array_filter dropping a
+     * null. analytics.js always sends it, so real traffic was fine; anything
+     * else posting to this route — a smoke test, a probe, an old cached copy
+     * of the script — produced an event Meta was certain to refuse, one
+     * refusal per call, in a dashboard whose headline then reads "Conversions
+     * API failing" and blames the access token. (That is exactly what
+     * happened on 2026-09-12: 288 of 289 events accepted, and the one refused
+     * was a hand-made POST from this session with no event_source_url.)
+     *
+     * The fallbacks are the truth in descending order of confidence: the path
+     * the browser reported for this same event, made absolute against the host
+     * it posted to; then the Referer; then the site root. A reconstructed URL
+     * is worth more than a guaranteed rejection, and Meta uses this field for
+     * reporting rather than matching.
+     *
+     * @param array<string, mixed> $data
+     */
+    private function sourceUrl(Request $request, array $data): string
+    {
+        $given = trim((string) ($data['event_source_url'] ?? ''));
+
+        if ($given !== '') {
+            return $given;
+        }
+
+        $path = trim((string) ($data['path'] ?? ''));
+
+        if ($path !== '' && str_starts_with($path, '/')) {
+            return url($path);
+        }
+
+        $referer = trim((string) $request->headers->get('referer'));
+
+        return $referer !== '' ? $referer : url('/');
     }
 
     /**
