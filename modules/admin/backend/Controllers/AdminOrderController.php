@@ -33,12 +33,16 @@ class AdminOrderController extends Controller
     /**
      * How many product thumbnails a row on the order list carries.
      *
-     * Three, because the point of the pictures is recognition — "that is the
-     * dates order" — and a fourth does not help anyone recognise anything. The
-     * row prints "+N" for whatever is past this, so the number is the server's
-     * to change alone.
+     * The point of the pictures is recognition — "that is the dates order" —
+     * and recognition is a function of SIZE before it is of count. Two large
+     * photographs beat three small ones in the same column width, which is the
+     * trade admin-thumb.js makes.
+     *
+     * This caps the PAYLOAD. The browser caps what it draws separately, and on
+     * purpose: the two are allowed to disagree for the minute of a deploy
+     * without the column overflowing. See ROW_THUMBS in admin-thumb.js.
      */
-    private const ROW_THUMBS = 3;
+    private const ROW_THUMBS = 2;
 
     public function __construct(
         private readonly OrderFulfilmentService $fulfilment,

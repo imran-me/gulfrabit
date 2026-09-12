@@ -106,30 +106,55 @@ export function thumb(image, title) {
  * The first few products in an order, as overlapping pictures.
  *
  * `lineCount` is how many distinct products the order actually has; `items` is
- * the capped preview the server sent. The difference is drawn as "+N", so the
- * cap lives on the server alone (AdminOrderController::ROW_THUMBS) and the row
- * cannot disagree with it.
+ * the preview the server sent. Everything not drawn becomes "+N", counted from
+ * what was drawn rather than from what arrived — see ROW_THUMBS below for why
+ * those are two different numbers.
+ *
+ * A single-product order gets no stack at all, just its photograph. Overlap is
+ * a way of saying "these belong together"; with one picture there is nothing to
+ * belong to, and the width the overlap would have saved is width that picture
+ * can have instead.
  *
  * Returns '' when there is nothing to draw — including when an older backend
  * sends no preview at all, which is what keeps the order list working through
  * the minute between a deploy landing the JS and landing the PHP.
  */
-export function thumbStack(items, lineCount = 0) {
-  const list = Array.isArray(items) ? items.filter(Boolean) : [];
-  if (!list.length) return '';
+/**
+ * How many pictures a row draws, whatever the server sent.
+ *
+ * The server caps the PAYLOAD at AdminOrderController::ROW_THUMBS so a
+ * forty-line order does not travel as forty titles. This caps the DRAWING, and
+ * the two are allowed to differ: during the minute of a deploy the browser can
+ * be new while the API is still sending the old, larger preview, and three
+ * 56px pictures where two fit is a column that overflows on the live shop for
+ * as long as that takes. Drawing from what actually fits, and counting "+N"
+ * from what was actually drawn, makes that window a non-event.
+ */
+const ROW_THUMBS = 2;
 
-  /* `|| 0` before the subtraction, not after. A missing lineCount makes this
+export function thumbStack(items, lineCount = 0) {
+  const all = Array.isArray(items) ? items.filter(Boolean) : [];
+  if (!all.length) return '';
+
+  const list = all.slice(0, ROW_THUMBS);
+
+  /* Counted from what is DRAWN, not from what arrived, so the badge is right
+     whichever of the two caps is smaller.
+
+     `|| 0` before the subtraction, not after. A missing lineCount makes this
      NaN, and NaN is falsy, so the "+N" would happen to be skipped — but only
      by accident, and the next person to write `more > 0` would be reading a
      comparison that is false for the wrong reason. */
-  const more = Math.max(0, (Number(lineCount) || 0) - list.length);
-  const names = list.map((i) => String(i.title || 'Unnamed product'));
+  const more = Math.max(0, (Number(lineCount) || all.length) - list.length);
+  const names = all.map((i) => String(i.title || 'Unnamed product'));
 
   /* One label for the whole stack, because the pictures are one fact: what is
      in this order. Reading three empty images and a "+2" is not that fact. */
-  const label = names.join(', ') + (more ? `, and ${more} more` : '');
+  const unnamed = Math.max(0, (Number(lineCount) || all.length) - all.length);
+  const label = names.join(', ') + (unnamed ? `, and ${unnamed} more` : '');
 
-  return `<span class="athumbs" role="img" aria-label="${escapeHtml(label)}">${
+  return `<span class="athumbs${list.length === 1 && !more ? ' athumbs--solo' : ''}"
+                role="img" aria-label="${escapeHtml(label)}">${
     list.map((i) => thumb(i.image, i.title)).join('')
   }${more ? `<span class="athumbs__more">+${more}</span>` : ''}</span>`;
 }

@@ -2274,7 +2274,7 @@
      cannot drift apart. 28px rather than 32: this column is competing for the
      width of a ten-column table, and the measurement that decided it is in the
      commit message. */
-  --_stack: 34px;
+  --_stack: 44px;
   display: inline-flex;
   align-items: center;
   /* The ring hangs outside the box; without this the first thumbnail's ring is
@@ -2292,7 +2292,14 @@
    and 16px of a dark product photograph beside another dark product
    photograph is one blob, not two things you can tell apart — which is the
    entire job the pictures are here to do. 20px is the least that reads. */
-.athumbs .athumb + .athumb { margin-left: -10px; }
+.athumbs .athumb + .athumb { margin-left: -14px; }
+
+/* One product, one photograph, at the height of the row rather than a third of
+   it. Most orders in this shop are exactly this, and 34px of a jar is a dark
+   square — the picture only earns its column at a size you can recognise
+   something in. Nothing is overlapping it, so the width two tiles would have
+   shared goes to the one that is there. */
+.athumbs--solo { --_stack: 60px; }
 
 /* Later thumbnails sit ON TOP of earlier ones, so the stack reads front-to-back
    in the order the products were bought. Without this the DOM order wins and
