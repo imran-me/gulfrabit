@@ -6,6 +6,7 @@ namespace Modules\Marketing;
 
 use Illuminate\Support\ServiceProvider;
 use Modules\Marketing\Console\StampPixel;
+use Modules\Marketing\Console\SyncAdSpend;
 use Modules\Marketing\Services\MetaPixelSettings;
 use Modules\Marketing\Services\PixelStamp;
 
@@ -52,7 +53,9 @@ class MarketingServiceProvider extends ServiceProvider
         // Console only, so the command does not exist on a web request.
         // deploy.sh runs it after every `git reset --hard`.
         if ($this->app->runningInConsole()) {
-            $this->commands([StampPixel::class]);
+            // StampPixel runs on every deploy; SyncAdSpend on a daily cron, so
+            // a window nobody pressed the button for still has its spend.
+            $this->commands([StampPixel::class, SyncAdSpend::class]);
         }
 
         $this->app->booted(function (): void {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Marketing\Controllers\AdminAnalyticsController;
 use Modules\Marketing\Controllers\AdminCampaignController;
+use Modules\Marketing\Controllers\AdminAdSpendController;
 use Modules\Marketing\Controllers\AdminPixelController;
 
 /*
@@ -120,3 +121,39 @@ Route::post('admin/marketing/pixel/test-mode', [AdminPixelController::class, 'te
 Route::post('admin/marketing/pixel/stamp', [AdminPixelController::class, 'stamp'])
     ->middleware(['admin', 'admin:settings.edit'])
     ->name('marketing.pixel.stamp');
+
+/*
+ * Ad spend — what the campaigns beside it cost.
+ *
+ * READING is the orders capability, the same as the revenue it is divided
+ * into. CHANGING where the money is read from — an ad account, an access
+ * token, an exchange rate — is the settings capability: it is a credential,
+ * and a rate that is wrong rewrites every cost-per-order on the screen.
+ *
+ * The sync is throttled because every press is a call to Meta, and a button
+ * that makes a number appear gets pressed twice by anyone waiting for it.
+ */
+Route::get('admin/marketing/ad-spend', [AdminAdSpendController::class, 'show'])
+    ->middleware(['admin', 'admin:orders'])
+    ->name('marketing.spend.show');
+
+Route::put('admin/marketing/ad-spend', [AdminAdSpendController::class, 'update'])
+    ->middleware(['admin', 'admin:settings.edit'])
+    ->name('marketing.spend.update');
+
+Route::post('admin/marketing/ad-spend/sync', [AdminAdSpendController::class, 'sync'])
+    ->middleware(['admin', 'admin:orders', 'throttle:20,1'])
+    ->name('marketing.spend.sync');
+
+Route::post('admin/marketing/ad-spend/rows', [AdminAdSpendController::class, 'store'])
+    ->middleware(['admin', 'admin:orders'])
+    ->name('marketing.spend.store');
+
+Route::delete('admin/marketing/ad-spend/rows/{id}', [AdminAdSpendController::class, 'destroy'])
+    ->whereNumber('id')
+    ->middleware(['admin', 'admin:orders'])
+    ->name('marketing.spend.destroy');
+
+Route::post('admin/marketing/ad-spend/map', [AdminAdSpendController::class, 'map'])
+    ->middleware(['admin', 'admin:orders'])
+    ->name('marketing.spend.map');
