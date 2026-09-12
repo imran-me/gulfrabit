@@ -1,281 +1,737 @@
 /**
- * analytics.css — the pixel dashboard's own pieces.
+ * analytics.css — the Tracking screen.
  *
- * Everything that is already a shared admin component (cards, tables, filters,
- * error strip) is reused from admin.css. What is here is only what the funnel
- * needs and nothing else had: a bar, a drop-off note, a footprint trail.
+ * Everything that is already a shared admin component — cards, tables,
+ * filters, tabs, the error strip — is reused from admin.css. What is here is
+ * only what this screen needed and nothing else had: charts, a funnel, an
+ * insight card, a visit trail.
  *
- * COLOUR: THE FUNNEL IS ONE MEASURE, SO IT IS ONE HUE.
- * The five stages are not five things competing for identity — they are one
- * number narrowing. Giving each stage its own colour would be a categorical
- * palette applied to non-categorical data: it invites the reader to compare
- * stages as if they were rivals, when the only relationship that matters is
- * "how much of the previous step survived". One hue, one meaning.
+ * COLOUR, AND THE TWO JOBS IT DOES HERE
+ * -------------------------------------
+ * 1. MAGNITUDE — one hue, light to dark. The funnel, every ranked bar, the
+ *    trend line and the heatmap are all the same measure at different sizes,
+ *    so they are all one cyan. Giving each channel or each product its own
+ *    colour would be a categorical palette applied to non-categorical data:
+ *    it invites the reader to compare rivals when the only relationship that
+ *    matters is "bigger or smaller". It also runs out — there are sixteen
+ *    channels and no reader can hold sixteen hues apart.
+ * 2. STATE — delivered, cancelled, returned. These MEAN good and bad, so they
+ *    wear the status colours and nothing else on this screen may borrow them.
+ *    Each one carries its word as well as its colour, so the bar still reads
+ *    printed in grey or by someone who cannot separate the hues.
  *
- * Text never wears the bar's colour. Counts and labels stay on the ink tokens
- * so they keep their contrast in both themes; the bar beside them carries the
- * magnitude on its own.
+ * The heatmap ramp is five steps of one hue, checked so that each step is
+ * visibly darker than the one before it and the lightest still shows against
+ * the card it sits on.
+ *
+ * Text never wears a data colour: counts and labels stay on the ink tokens
+ * and keep their contrast, while the mark beside them carries the magnitude.
  */
 
-/* ---- Funnel ------------------------------------------------------------ */
+/* On :root, not on the panel: the tooltip is appended to <body>, outside the
+   panel, and a custom property it cannot inherit resolves to nothing — which
+   silently painted its line keys transparent. */
+:root {
+  /* The measure. One hue, used at five strengths. */
+  --t-accent: var(--gr-cyan-dark);
+  --t-accent-soft: rgba(14, 124, 153, .10);
+  --t-accent-line: rgba(14, 124, 153, .28);
+  --t-h1: #6BBFD6;
+  --t-h2: #40A4C2;
+  --t-h3: #2289AA;
+  --t-h4: #156C88;
+  --t-h5: #0D5166;
 
-.fnl {
-  display: grid;
-  /* 2px between rows: the bars are a stack of related magnitudes and need a
-     surface gap to read as separate marks rather than one shape. */
-  gap: 2px;
-  margin-top: var(--space-4);
+  /* The period being compared with — context, so it recedes. */
+  --t-prev: #9AA5A1;
+
+  /* Chart furniture, one step off the surface it sits on. */
+  --t-grid: #ECEFED;
+  --t-axis: #D7DCD9;
+
+  /* State. Reserved: never used as a series colour. */
+  --t-ok: #0F8A3C;
+  --t-progress: #B4BDB8;
+  --t-returned: #E08A4F;
+  --t-cancel: #D03B3B;
+  --t-spam: #6F7672;
 }
+
+/* ---- Head, filters, health -------------------------------------------- */
+
+.thead { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
+
+.tfilters { align-items: flex-end; }
+
+/* The health strip answers "is the tracking itself alive?" before any number
+   below is read. A dashboard of zeroes because the pixel stopped looks
+   exactly like a dashboard of zeroes because nobody visited. */
+.thealth {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: calc(var(--space-5) * -1 + var(--space-2)) 0 var(--space-5);
+}
+
+.ttabs { margin-bottom: var(--space-5); }
+
+/* While a panel reloads it holds its last render at reduced opacity — no
+   skeleton, no jump. A screen that empties itself every thirty seconds
+   cannot be read while it refreshes. */
+.tpanel.is-loading { opacity: .55; transition: opacity .18s ease; }
+
+.tsection { margin-bottom: var(--space-6); }
+.tsection__head { margin-bottom: var(--space-4); }
+.tsection__title { margin: 0; font-size: var(--fs-20); line-height: var(--lh-tight); }
+.tsection__sub { margin: var(--space-2) 0 0; color: var(--text-secondary); font-size: var(--fs-14); }
+
+.tgrid { display: grid; gap: var(--space-5); margin-bottom: var(--space-5); }
+.tgrid--2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+
+/* ---- Cards ------------------------------------------------------------ */
+
+.tcard {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-top: 2px solid rgba(201, 162, 75, .35);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
+  box-shadow: 0 1px 3px rgba(16, 32, 44, .05);
+  min-width: 0;
+}
+
+.tgrid .tcard { margin-bottom: 0; }
+
+.tcard__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.tcard__title { margin: 0; font-size: var(--fs-20); line-height: var(--lh-tight); }
+.tcard__sub { margin: var(--space-2) 0 0; color: var(--text-secondary); font-size: var(--fs-14); max-width: 64ch; }
+
+.tsub {
+  margin: var(--space-5) 0 var(--space-3);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+}
+
+.tnote { margin: var(--space-4) 0 0; font-size: var(--fs-12); color: var(--text-muted); max-width: 76ch; }
+.tfoot { margin: var(--space-6) 0 0; font-size: var(--fs-12); color: var(--text-muted); max-width: 86ch; }
+.tstamp { margin: 0; font-size: var(--fs-12); color: var(--text-muted); }
+
+.tempty { margin: 0; padding: var(--space-5) 0; color: var(--text-muted); font-size: var(--fs-14); }
+.tempty--calm { padding: var(--space-4) 0; max-width: 70ch; }
+
+/* The panel's small print sits on its own line inside a cell. Left inline it
+   runs straight on from the line above it — "12 Sept, 10:09" and "7 min on
+   the shop" became one unreadable string in every table here. */
+.tpanel .atable__sub,
+.tdrawer .atable__sub { display: block; }
+
+.tmuted { color: var(--text-muted); }
+.tbad { color: var(--gr-error); font-weight: var(--fw-semibold); }
+.tname { display: block; font-weight: var(--fw-semibold); color: var(--text-primary); overflow-wrap: anywhere; }
+.tpath { font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: var(--fs-12); color: var(--text-secondary); overflow-wrap: anywhere; }
+
+/* A button that reads as a link — used for "See details", "Follow", tab jumps. */
+.tlink {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--gr-cyan-dark);
+  cursor: pointer;
+  text-align: left;
+}
+.tlink:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; border-radius: 2px; }
+@media (hover: hover) {
+  .tlink:hover { text-decoration: underline; }
+}
+
+/* ---- Insights --------------------------------------------------------- */
+
+.tinsights {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* The tone is carried by a word AND an icon as well as the edge colour: a
+   finding that only reads as serious because it is red does not read at all
+   in grey, and these are the sentences the merchant acts on. */
+.tinsight {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-left: 3px solid var(--t-progress);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  box-shadow: 0 1px 3px rgba(16, 32, 44, .05);
+}
+
+.tinsight--bad { border-left-color: var(--t-cancel); }
+.tinsight--warn { border-left-color: var(--t-returned); }
+.tinsight--good { border-left-color: var(--t-ok); }
+.tinsight--info { border-left-color: var(--gr-cyan-dark); }
+
+.tinsight__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.tinsight__tone {
+  display: inline-flex;
+  align-items: center;
+  gap: .4em;
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+}
+.tinsight__tone svg { width: 15px; height: 15px; }
+.tinsight--bad .tinsight__tone { color: var(--t-cancel); }
+.tinsight--warn .tinsight__tone { color: #A2601F; }
+.tinsight--good .tinsight__tone { color: var(--t-ok); }
+.tinsight--info .tinsight__tone { color: var(--gr-cyan-dark); }
+
+.tinsight__figure {
+  font-family: var(--font-display);
+  font-size: var(--fs-20);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.tinsight__title { margin: 0 0 var(--space-2); font-size: var(--fs-16); line-height: 1.35; }
+.tinsight__body { margin: 0 0 var(--space-3); font-size: var(--fs-14); color: var(--text-secondary); }
+.tinsight__body:last-child { margin-bottom: 0; }
+
+/* ---- Headline tiles --------------------------------------------------- */
+
+.tkpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.tkpi {
+  position: relative;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-top: 2px solid rgba(201, 162, 75, .35);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  box-shadow: 0 1px 3px rgba(16, 32, 44, .05);
+  overflow: hidden;
+}
+
+.tkpi__label { display: block; font-size: var(--fs-12); color: var(--text-secondary); }
+
+/* Proportional figures, not tabular: equal-width digits make a large
+   standalone number look loose. Tabular belongs in columns that align. */
+.tkpi__value {
+  display: block;
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-31);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  color: var(--text-primary);
+}
+
+.tkpi__foot { display: flex; align-items: baseline; gap: var(--space-2); margin-top: var(--space-2); flex-wrap: wrap; }
+.tkpi__sub { font-size: var(--fs-11); color: var(--text-muted); }
+
+/* Under the numbers, not behind them. Absolutely positioned it sat on top of
+   "was 7,100" in every tile whose comparison ran long. */
+.tkpi { display: flex; flex-direction: column; }
+.tkpi__spark { align-self: flex-end; margin-top: auto; padding-top: var(--space-2); opacity: .9; pointer-events: none; }
+.tspark { display: block; }
+.tspark path { fill: none; stroke: var(--t-accent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.tspark circle { fill: var(--t-accent); }
+
+/* The direction is an arrow AND a sign, never colour alone. */
+.tdelta {
+  display: inline-flex;
+  align-items: center;
+  gap: .3em;
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  color: var(--text-secondary);
+}
+.tdelta--good { color: var(--t-ok); }
+.tdelta--bad { color: var(--t-cancel); }
+.tdelta--flat { color: var(--text-muted); }
+
+/* ---- Trend chart ------------------------------------------------------ */
+
+.tchart { margin-top: var(--space-2); min-height: 248px; }
+.tchart__svg { display: block; width: 100%; height: auto; touch-action: pan-y; }
+.tchart__svg:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; border-radius: var(--radius-sm); }
+
+/* Hairline, solid, one step off the surface. Dashed gridlines read as a
+   threshold or a projection when they are only a grid. */
+.tchart__grid { stroke: var(--t-grid); stroke-width: 1; }
+.tchart__grid--base { stroke: var(--t-axis); }
+
+.tchart__ytick, .tchart__xtick {
+  fill: var(--text-muted);
+  font-size: 11px;
+  font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.tchart__area { fill: var(--t-accent-soft); }
+.tchart__line { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tchart__line--cur { stroke: var(--t-accent); }
+.tchart__line--prev { stroke: var(--t-prev); }
+.tchart__end { fill: var(--t-accent); stroke: var(--surface-raised); stroke-width: 2; }
+
+.tchart__cross { stroke: var(--t-axis); stroke-width: 1; opacity: 0; }
+.tchart__dot { opacity: 0; stroke: var(--surface-raised); stroke-width: 2; }
+.tchart__dot--cur { fill: var(--t-accent); }
+.tchart__dot--prev { fill: var(--t-prev); }
+.tchart__svg.is-hover .tchart__cross,
+.tchart__svg.is-hover .tchart__dot { opacity: 1; }
+
+/* The hit area is the whole plot, so the reader aims at a date rather than
+   at a two-pixel line. */
+.tchart__hit { fill: transparent; }
+
+.tlegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-12);
+  color: var(--text-secondary);
+}
+.tlegend li { display: inline-flex; align-items: center; gap: .45em; }
+.tlegend__line { width: 18px; height: 2px; border-radius: 1px; background: var(--t-prev); }
+.tlegend__line--cur { background: var(--t-accent); }
+.tlegend__line--prev { background: var(--t-prev); }
+.tlegend__swatch { width: 12px; height: 12px; border-radius: 3px; }
+
+/* ---- Tooltip ---------------------------------------------------------- */
+
+.ttip {
+  position: fixed;
+  z-index: 60;
+  min-width: 8rem;
+  max-width: 18rem;
+  padding: var(--space-3);
+  background: var(--surface-inverse);
+  color: #FFFFFF;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  font-size: var(--fs-12);
+  pointer-events: none;
+}
+.ttip__title { font-weight: var(--fw-semibold); margin-bottom: var(--space-2); opacity: .85; }
+.ttip__row { display: flex; align-items: baseline; gap: .45em; margin-top: 2px; }
+/* The value leads and the name follows: the reader already knows the series. */
+.ttip__row strong { font-size: var(--fs-14); font-variant-numeric: tabular-nums; }
+.ttip__row span { opacity: .8; }
+.ttip__key { width: 12px; height: 2px; border-radius: 1px; background: #FFFFFF; flex: 0 0 auto; }
+.ttip__key--cur { background: var(--t-h1); }
+.ttip__key--prev { background: var(--t-prev); }
+
+/* ---- Funnel ----------------------------------------------------------- */
+
+.fnl { display: grid; gap: 2px; margin-top: var(--space-4); }
 
 .fnl__row {
   display: grid;
-  grid-template-columns: minmax(0, 11rem) 1fr minmax(0, 9rem);
+  grid-template-columns: minmax(0, 10rem) 1fr minmax(0, 11rem);
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2) 0;
 }
 
-.fnl__stage {
-  font-size: var(--fs-14);
-  font-weight: 600;
-  color: var(--text-primary);
-  /* minmax(0, …) on the track above and this here: a long stage name must
-     shrink rather than push the bar off the row. */
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
+.fnl__stage { font-size: var(--fs-14); font-weight: var(--fw-semibold); color: var(--text-primary); min-width: 0; overflow-wrap: anywhere; }
 
 /* The track is the 100% reference, so every bar is read against the same
-   width. Without it each bar would be its own scale and the shape would lie. */
-.fnl__track {
-  position: relative;
-  height: 1.75rem;
-  border-radius: 4px;
-  background: var(--surface-sunken);
-  overflow: hidden;
-}
-
+   width. Without it each bar is its own scale and the shape lies. */
+.fnl__track { position: relative; height: 1.6rem; border-radius: 4px; background: var(--surface-sunken); overflow: hidden; }
 .fnl__bar {
   height: 100%;
-  /* Anchored to the left edge — a bar that floats has no baseline and cannot
-     be compared to the one above it. 4px only on the leading end, so the data
-     end stays square against its own value. */
   border-radius: 4px;
-  background: var(--gr-cyan-dark);
+  background: var(--t-accent);
   transition: width .45s cubic-bezier(.22, 1, .36, 1);
-  min-width: 2px;   /* a non-zero count must never render as nothing */
+  min-width: 2px;
 }
 
-.fnl__count {
-  font-size: var(--fs-14);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
-  text-align: right;
-}
+.fnl__count { font-size: var(--fs-14); font-variant-numeric: tabular-nums; color: var(--text-primary); text-align: right; }
+.fnl__count b { font-weight: var(--fw-bold); }
+.fnl__pct { display: block; font-size: var(--fs-11); color: var(--text-muted); font-weight: var(--fw-medium); }
 
-.fnl__count b { font-weight: 700; }
-
-.fnl__pct {
-  display: block;
-  font-size: var(--fs-11);
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-/* Drop-off is the number the screen exists for, so it is allowed to be the one
-   coloured piece of text — and only when it is bad enough to act on. */
+/* Drop-off is the number this screen exists for, so it is allowed to be the
+   one coloured piece of text — and only when it is bad enough to act on. */
 .fnl__drop { color: var(--text-muted); }
-.fnl__drop--bad { color: var(--gr-error); font-weight: 600; }
+.fnl__drop--bad { color: var(--gr-error); font-weight: var(--fw-semibold); }
 
-/* ---- Session footprint ------------------------------------------------- */
+/* ---- Ranked bars ------------------------------------------------------ */
 
-.fp {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.tbars { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+
+.tbars__row {
   display: grid;
-  gap: 2px;
-}
-
-.fp__item {
-  display: grid;
-  grid-template-columns: 5.5rem minmax(0, 10rem) 1fr auto;
+  grid-template-columns: minmax(0, 12rem) 1fr minmax(0, 8rem);
+  align-items: center;
   gap: var(--space-3);
-  align-items: baseline;
-  padding: var(--space-2) var(--space-3);
-  border-radius: 4px;
-  background: var(--surface-sunken);
+  padding: var(--space-2) 0;
   font-size: var(--fs-14);
 }
 
-.fp__time { color: var(--text-muted); font-variant-numeric: tabular-nums; }
-.fp__ev { font-weight: 600; color: var(--text-primary); }
-.fp__path { color: var(--text-secondary); overflow-wrap: anywhere; }
-.fp__val { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.tbars__label { min-width: 0; overflow-wrap: anywhere; color: var(--text-primary); }
+.tbars__track { height: 1.1rem; border-radius: 3px; background: var(--surface-sunken); overflow: hidden; }
+.tbars__bar { display: block; height: 100%; border-radius: 3px; background: var(--t-accent); }
+.tbars__value { text-align: right; font-variant-numeric: tabular-nums; font-weight: var(--fw-semibold); }
+.tbars__meta { display: block; font-size: var(--fs-11); color: var(--text-muted); font-weight: var(--fw-regular); }
 
-/* ---- Status chips ------------------------------------------------------ */
-/* Status colours are reserved for state and never reused as a series colour.
-   Each carries a word as well as a colour — the state must survive being
-   printed in grey or read by someone who cannot separate the hues. */
+/* ---- Chips, badges, flags --------------------------------------------- */
 
-.chip {
+.tchip {
   display: inline-flex;
   align-items: center;
   gap: .4em;
-  padding: .15em .6em;
-  border-radius: 999px;
+  padding: .15em .65em;
+  border-radius: var(--radius-pill);
   font-size: var(--fs-11);
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
   border: 1px solid var(--border-hairline);
   color: var(--text-secondary);
   background: var(--surface-sunken);
+  white-space: nowrap;
 }
+.tchip::before { content: ""; width: .5em; height: .5em; border-radius: 50%; background: currentColor; }
+.tchip--ok { color: var(--t-ok); }
+.tchip--warn { color: #A2601F; }
+.tchip--info { color: var(--gr-cyan-dark); }
+.tchip--bad { color: var(--t-cancel); }
 
-.chip::before {
-  content: "";
-  width: .5em;
-  height: .5em;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.chip--ok { color: var(--gr-success); }
-.chip--warn { color: var(--gr-warning); }
-.chip--bad { color: var(--gr-error); }
-
-.fnl__note {
-  margin-top: var(--space-4);
-  font-size: var(--fs-12);
-  color: var(--text-muted);
-}
-
-@media (max-width: 640px) {
-  .fnl__row { grid-template-columns: 1fr; gap: var(--space-1); }
-  .fnl__count { text-align: left; }
-  .fp__item { grid-template-columns: 1fr; }
-}
-
-/* ---- Daily trend ------------------------------------------------------- */
-/*
- * ONE SERIES, ONE SCALE. Visits run to hundreds and orders to single digits;
- * plotting both as bars would need a second y-axis, and a dual-axis chart lets
- * the author decide what "crossing over" looks like by choosing the scales.
- * So the bars are visits alone, and a day that produced an order is marked with
- * a dot — secondary encoding, no second scale, nothing to misread.
- */
-
-.trend {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;               /* the surface gap that keeps adjacent bars separate */
-  height: 6rem;
-  margin-top: var(--space-4);
-  padding-top: var(--space-4);   /* room for the order dots above the tallest bar */
-}
-
-.trend__col {
-  flex: 1 1 0;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  height: 100%;
-  position: relative;
-}
-
-.trend__bar {
-  width: 100%;
-  /* Rounded only at the data end, anchored to the baseline. A minimum height so
-     a day with one visit is still visibly different from a day with none. */
-  border-radius: 4px 4px 0 0;
-  background: var(--gr-cyan-dark);
-  min-height: 2px;
-}
-
-/* A day with nothing is drawn, not skipped — an omitted day silently closes the
-   gap and turns a real dip into a smooth line. */
-.trend__col--empty .trend__bar { background: var(--surface-sunken); }
-
-.trend__dot {
-  position: absolute;
-  top: 0;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--gr-success);
-  /* A ring in the surface colour so the dot stays legible where it overlaps
-     the top of a tall bar. */
-  box-shadow: 0 0 0 2px var(--surface-raised, var(--surface-page));
-}
-
-.trend__axis {
-  display: flex;
-  justify-content: space-between;
+.tbadge {
+  display: inline-block;
+  margin-left: .4em;
+  padding: .05em .4em;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-hairline);
   font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
   color: var(--text-muted);
-  margin-top: var(--space-2);
+  white-space: nowrap;
 }
+.tbadge--ad { color: var(--gr-cyan-dark); }
+.tbadge--bad { color: var(--t-cancel); }
 
-.trend__legend {
-  display: flex;
-  gap: var(--space-4);
+.tflag {
+  display: inline-block;
+  margin: 2px .3em 0 0;
+  padding: .1em .5em;
+  border-radius: var(--radius-sm);
   font-size: var(--fs-11);
-  color: var(--text-muted);
-  margin-top: var(--space-2);
-  align-items: center;
+  font-weight: var(--fw-semibold);
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-hairline);
 }
+.tflag--ok { color: var(--t-ok); }
+.tflag--warn { color: #A2601F; }
+.tflag--bad { color: var(--t-cancel); }
 
-.trend__key {
-  display: inline-flex;
-  align-items: center;
-  gap: .4em;
-}
+.tflags-key { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; margin: var(--space-4) 0 0; padding: 0; }
 
-.trend__key::before {
-  content: "";
-  width: .6em;
-  height: .6em;
-  border-radius: 2px;
-  background: var(--gr-cyan-dark);
-}
+/* ---- Segmented control ------------------------------------------------ */
 
-.trend__key--orders::before {
-  border-radius: 50%;
-  background: var(--gr-success);
-}
-
-/* ---- Live toggle ------------------------------------------------------- */
-
-.live {
-  display: inline-flex;
-  align-items: center;
-  gap: .45em;
+.tseg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; background: var(--surface-sunken); border-radius: var(--radius-pill); }
+.tseg button {
+  border: 0;
+  background: none;
+  padding: .35em .85em;
+  border-radius: var(--radius-pill);
+  font: inherit;
   font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
   color: var(--text-secondary);
   cursor: pointer;
-  user-select: none;
 }
+.tseg button.is-on { background: var(--surface-raised); color: var(--text-primary); box-shadow: 0 1px 2px rgba(16, 32, 44, .12); }
+.tseg button:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 1px; }
 
-.live__dot {
-  width: .5em;
-  height: .5em;
+/* ---- Device and channel tags ------------------------------------------ */
+
+.tdev { display: inline-flex; align-items: center; gap: .4em; }
+.ticon { width: 15px; height: 15px; flex: 0 0 auto; color: var(--text-muted); }
+.tchan { font-weight: var(--fw-semibold); }
+
+/* ---- Split stats ------------------------------------------------------ */
+
+.tsplit { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.tsplit--two { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.tsplit--three { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+.tsplit__item { padding: var(--space-3) var(--space-4); background: var(--surface-sunken); border-radius: var(--radius-lg); }
+.tsplit + .atable-wrap, .tsplit + .tstatus-row { margin-top: var(--space-4); }
+.tsplit__n { display: block; font-family: var(--font-display); font-size: var(--fs-25); font-weight: var(--fw-bold); line-height: var(--lh-tight); }
+.tsplit__l { display: block; margin-top: var(--space-1); font-size: var(--fs-14); color: var(--text-primary); }
+.tsplit__m { display: block; margin-top: var(--space-1); font-size: var(--fs-11); color: var(--text-muted); }
+
+/* ---- Live ------------------------------------------------------------- */
+
+.tcard--live { border-top-color: var(--t-accent); }
+.tlive__top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-bottom: var(--space-3); }
+.tlive__chips { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; margin: 0; padding: 0; }
+
+.thero { margin: 0; display: flex; align-items: baseline; gap: var(--space-3); }
+.thero__n { font-family: var(--font-display); font-size: var(--fs-49); font-weight: var(--fw-bold); line-height: 1; color: var(--text-primary); }
+.thero__l { font-size: var(--fs-16); color: var(--text-secondary); }
+
+.tminutes { margin-top: var(--space-3); }
+.tcols { display: flex; align-items: flex-end; gap: 2px; height: 4.5rem; }
+.tcols__col { flex: 1 1 0; min-width: 0; height: 100%; display: flex; align-items: flex-end; }
+.tcols__bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--t-accent); min-height: 2px; }
+/* A minute with nothing is drawn, not skipped: a gap silently closed up
+   turns a quiet stretch into a busy one. */
+.tcols__bar--zero { height: 2px !important; background: var(--surface-sunken); }
+
+.tvisitors, .tfeed { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+
+.tvisitor {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-sm);
+}
+.tvisitor__main { min-width: 0; }
+.tvisitor__now { margin: 0; font-weight: var(--fw-semibold); overflow-wrap: anywhere; }
+.tvisitor__meta { margin: 2px 0 0; font-size: var(--fs-11); color: var(--text-muted); }
+.tvisitor__side { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-1); flex: 0 0 auto; }
+.tvisitor__value { font-size: var(--fs-14); font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
+
+.tfeed__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+}
+.tfeed__row:nth-child(odd) { background: var(--surface-sunken); }
+.tfeed__icon { width: 17px; height: 17px; color: var(--text-muted); }
+.tfeed__row--Purchase .tfeed__icon { color: var(--t-ok); }
+.tfeed__row--AddToCart .tfeed__icon,
+.tfeed__row--InitiateCheckout .tfeed__icon { color: var(--t-accent); }
+.tfeed__what { min-width: 0; overflow-wrap: anywhere; }
+.tfeed__meta { font-size: var(--fs-11); color: var(--text-muted); white-space: nowrap; }
+.tfeed__val { font-variant-numeric: tabular-nums; font-weight: var(--fw-semibold); white-space: nowrap; }
+.tfeed__ago { font-size: var(--fs-11); color: var(--text-muted); font-weight: var(--fw-regular); white-space: nowrap; }
+
+/* ---- Heatmap ---------------------------------------------------------- */
+
+.theat-wrap { overflow-x: auto; padding-bottom: var(--space-2); }
+.theat {
+  display: grid;
+  grid-template-columns: 2.6rem repeat(24, minmax(14px, 1fr));
+  gap: 2px;
+  min-width: 640px;
+  align-items: center;
+}
+.theat__corner { display: block; }
+.theat__hour { font-size: var(--fs-11); color: var(--text-muted); text-align: left; }
+.theat__day { font-size: var(--fs-11); color: var(--text-secondary); font-weight: var(--fw-semibold); }
+
+.theat__cell {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  min-height: 14px;
+  border-radius: 3px;
+  background: var(--surface-sunken);
+}
+.theat__cell--l1 { background: var(--t-h1); }
+.theat__cell--l2 { background: var(--t-h2); }
+.theat__cell--l3 { background: var(--t-h3); }
+.theat__cell--l4 { background: var(--t-h4); }
+.theat__cell--l5 { background: var(--t-h5); }
+.theat__cell:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 1px; }
+
+/* An hour that produced an order is marked as well as shaded: a second
+   channel, so it survives being read in grey. */
+.theat__dot {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: var(--text-muted);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 1px rgba(16, 32, 44, .25);
 }
 
-.live input:checked ~ .live__dot {
-  background: var(--gr-success);
-  animation: live-pulse 2s ease-in-out infinite;
+.theat-legend { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-3); font-size: var(--fs-11); color: var(--text-muted); }
+.theat-legend .theat__cell { width: 14px; min-height: 14px; aspect-ratio: auto; height: 14px; }
+
+/* ---- Order outcomes --------------------------------------------------- */
+
+.tstatus { display: flex; gap: 2px; width: 100%; min-width: 8rem; height: .9rem; border-radius: 3px; overflow: hidden; }
+.tstatus--empty { background: var(--surface-sunken); display: block; }
+.tstatus__seg { display: block; min-width: 3px; }
+.tstatus__seg--delivered { background: var(--t-ok); }
+.tstatus__seg--in_progress { background: var(--t-progress); }
+.tstatus__seg--returned { background: var(--t-returned); }
+.tstatus__seg--cancelled { background: var(--t-cancel); }
+.tstatus__seg--spam { background: var(--t-spam); }
+
+.tstatus-cell { min-width: 9rem; }
+.tstatus-row { margin: var(--space-3) 0; }
+
+.tcounts { display: flex; flex-wrap: wrap; gap: var(--space-4); list-style: none; margin: 0; padding: 0; font-size: var(--fs-12); color: var(--text-secondary); }
+.tcounts__n { font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; color: var(--text-primary); }
+
+/* ---- Products --------------------------------------------------------- */
+
+.tprod { display: flex; gap: var(--space-3); align-items: flex-start; min-width: 0; }
+.tprod__img { width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: cover; flex: 0 0 auto; background: var(--surface-sunken); }
+.tprod__img--none { display: block; }
+.tprod__text { min-width: 0; display: block; }
+.tprod__flags { display: block; margin-top: 2px; }
+
+/* Three bars against one scale — looks, carts, orders. The numbers are in the
+   row beside it; this carries the shape only. */
+.tmini { display: flex; flex-direction: column; gap: 2px; min-width: 4.5rem; }
+.tmini__bar { display: block; height: 5px; border-radius: 3px; background: var(--t-accent); min-width: 2px; }
+.tmini__bar:nth-child(2) { background: var(--t-h2); }
+.tmini__bar:nth-child(3) { background: var(--t-h4); }
+
+/* ---- Search ----------------------------------------------------------- */
+
+.tterms { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.tterm { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); padding: var(--space-2) var(--space-3); background: var(--surface-sunken); border-radius: var(--radius-sm); }
+.tterm__word { font-weight: var(--fw-semibold); overflow-wrap: anywhere; }
+.tterm__meta { font-size: var(--fs-11); color: var(--text-muted); white-space: nowrap; }
+.tcard--flag { border-top-color: var(--t-returned); }
+
+/* ---- Visits ----------------------------------------------------------- */
+
+.tvisits__filter { flex: 0 0 auto; min-width: 15rem; }
+.tmore { display: flex; justify-content: center; margin-top: var(--space-4); }
+
+/* ---- The visit drawer ------------------------------------------------- */
+
+.tdrawer {
+  border: 0;
+  padding: 0;
+  margin: 0 0 0 auto;
+  width: min(560px, 100%);
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  background: transparent;
+  overflow: visible;
 }
+.tdrawer::backdrop { background: rgba(8, 20, 24, .45); }
+
+.tdrawer__panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--surface-raised);
+  border-left: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-lg);
+}
+
+.tdrawer__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--border-hairline);
+}
+.tdrawer__title { margin: 0; font-size: var(--fs-20); }
+.tdrawer__sub { margin: var(--space-1) 0 0; font-size: var(--fs-12); color: var(--text-muted); }
+.tdrawer__body { flex: 1 1 auto; overflow-y: auto; padding: var(--space-5); overscroll-behavior: contain; }
+
+.tfacts { margin: 0 0 var(--space-4); display: grid; gap: 2px; }
+.tfacts__row { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: var(--space-3); padding: var(--space-2) var(--space-3); background: var(--surface-sunken); border-radius: var(--radius-sm); font-size: var(--fs-14); }
+.tfacts__row dt { color: var(--text-muted); font-size: var(--fs-12); }
+.tfacts__row dd { margin: 0; overflow-wrap: anywhere; }
+
+.torder {
+  display: block;
+  padding: var(--space-4);
+  border: 1px solid var(--border-hairline);
+  border-left: 3px solid var(--t-ok);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: var(--space-4);
+}
+.torder__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.torder__no { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-16); }
+.torder__meta { display: block; margin-top: var(--space-1); font-size: var(--fs-12); color: var(--text-secondary); }
+.torder__go { display: block; margin-top: var(--space-2); font-size: var(--fs-12); font-weight: var(--fw-semibold); color: var(--gr-cyan-dark); }
+@media (hover: hover) {
+  .torder:hover { border-color: var(--gr-cyan); }
+}
+
+.ttrail { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.ttrail__step { display: grid; grid-template-columns: 4.6rem minmax(0, 1fr) auto; gap: var(--space-3); align-items: baseline; padding: var(--space-2) var(--space-3); background: var(--surface-sunken); border-radius: var(--radius-sm); font-size: var(--fs-14); }
+.ttrail__time { color: var(--text-muted); font-variant-numeric: tabular-nums; font-size: var(--fs-12); }
+.ttrail__body { min-width: 0; }
+.ttrail__what { display: block; overflow-wrap: anywhere; }
+.ttrail__gap { display: block; font-size: var(--fs-11); color: var(--text-muted); }
+.ttrail__val { font-variant-numeric: tabular-nums; font-weight: var(--fw-semibold); }
+
+/* ---- Live toggle ------------------------------------------------------ */
+
+.live { display: inline-flex; align-items: center; gap: .45em; font-size: var(--fs-12); color: var(--text-secondary); cursor: pointer; -webkit-user-select: none; user-select: none; }
+.live__dot { width: .5em; height: .5em; border-radius: 50%; background: var(--text-muted); }
+.live input:checked ~ .live__dot { background: var(--t-ok); animation: live-pulse 2s ease-in-out infinite; }
 
 @keyframes live-pulse {
   0%, 100% { opacity: 1; }
-  50%      { opacity: .35; }
+  50% { opacity: .35; }
 }
 
-/* Motion is decoration here; the colour already says "on". */
+/* ---- Narrow screens --------------------------------------------------- */
+
+@media (max-width: 720px) {
+  .fnl__row { grid-template-columns: 1fr; gap: var(--space-1); }
+  .fnl__count { text-align: left; }
+  .tbars__row { grid-template-columns: minmax(0, 1fr) 5.5rem; }
+  .tbars__track { display: none; }
+  .tfeed__row { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .tfeed__meta { display: none; }
+  .ttrail__step { grid-template-columns: 4rem minmax(0, 1fr); }
+  .ttrail__val { grid-column: 2; }
+  .tfacts__row { grid-template-columns: 1fr; gap: 0; }
+  .thero__n { font-size: var(--fs-39); }
+}
+
+/* Motion is decoration on this screen; the colour and the number already say
+   everything the movement does. */
 @media (prefers-reduced-motion: reduce) {
   .live input:checked ~ .live__dot { animation: none; }
-  .fnl__bar, .trend__bar { transition: none; }
+  .fnl__bar { transition: none; }
+  .tpanel.is-loading { transition: none; }
 }

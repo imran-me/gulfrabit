@@ -117,7 +117,7 @@ try {
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=3a7d16d2">
   <link rel="stylesheet" href="../../modules/admin/admin.css?v=d5fec296">
-  <link rel="stylesheet" href="../../modules/marketing/analytics.css?v=5b243b72">
+  <link rel="stylesheet" href="../../modules/marketing/analytics.css?v=48c485eb">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -265,173 +265,237 @@ try {
 <div class="admin__head">
         <div>
           <h1 class="admin__title">Tracking</h1>
-          <p class="admin__sub" data-an-sub>Where people came from, and where they left.</p>
+          <p class="admin__sub" data-t-sub>Who came, from where, on what — and where they left.</p>
         </div>
-        <div style="display:flex;gap:var(--space-3);align-items:flex-end;flex-wrap:wrap">
-          <div class="afilters__field" style="max-width:170px">
-            <label for="an-days">Period</label>
-            <select class="select-gr" id="an-days" data-an-days>
-              <option value="1">Today</option>
-              <option value="7" selected>Last 7 days</option>
-              <option value="30">Last 30 days</option>
-              <option value="90">Last 90 days</option>
-            </select>
-          </div>
-          <!-- A real link, not a fetch: the browser's own download handles a
-               streamed file of any size, and the period rides the href so the
-               export always matches what is on screen. -->
-          <a class="btn-gr btn-gr--ghost" data-an-export href="#" download>Export CSV</a>
-          <!-- Opt-in, not on by default: a screen that reloads under someone
+        <div class="thead">
+          <!-- Opt-in, not on by default: a screen that reloads under somebody
                reading it is hostile, and this one is read as often as it is
-               watched. -->
+               watched. The Live tab refreshes on its own, because watching is
+               the whole purpose of that one. -->
           <label class="live">
-            <input type="checkbox" data-an-live>
+            <input type="checkbox" data-t-auto>
             <span class="live__dot" aria-hidden="true"></span>
-            Live
+            Auto-refresh
           </label>
+          <!-- A real link, not a fetch: the browser's own download handles a
+               streamed file of any size, and the slice rides the href so the
+               export always matches what is on screen. -->
+          <a class="btn-gr btn-gr--ghost" data-t-export href="../../api/admin/marketing/analytics/export" download>Export CSV</a>
         </div>
       </div>
 
-      <p class="aerror" data-an-error hidden role="alert"></p>
+      <!-- ONE FILTER ROW, ABOVE EVERYTHING IT SCOPES. Period first: it is the
+           control every reader reaches for. Each change re-reads every panel
+           below, so the numbers can never disagree about which visits they
+           are describing. -->
+      <form class="afilters tfilters" data-t-filters aria-label="Choose the visits to report on">
+        <div class="afilters__field">
+          <label for="t-period">Period</label>
+          <select class="select-gr" id="t-period" data-t-period>
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+            <option value="month">This month</option>
+            <option value="last_month">Last month</option>
+            <option value="custom">Custom range…</option>
+          </select>
+        </div>
 
-      <div class="acards" data-an-cards hidden>
-        <div class="acard">
-          <span class="acard__n" data-an-visitors>—</span>
-          <span class="acard__l">Visitors</span>
+        <div class="afilters__field" data-t-range hidden>
+          <label for="t-from">From</label>
+          <input class="input-gr" type="date" id="t-from" data-t-from>
         </div>
-        <div class="acard">
-          <span class="acard__n" data-an-sessions>—</span>
-          <span class="acard__l">Visits</span>
+
+        <div class="afilters__field" data-t-range hidden>
+          <label for="t-to">To</label>
+          <input class="input-gr" type="date" id="t-to" data-t-to>
         </div>
-        <div class="acard">
-          <span class="acard__n" data-an-purchases>—</span>
-          <span class="acard__l">Purchases</span>
+
+        <div class="afilters__field">
+          <label for="t-channel">Channel</label>
+          <select class="select-gr" id="t-channel" data-t-channel>
+            <option value="">All channels</option>
+          </select>
         </div>
-        <div class="acard">
-          <span class="acard__n" data-an-revenue>—</span>
-          <span class="acard__l">Revenue tracked</span>
+
+        <div class="afilters__field">
+          <label for="t-device">Device</label>
+          <select class="select-gr" id="t-device" data-t-device>
+            <option value="">All devices</option>
+            <option value="mobile">Phones</option>
+            <option value="desktop">Computers</option>
+            <option value="tablet">Tablets</option>
+            <option value="unknown">Not recorded</option>
+          </select>
         </div>
+
+        <div class="afilters__field">
+          <label for="t-campaign">Campaign</label>
+          <select class="select-gr" id="t-campaign" data-t-campaign>
+            <option value="">All campaigns</option>
+            <option value="(none)">No campaign tag</option>
+          </select>
+        </div>
+
+        <div class="afilters__actions">
+          <button type="button" class="btn-gr btn-gr--ghost" data-t-clear hidden>Clear filters</button>
+        </div>
+      </form>
+
+      <!-- Whether the tracking itself is alive, before any number is read.
+           A dashboard of zeroes because the pixel stopped looks exactly like a
+           dashboard of zeroes because nobody visited. -->
+      <div class="thealth" data-t-health aria-live="polite"></div>
+
+      <p class="aerror" data-t-error hidden role="alert"></p>
+
+      <div class="atabs ttabs" role="tablist" aria-label="Tracking views">
+        <button type="button" class="atab is-on" role="tab" id="ttab-overview" aria-controls="tpanel-overview" aria-selected="true" data-t-tab="overview">Overview</button>
+        <button type="button" class="atab" role="tab" id="ttab-live" aria-controls="tpanel-live" aria-selected="false" tabindex="-1" data-t-tab="live">Live <span class="atab__count" data-t-live-count hidden>0</span></button>
+        <button type="button" class="atab" role="tab" id="ttab-sources" aria-controls="tpanel-sources" aria-selected="false" tabindex="-1" data-t-tab="sources">Sources</button>
+        <button type="button" class="atab" role="tab" id="ttab-audience" aria-controls="tpanel-audience" aria-selected="false" tabindex="-1" data-t-tab="audience">Audience</button>
+        <button type="button" class="atab" role="tab" id="ttab-products" aria-controls="tpanel-products" aria-selected="false" tabindex="-1" data-t-tab="products">Products</button>
+        <button type="button" class="atab" role="tab" id="ttab-search" aria-controls="tpanel-search" aria-selected="false" tabindex="-1" data-t-tab="search">Search</button>
+        <button type="button" class="atab" role="tab" id="ttab-checkout" aria-controls="tpanel-checkout" aria-selected="false" tabindex="-1" data-t-tab="checkout">Checkout</button>
+        <button type="button" class="atab" role="tab" id="ttab-visits" aria-controls="tpanel-visits" aria-selected="false" tabindex="-1" data-t-tab="visits">Visits</button>
       </div>
 
-      <section style="margin-top:var(--space-6)" data-an-trend-wrap hidden>
-        <h2 class="admin__title" style="font-size:var(--fs-20)">Visits per day</h2>
-        <p class="admin__sub">Whether today is better than yesterday — the one thing a single total cannot tell you.</p>
-        <div class="trend" data-an-trend></div>
-        <div class="trend__axis"><span data-an-trend-from>—</span><span data-an-trend-to>—</span></div>
-        <div class="trend__legend">
-          <span class="trend__key">Visits</span>
-          <span class="trend__key trend__key--orders">Day with an order</span>
-        </div>
-      </section>
-
-      <!-- THE FUNNEL.
-           Counted in VISITS, not events: one shopper opening eight product
-           pages fires eight ViewContent events, and counted raw that single
-           person makes the middle of the funnel look eight times healthier
-           than it is. Each percentage is against the step above it, so one bad
-           screen shows up as one bad number instead of dragging every row
-           below it down with it. -->
-      <section style="margin-top:var(--space-6)">
-        <h2 class="admin__title" style="font-size:var(--fs-20)">Funnel</h2>
-        <p class="admin__sub">How many visits reached each step, and what share was lost at each one.</p>
-        <div class="fnl" data-an-funnel>
-          <p class="atable__empty">Loading…</p>
-        </div>
-        <p class="fnl__note">
-          Counted in visits, not events — a visit that views six products counts once.
-          Ad blockers stop some events, so these are a floor, not a headcount.
-        </p>
-      </section>
-
-      <div style="display:grid;gap:var(--space-5);grid-template-columns:repeat(auto-fit,minmax(320px,1fr));margin-top:var(--space-6)">
-        <section>
-          <h2 class="admin__title" style="font-size:var(--fs-20)">Most visited pages</h2>
-          <div class="atable-wrap" style="margin-top:var(--space-3)">
-            <table class="atable">
-              <thead>
-                <tr>
-                  <th scope="col">Page</th>
-                  <th scope="col" class="atable__num">Visits</th>
-                  <th scope="col" class="atable__num">Views</th>
-                </tr>
-              </thead>
-              <tbody data-an-pages>
-                <tr><td colspan="3" class="atable__empty">Loading…</td></tr>
-              </tbody>
-            </table>
+      <section class="tpanel" id="tpanel-overview" role="tabpanel" aria-labelledby="ttab-overview" data-t-panel="overview">
+        <section class="tsection" aria-labelledby="t-insights-h">
+          <div class="tsection__head">
+            <h2 class="tsection__title" id="t-insights-h">What stands out</h2>
+            <p class="tsection__sub">Read from this period's own visits. Each finding needs enough traffic behind it to be true, so a quiet week says little.</p>
+          </div>
+          <div class="tinsights" data-t-insights>
+            <p class="tempty">Reading your traffic…</p>
           </div>
         </section>
 
-        <section>
-          <h2 class="admin__title" style="font-size:var(--fs-20)">Where they came from</h2>
-          <div class="atable-wrap" style="margin-top:var(--space-3)">
-            <table class="atable">
-              <thead>
-                <tr>
-                  <th scope="col">Campaign</th>
-                  <th scope="col" class="atable__num">Visits</th>
-                  <th scope="col" class="atable__num">Orders</th>
-                  <th scope="col" class="atable__num">Revenue</th>
-                </tr>
-              </thead>
-              <tbody data-an-campaigns>
-                <tr><td colspan="4" class="atable__empty">Loading…</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </div>
+        <div class="tkpis" data-t-kpis></div>
 
-      <section style="margin-top:var(--space-6)">
-        <div class="admin__head" style="margin-bottom:var(--space-3)">
-          <div>
-            <h2 class="admin__title" style="font-size:var(--fs-20)">Recent visits</h2>
-            <p class="admin__sub">Open one to see every step that visit took.</p>
+        <section class="tcard" aria-labelledby="t-trend-h">
+          <div class="tcard__head">
+            <div>
+              <h2 class="tcard__title" id="t-trend-h">Over time</h2>
+              <p class="tcard__sub" data-t-trend-sub>—</p>
+            </div>
+            <!-- ONE MEASURE AT A TIME, ONE AXIS. Visits run to hundreds and
+                 orders to single digits; drawn together they need two scales,
+                 and on a two-scale chart whoever picks the scales decides
+                 where the lines cross. -->
+            <div class="tseg" role="radiogroup" aria-label="Measure to draw" data-t-metric>
+              <button type="button" role="radio" aria-checked="true" class="is-on" data-metric="sessions">Visits</button>
+              <button type="button" role="radio" aria-checked="false" data-metric="visitors">Visitors</button>
+              <button type="button" role="radio" aria-checked="false" data-metric="orders">Orders</button>
+              <button type="button" role="radio" aria-checked="false" data-metric="revenueTaka">Revenue</button>
+            </div>
           </div>
+          <ul class="tlegend" data-t-trend-legend></ul>
+          <div class="tchart" data-t-trend></div>
+          <button type="button" class="tlink" data-t-trend-table aria-expanded="false">Show as a table</button>
+          <div data-t-trend-tablewrap hidden></div>
+        </section>
+
+        <div class="tgrid tgrid--2">
+          <!-- THE FUNNEL, COUNTED IN VISITS. One shopper opening eight product
+               pages fires eight events, and counted raw that single person
+               makes the middle of the funnel look eight times healthier than
+               it is. Each percentage is against the step above it, so one bad
+               screen shows as one bad number instead of dragging every row
+               below it down with it. -->
+          <section class="tcard" aria-labelledby="t-funnel-h">
+            <div class="tcard__head"><div>
+              <h2 class="tcard__title" id="t-funnel-h">Funnel</h2>
+              <p class="tcard__sub">How many visits reached each step, and the share lost at each one.</p>
+            </div></div>
+            <div class="fnl" data-t-funnel></div>
+            <p class="tnote">Counted in visits, not events — a visit that opens six products counts once.
+              Ad blockers stop some events, so these are a floor, not a headcount.</p>
+          </section>
+
+          <section class="tcard" aria-labelledby="t-mix-h">
+            <div class="tcard__head">
+              <div>
+                <h2 class="tcard__title" id="t-mix-h">Where visits came from</h2>
+                <p class="tcard__sub">By how each visit arrived.</p>
+              </div>
+              <button type="button" class="tlink" data-goto-tab="sources">All sources <span aria-hidden="true">→</span></button>
+            </div>
+            <div data-t-mix></div>
+          </section>
         </div>
-        <div class="atable-wrap">
-          <table class="atable">
+
+        <section class="tcard" aria-labelledby="t-pages-h">
+          <div class="tcard__head"><div>
+            <h2 class="tcard__title" id="t-pages-h">Most visited pages</h2>
+            <p class="tcard__sub">Ranked by visits, not hits — one person refreshing is not a popular page.</p>
+          </div></div>
+          <div class="atable-wrap"><table class="atable atable--tight">
             <thead>
               <tr>
-                <th scope="col">Started</th>
-                <th scope="col">Came from</th>
-                <th scope="col" class="atable__num">Pages</th>
-                <th scope="col">Got as far as</th>
-                <th scope="col" class="atable__num">Value</th>
-                <th scope="col"><span class="sr-only">Footprint</span></th>
+                <th scope="col">Page</th>
+                <th scope="col" class="atable__num">Visits</th>
+                <th scope="col" class="atable__num">Views</th>
               </tr>
             </thead>
-            <tbody data-an-visits>
-              <tr><td colspan="6" class="atable__empty">Loading…</td></tr>
+            <tbody data-t-pages>
+              <tr><td colspan="3" class="atable__empty">Reading…</td></tr>
             </tbody>
-          </table>
-        </div>
-        <div style="margin-top:var(--space-3);display:flex;justify-content:center">
-          <!-- The list used to stop silently at 50, which reads as "you have had
-               50 visits" rather than "this is the first 50". -->
-          <button type="button" class="btn-gr btn-gr--ghost" data-an-more hidden>Load more visits</button>
-        </div>
+          </table></div>
+        </section>
+
+        <p class="tfoot">This is the shop's own copy of what the pixel fired, recorded server-side.
+          Meta reports on the ad; this reports on the pages the ad sent people to — including the ones
+          nobody bought from, which Meta never sees. Visitors are counted by a random id in the
+          browser's own storage: a cleared browser or a second phone is a second visitor, so every
+          count here is an honest floor rather than a headcount.</p>
       </section>
 
-      <!-- The footprint opens in place under the table rather than in a modal:
-           it is a reading task, it can be long, and a dialog would trap it in a
-           scroll box the size of a phone. -->
-      <section data-an-fp-wrap hidden style="margin-top:var(--space-5)">
-        <div class="admin__head" style="margin-bottom:var(--space-3)">
-          <div>
-            <h2 class="admin__title" style="font-size:var(--fs-20)">Visit footprint</h2>
-            <p class="admin__sub" data-an-fp-sub>—</p>
+      <section class="tpanel" id="tpanel-live" role="tabpanel" aria-labelledby="ttab-live" data-t-panel="live" hidden>
+        <div data-t-body><p class="tempty">Reading…</p></div>
+      </section>
+
+      <section class="tpanel" id="tpanel-sources" role="tabpanel" aria-labelledby="ttab-sources" data-t-panel="sources" hidden>
+        <div data-t-body><p class="tempty">Reading…</p></div>
+      </section>
+
+      <section class="tpanel" id="tpanel-audience" role="tabpanel" aria-labelledby="ttab-audience" data-t-panel="audience" hidden>
+        <div data-t-body><p class="tempty">Reading…</p></div>
+      </section>
+
+      <section class="tpanel" id="tpanel-products" role="tabpanel" aria-labelledby="ttab-products" data-t-panel="products" hidden>
+        <div data-t-body><p class="tempty">Reading…</p></div>
+      </section>
+
+      <section class="tpanel" id="tpanel-search" role="tabpanel" aria-labelledby="ttab-search" data-t-panel="search" hidden>
+        <div data-t-body><p class="tempty">Reading…</p></div>
+      </section>
+
+      <section class="tpanel" id="tpanel-checkout" role="tabpanel" aria-labelledby="ttab-checkout" data-t-panel="checkout" hidden>
+        <div data-t-body><p class="tempty">Reading…</p></div>
+      </section>
+
+      <section class="tpanel" id="tpanel-visits" role="tabpanel" aria-labelledby="ttab-visits" data-t-panel="visits" hidden>
+        <div data-t-body><p class="tempty">Reading…</p></div>
+      </section>
+
+      <!-- One visit, step by step. A drawer rather than a section under the
+           table: it is opened from six different places on this screen, and a
+           panel that pushes the table down moves the row you were reading. -->
+      <dialog class="tdrawer" data-t-drawer aria-labelledby="t-drawer-title">
+        <div class="tdrawer__panel">
+          <div class="tdrawer__head">
+            <div>
+              <h2 class="tdrawer__title" id="t-drawer-title">One visit</h2>
+              <p class="tdrawer__sub" data-t-drawer-sub>—</p>
+            </div>
+            <button type="button" class="btn-gr btn-gr--ghost" data-t-drawer-close>Close</button>
           </div>
-          <button type="button" class="btn-gr btn-gr--ghost" data-an-fp-close>Close</button>
+          <div class="tdrawer__body" data-t-drawer-body></div>
         </div>
-        <ol class="fp" data-an-fp></ol>
-      </section>
-
-      <p class="admin__sub" style="margin-top:var(--space-5)">
-        This is the shop's own copy of what the pixel fired, recorded server-side.
-        Meta reports on the ad; this reports on the pages the ad sent people to —
-        including the ones nobody bought from, which Meta never sees.
-      </p>
+      </dialog>
     </main>
   </div>
 
@@ -448,6 +512,6 @@ try {
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=0451c724"></script>
-  <script type="module" src="../../modules/marketing/analytics-page.js?v=e299e21c"></script>
+  <script type="module" src="../../modules/marketing/analytics-page.js?v=f72ca621"></script>
 </body>
 </html>
