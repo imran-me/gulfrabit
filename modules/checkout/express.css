@@ -17,6 +17,35 @@
 .express__head { margin-bottom: var(--space-5); }
 .express__legend { margin: var(--space-6) 0 var(--space-4); }
 
+/* The line that explains why two address boxes have no asterisk.
+   A form that stops demanding things without saying why reads as broken, so
+   this sits directly under the legend, where it is read BEFORE the fields it
+   is explaining rather than after them. */
+.express__aside {
+  margin: calc(var(--space-3) * -1) 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-hairline);
+  font-size: var(--fs-14);
+  line-height: var(--lh-normal, 1.5);
+  color: var(--text-secondary);
+}
+.express__aside strong { color: var(--text-primary); }
+.express__aside .bn { display: block; margin-top: 2px; color: var(--text-muted); }
+
+/* "optional", where the asterisk used to be. Deliberately a word and not the
+   ABSENCE of an asterisk: on a form where three fields are starred, a fourth
+   with nothing beside it is ambiguous — it could be optional or it could be
+   an oversight. Saying it removes the doubt in the only place it matters. */
+.express__opt {
+  font-weight: var(--fw-regular, 400);
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+  text-transform: lowercase;
+  letter-spacing: .01em;
+}
+
 /* ---- The item being bought -------------------------------------------- */
 .express-item {
   display: grid;

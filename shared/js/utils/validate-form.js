@@ -71,7 +71,21 @@ function ruleWithArg(name, arg, v, form, c) {
   const subject = c.label || 'This';
 
   switch (name) {
-    case 'min':   return v.length >= +arg || `${subject} must be at least ${arg} characters.`;
+    /* `!v ||` — AN EMPTY OPTIONAL FIELD PASSES.
+     *
+     * Every other format rule in this file already works this way: email,
+     * phone and numeric all begin `!v ||`, because in this validator
+     * emptiness is `required`'s business and nobody else's. `min` was the one
+     * that did not, which meant `data-validate="min:2"` on a field with no
+     * `required` silently made it mandatory — with the wrong message, too:
+     * "Thana must be at least 2 characters" rather than a request for it.
+     *
+     * Found when the express checkout made its address boxes optional and the
+     * form still refused to submit, flagging two fields the customer had been
+     * told they could skip. Checked every data-validate in the project first:
+     * `min:` appears without `required` on exactly those two fields, so no
+     * other form was relying on the old behaviour. */
+    case 'min':   return !v || v.length >= +arg || `${subject} must be at least ${arg} characters.`;
     case 'max':   return v.length <= +arg || `${subject} must be at most ${arg} characters.`;
     case 'match': {
       const other = form.querySelector(arg);

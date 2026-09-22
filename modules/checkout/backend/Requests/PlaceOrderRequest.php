@@ -35,7 +35,25 @@ class PlaceOrderRequest extends FormRequest
             'phone'    => ['required', 'string', 'regex:/^(?:\+?88)?01[3-9]\d{8}$/'],
             'email'    => ['nullable', 'email', 'max:160'],
 
-            'address'  => ['required', 'string', 'min:6', 'max:255'],
+            // THE STREET ADDRESS IS NOT REQUIRED, AND THE DISTRICT IS.
+            //
+            // Every order is telephoned before it is packed — `placed` means
+            // "it arrived; nobody has spoken to them yet" and `confirmed`
+            // means "a human called and the customer said yes". The address is
+            // settled on that call whatever the form collected, so refusing an
+            // order for want of a house number loses a sale to save a phone
+            // call that was going to happen anyway.
+            //
+            // `min:6` still applies to an address that IS given, so a typed
+            // "x" is still rejected — nullable means absent, not unchecked.
+            //
+            // The district stays required because it is the only one of the
+            // three that is load-bearing before the call: delivery_zones is
+            // keyed on it, so the total quoted to the customer depends on it.
+            // A total agreed before the district is known is a total that can
+            // change afterwards, and that is a different conversation from
+            // "what is your house number".
+            'address'  => ['nullable', 'string', 'min:6', 'max:255'],
             'area'     => ['nullable', 'string', 'max:120'],
             'district' => ['required', 'string', 'max:64', 'exists:districts,key'],
             'notes'    => ['nullable', 'string', 'max:500'],
