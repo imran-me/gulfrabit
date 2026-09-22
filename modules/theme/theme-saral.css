@@ -451,3 +451,31 @@
   }
   [data-theme="saral"] .product-card__buy > .product-card__now .btn-bn { display: none; }
 }
+
+/* ---- The same split, pinned to the thumb --------------------------------
+ *
+ * The phone buy bar is the card foot again: it is what a customer sees for
+ * the whole length of a product page, and until now the only thing it could
+ * do was fill a cart. It gets the same pair, in the same order and the same
+ * proportion — Add to Cart as an outline, Order now filled and larger.
+ *
+ * The bar already flexes its buttons `1 1 auto`, so the price block keeps its
+ * width and the two controls share what is left.
+ */
+[data-theme="saral"] .pdp-buybar__now { display: inline-flex; }
+[data-theme="saral"] .pdp-buybar .btn-gr { flex-grow: 1; }
+[data-theme="saral"] .pdp-buybar__now { flex-grow: 1.6; }
+[data-theme="saral"] .pdp-buybar [data-buybar-add] {
+  --_bg: transparent;
+  --_fg: var(--link);
+  --_bd: var(--border-hairline);
+}
+@media (max-width: 575.98px) {
+  /* Three things across 393px minus the price block. The English label alone
+     carries each control; the Bengali is the half that will not fit. */
+  [data-theme="saral"] .pdp-buybar .btn-gr {
+    font-size: 12px;
+    padding-inline: 8px;
+  }
+  [data-theme="saral"] .pdp-buybar .btn-gr .btn-bn { display: none; }
+}

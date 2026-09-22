@@ -17,7 +17,7 @@ import { setup as setupStepper } from '../../shared/js/components/quantity-stepp
 import { initWishlistButtons } from '../../shared/js/components/wishlist.js';
 import { getParam, pathKey, setCanonical, setPageMeta } from '../../shared/js/core/router-helpers.js';
 import { track, productPayload } from '../../shared/js/core/analytics.js';
-import { categoryURL, productURL, siteURL } from '../../shared/js/core/paths.js';
+import { categoryURL, productURL, siteURL, buyURL } from '../../shared/js/core/paths.js';
 import { initBuyBar } from './pdp-buybar.js';
 
 const STAR = '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
@@ -368,6 +368,13 @@ function paintPrice(p) {
     bbPrice.textContent = formatBDT(v.price);
     document.querySelector('[data-buybar-variant]').textContent = v.label || '';
   }
+  /* Order now points at the size the bar is quoting. paintPrice is the ONE
+     place the selected variant becomes visible, so it is the one place the
+     express link can never fall out of step with the price beside it — a bar
+     reading "৳ 2,650 · 1 kg" whose button opened express on 500 g would be
+     the mis-sale this whole path was built to avoid. */
+  const bbNow = document.querySelector('[data-buybar-now]');
+  if (bbNow) bbNow.href = buyURL(p, { variant: v.label || null, qty: currentQty });
   document.querySelector('[data-pdp-original]').textContent = v.originalPrice > v.price ? formatBDT(v.originalPrice) : '';
   document.querySelector('[data-pdp-discount]').innerHTML = v.originalPrice > v.price
     ? `<span class="badge-gr badge-sale">${discountLabel(v.originalPrice, v.price)}</span>`
@@ -625,7 +632,12 @@ function wireActions(p) {
     delete stepper.dataset.ready;
   }
   setupStepper(stepper);
-  stepper.addEventListener('qty:change', (e) => { currentQty = e.detail.value; });
+  stepper.addEventListener('qty:change', (e) => {
+    currentQty = e.detail.value;
+    // Re-point Order now: the express page takes qty in the URL, so a customer
+    // who set 3 and tapped it must land on 3, not on 1.
+    paintPrice(p);
+  });
 
   const addBtn = document.querySelector('[data-add-to-cart]');
   if (!p.inStock) { addBtn.disabled = true; addBtn.textContent = 'Sold out'; }
@@ -638,6 +650,9 @@ function wireActions(p) {
   if (buybar) {
     const bbBtn = buybar.querySelector('[data-buybar-add]');
     if (!p.inStock) { bbBtn.disabled = true; bbBtn.textContent = 'Sold out'; }
+    // Nothing to place today, so the express link is removed rather than left
+    // pointing at a page that would only tell them the same thing again.
+    if (!p.inStock || p.isPreorder || p.isComingSoon) buybar.querySelector('[data-buybar-now]')?.remove();
     bbBtn.addEventListener('click', () => addBtn.click());
     buybar.hidden = false;
     document.body.classList.add('has-pdp-buybar');

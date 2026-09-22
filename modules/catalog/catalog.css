@@ -387,6 +387,10 @@
 .pdp-buybar__price .price { font-size: var(--fs-20); }
 .pdp-buybar__price .caption { color: var(--text-muted); }
 .pdp-buybar .btn-gr { flex: 1 1 auto; min-width: 0; justify-content: center; }
+/* The express control in the bar, hidden the same way .product-card__now is:
+   it ships in the markup of every product page so it paints with the bar, and
+   no theme but Saral shows it. Classic's bar is the bar it always was. */
+.pdp-buybar__now { display: none; }
 @media (max-width: 991.98px) {
   .pdp-buybar:not([hidden]) { display: flex; }
   body.has-pdp-buybar { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }

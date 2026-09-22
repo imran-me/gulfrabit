@@ -147,5 +147,13 @@
       <button class="btn-gr btn-primary-gr" type="button" data-buybar-add>
         <span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">। কার্টে যোগ করুন</span>
       </button>
+      <!-- The express path, for themes that want one. Hidden by default in
+           catalog.css exactly like .product-card__now is in _cards.css, so
+           every theme but Saral has the bar it always had. An <a>, so it
+           survives a broken script and opens in a new tab like any link.
+           product-page.js keeps the href on the selected size and qty. -->
+      <a class="btn-gr btn-primary-gr pdp-buybar__now" data-buybar-now href="#">
+        <span class="btn-gr__en">Order now</span><span class="btn-bn bn" lang="bn">এখনই অর্ডার</span>
+      </a>
     </div>
   </main>
