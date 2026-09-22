@@ -48,6 +48,9 @@ const bar = document.querySelector('[data-express-bar]');
 const sheet = document.querySelector('[data-express-confirm]');
 
 let product = null;
+/* The pack the customer chose, as a variant LABEL ("500 g") or null when the
+   product has nothing to choose. See resolveVariant(). */
+let variant = null;
 let qty = 1;
 let quote = DEFAULT_OPTION;
 let placing = false;
@@ -73,6 +76,9 @@ async function init() {
   if (!product) return showGone('This product is no longer listed.');
   if (product.inStock === false) return showGone('This product is out of stock.');
 
+  const bad = resolveVariant();
+  if (bad) return showGone(bad);
+
   paintItem();
   await fillDistricts();
   attachLiveValidation(form);
@@ -92,6 +98,55 @@ async function init() {
   // Meta lists it on InitiateCheckout, and without it the express funnel and
   // the cart funnel report the same step with different shapes.
   track('InitiateCheckout', { ...productPayload(product, qty), num_items: qty });
+}
+
+/* ---- Which pack ---------------------------------------------------------
+ *
+ * THIS PAGE USED TO SEND variant: null, ALWAYS, AND CHARGE THE DEFAULT PRICE.
+ *
+ * That was harmless while the only way in was an ad link for a single-size
+ * product. It stopped being harmless the moment a product card grew an
+ * "Order now" button beside its size chips: a customer taps 1 kg, lands here,
+ * and buys 500 g at the 500 g price without being told. The order reaches the
+ * warehouse with no size on it at all.
+ *
+ * So the pack rides the URL — /buy?sku=gr-1101&size=1%20kg — and is resolved
+ * HERE, against the product the server just sent, not trusted from the link.
+ * A label that matches nothing, or matches something out of stock, stops the
+ * page rather than quietly falling back to the default: falling back is
+ * exactly the bug this exists to prevent.
+ *
+ * Everything downstream reads product.price, so the matched variant's price
+ * is written onto the working copy once, and the totals, the confirm sheet,
+ * the receipt and the order payload are all correct without knowing why.
+ *
+ * Returns an error string to show, or null when all is well.
+ */
+function resolveVariant() {
+  const wanted = (getParam('size') || getParam('variant') || '').trim();
+  const variants = Array.isArray(product.variants) ? product.variants.filter((v) => v?.label) : [];
+
+  if (!wanted) {
+    // No size asked for. A multi-size product still has to record WHICH pack
+    // the price belongs to, so fall back to the one the shop defaults to.
+    if (variants.length > 1) variant = product.defaultVariant ?? variants[0].label;
+    return null;
+  }
+
+  const match = variants.find((v) => v.label.toLowerCase() === wanted.toLowerCase());
+  if (!match) return `We could not find the “${wanted}” pack of this product.`;
+  if (match.inStock === false) return `The ${match.label} pack is out of stock.`;
+
+  variant = match.label;
+  product = {
+    ...product,
+    price: match.price,
+    originalPrice: match.originalPrice ?? product.originalPrice,
+    // The meta line under the title reads "brand · unit"; the pack the
+    // customer picked is a more useful thing to put there than "kg".
+    unit: match.label,
+  };
+  return null;
 }
 
 /* ---- The item --------------------------------------------------------- */
@@ -250,8 +305,12 @@ function openConfirm() {
   }
 
   const method = paymentLabel();
+  // The pack is named here because this sheet is the LAST thing between a tap
+  // and a charge. "2 × Ajwa Dates" and "2 × Ajwa Dates (1 kg)" are different
+  // orders, and the one place a customer is certain to read is the one asking
+  // them to confirm.
   setText('[data-confirm-line]',
-    `${qty} × ${product.title} — ${formatBDT(product.price * qty + quote.cost)} total, ${method}.`);
+    `${qty} × ${product.title}${variant ? ` (${variant})` : ''} — ${formatBDT(product.price * qty + quote.cost)} total, ${method}.`);
   setText('[data-confirm-addr]', addressLine());
   sheet.hidden = false;
   document.querySelector('[data-express-confirm-yes]').focus();
@@ -295,7 +354,7 @@ async function confirmOrder() {
 
   const g = (n) => form.querySelector(`[name="${n}"]`)?.value.trim() || '';
   const result = await createOrder({
-    items: [{ sku: product.id, qty, variant: null }],
+    items: [{ sku: product.id, qty, variant }],
     name: g('fullName'),
     phone: g('phone'),
     email: g('email') || null,
@@ -344,7 +403,7 @@ function buildOrder() {
     items: [{
       id: product.id,
       title: product.title,
-      variant: null,
+      variant,
       qty,
       price: product.price,
       image: product.image,
