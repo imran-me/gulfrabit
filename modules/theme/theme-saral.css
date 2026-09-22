@@ -222,9 +222,16 @@
  * the correct answer for them, and the selector — not a comment — is what
  * guarantees it.
  */
-[data-theme="saral"] .product-card__body > .btn-gr:last-child {
+[data-theme="saral"] .product-card__body > .product-card__buy:last-child {
+  display: flex;
   width: auto;
   margin: 10px -12px -12px;
+  min-height: 42px;
+}
+[data-theme="saral"] .product-card__body > .product-card__buy:last-child > .btn-gr {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
   border-radius: 0;
   min-height: 42px;
 }
@@ -232,7 +239,7 @@
    2px slot of card underneath it. The press state is left alone: it does not
    move the button, and it is the feedback that matters on a phone. */
 @media (hover: hover) {
-  [data-theme="saral"] .product-card__body > .btn-gr:last-child:hover { transform: none; }
+  [data-theme="saral"] .product-card__buy > .btn-gr:hover { transform: none; }
 }
 
 /* ---- The card on a phone ----------------------------------------------
@@ -274,10 +281,11 @@
 
   /* The button keeps the phone's smaller type and gains the flush edges; the
      margins match this block's 10px body padding, not the 12px above. */
-  [data-theme="saral"] .product-card__body > .btn-gr:last-child {
+  [data-theme="saral"] .product-card__body > .product-card__buy:last-child {
     margin: 8px -10px -10px;
     min-height: 38px;
   }
+  [data-theme="saral"] .product-card__buy > .btn-gr { min-height: 38px; }
 
   /* Badges and circles tuck in by 2px — an 8px inset on a 163px photograph
      reads as adrift in the corner rather than tucked into it. */
@@ -360,10 +368,86 @@
 /* The price row stops being the thing that absorbs the slack... */
 [data-theme="saral"] .product-card__price-row { margin-top: 0; }
 /* ...and the button, which is welded to the foot regardless, becomes it. */
-[data-theme="saral"] .product-card__body > .btn-gr:last-child { margin-top: auto; }
+[data-theme="saral"] .product-card__body > .product-card__buy:last-child { margin-top: auto; }
 
 @media (max-width: 575.98px) {
   /* 11px: this is the fourth thing read on the card, after the photograph,
      the title and the price. It fills the space; it must not compete for it. */
   [data-theme="saral"] .product-card__note { font-size: .6875rem; line-height: 1.3; }
+}
+
+/* =========================================================================
+   ORDER NOW — THE WHOLE POINT OF THE THEME
+   =========================================================================
+
+   The merchant's brief: "drive the customer to checkout in the smallest time
+   possible, with less steps, as our main target is placing the orders and
+   having their numbers, we will call and confirm the rest."
+
+   That is not a styling note, it is a description of the business. The order
+   pipeline already says the same thing in its own words — `placed` is "it
+   arrived; nobody has spoken to them yet" and `confirmed` is "a human called
+   and the customer said yes" (modules/checkout/README.md). The shop does not
+   need a finished order. It needs a product, a name and a PHONE NUMBER.
+
+   What the shop asked of a customer before this:
+
+       card -> Add to Cart -> mini cart -> Checkout -> cart page
+            -> Address -> Delivery -> Payment -> Review -> Place order
+
+   What it asks now:
+
+       card -> Order now -> one screen -> Place order
+
+   The page that makes the difference was already built and finished and
+   REACHABLE BY NOBODY: modules/checkout/express.html, written for paid social
+   traffic, three states in one document so placing an order never navigates.
+   Nothing in the shop linked to it. This theme links to it.
+
+   THE FOOT IS SPLIT, NOT REPLACED. Order now takes the larger half and the
+   primary fill; Add to Cart keeps the smaller half as an outline. Replacing
+   the cart outright would buy a shorter path at the cost of every basket with
+   two things in it, and a shop selling dates and nuts has plenty of those.
+   Nothing is removed, and the loud half is the one that ends in an order.
+   ========================================================================= */
+[data-theme="saral"] .product-card__now { display: inline-flex; }
+
+/* 3:2 in favour of the order. Enough that the eye lands on it first and the
+   label fits on one line at 163px; not so much that Add to Cart reads as
+   disabled. */
+/* Matched to the weld rule's own reach — that one is
+   [data-theme] .__body > .__buy:last-child > .btn-gr and sets `flex: 1 1 0`,
+   so anything shorter than it loses and both halves came out identical. */
+[data-theme="saral"] .product-card__body > .product-card__buy:last-child > .product-card__now {
+  flex-grow: 1.5;
+}
+
+/* Add to Cart steps back to an outline so there is ONE filled control in the
+   card and no question which one is the default. Same cyan, same weight — it
+   is the second choice, not a lesser one. */
+[data-theme="saral"] .product-card__buy > [data-action="add-to-cart"] {
+  --_bg: transparent;
+  --_fg: var(--link);
+  --_bd: transparent;
+  box-shadow: inset -1px 0 0 var(--border-hairline);
+}
+@media (hover: hover) {
+  [data-theme="saral"] .product-card__buy > [data-action="add-to-cart"]:hover {
+    --_bg: var(--wash-hover);
+    --_fg: var(--link-hover);
+  }
+}
+
+@media (max-width: 575.98px) {
+  /* Two labels in two scripts across a 188px foot. The Bengali half of Add to
+     Cart is what breaks first, so it is the half that goes: "Add to Cart"
+     alone is understood, and the Bengali still carries the order button where
+     the tap that matters is. */
+  [data-theme="saral"] .product-card__buy > [data-action="add-to-cart"] .btn-bn { display: none; }
+  [data-theme="saral"] .product-card__buy > .btn-gr {
+    font-size: 11px;
+    padding-inline: 6px;
+    letter-spacing: 0;
+  }
+  [data-theme="saral"] .product-card__buy > .product-card__now .btn-bn { display: none; }
 }

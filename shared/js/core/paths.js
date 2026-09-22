@@ -39,6 +39,25 @@ export function productURL(product) {
   return siteURL(`product/${encodeURIComponent(key)}`);
 }
 
+/**
+ * The one-screen express checkout for ONE product: /buy?sku=gr-1101&size=1%20kg
+ *
+ * This is the shortest path through the shop that ends in an order. It skips
+ * the cart, the cart page and the four-step checkout, which is the point: a
+ * customer who has decided should not be asked to decide four more times.
+ *
+ * The pack rides as `size` and is re-validated on arrival against the real
+ * variant list — see resolveVariant() in modules/checkout/express-page.js.
+ * Never build this link with a size the card did not actually offer.
+ */
+export function buyURL(product, { variant = null, qty = 1 } = {}) {
+  const sku = typeof product === 'string' ? product : (product?.id || '');
+  const q = new URLSearchParams({ sku });
+  if (qty > 1) q.set('qty', String(qty));
+  if (variant) q.set('size', variant);
+  return `${siteURL('buy')}?${q}`;
+}
+
 /** Where a category lives: /category/dates-nuts */
 export function categoryURL(slug) {
   return siteURL(`category/${encodeURIComponent(slug || '')}`);

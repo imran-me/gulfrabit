@@ -745,6 +745,20 @@ a:hover { color: var(--link-hover); }
    existed. */
 .product-card__note { display: none; }
 
+/* The foot of the card, wrapped so a theme has ONE thing to restyle.
+ *
+ * `display: contents` means this box is not laid out at all: its children are
+ * flex children of .product-card__body exactly as they were before the
+ * wrapper existed, so Classic's foot is unchanged to the pixel. A theme that
+ * wants both controls on one line — Saral — gives it back a `display` and
+ * gets a row.
+ *
+ * Order now is hidden here for the same reason .product-card__note is: it
+ * ships in the markup of every card so it paints WITH the card rather than
+ * arriving a frame later, and no theme but Saral shows it. */
+.product-card__buy { display: contents; }
+.product-card__now { display: none; }
+
 .product-card__price-row { display: flex; align-items: baseline; gap: var(--space-2); margin-top: auto; }
 .product-card__price { font-size: var(--fs-20); color: var(--text-primary); }
 /* The CTA's offset from the price used to be an inline style on every card —

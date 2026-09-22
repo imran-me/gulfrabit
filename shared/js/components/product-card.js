@@ -15,7 +15,7 @@
 
 import { formatBDT, discountLabel, savingsLabel } from '../utils/format-currency.js';
 import * as store from '../core/state.js';
-import { productURL, siteURL } from '../core/paths.js';
+import { productURL, siteURL, buyURL } from '../core/paths.js';
 import { imageSource } from '../core/product-image.js';
 import { toast } from './toast-notifications.js';
 
@@ -291,37 +291,71 @@ function cardNote(product) {
 function cardAction(product) {
   const { inStock = true, isPreorder, isComingSoon, availableFrom } = product;
 
+  /* THE FOOT OF THE CARD IS ALWAYS WRAPPED, in every state, so there is one
+     thing for a theme to style instead of four. The wrapper is
+     `display: contents` in _cards.css, so for Classic it is not there at all:
+     the button stays a direct flex child of the body and lays out exactly as
+     it did before this wrapper existed.
+
+     A theme that wants a split foot — Saral does — turns the wrapper back
+     into a box and gets both controls side by side without the renderer
+     needing to know which theme is live. */
+  const foot = (inner) => `<div class="product-card__buy">${inner}</div>`;
+
   if (isPreorder) {
-    return `
+    return foot(`
       <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart">
         <span class="btn-gr__en">Pre-order</span>
         <span class="btn-bn bn" lang="bn">প্রি-অর্ডার</span>
-      </button>
-      ${arrivalLine(availableFrom, 'Ships')}`;
+      </button>`) + arrivalLine(availableFrom, 'Ships');
   }
 
   if (isComingSoon) {
-    return `
+    return foot(`
       <button class="btn-gr btn-outline-gr btn-block-gr btn-sm-gr" data-action="notify-me">
         <span class="btn-gr__en">Notify me</span>
         <span class="btn-bn bn" lang="bn">জানান</span>
-      </button>
-      ${arrivalLine(availableFrom, 'Arrives')}`;
+      </button>`) + arrivalLine(availableFrom, 'Arrives');
   }
 
   if (!inStock) {
-    return `
+    return foot(`
       <button class="btn-gr btn-outline-gr btn-block-gr btn-sm-gr" data-action="notify-me">
         <span class="btn-gr__en">Notify me</span>
         <span class="btn-bn bn" lang="bn">জানান</span>
-      </button>`;
+      </button>`);
   }
 
-  return `
+  /* ORDER NOW — the shortest path in the shop that ends in an order.
+   *
+   * An <a>, not a button, and deliberately: it is a navigation to
+   * /buy?sku=…&size=…, so it middle-clicks, long-presses and opens in a new
+   * tab like any other link, and it works with JavaScript broken. The cart
+   * needs a script; this does not.
+   *
+   * The size in the href is the card's CURRENT pack, and enhanceProductCards
+   * rewrites it whenever a chip is tapped — see the chip handler. Express
+   * re-validates it on arrival either way.
+   *
+   * Only in this branch. A pre-order, a coming-soon and a sold-out product
+   * have no express path, because there is nothing to place today. */
+  return foot(`
     <button class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr" data-action="add-to-cart">
       <span class="btn-gr__en">Add to Cart</span>
       <span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span>
-    </button>`;
+    </button>
+    <a class="btn-gr btn-primary-gr btn-block-gr btn-sm-gr product-card__now"
+       data-order-now href="${buyURL(product, { variant: currentPack(product) })}">
+      <span class="btn-gr__en">Order now</span>
+      <span class="btn-bn bn" lang="bn">এখনই অর্ডার</span>
+    </a>`);
+}
+
+/** The pack a freshly drawn card is showing — the same one sizeChips marks. */
+function currentPack(product) {
+  const variants = Array.isArray(product.variants) ? product.variants.filter((v) => v?.label) : [];
+  if (variants.length < 2) return null;
+  return product.defaultVariant ?? variants[0].label;
 }
 
 /**
@@ -453,6 +487,16 @@ export function enhanceProductCards(root = document) {
 
         card.dataset.price = String(price);
         card.dataset.variant = chip.dataset.vLabel;
+
+        /* Order now is a plain link, so the chosen pack has to be written into
+           its href — nothing reads the card's state at click time the way
+           cardPayload() does for Add to Cart. Without this, tapping 1 kg and
+           then Order now would open express on the default pack, which is the
+           exact mis-sale express's own resolveVariant() was written to stop.
+           Express would still price and label honestly; it would simply be
+           honest about the WRONG pack. */
+        const now = card.querySelector('[data-order-now]');
+        if (now) now.href = buyURL(card.dataset.id, { variant: chip.dataset.vLabel });
 
         chips.forEach((c) => {
           const on = c === chip;
