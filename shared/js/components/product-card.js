@@ -205,6 +205,10 @@ export function productCardHTML(product, { eager = false } = {}) {
     <div class="product-card__body">
       ${brand ? `<span class="product-card__brand">${escapeHtml(brand)}${origin ? ` · ${escapeHtml(origin)}` : ''}</span>` : ''}
       <a href="${productURL(product)}"><h3 class="product-card__title">${escapeHtml(title)}</h3></a>
+      ${/* Hidden in every theme but Saral — see .product-card__note in _cards.css.
+            It exists in the markup rather than being injected by the theme so it
+            paints with the card instead of arriving a frame later. */''
+        }${(() => { const n = cardNote(product); return n ? `<p class="product-card__note">${escapeHtml(n)}</p>` : ''; })()}
       <div class="product-card__rating" style="display:flex;align-items:center;gap:6px">${starsHTML(rating, reviewCount)}</div>
       <div class="product-card__price-row">
         <span class="price product-card__price">${formatBDT(price)}</span>
@@ -238,6 +242,52 @@ export function productCardHTML(product, { eager = false } = {}) {
  * disclosure: it is the only place before checkout where somebody learns they
  * are buying something that has not arrived.
  */
+/**
+ * The line under the title, and why a card has one at all.
+ *
+ * Saral welds the button to the foot of the card and pins the price above it,
+ * so a card with nothing to choose — no size chips — ends up with its slack
+ * pooled in the MIDDLE, a visible hole between the title and the price while
+ * the card beside it is full. The merchant sent a screenshot with two of them
+ * ringed in red.
+ *
+ * The honest fix is not to shrink the card until the hole closes; it is to put
+ * something in it worth reading. Every product already carries a sentence
+ * written to sell it, so that is what goes there.
+ *
+ * In order of preference, first hit wins:
+ *
+ *   1. A BENGALI NAME already carried in the title after a separator —
+ *      "Chamomile Flower Tea | ক্যামোমাইল ফুলের চা". Half this shop's
+ *      customers read the Bengali half first, and on a 2-line clamp it is
+ *      usually the half that gets cut off. Promoted out of the title, it is
+ *      the best thing that can be in this slot.
+ *   2. shortDescription — one written sentence about the product.
+ *   3. brand · origin — the import claim, which is the shop's whole pitch.
+ *   4. categoryName, so the function cannot return nothing for a sparse record.
+ *
+ * Returns '' only when a product carries none of the four, and the card then
+ * renders exactly as it did before this existed.
+ */
+const BENGALI = /[ঀ-৿]/;
+
+function cardNote(product) {
+  const { title = '', shortDescription, brand, origin, categoryName } = product;
+
+  // A title in two scripts, split on the separator the catalogue uses.
+  for (const sep of ['|', '–', '—', '-']) {
+    if (!title.includes(sep)) continue;
+    const tail = title.slice(title.indexOf(sep) + sep.length).trim();
+    // Only when the TAIL is the Bengali half: "Dates — Madinah Select" is a
+    // subtitle in the same script and belongs in the title where it already is.
+    if (tail && BENGALI.test(tail) && !BENGALI.test(title.slice(0, title.indexOf(sep)))) return tail;
+  }
+
+  if (shortDescription) return shortDescription;
+  const line = [brand, origin].filter(Boolean).join(' · ');
+  return line || categoryName || '';
+}
+
 function cardAction(product) {
   const { inStock = true, isPreorder, isComingSoon, availableFrom } = product;
 

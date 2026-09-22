@@ -284,3 +284,86 @@
   [data-theme="saral"] .product-card__badges { top: 6px; left: 6px; }
   [data-theme="saral"] .product-card__actions { top: 6px; right: 6px; }
 }
+
+/* =========================================================================
+   THE PAGE GUTTER, AND WHAT THE CARDS DO WITH IT
+   =========================================================================
+
+   The merchant's note, against a screenshot with the left margin ringed:
+   "reduce theme spaces by 75%, and increase the cards width". Those are one
+   instruction, not two — the grid is `repeat(2, 1fr)`, so a card is whatever
+   is left after the gutters, and the only way to make it wider is to stop
+   spending the screen on air.
+
+   On a 393px phone Classic spends 24px of container padding each side and a
+   16px gap between the two columns: 64px of a 393px screen, 16%, on nothing.
+   At a quarter of that it is 16px, and the 48px saved goes where the shop
+   actually earns — into the photograph.
+
+       container padding   24px -> 6px
+       grid gap            16px -> 4px
+       CARD WIDTH        164.5px -> 188.5px   (+14.6%)
+
+   Phones only. A 1400px desktop has the room to be generous and nobody has
+   ever complained about a margin on a computer.
+   ========================================================================= */
+@media (max-width: 575.98px) {
+  [data-theme="saral"] .gr-container { padding-inline: 6px; }
+  [data-theme="saral"] .product-grid { gap: 4px; }
+}
+
+/* =========================================================================
+   THE HOLE IN THE MIDDLE OF A CARD WITH NOTHING TO CHOOSE
+   =========================================================================
+
+   A grid row is as tall as its tallest card, and .product-card__body is
+   flex-grow:1, so every card in the row is stretched to match. Classic parks
+   that slack with `margin-top: auto` on the price row, which pushes price,
+   chips and button to the bottom as one block and leaves the leftover between
+   the title and the price. On a card WITH chips you never see it. On a card
+   without them it is a visible hole — the merchant ringed two of them.
+
+   Two changes, and the hole has nowhere left to be:
+
+   1. The note grows. `flex: 1` on a line of real text means the leftover
+      height is spent SHOWING MORE OF THE SENTENCE rather than on nothing,
+      clamped so a long description cannot push the price off the card.
+   2. The pin moves to the button. Classic pins the price row; Saral pins the
+      button, which is welded to the foot anyway, so everything above it packs
+      tight under the title in the order it is read.
+   ========================================================================= */
+[data-theme="saral"] .product-card__note {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /* flex-basis 0, NOT auto, and this is the whole trick.
+   *
+   * With `auto` the note's own three lines count towards the card's natural
+   * height, so it did not fill the hole — it MADE one, adding 46px to every
+   * card including the ones that had no slack to spare (measured: 325.9 ->
+   * 371.8 on cards that already carried size chips). That is the opposite of
+   * the theme.
+   *
+   * At 0 the line contributes nothing to how tall the card wants to be and
+   * only ever grows into space the grid row has ALREADY given away. A card
+   * whose neighbour is taller gets a sentence; a card in a row of equals gets
+   * none, because there was no hole to fill. overflow:hidden does the
+   * trimming, so the text is never half a line clipped mid-descender. */
+  flex: 1 1 0;
+  min-height: 0;
+  margin: 0;
+  font-size: .75rem;
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+/* The price row stops being the thing that absorbs the slack... */
+[data-theme="saral"] .product-card__price-row { margin-top: 0; }
+/* ...and the button, which is welded to the foot regardless, becomes it. */
+[data-theme="saral"] .product-card__body > .btn-gr:last-child { margin-top: auto; }
+
+@media (max-width: 575.98px) {
+  /* 11px: this is the fourth thing read on the card, after the photograph,
+     the title and the price. It fills the space; it must not compete for it. */
+  [data-theme="saral"] .product-card__note { font-size: .6875rem; line-height: 1.3; }
+}

@@ -166,6 +166,14 @@
   color: var(--text-primary);
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
+/* The sentence under the title. Rendered by productCardHTML for every card
+   and shown by NO theme that ships today except Saral, which welds its button
+   to the card's foot and would otherwise leave a hole where the size chips
+   are on a card that has none. Hidden here rather than omitted there so the
+   card Classic draws is byte-identical to the one it drew before the line
+   existed. */
+.product-card__note { display: none; }
+
 .product-card__price-row { display: flex; align-items: baseline; gap: var(--space-2); margin-top: auto; }
 .product-card__price { font-size: var(--fs-20); color: var(--text-primary); }
 /* The CTA's offset from the price used to be an inline style on every card —
