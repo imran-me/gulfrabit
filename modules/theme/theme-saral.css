@@ -479,3 +479,45 @@
   }
   [data-theme="saral"] .pdp-buybar .btn-gr .btn-bn { display: none; }
 }
+
+/* =========================================================================
+   THE PRODUCT PAGE'S TABS, WHICH WERE HIDING THE TWO THAT SELL
+   =========================================================================
+
+   `.tabs` is `display:flex; overflow-x:auto` with `white-space:nowrap` on
+   every button, and it carries five labels: Description, Specifications,
+   Shipping & Returns, FAQ, Reviews. They come to well over 393px, so on a
+   phone the strip scrolls — and a flex scroller with no arrow, no fade and no
+   scrollbar gives a customer nothing to tell them it scrolls at all.
+
+   Measured at 393px: THREE of the five are off the right-hand edge — only
+   Description and Specifications are reachable. The three a customer cannot
+   get to are Shipping & Returns, FAQ and Reviews: the refund promise, the
+   objection-handling and the social proof. In a cash-on-delivery market
+   those are the three things that actually close a sale, and the page was
+   showing a customer the two that do not.
+
+   Wrapping is the whole fix. Every label is on screen, nothing is behind an
+   invisible gesture, and the existing tab script is untouched: it still owns
+   which panel is open, the roving focus and aria-selected. A theme should not
+   be reimplementing a tablist, and this one does not — it only stops the
+   container from hiding half of it.
+
+   Two lines of labels cost 41px — the strip measures 53px in Classic and 94px
+   here. The refund policy, the FAQ and the reviews are worth more than 41px.
+   ========================================================================= */
+@media (max-width: 575.98px) {
+  [data-theme="saral"] .tabs {
+    flex-wrap: wrap;
+    /* The scroller is what clipped them; with wrapping there is nothing to
+       scroll and the property would only re-introduce the clipping. */
+    overflow-x: visible;
+    /* Row gap first: two lines of tabs need air between them that a single
+       horizontal gap never had to supply. */
+    gap: 2px var(--space-4);
+  }
+  /* The active underline sits on the button's own bottom border, so on a
+     wrapped first row it would otherwise draw a cyan line through the middle
+     of the strip. Tightened so the two rows read as one control. */
+  [data-theme="saral"] .tab-btn { padding: 10px 0 8px; }
+}
