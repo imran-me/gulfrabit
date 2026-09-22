@@ -54,7 +54,7 @@ try {
       if (t) {
         var el = document.documentElement;
         var v = JSON.parse(t);
-        if (['luxe','trio','noor','nakshi','utsab'].indexOf(v) > -1) el.setAttribute('data-theme', v);
+        if (['luxe','trio','noor','nakshi','utsab','saral'].indexOf(v) > -1) el.setAttribute('data-theme', v);
         else el.removeAttribute('data-theme');
 
         /* AND ITS STYLESHEET, if this build did not bake it.
@@ -72,7 +72,7 @@ try {
            Skipped when the mirror agrees with the build, which is the normal
            case and already has its sheet linked. */
         var baked = 'trio';
-        var sheets = {luxe:['/modules/theme/theme-luxe.css?v=72101cb9'],trio:['/modules/theme/theme-trio.css?v=dd326453'],noor:['/modules/theme/theme-noor.css?v=a4d38565','/modules/theme/theme-noor-sky.css?v=f8c6680b'],nakshi:['/modules/theme/theme-nakshi.css?v=0e635894','/modules/theme/theme-nakshi-scene.css?v=b4627e73'],utsab:['/modules/theme/theme-utsab.css?v=b0d10326']};
+        var sheets = {luxe:['/modules/theme/theme-luxe.css?v=72101cb9'],trio:['/modules/theme/theme-trio.css?v=dd326453'],noor:['/modules/theme/theme-noor.css?v=a4d38565','/modules/theme/theme-noor-sky.css?v=f8c6680b'],nakshi:['/modules/theme/theme-nakshi.css?v=0e635894','/modules/theme/theme-nakshi-scene.css?v=b4627e73'],utsab:['/modules/theme/theme-utsab.css?v=b0d10326'],saral:['/modules/theme/theme-saral.css?v=900b1a10']};
         if (v !== baked && sheets[v]) {
           for (var i = 0; i < sheets[v].length; i++) {
             var link = document.createElement('link');
@@ -117,7 +117,7 @@ try {
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=3a7d16d2">
   <link rel="stylesheet" href="../../modules/admin/admin.css?v=ba9a4ee1">
-  <link rel="stylesheet" href="../../modules/theme/theme-admin.css?v=195abc01">
+  <link rel="stylesheet" href="../../modules/theme/theme-admin.css?v=f8f4d614">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -370,6 +370,21 @@ try {
               </span>
             </span>
           </label>
+
+          <label class="theme-option">
+            <input type="radio" name="theme" value="saral" class="theme-option__input">
+            <span class="theme-option__frame">
+              <span class="theme-swatch theme-swatch--saral" aria-hidden="true">
+                <span class="theme-swatch__bar"></span>
+                <span class="theme-swatch__row"><i></i><i></i><i></i></span>
+                <span class="theme-swatch__cta"></span>
+              </span>
+              <span class="theme-option__body">
+                <span class="theme-option__name">Saral<span class="theme-option__flag" data-live-for="saral" hidden>Live</span></span>
+                <span class="theme-option__desc">সরল — the same shop, a shorter card. The discount and the wishlist move onto the photograph, the brand line and the stars come off, and Add to Cart is welded to the card’s bottom edge. About 15% less height on a phone, with the photograph untouched. Changes no colour at all — this is Classic with the furniture taken out.</span>
+              </span>
+            </span>
+          </label>
         </fieldset>
 
         <div class="acard" style="margin-top:var(--space-5)">
@@ -475,6 +490,6 @@ try {
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=0451c724"></script>
-  <script type="module" src="../../modules/theme/theme-page.js?v=83b5d5e1"></script>
+  <script type="module" src="../../modules/theme/theme-page.js?v=d0602b13"></script>
 </body>
 </html>

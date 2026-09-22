@@ -98,6 +98,7 @@ THEME_SHEETS = {
     "nakshi":  ["/modules/theme/theme-nakshi.css",
                 "/modules/theme/theme-nakshi-scene.css"],
     "utsab":   ["/modules/theme/theme-utsab.css"],
+    "saral":   ["/modules/theme/theme-saral.css"],
 }
 
 # ONE THEME'S SHEETS, NOT ALL OF THEM.
@@ -224,7 +225,7 @@ def _theme_sheet_map_js():
 # SiteSetting::THEMES on the server. It exists because the pre-paint bootstrap
 # below has to decide, before any JavaScript module has loaded, whether the
 # mirrored value is a theme it should paint or junk it should ignore.
-STOREFRONT_THEMES = ["luxe", "trio", "noor", "nakshi", "utsab"]
+STOREFRONT_THEMES = ["luxe", "trio", "noor", "nakshi", "utsab", "saral"]
 
 
 # Keep in step with Modules\Theme\Models\CardParts::PARTS and with

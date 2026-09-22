@@ -42,7 +42,7 @@ import { normalise as normaliseCard, applyCardParts, readMirror as readCardMirro
 import { normalise as normaliseMiniCart, applyMiniCart, applyMirror as applyMiniCartMirror, writeMirror as writeMiniCartMirror } from './mini-cart.js';
 
 /** The only values that may ever reach the DOM. */
-const THEMES = ['classic', 'luxe', 'trio', 'noor', 'nakshi', 'utsab'];
+const THEMES = ['classic', 'luxe', 'trio', 'noor', 'nakshi', 'utsab', 'saral'];
 
 /** Preview lives in sessionStorage: it dies with the tab, so it cannot be
  *  mistaken later for the published theme, and it cannot leak to a visitor. */
@@ -75,6 +75,7 @@ const THEME_SHEETS = {
   noor:   ['/modules/theme/theme-noor.css', '/modules/theme/theme-noor-sky.css'],
   nakshi: ['/modules/theme/theme-nakshi.css', '/modules/theme/theme-nakshi-scene.css'],
   utsab:  ['/modules/theme/theme-utsab.css'],
+  saral:  ['/modules/theme/theme-saral.css'],
 };
 
 /**

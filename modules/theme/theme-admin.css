@@ -230,6 +230,21 @@
 }
 .theme-swatch--utsab .theme-swatch__cta { background: #56D8F0; }
 
+/* Saral's miniature. It is the only swatch here that is NOT about colour,
+   because the theme is not: it is Classic's own white, hairline and cyan-lime
+   CTA, arranged the way Saral arranges them. Two things are being shown —
+   each card wears its button as a band welded across its foot, and the row of
+   cards gives back a third of its height to the empty space beneath it, which
+   is the trade the theme makes on a phone. */
+.theme-swatch--saral { background: #FFFFFF; border-color: #E5E9E7; }
+.theme-swatch--saral .theme-swatch__bar { background: #F4F6F5; }
+.theme-swatch--saral .theme-swatch__row { flex: 0 1 62%; }
+.theme-swatch--saral .theme-swatch__row i {
+  background: linear-gradient(180deg, #F4F6F5 0 66%, #1BB4D4 66% 100%);
+  border: 1px solid #E5E9E7;
+}
+.theme-swatch--saral .theme-swatch__cta { background: linear-gradient(135deg, #1BB4D4, #9ACD3C); }
+
 /* =========================================================================
    Home layout screen
 

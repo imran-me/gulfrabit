@@ -28,7 +28,7 @@
 
 import { adminFetch, isBackendAbsent } from '/modules/admin/backend/api.js';
 
-const THEMES = ['classic', 'luxe', 'trio', 'noor', 'nakshi', 'utsab'];
+const THEMES = ['classic', 'luxe', 'trio', 'noor', 'nakshi', 'utsab', 'saral'];
 
 /**
  * What the shop is serving, and whether anyone can change it from here.
@@ -189,7 +189,7 @@ async function initMiniCart() {
 }
 
 function label(theme) {
-  return { luxe: 'Luxe', trio: 'Trio', noor: 'Noor', nakshi: 'Nakshi', utsab: 'Utsab' }[theme] ?? 'Classic';
+  return { luxe: 'Luxe', trio: 'Trio', noor: 'Noor', nakshi: 'Nakshi', utsab: 'Utsab', saral: 'Saral' }[theme] ?? 'Classic';
 }
 
 /** The "Live" flag next to whichever option the shop is actually serving. */

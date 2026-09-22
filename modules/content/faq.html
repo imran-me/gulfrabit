@@ -54,7 +54,7 @@ try {
       if (t) {
         var el = document.documentElement;
         var v = JSON.parse(t);
-        if (['luxe','trio','noor','nakshi','utsab'].indexOf(v) > -1) el.setAttribute('data-theme', v);
+        if (['luxe','trio','noor','nakshi','utsab','saral'].indexOf(v) > -1) el.setAttribute('data-theme', v);
         else el.removeAttribute('data-theme');
 
         /* AND ITS STYLESHEET, if this build did not bake it.
@@ -72,7 +72,7 @@ try {
            Skipped when the mirror agrees with the build, which is the normal
            case and already has its sheet linked. */
         var baked = 'trio';
-        var sheets = {luxe:['/modules/theme/theme-luxe.css?v=72101cb9'],trio:['/modules/theme/theme-trio.css?v=dd326453'],noor:['/modules/theme/theme-noor.css?v=a4d38565','/modules/theme/theme-noor-sky.css?v=f8c6680b'],nakshi:['/modules/theme/theme-nakshi.css?v=0e635894','/modules/theme/theme-nakshi-scene.css?v=b4627e73'],utsab:['/modules/theme/theme-utsab.css?v=b0d10326']};
+        var sheets = {luxe:['/modules/theme/theme-luxe.css?v=72101cb9'],trio:['/modules/theme/theme-trio.css?v=dd326453'],noor:['/modules/theme/theme-noor.css?v=a4d38565','/modules/theme/theme-noor-sky.css?v=f8c6680b'],nakshi:['/modules/theme/theme-nakshi.css?v=0e635894','/modules/theme/theme-nakshi-scene.css?v=b4627e73'],utsab:['/modules/theme/theme-utsab.css?v=b0d10326'],saral:['/modules/theme/theme-saral.css?v=900b1a10']};
         if (v !== baked && sheets[v]) {
           for (var i = 0; i < sheets[v].length; i++) {
             var link = document.createElement('link');
@@ -584,7 +584,7 @@ try {
 </footer>
 
   <script type="module" src="../../shared/js/main.js?v=65e9eef8"></script>
-  <script type="module" src="../../modules/theme/theme.js?v=a2cf5ea2"></script>
+  <script type="module" src="../../modules/theme/theme.js?v=f377b4f9"></script>
   <script type="module" src="../../modules/content/faq-page.js?v=7d754a78"></script>
   <script type="module" src="../../modules/cms/cms.js?v=9665d8ea"></script>
   <script type="module" src="../../modules/cms/cms-editor.js?v=46b9f9bd"></script>

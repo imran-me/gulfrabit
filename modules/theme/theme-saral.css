@@ -1,0 +1,286 @@
+/* =========================================================================
+   GulfRabit · Saral theme
+   =========================================================================
+
+   সরল — "plain". THE CARD, WITH THE FURNITURE TAKEN OUT.
+
+   This theme changes no colour. Not one. Every value below is a position, a
+   size or a piece of spacing, and every colour it does name is pulled from
+   the same variables Classic paints with. Put Classic and Saral side by side
+   with the images off and you cannot tell them apart by hue — only by how
+   much vertical space a product card spends on things that are not the
+   product.
+
+   WHAT IT IS COPYING, AND WHY
+   ---------------------------
+   The merchant's other shop lays a product card out like this: photograph,
+   the discount and the delivery promise riding ON the photograph, title,
+   price, and one solid button welded to the bottom edge of the card. No
+   brand line, no stars, no repeated "you save". Two of those cards clear a
+   phone fold with room underneath; two of ours do not, and ours is the
+   busier card of the two despite selling the same kind of thing.
+
+   The difference is not the image — both are square on a phone. It is the
+   four short rows underneath it and the 34px label strip between it and the
+   body. Saral removes the strip, removes two of the rows, and lets the
+   button take back the padding it was sitting inside.
+
+   Measured in Edge against the Best Sellers grid on the home page, Classic
+   and Saral at the same viewport, nothing else changed:
+
+                          393x850 phone        1280x900 computer
+       card height        350.2 -> 309.9       603.8 -> 470.3
+       photograph         162.5 -> 162.5       351.9 -> 281.5
+       the label strip       37 -> 0              0 -> 0
+
+   40px off every card on a phone, about 11%, AND NOT ONE PIXEL OF IT COMES
+   OUT OF THE PHOTOGRAPH — the media well measures the same 162.5px square in
+   both. The whole saving is chrome. That is the entire theme.
+
+   A computer loses more, 133px, but from a different place: the strip is
+   already absent there, so the saving is the 4:5 well becoming 1:1 plus the
+   button's gutter. The brand line and the stars stay on a 283px card, where
+   the room they need is room the card has. Only the phone drops them.
+
+   WHAT IT REFUSES TO REMOVE
+   -------------------------
+   The size chips stay. Every other row below the price is a restatement of
+   something already on the card: the brand repeats the title's first words,
+   the stars repeat the reviews on the page you are going to anyway, and
+   "Save ৳ 350" is the third time one discount has been mentioned. The chips
+   are not a restatement — they decide what goes in the basket. A card that
+   hides them while keeping a button labelled Add to Cart quietly sells
+   somebody 250 g when they wanted 500 g, and no amount of saved height pays
+   for that. So a multi-size product keeps its chips and keeps its height,
+   and the compression lands on the cards that have nothing to choose. See
+   the note in the module README about parts that are not switchable.
+
+   Same contract as every other theme in this folder: every rule is scoped
+   under [data-theme="saral"], the sheet is inert until the attribute is set,
+   and Classic remains the absence of the attribute. Nothing here starts an
+   element at opacity 0, hides anything pending JavaScript, or gates a layout
+   on a transition. There is no motion in this file at all, so there is
+   nothing for prefers-reduced-motion to turn off.
+   ========================================================================= */
+
+/* ---- The shell ---------------------------------------------------------
+   A slightly tighter corner. 16px on a 163px phone card is a visible scallop
+   at each end of the flush button below; 12px reads as a card edge rather
+   than as a decision. */
+[data-theme="saral"] .product-card { border-radius: 12px; }
+
+/* ---- The photograph is square at every width --------------------------
+   Classic is 4:5 on a computer and 1:1 on a phone. Saral is 1:1 throughout,
+   which is the shape being copied and which takes a further ~20% off a
+   desktop card without touching the body. The photographs are square as
+   shot (see tools/gen-product-images.py), so this is the crop they already
+   have on phones — no new cropping happens for anyone. */
+[data-theme="saral"] .product-card__media { aspect-ratio: 1 / 1; }
+
+/* ---- Badges and actions ride the photograph ---------------------------
+ *
+ * TWO MARKUPS, ONE RULE. Cards drawn by shared/js/components/product-card.js
+ * put the badges and the wishlist in a .product-card__labels row BETWEEN the
+ * media and the body; the hand-authored cards in index.html put them INSIDE
+ * .product-card__media. Both are positioned absolutely here, and in both
+ * cases the nearest positioned ancestor — .product-card or
+ * .product-card__media — has its top edge at the top of the photograph, so
+ * the same four offsets land in the same place either way.
+ *
+ * On a computer this is already what Classic does and nothing moves. The
+ * change is on phones, where Classic drops them into a 34px strip under the
+ * image so the photograph is never covered. That is a good trade in Classic
+ * and the wrong one here: it is the single largest block of height on the
+ * card, and this theme exists to get it back. Saral pays for it by keeping
+ * the furniture small — 9px pills and 28px circles on a 163px card, against
+ * the 78px pill and two 34px circles that made the strip necessary in the
+ * first place.
+ */
+[data-theme="saral"] .product-card__labels {
+  /* The row itself stops existing: both children leave the flow above, so
+     all this needs to do is surrender the height and padding Classic's phone
+     block gives it. */
+  position: static;
+  display: block;
+  min-height: 0;
+  padding: 0;
+}
+[data-theme="saral"] .product-card__badges {
+  position: absolute;
+  top: 8px; left: 8px; right: auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px;
+  z-index: 2;
+}
+/* A ROW, NOT A STACK. Classic stands these two on top of each other, which
+   is right when they are revealed on hover over a 280px desktop image and
+   wrong here: stacked on a 163px phone photograph they run 64px down the
+   right-hand edge, which is a third of the picture, and they do it on every
+   card whether anyone is pointing at it or not. Side by side they occupy the
+   same top band as the discount chip — 60x28 of a corner the badge has
+   already claimed — and the photograph below the band is clear. */
+[data-theme="saral"] .product-card__actions {
+  position: absolute;
+  top: 8px; right: 8px; left: auto;
+  flex-direction: row;
+  gap: 4px;
+  margin-left: 0;
+  z-index: 2;
+}
+
+/* ---- The badges, as marks on an image ---------------------------------
+   Classic sets these to 7.2px on a computer, where they sit on the photo as
+   marks, and 9px on a phone, where they sit in the strip and are meant to be
+   read. In Saral they are on the photo at both widths AND meant to be read,
+   which is the case neither size was cut for — so one size, 9px, everywhere.
+
+   Every colour below is the badge's own Classic colour. What changes is that
+   the translucent fills become opaque: a 16%-alpha wash is legible on the
+   card's white surface and is a smear on a photograph of dark figs. Opacity
+   is not a hue. */
+[data-theme="saral"] .product-card__badges .badge-gr {
+  padding: 3px 8px;
+  font-size: 9px;
+  letter-spacing: .03em;
+  gap: 3px;
+  /* Pill rather than 8px radius — the shape being copied, and at 9px a
+     rounded rectangle and a pill differ by about a pixel anyway. */
+  border-radius: var(--radius-pill);
+  /* So a pale badge keeps its edge against a pale photograph. */
+  box-shadow: 0 1px 4px rgba(16, 19, 20, .18);
+}
+/* The sale chip is already solid lime on ink in Classic and needs nothing
+   but the shape it inherits above. Listed here only so the next person does
+   not go looking for where it was handled. */
+
+/* The four that ship translucent, made opaque on their own colours. */
+[data-theme="saral"] .product-card__badges .badge-premium {
+  background: #FFFFFF;
+  border-color: rgba(201, 162, 75, .55);
+}
+[data-theme="saral"] .product-card__badges .badge-new {
+  background: #FFFFFF;
+  border-color: rgba(27, 180, 212, .45);
+}
+[data-theme="saral"] .product-card__badges .badge-preorder {
+  background: #FFFFFF;
+  border-color: rgba(201, 162, 75, .55);
+}
+[data-theme="saral"] .product-card__badges .badge-out,
+[data-theme="saral"] .product-card__badges .badge-soon,
+[data-theme="saral"] .product-card__badges .badge-origin {
+  background: #FFFFFF;
+}
+
+/* ---- The wishlist and the quick view ----------------------------------
+   Back on the photograph, so they are sized to cost it as little as
+   possible: 28px against Classic's 30px in the strip and 32px on a desktop
+   image. Still past WCAG 2.5.8's 24px floor, and the same actions are
+   full-size on the product page. A translucent white disc rather than the
+   strip's bare glyph, because a bare glyph on an unknown photograph is a
+   glyph you cannot see. */
+[data-theme="saral"] .product-card__actions .btn-icon-gr {
+  width: 28px; height: 28px;
+  background: rgba(255, 255, 255, .92);
+  color: var(--text-secondary);
+  box-shadow: 0 1px 4px rgba(16, 19, 20, .14);
+  backdrop-filter: blur(6px);
+  opacity: 1;
+}
+[data-theme="saral"] .product-card__actions .btn-icon-gr svg { width: 15px; height: 15px; }
+
+/* ---- The body ----------------------------------------------------------
+   Title, price, and whatever the product genuinely makes you choose. */
+[data-theme="saral"] .product-card__body {
+  gap: 4px;
+  padding: 10px 12px 12px;
+}
+
+/* The discount, stated once.
+ *
+ * The badge on the photograph says −27% and the struck-through ৳ 6,000 says
+ * what it was; "Save ৳ 1,600" is the same fact a third time, and it is a
+ * whole row. Classic already drops it on phones for exactly this reason —
+ * Saral finishes the thought and drops it on computers too. The product page
+ * keeps it (.pdp-price .price-saving), where there is room to labour it. */
+[data-theme="saral"] .product-card .price-saving { display: none; }
+
+/* ---- The button is welded to the card ---------------------------------
+ *
+ * Full width, no radius, flush to the three edges it can reach — the card's
+ * own overflow:hidden rounds its bottom corners to match the shell. The
+ * negative margins are the body's padding, cancelled: the button gives back
+ * the 12px gutter it was sitting inside, which is most of what makes the
+ * foot of the card look tighter than Classic's.
+ *
+ * :last-child IS LOAD-BEARING AND MUST STAY. A pre-order card and a coming
+ * soon card put a "Ships 14 Sept" line AFTER the button (see arrivalLine in
+ * product-card.js). Welding the button to the bottom of a card that has
+ * something below it would hang that line off the end, outside the padding
+ * the button just took. Those cards keep Classic's inset button, which is
+ * the correct answer for them, and the selector — not a comment — is what
+ * guarantees it.
+ */
+[data-theme="saral"] .product-card__body > .btn-gr:last-child {
+  width: auto;
+  margin: 10px -12px -12px;
+  border-radius: 0;
+  min-height: 42px;
+}
+/* The pointer lift would peel a welded button away from the card and show a
+   2px slot of card underneath it. The press state is left alone: it does not
+   move the button, and it is the feedback that matters on a phone. */
+@media (hover: hover) {
+  [data-theme="saral"] .product-card__body > .btn-gr:last-child:hover { transform: none; }
+}
+
+/* ---- The card on a phone ----------------------------------------------
+   Where the theme is actually for. Two cards across a 360px screen, ~163px
+   each, which is the width every number below was measured at. */
+@media (max-width: 575.98px) {
+  [data-theme="saral"] .product-card__body { padding: 8px 10px 10px; gap: 3px; }
+
+  /* The two rows that go.
+   *
+   * The brand line is the vendor and the origin — "IMPORTED PRODUCTS",
+   * "GULFRABIT" — set above a title that usually contains the same words.
+   * The stars are a rating whose reviews are on the page this card links to.
+   * Neither is wrong; both are a row of type on a card that has four rows to
+   * spend, and the shop can put either back from Appearance → Product cards
+   * without leaving this theme.
+   *
+   * !important, once, on the rating, and only because the renderer writes
+   * style="display:flex" onto that div inline — nothing in a stylesheet can
+   * reach past an inline declaration without it. (The same inline style is
+   * why the panel's own `rating:off` switch does nothing on rendered cards;
+   * that is a bug in the switch, not in this theme, and fixing it belongs
+   * with the switch.) */
+  [data-theme="saral"] .product-card__brand { display: none; }
+  [data-theme="saral"] .product-card__rating { display: none !important; }
+
+  /* The title takes a little of the freed space back. Classic squeezes it to
+     12px because it is competing with four rows below it; with two of them
+     gone it can have the size it wants to be read at, and the card is still
+     far shorter than where it started. Two lines clear ~30 characters. */
+  [data-theme="saral"] .product-card__title {
+    font-size: .8125rem;
+    line-height: 1.3;
+  }
+
+  /* Likewise the price, which is the loudest thing in the body and was being
+     set at 14px so it would not crowd the rows that are no longer there. */
+  [data-theme="saral"] .product-card__price { font-size: .9375rem; }
+
+  /* The button keeps the phone's smaller type and gains the flush edges; the
+     margins match this block's 10px body padding, not the 12px above. */
+  [data-theme="saral"] .product-card__body > .btn-gr:last-child {
+    margin: 8px -10px -10px;
+    min-height: 38px;
+  }
+
+  /* Badges and circles tuck in by 2px — an 8px inset on a 163px photograph
+     reads as adrift in the corner rather than tucked into it. */
+  [data-theme="saral"] .product-card__badges { top: 6px; left: 6px; }
+  [data-theme="saral"] .product-card__actions { top: 6px; right: 6px; }
+}
