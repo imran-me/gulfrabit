@@ -521,3 +521,67 @@
      of the strip. Tightened so the two rows read as one control. */
   [data-theme="saral"] .tab-btn { padding: 10px 0 8px; }
 }
+
+/* =========================================================================
+   THE MINI CART, WHERE THE CART PAGE STOPS BEING A STOP
+   =========================================================================
+
+   The drawer's foot offers View Cart and Checkout as `btn-block-gr` in a
+   flex row: identical width, identical weight, one outlined and one filled.
+   Two equal buttons is not a recommendation, it is a fork, and the half that
+   says View Cart leads to a page whose own job is to show another Checkout
+   button. For a customer who has already added the thing they came for, the
+   cart page is a detour with a chance of leaving at the end of it.
+
+   Saral does NOT remove it — the shop can do that itself in Appearance ▸
+   Mini cart, and a basket being built over several taps is exactly when
+   somebody wants to see the whole thing. It changes the proportion:
+
+       View Cart   1fr, quiet, no border
+       Checkout    2fr, filled
+
+   Same two destinations, one obvious default.
+
+   Checkout still points at /checkout and NOT at express, deliberately: the
+   express screen carries one product from a URL, and a drawer that has three
+   lines in it cannot be expressed that way. Order now is the one-item path
+   and it is on the card; this is the several-items path.
+   ========================================================================= */
+/* THE ROW HAS TO BE MADE BEFORE IT CAN BE WEIGHTED.
+ *
+ * cart-drawer.js writes the foot as <div class="flex gap-3 mt-4">, which are
+ * Tailwind utility names. THIS PROJECT HAS NO TAILWIND: `.flex`, `.gap-3` and
+ * `.mt-4` are defined nowhere in the built bundle, so that div computes to
+ * `display: block` and the two buttons have always stacked full-width with no
+ * gap and no top margin. Setting flex-grow on the children did nothing at all
+ * until this rule existed — they were not flex items.
+ *
+ * Fixed here, in the theme, rather than in cart-drawer.js, because fixing it
+ * at the source would change how Classic's drawer looks, and Classic is meant
+ * to be the shop exactly as it was. The bug is worth reporting on its own.
+ *
+ * :has() is already relied on in _cards.css for the premium hairline. Where it
+ * is missing the foot simply stays stacked, which is what it does today — the
+ * fallback is the current behaviour, not a broken one. */
+[data-theme="saral"] .cart-drawer__footer > div:has(> [data-view-cart]) {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+[data-theme="saral"] .cart-drawer__footer [data-view-cart] { flex: 1 1 0; }
+[data-theme="saral"] .cart-drawer__footer [data-view-cart] + .btn-gr { flex: 2 1 0; }
+
+/* Quieter, but still a button-sized target: this is a real destination, not
+   a footnote, and the customer who wants it is usually the one carrying the
+   biggest basket. Border off, fill off, label kept at full size. */
+[data-theme="saral"] .cart-drawer__footer [data-view-cart] {
+  --_bg: transparent;
+  --_fg: var(--link);
+  --_bd: transparent;
+}
+@media (hover: hover) {
+  [data-theme="saral"] .cart-drawer__footer [data-view-cart]:hover {
+    --_bg: var(--wash-hover);
+    --_fg: var(--link-hover);
+  }
+}
