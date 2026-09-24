@@ -391,6 +391,8 @@
    it ships in the markup of every product page so it paints with the bar, and
    no theme but Saral shows it. Classic's bar is the bar it always was. */
 .pdp-buybar__now { display: none; }
+/* The in-page express link, hidden the same way and for the same reason. */
+.pdp-now { display: none; }
 @media (max-width: 991.98px) {
   .pdp-buybar:not([hidden]) { display: flex; }
   body.has-pdp-buybar { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }

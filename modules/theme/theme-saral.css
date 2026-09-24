@@ -585,3 +585,31 @@
     --_fg: var(--link-hover);
   }
 }
+
+/* ---- Order now where the size is chosen --------------------------------
+ *
+ * The pinned bar already carries this link, but a pinned bar is for AFTER a
+ * customer has scrolled past the thing it is about. The decision happens at
+ * the size chips and the quantity stepper, and until now the only control
+ * there filled a cart.
+ *
+ * Full width, directly under the qty + Add to Cart row, and the loudest thing
+ * in the buy box. Add to Cart steps back to an outline exactly as it does in
+ * the card foot, so the same pair reads the same way in all three places it
+ * appears: card, buy box, pinned bar.
+ */
+[data-theme="saral"] .pdp-now {
+  display: inline-flex;
+  margin-top: var(--space-3);
+}
+[data-theme="saral"] .pdp-actions [data-add-to-cart] {
+  --_bg: transparent;
+  --_fg: var(--link);
+  --_bd: var(--gr-cyan);
+}
+@media (hover: hover) {
+  [data-theme="saral"] .pdp-actions [data-add-to-cart]:hover {
+    --_bg: var(--wash-hover);
+    --_fg: var(--link-hover);
+  }
+}

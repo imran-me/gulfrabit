@@ -373,8 +373,12 @@ function paintPrice(p) {
      express link can never fall out of step with the price beside it — a bar
      reading "৳ 2,650 · 1 kg" whose button opened express on 500 g would be
      the mis-sale this whole path was built to avoid. */
-  const bbNow = document.querySelector('[data-buybar-now]');
-  if (bbNow) bbNow.href = buyURL(p, { variant: v.label || null, qty: currentQty });
+  /* BOTH express links, from the one place that knows the selection. There
+     are two — the pinned bar and the one beside the size chooser — and they
+     must never disagree with each other or with the price above them. */
+  document.querySelectorAll('[data-buybar-now], [data-pdp-now]').forEach((a) => {
+    a.href = buyURL(p, { variant: v.label || null, qty: currentQty });
+  });
   document.querySelector('[data-pdp-original]').textContent = v.originalPrice > v.price ? formatBDT(v.originalPrice) : '';
   document.querySelector('[data-pdp-discount]').innerHTML = v.originalPrice > v.price
     ? `<span class="badge-gr badge-sale">${discountLabel(v.originalPrice, v.price)}</span>`
@@ -650,12 +654,17 @@ function wireActions(p) {
   if (buybar) {
     const bbBtn = buybar.querySelector('[data-buybar-add]');
     if (!p.inStock) { bbBtn.disabled = true; bbBtn.textContent = 'Sold out'; }
-    // Nothing to place today, so the express link is removed rather than left
-    // pointing at a page that would only tell them the same thing again.
-    if (!p.inStock || p.isPreorder || p.isComingSoon) buybar.querySelector('[data-buybar-now]')?.remove();
     bbBtn.addEventListener('click', () => addBtn.click());
     buybar.hidden = false;
     document.body.classList.add('has-pdp-buybar');
+  }
+
+  // Nothing to place today, so BOTH express links go rather than being left
+  // to point at a page that would only repeat what this one already says.
+  // Outside the buybar block on purpose: the in-page link exists whether or
+  // not the layout has a pinned bar.
+  if (!p.inStock || p.isPreorder || p.isComingSoon) {
+    document.querySelectorAll('[data-buybar-now], [data-pdp-now]').forEach((a) => a.remove());
   }
   addBtn.addEventListener('click', () => {
     if (!p.inStock) return;

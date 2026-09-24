@@ -55,6 +55,18 @@
           <button class="btn-gr btn-primary-gr" data-add-to-cart style="flex:1"><span class="btn-gr__en">Add to Cart</span><span class="btn-bn bn" lang="bn">কার্টে যোগ করুন</span></button>
         </div>
 
+        <!-- The express path, where the decision is actually made.
+             The pinned bar at the foot of the phone carries the same link, but
+             this is the one beside the size chooser and the quantity — a
+             customer who has just picked 1 kg is deciding HERE, and the pinned
+             bar is for after they have scrolled away from it.
+             Hidden by default in catalog.css; shown by Saral. An <a>, so it
+             survives a broken script. product-page.js keeps the href on the
+             selected size and quantity. -->
+        <a class="btn-gr btn-primary-gr btn-block-gr pdp-now" data-pdp-now href="#">
+          <span class="btn-gr__en">Order now</span><span class="btn-bn bn" lang="bn">এখনই অর্ডার</span>
+        </a>
+
         <button class="btn-gr btn-outline-gr btn-block-gr" data-wishlist-toggle
                 data-id="" data-title="" data-brand="" data-price="" data-image="">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
