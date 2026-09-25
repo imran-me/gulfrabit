@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Modules\Admin\Models\AdminUser;
 use Modules\Admin\Models\OrderNote;
+use Modules\Admin\Requests\OrderAddressRequest;
 use Modules\Admin\Requests\OrderNoteRequest;
 use Modules\Admin\Requests\OrderRefundRequest;
 use Modules\Admin\Requests\OrderTransitionRequest;
@@ -221,15 +222,7 @@ class AdminOrderController extends Controller
                     'phone' => $order->customer_phone,
                     'email' => $order->customer_email,
                 ],
-                'delivery' => [
-                    'address'  => $order->address_line,
-                    'area'     => $order->area,
-                    'district' => $order->district_name,
-                    'zone'     => $order->delivery_zone_key,
-                    'eta'      => $order->delivery_eta,
-                    'notes'    => $order->delivery_notes,
-                    'chargeTaka' => intdiv($order->delivery_charge_poisha, 100),
-                ],
+                'delivery' => $this->deliveryArray($order),
                 /* The picture, the brand and whether the product is still
                    there, alongside the figures.
 
@@ -300,6 +293,9 @@ class AdminOrderController extends Controller
                 // so the panel can never draw a button the API would refuse.
                 'allowedTransitions' => $this->fulfilment->allowedTransitions($order, $mayEnd),
                 'canRefund'          => $admin->may('orders.refund'),
+                // Same reason as canRefund: the panel must not draw an Edit
+                // button beside the address that the API would then refuse.
+                'canEditAddress'     => $admin->may('orders.edit'),
             ],
         ]);
     }
@@ -346,6 +342,98 @@ class AdminOrderController extends Controller
         ]);
 
         return response()->json(['data' => $note->toAdminArray()], 201);
+    }
+
+    /**
+     * PATCH /api/admin/orders/{order}/address
+     *
+     * Write down the address the customer just gave on the phone.
+     *
+     * Express asks for a name, a phone and a district and stops — the rest is
+     * settled on the confirmation call, which is what `placed` -> `confirmed`
+     * has always meant here. Before this endpoint the person making that call
+     * had a house number and nowhere to put it: a note is free text the
+     * packing slip never reads, and `address_line` was written once at
+     * checkout and never again.
+     *
+     * THE CHANGE LEAVES A MARK. The old address goes into the timeline as an
+     * ordinary order note before the new one is saved, in the same
+     * transaction, so there is no version of this where an address changed and
+     * nothing records what it was or who changed it. A delivery that goes to
+     * the wrong house is exactly the argument that follows, and "the address
+     * was edited at some point by somebody" is not an answer to it.
+     *
+     * The district is deliberately NOT editable — see OrderAddressRequest. It
+     * sets the delivery fee the customer has already agreed to.
+     */
+    public function updateAddress(OrderAddressRequest $request, Order $order): JsonResponse
+    {
+        if ($order->trashed()) {
+            return response()->json(['message' => 'That order is deleted. Restore it first.'], 422);
+        }
+
+        $admin = $request->user('admin');
+        $address = $request->string('address')->trim()->toString();
+        $area = $request->string('area')->trim()->toString() ?: null;
+
+        // Nothing typed that differs from what is already there: repaint with
+        // what we have rather than writing a note recording that nothing
+        // happened. Somebody opening the form, thinking better of it and
+        // pressing Save should not leave a mark on the order.
+        if ($address === (string) $order->address_line && $area === $order->area) {
+            return response()->json(['data' => ['delivery' => $this->deliveryArray($order), 'note' => null]]);
+        }
+
+        $before = trim(implode(', ', array_filter([
+            (string) $order->address_line,
+            (string) $order->area,
+        ]))) ?: '(nothing recorded)';
+
+        $note = DB::transaction(function () use ($order, $admin, $address, $area, $before): OrderNote {
+            $note = OrderNote::create([
+                'order_id'        => $order->id,
+                'body'            => "Delivery address updated.\nWas: {$before}\nNow: "
+                    . trim(implode(', ', array_filter([$address, $area]))),
+                'author_admin_id' => $admin->id,
+                'author_name'     => $admin->name,
+            ]);
+
+            $order->forceFill([
+                'address_line' => $address,
+                'area'         => $area,
+            ])->save();
+
+            return $note;
+        });
+
+        /* The same `delivery` block `show()` sends, and the note that was just
+           written — so the panel repaints both the address and the timeline
+           from the server's answer instead of patching its local copy and
+           hoping the two still agree. */
+        return response()->json(['data' => [
+            'delivery' => $this->deliveryArray($order->fresh()),
+            'note'     => $note->toAdminArray(),
+        ]]);
+    }
+
+    /**
+     * The delivery block, in one place, because `show()` and `updateAddress()`
+     * both send it and a screen that repaints from a DIFFERENT shape than it
+     * first drew is a screen that goes subtly wrong on the second render.
+     *
+     * @return array<string, mixed>
+     */
+    private function deliveryArray(Order $order): array
+    {
+        return [
+            'address'    => $order->address_line,
+            'area'       => $order->area,
+            'district'   => $order->district_name,
+            'zone'       => $order->delivery_zone_key,
+            'eta'        => $order->delivery_eta,
+            'notes'      => $order->delivery_notes,
+            'chargeTaka' => intdiv($order->delivery_charge_poisha, 100),
+        ];
     }
 
     /**

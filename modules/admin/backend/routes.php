@@ -87,6 +87,13 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             // of thing that must not need a manager to type it.
             Route::post('/{order}/notes', [AdminOrderController::class, 'addNote'])
                 ->middleware('admin:orders.edit')->name('notes.store');
+            // The address, written down from the confirmation call. Same
+            // capability as a note and for the same reason: the person on the
+            // phone IS the person who has just been told the house number, and
+            // routing that through a manager loses it. The district is not
+            // editable here — it prices the delivery. See OrderAddressRequest.
+            Route::patch('/{order}/address', [AdminOrderController::class, 'updateAddress'])
+                ->middleware('admin:orders.edit')->name('address.update');
             // Refunds carry a second, narrower check inside the controller:
             // `orders` gets you the screen, it does not get you the money.
             Route::post('/{order}/refund', [AdminOrderController::class, 'refund'])->name('refund');

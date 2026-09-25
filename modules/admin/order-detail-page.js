@@ -183,18 +183,133 @@ function paintItems() {
 function paintCustomer() {
   const c = order.customer;
   const d = order.delivery;
-  const pairs = [
-    ['Name', c.name],
-    ['Phone', c.phone],
-    ['Email', c.email || '—'],
-    ['Address', d.address],
-    ['Area', d.area || '—'],
-    ['District', d.district],
-    ['Delivery', `${d.zone} · ${d.eta} · ৳ ${money(d.chargeTaka)}`],
-    ['Notes', d.notes || '—'],
-  ];
-  document.querySelector('[data-order-customer]').innerHTML = pairs.map(([k, v]) => `
-    <div class="akv__row"><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(String(v))}</dd></div>`).join('');
+  const row = ([k, v]) => `
+    <div class="akv__row"><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(String(v))}</dd></div>`;
+
+  document.querySelector('[data-order-customer]').innerHTML =
+    [['Name', c.name], ['Phone', c.phone], ['Email', c.email || '—']].map(row).join('')
+    + addressBlock()
+    + [
+      ['District', d.district],
+      ['Delivery', `${d.zone} · ${d.eta} · ৳ ${money(d.chargeTaka)}`],
+      ['Notes', d.notes || '—'],
+    ].map(row).join('');
+
+  wireAddress();
+}
+
+/**
+ * The address, and the one place on this screen somebody types while holding
+ * a phone.
+ *
+ * Express asks for a name, a phone and a district and stops; the rest is
+ * settled on the confirmation call. So an order can legitimately arrive here
+ * with no street address, and the person who rings needs somewhere to write
+ * down what they are told. Before this there was nowhere — a note is free text
+ * that the packing slip never reads.
+ *
+ * MISSING IS SHOWN AS MISSING. An empty address rendered as a blank row, which
+ * on a screen full of blank-ish rows reads as a page that failed to load
+ * rather than as a job to do. It now says what it is and what to do about it,
+ * because the whole point of the shorter checkout is that somebody finishes
+ * the order on the phone.
+ *
+ * The district is deliberately not in the form: it sets the delivery charge
+ * the customer has already agreed to, and moving it here would change what the
+ * order is worth as a side effect of a typing correction.
+ */
+function addressBlock() {
+  const d = order.delivery;
+  const missing = !String(d.address || '').trim();
+
+  return `
+    <div class="akv__row">
+      <dt>Address</dt>
+      <dd>
+        ${missing
+          ? '<span class="akv__missing">Not recorded yet — ask when you call</span>'
+          : escapeHtml(String(d.address))}
+        ${order.canEditAddress
+          ? `<button type="button" class="akv__edit" data-address-edit>${missing ? 'Add' : 'Edit'}</button>`
+          : ''}
+      </dd>
+    </div>
+    ${row2('Area', d.area || '—')}
+    ${order.canEditAddress ? `
+    <form class="akv__form" data-address-form hidden>
+      <label class="label-gr" for="od-address">Street address</label>
+      <input class="input-gr" id="od-address" name="address" autocomplete="off"
+             value="${escapeHtml(String(d.address || ''))}" placeholder="House, road, block">
+      <label class="label-gr" for="od-area">Thana / Upazila</label>
+      <input class="input-gr" id="od-area" name="area" autocomplete="off"
+             value="${escapeHtml(String(d.area || ''))}" placeholder="e.g. Gulshan">
+      <p class="akv__hint">
+        ${escapeHtml(d.district)} stays as it is — the district sets the delivery
+        charge the customer already agreed to. The change is recorded in the timeline.
+      </p>
+      <div class="akv__formactions">
+        <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Save address</button>
+        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-address-cancel>Cancel</button>
+      </div>
+    </form>` : ''}`;
+}
+
+function row2(k, v) {
+  return `<div class="akv__row"><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(String(v))}</dd></div>`;
+}
+
+function wireAddress() {
+  const form = document.querySelector('[data-address-form]');
+  if (!form) return;
+  const open = (on) => {
+    form.hidden = !on;
+    if (on) form.querySelector('[name="address"]').focus();
+  };
+  document.querySelector('[data-address-edit]')?.addEventListener('click', () => open(true));
+  form.querySelector('[data-address-cancel]').addEventListener('click', () => open(false));
+  form.addEventListener('submit', saveAddress);
+}
+
+async function saveAddress(e) {
+  e.preventDefault();
+  const form = e.currentTarget;
+  const btn = form.querySelector('button[type="submit"]');
+  const address = form.address.value.trim();
+  const area = form.area.value.trim();
+
+  // The server says the same thing, in the same words. This is here so the
+  // common mistake does not cost a round trip while somebody is on a call.
+  if (address.length < 6) return fail('That is too short to find a house with.');
+
+  btn.disabled = true;
+  let saved;
+  try {
+    ({ data: saved } = await adminFetch(`/orders/${encodeURIComponent(order.orderNumber)}/address`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address, area: area || null }),
+    }));
+  } catch (err) {
+    btn.disabled = false;
+    return fail(err.message);
+  }
+
+  /* The server is the authority on what the order now says. It returns the
+     same `delivery` block show() sent, so this repaints from its answer rather
+     than patching the local copy and hoping the two still agree.
+
+     `note` is null when nothing actually changed — somebody opened the form,
+     thought better of it and pressed Save. Nothing is appended in that case,
+     because the timeline should not record a decision not to make one. */
+  order.delivery = saved.delivery;
+  if (saved.note) {
+    order.notes.push(saved.note);
+    paintNotes();
+  }
+
+  btn.disabled = false;
+  paintCustomer();
+  toast(saved.note ? 'Address saved.' : 'No change to save.');
 }
 
 function paintHistory() {

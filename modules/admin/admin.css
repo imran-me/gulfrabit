@@ -904,6 +904,57 @@
 .akv__row dt { margin: 0; color: var(--text-muted); }
 .akv__row dd { margin: 0; word-break: break-word; }
 
+/* ---- The address, and editing it from the order screen -----------------
+ *
+ * Express takes a name, a phone and a district and stops; the street address
+ * is settled on the confirmation call. So an order can legitimately sit here
+ * with no address, and the person on the phone needs to write one down.
+ */
+
+/* An address nobody has taken yet. Said out loud, because a blank dd on a
+   screen of short rows reads as a page that failed to load rather than as the
+   job the shorter checkout deliberately left for the call. Amber, not red:
+   nothing is broken, something is outstanding. */
+.akv__missing {
+  color: #8A6D22;
+  background: rgba(201, 162, 75, .14);
+  border: 1px solid rgba(201, 162, 75, .4);
+  border-radius: var(--radius-sm);
+  padding: 1px 7px;
+  font-size: var(--fs-12);
+}
+
+/* Sits on the value, not in a toolbar at the top of the card: the thing being
+   edited is this one line, and a button anywhere else would have to say which
+   line it meant. */
+.akv__edit {
+  margin-left: var(--space-2);
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--link);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.akv__edit:hover { color: var(--link-hover); }
+.akv__edit:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 2px; border-radius: 3px; }
+
+.akv__form {
+  display: grid;
+  gap: 6px;
+  margin: var(--space-2) 0 var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+}
+.akv__form .label-gr { font-size: var(--fs-12); color: var(--text-muted); }
+.akv__hint { margin: 2px 0 0; font-size: var(--fs-12); color: var(--text-muted); }
+.akv__formactions { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
+
 /* ---- Timeline --------------------------------------------------------- */
 .atimeline { list-style: none; margin: 0; padding: 0 0 0 var(--space-4); border-left: 2px solid var(--border-hairline); }
 .atimeline__item { position: relative; padding: 0 0 var(--space-4) var(--space-4); font-size: var(--fs-14); }
