@@ -463,8 +463,26 @@
  * width and the two controls share what is left.
  */
 [data-theme="saral"] .pdp-buybar__now { display: inline-flex; }
-[data-theme="saral"] .pdp-buybar .btn-gr { flex-grow: 1; }
-[data-theme="saral"] .pdp-buybar__now { flex-grow: 1.6; }
+
+/* flex-basis 0, AND THAT IS THE WHOLE RULE — the same trap as the card note.
+ *
+ * .pdp-buybar sets `flex: 1 1 auto` on its buttons, so each one starts at its
+ * own TEXT width and grow only shares out what is left over. "Add to Cart" is
+ * a longer string than "Order now", so at 360px it came out WIDER than the
+ * button it is supposed to defer to — 117.4px against 112.1px, the hierarchy
+ * exactly backwards, on the narrowest screen most of this shop is browsed
+ * from. Growing 1.6 against 1 could not fix it because the two were never
+ * starting level.
+ *
+ * At basis 0 the labels stop deciding and the ratio does. */
+[data-theme="saral"] .pdp-buybar .btn-gr { flex: 1 1 0; }
+/* .btn-gr in the selector ON PURPOSE, and this is the second time this theme
+   has needed it: the rule above is [data-theme] .__buybar .btn-gr, and the
+   `flex` shorthand it uses RESETS flex-grow to 1. A plainer
+   [data-theme] .__now loses on specificity and the two halves came out
+   identical — 114.7px each. Whenever a shorthand sets the thing you are
+   trying to override, match its reach or it never lands. */
+[data-theme="saral"] .pdp-buybar .btn-gr.pdp-buybar__now { flex-grow: 1.6; }
 [data-theme="saral"] .pdp-buybar [data-buybar-add] {
   --_bg: transparent;
   --_fg: var(--link);
@@ -612,4 +630,88 @@
     --_bg: var(--wash-hover);
     --_fg: var(--link-hover);
   }
+}
+
+/* =========================================================================
+   THE SIZE CHIPS ARE A 23.4px TARGET, AND THEY DECIDE WHAT IS BOUGHT
+   =========================================================================
+
+   Measured at 360x800 — the common Android here, not a 390px iPhone — a chip
+   comes out 44.7 x 23.4. WCAG 2.5.8 sets the floor at 24x24, so it misses by
+   six tenths of a pixel, on the one control in the card that changes what goes
+   into the basket and what it costs.
+
+   Classic set 3px of vertical padding at 11px type because it was fighting for
+   room against a brand line, a rating, a saving line and a 34px label strip.
+   Saral removed all four and gave 40px back. Spending 5 of them here is the
+   easiest trade in the theme.
+
+   28px, not 24. Clearing a floor by a pixel is how you end up back under it
+   the next time the type scale moves, and the difference between tapping 500 g
+   and tapping 1 kg is the difference between the right order and a phone call
+   about the wrong one.
+   ========================================================================= */
+@media (max-width: 575.98px) {
+  [data-theme="saral"] .size-chip {
+    min-height: 28px;
+    padding-block: 0;
+    /* The chip is a flex line now so the label sits dead centre in the taller
+       box rather than riding on the old line-height. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* The row was gapped for 23px chips; 28px ones need their own air or the
+     strip reads as one bar rather than three choices. */
+  [data-theme="saral"] .size-chips { gap: 5px; }
+}
+
+/* =========================================================================
+   THE SMALL TARGETS, AND THE ONE STRING THAT DID NOT FIT
+   =========================================================================
+   Measured at 360x800 and again at 320x720, the two widths that matter here —
+   the shop's own notes put the common Android at 360, not a 390px iPhone.
+
+   Nothing scrolls sideways on any page at either width and the console is
+   clean, so what is left is the finish.
+   ========================================================================= */
+@media (max-width: 575.98px) {
+  /* Breadcrumbs came out 30.8 x 17.6. They are set at 11px and sit directly
+     under a fixed header, which is the worst place on the page to need a
+     careful thumb: a miss scrolls instead, and "Home" is how somebody leaves a
+     category they opened by accident.
+
+     The padding is vertical only and the row already wraps, so this buys the
+     target without moving anything sideways. The gap absorbs it, so the strip
+     itself grows by nothing. */
+  [data-theme="saral"] .breadcrumb-gr a {
+    display: inline-block;
+    padding-block: 5px;
+  }
+  [data-theme="saral"] .breadcrumb-gr { gap: 2px var(--space-2); margin-block: -5px var(--space-2); }
+
+  /* Footer links measured 22.4px tall — a pixel and a half short of WCAG
+     2.5.8's floor, on Shipping, FAQ, Privacy and Terms. These are the four
+     links a customer looks for when they are deciding whether to trust a
+     cash-on-delivery order, which makes them a bad place to ask for a precise
+     tap. */
+  [data-theme="saral"] .footer-links a,
+  [data-theme="saral"] .footer-legal a {
+    display: inline-block;
+    padding-block: 3px;
+  }
+}
+
+/* ---- Below 360px ------------------------------------------------------
+   The toolbar is Filters + "13 products" + the sort select on one nowrap row.
+   At 320px the count has 67px and wants 77, so it ellipsises to "13 produc…"
+   — the fallback works, it just reads like a bug.
+
+   Scoped to the width where it actually happens rather than fixed everywhere:
+   letting the row wrap costs a line of vertical on EVERY phone to tidy a
+   string that is perfectly fine at 360. Below 360 that line is worth it,
+   above it is not. */
+@media (max-width: 359.98px) {
+  [data-theme="saral"] .plp-toolbar { flex-wrap: wrap; }
+  [data-theme="saral"] .plp-count { overflow: visible; text-overflow: clip; }
 }
