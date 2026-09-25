@@ -208,3 +208,20 @@
 /* Declared here as well as in checkout.css, which this page also loads and
    which sizes the gap for the checkout form's 45px pill. Later sheet wins, and
    express's bar carries a total beside its button and is half as tall again. */
+
+
+/* The confirmation call, promised on the receipt. Given the weight of a
+   callout rather than a paragraph: it is an instruction to the customer —
+   answer your phone — not a pleasantry, and everything above it on this
+   screen is already good news they will read anyway. */
+.express-done__call {
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(27, 180, 212, .38);
+  background: rgba(27, 180, 212, .08);
+  color: var(--text-primary);
+  font-size: var(--fs-14);
+  line-height: 1.5;
+  text-align: left;
+}

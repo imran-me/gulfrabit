@@ -148,7 +148,7 @@ try {
        told this visitor which theme is published. -->
   <link rel="stylesheet" href="../../modules/theme/theme-trio.css?v=dd326453">
   <link rel="stylesheet" href="../../modules/checkout/checkout.css?v=6fafb4ab">
-  <link rel="stylesheet" href="../../modules/checkout/express.css?v=dd31071a">
+  <link rel="stylesheet" href="../../modules/checkout/express.css?v=520017b8">
   <!-- GENERATED-PIXEL-BEGIN -->
   <meta name="gr-meta-pixel" content="1423900436303846">
   <!-- Meta Pixel - base code, including the one PageView. The id is set in
@@ -566,6 +566,19 @@ try {
           <p class="express-done__sub">Order <strong data-done-id></strong> · <span data-done-eta></span></p>
           <p class="express-done__pay" data-done-pay></p>
 
+          <!-- THE CALL, PROMISED IN ADVANCE.
+               Every order here is telephoned before it is packed — `placed`
+               means "nobody has spoken to them yet". Since the form stopped
+               demanding a full address, that call is also where the address
+               gets finished, so it is no longer a courtesy: it is the rest of
+               the order.
+               A customer who is not expecting it sees an unknown number and
+               lets it ring, and in a cash-on-delivery market an unanswered
+               confirmation call is a cancelled order. Saying it here, on the
+               one screen every customer reads, is the cheapest thing the shop
+               can do about that. -->
+          <p class="express-done__call" data-done-call></p>
+
           <div class="express-done__actions">
             <a class="btn-gr btn-primary-gr btn-lg-gr" data-done-track href="../../track">Track order</a>
             <a class="btn-gr btn-outline-gr btn-lg-gr" href="../../">Shop more</a>
@@ -665,6 +678,6 @@ try {
 
   <script type="module" src="../../shared/js/main.js?v=65e9eef8"></script>
   <script type="module" src="../../modules/theme/theme.js?v=f377b4f9"></script>
-  <script type="module" src="../../modules/checkout/express-page.js?v=955ed8f1"></script>
+  <script type="module" src="../../modules/checkout/express-page.js?v=5552038e"></script>
 </body>
 </html>

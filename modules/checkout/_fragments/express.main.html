@@ -175,6 +175,19 @@
           <p class="express-done__sub">Order <strong data-done-id></strong> · <span data-done-eta></span></p>
           <p class="express-done__pay" data-done-pay></p>
 
+          <!-- THE CALL, PROMISED IN ADVANCE.
+               Every order here is telephoned before it is packed — `placed`
+               means "nobody has spoken to them yet". Since the form stopped
+               demanding a full address, that call is also where the address
+               gets finished, so it is no longer a courtesy: it is the rest of
+               the order.
+               A customer who is not expecting it sees an unknown number and
+               lets it ring, and in a cash-on-delivery market an unanswered
+               confirmation call is a cancelled order. Saying it here, on the
+               one screen every customer reads, is the cheapest thing the shop
+               can do about that. -->
+          <p class="express-done__call" data-done-call></p>
+
           <div class="express-done__actions">
             <a class="btn-gr btn-primary-gr btn-lg-gr" data-done-track href="/track">Track order</a>
             <a class="btn-gr btn-outline-gr btn-lg-gr" href="/">Shop more</a>

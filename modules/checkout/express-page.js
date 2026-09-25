@@ -459,6 +459,17 @@ async function showDone(order) {
   setText('[data-done-pay]', order.payment === 'cod'
     ? `Pay ${formatBDT(order.total)} in cash when the rider arrives.`
     : `We’ll contact you on ${order.phone} to collect payment by ${paymentLabel()}.`);
+  /* Name the number we will ring, because "we will call you" on a screen that
+     does not say WHICH number is a promise the customer cannot check — and a
+     typo in a phone number is the one mistake on this form that nobody
+     notices until the order quietly fails. Seeing it back is the only
+     confirmation step this checkout has left. */
+  const phone = (form.querySelector('[name="phone"]')?.value || '').trim();
+  const needsAddress = !(form.querySelector('[name="address"]')?.value || '').trim();
+  setText('[data-done-call]', phone
+    ? `We’ll call you on ${phone} to confirm${needsAddress ? ' and take your full address' : ''}. Please pick up — we can’t send it until we’ve spoken.`
+    : 'We’ll call you to confirm before we send it.');
+
   document.querySelector('[data-done-track]').href =
     siteURL(`track?id=${encodeURIComponent(order.id)}`);
   done.hidden = false;
