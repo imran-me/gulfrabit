@@ -76,3 +76,26 @@ export function stageLabel(key) {
 export function stageTone(key) {
   return BY_KEY[key]?.tone ?? 'wait';
 }
+
+/**
+ * How an order is being paid, spelled out.
+ *
+ * Not a stage, but the same kind of fact and here for the same reason: a key
+ * the server stores, a word a person reads, and more than one place that has
+ * to say it. This lived in the orders list alone until the order image needed
+ * it too — and a picture telling customer care "cod" where the list says
+ * "Cash on delivery" is the drift this file exists to prevent.
+ *
+ * Falls back to the raw key, as stageLabel does: a payment method this file
+ * has not learned yet should be shown ugly and true rather than hidden.
+ */
+const PAY_METHODS = {
+  cod: 'Cash on delivery',
+  bkash: 'bKash',
+  nagad: 'Nagad',
+  card: 'Card',
+};
+
+export function payMethod(key) {
+  return PAY_METHODS[key] || key || '—';
+}

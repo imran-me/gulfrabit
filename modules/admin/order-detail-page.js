@@ -465,6 +465,16 @@ function paintActions() {
       Print slip
     </a>`;
 
+  // The same order as a picture, for whoever rings the customer. Beside the
+  // slip because it is the same kind of thing — the order leaving the panel —
+  // and offered at every stage for the same reason: customer care asks about
+  // an order that has already shipped at least as often as about a new one.
+  const image = `
+    <a class="btn-gr btn-outline-gr btn-sm-gr"
+       href="/admin/order-image?no=${encodeURIComponent(order.orderNumber)}" target="_blank" rel="noopener">
+      Order image
+    </a>`;
+
   // A deleted order shows one control and no stage moves. The server already
   // sends it no transitions; this is about not also offering a reprint, which
   // would put a slip for an order that is off the floor into somebody's hand.
@@ -488,14 +498,14 @@ function paintActions() {
     : '';
 
   if (!order.allowedTransitions.length) {
-    host.innerHTML = slip
+    host.innerHTML = slip + image
       + `<span class="admin__sub">No further changes possible from ${escapeHtml(stageLabel(order.status))}.</span>`
       + del;
   } else {
     // The ending moves get the quieter button. Both are one click away, but the
     // one that carries the order forward is the one the eye lands on — which is
     // the right default a hundred times a day.
-    host.innerHTML = slip + order.allowedTransitions.map((to) => `
+    host.innerHTML = slip + image + order.allowedTransitions.map((to) => `
       <button class="btn-gr ${NEEDS_REASON.includes(to) ? 'btn-outline-gr' : 'btn-primary-gr'} btn-sm-gr"
               type="button" data-transition="${escapeHtml(to)}">
         ${escapeHtml(TRANSITION_LABELS[to] || to)}

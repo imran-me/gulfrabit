@@ -1,0 +1,28 @@
+      <div class="admin__head">
+        <div>
+          <p class="admin__sub" style="margin:0 0 .25rem"><a href="/admin/orders">← All orders</a></p>
+          <h1 class="admin__title">Order images</h1>
+          <p class="admin__sub" data-oimg-count>Making the images…</p>
+        </div>
+        <!-- Shown only when there is more than one picture. With a single
+             order the card's own buttons are the whole job, and a second pair
+             up here saying "all" would be the same two buttons twice. -->
+        <div class="aactions" data-oimg-all hidden>
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-oimg-share-all hidden>Share all</button>
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-oimg-download-all>Download all</button>
+        </div>
+      </div>
+
+      <!-- Said on the screen, not only in a comment: these leave the panel,
+           and the person pressing Share is the one who needs to know what is
+           on them and how long they stay true. -->
+      <p class="oimg-hint">
+        One image per order, for whoever is making the confirmation calls. Each
+        carries the customer's name, phone number and address, so send it only
+        to the person ringing them. An image shows the order as it stood when
+        this page opened — reload for a fresh one after anything changes.
+      </p>
+
+      <div class="oimg-grid" data-oimg-list></div>
+
+      <p class="aerror" data-oimg-error hidden role="alert"></p>

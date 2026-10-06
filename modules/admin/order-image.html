@@ -86,7 +86,7 @@ try {
 
     
   </script>
-  <title>Couriers — GulfRabit Admin</title>
+  <title>Order images — GulfRabit Admin</title>
   <meta name="description" content="GulfRabit staff panel.">
   <meta name="theme-color" content="#0A0A0A">
   <meta name="author" content="GulfRabit">
@@ -95,11 +95,11 @@ try {
   <!-- Social / Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GulfRabit">
-  <meta property="og:title" content="Couriers — GulfRabit Admin">
+  <meta property="og:title" content="Order images — GulfRabit Admin">
   <meta property="og:description" content="GulfRabit staff panel.">
   <meta property="og:image" content="https://gulfrabit.com/assets/images/hero/hero-food.svg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Couriers — GulfRabit Admin">
+  <meta name="twitter:title" content="Order images — GulfRabit Admin">
   <meta name="twitter:description" content="GulfRabit staff panel.">
   <link rel="icon" href="../../favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="../../assets/logo/favicon-32.png">
@@ -117,6 +117,7 @@ try {
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../shared/css/gulfrabit.css?v=4b389b07">
   <link rel="stylesheet" href="../../modules/admin/admin.css?v=06361e45">
+  <link rel="stylesheet" href="../../modules/admin/order-image.css?v=c3e6ef64">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"GulfRabit","url":"https://gulfrabit.com","logo":"https://gulfrabit.com/assets/logo/gulfrabit-logo-dark-bg.jpeg","description":"Premium import marketplace for Bangladesh.","slogan":"Shop Smart. Hop Fast.","areaServed":"BD"}
   </script>
@@ -263,59 +264,32 @@ try {
 
 <div class="admin__head">
         <div>
-          <h1 class="admin__title">Couriers</h1>
-          <p class="admin__sub" data-board-count>Loading…</p>
+          <p class="admin__sub" style="margin:0 0 .25rem"><a href="../../admin/orders">← All orders</a></p>
+          <h1 class="admin__title">Order images</h1>
+          <p class="admin__sub" data-oimg-count>Making the images…</p>
+        </div>
+        <!-- Shown only when there is more than one picture. With a single
+             order the card's own buttons are the whole job, and a second pair
+             up here saying "all" would be the same two buttons twice. -->
+        <div class="aactions" data-oimg-all hidden>
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-oimg-share-all hidden>Share all</button>
+          <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-oimg-download-all>Download all</button>
         </div>
       </div>
 
-      <!-- Stated up front rather than discovered one parcel at a time. Until
-           credentials exist, every courier is worked by hand — that is a real
-           way to run a storefront, not a broken state, and saying so plainly
-           keeps anyone from waiting for an integration that has not been set
-           up. Every status on this board was typed by one of us. -->
-      <div class="acard" style="margin-bottom:var(--space-5)">
-        <h2 class="h5" style="margin:0 0 var(--space-2)">No courier API is connected yet</h2>
-        <p class="admin__sub" style="margin:0">
-          Every parcel below is tracked manually: you hand it over, type the tracking number,
-          and record each status yourself. Nothing here contacts a courier automatically.
-          When API credentials are added for one, its scans start arriving on their own and
-          nothing else changes.
-        </p>
-      </div>
+      <!-- Said on the screen, not only in a comment: these leave the panel,
+           and the person pressing Share is the one who needs to know what is
+           on them and how long they stay true. -->
+      <p class="oimg-hint">
+        One image per order, for whoever is making the confirmation calls. Each
+        carries the customer's name, phone number and address, so send it only
+        to the person ringing them. An image shows the order as it stood when
+        this page opened — reload for a fresh one after anything changes.
+      </p>
 
-      <!-- The parcel pipeline as places. Filled by couriers-page.js from the
-           stage list the server sends counts for. The last tab is the courier
-           companies themselves — settings, kept at the end where settings go. -->
-      <nav class="atabs" data-board-tabs aria-label="Parcel stages"></nav>
+      <div class="oimg-grid" data-oimg-list></div>
 
-      <form class="afilters" data-board-search>
-        <div class="afilters__field">
-          <label for="b-q">Search</label>
-          <input class="input-gr" id="b-q" name="q" type="search"
-                 placeholder="Order no, phone, name or tracking">
-        </div>
-        <div class="afilters__actions">
-          <button class="btn-gr btn-primary-gr btn-sm-gr" type="submit">Search</button>
-        </div>
-      </form>
-
-      <!-- One table, two shapes: the handover queue lists orders, every other
-           stage lists parcels. The header row is written by the page script so
-           the columns always match what is actually in the body. -->
-      <div class="atable-wrap">
-        <table class="atable">
-          <thead data-board-head></thead>
-          <tbody data-board-body>
-            <tr><td colspan="8" class="atable__empty">Loading…</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <nav class="apager" data-board-pager hidden aria-label="Parcel pages">
-        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-board-prev>← Previous</button>
-        <span data-board-page></span>
-        <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-board-next>Next →</button>
-      </nav>
+      <p class="aerror" data-oimg-error hidden role="alert"></p>
     </main>
   </div>
 
@@ -333,6 +307,6 @@ try {
   <script type="module" src="../../modules/accounting/accounting-nav.js?v=497eba94"></script>
   <script type="module" src="../../modules/b2b/b2b-nav.js?v=d8d5024c"></script>
   <script type="module" src="../../modules/theme/theme-nav.js?v=0451c724"></script>
-  <script type="module" src="../../modules/courier/couriers-page.js?v=51b6d31a"></script>
+  <script type="module" src="../../modules/admin/order-image-page.js?v=6b7e4c3b"></script>
 </body>
 </html>

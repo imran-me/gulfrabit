@@ -993,6 +993,18 @@ ADMIN_PAGES = [
      ["/modules/admin/admin.css", "/modules/admin/slip.css"],
      ["/modules/admin/admin-shell.js", "/modules/admin/slip-page.js"], True),
 
+    # The order as a picture, for the person who rings the customer to confirm
+    # it. chrome=True for the reason given above — the shell is what checks the
+    # session and dispatches admin:ready — and here the sidebar simply stays:
+    # this is a screen somebody works from, not a sheet that gets printed.
+    #
+    # order-image.js, which does the drawing, is not listed. The page script
+    # imports it, and nothing else on the page needs it to exist.
+    ("modules/admin/order-image.html", "Order images — GulfRabit Admin",
+     "modules/admin/_fragments/order-image.main.html",
+     ["/modules/admin/admin.css", "/modules/admin/order-image.css"],
+     ["/modules/admin/admin-shell.js", "/modules/admin/order-image-page.js"], True),
+
     ("modules/admin/login.html", "Staff sign-in — GulfRabit Admin",
      "modules/admin/_fragments/login.main.html",
      ["/modules/admin/admin.css"],

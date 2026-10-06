@@ -1,0 +1,109 @@
+/* ============================================================
+   modules/admin — the order images screen.
+
+   This styles the SCREEN the pictures are shown on, and nothing
+   about the pictures themselves. Those are drawn onto a canvas by
+   order-image.js, in pixels, and no rule in any stylesheet reaches
+   them — which is the point: what is sent to customer care looks
+   the same whatever this page happens to look like.
+
+   So everything here is a frame. Each picture sits in a card about
+   the width of the phone it will be read on, because the useful
+   preview of something made for a chat is that thing at chat size.
+   ============================================================ */
+
+.oimg-hint {
+  max-width: 68ch;
+  margin: var(--space-5) 0;
+  color: var(--text-secondary);
+  font-size: var(--fs-14);
+}
+
+/* Capped at 360, not stretched to fill. A picture 1080 wide shown 700 wide on
+   a desk monitor is a preview of nothing anybody will see; at phone width it
+   is the real thing, and three of them fit across. `min(100%, 300px)` keeps
+   the single column inside a 320px screen instead of forcing a sideways
+   scroll. */
+.oimg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 360px));
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.oimg {
+  margin: 0;
+  overflow: hidden;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* The width and height attributes carry the picture's real proportions, so the
+   card is its final size before the bytes are decoded. */
+.oimg__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #fff;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.oimg__cap {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.oimg__who a { font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
+.oimg__who span {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: var(--fs-12);
+  /* A long name must not push the buttons below it out of the card. */
+  overflow-wrap: anywhere;
+}
+
+/* Equal shares of the row, so two buttons and three buttons both end flush
+   with the card — which of Share and Copy exist depends on the device. */
+.oimg__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.oimg__actions .btn-gr { flex: 1 1 0; min-width: max-content; }
+
+/* ---- While they are being made ----------------------------------------
+   The proportions of an ordinary two-item order. The shimmer is the shared
+   .skeleton, which already stands still under prefers-reduced-motion. */
+.oimg--waiting .oimg__img { aspect-ratio: 1080 / 1560; border-radius: 0; }
+.oimg__bar { display: block; height: 14px; width: 62%; border-radius: var(--radius-sm); }
+.oimg__bar--short { width: 38%; }
+
+/* ---- One that could not be made ---------------------------------------
+   Dashed, the way the slip marks a sheet it could not fill: present, so the
+   count above adds up, and visibly not a picture. */
+.oimg--broken {
+  padding: var(--space-5);
+  border-style: dashed;
+  box-shadow: none;
+  font-size: var(--fs-14);
+}
+.oimg--broken p { margin: 0 0 var(--space-2); color: var(--text-secondary); }
+/* The body face, not the display one a heading would inherit. An order number
+   is something to be read back digit by digit, and the display face draws its
+   zero as a circle — "GR-0000" came out as "GR-OOOO". */
+.oimg__no {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.oimg__aside { color: var(--text-muted); font-size: var(--fs-12); }
+.oimg--broken .oimg__aside { margin-bottom: 0; color: var(--text-muted); }
+
+/* On a phone the card IS the screen width, and a column of them is a scroll of
+   full-size pictures — which is what the person about to share them wants. */
+@media (max-width: 599.98px) {
+  .oimg-grid { grid-template-columns: minmax(0, 1fr); }
+}

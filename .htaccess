@@ -123,6 +123,9 @@
     # this block: the whole page is driven by ?no= — and by a comma-separated
     # list of them when a batch is printed from the orders list.
     RewriteRule ^admin/slip/?$ modules/admin/slip.html [L,QSA]
+    # The same order as a picture, for whoever rings the customer to confirm
+    # it. Driven by ?no= exactly as the slip is, comma-separated list and all.
+    RewriteRule ^admin/order-image/?$ modules/admin/order-image.html [L,QSA]
     RewriteRule ^admin/quotes/?$ modules/b2b/quotes.html [L,QSA]
     RewriteRule ^admin/pnl/?$ modules/accounting/pnl.html [L,QSA]
     RewriteRule ^admin/journal/?$ modules/accounting/journal.html [L,QSA]

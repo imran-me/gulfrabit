@@ -21,7 +21,7 @@ import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
 import { canDelete, confirmDelete, toast } from './admin-delete.js';
 import { thumbStack } from './admin-thumb.js';
-import { STAGES, TRANSITION_LABELS, NEEDS_REASON, stageLabel, stageTone } from './order-stages.js';
+import { STAGES, TRANSITION_LABELS, NEEDS_REASON, stageLabel, stageTone, payMethod } from './order-stages.js';
 
 /* `deleted` is a filter like any other so it lives in the URL with the rest:
    the Deleted tab has to survive a reload and be shareable, exactly as the
@@ -120,6 +120,7 @@ function init() {
     const btn = e.target.closest('[data-bulk]');
     if (!btn) return;
     if (btn.dataset.bulk === 'print') return printSlips();
+    if (btn.dataset.bulk === 'image') return makeImages();
     if (btn.dataset.bulk === 'delete') return remove([...selected], btn);
     if (btn.dataset.bulk === 'restore') return putBackMany([...selected], btn);
     bulkMove(btn.dataset.bulk, btn);
@@ -470,18 +471,6 @@ function sameWord(a, b) {
   return !norm(a) || norm(a) === norm(b);
 }
 
-/** How they are paying, spelled out. The stored value is a key, not a word. */
-const PAY_METHODS = {
-  cod: 'Cash on delivery',
-  bkash: 'bKash',
-  nagad: 'Nagad',
-  card: 'Card',
-};
-
-function payMethod(key) {
-  return PAY_METHODS[key] || key || '—';
-}
-
 /**
  * How many columns this table has, read from its own header.
  *
@@ -606,7 +595,9 @@ function paymentTone(s) {
  * to work out afterwards which five did not move.
  *
  * Printing is always available: a slip can be printed for an order in any
- * stage, and reprints are most often wanted for orders already gone.
+ * stage, and reprints are most often wanted for orders already gone. The order
+ * images sit beside it on the same terms — they are the other way an order
+ * leaves this panel, to the person ringing the customer instead of the rider.
  */
 function paintBulk() {
   const bar = document.querySelector('[data-orders-bulk]');
@@ -646,6 +637,9 @@ function paintBulk() {
     <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-bulk="print">
       Print ${n} slip${n === 1 ? '' : 's'}
     </button>
+    <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-bulk="image">
+      ${n === 1 ? 'Order image' : `${n} order images`}
+    </button>
     ${shared.map((t) => `
       <button class="btn-gr btn-primary-gr btn-sm-gr" type="button" data-bulk="${escapeHtml(t)}">
         ${escapeHtml(TRANSITION_LABELS[t] || t)}
@@ -675,6 +669,18 @@ function clearSelection() {
 function printSlips() {
   const list = [...selected].map(encodeURIComponent).join(',');
   window.open(`/admin/slip?no=${list}&auto=1`, '_blank', 'noopener');
+}
+
+/**
+ * One tab, every selected order as a picture for customer care.
+ *
+ * A new tab for the reason the slips get one: the list underneath keeps its
+ * filters, its page and its selection, so the next thing — usually pressing
+ * "Confirm — call done" as the answers come back — starts where this left off.
+ */
+function makeImages() {
+  const list = [...selected].map(encodeURIComponent).join(',');
+  window.open(`/admin/order-image?no=${list}`, '_blank', 'noopener');
 }
 
 /**
