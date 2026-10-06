@@ -303,7 +303,7 @@ RedirectMatch 404 ^/(composer\.(json|lock)|artisan|phpunit\.xml|context\.md|BACK
     # STYLESHEET is served from there, so it never belonged in the script
     # list at all.
     #
-    # THE ONE THIRD-PARTY SCRIPT IS NOW THE META PIXEL, and it needs three
+    # THE ONE THIRD-PARTY SCRIPT IS NOW THE META PIXEL, and it needs five
     # entries, not one. Miss any and the failure is silent — the pixel loads,
     # reports nothing, and Events Manager shows "No activity" while the ads
     # keep spending:
@@ -314,6 +314,30 @@ RedirectMatch 404 ^/(composer\.(json|lock)|artisan|phpunit\.xml|context\.md|BACK
     #   connect-src www.facebook.com       the same beacon sent via fetch/
     #               connect.facebook.net   sendBeacon by current fbevents, plus
     #                                      the config it fetches on init
+    #   form-action www.facebook.com       a hidden <form> POSTed to /tr into
+    #   frame-src   www.facebook.com       a hidden <iframe>. One transport,
+    #                                      and it needs BOTH directives.
+    #
+    # THE LAST TWO WERE MISSING UNTIL 2026-10-06, AND THE PIXEL LOOKED ALIVE
+    # THE WHOLE TIME. fbevents sends an event as an image only while the whole
+    # URL is under 2,048 characters. A bare PageView fits, so Events Manager
+    # showed activity. Past that length Edge, Safari and Firefox use
+    # sendBeacon — but Chrome is sent straight to the form, and the form was
+    # refused twice over: form-action was 'self', and with no frame-src the
+    # iframe fell back to default-src 'self'.
+    #
+    # Measured on the live site in an ordinary Chrome 154 window: ViewContent,
+    # AddToCart and InitiateCheckout never left the page, and neither did
+    # PageView on a landing URL carrying an fbclid and UTMs — which is every
+    # ad click. Purchase was not measured (it needs a real order) but carries
+    # the same cart payload. Only the server copy through /api/track was
+    # reaching Meta for those. A check in Edge passes, which is how this hid.
+    # (Inside the Facebook and Instagram apps the image limit is 32 KB, so
+    # their in-app browsers were never affected.)
+    #
+    # form-action is the directive this policy leans on hardest — see WHAT IT
+    # STOPS — so what it admits is one host that three other directives
+    # already trust. A form can post here or to www.facebook.com, nowhere else.
     #
     # Only these two hosts, never a wildcard *.facebook.com: the pixel needs
     # no other subdomain, and the point of the policy is that a compromised
@@ -328,7 +352,7 @@ RedirectMatch 404 ^/(composer\.(json|lock)|artisan|phpunit\.xml|context\.md|BACK
     # which is the one written in the page — blocks the display typeface on
     # every page, and the failure is a silent fallback to a system font rather
     # than an error anybody notices. Verified by fetching the stylesheet.
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com; font-src 'self' https://fonts.gstatic.com https://cdn.fontshare.com data:; img-src 'self' data: blob: https://www.facebook.com; connect-src 'self' https://www.facebook.com https://connect.facebook.net; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com; font-src 'self' https://fonts.gstatic.com https://cdn.fontshare.com data:; img-src 'self' data: blob: https://www.facebook.com; connect-src 'self' https://www.facebook.com https://connect.facebook.net; frame-src 'self' https://www.facebook.com; form-action 'self' https://www.facebook.com; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests"
 </IfModule>
 
 Options -Indexes
