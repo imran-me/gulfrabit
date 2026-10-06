@@ -28,10 +28,18 @@ export const CONFIG = {
    * is used only by a page built without one. Leave it empty and the build
    * writes the block switched off.
    *
-   * Set 2026-09-06 for the first ad campaign. This is the dataset named
-   * "GulfRabit Pixel" in Events Manager, on ad account 3375856489152009.
+   * This is the dataset named "GulfRabit01" in Events Manager, on ad account
+   * 1272957174959098. It replaced "GulfRabit Pixel" (1423900436303846, ad
+   * account 3375856489152009, set 2026-09-06 for the first campaign) in the
+   * panel on 2026-10-05.
+   *
+   * THE WARNING ABOVE IS NOT THEORETICAL. This line was left on the old id,
+   * and the first deploy after the switch (2026-10-06) put the old pixel back
+   * on every page — not for a few seconds, but until somebody noticed in
+   * Pixel Helper, because the re-stamp that should follow a deploy changed
+   * nothing. Change the pixel in the panel, then change it here.
    */
-  metaPixelId: '1423900436303846',
+  metaPixelId: '2909316949423129',
 
   /**
    * Where the browser mirrors each event for server-side forwarding.
