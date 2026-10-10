@@ -136,6 +136,49 @@ otherwise browsing customers exhaust a limited campaign without buying anything.
 
 ---
 
+## Two ways in, one way of writing an order
+
+`OrderService` has two public doors and one private room:
+
+| Door | Caller | Basket |
+|---|---|---|
+| `placeFromCart()` | `POST /api/orders` — the storefront | the customer's saved cart, locked |
+| `placeManual()` | `POST /api/admin/orders` — a custom order typed in by staff | a `Cart` built in memory from the typed lines, never saved |
+
+Both hand their basket to **`capture()`**, which does everything that makes an
+order an order: availability, delivery, promotion, the pre-order split, the
+snapshot, the order number. A custom order therefore cannot be priced
+differently from a website order — there is no second copy of the arithmetic
+for it to be priced by. `quoteManual()` runs the same figures without writing.
+
+Two things differ, and only these:
+
+- **`channel`** (`orders.channel`, default `website`). `placeManual()` sets it
+  to how the order came in; the storefront's request has no such field.
+- **The COD abuse guards** — the ten-minute duplicate check and the five-a-day
+  cap — are skipped when staff vouch for the order. They exist to stop a
+  script, and the cap's own message tells the customer to ring the shop.
+
+## A line is charged at its PACK's price
+
+`CartItem::currentUnitPricePoisha()` asks `Product::pricePoishaFor($variant)`,
+which is the one place a line's unit price is decided. A product with packs
+has a price per pack; `products.price_poisha` is only the price of the pack
+the shop preselects.
+
+Until 2026-10-10 every line was charged from `price_poisha` alone — so a
+customer who chose 1 kg was shown the 1 kg price by the product page, the cart
+and the express checkout, and the order was then written, slipped and
+collected at the default pack's price. A line with no pack, or a label that
+matches nothing, still falls back to the product price.
+
+## The street address is optional — in the table too
+
+`PlaceOrderRequest` has allowed an order without a street address since the
+express checkout was shortened; `orders.address_line` was still `NOT NULL`
+until `2026_10_10_000002`, so that order was an INSERT the database refused.
+Every reader of the column already treats empty as "not recorded yet".
+
 ## Payment — not built
 
 `payment_status` starts at `pending` for every method, including COD (which is

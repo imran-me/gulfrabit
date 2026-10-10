@@ -95,6 +95,9 @@
     # noindexed and every figure on them comes from an endpoint behind the
     # admin middleware. The routes are for the people who work here.
     RewriteRule ^admin/products/edit/?$ modules/admin/product-edit.html [L,QSA]
+    # Typing in an order taken by phone or by message. Above /admin/orders for
+    # the reason given at the top of this block.
+    RewriteRule ^admin/orders/new/?$ modules/admin/order-new.html [L,QSA]
     RewriteRule ^admin/stock/movements/?$ modules/inventory/movements.html [L,QSA]
 
     RewriteRule ^admin/?$ modules/admin/index.html [L,QSA]

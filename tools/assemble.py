@@ -842,6 +842,14 @@ ADMIN_PAGES = [
      ["/modules/admin/admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/admin/orders-page.js"], True),
 
+    # Typing in an order taken by phone or by message. Its own page rather
+    # than a panel on the list: it is a form somebody fills in mid-call, and it
+    # needs the whole screen and a URL that can be bookmarked.
+    ("modules/admin/order-new.html", "Add custom order — GulfRabit Admin",
+     "modules/admin/_fragments/order-new.main.html",
+     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin-shell.js", "/modules/admin/order-new-page.js"], True),
+
     ("modules/admin/order.html", "Order — GulfRabit Admin",
      "modules/admin/_fragments/order.main.html",
      ["/modules/admin/admin.css"],

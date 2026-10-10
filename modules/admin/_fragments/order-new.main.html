@@ -1,0 +1,182 @@
+      <div class="admin__head">
+        <div>
+          <p class="admin__sub" style="margin:0 0 .25rem"><a href="/admin/orders">← All orders</a></p>
+          <h1 class="admin__title">Add custom order</h1>
+        </div>
+      </div>
+
+      <p class="admin__sub aentry__lede">
+        For an order taken by phone or by message. It joins the same list as website orders —
+        same stages, same slip, same courier booking.
+      </p>
+
+      <!-- Said in place of the form when the signed-in account may not take
+           orders, rather than drawing a form whose every request would be
+           refused. The server decides; this is the explanation. -->
+      <p class="abanner abanner--wait" data-entry-denied hidden>
+        Your account can view orders but not create them. Ask an owner for “Orders — edit”.
+      </p>
+
+      <!-- novalidate: the browser's own bubbles point at one field at a time
+           and vanish when it loses focus, which is no use to somebody typing
+           with a phone on their shoulder. The checks are the server's, with a
+           copy of the cheap ones in order-new-page.js. -->
+      <form class="aentry" data-entry-form novalidate hidden>
+        <div class="aentry__main">
+
+          <!-- FIRST, because it is what a caller says first. Nobody rings a
+               shop and opens with their postcode. -->
+          <section class="acard" aria-labelledby="en-items">
+            <h2 class="h5" id="en-items">What they want</h2>
+            <!-- Replaced by product-picker.js. Searches the catalogue as
+                 somebody taking an order may see it — see `products()` in
+                 AdminOrderEntryController for why that is its own endpoint. -->
+            <div data-entry-picker></div>
+            <ul class="alines" data-entry-lines role="list"></ul>
+            <p class="aentry__hint" data-entry-empty>
+              Search for each product and pick it from the list. Choose the pack and the
+              quantity on its line — the price is worked out for you.
+            </p>
+          </section>
+
+          <section class="acard" aria-labelledby="en-who">
+            <h2 class="h5" id="en-who">Who it is for</h2>
+            <div class="aentry__row">
+              <!-- Phone before name: it is the half that identifies somebody,
+                   and typing it is what finds their earlier orders. -->
+              <div class="afilters__field">
+                <label for="en-phone">Mobile number</label>
+                <input class="input-gr" id="en-phone" name="phone" type="tel" inputmode="numeric"
+                       autocomplete="off" placeholder="01712345678" maxlength="16" required>
+              </div>
+              <div class="afilters__field">
+                <label for="en-name">Name</label>
+                <input class="input-gr" id="en-name" name="name" type="text" autocomplete="off"
+                       maxlength="120" required>
+              </div>
+            </div>
+            <!-- What this number has ordered before, filled by order-new-page.js
+                 from the orders list's own search. Empty for a new customer,
+                 which is most of them, so it takes no room until it has
+                 something to say. -->
+            <div class="aentry__known" data-entry-known hidden aria-live="polite"></div>
+          </section>
+
+          <section class="acard" aria-labelledby="en-where">
+            <h2 class="h5" id="en-where">Where it is going</h2>
+            <div class="aentry__row">
+              <div class="afilters__field">
+                <label for="en-district">District</label>
+                <select class="select-gr" id="en-district" name="district" data-entry-district required>
+                  <option value="">Choose a district…</option>
+                </select>
+              </div>
+              <div class="afilters__field">
+                <label for="en-area">Thana / Upazila <span class="atable__sub">optional</span></label>
+                <input class="input-gr" id="en-area" name="area" type="text" autocomplete="off"
+                       maxlength="120" placeholder="e.g. Gulshan">
+              </div>
+            </div>
+            <div class="afilters__field">
+              <label for="en-address">Street address <span class="atable__sub">optional — can be added later</span></label>
+              <input class="input-gr" id="en-address" name="address" type="text" autocomplete="off"
+                     maxlength="255" placeholder="House, road, block">
+            </div>
+            <div class="afilters__field">
+              <label for="en-notes">Delivery note <span class="atable__sub">optional — printed on the slip</span></label>
+              <textarea class="input-gr" id="en-notes" name="notes" rows="2" maxlength="500"
+                        placeholder="Call before coming · leave with the guard · after 5pm only"></textarea>
+            </div>
+          </section>
+        </div>
+
+        <!-- The summary rides beside the form on a wide screen and under it on
+             a narrow one. Every figure in it is the server's — see the quote
+             endpoint — so what is read out to the customer is what the order
+             will say. -->
+        <aside class="aentry__side">
+          <section class="acard" aria-labelledby="en-sum">
+            <h2 class="h5" id="en-sum">Order</h2>
+
+            <div class="afilters__field">
+              <label for="en-channel">How it came in</label>
+              <select class="select-gr" id="en-channel" name="channel" data-entry-channel></select>
+            </div>
+
+            <!-- Drawn from the options the server says this district is
+                 actually offered. Hidden until there is a choice to make:
+                 nearly every district has exactly one way to reach it. -->
+            <fieldset class="aentry__ship" data-entry-delivery hidden>
+              <legend>Delivery</legend>
+              <div data-entry-delivery-options></div>
+            </fieldset>
+
+            <div class="afilters__field">
+              <label for="en-payment">How they will pay</label>
+              <select class="select-gr" id="en-payment" name="payment">
+                <option value="cod">Cash on delivery</option>
+                <option value="bkash">bKash</option>
+                <option value="nagad">Nagad</option>
+                <option value="card">Card</option>
+              </select>
+              <p class="aentry__hint" data-entry-payhint hidden>
+                Recorded as how they intend to pay. The order stays unpaid — and the slip
+                still says to collect — until a payment is recorded against it.
+              </p>
+            </div>
+
+            <div class="afilters__field">
+              <label for="en-promo">Coupon code <span class="atable__sub">optional</span></label>
+              <input class="input-gr" id="en-promo" name="promo" type="text" autocomplete="off"
+                     maxlength="32" autocapitalize="characters" spellcheck="false">
+              <p class="aentry__hint" data-entry-promo hidden></p>
+            </div>
+
+            <dl class="atotals" data-entry-totals></dl>
+
+            <!-- Why this total is what it is, when the reason is a pre-order:
+                 one order becoming two, or the whole thing waiting on a
+                 shipment. The person on the phone has to say so. -->
+            <p class="abanner abanner--wait" data-entry-preorder hidden></p>
+
+            <!-- UNTICKED, and that is the rule this screen is built on: a
+                 custom order is an order like any other. It lands in Placed
+                 and is worked from there by the same buttons, exactly as one
+                 from the website is. The box is the shortcut for the case
+                 where the confirmation call has plainly already happened —
+                 one click here instead of one on the list — and it is never
+                 taken on somebody's behalf. See store() in
+                 AdminOrderEntryController for what ticking it does. -->
+            <label class="apane__row aentry__confirm">
+              <input type="checkbox" name="confirmed">
+              <span>
+                <strong>Already confirmed with the customer</strong>
+                <span class="atable__sub">
+                  Left unticked, it lands in Placed like any website order. Ticked, it goes
+                  straight to Confirmed and they are sent their order number by SMS.
+                </span>
+              </span>
+            </label>
+
+            <p class="aerror aentry__error" data-entry-error hidden role="alert"></p>
+
+            <button class="btn-gr btn-primary-gr aentry__place" type="submit" data-entry-place disabled>
+              Place order
+            </button>
+          </section>
+        </aside>
+      </form>
+
+      <!-- Replaces the form once the order exists. In place rather than on a
+           new page, so the back button cannot resubmit it and the next call —
+           there is usually a next call — starts one click away. -->
+      <section class="acard aentry__done" data-entry-done hidden aria-labelledby="en-done" tabindex="-1">
+        <h2 class="h5" id="en-done" data-done-title>Order placed</h2>
+        <ul class="aentry__placed" data-done-orders role="list"></ul>
+        <p class="abanner abanner--due" data-done-warning hidden></p>
+        <div class="aactions">
+          <a class="btn-gr btn-primary-gr btn-sm-gr" data-done-slip target="_blank" rel="noopener">Print slip</a>
+          <a class="btn-gr btn-outline-gr btn-sm-gr" data-done-open>Open the order</a>
+          <button class="btn-gr btn-outline-gr btn-sm-gr" type="button" data-done-again>Take another order</button>
+        </div>
+      </section>

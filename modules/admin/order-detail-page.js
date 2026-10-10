@@ -25,7 +25,7 @@ import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
 import { canDelete, confirmDelete, toast } from './admin-delete.js';
 import { thumb } from './admin-thumb.js';
-import { TRANSITION_LABELS, NEEDS_REASON, stageLabel } from './order-stages.js';
+import { TRANSITION_LABELS, NEEDS_REASON, stageLabel, channelLabel, isManualChannel } from './order-stages.js';
 
 let order = null;
 
@@ -68,8 +68,13 @@ function paintHeader() {
   const ad = order.adSource
     ? ` · via ${order.adSource.utm_campaign || order.adSource.utm_source || 'ad'}`
     : '';
+  // An order somebody typed in says so, in the same line: it explains why
+  // there is no ad, no cart and no website visit behind it.
+  const taken = isManualChannel(order.channel)
+    ? ` · custom order (${channelLabel(order.channel)})`
+    : '';
   document.querySelector('[data-order-meta]').textContent =
-    `${stageLabel(order.status)} · ${order.paymentStatus} via ${order.paymentMethod} · placed ${when(order.placedAt)}${ad}`;
+    `${stageLabel(order.status)} · ${order.paymentStatus} via ${order.paymentMethod} · placed ${when(order.placedAt)}${taken}${ad}`;
   document.title = `${order.orderNumber} — GulfRabit Admin`;
 
   // Stated outright, because everything else on this screen still looks like a

@@ -2687,3 +2687,247 @@
   color: var(--gold-ink);
   font-variant-numeric: tabular-nums;
 }
+
+/* ------------------------------------------------------------------ *
+ * New order (modules/admin/order-new-page.js)
+ *
+ * The screen for an order taken by phone or by message. A form on the left
+ * and the running total on the right, because the person using it is being
+ * asked "so what does that come to?" while they are still typing — the
+ * answer must never be below the fold of the thing they are filling in.
+ *
+ * Under 1200px it is one column, in the order the call goes: what, who,
+ * where, and then the total and the button.
+ * ------------------------------------------------------------------ */
+.aentry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+  max-width: 1180px;
+}
+/* What the screen is for, said once, under the masthead rather than in it.
+   The masthead is sticky and stays for the whole call; three lines of
+   explanation riding down the page with it would cost the form 60px of a
+   laptop for a sentence that is read on the first visit and never again. */
+.aentry__lede { margin: calc(var(--space-3) * -1) 0 var(--space-5); max-width: 70ch; }
+.aentry__main { display: grid; gap: var(--space-4); min-width: 0; }
+.aentry__side { min-width: 0; }
+.aentry .acard h2 { margin: 0 0 var(--space-4); }
+
+/* 1200, not 1024. The sidebar takes 248px of the window before this grid
+   gets any, so at 1024 a second column left the form 330px — narrower than
+   it is on a phone. */
+@media (min-width: 1200px) {
+  .aentry { grid-template-columns: minmax(0, 1fr) 360px; }
+  /* Rides with the form. The offset clears the masthead, which is itself
+     sticky and would otherwise sit on top of the card's first field.
+
+     The max-height is what keeps Place order on the screen. A sticky box
+     taller than the window pins its TOP and leaves its bottom out of reach
+     until the whole page has been scrolled to the end — and the bottom of
+     this one is the button. On a 768px laptop that is most of the time, so
+     the card scrolls inside itself instead. */
+  .aentry__side {
+    position: sticky;
+    top: 6.5rem;
+    max-height: calc(100vh - 7.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+}
+
+/* The storefront's roomier control, at full width — this is a form filled in
+   carefully, not the row of switches .afilters tightens them for. */
+.aentry .afilters__field { margin-bottom: var(--space-4); }
+.aentry .afilters__field > .input-gr,
+.aentry .afilters__field > .select-gr { width: 100%; }
+.aentry textarea.input-gr { resize: vertical; min-height: 4rem; }
+
+/* Two fields side by side where there is room, one above the other where
+   there is not. auto-fit rather than a breakpoint: the card is narrower on a
+   desktop with the summary beside it than on a tablet without. */
+.aentry__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0 var(--space-4);
+}
+
+.aentry__hint { margin: var(--space-2) 0 0; font-size: var(--fs-12); color: var(--text-muted); }
+.aentry__hint.is-bad { color: var(--gr-error); }
+
+/* ---- The lines ---------------------------------------------------------
+   A list, not a table: admin-table-cards.js turns every table in the panel
+   into stacked cards on a phone, and a line here is a row of CONTROLS — a
+   pack to choose and a quantity to change — which that treatment is not
+   written for. */
+.alines {
+  list-style: none; margin: var(--space-4) 0 0; padding: 0;
+  /* The rows below ask how wide THIS LIST is, not how wide the window is.
+     The card is 650px on a 1366px laptop — the summary sits beside it — and
+     980px on a tablet where it does not, so a breakpoint on the viewport gets
+     the two exactly backwards. */
+  container-type: inline-size;
+}
+.alines:empty { margin: 0; }
+.aline {
+  display: grid;
+  /* picture · what it is · which pack · how many · what that costs · remove */
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 12rem) auto 6.5rem auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--border-hairline);
+}
+.aline__ident { min-width: 0; }
+.aline__title { font-weight: 500; overflow-wrap: anywhere; }
+.aline__flag { color: var(--gold-ink); }
+.aline__pack { min-width: 0; width: 100%; font-size: var(--fs-14); }
+.aline__sum {
+  display: grid;
+  justify-items: end;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.aline__remove {
+  width: 32px; height: 32px;
+  border: 0; border-radius: var(--radius-sm);
+  background: none; color: var(--text-muted);
+  font-size: 1.25rem; line-height: 1; cursor: pointer;
+}
+.aline__remove:hover { background: rgba(200, 30, 30, .08); color: var(--gr-error); }
+.aline__remove:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: 1px; }
+
+/* One row only where the list is genuinely wide. Narrower than that and the
+   line is two rows: what it is, then the three things you can do to it. Six
+   columns in 650px left the product name 120px, wrapped over four lines —
+   and the name is how the person typing checks they picked the right thing. */
+@container (max-width: 800px) {
+  .aline {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "pic   ident ident remove"
+      "pack  pack  qty   sum";
+  }
+  .aline > .athumb { grid-area: pic; }
+  .aline__ident { grid-area: ident; }
+  .aline__remove { grid-area: remove; }
+  .aline__pack { grid-area: pack; }
+  .aline > .aqty { grid-area: qty; }
+  .aline__sum { grid-area: sum; min-width: 4.5rem; }
+}
+/* On a phone the pack gets a row to itself. Sharing one with the stepper and
+   the price left it 90px, showing "500" and a chevron — the half of the
+   label that says which pack, cut off before the half that says what it
+   costs. */
+@container (max-width: 440px) {
+  .aline {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "pic   ident remove"
+      "pack  pack  pack"
+      "qty   qty   sum";
+  }
+  .aline > .aqty { justify-self: start; }
+  /* A product with nothing to choose leaves no empty row behind. */
+  span.aline__pack { display: none; }
+}
+
+/* − 2 +. One bordered control rather than three, so it reads as a single
+   quantity and not as a number with two unrelated buttons beside it. */
+.aqty {
+  display: inline-flex;
+  align-items: stretch;
+  height: 40px;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: #FFFFFF;
+  overflow: hidden;
+}
+.aqty button {
+  width: 34px;
+  border: 0; background: var(--surface-sunken);
+  color: var(--text-primary); font-size: var(--fs-16); line-height: 1; cursor: pointer;
+}
+.aqty button:hover { background: var(--wash-hover); }
+.aqty button:focus-visible { outline: 2px solid var(--gr-cyan); outline-offset: -2px; }
+.aqty .input-gr {
+  width: 3.25rem; min-height: 0; height: 100%;
+  padding: 0; border: 0; border-radius: 0;
+  text-align: center; font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield; appearance: textfield;
+}
+/* The stepper buttons ARE the spinner; the browser's own pair inside a box
+   this narrow leaves no room for the number. */
+.aqty .input-gr::-webkit-outer-spin-button,
+.aqty .input-gr::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* ---- What this number has ordered before -------------------------------
+   Neutral, not an alert: for most returning customers it is good news. The
+   lines inside that ARE a warning carry the amber the order screen uses for
+   "something is outstanding" — nothing is broken, something wants a second
+   look before the button is pressed. */
+.aentry__known {
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+}
+.aentry__known p { margin: 0 0 var(--space-2); }
+.aentry__known .akv__edit { margin-left: 0; }
+.aentry__known-warn {
+  padding: var(--space-2) var(--space-3);
+  color: #8A6D22;
+  background: rgba(201, 162, 75, .14);
+  border: 1px solid rgba(201, 162, 75, .4);
+  border-radius: var(--radius-sm);
+}
+
+/* ---- The summary card -------------------------------------------------- */
+.aentry__ship { margin: 0 0 var(--space-4); padding: 0; border: 0; min-width: 0; }
+.aentry__ship legend {
+  padding: 0; margin-bottom: 4px;
+  font-size: var(--fs-12); font-weight: var(--fw-semibold); color: var(--text-secondary);
+}
+/* The promise under the price, not trailing after it: "Within 72 hours"
+   broke mid-phrase wherever the line happened to end. */
+.aentry__ship .atable__sub { display: block; }
+.aentry .atotals { margin-top: 0; transition: opacity var(--dur-base) var(--ease-out); }
+/* The figures are answering an older question while a new one is out. Dimmed
+   rather than blanked: the card must not change height on every keystroke. */
+.aentry .atotals.is-stale { opacity: .45; }
+.aentry .atotals__row dd { white-space: nowrap; }
+.aentry .abanner { margin: var(--space-4) 0 0; }
+.aentry__confirm { margin-top: var(--space-4); padding: var(--space-3) 0 0; border-top: 1px solid var(--border-hairline); }
+.aentry__confirm .atable__sub { display: block; margin-top: 2px; }
+.aentry__error { margin-top: var(--space-3); }
+.aentry__place { width: 100%; margin-top: var(--space-4); }
+
+/* ---- Once it is placed ------------------------------------------------- */
+.aentry__done { max-width: 720px; }
+.aentry__done:focus { outline: none; }
+.aentry__done h2 { margin: 0 0 var(--space-4); }
+.aentry__done .aactions { margin-top: var(--space-5); }
+.aentry__placed { list-style: none; margin: 0 0 var(--space-5); padding: 0; display: grid; gap: var(--space-2); }
+.aentry__placed li { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.aentry__placed a { font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
+
+/* ---- "Custom · Phone call", on a row of the orders list ----------------
+   The ONE way a custom order differs from any other on this list. Everything
+   else about its row — the stage, the buttons, the slip — is the same row.
+   Under the order number, where the eye already is when it is deciding which
+   row to work, and only drawn for an order somebody added by hand: a pill
+   reading "Website" on nine rows in ten is nine pills nobody reads. */
+.achannel {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(201, 162, 75, .16);
+  color: var(--gold-ink);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}

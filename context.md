@@ -2351,6 +2351,116 @@ only the page, and let their own rebuild carry their CSS when it lands.
 
 ---
 
+### Custom orders — the order taken by phone or by message (2026-10-10)
+
+**What the owner asked for:** orders that arrive by call or message have to be
+put into the same Orders list as website orders — same stages, same slip — with
+the button at the top right of the Orders masthead. And, in their words, *"the
+customly added orders will be same exactly like others, its just difference is,
+added by custom."* That sentence is the design.
+
+**What was built**
+
+- `/admin/orders/new` — **+ Add custom order**, in the Orders masthead.
+  Search and pick products, choose pack and quantity, customer, district,
+  payment, optional coupon. The running total is the server's, re-asked on
+  every change (`POST /api/admin/orders/quote`); the browser adds nothing up.
+- `POST /api/admin/orders` writes it through `OrderService::placeManual()` →
+  **`capture()`**, the same private method `placeFromCart()` now uses. One
+  pricing path, not two.
+- It lands in **Placed** like any other order. "Already confirmed with the
+  customer" is an unticked box — the *Confirm — call done* click, offered one
+  screen sooner. It was built ticked by default first; the owner's sentence
+  above is why it is not.
+- The one difference: `orders.channel` (`phone` / `whatsapp` / `messenger` /
+  `instagram` / `other`; `website` by default). Shown as a "Custom · Phone
+  call" pill on the list and in the order's header line, plus an internal note
+  naming who added it. Nothing else branches on it.
+- Typing a phone number looks up that number's earlier orders (the list's own
+  search — no new endpoint): a returning customer's address can be filled in,
+  and an order already on its way is flagged before a second one is placed.
+- Permission: `orders.edit`. No new permission, so nobody's stored permission
+  list needs touching.
+
+**Decisions**
+
+- **No price, discount or delivery field for staff.** The locked rule says the
+  client never sets a price; a member of staff is trusted to take an order,
+  which is not the same as being handed a field that edits one. A negotiated
+  discount is a coupon code. If the shop wants a free-typed discount it is a
+  deliberate addition with its own permission — not built.
+- **The abuse guards are skipped for a custom order** (duplicate-in-ten-minutes,
+  five-a-day). They stop scripts; the cap's own message tells the customer to
+  ring. The phone lookup on the form does the job a human needs instead.
+- **Channel is its own column, not `ad_source`.** The campaign report groups by
+  `ad_source`; a phone order there would be a campaign called "phone".
+
+**Two bugs this turned up — both pre-existing, both fixed here, both affect
+WEBSITE orders**
+
+1. **Packs were charged at the default pack's price.**
+   `CartItem::currentUnitPricePoisha()` read `products.price_poisha` for every
+   line. The storefront shows the chosen pack's price; the server wrote the
+   order at the preselected pack's. 1 kg of gr-1101 is ৳2,650 on the page and
+   was ৳1,380 on the order and the slip. Now `Product::pricePoishaFor()`.
+   **Worth checking past orders whose line carries a non-default pack.**
+2. **An order with no street address could not be saved.** The request allowed
+   it (express checkout, 646035a); `orders.address_line` was still `NOT NULL`.
+   Migration `2026_10_10_000002` makes it nullable. The packing slip printed
+   the word "null" for such an order; it now says the address is not recorded.
+
+**Verified — and for once, by running the PHP**
+
+This repo's standing caveat is B1, "no PHP has ever executed here". For this
+change it did: PHP 8.3.35 (the version hPanel reports) and Composer were put in
+a scratch folder, the app was installed there, and it ran against a throwaway
+MariaDB 10.4 started from the XAMPP binaries already on the machine — its own
+port, its own data folder, nothing shared. SQLite could not be used: the
+products migration creates a FULLTEXT index.
+
+- `php -l` over all 328 PHP files on 8.3: clean.
+- Every migration ran on MariaDB, and the two new ones were rolled back and
+  re-applied. `orders.address_line` goes `NO` → `YES`; `channel` arrives as
+  `varchar(16) NOT NULL DEFAULT 'website'`.
+- **52 checks against the real endpoints** over HTTP, with a real session and
+  CSRF token. The ones that matter:
+  - website cart line for the 1 kg pack: ৳2,650, was ৳1,380;
+  - website order with no street address: 201, was an INSERT refused;
+  - the website's duplicate guard and coupon arithmetic unchanged;
+  - custom order 3 × 1 kg + GULF10 + express = ৳7,305, the row in `orders`
+    exact to the poisha, `channel = phone`, `status = placed`;
+  - then Confirm → Start packing by the ordinary transition endpoint, and the
+    address added from the order screen;
+  - "already confirmed" ticked → `confirmed`, one history row, one SMS logged;
+  - pre-order + in-stock → two orders, one placement, delivery charged once;
+  - an Employee account can search, quote and place, and is still refused the
+    catalogue endpoint; a view-only account is refused all three with a 403.
+- **15 checks in a headless browser against that same backend**, through the
+  panel's own login page: press *+ Add custom order*, pick, switch pack, look
+  the customer up, coupon, place, print the slip, then press *Confirm — call
+  done* on the list. No JavaScript errors.
+- The screen alone, against a stand-in API: 64 checks, overflow measured at
+  360 / 390 / 768 / 1024 / 1280 / 1366 / 1920.
+- The PHP that was tested was diffed against the repo before committing: 327
+  files, none differ.
+
+**Still true:** the live database is MySQL on Hostinger, not this MariaDB, and
+its rows are real. First thing after the deploy: add one custom order, and
+place one website order for a non-default pack, and read both totals.
+**Two migrations must run** (`deploy.sh` runs them): `2026_10_10_000001`
+(channel) and `2026_10_10_000002` (address optional). Until the first has run,
+*Place order* on the custom form says so instead of failing; website orders are
+unaffected either way.
+
+**Found on the way, NOT fixed:** after signing in, the login page only honours
+a `next` beginning `/modules/admin/`, but the shell sends the pretty URL
+(`/admin/orders`) — so a signed-out visit to any screen lands on the dashboard
+after login instead of the screen that was asked for.
+
+**Not built:** editing an order's lines after placing; marking an order paid by
+hand (a bKash transfer taken on the phone still reads `pending`); filtering the
+list by channel.
+
 ## 10. URLs ARE ROUTES (2026-08-13) — read before touching a link
 
 Every page on the site answers at a readable route. There is no `.html` and no

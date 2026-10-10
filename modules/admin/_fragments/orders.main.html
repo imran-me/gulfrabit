@@ -3,6 +3,12 @@
           <h1 class="admin__title">Orders</h1>
           <p class="admin__sub" data-orders-count>Loading…</p>
         </div>
+        <!-- For the order that did not come through the website: a call, a
+             WhatsApp message, a reply under a post. In the masthead, which
+             stays on screen however far down the list somebody has scrolled
+             when the phone rings. Hidden until orders-page.js has checked the
+             account may use it — the route refuses on its own regardless. -->
+        <a class="btn-gr btn-primary-gr btn-sm-gr" href="/admin/orders/new" data-orders-new hidden>+ Add custom order</a>
       </div>
 
       <!-- The pipeline, as places rather than as a dropdown. Filled by

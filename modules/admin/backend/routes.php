@@ -9,6 +9,7 @@ use Modules\Admin\Controllers\AdminHealthController;
 use Modules\Admin\Controllers\AdminCategoryController;
 use Modules\Admin\Controllers\AdminCustomerController;
 use Modules\Admin\Controllers\AdminOrderController;
+use Modules\Admin\Controllers\AdminOrderEntryController;
 use Modules\Admin\Controllers\AdminProductController;
 use Modules\Admin\Controllers\AdminPromotionController;
 use Modules\Admin\Controllers\AdminStaffController;
@@ -75,6 +76,27 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         // and the ones added later.
         Route::middleware('admin:orders')->prefix('orders')->name('orders.')->group(function (): void {
             Route::get('/', [AdminOrderController::class, 'index'])->name('index');
+
+            // Orders taken by phone or by message, typed in by staff.
+            //
+            // `orders.edit`, the same capability as a note and an address and
+            // for the same reason: the person holding the phone is the person
+            // who has just been told what the customer wants, and an order
+            // that has to wait for a manager to type it is an order that gets
+            // written on paper instead. No money is decided here — there is no
+            // field for a price or a discount — so this is not `orders.refund`
+            // territory.
+            //
+            // ABOVE `/{order}`, AND IT HAS TO BE. `products` is a literal path
+            // under a prefix whose next route binds anything in that position
+            // to an order number; declared below it, this would be a lookup
+            // for an order called "products" and a 404.
+            Route::middleware('admin:orders.edit')->group(function (): void {
+                Route::get('/products', [AdminOrderEntryController::class, 'products'])->name('products');
+                Route::post('/quote', [AdminOrderEntryController::class, 'quote'])->name('quote');
+                Route::post('/', [AdminOrderEntryController::class, 'store'])->name('store');
+            });
+
             // withTrashed, so a deleted order still opens from the Deleted tab.
             // Without it the link in that tab 404s, and "I can see it in the
             // list but I cannot open it to decide whether to restore it" is a

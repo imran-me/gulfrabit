@@ -146,6 +146,162 @@ prints plain text when it is false, so an order containing a product that was
 removed does not offer a dead link. The product's numeric id stays on the
 server: public keys in this project are skus and slugs.
 
+Both order endpoints carry **`channel`** — how the order reached the shop.
+`website` for anything the storefront wrote (and for every row older than the
+column); otherwise one of `phone`, `whatsapp`, `messenger`, `instagram`,
+`other`, which means a member of staff added it by hand. It is the **only**
+field on which a custom order differs from any other: the panel draws a
+"Custom · Phone call" pill from it and changes nothing else.
+
+---
+
+## Custom orders — an order taken by phone or by message
+
+Three routes, all behind **`admin:orders.edit`** — the capability a note and an
+address correction need, for the same reason: the person holding the phone is
+the person who has just been told what the customer wants. Screen:
+`/admin/orders/new`.
+
+**A custom order is an order like any other.** It is written to the same table
+by the same method (`OrderService::capture()`), lands in `placed`, and from
+there is confirmed, packed, slipped, booked with a courier and texted by exactly
+the code a website order goes through. There is no second pipeline and no
+second price list.
+
+**What is absent, as everywhere else:** no request below has a field for a
+price, a discount, a delivery charge or a total. Staff choose products, packs
+and quantities. A discount is a coupon code, which is data the Coupons screen
+owns — not a number typed while a customer haggles.
+
+### `GET /api/admin/orders/products`
+
+`?q=&perPage=` — what can be sold right now, searched by title, SKU or brand.
+
+Not `/api/admin/products`, deliberately: that one is behind `products.view`
+and returns cost and margin, and the person on the phone is usually an Employee
+account, which holds neither. This is the catalogue as somebody taking an order
+may see it.
+
+```json
+{ "data": [ {
+  "sku": "gr-1101", "title": "Ajwa Dates — Madinah Select",
+  "brand": "GulfRabit Select", "image": "/assets/images/products/gr-1101.jpg",
+  "priceTaka": 1380, "isActive": true,
+  "orderable": true, "unavailable": null,
+  "isPreorder": false, "availableFrom": null,
+  "maxQty": 99, "defaultVariant": "500 g",
+  "variants": [ { "label": "200 g", "priceTaka": 580,  "inStock": true },
+                { "label": "500 g", "priceTaka": 1380, "inStock": true },
+                { "label": "1 kg",  "priceTaka": 2650, "inStock": true } ]
+} ] }
+```
+
+Only products the storefront would sell (`Product::scopeActive`) — the same set
+the order will accept. **Out-of-stock products are returned**, with
+`orderable: false` and the reason in `unavailable`: "do you have the 1 kg?" is
+a question a caller asks, and the list should be able to answer it. No stock
+counts and no cost, ever.
+
+### `POST /api/admin/orders/quote`
+
+What the order being typed would come to. **Writes nothing.**
+
+```json
+{ "lines": [ { "sku": "gr-1101", "qty": 3, "variant": "1 kg" } ],
+  "district": "dhaka", "delivery": "express", "payment": "cod", "promo": "GULF10" }
+```
+
+Only `lines` is required — half a form is the normal state of a form.
+
+**200** →
+
+```json
+{ "data": {
+  "lines":  [ { "sku": "gr-1101", "variant": "1 kg", "qty": 3,
+                "unitTaka": 2650, "lineTaka": 7950 } ],
+  "totals": { "subtotalTaka": 7950, "discountTaka": 795,
+              "deliveryTaka": 150, "totalTaka": 7305 },
+  "promo":  { "code": "GULF10", "problem": null },
+  "delivery": { "chosen":  { "id": "express", "label": "…", "eta": "…", "cost": 150 },
+                "options": [ { "id": "metro", … }, { "id": "express", … } ] },
+  "shipsOn": null, "splits": false
+} }
+```
+
+- `totals.deliveryTaka` is **`null`** until a district is chosen. "Not priced
+  yet" and "free" are different facts.
+- `promo` is `null` when no code was sent. `promo.problem` is a sentence when
+  the code takes nothing off — not live, basket too small, nothing eligible —
+  and the totals beside it are worked out **without** the code. Placing refuses
+  on the same sentence.
+- `delivery.options` is every service this district is actually offered, from
+  the one statement of that rule (`OrderService::zonesFor`). The form draws its
+  choices from it rather than keeping a list of its own.
+- `shipsOn` / `splits` — a pre-order line. `splits: true` means placing will
+  write **two** orders (in stock now, the rest on arrival).
+
+The browser adds nothing up. Every figure it shows before *Place order* comes
+from here, produced by the methods that will charge the order.
+
+**422** → a product is unlisted or out of stock, a pack does not exist or is out
+of stock, a pre-order was asked for on cash, or we do not deliver to the
+district. The message names the product.
+
+### `POST /api/admin/orders`
+
+Everything the quote takes, plus who it is for:
+
+```json
+{ "lines": [ … ], "district": "dhaka", "delivery": "metro", "payment": "cod",
+  "promo": null,
+  "name": "Rahim Uddin", "phone": "01712345678",
+  "address": "House 12, Road 5", "area": "Banani", "notes": null,
+  "channel": "phone", "confirmed": false }
+```
+
+The customer fields carry the storefront's own rules (`PlaceOrderRequest`): the
+same phone pattern, the same **optional** street address, the same required
+district. `channel` is one of `Order::MANUAL_CHANNELS` — `website` is not on
+that list, so an order added by hand can never be filed as one a customer
+placed.
+
+`confirmed` defaults to **false**: the order lands in `placed`, like any other.
+Sent `true`, it is then moved to `confirmed` through
+`OrderFulfilmentService::transition` — the same call the *Confirm — call done*
+button makes, one screen sooner — which writes the history row and sends the
+confirmation SMS.
+
+**201** →
+
+```json
+{ "data": { "orderNumber": "GR-2026-A1B2C3",
+            "orders": [ { "orderNumber": "GR-2026-A1B2C3", "status": "placed",
+                          "totalTaka": 7305, "shipsOn": null } ],
+            "warning": null } }
+```
+
+`orders` holds two entries when the basket split. `warning` is a sentence when
+the order was placed but could not be marked confirmed; the order still exists,
+so the request does **not** fail — a failure there would invite the click that
+places it twice.
+
+Two things are recorded that a website order has no need of: `channel` on the
+order, and an internal note — *"Custom order — taken by phone and added by
+staff"* — with the staff member's name, written in the same transaction.
+
+**Not applied to a custom order:** the duplicate-order guard and the
+five-a-day cap on a phone number. Both exist to stop a stranger's script, and
+the cap's own refusal tells the customer to ring the shop — which is this.
+
+**422** → validation, or any refusal the quote would have given. The form keeps
+everything typed.
+
+**Not built:** editing the lines of an order after it is placed (cancel and add
+it again); recording a payment by hand — a custom order paid by bKash transfer
+still reads `pending`, because only a gateway callback may set `paid`.
+
+---
+
 ### `POST /api/admin/orders/{order}/transition`
 
 ```json

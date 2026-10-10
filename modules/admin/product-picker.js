@@ -26,6 +26,13 @@
  *     exclude: () => new Set(alreadyChosenSkus),
  *     onPick: (product) => { … },
  *   });
+ *
+ * `endpoint` AND `note` exist for the one caller that is not curating a shelf:
+ * the order form. It searches /orders/products instead — the catalogue as
+ * somebody taking an order may see it, behind `orders.edit` rather than
+ * `products.view`, with no cost in it — and it has to say "out of stock" on a
+ * row, which a shelf never needed to. Everything else about the control is the
+ * same control, which is the point of there being one.
  */
 
 import { adminFetch } from './backend/api.js';
@@ -39,9 +46,17 @@ let seq = 0;
  *   exclude?: () => Set<string>,
  *   onPick: (product: object) => void,
  *   placeholder?: string,
+ *   endpoint?: string,                       admin API path to search
+ *   note?: (product: object) => string,      extra words for a row's small print
  * }} opts
  */
-export function mountProductPicker(host, { exclude = () => new Set(), onPick, placeholder } = {}) {
+export function mountProductPicker(host, {
+  exclude = () => new Set(),
+  onPick,
+  placeholder,
+  endpoint = '/products',
+  note = () => '',
+} = {}) {
   const id = `pp${++seq}`;
 
   host.classList.add('ppick');
@@ -95,7 +110,7 @@ export function mountProductPicker(host, { exclude = () => new Set(), onPick, pl
           <strong>${escapeHtml(p.title)}</strong>
           <small>${escapeHtml(p.sku)}${p.brand ? ` · ${escapeHtml(p.brand)}` : ''}${
             p.isActive ? '' : ' · unlisted'
-          }</small>
+          }${note(p) ? ` · ${escapeHtml(note(p))}` : ''}</small>
         </span>
         <span class="ppick__price">৳${Number(p.priceTaka ?? 0).toLocaleString('en-BD')}</span>
       </li>`).join('');
@@ -137,7 +152,7 @@ export function mountProductPicker(host, { exclude = () => new Set(), onPick, pl
 
     let payload;
     try {
-      payload = await adminFetch(`/products?perPage=12${term ? `&q=${encodeURIComponent(term)}` : ''}`);
+      payload = await adminFetch(`${endpoint}?perPage=12${term ? `&q=${encodeURIComponent(term)}` : ''}`);
     } catch {
       if (mine === token) {
         searched = true;

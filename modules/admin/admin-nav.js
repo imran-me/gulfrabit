@@ -33,8 +33,9 @@ registerScreen({
   id: 'orders',
   label: 'Orders',
   href: '/admin/orders',
-  // Viewing one order is still being in Orders, and so is making its image.
-  match: ['/admin/order', '/admin/order-image'],
+  // Viewing one order is still being in Orders, and so is making its image
+  // or typing a new one in.
+  match: ['/admin/order', '/admin/order-image', '/admin/orders/new'],
   area: 'orders',
   group: 'Trade',
   order: 10,

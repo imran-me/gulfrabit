@@ -152,6 +152,7 @@ modules/admin/
   admin-shell.js         layout, nav registry, session guard
   login-page.js          the one page that must work signed-out
   dashboard-page.js      landing screen; registers itself like any module
+  order-new-page.js      add a custom order — one taken by phone or by message
   staff-page.js          who works here — owner only; the screen that grants access
   admin.css              owns .admin*, .anav*, .acard*, .alogin*
   _fragments/            _shell.html, _shell-end.html, page fragments
@@ -164,10 +165,32 @@ modules/admin/
     Controllers/ Models/ Services/ Requests/ Migrations/ Seeders/
 ```
 
+## Custom orders
+
+`/admin/orders/new`, reached from **+ Add custom order** in the Orders masthead.
+For the order that did not come through the website: a call, a WhatsApp
+message, a reply under a post.
+
+**A custom order is an order like any other.** It is written by
+`OrderService::capture()` — the method a website order goes through — so it is
+priced, numbered and snapshotted the same way, lands in **Placed**, and is
+worked by the same buttons: confirm, pack, slip, courier, SMS. The one
+difference is `orders.channel`, which the list shows as a "Custom · Phone call"
+pill. Nothing else branches on it.
+
+The form holds no price field. It asks `POST /orders/quote` on every change and
+paints the server's answer, so the total read out on the phone is the total on
+the slip. See `backend/endpoints.md` → *Custom orders*.
+
+Needs `orders.edit`. The product search has its own endpoint
+(`GET /orders/products`) because the catalogue endpoint needs `products.view`
+and carries cost, and the Employee account — the one usually holding the phone
+— has neither.
+
 ## Dependencies
 
-`admin` reads from checkout (orders), auth (customers) and catalog (products)
-for its screens. One-way: nothing depends on `admin` except the modules that
+`admin` reads from checkout (orders), auth (customers), catalog (products) and
+delivery (the district list on the custom-order form) for its screens. One-way: nothing depends on `admin` except the modules that
 choose to register a screen with it.
 
 ## First run

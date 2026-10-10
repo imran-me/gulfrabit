@@ -19,9 +19,12 @@
 
 import { adminFetch } from './backend/api.js';
 import { escapeHtml } from './admin-shell.js';
-import { canDelete, confirmDelete, toast } from './admin-delete.js';
+import { canDelete, confirmDelete, may, toast } from './admin-delete.js';
 import { thumbStack } from './admin-thumb.js';
-import { STAGES, TRANSITION_LABELS, NEEDS_REASON, stageLabel, stageTone, payMethod } from './order-stages.js';
+import {
+  STAGES, TRANSITION_LABELS, NEEDS_REASON, stageLabel, stageTone, payMethod,
+  channelLabel, isManualChannel,
+} from './order-stages.js';
 
 /* `deleted` is a filter like any other so it lives in the URL with the rest:
    the Deleted tab has to survive a reload and be shareable, exactly as the
@@ -44,6 +47,11 @@ function init() {
   if (!form) return;
 
   paintTabs({});   // drawn immediately, counts filled in when they arrive
+
+  // Taking an order by phone needs `orders.edit`, which a view-only account
+  // does not hold. Not offering a door that will be shut in their face.
+  const add = document.querySelector('[data-orders-new]');
+  if (add) add.hidden = !may('orders.edit');
 
   // Restore from the URL so a shared or bookmarked link opens the same view.
   const params = new URLSearchParams(location.search);
@@ -320,6 +328,14 @@ function paint({ data, meta }) {
         <div class="atable__sub">${formatWhen(o.placedAt)}</div>
         <div class="atable__sub aage${wait ? ` aage--${wait}` : ''}">${
           escapeHtml(howLongAgo(o.placedAt))}</div>
+        ${
+          // Only for an order somebody typed in. It was taken by a person who
+          // has already spoken to the customer, which a website order has not
+          // been — on a list worked by ringing people, that is worth a word.
+          isManualChannel(o.channel)
+            ? `<span class="achannel">Custom · ${escapeHtml(channelLabel(o.channel))}</span>`
+            : ''
+        }
       </td>
       <td class="atable__name">
         <div>${escapeHtml(o.customerName)}</div>

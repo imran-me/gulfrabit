@@ -35,6 +35,26 @@ class Order extends Model
     public const CANCELLABLE = ['placed', 'confirmed'];
 
     /**
+     * How an order can reach the shop.
+     *
+     * `website` is the storefront and is the column's default, so the checkout
+     * never names it. Everything after it is an order somebody on the staff
+     * typed in for a customer — see MANUAL_CHANNELS, which is the list a
+     * person is allowed to choose from.
+     */
+    public const CHANNELS = ['website', 'phone', 'whatsapp', 'messenger', 'instagram', 'other'];
+
+    /**
+     * The channels a member of staff may record an order under.
+     *
+     * Deliberately not CHANNELS: `website` is absent, because an order typed
+     * in by hand and filed as a website order would be indistinguishable from
+     * one a customer placed — which is the single thing this column exists to
+     * prevent.
+     */
+    public const MANUAL_CHANNELS = ['phone', 'whatsapp', 'messenger', 'instagram', 'other'];
+
+    /**
      * Is this order waiting on a shipment rather than on us?
      *
      * The distinction the warehouse needs: an order sitting in `confirmed` for
@@ -64,6 +84,7 @@ class Order extends Model
         'payment_method', 'payment_status', 'payment_reference',
         'status', 'placed_at',
         'ad_source', 'pixel_event_id',
+        'channel',
     ];
 
     protected function casts(): array

@@ -216,6 +216,10 @@ class AdminOrderController extends Controller
                 'preorderDue'   => $order->isPreorder() ? $order->preorderDue() : null,
                 // Its sibling from the same checkout, when the basket split.
                 'placementRef'  => $order->placement_ref,
+                // How it reached the shop — the website, or a call or message
+                // somebody typed in. `website` for every row written before
+                // the column existed, which is the truth about all of them.
+                'channel'       => $order->channel ?? 'website',
 
                 'customer' => [
                     'name'  => $order->customer_name,
@@ -613,6 +617,13 @@ class AdminOrderController extends Controller
             'promoCode'     => $o->promo_code,
 
             'placedAt'      => $o->placed_at?->toIso8601String(),
+
+            /* Which door it came through. An order taken on a call has already
+               been spoken to and one from the website has not, and on a list
+               worked by ringing people that is the difference between a row to
+               pick the phone up for and a row to pack. */
+            'channel'       => $o->channel ?? 'website',
+
             // Null for a live order. The row draws itself struck through when
             // this is set, so a screenshot of the Deleted tab can never be
             // mistaken for the live list.

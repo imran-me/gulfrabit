@@ -99,3 +99,44 @@ const PAY_METHODS = {
 export function payMethod(key) {
   return PAY_METHODS[key] || key || '—';
 }
+
+/**
+ * How an order reached the shop, spelled out.
+ *
+ * The same kind of fact as a payment method: a key the server stores
+ * (Order::CHANNELS), a word a person reads, and three places that have to say
+ * it — the dropdown on the order form, the pill on the list, and the header of
+ * one order.
+ *
+ * `website` is deliberately absent from MANUAL_CHANNELS, as it is on the
+ * server: an order typed in by hand and filed as a website order would be
+ * indistinguishable from one a customer placed, and telling those two apart is
+ * the whole reason the column exists.
+ */
+const CHANNELS = {
+  website: 'Website',
+  phone: 'Phone call',
+  whatsapp: 'WhatsApp',
+  messenger: 'Messenger',
+  instagram: 'Instagram',
+  other: 'Other',
+};
+
+/** The channels a member of staff may record an order under, in menu order. */
+export const MANUAL_CHANNELS = ['phone', 'whatsapp', 'messenger', 'instagram', 'other']
+  .map((key) => ({ key, label: CHANNELS[key] }));
+
+/** Raw key as the fallback, for the reason stageLabel gives. */
+export function channelLabel(key) {
+  return CHANNELS[key] || key || CHANNELS.website;
+}
+
+/**
+ * Was this order typed in by staff rather than placed by the customer?
+ *
+ * An absent channel is a website order — that is every order written before
+ * the column existed, and what an older backend sends during a deploy.
+ */
+export function isManualChannel(key) {
+  return !!key && key !== 'website';
+}
