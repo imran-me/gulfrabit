@@ -89,9 +89,20 @@ class CartItem extends Model
         return $this->currentUnitPricePoisha() * $this->qty;
     }
 
+    /**
+     * The price of the PACK on this line, not of the product.
+     *
+     * This read `product->price_poisha` for every line, which is the price of
+     * the pack the shop preselects. The product page, the cart and the express
+     * checkout all show the chosen pack's own price — so a customer who picked
+     * 1 kg was shown ৳2,650, and the order was then written, slipped and
+     * collected at the 500 g price. Product::pricePoishaFor() is the one
+     * definition, and it falls back to the product price for a line with no
+     * pack, so single-size products are priced exactly as before.
+     */
     public function currentUnitPricePoisha(): int
     {
-        return (int) ($this->product?->price_poisha ?? $this->added_price_poisha);
+        return (int) ($this->product?->pricePoishaFor($this->variant) ?? $this->added_price_poisha);
     }
 
     /** True when the product's price moved since it was added. */

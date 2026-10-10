@@ -357,6 +357,55 @@ class Product extends Model
     }
 
     /**
+     * The stored row for ONE pack, found by its label — or null.
+     *
+     * The label is the pack's identity: it is what a cart line and an order
+     * line record ("500 g"), there being no variant id anywhere in this schema.
+     * Matched without regard to case or surrounding space, because the label
+     * on a line was typed into the product editor once and has since travelled
+     * through a URL, a cart and a form to get back here.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function variantRow(?string $label): ?array
+    {
+        $wanted = mb_strtolower(trim((string) $label));
+
+        if ($wanted === '') {
+            return null;
+        }
+
+        foreach ($this->rawVariants() as $row) {
+            if (mb_strtolower(trim((string) ($row['label'] ?? ''))) === $wanted) {
+                return $row;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * What ONE unit of this product costs in the given pack.
+     *
+     * THE ONE PLACE A LINE'S PRICE IS DECIDED. A product with packs has a
+     * price per pack — 200 g, 500 g and 1 kg of the same dates are three
+     * different sums — and `price_poisha` on the product is only the price of
+     * the pack the shop preselects. Anything that prices a line from that
+     * column alone charges the default pack's price for every pack.
+     *
+     * Falls back to the product's own price for no pack, for a label that
+     * matches nothing, and for a row written before packs carried a price —
+     * the same fallback variantsTaka() applies, so what the product page shows
+     * and what an order charges cannot disagree about a pack.
+     */
+    public function pricePoishaFor(?string $variant): int
+    {
+        $row = $this->variantRow($variant);
+
+        return (int) ($row['price_poisha'] ?? $this->price_poisha);
+    }
+
+    /**
      * The same rows for staff, with the count of what we hold per pack.
      *
      * Null is "not counted", not zero — the same distinction cost makes. A

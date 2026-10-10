@@ -102,7 +102,12 @@ final class CartService
                 'product_id'         => $product->id,
                 'variant'            => $variant,
                 'qty'                => $this->clampQty($qty, $product->moq),
-                'added_price_poisha' => $product->price_poisha,
+                // The pack's price, to match what currentUnitPricePoisha()
+                // reads back. Snapshotting the product's price here instead
+                // would make priceChanged() true for every pack but the
+                // default one, and tell the customer a price had moved when
+                // nothing had.
+                'added_price_poisha' => $product->pricePoishaFor($variant),
             ]);
         }
 
