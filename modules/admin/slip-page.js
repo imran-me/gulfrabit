@@ -107,7 +107,15 @@ function slip(o) {
         <h2>Deliver to</h2>
         <p class="slip__name">${escapeHtml(c.name)}</p>
         <p class="slip__phone">${escapeHtml(c.phone)}</p>
-        <p>${escapeHtml(d.address)}${d.area ? `, ${escapeHtml(d.area)}` : ''}</p>
+        ${
+          // An order can be placed before its street address is known — the
+          // express checkout and a phone order both allow it, and the address
+          // is added from the order screen. Printed blind, a missing one came
+          // out as the word "null" on a label going to a courier.
+          [d.address, d.area].filter(Boolean).length
+            ? `<p>${[d.address, d.area].filter(Boolean).map(escapeHtml).join(', ')}</p>`
+            : '<p class="slip__note">Street address not recorded — add it on the order before this goes out.</p>'
+        }
         <p><strong>${escapeHtml(d.district)}</strong></p>
         ${d.notes ? `<p class="slip__note">Note: ${escapeHtml(d.notes)}</p>` : ''}
       </section>
