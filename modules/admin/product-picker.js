@@ -144,17 +144,23 @@ export function mountProductPicker(host, {
     return 'No products in the catalogue. Anything archived or deleted is not offered here.';
   }
 
+  // True from a search going out until the NEWEST one has answered. Only the
+  // click handler below reads it — see there.
+  let busy = false;
+
   const search = async (term) => {
     // Every request carries a token and only the newest one is allowed to
     // paint. Typing "saf" fires three searches and they can come back in any
     // order; without this the list can settle on the answer to "sa".
     const mine = ++token;
+    busy = true;
 
     let payload;
     try {
       payload = await adminFetch(`${endpoint}?perPage=12${term ? `&q=${encodeURIComponent(term)}` : ''}`);
     } catch {
       if (mine === token) {
+        busy = false;
         searched = true;
         rawCount = 0;
         results = [];
@@ -167,6 +173,7 @@ export function mountProductPicker(host, {
 
     const already = exclude();
 
+    busy = false;
     searched = true;
     rawCount = payload.data.length;
 
@@ -183,11 +190,26 @@ export function mountProductPicker(host, {
     debounce = setTimeout(() => search(input.value.trim()), 200);
   });
 
-  // Opening on focus rather than only on the first keystroke, so the control
-  // still answers "what have I got?" the way the dropdown it replaced did.
-  input.addEventListener('focus', () => {
+  const open = () => {
     if (!results.length) search(input.value.trim());
     else paint();
+  };
+
+  // Opening on focus rather than only on the first keystroke, so the control
+  // still answers "what have I got?" the way the dropdown it replaced did.
+  input.addEventListener('focus', open);
+
+  // AND ON A CLICK, because a box that already has the focus is not focused
+  // again by clicking it — and that is exactly the state choose() leaves it
+  // in, having handed the focus straight back for the next product. Without
+  // this the list opened for the first product and then stayed shut for the
+  // second however often the box was clicked, which reads as "one product
+  // only": the question the order form was asked on its second day.
+  //
+  // Not while a search is already out — the first click on the box is a focus
+  // AND a click, and that would be the same question sent twice.
+  input.addEventListener('click', () => {
+    if (list.hidden && !busy) open();
   });
 
   input.addEventListener('keydown', (e) => {
@@ -247,6 +269,8 @@ export function mountProductPicker(host, {
 
   return {
     focus: () => input.focus(),
+    /** Change the words in the empty box — "add another…" once there is one. */
+    setPlaceholder: (text) => { input.placeholder = text; },
     /** Re-run the current search — for after the exclude set changes. */
     refresh: () => search(input.value.trim()),
   };
