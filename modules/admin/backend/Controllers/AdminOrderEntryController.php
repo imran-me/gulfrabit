@@ -146,6 +146,10 @@ class AdminOrderEntryController extends Controller
      */
     public function quote(OrderQuoteRequest $request): JsonResponse
     {
+        if ($refused = $this->mayNotGive($request)) {
+            return $refused;
+        }
+
         try {
             $quote = $this->orders->quoteManual($request->validated('lines'), $request->validated());
         } catch (RuntimeException $e) {
@@ -168,14 +172,26 @@ class AdminOrderEntryController extends Controller
 
             'totals' => [
                 'subtotalTaka' => intdiv($quote['subtotalPoisha'], 100),
+                // The coupon's alone. What was given by hand is its own line,
+                // on this form and on every screen the order is later read on.
                 'discountTaka' => intdiv($quote['discountPoisha'], 100),
+                'extraDiscountTaka' => intdiv($quote['extraDiscountPoisha'], 100),
                 // Null until a district is chosen — "not priced yet" and "free"
                 // are different facts, and only one of them should print ৳ 0.
                 'deliveryTaka' => $quote['deliveryPoisha'] === null
                     ? null
                     : intdiv($quote['deliveryPoisha'], 100),
+                // The charge that is NOT being made — 0 unless free delivery
+                // was given. Beside `deliveryTaka: 0` it is what tells "we
+                // waived ৳ 130" apart from a zone that costs nothing.
+                'deliveryWaivedTaka' => intdiv($quote['deliveryWaivedPoisha'], 100),
                 'totalTaka'    => intdiv($quote['totalPoisha'], 100),
             ],
+
+            // A sentence when the extra discount is more than the goods come
+            // to, null otherwise. The totals beside it are worked out without
+            // it, as they are for a dead coupon; placing refuses on it.
+            'extraDiscountProblem' => $quote['extraDiscountProblem'],
 
             'promo' => $quote['promoCode'] === null ? null : [
                 'code'    => $quote['promoCode'],
@@ -221,14 +237,27 @@ class AdminOrderEntryController extends Controller
      * click on "Confirm — call done" would be, which is what writes the
      * history row and sends the customer their order number by SMS. It is the
      * same click, made one screen sooner; nothing about the order differs.
+     *
+     * AND TWO THINGS CAN BE GIVEN, BY AN ACCOUNT TRUSTED TO GIVE THEM: an
+     * extra discount and free delivery. Each takes something off a figure the
+     * server worked out, is written on the order beside the result, and is
+     * said in the timeline under the name of whoever gave it — see
+     * givenAway(). An order with neither is the order it always was.
      */
     public function store(OrderStoreRequest $request): JsonResponse
     {
+        if ($refused = $this->mayNotGive($request)) {
+            return $refused;
+        }
+
         // One window only: this code deployed, the migration not yet run.
         // Without the check that is a 500 on Place order with nothing to say
         // what is missing. Website orders are unaffected either way — the
-        // checkout never names this column.
-        if (! Schema::hasColumn('orders', 'channel')) {
+        // checkout never names these columns. The second half is the same
+        // window for the 2026_10_12 migration, and only an order that
+        // actually gives something needs it.
+        if (! Schema::hasColumn('orders', 'channel')
+            || ($this->gives($request) && ! Schema::hasColumn('orders', 'extra_discount_poisha'))) {
             return response()->json([
                 'message' => 'Orders taken by hand need one database change first. '
                     . 'Run “php artisan migrate” on the server, then place this again.',
@@ -253,6 +282,8 @@ class AdminOrderEntryController extends Controller
                     'payment'  => $data['payment'],
                     'promo'    => $data['promo'] ?? null,
                     'channel'  => $data['channel'],
+                    'extraDiscount' => $data['extraDiscount'] ?? null,
+                    'freeDelivery'  => $data['freeDelivery'] ?? false,
                 ]);
 
                 // One order, or two when the basket held something that has
@@ -270,7 +301,8 @@ class AdminOrderEntryController extends Controller
                         OrderNote::create([
                             'order_id'        => $order->id,
                             'body'            => "Custom order — taken {$taken} and added by staff. "
-                                . 'The customer did not place it on the website.',
+                                . 'The customer did not place it on the website.'
+                                . $this->givenAway($order),
                             'author_admin_id' => $admin->id,
                             'author_name'     => $admin->name,
                         ]);
@@ -323,5 +355,61 @@ class AdminOrderEntryController extends Controller
             ], $orders),
             'warning'     => $warning,
         ]], 201);
+    }
+
+    /** Does this request ask for an extra discount or for free delivery? */
+    private function gives(Request $request): bool
+    {
+        return (int) $request->input('extraDiscount') > 0 || $request->boolean('freeDelivery');
+    }
+
+    /**
+     * The refusal for an account that may take an order but not discount one —
+     * or null, which is the answer for every request that gives nothing.
+     *
+     * WHY IT IS NOT `orders.edit`. That is the shop floor's permission, held
+     * so that the person with the phone can write the order down. Deciding
+     * what the shop will take LESS for is a different trust, and it has its
+     * own box on the staff screen: `orders.discount`.
+     *
+     * Checked here rather than on the route because the route is the same one
+     * either way — it is two fields of the request that need the permission,
+     * not the request. And on the quote as well as on placing, so an account
+     * without it is never shown a total it then cannot place.
+     *
+     * 403, like the middleware's own refusal, and in its words.
+     */
+    private function mayNotGive(Request $request): ?JsonResponse
+    {
+        if (! $this->gives($request) || $request->user('admin')->may('orders.discount')) {
+            return null;
+        }
+
+        return response()->json([
+            'message' => 'Your account can take an order but cannot give an extra discount or free delivery. '
+                . 'Ask an owner to turn that on, or place the order without them.',
+        ], 403);
+    }
+
+    /**
+     * What was given away on this order, as lines for its timeline — or
+     * nothing, which is what nearly every order gets.
+     *
+     * Read off the order rather than off the request, so it says what was
+     * WRITTEN: when a basket splits in two, each order carries its own share
+     * of the discount and only the first carries the delivery.
+     *
+     * It goes in the note that already records who typed the order in, which
+     * is what answers "who gave this away" without a column for it.
+     */
+    private function givenAway(Order $order): string
+    {
+        $extra  = (int) $order->extra_discount_poisha;
+        $waived = (int) $order->delivery_waived_poisha;
+
+        return ($extra > 0 ? "\nExtra discount given: ৳ " . number_format(intdiv($extra, 100)) . '.' : '')
+            . ($waived > 0
+                ? "\nFree delivery given — the ৳ " . number_format(intdiv($waived, 100)) . ' charge was not added.'
+                : '');
     }
 }

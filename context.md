@@ -2389,6 +2389,7 @@ added by custom."* That sentence is the design.
   which is not the same as being handed a field that edits one. A negotiated
   discount is a coupon code. If the shop wants a free-typed discount it is a
   deliberate addition with its own permission — not built.
+  **(Asked for and built two days later — see 2026-10-12 below.)**
 - **The abuse guards are skipped for a custom order** (duplicate-in-ten-minutes,
   five-a-day). They stop scripts; the cap's own message tells the customer to
   ring. The phone lookup on the form does the job a human needs instead.
@@ -2460,6 +2461,85 @@ after login instead of the screen that was asked for.
 **Not built:** editing an order's lines after placing; marking an order paid by
 hand (a bKash transfer taken on the phone still reads `pending`); filtering the
 list by channel.
+
+---
+
+### Custom orders — several products, an extra discount, free delivery (2026-10-12)
+
+**What the owner asked:** *"how do I select multiple products in one order?"*,
+then: an option to reduce the balance while entering the order, shown as an
+**extra discount**; and a tick to give **free delivery**.
+
+**1. Several products — it already could, and a bug hid it.** Every pick adds a
+line. But `product-picker.js` opened its list on `focus` only, and after a pick
+it hands the focus straight back to the box — so clicking the box for the
+second product did nothing at all. Somebody who picks by clicking rather than
+typing got exactly one product. Reproduced against the committed code in a
+real browser before fixing. Now the list also opens on a click; the box reads
+*"Add another product…"* once there is a line, and a hint under the lines says
+to search again. The picker is shared, so the home-page shelves gain the fix.
+
+**2. Extra discount and free delivery**
+
+- Two fields in the form's Order card, under the coupon: *Extra discount*
+  (whole taka) and a *Free delivery* tick. Sent with the quote like the coupon
+  is; the server answers with them as their own lines. The browser still adds
+  nothing up.
+- **Neither is a price.** Goods are still priced from the products table and
+  delivery from the district; these take something off the answer. The extra
+  discount comes off the goods after the coupon and may take them to ৳0, not
+  below — more than that is refused with a sentence, not trimmed. Free delivery
+  is the whole charge or none of it.
+- **Stored** (migration `2026_10_12_000001`): `extra_discount_poisha` is the
+  part **of** `discount_poisha` given by hand; `delivery_waived_poisha` is the
+  charge not made, with `delivery_charge_poisha` at 0. So
+  `total = subtotal − discount + delivery` is still true of every order, and
+  the books, refunds and the storefront needed no change.
+- **Shown** as "Extra discount" and "Free" on the form, the order screen, the
+  slip and the order picture. The custom-order note in the timeline says what
+  was given, under the name of who gave it.
+- **Permission: `orders.discount`** — "Give an extra discount or free
+  delivery". This is the "own permission" the 2026-10-10 note said such a field
+  would need. Owner, Manager and Accounts hold it from their role (the ones who
+  already hold `orders.refund`); **an Employee does not** — an owner ticks it
+  for them on the staff screen. Without it the fields are not drawn and the
+  server answers 403. *An account with a hand-set permission list does not gain
+  it automatically, whatever its role.*
+- `capture()` honours both only for a vouched (staff) order, so a customer
+  posting them to the website's checkout gets nothing off.
+- Still identical to a website order in every other respect: lands in Placed,
+  same buttons, same slip.
+
+**Verified by running it** — PHP 8.3.35 and Composer in a scratch folder, the
+app installed from the working tree, a throwaway MariaDB 10.4 on its own port.
+
+- `php -l` clean on all 8 changed PHP files; the migration applied, rolled back
+  and re-applied.
+- **49 checks against the real endpoints**, every figure read back out of the
+  table: ৳7,950 − GULF10 ৳795 − extra ৳200 + free delivery = ৳6,955; a ৳0
+  replacement parcel; refusals for too large, negative and fractional; a
+  pre-order split sharing ৳301 across two orders to the poisha with the waived
+  delivery on the first; Employee refused (403) for both fields on quote and
+  place but still able to take an ordinary order; Manager, Accounts and a
+  ticked Employee allowed; a website order posting `extraDiscount` /
+  `freeDelivery` charged in full; every order in the table adds up.
+- **7 checks with the migration rolled back** (the window a deploy passes
+  through): website orders and ordinary custom orders place, the order screen
+  and list open, and a custom order *with* a gift is refused in a sentence
+  naming `php artisan migrate` rather than failing.
+- **27 checks in a headless browser against that backend**, through the real
+  login page: the click-only second product (failing as committed, passing
+  now), the two fields live in the totals, the red sentence and blocked Place
+  for too large a discount, no sideways scroll at 390 / 360, then the order
+  screen, slip and order picture for the placed order, the new box on the staff
+  screen, and an Employee's form without the two fields. No JavaScript errors.
+
+**After the deploy:** one migration must run (`deploy.sh` runs it). Then add
+one custom order with ৳1 extra discount and read the slip.
+
+**Not built:** changing the discount or delivery of an order after it is
+placed (cancel and add it again); a report of what was given away, by whom —
+the two columns and the notes are there for one.
 
 ## 10. URLs ARE ROUTES (2026-08-13) — read before touching a link
 

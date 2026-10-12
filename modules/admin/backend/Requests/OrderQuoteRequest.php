@@ -19,10 +19,21 @@ use Modules\Cart\Models\CartItem;
  *
  * WHAT IS ABSENT, AS EVERYWHERE ELSE
  * ----------------------------------
- * No price, no discount, no delivery charge, no total. Staff choose products,
- * packs and quantities; the server works out what that costs, by the same
- * route it prices a website order. A member of staff is trusted to take an
- * order — that is not the same as being handed a field that edits one.
+ * No price, no delivery charge, no total. Staff choose products, packs and
+ * quantities; the server works out what that costs, by the same route it
+ * prices a website order. A member of staff is trusted to take an order —
+ * that is not the same as being handed a field that edits one.
+ *
+ * WHAT IS PRESENT, SINCE 2026-10-12
+ * ---------------------------------
+ * Two things that take something OFF what the server worked out, and replace
+ * nothing: `extraDiscount`, a number of taka off the goods, and `freeDelivery`,
+ * the delivery charge not made. The owner asked for both — a discount agreed
+ * on a call had nowhere to go but a coupon invented for one customer.
+ *
+ * These rules say only what shape they take. WHO may send them is
+ * `orders.discount`, checked in AdminOrderEntryController, because the answer
+ * to that depends on the account and a rule here can only see the request.
  */
 class OrderQuoteRequest extends FormRequest
 {
@@ -58,6 +69,13 @@ class OrderQuoteRequest extends FormRequest
             'delivery' => ['sometimes', 'nullable', 'string', 'max:64'],
             'payment'  => ['sometimes', 'nullable', Rule::in(['cod', 'bkash', 'nagad', 'card'])],
             'promo'    => ['sometimes', 'nullable', 'string', 'max:32'],
+
+            // Whole taka, the way it is said on a call. The ceiling is the
+            // column's, like the quantity's above: what one ORDER may be
+            // discounted by is its goods, which this class cannot see —
+            // OrderService refuses a figure larger than that, in a sentence.
+            'extraDiscount' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:9999999'],
+            'freeDelivery'  => ['sometimes', 'boolean'],
         ];
     }
 
@@ -69,6 +87,9 @@ class OrderQuoteRequest extends FormRequest
             'lines.max'       => 'That is more lines than one order can hold here. Split it into two orders.',
             'lines.*.qty.min' => 'A quantity has to be at least 1.',
             'district.exists' => 'Choose the district so delivery can be priced.',
+            'extraDiscount.integer' => 'Enter the extra discount in whole taka — 200, not 200.50.',
+            'extraDiscount.min'     => 'An extra discount cannot be less than nothing.',
+            'extraDiscount.max'     => 'That extra discount is larger than any order here could be.',
         ];
     }
 }

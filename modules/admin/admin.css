@@ -2894,6 +2894,11 @@
 /* The promise under the price, not trailing after it: "Within 72 hours"
    broke mid-phrase wherever the line happened to end. */
 .aentry__ship .atable__sub { display: block; }
+/* Free delivery, under the extra discount. A tick box, not a field, so it
+   has none of .afilters__field's spacing and needs its own gap before the
+   totals — which are the next thing down and change the moment it is used. */
+.aentry__free { margin: 0 0 var(--space-4); }
+.aentry__free .atable__sub { display: block; margin-top: 2px; }
 .aentry .atotals { margin-top: 0; transition: opacity var(--dur-base) var(--ease-out); }
 /* The figures are answering an older question while a new one is out. Dimmed
    rather than blanked: the card must not change height on every keystroke. */

@@ -173,7 +173,13 @@ function paintItems() {
   const rows = [
     ['Subtotal', t.subtotalTaka],
     ...(t.discountTaka ? [['Discount' + (order.promoCode ? ` (${order.promoCode})` : ''), -t.discountTaka]] : []),
-    ['Delivery', t.deliveryTaka],
+    // Given by hand when a custom order was typed in — never a coupon's, so
+    // never under the coupon's name. Who gave it is in the timeline.
+    ...(t.extraDiscountTaka ? [['Extra discount', -t.extraDiscountTaka]] : []),
+    // ৳ 0 with the reason beside it: "free" that does not say it was given
+    // looks, a month later, like a delivery charge somebody forgot to add.
+    ['Delivery' + (t.deliveryWaivedTaka ? ` — given free, ৳ ${money(t.deliveryWaivedTaka)} not charged` : ''),
+      t.deliveryTaka],
     ['Total', t.totalTaka],
     // Only shown once money has actually gone back, so a clean order does not
     // carry a row of zeroes implying something happened.
@@ -196,7 +202,8 @@ function paintCustomer() {
     + addressBlock()
     + [
       ['District', d.district],
-      ['Delivery', `${d.zone} · ${d.eta} · ৳ ${money(d.chargeTaka)}`],
+      ['Delivery', `${d.zone} · ${d.eta} · ${
+        d.waivedTaka ? `free (was ৳ ${money(d.waivedTaka)})` : `৳ ${money(d.chargeTaka)}`}`],
       ['Notes', d.notes || '—'],
     ].map(row).join('');
 

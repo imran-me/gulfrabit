@@ -20,9 +20,18 @@
  * delivery zone costs. The unit price shown beside a pack is the catalogue's
  * own figure, displayed, never multiplied.
  *
- * NOTHING HERE IS A PRICE FIELD. Staff choose products, packs and quantities.
- * A discount is a coupon code, which is data the Coupons screen owns, not a
- * number somebody types while a customer is haggling.
+ * NOTHING HERE IS A PRICE FIELD. Staff choose products, packs and quantities;
+ * what those cost is the server's to say.
+ *
+ * TWO THINGS TAKE MONEY OFF, and they are the two the owner asked for: an
+ * extra discount, typed in taka, and a Free delivery tick. Neither replaces a
+ * figure — each is sent with the quote like the coupon is, and comes back as
+ * its own line in the server's totals. They are drawn only for an account
+ * holding `orders.discount`, and refused by the server from any other.
+ *
+ * ONE ORDER, MANY PRODUCTS. Every pick from the search box is another line;
+ * the box empties itself and waits for the next. The hint under the lines and
+ * the box's own placeholder say so, because it was asked.
  *
  * ENTER DOES NOT PLACE THE ORDER. Placing one texts a customer, and this is a
  * form somebody fills in fast with a phone on their shoulder — Enter after a
@@ -51,8 +60,18 @@ const PHONE = /^(?:\+?88)?01[3-9]\d{8}$/;
 const IN_PROGRESS = ['placed', 'confirmed', 'packed', 'ready_for_courier', 'shipped'];
 const WENT_BADLY = ['returned', 'cancelled', 'spam'];
 
+/* What the search box says when it is empty: before the first product, and
+   after it — when the question is no longer "what" but "what else". */
+const FIND_FIRST = 'Search by product name, SKU or brand…';
+const FIND_NEXT = 'Add another product — name, SKU or brand…';
+
 let form;
 let picker;
+
+/* May this account give an extra discount or free delivery? Read once, in
+   init(). It decides whether the two fields are drawn AND whether they are
+   sent — a browser can hand a hidden box back ticked after a reload. */
+let mayGive = false;
 
 /** @type {Array<{sku:string,title:string,brand:?string,image:?string,packs:Array,variant:?string,qty:number,maxQty:number,isPreorder:boolean}>} */
 let lines = [];
@@ -88,12 +107,18 @@ function init() {
 
   form.hidden = false;
 
+  // The same courtesy, one permission finer: taking an order and deciding
+  // what the shop will take less for are different trusts, and the second
+  // has its own box on the staff screen.
+  mayGive = may('orders.discount');
+  document.querySelector('[data-entry-give]').hidden = !mayGive;
+
   form.channel.innerHTML = MANUAL_CHANNELS
     .map((c) => `<option value="${escapeHtml(c.key)}">${escapeHtml(c.label)}</option>`).join('');
 
   picker = mountProductPicker(document.querySelector('[data-entry-picker]'), {
     endpoint: '/orders/products',
-    placeholder: 'Search by product name, SKU or brand…',
+    placeholder: FIND_FIRST,
     note: (p) => (p.orderable === false ? 'out of stock' : p.isPreorder ? 'pre-order' : ''),
     onPick: addLine,
   });
@@ -209,6 +234,18 @@ function wire() {
 
   form.promo.addEventListener('change', requote);
 
+  // As it is typed, not when the field is left: the next thing somebody does
+  // after typing a discount is read the new total out, and a total that only
+  // moves once they click somewhere else is one they read out wrong.
+  // requote() is debounced, so "200" is one question and not three.
+  form.extraDiscount.addEventListener('input', requote);
+  form.extraDiscount.addEventListener('change', () => {
+    // Shown as it is sent. "200.50" and "-50" both mean something to the
+    // person who typed them and neither is what goes to the server.
+    form.extraDiscount.value = extraDiscount() || '';
+  });
+  form.freeDelivery.addEventListener('change', requote);
+
   // Looked up as the number is typed, so by the time the name is being asked
   // for, the screen already knows whether this is somebody the shop has met.
   let lookupTimer = 0;
@@ -294,6 +331,10 @@ function paintLines() {
   const host = document.querySelector('[data-entry-lines]');
 
   document.querySelector('[data-entry-empty]').hidden = lines.length > 0;
+  // "How do I add a second one?" is answered where the question is asked:
+  // under the first line, and in the box that takes the answer.
+  document.querySelector('[data-entry-more]').hidden = lines.length === 0;
+  picker.setPlaceholder(lines.length ? FIND_NEXT : FIND_FIRST);
 
   host.innerHTML = lines.map((l, i) => {
     const title = escapeHtml(l.title);
@@ -352,7 +393,17 @@ function quotePayload() {
     delivery,
     payment: form.payment.value,
     promo: form.promo.value.trim() || null,
+    // Named only when given. An order with neither is the request it always
+    // was — and an account that may not give them never sends a key the
+    // server would have to refuse.
+    ...(mayGive && extraDiscount() ? { extraDiscount: extraDiscount() } : {}),
+    ...(mayGive && form.freeDelivery.checked ? { freeDelivery: true } : {}),
   };
+}
+
+/** The extra discount as typed: whole taka, never negative, 0 for none. */
+function extraDiscount() {
+  return Math.max(0, Math.trunc(Number(form.extraDiscount.value)) || 0);
 }
 
 /**
@@ -428,10 +479,18 @@ function paintSummary() {
   const rows = !t ? [] : [
     ['Subtotal', `৳ ${money(t.subtotalTaka)}`],
     ...(t.discountTaka ? [[`Discount${promo?.code ? ` (${promo.code})` : ''}`, `− ৳ ${money(t.discountTaka)}`]] : []),
-    // "Not priced yet" and "free" are different facts, and the server sends
-    // them as different values. Only one of them prints a number.
+    // Its own line, never folded into the coupon's: the code is something the
+    // customer brought, this is something the shop gave, and the person on
+    // the phone has to be able to say which is which.
+    ...(t.extraDiscountTaka ? [['Extra discount', `− ৳ ${money(t.extraDiscountTaka)}`]] : []),
+    // "Not priced yet", "free because we said so" and a charge are three
+    // different facts, and the server sends them as three different values.
+    // The middle one keeps the figure it replaced — "free" is worth more to
+    // a customer who is told what it would have been.
     ['Delivery' + (chosen ? ` · ${chosen.label}` : ''),
-      t.deliveryTaka === null ? 'Choose a district' : `৳ ${money(t.deliveryTaka)}`],
+      t.deliveryTaka === null ? 'Choose a district'
+        : t.deliveryWaivedTaka ? `Free (was ৳ ${money(t.deliveryWaivedTaka)})`
+          : `৳ ${money(t.deliveryTaka)}`],
     [t.deliveryTaka === null ? 'Total before delivery' : 'Total', `৳ ${money(t.totalTaka)}`],
   ];
 
@@ -449,6 +508,12 @@ function paintSummary() {
     promoHint.textContent = promo.problem
       || (t.discountTaka ? `${promo.code} applied — ৳ ${money(t.discountTaka)} off.` : `${promo.code} applied.`);
   }
+
+  // Why the extra discount was NOT taken off, under the field it was typed
+  // in. The totals beside it are worked out without it, as for a dead coupon.
+  const extraHint = document.querySelector('[data-entry-extra]');
+  extraHint.hidden = !quote?.extraDiscountProblem;
+  extraHint.textContent = quote?.extraDiscountProblem || '';
 
   const pre = document.querySelector('[data-entry-preorder]');
   pre.hidden = !quote?.shipsOn;
@@ -621,6 +686,7 @@ function firstProblem() {
     return ['That address is too short to find a house with. Leave it empty to add it later.', form.address];
   }
   if (quote?.promo?.problem) return [`${quote.promo.problem} Fix the code or clear it.`, form.promo];
+  if (quote?.extraDiscountProblem) return [quote.extraDiscountProblem, form.extraDiscount];
 
   return null;
 }

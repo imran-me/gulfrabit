@@ -79,14 +79,20 @@ final class OrderService
      * same pipeline: the same stages, the same slip, the same courier booking.
      *
      * The staff member chooses the products, the packs and the quantities.
-     * They do not choose a price, a discount or a delivery charge any more
-     * than a customer does — there is still no field for one.
+     * They do not choose a price or a delivery charge any more than a customer
+     * does — there is still no field for either.
+     *
+     * TWO THINGS THEY MAY GIVE, and both come off figures worked out here
+     * rather than replacing them: an extra discount, in whole taka, and free
+     * delivery. See GIVEN BY HAND in capture(). Whether THIS member of staff
+     * may give them is the caller's question (`orders.discount`); this method
+     * is told what was given, not who by.
      *
      * @param array<int, array{sku:string, qty:int, variant?:?string}> $lines
      * @param array{
      *   name:string, phone:string, email:?string, address:?string, area:?string,
      *   district:string, notes:?string, delivery:?string, payment:string,
-     *   promo:?string, channel:string
+     *   promo:?string, channel:string, extraDiscount?:?int, freeDelivery?:bool
      * } $input
      */
     public function placeManual(array $lines, array $input): Order
@@ -122,13 +128,24 @@ final class OrderService
      * while the customer is still on the line. A promo code that does not
      * apply is NOT thrown: it comes back as `promoProblem` beside totals
      * worked out without it, because "that code is no use here, it is ৳1,520"
-     * is an answer the person on the phone can give straight away.
+     * is an answer the person on the phone can give straight away. An extra
+     * discount larger than the goods gets the same treatment, for the same
+     * reason: `extraDiscountProblem`, beside totals worked out without it.
+     *
+     * `discountPoisha` here is the COUPON'S ALONE, with what was given by hand
+     * beside it in `extraDiscountPoisha` — the form shows them as two lines.
+     * It is only on the order itself that the two are one column; see the
+     * 2026_10_12 migration for why.
      *
      * @param array<int, array{sku:string, qty:int, variant?:?string}> $lines
-     * @param array{district?:?string, delivery?:?string, promo?:?string, payment?:?string} $input
+     * @param array{
+     *   district?:?string, delivery?:?string, promo?:?string, payment?:?string,
+     *   extraDiscount?:?int, freeDelivery?:bool
+     * } $input
      * @return array{
      *   items: EloquentCollection<int, CartItem>,
      *   subtotalPoisha: int, discountPoisha: int, deliveryPoisha: ?int, totalPoisha: int,
+     *   extraDiscountPoisha: int, extraDiscountProblem: ?string, deliveryWaivedPoisha: int,
      *   promoCode: ?string, promoProblem: ?string,
      *   zone: ?DeliveryZone, zones: array<int, DeliveryZone>,
      *   shipsOn: ?string, splits: bool
@@ -141,6 +158,14 @@ final class OrderService
         $this->assertAvailable($basket);
 
         $goods = $this->goods($basket);
+        $afterCoupon = max(0, $goods['subtotalPoisha'] - $goods['discountPoisha']);
+
+        $extraPoisha  = $this->extraDiscountPoisha($input);
+        $extraProblem = $this->extraDiscountProblem($extraPoisha, $afterCoupon);
+
+        if ($extraProblem !== null) {
+            $extraPoisha = 0;
+        }
 
         // No district yet is an ordinary state of a half-filled form, not an
         // error: the goods are priced and the delivery line waits.
@@ -154,14 +179,20 @@ final class OrderService
             $this->assertPreorderPayable($input['payment'], $later);
         }
 
-        $deliveryPoisha = $delivery === null ? null : $delivery['zone']->charge_poisha;
+        // Nothing to waive until there is a district to price: free delivery
+        // ticked on a half-filled form waits, like the delivery line itself.
+        $waivedPoisha = $delivery === null ? 0 : $this->waivedPoisha($input, $delivery['zone']);
+        $deliveryPoisha = $delivery === null ? null : $delivery['zone']->charge_poisha - $waivedPoisha;
 
         return [
             'items'          => $basket->items,
             'subtotalPoisha' => $goods['subtotalPoisha'],
             'discountPoisha' => $goods['discountPoisha'],
             'deliveryPoisha' => $deliveryPoisha,
-            'totalPoisha'    => max(0, $goods['subtotalPoisha'] - $goods['discountPoisha']) + ($deliveryPoisha ?? 0),
+            'totalPoisha'    => $afterCoupon - $extraPoisha + ($deliveryPoisha ?? 0),
+            'extraDiscountPoisha'  => $extraPoisha,
+            'extraDiscountProblem' => $extraProblem,
+            'deliveryWaivedPoisha' => $waivedPoisha,
             // The code as typed, found or not — the form has to be able to
             // say which code it is talking about when it says one is dead.
             'promoCode'      => $basket->promo_code,
@@ -200,7 +231,44 @@ final class OrderService
         ['subtotalPoisha' => $subtotalPoisha, 'promo' => $promo, 'discountPoisha' => $discountPoisha] =
             $this->goods($cart);
 
-        $deliveryPoisha = $chosenZone->charge_poisha;
+        /* GIVEN BY HAND.
+
+           Two things a member of staff may give on an order they are typing
+           in: an extra discount, and free delivery. Neither replaces a figure
+           worked out above — the goods are still priced from the products
+           table and the delivery from the district — each takes something off
+           one, and what it took is written on the order beside the result.
+
+           ONLY FOR A VOUCHED ORDER, and that is not a courtesy. This method
+           also writes every website order, from whatever PlaceOrderRequest
+           let through. That request has no such fields today; this is what
+           makes it not matter if one day it does. A customer cannot discount
+           their own order by posting a number.
+
+           An extra discount larger than the goods is REFUSED, not trimmed to
+           fit — the reasoning basket() gives for a quantity. The form shows
+           this sentence long before Place order, from quoteManual(). */
+        $extraPoisha = 0;
+        $waivedPoisha = 0;
+
+        if ($vouched) {
+            $extraPoisha = $this->extraDiscountPoisha($input);
+            $problem = $this->extraDiscountProblem($extraPoisha, max(0, $subtotalPoisha - $discountPoisha));
+
+            if ($problem !== null) {
+                throw new RuntimeException($problem);
+            }
+
+            $waivedPoisha = $this->waivedPoisha($input, $chosenZone);
+        }
+
+        // From here on `$discountPoisha` is everything off the goods — the
+        // coupon's and what was given by hand — because that is what the
+        // column of the same name holds. `$extraPoisha` is how much of it a
+        // person gave. See the 2026_10_12 migration.
+        $discountPoisha += $extraPoisha;
+
+        $deliveryPoisha = $chosenZone->charge_poisha - $waivedPoisha;
 
         $goodsAfterDiscount = max(0, $subtotalPoisha - $discountPoisha);
         $totalPoisha = $goodsAfterDiscount + $deliveryPoisha;
@@ -253,6 +321,7 @@ final class OrderService
 
         $orders = [];
         $discountLeft = $discountPoisha;
+        $extraLeft = $extraPoisha;
 
         foreach ($groups as $index => $group) {
             $isFirst = $index === 0;
@@ -282,7 +351,20 @@ final class OrderService
                 : intdiv($discountPoisha * $groupSubtotal, max(1, $subtotalPoisha));
             $discountLeft -= $groupDiscount;
 
+            // The part of that discount a person gave, shared out the same
+            // way so that each order can say how much of ITS discount was by
+            // hand. It is a share of `$groupDiscount`, never an addition to
+            // it, so it can never be the larger of the two.
+            $groupExtra = $isLast
+                ? $extraLeft
+                : intdiv($extraPoisha * $groupSubtotal, max(1, $subtotalPoisha));
+            $extraLeft -= $groupExtra;
+            $groupExtra = min($groupExtra, $groupDiscount);
+
+            // Delivery is charged once, on the first parcel — so that is the
+            // one a waived charge is recorded against too.
             $groupDelivery = $isFirst ? $deliveryPoisha : 0;
+            $groupWaived = $isFirst ? $waivedPoisha : 0;
             $groupTotal = max(0, $groupSubtotal - $groupDiscount) + $groupDelivery;
 
             $order = Order::create([
@@ -333,6 +415,15 @@ final class OrderService
                    which also means a deploy that has not yet run the
                    2026_10_10 migration still takes website orders. */
                 ...(isset($input['channel']) ? ['channel' => $input['channel']] : []),
+
+                /* What was given by hand, named only when something was.
+                   The same reasoning as `channel`: a website order gives
+                   nothing and so never names these columns, and neither
+                   does a custom order nobody discounted — which is what
+                   keeps both working on a deploy that has not yet run the
+                   2026_10_12 migration. */
+                ...($groupExtra > 0 ? ['extra_discount_poisha' => $groupExtra] : []),
+                ...($groupWaived > 0 ? ['delivery_waived_poisha' => $groupWaived] : []),
             ]);
 
             foreach ($group['items'] as $item) {
@@ -547,6 +638,57 @@ final class OrderService
             'not_eligible' => "{$code} does not cover anything in this order.",
             default        => "{$code} is not a live code.",
         };
+    }
+
+    /**
+     * The extra discount a member of staff typed, in poisha.
+     *
+     * Whole taka on the way in: that is how a discount is said on a telephone
+     * — "two hundred off" — and it is how every price in the shop is shown.
+     *
+     * @param array<string, mixed> $input
+     */
+    private function extraDiscountPoisha(array $input): int
+    {
+        return max(0, (int) ($input['extraDiscount'] ?? 0)) * 100;
+    }
+
+    /**
+     * Why that discount cannot be given — or null when it can, or when there
+     * is none.
+     *
+     * One rule: it comes off the goods and cannot take them below nothing. It
+     * is not let loose on the delivery charge, which has its own tick — a
+     * discount that quietly ate the delivery would leave an order whose slip
+     * says "Delivery ৳ 130" for a parcel the customer was told is free.
+     *
+     * `$goodsPoisha` is what the goods come to AFTER the coupon, which is
+     * taken off first: the code is the customer's by right, the rest is ours
+     * to give.
+     */
+    private function extraDiscountProblem(int $extraPoisha, int $goodsPoisha): ?string
+    {
+        if ($extraPoisha <= $goodsPoisha) {
+            return null;
+        }
+
+        return 'An extra discount of ৳ ' . number_format(intdiv($extraPoisha, 100))
+            . ' is more than the goods come to (৳ ' . number_format(intdiv($goodsPoisha, 100)) . '). '
+            . 'Make it smaller — to take the delivery charge off as well, tick Free delivery.';
+    }
+
+    /**
+     * The delivery charge that will NOT be made, when free delivery was given
+     * — nothing otherwise, and nothing for a zone that costs nothing anyway.
+     *
+     * The whole of the charge or none of it. "Half-price delivery" is an
+     * extra discount by another name, and there is a field for that.
+     *
+     * @param array<string, mixed> $input
+     */
+    private function waivedPoisha(array $input, DeliveryZone $zone): int
+    {
+        return empty($input['freeDelivery']) ? 0 : $zone->charge_poisha;
     }
 
     /**

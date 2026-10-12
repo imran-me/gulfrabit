@@ -34,8 +34,16 @@
             <div data-entry-picker></div>
             <ul class="alines" data-entry-lines role="list"></ul>
             <p class="aentry__hint" data-entry-empty>
-              Search for each product and pick it from the list. Choose the pack and the
-              quantity on its line — the price is worked out for you.
+              Search for a product and pick it from the list, then search again for the next —
+              one order holds as many products as they want. Choose the pack and the quantity
+              on each line; the price is worked out for you.
+            </p>
+            <!-- Said once there is a line, because that is when the question
+                 comes up: the box above empties itself after every pick, and
+                 nothing else on the screen says it is ready for the next one. -->
+            <p class="aentry__hint" data-entry-more hidden>
+              More than one product on this order? Search again in the box above — each one
+              you pick is added here as its own line.
             </p>
           </section>
 
@@ -130,6 +138,33 @@
               <input class="input-gr" id="en-promo" name="promo" type="text" autocomplete="off"
                      maxlength="32" autocapitalize="characters" spellcheck="false">
               <p class="aentry__hint" data-entry-promo hidden></p>
+            </div>
+
+            <!-- GIVEN BY HAND. The only two things on this form that take
+                 money off, and so the only two that need more than the
+                 permission to take an order: `orders.discount`. Unhidden by
+                 order-new-page.js for an account that holds it; the server
+                 refuses both from one that does not, whatever this says.
+
+                 Neither is a price. The goods and the delivery are still
+                 worked out by the server — these take something off the
+                 answer, and each shows in the totals below as its own line,
+                 so what is read out to the customer is what was given. -->
+            <div data-entry-give hidden>
+              <div class="afilters__field">
+                <label for="en-extra">Extra discount <span class="atable__sub">optional — taka off the goods</span></label>
+                <input class="input-gr" id="en-extra" name="extraDiscount" type="number" inputmode="numeric"
+                       min="0" step="1" autocomplete="off" placeholder="e.g. 200">
+                <p class="aentry__hint is-bad" data-entry-extra hidden></p>
+              </div>
+
+              <label class="apane__row aentry__free">
+                <input type="checkbox" name="freeDelivery">
+                <span>
+                  <strong>Free delivery</strong>
+                  <span class="atable__sub">The delivery charge is left off this order.</span>
+                </span>
+              </label>
             </div>
 
             <dl class="atotals" data-entry-totals></dl>

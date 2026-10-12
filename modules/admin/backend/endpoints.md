@@ -169,9 +169,18 @@ the code a website order goes through. There is no second pipeline and no
 second price list.
 
 **What is absent, as everywhere else:** no request below has a field for a
-price, a discount, a delivery charge or a total. Staff choose products, packs
-and quantities. A discount is a coupon code, which is data the Coupons screen
-owns — not a number typed while a customer haggles.
+price, a delivery charge or a total. Staff choose products, packs and
+quantities; the server says what they cost.
+
+**What can be given by hand (2026-10-12):** two fields take something *off*
+what the server worked out, and replace nothing — `extraDiscount` (whole taka
+off the goods) and `freeDelivery` (the delivery charge not made). Both need
+**`orders.discount`** on top of `orders.edit`: taking an order and deciding
+what the shop will take less for are different trusts. Owner, Manager and
+Accounts hold it from their role; an Employee does not until an owner ticks
+*Give an extra discount or free delivery* for them on the staff screen. Sent by
+an account without it, either field is a **403** with a sentence — on the quote
+as well as on placing.
 
 ### `GET /api/admin/orders/products`
 
@@ -208,10 +217,13 @@ What the order being typed would come to. **Writes nothing.**
 
 ```json
 { "lines": [ { "sku": "gr-1101", "qty": 3, "variant": "1 kg" } ],
-  "district": "dhaka", "delivery": "express", "payment": "cod", "promo": "GULF10" }
+  "district": "dhaka", "delivery": "express", "payment": "cod", "promo": "GULF10",
+  "extraDiscount": 200, "freeDelivery": true }
 ```
 
 Only `lines` is required — half a form is the normal state of a form.
+`extraDiscount` and `freeDelivery` are optional, need `orders.discount`, and
+`0` / `false` mean the same as leaving them out.
 
 **200** →
 
@@ -219,8 +231,9 @@ Only `lines` is required — half a form is the normal state of a form.
 { "data": {
   "lines":  [ { "sku": "gr-1101", "variant": "1 kg", "qty": 3,
                 "unitTaka": 2650, "lineTaka": 7950 } ],
-  "totals": { "subtotalTaka": 7950, "discountTaka": 795,
-              "deliveryTaka": 150, "totalTaka": 7305 },
+  "totals": { "subtotalTaka": 7950, "discountTaka": 795, "extraDiscountTaka": 200,
+              "deliveryTaka": 0, "deliveryWaivedTaka": 150, "totalTaka": 6955 },
+  "extraDiscountProblem": null,
   "promo":  { "code": "GULF10", "problem": null },
   "delivery": { "chosen":  { "id": "express", "label": "…", "eta": "…", "cost": 150 },
                 "options": [ { "id": "metro", … }, { "id": "express", … } ] },
@@ -230,6 +243,16 @@ Only `lines` is required — half a form is the normal state of a form.
 
 - `totals.deliveryTaka` is **`null`** until a district is chosen. "Not priced
   yet" and "free" are different facts.
+- `totals.discountTaka` is the **coupon's alone**. What was given by hand is
+  `totals.extraDiscountTaka`, its own line on every screen.
+- `totals.deliveryWaivedTaka` is the charge that is **not** being made — `0`
+  unless `freeDelivery` was sent (and a district chosen). Beside
+  `deliveryTaka: 0` it tells "we gave ৳150 away" from a zone that costs nothing.
+- `extraDiscountProblem` is a sentence when the extra discount is more than the
+  goods come to after the coupon, and the totals beside it are worked out
+  **without** it — the treatment a dead coupon gets. It comes off the goods
+  only and may take them to ৳0, never below; the delivery charge has its own
+  tick. Placing refuses on the same sentence.
 - `promo` is `null` when no code was sent. `promo.problem` is a sentence when
   the code takes nothing off — not live, basket too small, nothing eligible —
   and the totals beside it are worked out **without** the code. Placing refuses
@@ -253,7 +276,7 @@ Everything the quote takes, plus who it is for:
 
 ```json
 { "lines": [ … ], "district": "dhaka", "delivery": "metro", "payment": "cod",
-  "promo": null,
+  "promo": null, "extraDiscount": 200, "freeDelivery": false,
   "name": "Rahim Uddin", "phone": "01712345678",
   "address": "House 12, Road 5", "area": "Banani", "notes": null,
   "channel": "phone", "confirmed": false }
@@ -289,12 +312,34 @@ Two things are recorded that a website order has no need of: `channel` on the
 order, and an internal note — *"Custom order — taken by phone and added by
 staff"* — with the staff member's name, written in the same transaction.
 
+**When something was given**, the order carries it in two columns
+(migration `2026_10_12_000001`) and that same note says so, under the giver's
+name — *"Extra discount given: ৳ 200."*, *"Free delivery given — the ৳ 150
+charge was not added."*:
+
+- `orders.extra_discount_poisha` — how much **of `discount_poisha`** was given
+  by hand. It is part of that column, not beside it, so
+  `total = subtotal − discount + delivery` stays true of every order and the
+  books, the refund ceiling and the storefront need no change.
+- `orders.delivery_waived_poisha` — the charge that was not made;
+  `delivery_charge_poisha` is `0`.
+
+`GET /api/admin/orders/{order}` returns them as `totals.extraDiscountTaka`
+(with `totals.discountTaka` reduced to the coupon's share),
+`totals.deliveryWaivedTaka` and `delivery.waivedTaka`. When a basket splits,
+the extra discount is shared between the two orders in proportion to their
+goods, to the poisha, and the waived delivery sits on the first — the parcel
+that would have carried the charge.
+
 **Not applied to a custom order:** the duplicate-order guard and the
 five-a-day cap on a phone number. Both exist to stop a stranger's script, and
 the cap's own refusal tells the customer to ring the shop — which is this.
 
 **422** → validation, or any refusal the quote would have given. The form keeps
 everything typed.
+
+**403** → `extraDiscount` or `freeDelivery` from an account without
+`orders.discount`. Nothing is written.
 
 **Not built:** editing the lines of an order after it is placed (cancel and add
 it again); recording a payment by hand — a custom order paid by bKash transfer

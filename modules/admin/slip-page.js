@@ -133,7 +133,15 @@ function slip(o) {
         <tfoot>
           <tr><td colspan="2">Subtotal</td><td class="slip__n">৳ ${money(t.subtotalTaka)}</td></tr>
           ${t.discountTaka ? `<tr><td colspan="2">Discount${o.promoCode ? ` (${escapeHtml(o.promoCode)})` : ''}</td><td class="slip__n">− ৳ ${money(t.discountTaka)}</td></tr>` : ''}
-          <tr><td colspan="2">Delivery</td><td class="slip__n">৳ ${money(t.deliveryTaka)}</td></tr>
+          ${
+            // What the shop gave by hand on a custom order, on its own line:
+            // the customer was told "two hundred off" on the phone and this
+            // is the sheet of paper that has to agree with it.
+            t.extraDiscountTaka ? `<tr><td colspan="2">Extra discount</td><td class="slip__n">− ৳ ${money(t.extraDiscountTaka)}</td></tr>` : ''}
+          <tr><td colspan="2">Delivery</td><td class="slip__n">${
+            // "Free" only when it was given. A zone that happens to cost
+            // nothing still prints its ৳ 0, as it always has.
+            t.deliveryWaivedTaka ? 'Free' : `৳ ${money(t.deliveryTaka)}`}</td></tr>
           <tr class="slip__total"><td colspan="2">Total</td><td class="slip__n">৳ ${money(t.totalTaka)}</td></tr>
         </tfoot>
       </table>

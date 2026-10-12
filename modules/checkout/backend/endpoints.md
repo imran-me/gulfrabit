@@ -151,13 +151,26 @@ snapshot, the order number. A custom order therefore cannot be priced
 differently from a website order — there is no second copy of the arithmetic
 for it to be priced by. `quoteManual()` runs the same figures without writing.
 
-Two things differ, and only these:
+Three things differ, and only these:
 
 - **`channel`** (`orders.channel`, default `website`). `placeManual()` sets it
   to how the order came in; the storefront's request has no such field.
 - **The COD abuse guards** — the ten-minute duplicate check and the five-a-day
   cap — are skipped when staff vouch for the order. They exist to stop a
   script, and the cap's own message tells the customer to ring the shop.
+- **What staff gave by hand** (2026-10-12): `extraDiscount`, whole taka off the
+  goods after the coupon, and `freeDelivery`, the district's charge not made.
+  `capture()` honours them **only when the order is vouched** — so a customer
+  posting either to `POST /api/orders` gets nothing off, whatever the request
+  class lets through. An extra discount larger than the goods is refused, not
+  trimmed. Both take something off a figure worked out here; neither replaces
+  one.
+
+  On the order, `discount_poisha` is still *everything* off the goods and
+  `extra_discount_poisha` says how much of it was by hand;
+  `delivery_charge_poisha` is `0` and `delivery_waived_poisha` holds what was
+  not charged. `total = subtotal − discount + delivery` is true of every
+  order, with or without a gift.
 
 ## A line is charged at its PACK's price
 

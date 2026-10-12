@@ -256,8 +256,23 @@ class AdminOrderController extends Controller
 
                 'totals' => [
                     'subtotalTaka'  => intdiv($order->subtotal_poisha, 100),
-                    'discountTaka'  => intdiv($order->discount_poisha, 100),
+                    /* Two lines out of one column. `discount_poisha` is
+                       everything off the goods; `extra_discount_poisha` is
+                       how much of that a member of staff gave by hand on a
+                       custom order. So the coupon's share is the difference,
+                       and it is what "Discount (CODE)" on every screen means.
+
+                       The casts read null as 0, which is what both new
+                       columns are on a deploy that has not run the 2026_10_12
+                       migration — the order screen must not need it. */
+                    'discountTaka'  => intdiv(
+                        $order->discount_poisha - (int) $order->extra_discount_poisha,
+                        100,
+                    ),
+                    'extraDiscountTaka' => intdiv((int) $order->extra_discount_poisha, 100),
                     'deliveryTaka'  => intdiv($order->delivery_charge_poisha, 100),
+                    // What was NOT charged, when free delivery was given.
+                    'deliveryWaivedTaka' => intdiv((int) $order->delivery_waived_poisha, 100),
                     'totalTaka'     => intdiv($order->total_poisha, 100),
                     'refundedTaka'  => intdiv($this->fulfilment->refundedPoisha($order), 100),
                     'refundableTaka' => intdiv($this->fulfilment->refundablePoisha($order), 100),
@@ -437,6 +452,9 @@ class AdminOrderController extends Controller
             'eta'        => $order->delivery_eta,
             'notes'      => $order->delivery_notes,
             'chargeTaka' => intdiv($order->delivery_charge_poisha, 100),
+            // Non-zero only when staff gave free delivery: the charge this
+            // district carries, which the order was not asked to pay.
+            'waivedTaka' => intdiv((int) $order->delivery_waived_poisha, 100),
         ];
     }
 

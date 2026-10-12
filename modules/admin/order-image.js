@@ -466,6 +466,9 @@ function paint(ctx, o, { logo, now }) {
   if (t.discountTaka) {
     row(`Discount${o.promoCode ? ` (${o.promoCode})` : ''}`, `− ${taka(t.discountTaka)}`);
   }
+  // What was given by hand on a custom order. This picture is what gets read
+  // back to the customer, and "extra discount" is the phrase they were told.
+  if (t.extraDiscountTaka) row('Extra discount', `− ${taka(t.extraDiscountTaka)}`);
   // The promise sits beside the price, because "when will it come" is the
   // question that follows "how much" on every one of these calls.
   row(`Delivery${d.eta ? ` · ${d.eta}` : ''}`, t.deliveryTaka ? taka(t.deliveryTaka) : 'Free');

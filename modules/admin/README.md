@@ -182,6 +182,19 @@ The form holds no price field. It asks `POST /orders/quote` on every change and
 paints the server's answer, so the total read out on the phone is the total on
 the slip. See `backend/endpoints.md` → *Custom orders*.
 
+**One order, many products.** Every pick from the search box adds a line and
+the box empties for the next. `product-picker.js` reopens its list on a click
+as well as on focus — it used to stay shut after the first pick, which read as
+"one product per order".
+
+**Two things can be given by hand:** an *Extra discount* (whole taka off the
+goods) and a *Free delivery* tick. Each is its own line in the totals, on the
+order screen, on the slip and on the order picture, and the timeline note names
+who gave it. They need `orders.discount` — "Give an extra discount or free
+delivery" on the staff screen — which Owner, Manager and Accounts hold from
+their role and an Employee does not. Without it the two fields are not drawn
+and the server refuses them.
+
 Needs `orders.edit`. The product search has its own endpoint
 (`GET /orders/products`) because the catalogue endpoint needs `products.view`
 and carries cost, and the Employee account — the one usually holding the phone

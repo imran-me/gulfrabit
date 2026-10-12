@@ -16,8 +16,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property string $order_number
  * @property int    $subtotal_poisha
- * @property int    $discount_poisha
+ * @property int    $discount_poisha         everything off the goods — the coupon's and any given by hand
+ * @property int    $extra_discount_poisha   how much of `discount_poisha` a member of staff gave by hand
  * @property int    $delivery_charge_poisha
+ * @property int    $delivery_waived_poisha  the charge that was NOT made, when staff gave free delivery
  * @property int    $total_poisha
  */
 class Order extends Model
@@ -85,6 +87,7 @@ class Order extends Model
         'status', 'placed_at',
         'ad_source', 'pixel_event_id',
         'channel',
+        'extra_discount_poisha', 'delivery_waived_poisha',
     ];
 
     protected function casts(): array
@@ -95,7 +98,9 @@ class Order extends Model
             'preorder_ships_on'      => 'date',
             'subtotal_poisha'        => 'integer',
             'discount_poisha'        => 'integer',
+            'extra_discount_poisha'  => 'integer',
             'delivery_charge_poisha' => 'integer',
+            'delivery_waived_poisha' => 'integer',
             'total_poisha'           => 'integer',
             'ad_source'              => 'array',
         ];

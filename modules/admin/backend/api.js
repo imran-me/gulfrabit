@@ -69,7 +69,7 @@ const DEV_SESSION = {
      real thing. Must stay in step with AdminUser::PERMISSIONS. */
   permissions: [
     'dashboard.view',
-    'orders.view', 'orders.edit', 'orders.cancel', 'orders.refund', 'orders.delete',
+    'orders.view', 'orders.edit', 'orders.cancel', 'orders.refund', 'orders.discount', 'orders.delete',
     'customers.view', 'customers.edit', 'customers.erase', 'customers.delete',
     'products.view', 'products.edit', 'products.archive', 'products.delete',
     'inventory.view', 'inventory.edit',

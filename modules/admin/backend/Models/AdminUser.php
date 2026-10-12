@@ -84,7 +84,13 @@ class AdminUser extends Authenticatable
         // `cancel` covers cancelled, returned and spam together: all three end
         // an order rather than advancing it, and they were already one group in
         // OrderFulfilmentService::RESTRICTED_TO_MANAGEMENT.
-        'orders'     => ['view', 'edit', 'cancel', 'refund', 'delete'],
+        //
+        // `discount` is the one place a member of staff decides what the shop
+        // will take LESS for: an extra discount, or free delivery, on a custom
+        // order they are typing in. Its own permission rather than part of
+        // `edit`, because `edit` is what lets the shop floor write an order
+        // down, and taking an order is not the same trust as pricing one.
+        'orders'     => ['view', 'edit', 'cancel', 'refund', 'discount', 'delete'],
         // `erase` anonymises and is irreversible; `delete` merely takes them
         // off the list. Two acts, never synonyms — see AdminCustomerController.
         'customers'  => ['view', 'edit', 'erase', 'delete'],
@@ -133,6 +139,7 @@ class AdminUser extends Authenticatable
         'archive' => 'Archive and restore',
         'cancel'  => 'Cancel, return or mark as spam',
         'refund'  => 'Authorise refunds',
+        'discount' => 'Give an extra discount or free delivery',
         'erase'   => 'Erase permanently',
         'delete'  => 'Delete',
         'manage'  => 'Create accounts and set permissions',
@@ -151,6 +158,12 @@ class AdminUser extends Authenticatable
      * an action. A wildcard cannot be forgotten, and "an owner can do
      * everything" is the one rule here that will never want an exception.
      *
+     * `orders.discount` is the one entry that is newer than the presets
+     * (2026-10-12). It went to the two roles that already hold
+     * `orders.refund` and to nobody else: whoever may give money back may
+     * agree to take less of it. The shop floor does not get it from its role
+     * — an owner ticks it for the person who takes the calls.
+     *
      * @var array<string, array<int, string>>
      */
     public const ROLE_PERMISSIONS = [
@@ -158,7 +171,7 @@ class AdminUser extends Authenticatable
 
         'manager' => [
             'dashboard.view',
-            'orders.view', 'orders.edit', 'orders.cancel', 'orders.refund',
+            'orders.view', 'orders.edit', 'orders.cancel', 'orders.refund', 'orders.discount',
             'customers.view', 'customers.edit',
             'products.view', 'products.edit', 'products.archive',
             'inventory.view', 'inventory.edit',
@@ -181,7 +194,7 @@ class AdminUser extends Authenticatable
         'accounts' => [
             'dashboard.view',
             'accounting.view', 'accounting.edit',
-            'orders.view', 'orders.edit', 'orders.cancel', 'orders.refund',
+            'orders.view', 'orders.edit', 'orders.cancel', 'orders.refund', 'orders.discount',
         ],
 
         'editor' => [

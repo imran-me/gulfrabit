@@ -83,9 +83,14 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             // for the same reason: the person holding the phone is the person
             // who has just been told what the customer wants, and an order
             // that has to wait for a manager to type it is an order that gets
-            // written on paper instead. No money is decided here — there is no
-            // field for a price or a discount — so this is not `orders.refund`
+            // written on paper instead. Taking the order decides no money —
+            // there is no field for a price — so this is not `orders.refund`
             // territory.
+            //
+            // The two fields that DO decide money, an extra discount and free
+            // delivery, need `orders.discount` on top. That is checked in the
+            // controller, not here: it is those two fields that need it, and
+            // an order without them must stay placeable by the shop floor.
             //
             // ABOVE `/{order}`, AND IT HAS TO BE. `products` is a literal path
             // under a prefix whose next route binds anything in that position
