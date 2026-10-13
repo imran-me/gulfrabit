@@ -900,9 +900,12 @@ ADMIN_PAGES = [
      ["/modules/admin/admin.css", "/modules/theme/theme-admin.css"],
      ["/modules/admin/admin-shell.js", "/modules/theme/card-page.js"], True),
 
+    # media.css because "Change picture" opens the image sheet. Without it the
+    # sheet lands unstyled at the foot of the page, out of sight, while its
+    # scroll lock still holds — no picker to be seen and a page that will not move.
     ("modules/hero/hero.html", "Hero banners — GulfRabit Admin",
      "modules/hero/_fragments/hero.main.html",
-     ["/modules/admin/admin.css"],
+     ["/modules/admin/admin.css", "/modules/media/media.css"],
      ["/modules/admin/admin-shell.js", "/modules/hero/hero-page.js"], True),
 
     ("modules/highlights/highlights.html", "Home page — GulfRabit Admin",
