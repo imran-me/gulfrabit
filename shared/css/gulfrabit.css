@@ -1507,13 +1507,18 @@ html[data-card~="saving:off"] .product-card .price-saving { display: none; }
   background: var(--surface-raised);
   color: var(--text-primary);
   border-right: 1px solid var(--border-hairline);
-  /* Long and soft: at this width the drawer reads as a panel lifted off the
-     page, and a tight shadow would read as a border with a smudge. */
-  box-shadow: 24px 0 60px -20px rgba(10, 19, 22, .28);
   transform: translateX(-100%);
-  transition: transform .34s var(--ease-out);
+  transition: transform .34s var(--ease-out), box-shadow .34s var(--ease-out);
   overscroll-behavior: contain;
 }
+/* Long and soft: at this width the drawer reads as a panel lifted off the
+   page, and a tight shadow would read as a border with a smudge.
+
+   On the OPEN drawer only. Closed, the panel is parked exactly one width off
+   the left edge, and a shadow thrown 24px right with a 60px blur reaches back
+   onto the page from there — a grey strip down the first 60px of every page,
+   at every width, desktop included. */
+.gr-offcanvas.is-open { box-shadow: 24px 0 60px -20px rgba(10, 19, 22, .28); }
 /* A single wash of brand colour behind the logo. The panel is white on white
    otherwise, and white on white at this width looks unfinished rather than
    minimal. */
