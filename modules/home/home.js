@@ -94,6 +94,79 @@ function initHeroCarousel() {
 
   show(0);
   start();
+  slides.forEach(continueEdges);
+
+  /**
+   * WHERE A BANNER DOES NOT REACH, CONTINUE IT — WHEN IT CAN BE CONTINUED.
+   *
+   * Past 1280px the artwork stops growing and the frame does not, and the gap
+   * either side is filled with a blurred, darkened copy of the slide. That
+   * suits a photograph. Beside a designed banner on a pale ground it is a grey
+   * smear next to the picture, and it reads as the banner being the wrong size.
+   *
+   * A banner whose left and right edges are each one flat colour can simply be
+   * carried on: paint each side of the slide in the colour the picture ends on
+   * and the join disappears. So the two edges are read off the loaded image.
+   * If both are flat, the slide takes their colours and drops the blurred copy
+   * (.is-continued in home.css). If either is not — every photograph — nothing
+   * changes.
+   *
+   * Measured, not configured: someone uploading a banner should not have to
+   * know this exists, let alone type a colour.
+   */
+  function continueEdges(slide) {
+    const art = slide.querySelector('.hero__art');
+    if (!art) return;
+
+    const ROWS = 48;   // samples down each edge — enough that a photograph cannot pass for flat
+    const FLAT = 10;   // of 255. A flat colour re-encoded as WebP wanders by 2 or 3.
+
+    const measure = () => {
+      const w = art.naturalWidth;
+      const h = art.naturalHeight;
+      if (w < 4 || !h) return;
+
+      let px;
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 2;
+        canvas.height = ROWS;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(art, 0, 0, 2, h, 0, 0, 1, ROWS);       // the left-most 2px, as column 0
+        ctx.drawImage(art, w - 2, 0, 2, h, 1, 0, 1, ROWS);   // the right-most 2px, as column 1
+        px = ctx.getImageData(0, 0, 2, ROWS).data;
+      } catch {
+        return;   // a canvas the browser will not let us read: the blurred copy stands
+      }
+
+      const edge = (col) => {
+        const at = (row, k) => px[(row * 2 + col) * 4 + k];
+        const mean = [0, 1, 2].map((k) => {
+          let sum = 0;
+          for (let row = 0; row < ROWS; row++) sum += at(row, k);
+          return sum / ROWS;
+        });
+        let spread = 0;
+        for (let row = 0; row < ROWS; row++) {
+          // A see-through edge has no colour to continue.
+          if (at(row, 3) < 250) return null;
+          for (let k = 0; k < 3; k++) spread = Math.max(spread, Math.abs(at(row, k) - mean[k]));
+        }
+        return spread <= FLAT ? `rgb(${mean.map(Math.round).join(' ')})` : null;
+      };
+
+      const left = edge(0);
+      const right = edge(1);
+      if (!left || !right) return;
+
+      slide.style.setProperty('--hero-edge-l', left);
+      slide.style.setProperty('--hero-edge-r', right);
+      slide.classList.add('is-continued');
+    };
+
+    if (art.complete && art.naturalWidth) measure();
+    else art.addEventListener('load', measure, { once: true });
+  }
 
   /**
    * Swap in whatever the merchant has set, and apply how it should move.
@@ -181,6 +254,7 @@ function initHeroCarousel() {
     slides = [...viewport.querySelectorAll('[data-hero-slide]')];
     index = 0;
     show(0);
+    slides.forEach(continueEdges);
   }
 }
 

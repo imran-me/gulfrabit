@@ -126,6 +126,17 @@
   transform: scale(1.18);
 }
 
+/* A banner that ends on a flat colour is continued in it instead — see
+   continueEdges() in home.js, which measures the two edges and sets these.
+   The left half of the slide takes the colour the picture starts on and the
+   right half the colour it ends on; the artwork covers the join in the middle.
+   The blurred copy is not drawn at all: under an opaque fill it would be a
+   34px blur that nobody sees. */
+.hero__slide.is-continued {
+  background: linear-gradient(90deg, var(--hero-edge-l) 50%, var(--hero-edge-r) 50%);
+}
+.hero__slide.is-continued .hero__backdrop { display: none; }
+
 /* The whole slide is the tap target — tapping anywhere on the banner buys,
    the SHOP NOW pill painted into the artwork included. There is no overlaid
    button: the painted pill is the only call to action. */
