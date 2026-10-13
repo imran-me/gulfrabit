@@ -42,6 +42,12 @@
 
 .hero__slide {
   position: absolute; inset: 0;
+  /* Centres the artwork frame when the slide has no link. A banner set to
+     "Nothing — just a picture" is not wrapped in .hero__link, which was the
+     only thing doing the centring, so its frame sat hard against the left and
+     the whole letterbox landed on the right. A linked slide is unaffected:
+     .hero__link is positioned, so it is not a grid item here. */
+  display: grid; place-items: center;
   opacity: 0; visibility: hidden;
   transition: opacity var(--hero-transition) var(--hero-easing),
               visibility var(--hero-transition),
