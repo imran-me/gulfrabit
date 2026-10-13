@@ -361,6 +361,11 @@
   /* Three across on the narrowest phone, more as room appears. auto-fill with
      a minimum keeps the tiles square-ish without a media query per size. */
   grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  /* Rows are as tall as their tiles and no less. Left at `auto` a row may
+     shrink to nothing — a tile clips its picture, so it has no minimum of its
+     own — and the grid took that over scrolling: 24 pictures in a 640px
+     window sat 48px apart, each row on top of the last. */
+  grid-auto-rows: max-content;
   gap: var(--space-3);
   align-content: start;
 }
